@@ -56,6 +56,8 @@ import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
+import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 import { SpecialtyChartTemplates } from '../../modules/chart/entities';
 import {
@@ -133,6 +135,8 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     DynamicEnumSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    BoliviaFacilitiesSeedService,
+    BoliviaInsuranceSeedService,
     MessagingSeedService,
     AudioAssetsSeedService,
     VademecumSeedService,
@@ -150,6 +154,8 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     DynamicEnumSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    BoliviaFacilitiesSeedService,
+    BoliviaInsuranceSeedService,
     MessagingSeedService,
     AudioAssetsSeedService,
     VademecumSeedService,

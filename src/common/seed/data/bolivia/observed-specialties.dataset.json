@@ -1,0 +1,1089 @@
+{
+  "_nota": "Especialidades que aparecen en las redes y el arancel, para contrastar contra VS_MEDICAL_SPECIALTY.",
+  "datos": [
+    {
+      "nombre": "TRAUMATOLOGIA Y ORTOPEDIA",
+      "apariciones": 999,
+      "origenes": [
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Cirugía general",
+      "apariciones": 485,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Pediatría",
+      "apariciones": 346,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Neurocirugía",
+      "apariciones": 318,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA PEDIATRICA",
+      "apariciones": 267,
+      "origenes": [
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Otorrinolaringología y Cirugía de Cabeza y Cuello",
+      "apariciones": 258,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Oftalmología",
+      "apariciones": 242,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Urología",
+      "apariciones": 242,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA PLASTICA ESTETICA Y RECONSTRUCTIVA",
+      "apariciones": 239,
+      "origenes": [
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Ginecología y obstetricia",
+      "apariciones": 223,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Cirugía Cardíaca, Torácica y Vascular",
+      "apariciones": 219,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Oncología",
+      "apariciones": 213,
+      "origenes": [
+        "red-alianza",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Cardiología",
+      "apariciones": 203,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Nefrología",
+      "apariciones": 172,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "RADIOLOGIA",
+      "apariciones": 155,
+      "origenes": [
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Dermatología",
+      "apariciones": 140,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Neurología",
+      "apariciones": 117,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Terapia Intensiva Pediátrica",
+      "apariciones": 117,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Medicina Interna",
+      "apariciones": 104,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "NEUROLOGIA PEDIATRICA",
+      "apariciones": 68,
+      "origenes": [
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Gastroenterología y Endoscopía Digestiva",
+      "apariciones": 64,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Emergenciología",
+      "apariciones": 63,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "COLOPROCTOLOGIA",
+      "apariciones": 53,
+      "origenes": [
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Ortopedia y Traumatología",
+      "apariciones": 51,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Medicina Física y Rehabilitación",
+      "apariciones": 49,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Medicina Crítica y Terapia Intensiva",
+      "apariciones": 47,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Fisioterapia",
+      "apariciones": 44,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Reumatología",
+      "apariciones": 42,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Mastología",
+      "apariciones": 39,
+      "origenes": [
+        "red-alianza",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Medicina General",
+      "apariciones": 37,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Anestesiología, Reanimación y Dolor (anexo)",
+      "apariciones": 34,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Cirugía Laparoscópica",
+      "apariciones": 31,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Gastroenterología",
+      "apariciones": 29,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Endocrinología, Metabolismo y Nutrición",
+      "apariciones": 28,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Psiquiatria",
+      "apariciones": 28,
+      "origenes": [
+        "red-alianza",
+        "red-nacional",
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "PEDIATRIA NEONATOLOGIA",
+      "apariciones": 20,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "PSICOLOGIA CLINICA",
+      "apariciones": 18,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Psicologia",
+      "apariciones": 18,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Patología",
+      "apariciones": 17,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Neumologia",
+      "apariciones": 15,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Cirugía cardiovascular",
+      "apariciones": 14,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Endocrinología",
+      "apariciones": 14,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "GINECOLOGIA Y OBSTETRICIA MASTOLOGIA",
+      "apariciones": 12,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Neonatología",
+      "apariciones": 11,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Salud Pública",
+      "apariciones": 11,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Proctología",
+      "apariciones": 10,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA TORACICA Y CARDIOVASCULAR",
+      "apariciones": 9,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Cirugía Pediatra",
+      "apariciones": 9,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Cirugía Vascular",
+      "apariciones": 9,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Nutricionista",
+      "apariciones": 9,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Infectología",
+      "apariciones": 8,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA GENERAL CIRUGIA ONCOLOGICA",
+      "apariciones": 7,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Cirugía Oncológica",
+      "apariciones": 7,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "HEMATOLOGIA Y HEMOTERAPIA",
+      "apariciones": 7,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA GENERAL COLOPROCTOLOGIA",
+      "apariciones": 6,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Hematología",
+      "apariciones": 6,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Auditoría Médica",
+      "apariciones": 5,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Cirugía de Columna y artrscópica",
+      "apariciones": 5,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Fonoaudiología",
+      "apariciones": 5,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Geriatría",
+      "apariciones": 5,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Infectología pediátrica",
+      "apariciones": 5,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "ONCOLOGIA CLINICA",
+      "apariciones": 5,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA PEDIATRICA UROLOGIA PEDIATRICA",
+      "apariciones": 4,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA Y TRAUMATOLOGIA EN BUCOMAXILOFACIAL",
+      "apariciones": 4,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "ENDOCRINOLOGIA MEDICINA INTERNA",
+      "apariciones": 4,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Fisiatra",
+      "apariciones": 4,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Medicina Familiar",
+      "apariciones": 4,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Traumatología pediátrica",
+      "apariciones": 4,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "ALERGIA E INMUNOLOGIA",
+      "apariciones": 3,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "CARDIOLOGIA MEDICINA CRITICA Y TERAPIA INTENSIVA",
+      "apariciones": 3,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Cardiología Infantil",
+      "apariciones": 3,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Endocrinólogo Pediatra",
+      "apariciones": 3,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONCOSSIO",
+      "apariciones": 3,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "MEDICINA NUCLEAR",
+      "apariciones": 3,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "PEDIATRIA CIRUGIA PEDIATRICA",
+      "apariciones": 3,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "PEDIATRIA ENDOCRINOLOGIA PEDIATRICA",
+      "apariciones": 3,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "PEDIATRIA NEFROLOGIA PEDIATRICA",
+      "apariciones": 3,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Psicología Infantil",
+      "apariciones": 3,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Urología Infantil",
+      "apariciones": 3,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Alergología",
+      "apariciones": 2,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA GENERAL CIRUGIA PEDIATRICA",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA GENERAL ONCOLOGIA CLINICA",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA TORACICA",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Cineangiocoronariografia",
+      "apariciones": 2,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONCAMACHO",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONCUELLAR",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONMONTERO",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONTABORGA",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Ginecología oncológica",
+      "apariciones": 2,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "MEDICINA FISICA Y REHABILITACION FISIOTERAPIA Y REHABILITACION",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "MEDICINA INTERNA HEMATOLOGIA Y HEMOTERAPIA",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Odontologia",
+      "apariciones": 2,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Oftalmología pediátrica",
+      "apariciones": 2,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Otorrinolaringologia",
+      "apariciones": 2,
+      "origenes": [
+        "red-alianza",
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "PEDIATRIA ONCO HEMATOLOGIA PEDIATRICA",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "REUMATOLOGIA MEDICINA INTERNA",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "TERAPIA INTENSIVA",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "UROLOGIA PEDIATRICA",
+      "apariciones": 2,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Anestesiología",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Anestesiología, Reanimación y Dolor",
+      "apariciones": 1,
+      "origenes": [
+        "arancel"
+      ]
+    },
+    {
+      "nombre": "Angioplastia Coronaria",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "CARDIOLOGIA PEDIATRICA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA DE CABEZA Y CUELLO",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "CIRUGIA VASCULAR Y ANGIOLOGIA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Cirugía Cardiaca",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Dermatología pediátrica",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Educación para el Parto",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONAGUAYO",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONALEXANDRE",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONANTELO",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONBAYRO",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONBEJARANO",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONFUCHTNER",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONGONZALES",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONLAVADENZ",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONMELONE",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONMIER",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONMILETA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONMORENO",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONMUNDACA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONNEGRETE",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONOGAN",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONOSINAGA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONPANIAGUA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONRAMOS",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONSALAS",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONSERRATE",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONSEVERICH",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONTARQUI",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONTEJADA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONULUNQUE",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONVACA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "FISIOTERAPIA Y REHABILITACIONVARGAS",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Fisioterapia del stress",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "GERIATRIA Y GERONTOLOGIA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Gastroenterología pediátrica",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "MEDICINA INTERNA CARDIOLOGIA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "MEDICINA INTERNA INFECTOLOGIA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "MEDICINA INTERNA MEDICINA FISICA Y REHABILITACION",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "MEDICINA INTERNA ONCOLOGIA CLINICA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Medicina del Dolor",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "NEUROFISIOLOGIA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Nefrología Pediatra",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Neumología pediátrica",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "Oncología-Quimioterapia",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    },
+    {
+      "nombre": "PEDIATRIA TERAPIA INTENSIVA PEDIATRICA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "PSICOPEDAGOGIA CLINICA",
+      "apariciones": 1,
+      "origenes": [
+        "red-nacional"
+      ]
+    },
+    {
+      "nombre": "Reumatología Pediatra",
+      "apariciones": 1,
+      "origenes": [
+        "red-alianza"
+      ]
+    }
+  ]
+}

@@ -1,12 +1,14 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 
-/** Los trece seeds de la cadena, en el orden en que el orquestador los corre. */
+/** Los quince seeds de la cadena, en el orden en que el orquestador los corre. */
 const PASOS = [
   'terminology',
   'dynamicEnums',
   'glossary',
   'boGeography',
+  'boliviaFacilities',
+  'boliviaInsurance',
   'vademecum',
   'messaging',
   'audioAssets',
@@ -57,6 +59,8 @@ function armar(fallan: Paso[] = []) {
     dobles.dynamicEnums as never,
     dobles.glossary as never,
     dobles.boGeography as never,
+    dobles.boliviaFacilities as never,
+    dobles.boliviaInsurance as never,
     dobles.messaging as never,
     dobles.audioAssets as never,
     dobles.vademecum as never,
