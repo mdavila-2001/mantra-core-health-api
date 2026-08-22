@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
   requireTenantId,
@@ -31,6 +32,7 @@ import {
   FormInstanceDetailResponseDto,
   FieldValueItemDto,
   FieldAssignmentListResponseDto,
+  ExtensionBudgetResponseDto,
   MyFormInstanceListResponseDto,
 } from '../dto';
 import { FORMS } from '../forms.concepts';
@@ -465,6 +467,47 @@ export class FormsReadService {
       })),
       limit,
       truncated,
+    };
+  }
+
+  /**
+   * Cuánto puede extender este tenant un formulario estándar.
+   *
+   * Devuelve la política **como la aplica la escritura**, no como está escrita:
+   * la del tenant le gana a la global, y sin política activa el presupuesto es
+   * cero y `allowTenantFields` es falso. Si dijera otra cosa, la pantalla
+   * ofrecería un botón que el `POST` va a rechazar.
+   *
+   * @param targetResourceConceptId - Target cuyo presupuesto se consulta.
+   * @param tenantId - Tenant del actor, si el contexto lo fijó.
+   * @returns Tope, consumo y resto.
+   */
+  async getExtensionBudget(
+    targetResourceConceptId: string,
+    tenantId: string | undefined,
+  ): Promise<ExtensionBudgetResponseDto> {
+    const em = this.em.fork();
+    const policy = await this.assignmentsRepo.findActivePolicyForTenant(
+      em,
+      targetResourceConceptId,
+      CONCEPTS.STATE_ACTIVE,
+      tenantId,
+    );
+    const used = await this.assignmentsRepo.countActiveAssignments(
+      em,
+      targetResourceConceptId,
+      FORMS.ASSIGNMENT_ACTIVE,
+      tenantId,
+    );
+    const maximumFields = policy?.maximumFields ?? undefined;
+    return {
+      targetResourceConceptId,
+      allowTenantFields: policy?.allowTenantFields === true,
+      ...(maximumFields === undefined ? {} : { maximumFields }),
+      used,
+      ...(maximumFields === undefined
+        ? {}
+        : { remaining: Math.max(0, maximumFields - used) }),
     };
   }
 

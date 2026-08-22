@@ -268,6 +268,18 @@ export class ChartTemplateFieldDto {
    */
   @ApiPropertyOptional()
   ordinal?: number;
+
+  /**
+   * Si el campo lo agregó esta organización, o viene del estándar.
+   *
+   * Lo necesita el generador para dos cosas que no puede adivinar: qué campos
+   * puede tocar —los del estándar no— y cuáles cuentan contra su presupuesto de
+   * extensión.
+   */
+  @ApiProperty({
+    description: '¿Es un campo propio del tenant, o del formulario estándar?',
+  })
+  own!: boolean;
 }
 
 /**
@@ -355,6 +367,24 @@ export class ChartTemplateResponseDto {
    */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
+
+  /**
+   * Sección que aloja los campos de la plantilla.
+   *
+   * Se publica porque colgar un campo propio **dentro** de la plantilla exige
+   * nombrarla: una asignación en otra sección existe pero no la dibuja nadie.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  sectionId?: string;
+
+  /**
+   * Target de las asignaciones de campo de las plantillas de chart.
+   *
+   * Es un concepto del catálogo, y su UUID se deriva de un código: publicarlo
+   * evita que cada cliente lo copie a mano y quede clavado el día que cambie.
+   */
+  @ApiProperty({ format: 'uuid' })
+  fieldTargetConceptId!: string;
 
   /**
    * Los campos del esquema, en su orden de presentación.

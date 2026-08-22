@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { EntityManager } from '@mikro-orm/postgresql';
+import { QueryOrder, type EntityManager } from '@mikro-orm/postgresql';
 import {
   FieldAssignments,
   ExtensionTargetPolicies,
@@ -90,16 +90,37 @@ export interface CreateAssignmentData {
  */
 @Injectable()
 export class AssignmentsRepository {
-  /** Política de extensibilidad activa para un target (enforcement de gobernanza). */
-  findActivePolicy(
+  /**
+   * Política de extensibilidad activa para un target, **vista desde un tenant**.
+   *
+   * Un target puede tener dos políticas vigentes: la de la plataforma
+   * (`tenant_id` nulo) y la que una organización negoció para sí. Se prefiere
+   * la del tenant y se cae a la global, que es el orden en que las lee quien
+   * las escribió: la propia manda sobre el estándar, y el estándar rige a quien
+   * no negoció nada.
+   *
+   * Sin el filtro, `findOne` podía devolver **la política de un tercero** —la
+   * consulta sólo pedía target y estado— y entonces el presupuesto que se
+   * aplicaba no era el de nadie en particular. Con un solo tenant en la base
+   * eso no se nota; con dos, decide mal en silencio.
+   */
+  findActivePolicyForTenant(
     em: EntityManager,
     targetResourceConceptId: string,
     statusConceptId: string,
+    tenantId: string | undefined,
   ): Promise<ExtensionTargetPolicies | null> {
-    return em.findOne(ExtensionTargetPolicies, {
-      targetResourceConceptId,
-      statusConceptId,
-    });
+    return em.findOne(
+      ExtensionTargetPolicies,
+      {
+        targetResourceConceptId,
+        statusConceptId,
+        $or: [{ tenantId: tenantId ?? null }, { tenantId: null }],
+      },
+      // `DESC` en Postgres pone los nulos primero, que es justo al revés de lo
+      // que hace falta: la del tenant tiene que ganarle a la global.
+      { orderBy: { tenantId: QueryOrder.DESC_NULLS_LAST } },
+    );
   }
 
   /**
