@@ -1736,6 +1736,855 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
         'Todavía no hay datos para decir si es aguda o crónica. Se deja dicho en vez de suponerlo.',
     },
   ],
+
+  /* --- órdenes de estudios (v4.1.4) ----------------------------------------
+     Los ejes de `clinical.service_requests` y los ochenta y ocho estudios de su
+     catálogo. El `display` del concepto está en inglés, como todo el code system
+     interno; esto es lo que ve el médico al pedir un laboratorio o una imagen. */
+  [
+    CLIN.SERVICE_REQUEST_DRAFT,
+    {
+      display: 'Orden en borrador',
+      definition:
+        'La orden se está escribiendo y todavía no se envió al prestador. El médico puede editarla o descartarla.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_ON_HOLD,
+    {
+      display: 'Orden en espera',
+      definition:
+        'La orden es válida pero su ejecución quedó suspendida; se retoma sin volver a emitirla.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_REVOKED,
+    {
+      display: 'Orden revocada',
+      definition:
+        'El médico dejó sin efecto la orden antes de que se realizara el estudio.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_INTENT_PLAN,
+    {
+      display: 'Intención de plan',
+      definition:
+        'El estudio queda planificado para más adelante; todavía no es una orden a ejecutar.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_INTENT_PROPOSAL,
+    {
+      display: 'Intención de propuesta',
+      definition:
+        'Se sugiere el estudio a otro profesional, que decide si lo ordena.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_PRIORITY_URGENT,
+    {
+      display: 'Prioridad urgente',
+      definition:
+        'Se necesita antes que las órdenes de rutina, sin llegar a ser una emergencia.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_PRIORITY_ASAP,
+    {
+      display: 'Prioridad cuanto antes',
+      definition:
+        'Se realiza en cuanto haya disponibilidad, por delante de lo urgente programado.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_PRIORITY_STAT,
+    {
+      display: 'Prioridad inmediata',
+      definition: 'Emergencia: se realiza de inmediato e interrumpe la cola.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
+    {
+      display: 'Estudio por imagen',
+      definition:
+        'Radiografía, ecografía, tomografía, resonancia y demás estudios que produce un centro de imagen.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
+    {
+      display: 'Anatomía patológica',
+      definition:
+        'Estudio de una muestra de tejido o de células, con su propio circuito de fijación, procesado e informe.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+    {
+      display: 'Procedimiento diagnóstico',
+      definition:
+        'Estudio que exige un procedimiento sobre el paciente, como una endoscopía o una espirometría.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
+    {
+      display: 'Estudio cardiológico',
+      definition:
+        'Electrocardiograma, ecocardiograma, Holter y demás estudios del corazón.',
+    },
+  ],
+  [
+    CLIN.STUDY_HEMOGRAMA,
+    {
+      display: 'Hemograma completo',
+      definition:
+        'Recuento y características de glóbulos rojos, glóbulos blancos y plaquetas.',
+    },
+  ],
+  [
+    CLIN.STUDY_VSG,
+    {
+      display: 'Velocidad de sedimentación globular',
+      definition:
+        'Marcador inespecífico de inflamación; se informa en milímetros por hora.',
+    },
+  ],
+  [
+    CLIN.STUDY_GRUPO_SANGUINEO,
+    {
+      display: 'Grupo sanguíneo y factor Rh',
+      definition: 'Determina el grupo ABO y el factor Rh.',
+    },
+  ],
+  [
+    CLIN.STUDY_RETICULOCITOS,
+    {
+      display: 'Recuento de reticulocitos',
+      definition:
+        'Glóbulos rojos jóvenes; indica si la médula ósea está respondiendo.',
+    },
+  ],
+  [
+    CLIN.STUDY_FERRITINA,
+    {
+      display: 'Ferritina',
+      definition: 'Refleja las reservas de hierro del organismo.',
+    },
+  ],
+  [
+    CLIN.STUDY_TIEMPO_PROTROMBINA,
+    {
+      display: 'Tiempo de protrombina e INR',
+      definition:
+        'Evalúa la vía extrínseca de la coagulación y controla el tratamiento anticoagulante oral.',
+    },
+  ],
+  [
+    CLIN.STUDY_TIEMPO_TROMBOPLASTINA,
+    {
+      display: 'Tiempo de tromboplastina parcial activada',
+      definition: 'Evalúa la vía intrínseca de la coagulación.',
+    },
+  ],
+  [
+    CLIN.STUDY_FIBRINOGENO,
+    {
+      display: 'Fibrinógeno',
+      definition:
+        'Proteína de la coagulación; también sube en cuadros inflamatorios.',
+    },
+  ],
+  [
+    CLIN.STUDY_DIMERO_D,
+    {
+      display: 'Dímero D',
+      definition:
+        'Producto de degradación de la fibrina; se usa para descartar trombosis.',
+    },
+  ],
+  [
+    CLIN.STUDY_GLICEMIA,
+    {
+      display: 'Glicemia en ayunas',
+      definition:
+        'Glucosa en sangre tras ayuno; es la prueba base para diabetes.',
+    },
+  ],
+  [
+    CLIN.STUDY_CURVA_TOLERANCIA_GLUCOSA,
+    {
+      display: 'Curva de tolerancia a la glucosa',
+      definition: 'Mide la glucosa antes y después de una carga oral.',
+    },
+  ],
+  [
+    CLIN.STUDY_HEMOGLOBINA_GLICOSILADA,
+    {
+      display: 'Hemoglobina glicosilada (HbA1c)',
+      definition: 'Promedio de glucosa de los últimos dos o tres meses.',
+    },
+  ],
+  [
+    CLIN.STUDY_PERFIL_LIPIDICO,
+    {
+      display: 'Perfil lipídico',
+      definition: 'Colesterol total, HDL, LDL y triglicéridos.',
+    },
+  ],
+  [
+    CLIN.STUDY_CREATININA,
+    {
+      display: 'Creatinina en sangre',
+      definition: 'Principal indicador de función renal.',
+    },
+  ],
+  [
+    CLIN.STUDY_UREA,
+    {
+      display: 'Urea en sangre',
+      definition:
+        'Producto del metabolismo de las proteínas; acompaña a la creatinina.',
+    },
+  ],
+  [
+    CLIN.STUDY_ACIDO_URICO,
+    {
+      display: 'Ácido úrico',
+      definition: 'Su elevación se asocia a gota y a litiasis renal.',
+    },
+  ],
+  [
+    CLIN.STUDY_PERFIL_HEPATICO,
+    {
+      display: 'Perfil hepático',
+      definition:
+        'Transaminasas, fosfatasa alcalina y gamma-glutamil transferasa.',
+    },
+  ],
+  [
+    CLIN.STUDY_BILIRRUBINAS,
+    {
+      display: 'Bilirrubinas',
+      definition: 'Bilirrubina total, directa e indirecta.',
+    },
+  ],
+  [
+    CLIN.STUDY_AMILASA,
+    {
+      display: 'Amilasa',
+      definition: 'Enzima pancreática; se eleva en la pancreatitis aguda.',
+    },
+  ],
+  [
+    CLIN.STUDY_LIPASA,
+    {
+      display: 'Lipasa',
+      definition: 'Enzima pancreática, más específica que la amilasa.',
+    },
+  ],
+  [
+    CLIN.STUDY_ELECTROLITOS,
+    {
+      display: 'Electrolitos séricos',
+      definition: 'Sodio, potasio y cloro.',
+    },
+  ],
+  [
+    CLIN.STUDY_CALCIO,
+    {
+      display: 'Calcio sérico',
+      definition: 'Calcio en sangre, total o iónico.',
+    },
+  ],
+  [
+    CLIN.STUDY_PROTEINAS_TOTALES,
+    {
+      display: 'Proteínas totales y albúmina',
+      definition: 'Estado proteico y función de síntesis del hígado.',
+    },
+  ],
+  [
+    CLIN.STUDY_VITAMINA_D,
+    {
+      display: 'Vitamina D 25-hidroxi',
+      definition: 'Nivel de vitamina D circulante.',
+    },
+  ],
+  [
+    CLIN.STUDY_VITAMINA_B12,
+    {
+      display: 'Vitamina B12',
+      definition: 'Su déficit causa anemia y compromiso neurológico.',
+    },
+  ],
+  [
+    CLIN.STUDY_PERFIL_TIROIDEO,
+    {
+      display: 'Perfil tiroideo',
+      definition: 'TSH, T4 libre y T3.',
+    },
+  ],
+  [
+    CLIN.STUDY_TSH,
+    {
+      display: 'Hormona estimulante de tiroides (TSH)',
+      definition: 'Primera prueba para evaluar la función tiroidea.',
+    },
+  ],
+  [
+    CLIN.STUDY_PSA,
+    {
+      display: 'Antígeno prostático específico (PSA)',
+      definition: 'Tamizaje y seguimiento de patología prostática.',
+    },
+  ],
+  [
+    CLIN.STUDY_BETA_HCG,
+    {
+      display: 'Subunidad beta de gonadotropina coriónica',
+      definition: 'Confirma embarazo y sigue su evolución.',
+    },
+  ],
+  [
+    CLIN.STUDY_TESTOSTERONA,
+    {
+      display: 'Testosterona',
+      definition: 'Hormona sexual masculina; se mide en sangre.',
+    },
+  ],
+  [
+    CLIN.STUDY_CORTISOL,
+    {
+      display: 'Cortisol',
+      definition:
+        'Hormona suprarrenal; su valor depende de la hora de la toma.',
+    },
+  ],
+  [
+    CLIN.STUDY_PCR,
+    {
+      display: 'Proteína C reactiva',
+      definition: 'Marcador de inflamación aguda e infección.',
+    },
+  ],
+  [
+    CLIN.STUDY_FACTOR_REUMATOIDEO,
+    {
+      display: 'Factor reumatoideo',
+      definition: 'Anticuerpo asociado a la artritis reumatoide.',
+    },
+  ],
+  [
+    CLIN.STUDY_ANTIESTREPTOLISINA,
+    {
+      display: 'Antiestreptolisina O (ASTO)',
+      definition: 'Evidencia de infección estreptocócica reciente.',
+    },
+  ],
+  [
+    CLIN.STUDY_ORINA_COMPLETA,
+    {
+      display: 'Examen general de orina',
+      definition: 'Estudio físico, químico y del sedimento urinario.',
+    },
+  ],
+  [
+    CLIN.STUDY_UROCULTIVO,
+    {
+      display: 'Urocultivo',
+      definition: 'Cultivo de orina con recuento de colonias y antibiograma.',
+    },
+  ],
+  [
+    CLIN.STUDY_COPROPARASITOLOGICO,
+    {
+      display: 'Coproparasitológico',
+      definition: 'Búsqueda de parásitos y sus huevos en materia fecal.',
+    },
+  ],
+  [
+    CLIN.STUDY_COPROCULTIVO,
+    {
+      display: 'Coprocultivo',
+      definition:
+        'Cultivo de materia fecal para identificar bacterias enteropatógenas.',
+    },
+  ],
+  [
+    CLIN.STUDY_HEMOCULTIVO,
+    {
+      display: 'Hemocultivo',
+      definition: 'Cultivo de sangre para detectar bacteriemia.',
+    },
+  ],
+  [
+    CLIN.STUDY_VIH,
+    {
+      display: 'Prueba de VIH',
+      definition:
+        'Tamizaje de anticuerpos contra el virus de la inmunodeficiencia humana.',
+    },
+  ],
+  [
+    CLIN.STUDY_VDRL,
+    {
+      display: 'Prueba de sífilis (VDRL/RPR)',
+      definition: 'Tamizaje serológico de sífilis.',
+    },
+  ],
+  [
+    CLIN.STUDY_HEPATITIS_B,
+    {
+      display: 'Antígeno de superficie de hepatitis B',
+      definition: 'Detecta infección por el virus de la hepatitis B.',
+    },
+  ],
+  [
+    CLIN.STUDY_HEPATITIS_C,
+    {
+      display: 'Anticuerpos de hepatitis C',
+      definition: 'Tamizaje de infección por el virus de la hepatitis C.',
+    },
+  ],
+  [
+    CLIN.STUDY_CHAGAS,
+    {
+      display: 'Serología de Chagas',
+      definition:
+        'Detecta anticuerpos contra Trypanosoma cruzi. Es de tamizaje obligado en gran parte de Bolivia.',
+    },
+  ],
+  [
+    CLIN.STUDY_DENGUE,
+    {
+      display: 'Serología de dengue',
+      definition: 'Detecta antígeno NS1 y anticuerpos del virus del dengue.',
+    },
+  ],
+  [
+    CLIN.STUDY_GOTA_GRUESA,
+    {
+      display: 'Gota gruesa para malaria',
+      definition: 'Examen microscópico de sangre para detectar Plasmodium.',
+    },
+  ],
+  [
+    CLIN.STUDY_BACILOSCOPIA,
+    {
+      display: 'Baciloscopía de esputo',
+      definition:
+        'Búsqueda de bacilos ácido-alcohol resistentes; tamizaje de tuberculosis.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_TORAX,
+    {
+      display: 'Radiografía de tórax',
+      definition: 'Estudio radiológico de pulmones, corazón y caja torácica.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_CRANEO,
+    {
+      display: 'Radiografía de cráneo',
+      definition: 'Estudio radiológico del cráneo.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_SENOS_PARANASALES,
+    {
+      display: 'Radiografía de senos paranasales',
+      definition: 'Estudio radiológico de los senos frontales y maxilares.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_COLUMNA_CERVICAL,
+    {
+      display: 'Radiografía de columna cervical',
+      definition: 'Estudio radiológico del segmento cervical.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_COLUMNA_DORSAL,
+    {
+      display: 'Radiografía de columna dorsal',
+      definition: 'Estudio radiológico del segmento dorsal o torácico.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_COLUMNA_LUMBAR,
+    {
+      display: 'Radiografía de columna lumbar',
+      definition: 'Estudio radiológico del segmento lumbosacro.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_ABDOMEN,
+    {
+      display: 'Radiografía de abdomen',
+      definition: 'Estudio radiológico simple del abdomen.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_PELVIS,
+    {
+      display: 'Radiografía de pelvis',
+      definition: 'Estudio radiológico de la pelvis y las caderas.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_MIEMBRO_SUPERIOR,
+    {
+      display: 'Radiografía de miembro superior',
+      definition: 'Hombro, brazo, codo, antebrazo, muñeca o mano.',
+    },
+  ],
+  [
+    CLIN.STUDY_RX_MIEMBRO_INFERIOR,
+    {
+      display: 'Radiografía de miembro inferior',
+      definition: 'Cadera, muslo, rodilla, pierna, tobillo o pie.',
+    },
+  ],
+  [
+    CLIN.STUDY_ECO_ABDOMINAL,
+    {
+      display: 'Ecografía abdominal',
+      definition:
+        'Estudio por ultrasonido de hígado, vesícula, páncreas, bazo y riñones.',
+    },
+  ],
+  [
+    CLIN.STUDY_ECO_RENAL,
+    {
+      display: 'Ecografía renal y de vías urinarias',
+      definition: 'Estudio por ultrasonido de riñones, uréteres y vejiga.',
+    },
+  ],
+  [
+    CLIN.STUDY_ECO_PELVICA,
+    {
+      display: 'Ecografía pélvica',
+      definition: 'Estudio por ultrasonido de los órganos de la pelvis.',
+    },
+  ],
+  [
+    CLIN.STUDY_ECO_OBSTETRICA,
+    {
+      display: 'Ecografía obstétrica',
+      definition: 'Control ecográfico del embarazo.',
+    },
+  ],
+  [
+    CLIN.STUDY_ECO_TIROIDES,
+    {
+      display: 'Ecografía de tiroides',
+      definition: 'Estudio por ultrasonido de la glándula tiroides.',
+    },
+  ],
+  [
+    CLIN.STUDY_ECO_MAMARIA,
+    {
+      display: 'Ecografía mamaria',
+      definition: 'Estudio por ultrasonido de las mamas.',
+    },
+  ],
+  [
+    CLIN.STUDY_ECO_PARTES_BLANDAS,
+    {
+      display: 'Ecografía de partes blandas',
+      definition:
+        'Estudio por ultrasonido de músculos, tendones y tejido subcutáneo.',
+    },
+  ],
+  [
+    CLIN.STUDY_ECO_DOPPLER,
+    {
+      display: 'Ecografía Doppler color',
+      definition:
+        'Estudio por ultrasonido que mide el flujo de la sangre en arterias y venas.',
+    },
+  ],
+  [
+    CLIN.STUDY_TC_CRANEO,
+    {
+      display: 'Tomografía de cráneo',
+      definition: 'Tomografía computarizada del encéfalo y el cráneo.',
+    },
+  ],
+  [
+    CLIN.STUDY_TC_TORAX,
+    {
+      display: 'Tomografía de tórax',
+      definition: 'Tomografía computarizada de pulmones y mediastino.',
+    },
+  ],
+  [
+    CLIN.STUDY_TC_ABDOMEN,
+    {
+      display: 'Tomografía de abdomen y pelvis',
+      definition: 'Tomografía computarizada del abdomen y la pelvis.',
+    },
+  ],
+  [
+    CLIN.STUDY_TC_COLUMNA,
+    {
+      display: 'Tomografía de columna',
+      definition: 'Tomografía computarizada de un segmento de la columna.',
+    },
+  ],
+  [
+    CLIN.STUDY_RM_CEREBRAL,
+    {
+      display: 'Resonancia magnética cerebral',
+      definition: 'Resonancia magnética del encéfalo.',
+    },
+  ],
+  [
+    CLIN.STUDY_RM_COLUMNA,
+    {
+      display: 'Resonancia magnética de columna',
+      definition: 'Resonancia magnética de un segmento de la columna.',
+    },
+  ],
+  [
+    CLIN.STUDY_RM_ARTICULAR,
+    {
+      display: 'Resonancia magnética articular',
+      definition:
+        'Resonancia magnética de una articulación, como rodilla u hombro.',
+    },
+  ],
+  [
+    CLIN.STUDY_MAMOGRAFIA,
+    {
+      display: 'Mamografía',
+      definition:
+        'Estudio radiológico de las mamas; es el tamizaje del cáncer de mama.',
+    },
+  ],
+  [
+    CLIN.STUDY_DENSITOMETRIA,
+    {
+      display: 'Densitometría ósea',
+      definition:
+        'Mide la densidad mineral del hueso; diagnostica osteoporosis.',
+    },
+  ],
+  [
+    CLIN.STUDY_ELECTROCARDIOGRAMA,
+    {
+      display: 'Electrocardiograma',
+      definition: 'Registro de la actividad eléctrica del corazón en reposo.',
+    },
+  ],
+  [
+    CLIN.STUDY_ECOCARDIOGRAMA,
+    {
+      display: 'Ecocardiograma',
+      definition: 'Estudio por ultrasonido del corazón y sus válvulas.',
+    },
+  ],
+  [
+    CLIN.STUDY_HOLTER,
+    {
+      display: 'Holter de ritmo',
+      definition:
+        'Registro continuo del electrocardiograma durante veinticuatro horas o más.',
+    },
+  ],
+  [
+    CLIN.STUDY_ERGOMETRIA,
+    {
+      display: 'Ergometría',
+      definition: 'Electrocardiograma durante esfuerzo físico controlado.',
+    },
+  ],
+  [
+    CLIN.STUDY_MAPA_PRESION,
+    {
+      display: 'Monitoreo ambulatorio de presión arterial',
+      definition: 'Registro de la presión arterial durante veinticuatro horas.',
+    },
+  ],
+  [
+    CLIN.STUDY_BIOPSIA,
+    {
+      display: 'Estudio histopatológico de biopsia',
+      definition: 'Análisis microscópico de una muestra de tejido.',
+    },
+  ],
+  [
+    CLIN.STUDY_CITOLOGIA,
+    {
+      display: 'Estudio citológico',
+      definition:
+        'Análisis microscópico de células obtenidas por punción o raspado.',
+    },
+  ],
+  [
+    CLIN.STUDY_PAPANICOLAOU,
+    {
+      display: 'Papanicolaou',
+      definition:
+        'Citología del cuello uterino; es el tamizaje del cáncer cervicouterino.',
+    },
+  ],
+  [
+    CLIN.STUDY_ENDOSCOPIA_ALTA,
+    {
+      display: 'Endoscopía digestiva alta',
+      definition: 'Exploración con endoscopio de esófago, estómago y duodeno.',
+    },
+  ],
+  [
+    CLIN.STUDY_COLONOSCOPIA,
+    {
+      display: 'Colonoscopía',
+      definition: 'Exploración con endoscopio del intestino grueso.',
+    },
+  ],
+  [
+    CLIN.STUDY_ESPIROMETRIA,
+    {
+      display: 'Espirometría',
+      definition: 'Mide los volúmenes y flujos respiratorios.',
+    },
+  ],
+  [
+    CLIN.STUDY_AUDIOMETRIA,
+    {
+      display: 'Audiometría',
+      definition: 'Mide la capacidad auditiva por vía aérea y ósea.',
+    },
+  ],
+  [
+    CLIN.STUDY_ELECTROENCEFALOGRAMA,
+    {
+      display: 'Electroencefalograma',
+      definition: 'Registro de la actividad eléctrica del cerebro.',
+    },
+  ],
+  [
+    CLIN.STUDY_ELECTROMIOGRAFIA,
+    {
+      display: 'Electromiografía',
+      definition:
+        'Registro de la actividad eléctrica del músculo y del nervio periférico.',
+    },
+  ],
+  /* Los cinco que ya existían desde el módulo 08 y nunca se habían traducido:
+     hasta ahora `service_requests` no tenía ninguna enumeración publicada, así
+     que ningún concepto suyo llegaba a una pantalla. */
+  [
+    CLIN.SERVICE_REQUEST_ACTIVE,
+    {
+      display: 'Orden activa',
+      definition:
+        'La orden está vigente y el prestador puede realizar el estudio.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_COMPLETED,
+    {
+      display: 'Orden completada',
+      definition: 'El estudio se realizó y la orden se cerró.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_INTENT_ORDER,
+    {
+      display: 'Intención de orden',
+      definition:
+        'El estudio se ordena para que se realice, sin pasos intermedios.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_PRIORITY_ROUTINE,
+    {
+      display: 'Prioridad de rutina',
+      definition:
+        'Se realiza en el turno normal del prestador, sin adelantarse a otras órdenes.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_CATEGORY_LAB,
+    {
+      display: 'Análisis de laboratorio',
+      definition:
+        'Estudio sobre una muestra biológica que procesa un laboratorio de análisis clínicos.',
+    },
+  ],
+  /* --- formas societarias (v4.1.4) ------------------------------------------
+     Las ocho que enumera el registro de procesos, con el nombre con el que las
+     nombra la ley boliviana. */
+  [
+    CONCEPTS.LEGAL_ENTITY_SOLE_PROPRIETORSHIP,
+    {
+      display: 'Empresa unipersonal',
+      definition:
+        'Una sola persona natural es la titular del negocio y responde con su patrimonio.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_SRL,
+    {
+      display: 'Sociedad de Responsabilidad Limitada (S.R.L.)',
+      definition:
+        'Los socios responden hasta el monto de sus aportes. El capital se divide en cuotas, no en acciones.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_LTDA,
+    {
+      display: 'Sociedad Limitada (Ltda.)',
+      definition:
+        'Denominación usada en el giro comercial para una sociedad de responsabilidad limitada.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_SA,
+    {
+      display: 'Sociedad Anónima (S.A.)',
+      definition:
+        'El capital se divide en acciones y los accionistas responden hasta el valor de las suyas.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_GENERAL_PARTNERSHIP,
+    {
+      display: 'Sociedad Colectiva',
+      definition:
+        'Todos los socios responden de forma solidaria e ilimitada por las obligaciones sociales.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_LIMITED_PARTNERSHIP,
+    {
+      display: 'Sociedad en Comandita Simple',
+      definition:
+        'Convive un socio gestor, que responde de forma ilimitada, con socios comanditarios que responden sólo por su aporte.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_PARTNERSHIP_BY_SHARES,
+    {
+      display: 'Sociedad en Comandita por Acciones',
+      definition:
+        'Como la comandita simple, pero el aporte de los socios comanditarios está representado en acciones.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_FOREIGN_BRANCH,
+    {
+      display: 'Sucursal de sociedad extranjera',
+      definition:
+        'Establecimiento en Bolivia de una sociedad constituida en otro país, inscrito en el registro de comercio.',
+    },
+  ],
 ];
 
 /**

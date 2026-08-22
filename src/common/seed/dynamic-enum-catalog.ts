@@ -381,6 +381,27 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     targets: ['directory.tenants.tenant_type_concept_id'],
   },
   {
+    code: 'legal-entity-type',
+    name: 'Forma societaria',
+    description:
+      'Figura jurídica con la que la organización está constituida, según el derecho comercial boliviano.',
+    concepts: [
+      CONCEPTS.LEGAL_ENTITY_SOLE_PROPRIETORSHIP,
+      CONCEPTS.LEGAL_ENTITY_SRL,
+      CONCEPTS.LEGAL_ENTITY_LTDA,
+      CONCEPTS.LEGAL_ENTITY_SA,
+      CONCEPTS.LEGAL_ENTITY_GENERAL_PARTNERSHIP,
+      CONCEPTS.LEGAL_ENTITY_LIMITED_PARTNERSHIP,
+      CONCEPTS.LEGAL_ENTITY_PARTNERSHIP_BY_SHARES,
+      CONCEPTS.LEGAL_ENTITY_FOREIGN_BRANCH,
+    ],
+    // Sin preseleccionado: la forma societaria es un hecho registral, y el que
+    // viniera puesto por omisión sería el que más filas tendría al final sin que
+    // nadie lo hubiera declarado. Justamente el dato que el registro de procesos
+    // quiere contar («cuantos proveedores tenemos con SRL, UNIPERSONAL y S.A.»).
+    targets: ['directory.tenants.legal_entity_type_concept_id'],
+  },
+  {
     code: 'tenant-status',
     name: 'Estado de la organización',
     description: 'Ciclo de vida de la organización dentro de la plataforma.',
@@ -777,6 +798,181 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     // clínico es un dato legítimo (`CONDITION_COURSE_UNKNOWN` está para eso), no
     // un olvido que convenga rellenar con un valor por omisión.
     targets: ['clinical.conditions.clinical_course_concept_id'],
+  },
+
+  /* --- clinical.service_requests --------------------------------------------
+     Las cinco columnas de catálogo de la orden de estudios. Ninguna estaba
+     amarrada: la pantalla de órdenes respondía «El catálogo de estudios no está
+     publicado» y `code_concept_id` es NOT NULL, así que pedir un laboratorio o
+     una radiografía era imposible de punta a punta. Es el mismo hueco que tenían
+     la receta y el diagnóstico antes de su vademécum. */
+  {
+    code: 'service-request-code',
+    name: 'Estudio solicitado',
+    description:
+      'Qué estudio pide la orden: laboratorio, imagen, estudio cardiológico, anatomía patológica o procedimiento diagnóstico.',
+    concepts: [
+      // Laboratorio · hematología y coagulación
+      CLIN.STUDY_HEMOGRAMA,
+      CLIN.STUDY_VSG,
+      CLIN.STUDY_GRUPO_SANGUINEO,
+      CLIN.STUDY_RETICULOCITOS,
+      CLIN.STUDY_FERRITINA,
+      CLIN.STUDY_TIEMPO_PROTROMBINA,
+      CLIN.STUDY_TIEMPO_TROMBOPLASTINA,
+      CLIN.STUDY_FIBRINOGENO,
+      CLIN.STUDY_DIMERO_D,
+      // Laboratorio · química y metabolismo
+      CLIN.STUDY_GLICEMIA,
+      CLIN.STUDY_CURVA_TOLERANCIA_GLUCOSA,
+      CLIN.STUDY_HEMOGLOBINA_GLICOSILADA,
+      CLIN.STUDY_PERFIL_LIPIDICO,
+      CLIN.STUDY_CREATININA,
+      CLIN.STUDY_UREA,
+      CLIN.STUDY_ACIDO_URICO,
+      CLIN.STUDY_PERFIL_HEPATICO,
+      CLIN.STUDY_BILIRRUBINAS,
+      CLIN.STUDY_AMILASA,
+      CLIN.STUDY_LIPASA,
+      CLIN.STUDY_ELECTROLITOS,
+      CLIN.STUDY_CALCIO,
+      CLIN.STUDY_PROTEINAS_TOTALES,
+      CLIN.STUDY_VITAMINA_D,
+      CLIN.STUDY_VITAMINA_B12,
+      // Laboratorio · hormonas
+      CLIN.STUDY_PERFIL_TIROIDEO,
+      CLIN.STUDY_TSH,
+      CLIN.STUDY_PSA,
+      CLIN.STUDY_BETA_HCG,
+      CLIN.STUDY_TESTOSTERONA,
+      CLIN.STUDY_CORTISOL,
+      // Laboratorio · inflamación e inmunología
+      CLIN.STUDY_PCR,
+      CLIN.STUDY_FACTOR_REUMATOIDEO,
+      CLIN.STUDY_ANTIESTREPTOLISINA,
+      // Laboratorio · microbiología y serología
+      CLIN.STUDY_ORINA_COMPLETA,
+      CLIN.STUDY_UROCULTIVO,
+      CLIN.STUDY_COPROPARASITOLOGICO,
+      CLIN.STUDY_COPROCULTIVO,
+      CLIN.STUDY_HEMOCULTIVO,
+      CLIN.STUDY_VIH,
+      CLIN.STUDY_VDRL,
+      CLIN.STUDY_HEPATITIS_B,
+      CLIN.STUDY_HEPATITIS_C,
+      CLIN.STUDY_CHAGAS,
+      CLIN.STUDY_DENGUE,
+      CLIN.STUDY_GOTA_GRUESA,
+      CLIN.STUDY_BACILOSCOPIA,
+      // Imagen · radiología simple
+      CLIN.STUDY_RX_TORAX,
+      CLIN.STUDY_RX_CRANEO,
+      CLIN.STUDY_RX_SENOS_PARANASALES,
+      CLIN.STUDY_RX_COLUMNA_CERVICAL,
+      CLIN.STUDY_RX_COLUMNA_DORSAL,
+      CLIN.STUDY_RX_COLUMNA_LUMBAR,
+      CLIN.STUDY_RX_ABDOMEN,
+      CLIN.STUDY_RX_PELVIS,
+      CLIN.STUDY_RX_MIEMBRO_SUPERIOR,
+      CLIN.STUDY_RX_MIEMBRO_INFERIOR,
+      // Imagen · ecografía
+      CLIN.STUDY_ECO_ABDOMINAL,
+      CLIN.STUDY_ECO_RENAL,
+      CLIN.STUDY_ECO_PELVICA,
+      CLIN.STUDY_ECO_OBSTETRICA,
+      CLIN.STUDY_ECO_TIROIDES,
+      CLIN.STUDY_ECO_MAMARIA,
+      CLIN.STUDY_ECO_PARTES_BLANDAS,
+      CLIN.STUDY_ECO_DOPPLER,
+      // Imagen · tomografía, resonancia y densitometría
+      CLIN.STUDY_TC_CRANEO,
+      CLIN.STUDY_TC_TORAX,
+      CLIN.STUDY_TC_ABDOMEN,
+      CLIN.STUDY_TC_COLUMNA,
+      CLIN.STUDY_RM_CEREBRAL,
+      CLIN.STUDY_RM_COLUMNA,
+      CLIN.STUDY_RM_ARTICULAR,
+      CLIN.STUDY_MAMOGRAFIA,
+      CLIN.STUDY_DENSITOMETRIA,
+      // Estudios cardiológicos
+      CLIN.STUDY_ELECTROCARDIOGRAMA,
+      CLIN.STUDY_ECOCARDIOGRAMA,
+      CLIN.STUDY_HOLTER,
+      CLIN.STUDY_ERGOMETRIA,
+      CLIN.STUDY_MAPA_PRESION,
+      // Anatomía patológica
+      CLIN.STUDY_BIOPSIA,
+      CLIN.STUDY_CITOLOGIA,
+      CLIN.STUDY_PAPANICOLAOU,
+      // Procedimientos diagnósticos
+      CLIN.STUDY_ENDOSCOPIA_ALTA,
+      CLIN.STUDY_COLONOSCOPIA,
+      CLIN.STUDY_ESPIROMETRIA,
+      CLIN.STUDY_AUDIOMETRIA,
+      CLIN.STUDY_ELECTROENCEFALOGRAMA,
+      CLIN.STUDY_ELECTROMIOGRAFIA,
+    ],
+    // Sin preseleccionado, por lo mismo que el medicamento y el diagnóstico: un
+    // estudio por omisión termina pedido —y cobrado— sin que nadie lo eligiera.
+    targets: ['clinical.service_requests.code_concept_id'],
+  },
+  {
+    code: 'service-request-category',
+    name: 'Categoría del estudio',
+    description:
+      'A qué prestador va la orden: laboratorio de análisis, centro de imagen, anatomía patológica o procedimiento.',
+    concepts: [
+      CLIN.SERVICE_REQUEST_CATEGORY_LAB,
+      CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
+      CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
+      CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
+      CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+    ],
+    targets: ['clinical.service_requests.category_concept_id'],
+  },
+  {
+    code: 'service-request-intent',
+    name: 'Intención de la orden',
+    description:
+      'Si la orden se emite para ejecutarse, se planifica para más adelante o se propone a otro profesional (HL7 FHIR request-intent).',
+    concepts: [
+      CLIN.SERVICE_REQUEST_INTENT_ORDER,
+      CLIN.SERVICE_REQUEST_INTENT_PLAN,
+      CLIN.SERVICE_REQUEST_INTENT_PROPOSAL,
+    ],
+    defaultConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+    targets: ['clinical.service_requests.intent_concept_id'],
+  },
+  {
+    code: 'service-request-priority',
+    name: 'Prioridad de la orden',
+    description:
+      'Con qué urgencia se espera el estudio (HL7 FHIR request-priority).',
+    concepts: [
+      CLIN.SERVICE_REQUEST_PRIORITY_ROUTINE,
+      CLIN.SERVICE_REQUEST_PRIORITY_URGENT,
+      CLIN.SERVICE_REQUEST_PRIORITY_ASAP,
+      CLIN.SERVICE_REQUEST_PRIORITY_STAT,
+    ],
+    // Rutina es lo que corresponde por omisión: marcar urgente sin decidirlo
+    // desordena la cola del prestador y le quita sentido a la palabra.
+    defaultConceptId: CLIN.SERVICE_REQUEST_PRIORITY_ROUTINE,
+    targets: ['clinical.service_requests.priority_concept_id'],
+  },
+  {
+    code: 'service-request-status',
+    name: 'Estado de la orden',
+    description:
+      'Ciclo de vida de la orden: borrador, activa, en espera, revocada o completada.',
+    concepts: [
+      CLIN.SERVICE_REQUEST_DRAFT,
+      CLIN.SERVICE_REQUEST_ACTIVE,
+      CLIN.SERVICE_REQUEST_ON_HOLD,
+      CLIN.SERVICE_REQUEST_REVOKED,
+      CLIN.SERVICE_REQUEST_COMPLETED,
+    ],
+    defaultConceptId: CLIN.SERVICE_REQUEST_DRAFT,
+    targets: ['clinical.service_requests.status_concept_id'],
   },
 ];
 

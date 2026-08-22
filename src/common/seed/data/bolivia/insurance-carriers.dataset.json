@@ -1,0 +1,158 @@
+{
+  "_nota": "Aseguradoras de Bolivia. Origen: LISTADO_DE_ASEGURADORAS_1.md. Regenerar con tools/bolivia-datasets/extract_datasets.py.",
+  "datos": [
+    {
+      "code": "BO_ASEG_ALIANZA_VIDA_S_A",
+      "razonSocial": "Alianza Vida Seguros y Reaseguros S.A.",
+      "sigla": "Alianza Vida S.A.",
+      "nit": "1015327022",
+      "direccion": "Mario Gutiérrez Nº 3325, esq. Av. Roca y Coronado, Edificio Alianza, Zona Villa Mercedes, Santa Cruz de la Sierra, Bolivia.",
+      "ramo": "PERSONAS",
+      "ofreceSalud": true
+    },
+    {
+      "code": "BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A",
+      "razonSocial": "BISA Seguros y Reaseguros S.A.",
+      "sigla": "BISA Seguros y Reaseguros S.A.",
+      "nit": "1020655027",
+      "direccion": "Av. Arce N° 2631, Edificio Multicine, Piso N° 14, zona de San Jorge, La Paz, Bolivia",
+      "ramo": "PERSONAS",
+      "ofreceSalud": true
+    },
+    {
+      "code": "BO_ASEG_FORTALEZA_SEGUROS_Y_REASEGUROS_S_A",
+      "razonSocial": "Compañía de Seguros y Reaseguros Fortaleza S.A.",
+      "sigla": "Fortaleza Seguros y Reaseguros S.A.",
+      "nit": "1028175023",
+      "direccion": "Av. Virgen de Cotoca N° 2080, Zona Lazareto, Santa Cruz de la Sierra, Bolivia",
+      "ramo": "PERSONAS",
+      "ofreceSalud": true
+    },
+    {
+      "code": "BO_ASEG_CREDISEGURO_S_A_SEGUROS_PERSONALES",
+      "razonSocial": "Crediseguro S.A. Seguros Personales",
+      "sigla": "Crediseguro S.A. Seguros Personales",
+      "nit": "191310020",
+      "direccion": "Av. Hernando Siles esq. calle 10 de Obrajes, Torre Empresarial ESIMSA, Piso 9, La Paz, Bolivia.",
+      "ramo": "PERSONAS",
+      "ofreceSalud": true
+    },
+    {
+      "code": "BO_ASEG_LA_BOLIVIANA_CIACRUZ_SEGUROS_PERSONALES_S_A",
+      "razonSocial": "LA BOLIVIANA CIACRUZ SEGUROS PERSONALES S.A.",
+      "sigla": "LA BOLIVIANA CIACRUZ SEGUROS PERSONALES S.A.",
+      "nit": "1006989027",
+      "direccion": "Calle Colón N° 288, Piso 2°, en la ciudad de La Paz, Bolivia.",
+      "ramo": "PERSONAS",
+      "ofreceSalud": true
+    },
+    {
+      "code": "BO_ASEG_LA_VITALICIA_SEGUROS_Y_REASEGUROS_DE_VIDA_S_",
+      "razonSocial": "LA VITALICIA SEGUROS Y REASEGUROS DE VIDA S.A.",
+      "sigla": "LA VITALICIA SEGUROS Y REASEGUROS DE VIDA S.A.",
+      "nit": "1020687029",
+      "direccion": "Av. 6 de Agosto Nº 2860, Zona San Jorge, La Paz, Bolivia",
+      "ramo": "PERSONAS",
+      "ofreceSalud": true
+    },
+    {
+      "code": "BO_ASEG_NACIONAL_SEGUROS_VIDA_Y_SALUD_S_A",
+      "razonSocial": "Nacional Seguros Vida y Salud S.A.",
+      "sigla": "Nacional Seguros Vida y Salud S.A.",
+      "nit": "1028483024",
+      "direccion": "Avenida Cristóbal de Mendoza esquina Avenida Alemana N° 333 (Segundo Anillo), Santa Cruz, Bolivia",
+      "ramo": "PERSONAS",
+      "ofreceSalud": true
+    },
+    {
+      "code": "BO_ASEG_UNIVIDA_S_A",
+      "razonSocial": "Empresa de Seguros y Reaseguros Personales UNIVIDA S.A.",
+      "sigla": "UNIVIDA S.A.",
+      "nit": "301204024",
+      "direccion": "Av. Camacho N° 1485, Edificio La Urbana, Piso 3, La Paz, Bolivia",
+      "ramo": "PERSONAS",
+      "ofreceSalud": true
+    },
+    {
+      "code": "BO_ASEG_SANTA_CRUZ_VIDA_Y_SALUD_S_A",
+      "razonSocial": "Santa Cruz Vida y Salud Seguros y Reaseguros Personales S.A.",
+      "sigla": "Santa Cruz Vida y Salud S.A.",
+      "nit": "370008027",
+      "direccion": "Avenida San Martín, Edificio Manzana 40, Torre 2, Piso 13, Zona Equipetrol, Santa Cruz de la Sierra, Bolivia.",
+      "ramo": "PERSONAS",
+      "ofreceSalud": true
+    },
+    {
+      "code": "BO_ASEG_ALIANZA_SEGUROS_S_A",
+      "razonSocial": "Alianza Compañía de Seguros y Reaseguros S.A.",
+      "sigla": "Alianza Seguros S.A.",
+      "nit": "1020351029",
+      "direccion": "Av. Roca y Coronado Nº 1380, Santa Cruz de la Sierra, Bolivia",
+      "ramo": "GENERALES",
+      "ofreceSalud": false
+    },
+    {
+      "code": "BO_ASEG_CREDISEGURO_S_A_SEGUROS_GENERALES",
+      "razonSocial": "Crediseguro S.A. Seguros Generales",
+      "sigla": "Crediseguro S.A. Seguros Generales",
+      "nit": "343764028",
+      "direccion": "Avenida Hernando Siles esquina Calle 10 de Obrajes, Torre Empresarial ESIMSA, Piso 9, La Paz, Bolivia",
+      "ramo": "GENERALES",
+      "ofreceSalud": false
+    },
+    {
+      "code": "BO_ASEG_LA_BOLIVIANA_CIACRUZ_DE_SEGUROS_Y_REASEGUROS",
+      "razonSocial": "La Boliviana Ciacruz de Seguros y Reaseguros S.A.",
+      "sigla": "La Boliviana Ciacruz de Seguros y Reaseguros S.A.",
+      "nit": "1007017028",
+      "direccion": "Calle Colón N° 288, Edificio La Boliviana Ciacruz (Zona Central), La Paz, Bolivia",
+      "ramo": "GENERALES",
+      "ofreceSalud": false
+    },
+    {
+      "code": "BO_ASEG_MERCANTIL_SANTA_CRUZ_SEGUROS_Y_REASEGUROS_GE",
+      "razonSocial": "Mercantil Santa Cruz Seguros y Reaseguros Generales S.A.",
+      "sigla": "Mercantil Santa Cruz Seguros y Reaseguros Generales S.A.",
+      "nit": "399309026",
+      "direccion": "Av. Camacho N° 1448, Edif. Banco Mercantil Santa Cruz, Piso 11, La Paz, Bolivia",
+      "ramo": "GENERALES",
+      "ofreceSalud": false
+    },
+    {
+      "code": "BO_ASEG_NACIONAL_SEGUROS_PATRIMONIALES_Y_FIANZAS_S_A",
+      "razonSocial": "Nacional Seguros Patrimoniales y Fianzas S.A.",
+      "sigla": "Nacional Seguros Patrimoniales y Fianzas S.A.",
+      "nit": "145776027",
+      "direccion": "Avenida Cristóbal de Mendoza esquina Avenida Alemana Nº 333 (Segundo Anillo), Santa Cruz, Bolivia",
+      "ramo": "GENERALES",
+      "ofreceSalud": false
+    },
+    {
+      "code": "BO_ASEG_SEGUROS_Y_REASEGUROS_CREDINFORM_INTERNATIONA",
+      "razonSocial": "Seguros y Reaseguros Credinform International S.A.",
+      "sigla": "Seguros y Reaseguros Credinform International S.A.",
+      "nit": "1006765027",
+      "direccion": "Calle Julio Patiño N° 550, esquina calle 12, Calacoto, La Paz, Bolivia",
+      "ramo": "GENERALES",
+      "ofreceSalud": false
+    },
+    {
+      "code": "BO_ASEG_SEGUROS_ILLIMANI_S_A",
+      "razonSocial": "Seguros Illimani S.A.",
+      "sigla": "Seguros Illimani S.A.",
+      "nit": "1007165029",
+      "direccion": "Calle Loayza N° 233, Edificio Mariscal de Ayacucho, Piso 10, Oficinas 1004-1013, La Paz, Bolivia",
+      "ramo": "GENERALES",
+      "ofreceSalud": false
+    },
+    {
+      "code": "BO_ASEG_UNIBIENES_S_A",
+      "razonSocial": "UNIBIENES Seguros y Reaseguros Patrimoniales S.A.",
+      "sigla": "Unibienes S.A.",
+      "nit": "338090023",
+      "direccion": "Calle 10 de Calacoto, Edificio Emporium N° 7812, Piso 5, Zona Sur, La Paz, Bolivia",
+      "ramo": "GENERALES",
+      "ofreceSalud": false
+    }
+  ]
+}

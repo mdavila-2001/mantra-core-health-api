@@ -7,6 +7,8 @@ import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
+import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
@@ -81,6 +83,10 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
+   * @param boliviaFacilities - Directorio de establecimientos de salud de
+   *   Santa Cruz (`VS_BO_HEALTH_FACILITY`).
+   * @param boliviaInsurance - Aseguradoras bolivianas con su producto de
+   *   salud y sus planes.
    * @param messaging - Datos estructurales de mensajería.
    * @param audioAssets - Colas y plantillas de audio.
    * @param vademecum - Catálogo de medicamentos para prescribir.
@@ -96,6 +102,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
+    private readonly boliviaFacilities: BoliviaFacilitiesSeedService,
+    private readonly boliviaInsurance: BoliviaInsuranceSeedService,
     private readonly messaging: MessagingSeedService,
     private readonly audioAssets: AudioAssetsSeedService,
     private readonly vademecum: VademecumSeedService,
@@ -187,6 +195,23 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     steps.push(
       await this.runStep('departamentos de Bolivia', () =>
         this.boGeography.run(),
+      ),
+    );
+    // Junto a los departamentos y por lo mismo: son catálogos de referencia de
+    // Bolivia que las pantallas resuelven por el código del conjunto. El
+    // directorio de establecimientos es el que le permite al médico decir en qué
+    // hospital está de turno y en qué clínica atiende.
+    steps.push(
+      await this.runStep('establecimientos de salud', () =>
+        this.boliviaFacilities.run(),
+      ),
+    );
+    // Las aseguradoras van después del catálogo de conceptos porque su estado y
+    // su tipo de producto salen de `insurance:*`, y antes que nada que registre
+    // una cobertura: `patient_coverages` apunta al plan, no a la compañía.
+    steps.push(
+      await this.runStep('aseguradoras de Bolivia', () =>
+        this.boliviaInsurance.run(),
       ),
     );
     // Mismo motivo que el glosario: amplía el motor de terminología con un code

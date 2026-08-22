@@ -97,6 +97,344 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Laboratory category',
     },
 
+    /* --- ciclo de vida, intención y prioridad, completados ---------------------
+       Hasta acá `service_requests` declaraba un estado (activa), una intención
+       (orden) y una prioridad (rutina): lo mínimo para insertar una fila, no lo
+       necesario para operarla. Una orden que nace en borrador, que se suspende
+       mientras el paciente no puede hacerse el estudio, o que el médico revoca,
+       no tenía dónde decirlo. Los nombres siguen los de HL7 FHIR `ServiceRequest`
+       para que el día que se exporte a un tercero la equivalencia sea directa. */
+    SERVICE_REQUEST_DRAFT: {
+      code: 'SR_DRAFT',
+      display: 'Service request draft',
+    },
+    SERVICE_REQUEST_ON_HOLD: {
+      code: 'SR_ON_HOLD',
+      display: 'Service request on hold',
+    },
+    SERVICE_REQUEST_REVOKED: {
+      code: 'SR_REVOKED',
+      display: 'Service request revoked',
+    },
+    SERVICE_REQUEST_INTENT_PLAN: { code: 'SR_PLAN', display: 'Plan intent' },
+    SERVICE_REQUEST_INTENT_PROPOSAL: {
+      code: 'SR_PROPOSAL',
+      display: 'Proposal intent',
+    },
+    SERVICE_REQUEST_PRIORITY_URGENT: {
+      code: 'SR_URGENT',
+      display: 'Urgent priority',
+    },
+    SERVICE_REQUEST_PRIORITY_ASAP: {
+      code: 'SR_ASAP',
+      display: 'ASAP priority',
+    },
+    SERVICE_REQUEST_PRIORITY_STAT: {
+      code: 'SR_STAT',
+      display: 'STAT priority',
+    },
+
+    /* Las categorías son las tres puertas del registro de procesos: el médico
+       emite «Orden para Laboratorio de Análisis de Sangre», «Orden para análisis
+       clínicos (Rayos X, Resonancia, ecografía)» y la receta. Anatomía patológica
+       va aparte de laboratorio porque su circuito es otro —hay una muestra que se
+       fija, se procesa y se informa— y quien la realiza no es el mismo prestador. */
+    SERVICE_REQUEST_CATEGORY_IMAGING: {
+      code: 'SR_IMAGING',
+      display: 'Imaging category',
+    },
+    SERVICE_REQUEST_CATEGORY_PATHOLOGY: {
+      code: 'SR_PATHOLOGY',
+      display: 'Pathology category',
+    },
+    SERVICE_REQUEST_CATEGORY_PROCEDURE: {
+      code: 'SR_PROCEDURE',
+      display: 'Procedure category',
+    },
+    SERVICE_REQUEST_CATEGORY_CARDIO: {
+      code: 'SR_CARDIO',
+      display: 'Cardiac study category',
+    },
+
+    /* --- qué se pide: el catálogo de estudios ---------------------------------
+       `service_requests.code_concept_id` es NOT NULL y no tenía ni un concepto
+       que ponerle: la pantalla de órdenes respondía «El catálogo de estudios no
+       está publicado» y pedir un estudio era imposible. Esto es ese catálogo.
+
+       **Por qué códigos locales y no LOINC.** El vademécum de arriba usa ATC
+       real porque ATC nombra el principio activo y es exactamente lo que la
+       receta necesita. LOINC no es equivalente: identifica una *medición* con su
+       método, su unidad y su espécimen —«Glucosa [Masa/volumen] en Suero o
+       Plasma»—, mientras que lo que el médico pide y el laboratorio cobra es un
+       *servicio* («glicemia»). Traducir uno al otro es una decisión clínica, no
+       una transcripción, y elegir mal el código LOINC es peor que no ponerlo:
+       queda un identificador que parece interoperable y no lo es. Cuando el
+       laboratorio entregue su nomenclador —que el registro de procesos ya prevé
+       («la APP tiene que estar enlazado o sincronizado con el sistema de la
+       empresa de Laboratorio»)— se publica una versión nueva del conjunto y el
+       binding la sigue sin tocar nada de aquí.
+
+       **De dónde sale la lista.** Los estudios por imagen siguen los grupos del
+       Arancel de Honorarios Médicos de Santa Cruz 2025 —tórax, cráneo y cara,
+       columna, miembros, contrastados, ecografía, doppler, densitometría,
+       tomografía y resonancia—, con los nombres escritos correctamente: el PDF
+       del arancel es escaneado y su propio pliego advierte que hay que validar
+       los textos antes de cargarlos. Los de laboratorio son el panel ambulatorio
+       que se pide todos los días en el primer nivel. */
+
+    // Laboratorio · hematología
+    STUDY_HEMOGRAMA: { code: 'LAB_HEMOGRAMA', display: 'Complete blood count' },
+    STUDY_VSG: {
+      code: 'LAB_VSG',
+      display: 'Erythrocyte sedimentation rate',
+    },
+    STUDY_GRUPO_SANGUINEO: {
+      code: 'LAB_GRUPO_RH',
+      display: 'ABO and Rh blood group',
+    },
+    STUDY_RETICULOCITOS: {
+      code: 'LAB_RETICULOCITOS',
+      display: 'Reticulocytes',
+    },
+    STUDY_FERRITINA: { code: 'LAB_FERRITINA', display: 'Ferritin' },
+
+    // Laboratorio · coagulación
+    STUDY_TIEMPO_PROTROMBINA: {
+      code: 'LAB_TP_INR',
+      display: 'Prothrombin time and INR',
+    },
+    STUDY_TIEMPO_TROMBOPLASTINA: {
+      code: 'LAB_TTPA',
+      display: 'Activated partial thromboplastin time',
+    },
+    STUDY_FIBRINOGENO: { code: 'LAB_FIBRINOGENO', display: 'Fibrinogen' },
+    STUDY_DIMERO_D: { code: 'LAB_DIMERO_D', display: 'D-dimer' },
+
+    // Laboratorio · química y metabolismo
+    STUDY_GLICEMIA: { code: 'LAB_GLICEMIA', display: 'Fasting blood glucose' },
+    STUDY_CURVA_TOLERANCIA_GLUCOSA: {
+      code: 'LAB_CTOG',
+      display: 'Oral glucose tolerance test',
+    },
+    STUDY_HEMOGLOBINA_GLICOSILADA: {
+      code: 'LAB_HBA1C',
+      display: 'Glycated hemoglobin A1c',
+    },
+    STUDY_PERFIL_LIPIDICO: {
+      code: 'LAB_PERFIL_LIPIDICO',
+      display: 'Lipid panel',
+    },
+    STUDY_CREATININA: { code: 'LAB_CREATININA', display: 'Serum creatinine' },
+    STUDY_UREA: { code: 'LAB_UREA', display: 'Blood urea' },
+    STUDY_ACIDO_URICO: { code: 'LAB_ACIDO_URICO', display: 'Uric acid' },
+    STUDY_PERFIL_HEPATICO: {
+      code: 'LAB_PERFIL_HEPATICO',
+      display: 'Liver function panel',
+    },
+    STUDY_BILIRRUBINAS: {
+      code: 'LAB_BILIRRUBINAS',
+      display: 'Bilirubin panel',
+    },
+    STUDY_AMILASA: { code: 'LAB_AMILASA', display: 'Amylase' },
+    STUDY_LIPASA: { code: 'LAB_LIPASA', display: 'Lipase' },
+    STUDY_ELECTROLITOS: {
+      code: 'LAB_ELECTROLITOS',
+      display: 'Serum electrolytes',
+    },
+    STUDY_CALCIO: { code: 'LAB_CALCIO', display: 'Serum calcium' },
+    STUDY_PROTEINAS_TOTALES: {
+      code: 'LAB_PROTEINAS',
+      display: 'Total protein and albumin',
+    },
+    STUDY_VITAMINA_D: {
+      code: 'LAB_VITAMINA_D',
+      display: 'Vitamin D 25-hydroxy',
+    },
+    STUDY_VITAMINA_B12: { code: 'LAB_VITAMINA_B12', display: 'Vitamin B12' },
+
+    // Laboratorio · hormonas
+    STUDY_PERFIL_TIROIDEO: {
+      code: 'LAB_PERFIL_TIROIDEO',
+      display: 'Thyroid panel',
+    },
+    STUDY_TSH: { code: 'LAB_TSH', display: 'Thyroid stimulating hormone' },
+    STUDY_PSA: { code: 'LAB_PSA', display: 'Prostate specific antigen' },
+    STUDY_BETA_HCG: {
+      code: 'LAB_BETA_HCG',
+      display: 'Beta human chorionic gonadotropin',
+    },
+    STUDY_TESTOSTERONA: { code: 'LAB_TESTOSTERONA', display: 'Testosterone' },
+    STUDY_CORTISOL: { code: 'LAB_CORTISOL', display: 'Cortisol' },
+
+    // Laboratorio · inflamación e inmunología
+    STUDY_PCR: { code: 'LAB_PCR', display: 'C-reactive protein' },
+    STUDY_FACTOR_REUMATOIDEO: {
+      code: 'LAB_FACTOR_REUMATOIDEO',
+      display: 'Rheumatoid factor',
+    },
+    STUDY_ANTIESTREPTOLISINA: {
+      code: 'LAB_ASTO',
+      display: 'Antistreptolysin O',
+    },
+
+    // Laboratorio · microbiología y serología
+    STUDY_ORINA_COMPLETA: { code: 'LAB_ORINA', display: 'Urinalysis' },
+    STUDY_UROCULTIVO: { code: 'LAB_UROCULTIVO', display: 'Urine culture' },
+    STUDY_COPROPARASITOLOGICO: {
+      code: 'LAB_COPROPARASITOLOGICO',
+      display: 'Stool ova and parasites',
+    },
+    STUDY_COPROCULTIVO: { code: 'LAB_COPROCULTIVO', display: 'Stool culture' },
+    STUDY_HEMOCULTIVO: { code: 'LAB_HEMOCULTIVO', display: 'Blood culture' },
+    STUDY_VIH: { code: 'LAB_VIH', display: 'HIV antibody screening' },
+    STUDY_VDRL: { code: 'LAB_VDRL', display: 'Syphilis screening' },
+    STUDY_HEPATITIS_B: {
+      code: 'LAB_HEPATITIS_B',
+      display: 'Hepatitis B surface antigen',
+    },
+    STUDY_HEPATITIS_C: {
+      code: 'LAB_HEPATITIS_C',
+      display: 'Hepatitis C antibody',
+    },
+    STUDY_CHAGAS: { code: 'LAB_CHAGAS', display: 'Chagas disease serology' },
+    STUDY_DENGUE: { code: 'LAB_DENGUE', display: 'Dengue serology' },
+    STUDY_GOTA_GRUESA: {
+      code: 'LAB_GOTA_GRUESA',
+      display: 'Malaria thick smear',
+    },
+    STUDY_BACILOSCOPIA: {
+      code: 'LAB_BACILOSCOPIA',
+      display: 'Sputum acid-fast bacilli smear',
+    },
+
+    // Imagen · radiología simple
+    STUDY_RX_TORAX: { code: 'IMG_RX_TORAX', display: 'Chest radiograph' },
+    STUDY_RX_CRANEO: { code: 'IMG_RX_CRANEO', display: 'Skull radiograph' },
+    STUDY_RX_SENOS_PARANASALES: {
+      code: 'IMG_RX_SENOS',
+      display: 'Paranasal sinus radiograph',
+    },
+    STUDY_RX_COLUMNA_CERVICAL: {
+      code: 'IMG_RX_COL_CERVICAL',
+      display: 'Cervical spine radiograph',
+    },
+    STUDY_RX_COLUMNA_DORSAL: {
+      code: 'IMG_RX_COL_DORSAL',
+      display: 'Thoracic spine radiograph',
+    },
+    STUDY_RX_COLUMNA_LUMBAR: {
+      code: 'IMG_RX_COL_LUMBAR',
+      display: 'Lumbar spine radiograph',
+    },
+    STUDY_RX_ABDOMEN: {
+      code: 'IMG_RX_ABDOMEN',
+      display: 'Abdominal radiograph',
+    },
+    STUDY_RX_PELVIS: { code: 'IMG_RX_PELVIS', display: 'Pelvis radiograph' },
+    STUDY_RX_MIEMBRO_SUPERIOR: {
+      code: 'IMG_RX_MIEMBRO_SUP',
+      display: 'Upper limb radiograph',
+    },
+    STUDY_RX_MIEMBRO_INFERIOR: {
+      code: 'IMG_RX_MIEMBRO_INF',
+      display: 'Lower limb radiograph',
+    },
+
+    // Imagen · ecografía
+    STUDY_ECO_ABDOMINAL: {
+      code: 'IMG_ECO_ABDOMINAL',
+      display: 'Abdominal ultrasound',
+    },
+    STUDY_ECO_RENAL: {
+      code: 'IMG_ECO_RENAL',
+      display: 'Renal and urinary tract ultrasound',
+    },
+    STUDY_ECO_PELVICA: {
+      code: 'IMG_ECO_PELVICA',
+      display: 'Pelvic ultrasound',
+    },
+    STUDY_ECO_OBSTETRICA: {
+      code: 'IMG_ECO_OBSTETRICA',
+      display: 'Obstetric ultrasound',
+    },
+    STUDY_ECO_TIROIDES: {
+      code: 'IMG_ECO_TIROIDES',
+      display: 'Thyroid ultrasound',
+    },
+    STUDY_ECO_MAMARIA: {
+      code: 'IMG_ECO_MAMARIA',
+      display: 'Breast ultrasound',
+    },
+    STUDY_ECO_PARTES_BLANDAS: {
+      code: 'IMG_ECO_PARTES_BLANDAS',
+      display: 'Soft tissue ultrasound',
+    },
+    STUDY_ECO_DOPPLER: {
+      code: 'IMG_ECO_DOPPLER',
+      display: 'Color Doppler ultrasound',
+    },
+
+    // Imagen · tomografía, resonancia y densitometría
+    STUDY_TC_CRANEO: { code: 'IMG_TC_CRANEO', display: 'Head CT scan' },
+    STUDY_TC_TORAX: { code: 'IMG_TC_TORAX', display: 'Chest CT scan' },
+    STUDY_TC_ABDOMEN: {
+      code: 'IMG_TC_ABDOMEN',
+      display: 'Abdomen and pelvis CT scan',
+    },
+    STUDY_TC_COLUMNA: { code: 'IMG_TC_COLUMNA', display: 'Spine CT scan' },
+    STUDY_RM_CEREBRAL: { code: 'IMG_RM_CEREBRAL', display: 'Brain MRI' },
+    STUDY_RM_COLUMNA: { code: 'IMG_RM_COLUMNA', display: 'Spine MRI' },
+    STUDY_RM_ARTICULAR: { code: 'IMG_RM_ARTICULAR', display: 'Joint MRI' },
+    STUDY_MAMOGRAFIA: { code: 'IMG_MAMOGRAFIA', display: 'Mammography' },
+    STUDY_DENSITOMETRIA: {
+      code: 'IMG_DENSITOMETRIA',
+      display: 'Bone densitometry',
+    },
+
+    // Estudios cardiológicos
+    STUDY_ELECTROCARDIOGRAMA: {
+      code: 'CAR_ECG',
+      display: 'Electrocardiogram',
+    },
+    STUDY_ECOCARDIOGRAMA: {
+      code: 'CAR_ECOCARDIOGRAMA',
+      display: 'Echocardiogram',
+    },
+    STUDY_HOLTER: { code: 'CAR_HOLTER', display: 'Holter monitoring' },
+    STUDY_ERGOMETRIA: {
+      code: 'CAR_ERGOMETRIA',
+      display: 'Exercise stress test',
+    },
+    STUDY_MAPA_PRESION: {
+      code: 'CAR_MAPA',
+      display: 'Ambulatory blood pressure monitoring',
+    },
+
+    // Anatomía patológica
+    STUDY_BIOPSIA: { code: 'PAT_BIOPSIA', display: 'Tissue biopsy study' },
+    STUDY_CITOLOGIA: { code: 'PAT_CITOLOGIA', display: 'Cytology study' },
+    STUDY_PAPANICOLAOU: {
+      code: 'PAT_PAPANICOLAOU',
+      display: 'Cervical cytology (Pap smear)',
+    },
+
+    // Procedimientos diagnósticos
+    STUDY_ENDOSCOPIA_ALTA: {
+      code: 'PRO_ENDOSCOPIA_ALTA',
+      display: 'Upper gastrointestinal endoscopy',
+    },
+    STUDY_COLONOSCOPIA: { code: 'PRO_COLONOSCOPIA', display: 'Colonoscopy' },
+    STUDY_ESPIROMETRIA: { code: 'PRO_ESPIROMETRIA', display: 'Spirometry' },
+    STUDY_AUDIOMETRIA: { code: 'PRO_AUDIOMETRIA', display: 'Audiometry' },
+    STUDY_ELECTROENCEFALOGRAMA: {
+      code: 'PRO_EEG',
+      display: 'Electroencephalogram',
+    },
+    STUDY_ELECTROMIOGRAFIA: {
+      code: 'PRO_EMG',
+      display: 'Electromyography',
+    },
+
     // --- diagnostic_reports ----------------------------------------------------
     REPORT_PARTIAL: {
       code: 'DR_PARTIAL',

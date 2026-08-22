@@ -514,6 +514,57 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'COMPANY',
     'Company',
   ),
+  /* Las formas societarias que reconoce el derecho comercial boliviano. El
+     registro de procesos las pide, con esta misma lista, en los cinco módulos
+     que dan de alta una organización —médico, farmacia, laboratorio, imagen y
+     aseguradora—: «Aquí nuestra APP tiene que tener este detalle en la base de
+     datos para que puedan SOLO SELECCIONAR AL REGISTRAR, UNIPERSONAL, SRL,
+     LTDA, S.A., SOCIEDAD COLECTIVA, SOCIEDAD EN COMANDITA SIMPLE, SOCIEDAD EN
+     COMANDITA POR ACCIONES, SUCURSAL DE SOCIEDAD EXTRANJERA».
+
+     El motivo que da es de negocio y no de forma: «Esto con la finalidad de
+     poder tener DATA de cuantos proveedores tenemos con SRL, UNIPERSONAL y
+     S.A.». Escrito a mano, ese dato no se puede contar.
+
+     `LEGAL_ENTITY_COMPANY` se conserva: es lo que llevan las filas que ya
+     existen, y retirarlo obligaría a decidir por ellas qué forma societaria
+     tienen. */
+  LEGAL_ENTITY_SOLE_PROPRIETORSHIP: def(
+    'directory:legal-entity:sole-proprietorship',
+    'UNIPERSONAL',
+    'Sole proprietorship',
+  ),
+  LEGAL_ENTITY_SRL: def(
+    'directory:legal-entity:srl',
+    'SRL',
+    'Limited liability company (S.R.L.)',
+  ),
+  LEGAL_ENTITY_LTDA: def(
+    'directory:legal-entity:ltda',
+    'LTDA',
+    'Limited company (Ltda.)',
+  ),
+  LEGAL_ENTITY_SA: def('directory:legal-entity:sa', 'SA', 'Corporation (S.A.)'),
+  LEGAL_ENTITY_GENERAL_PARTNERSHIP: def(
+    'directory:legal-entity:general-partnership',
+    'SOCIEDAD_COLECTIVA',
+    'General partnership',
+  ),
+  LEGAL_ENTITY_LIMITED_PARTNERSHIP: def(
+    'directory:legal-entity:limited-partnership',
+    'COMANDITA_SIMPLE',
+    'Limited partnership',
+  ),
+  LEGAL_ENTITY_PARTNERSHIP_BY_SHARES: def(
+    'directory:legal-entity:partnership-by-shares',
+    'COMANDITA_ACCIONES',
+    'Partnership limited by shares',
+  ),
+  LEGAL_ENTITY_FOREIGN_BRANCH: def(
+    'directory:legal-entity:foreign-branch',
+    'SUCURSAL_EXTRANJERA',
+    'Branch of a foreign company',
+  ),
   TENANT_ACTIVE: def(
     'directory:tenant-status:active',
     'TENANT_ACTIVE',
