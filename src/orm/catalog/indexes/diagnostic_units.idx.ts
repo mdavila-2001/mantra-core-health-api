@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `diagnostic_units`.
- * 72 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 73 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
@@ -40,7 +40,8 @@ export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
   ['diagnostic_study_prices', 'ix_diagnostic_study_prices_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['diagnostic_study_prices', 'ix_diagnostic_study_prices_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['diagnostic_study_prices', 'uq_diagnostic_study_prices_price_schedule_id_version_number', ['price_schedule_id', 'version_number'], true, 'btree'],
-  ['diagnostic_units', 'uq_diagnostic_units_tenant_id_code', ['tenant_id', 'code'], true, 'btree'],
+  ['diagnostic_units', 'uq_diagnostic_units_tenant_id', ['tenant_id'], true, 'btree'],
+  ['diagnostic_units', 'uq_diagnostic_units_code', ['code'], true, 'btree'],
   ['diagnostic_units', 'ix_diagnostic_units_tenant_id', ['tenant_id'], false, 'btree'],
   ['diagnostic_units', 'ix_diagnostic_units_practice_id', ['practice_id'], false, 'btree'],
   ['diagnostic_units', 'ix_diagnostic_units_primary_practice_site_id', ['primary_practice_site_id'], false, 'btree'],

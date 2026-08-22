@@ -31,6 +31,18 @@ export class InsuranceCarriers {
   legalName!: string;
 
   /**
+   * Valor de sigla mantenido por la instancia.
+   */
+  @Property({ fieldName: 'sigla', columnType: 'varchar', nullable: true })
+  sigla?: string;
+
+  /**
+   * Valor de address mantenido por la instancia.
+   */
+  @Property({ fieldName: 'address', columnType: 'varchar', nullable: true })
+  address?: string;
+
+  /**
    * Valor de regulator identifier mantenido por la instancia.
    */
   @Property({

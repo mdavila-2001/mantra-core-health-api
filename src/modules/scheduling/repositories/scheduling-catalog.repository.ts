@@ -9,6 +9,7 @@ import {
   BookableSlots,
 } from '../entities';
 import { createdBy } from '../../../common';
+import { inicioDeLoReservable } from '../scheduling-time';
 
 /**
  * Describe el contrato estructural de create resource data.
@@ -410,6 +411,49 @@ export class SchedulingCatalogRepository {
   }
 
   /**
+   * Las plantillas de un recurso, de la más reciente a la más vieja.
+   *
+   * El orden importa: la que gobierna hoy es la última publicada, y es la que
+   * la tarjeta del médico tiene que mostrar primero.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceId - Recurso cuyas plantillas se leen.
+   * @returns Sus plantillas.
+   */
+  findTemplatesByResource(
+    em: EntityManager,
+    resourceId: string,
+  ): Promise<ScheduleTemplates[]> {
+    return em.find(
+      ScheduleTemplates,
+      { resourceId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /**
+   * Las franjas de varias plantillas, en una sola consulta.
+   *
+   * Se piden en lote y no una por plantilla: un recurso con seis plantillas
+   * haría seis viajes para pintar una tarjeta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param templateIds - Plantillas cuyas franjas se leen.
+   * @returns Las franjas, ordenadas por día y hora.
+   */
+  findRulesByTemplates(
+    em: EntityManager,
+    templateIds: readonly string[],
+  ): Promise<ScheduleRules[]> {
+    if (templateIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      ScheduleRules,
+      { scheduleTemplateId: { $in: [...templateIds] } },
+      { orderBy: { dayOfWeek: 'ASC', startTime: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create rule.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -444,6 +488,84 @@ export class SchedulingCatalogRepository {
     scheduleTemplateId: string,
   ): Promise<ScheduleRules[]> {
     return em.find(ScheduleRules, { scheduleTemplateId });
+  }
+
+  /**
+   * Las franjas vigentes del profesional en **todos** sus recursos.
+   *
+   * Existe para poder rechazar un solape antes de publicarlo: un médico con dos
+   * consultorios puede declarar «lunes 9–12» en los dos, y el motor generaría
+   * cupos simultáneos en dos lugares. El paciente reserva uno y el profesional
+   * descubre el choque cuando ya hay dos personas citadas.
+   *
+   * Se busca por `resource_ref_id` —el vínculo del recurso con el perfil— y no
+   * por tenant: el mismo profesional puede publicar en organizaciones distintas
+   * y el choque es igual de real, porque el que no puede estar en dos lugares
+   * es él.
+   *
+   * Sólo plantillas **publicadas**: una en borrador todavía no ocupa horario.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceRefId - Perfil profesional dueño de los recursos.
+   * @param publishedStatusConceptId - Estado que cuenta como publicada.
+   * Devuelve también la **zona** de cada sede y la **vigencia** de cada
+   * plantilla: sin ellas, quien compara sólo puede mirar el texto de la hora, y
+   * «las nueve» de dos sedes en zonas distintas no son el mismo momento.
+   *
+   * @param exceptResourceId - Recurso que se está editando, si se excluye.
+   * @returns Las franjas, con su recurso, su zona y la vigencia de su plantilla.
+   */
+  async findRulesByResourceOwner(
+    em: EntityManager,
+    resourceRefId: string,
+    publishedStatusConceptId: string,
+    exceptResourceId?: string,
+  ): Promise<
+    {
+      rule: ScheduleRules;
+      resourceId: string;
+      resourceName: string;
+      timeZone?: string;
+      validTo?: Date;
+    }[]
+  > {
+    const recursos = await em.find(SchedulableResources, { resourceRefId });
+    const suyos = recursos.filter((recurso) => recurso.id !== exceptResourceId);
+    if (suyos.length === 0) return [];
+
+    const plantillas = await em.find(ScheduleTemplates, {
+      resourceId: { $in: suyos.map((recurso) => recurso.id) },
+      statusConceptId: publishedStatusConceptId,
+    });
+    if (plantillas.length === 0) return [];
+
+    const franjas = await em.find(ScheduleRules, {
+      scheduleTemplateId: { $in: plantillas.map((plantilla) => plantilla.id) },
+    });
+
+    const recursoPorPlantilla = new Map(
+      plantillas.map((plantilla) => [plantilla.id, plantilla.resourceId]),
+    );
+    const nombrePorRecurso = new Map(
+      suyos.map((recurso) => [recurso.id, recurso.name]),
+    );
+    const zonaPorRecurso = new Map(
+      suyos.map((recurso) => [recurso.id, recurso.timeZone]),
+    );
+    const vigenciaPorPlantilla = new Map(
+      plantillas.map((plantilla) => [plantilla.id, plantilla.validTo]),
+    );
+
+    return franjas.map((rule) => {
+      const resourceId = recursoPorPlantilla.get(rule.scheduleTemplateId) ?? '';
+      return {
+        rule,
+        resourceId,
+        resourceName: nombrePorRecurso.get(resourceId) ?? '',
+        timeZone: zonaPorRecurso.get(resourceId),
+        validTo: vigenciaPorPlantilla.get(rule.scheduleTemplateId),
+      };
+    });
   }
 
   /**
@@ -522,13 +644,15 @@ export class SchedulingCatalogRepository {
    *
    * `onlyAvailable` filtra por capacidad restante y no por estado: un slot puede
    * seguir marcado como abierto y tener el cupo tomado por un hold vivo, y
-   * ofrecerlo llevaría al paciente a un 409 al intentar reservarlo.
+   * ofrecerlo llevaría al paciente a un 409 al intentar reservarlo. Con `ahora`
+   * descarta además los que ya empezaron —un turno de ayer no se puede pedir—;
+   * ver {@link inicioDeLoReservable}.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param resourceId - Recurso cuya agenda se consulta.
    * @param from - Inicio de la ventana (inclusive).
    * @param to - Fin de la ventana (exclusive).
-   * @param options - `onlyAvailable` y tope de filas.
+   * @param options - `onlyAvailable`, `ahora` para descartar vencidos y tope de filas.
    * @returns Slots ordenados cronológicamente.
    */
   findSlotsByResourceInRange(
@@ -536,11 +660,16 @@ export class SchedulingCatalogRepository {
     resourceId: string,
     from: Date,
     to: Date,
-    options: { onlyAvailable: boolean; limit: number },
+    options: { onlyAvailable: boolean; limit: number; ahora?: Date },
   ): Promise<BookableSlots[]> {
+    const desde =
+      options.onlyAvailable && options.ahora
+        ? inicioDeLoReservable(from, options.ahora)
+        : from;
+
     const where: Record<string, unknown> = {
       resourceId,
-      startAt: { $gte: from, $lt: to },
+      startAt: { $gte: desde, $lt: to },
     };
     if (options.onlyAvailable) {
       where.remainingCapacity = { $gt: 0 };
@@ -549,6 +678,32 @@ export class SchedulingCatalogRepository {
       orderBy: { startAt: 'ASC' },
       limit: options.limit,
     });
+  }
+
+  /**
+   * Las excepciones de un recurso que tocan una ventana.
+   *
+   * Se cruza por solape y no por contención: un bloqueo de tres días que
+   * empieza el mes pasado y termina el 2 afecta al mes que se está mirando, y
+   * pedir sólo las que empiezan dentro lo dejaría afuera.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceId - Recurso cuyas excepciones se leen.
+   * @param from - Inicio de la ventana.
+   * @param to - Fin de la ventana.
+   * @returns Las excepciones que se solapan, cronológicamente.
+   */
+  findExceptionsByResourceInRange(
+    em: EntityManager,
+    resourceId: string,
+    from: Date,
+    to: Date,
+  ): Promise<AvailabilityExceptions[]> {
+    return em.find(
+      AvailabilityExceptions,
+      { resourceId, startAt: { $lt: to }, endAt: { $gt: from } },
+      { orderBy: { startAt: 'ASC' } },
+    );
   }
 
   /** Slots del recurso que se solapan con una excepción de no disponibilidad. */

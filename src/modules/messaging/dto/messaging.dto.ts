@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsBoolean,
   IsIn,
   IsInt,
   IsISO8601,
@@ -820,16 +819,14 @@ export class PendingNotificationRequestDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   recipientUserId?: string;
-
   /**
-   * Tipo del canal (`messaging.message_channels.channel_type_concept_id`).
+   * Tipo del canal (correo, in-app…).
    *
-   * Carril 18: el worker (`notification-delivery.job.ts`) necesita distinguir
-   * el canal in-app —que se resuelve escribiendo en la bandeja propia, sin
-   * ningún proveedor externo— de los canales que sí dependen de un adaptador
-   * de terceros. Sin este campo, el adapter por defecto no tenía forma de
-   * saberlo sin una consulta adicional que el worker (proceso separado, sin
-   * acceso directo a la base) no puede hacer.
+   * Viaja con el lote porque el worker necesita saber si hay un tercero al que
+   * llamar **antes** de llamarlo: una notificación in-app no sale a ningún
+   * proveedor, y sin este dato el adaptador por defecto la marcaba `FAILED`
+   * con `PROVIDER_NOT_CONFIGURED` — un fallo inventado por preguntarle a un
+   * proveedor que para ese canal no tiene que existir.
    */
   @ApiPropertyOptional({ format: 'uuid' })
   channelTypeConceptId?: string;
@@ -1125,91 +1122,4 @@ export class InAppReadResponseDto {
    */
   @ApiProperty({ description: 'true si ya estaba leída' })
   alreadyRead!: boolean;
-}
-
-// ---------------------------------------------------------------------------
-// Carril 18 · Preferencias y bandeja del propio usuario
-// ---------------------------------------------------------------------------
-
-/** Un canal disponible tal como lo ve el usuario para configurar su preferencia. */
-export class MessageChannelDto {
-  @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty() code!: string;
-  @ApiProperty() name!: string;
-  @ApiProperty({ format: 'uuid' }) channelTypeConceptId!: string;
-}
-
-/** Respuesta de `GET /notifications/channels`. */
-export class ListChannelsResponseDto {
-  @ApiProperty({ type: [MessageChannelDto] }) items!: MessageChannelDto[];
-}
-
-/** Una preferencia declarada, tal como la ve el propio usuario. */
-export class NotificationPreferenceDto {
-  @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty({ format: 'uuid' }) channelId!: string;
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
-  categoryConceptId!: string | null;
-  @ApiProperty() optedIn!: boolean;
-  @ApiPropertyOptional({ nullable: true })
-  quietHoursJson!: unknown;
-}
-
-/** Respuesta de `GET /notifications/preferences`. */
-export class ListPreferencesResponseDto {
-  @ApiProperty({ type: [NotificationPreferenceDto] })
-  items!: NotificationPreferenceDto[];
-}
-
-/** Cuerpo de `PUT /notifications/preferences` (una preferencia por llamada). */
-export class SetNotificationPreferenceDto {
-  /** Canal sobre el que se declara la preferencia. */
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
-  channelId!: string;
-
-  /**
-   * Categoría (clínica/administrativa/contable/promocional); se omite para
-   * fijar la preferencia por defecto del canal, sin distinguir categoría.
-   */
-  @ApiPropertyOptional({ format: 'uuid' })
-  @IsOptional()
-  @IsUUID()
-  categoryConceptId?: string;
-
-  /** Si el usuario acepta este canal para esta categoría. */
-  @ApiProperty()
-  @IsBoolean()
-  optedIn!: boolean;
-
-  /** Horas de silencio, `{ start: "HH:MM", end: "HH:MM" }` en UTC. */
-  @ApiPropertyOptional({
-    example: { start: '22:00', end: '07:00' },
-  })
-  @IsOptional()
-  @IsObject()
-  quietHoursJson?: { start?: string; end?: string };
-}
-
-/** Una notificación in-app tal como la ve el destinatario. */
-export class MyInAppNotificationDto {
-  @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
-  categoryConceptId!: string | null;
-  @ApiPropertyOptional({ nullable: true }) subject!: string | null;
-  @ApiPropertyOptional({ nullable: true }) bodyText!: string | null;
-  @ApiPropertyOptional() payloadJson?: unknown;
-  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
-  @ApiPropertyOptional({ nullable: true }) relatedResourceType!: string | null;
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
-  relatedResourceId!: string | null;
-  @ApiProperty() availableAt!: Date;
-  @ApiPropertyOptional({ nullable: true }) readAt!: Date | null;
-}
-
-/** Respuesta de `GET /notifications/in-app`. */
-export class ListMyInAppResponseDto {
-  @ApiProperty({ type: [MyInAppNotificationDto] })
-  items!: MyInAppNotificationDto[];
-  @ApiProperty() count!: number;
 }

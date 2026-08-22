@@ -56,12 +56,10 @@ export class FormInstancesRepository {
    */
   findByResourceAndVersion(
     em: EntityManager,
-    resourceTypeConceptId: string,
     resourceId: string,
     schemaVersion: number,
   ): Promise<FormInstances | null> {
     return em.findOne(FormInstances, {
-      resourceTypeConceptId,
       resourceId,
       schemaVersion,
     });
@@ -80,6 +78,57 @@ export class FormInstancesRepository {
       FormInstances,
       { ...rest, ...createdBy(actorUserId) },
       { partial: true },
+    );
+  }
+
+  /**
+   * Instancias adjuntas a un recurso, de la más reciente a la más antigua.
+   *
+   * Se filtra solo por `resource_id`: las instancias reales de hoy llevan el
+   * tipo por defecto (paciente) aunque el recurso sea un encuentro —deuda
+   * declarada del contrato de apertura—, así que acotar por tipo dejaría fuera
+   * exactamente las filas que se buscan.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceId - Recurso al que se adjuntaron los formularios.
+   * @param limit - Tope de filas (el llamador pide una de más para declarar el recorte).
+   * @returns Instancias del recurso.
+   */
+  findByResourceId(
+    em: EntityManager,
+    resourceId: string,
+    limit: number,
+  ): Promise<FormInstances[]> {
+    return em.find(
+      FormInstances,
+      { resourceId },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
+
+  /**
+   * Instancias adjuntas a cualquiera de los recursos, en un solo lote `$in`
+   * (una consulta para todos los encuentros del paciente, no una por cada uno).
+   * Mismo criterio que {@link findByResourceId}: solo `resource_id`, de la más
+   * reciente a la más antigua.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceIds - Recursos a los que se adjuntaron los formularios.
+   * @param limit - Tope de filas (el llamador pide una de más para declarar el recorte).
+   * @returns Instancias de esos recursos.
+   */
+  findByResourceIds(
+    em: EntityManager,
+    resourceIds: readonly string[],
+    limit: number,
+  ): Promise<FormInstances[]> {
+    if (resourceIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      FormInstances,
+      { resourceId: { $in: [...resourceIds] } },
+      { orderBy: { createdAt: 'DESC' }, limit },
     );
   }
 }

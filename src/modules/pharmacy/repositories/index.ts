@@ -7,3 +7,4 @@ export * from './pharmacy-price-lists.repository';
 export * from './pharmacy-product-prices.repository';
 export * from './pharmacy-integration-connections.repository';
 export * from './pharmacy-external-product-mappings.repository';
+export * from './pharmacy-read.repository';

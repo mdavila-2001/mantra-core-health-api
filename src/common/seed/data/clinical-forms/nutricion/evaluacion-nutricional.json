@@ -1,0 +1,35 @@
+{
+  "code": "NUTRI_EVALUACION_BASE",
+  "name": "Evaluación nutricional",
+  "specialty": { "code": "NUTRICION", "display": "Nutrición y Dietética" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y registro de medidas antropométricas",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma salen la estructura común (motivo, tiempo de evolución, antecedentes, examen con medidas antropométricas, diagnóstico y conducta) y el registro de peso y talla. Son agregados propios de la especialidad los hábitos alimentarios, el número de comidas al día, las intolerancias y alergias alimentarias, el consumo de líquidos, la actividad física y el objetivo nutricional acordado en consulta. Los valores se registran tal como se miden: la ficha no calcula ni interpreta índices."
+  },
+  "fields": [
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": false },
+    { "code": "antecedentes_patologicos", "name": "Antecedentes patológicos", "dataType": "text", "required": false },
+    { "code": "medicacion_y_suplementos", "name": "Medicación y suplementos", "dataType": "text", "required": false },
+    { "code": "peso_kg", "name": "Peso (kg)", "dataType": "decimal", "required": true },
+    { "code": "talla_m", "name": "Talla (m)", "dataType": "decimal", "required": true },
+    { "code": "perimetro_abdominal_cm", "name": "Perímetro abdominal (cm)", "dataType": "decimal", "required": false },
+    { "code": "cambio_de_peso_referido", "name": "Cambio de peso referido", "dataType": "text", "required": false },
+    { "code": "habitos_alimentarios", "name": "Hábitos alimentarios", "dataType": "text", "required": false },
+    { "code": "numero_de_comidas_al_dia", "name": "Número de comidas al día", "dataType": "integer", "required": false },
+    { "code": "intolerancias_alimentarias", "name": "Intolerancias alimentarias", "dataType": "text", "required": false },
+    { "code": "alergias_alimentarias", "name": "Alergias alimentarias", "dataType": "text", "required": false },
+    { "code": "consumo_de_liquidos", "name": "Consumo de líquidos", "dataType": "text", "required": false },
+    { "code": "habito_intestinal", "name": "Hábito intestinal", "dataType": "text", "required": false },
+    { "code": "actividad_fisica", "name": "Actividad física", "dataType": "text", "required": false },
+    { "code": "objetivo_nutricional", "name": "Objetivo nutricional", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico nutricional", "dataType": "text", "required": true },
+    { "code": "plan_de_tratamiento", "name": "Plan nutricional", "dataType": "text", "required": false }
+  ]
+}

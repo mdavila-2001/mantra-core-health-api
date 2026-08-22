@@ -6,6 +6,22 @@ import type { JwtPayload } from './jwt-payload.interface';
 import type { AuthenticatedUser } from './authenticated-user.interface';
 
 /**
+ * Reconstruye el `AuthenticatedUser` a partir de un payload ya verificado.
+ * Extraído de `JwtStrategy.validate` para que `WsJwtGuard` reconstruya el mismo
+ * sujeto a partir de un token de socket.io sin duplicar el mapeo de claims.
+ */
+export function toAuthenticatedUser(payload: JwtPayload): AuthenticatedUser {
+  return {
+    id: payload.sub,
+    sessionId: payload.sid,
+    roles: payload.roles ?? [],
+    tenantIds: payload.tenants ?? [],
+    practitionerProfileId: payload.hpid,
+    patientProfileId: payload.pid,
+  };
+}
+
+/**
  * Estrategia Passport que valida el access token (firma + expiración) y
  * reconstruye el `AuthenticatedUser`. No consulta la base de datos: la sesión y
  * los roles viajan firmados dentro del token, y la revocación fina (logout,
@@ -38,13 +54,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         'Tipo de token no válido para autenticación',
       );
     }
-    return {
-      id: payload.sub,
-      sessionId: payload.sid,
-      roles: payload.roles ?? [],
-      tenantIds: payload.tenants ?? [],
-      practitionerProfileId: payload.hpid,
-      patientProfileId: payload.pid,
-    };
+    return toAuthenticatedUser(payload);
   }
 }

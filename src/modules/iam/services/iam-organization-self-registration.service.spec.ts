@@ -20,7 +20,8 @@ const dto: RegisterOrganizationDto = {
   owner: {
     email: 'admin@sanrafael.bo',
     password: 'password123',
-    displayName: 'Ana Rojas',
+    name: 'Ana',
+    lastName: 'Rojas',
   },
 };
 
@@ -194,6 +195,36 @@ describe('IamOrganizationSelfRegistrationService', () => {
     expect(d.usersRepo.create).toHaveBeenCalledWith(
       d.tx,
       expect.objectContaining({ statusConceptId: CONCEPTS.USER_ACTIVE }),
+    );
+  });
+
+  it('composes the owner account name from its parts', async () => {
+    const d = build();
+
+    await d.service.registerOrganization(dto);
+
+    expect(d.usersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ displayName: 'Ana Rojas' }),
+    );
+  });
+
+  it('keeps honouring displayName for clients that still send it', async () => {
+    const d = build();
+
+    await d.service.registerOrganization({
+      ...dto,
+      owner: {
+        email: dto.owner.email,
+        password: dto.owner.password,
+        displayName: 'Dra. Ana Rojas',
+      },
+    });
+
+    // Quien mandó la forma anterior tiene que ver exactamente lo que mandó.
+    expect(d.usersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ displayName: 'Dra. Ana Rojas' }),
     );
   });
 

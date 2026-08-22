@@ -1,20 +1,35 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { FormsSchemaService } from '../services';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  getCurrentTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
+import { FormsReadService, FormsSchemaService } from '../services';
 import {
   CreateDefinitionSetDto,
   PublishVersionDto,
   RunMigrationDto,
   DefinitionSetResponseDto,
+  DefinitionSetDetailResponseDto,
+  DefinitionSetListResponseDto,
   MigrationRunResponseDto,
   OkResultDto,
 } from '../dto';
@@ -23,6 +38,9 @@ import {
  * Gobernanza del esquema dinámico sobre `/forms/definition-sets`. Operaciones de
  * administración de extensibilidad: creación de sets, publicación de versiones y
  * ejecución de migraciones. Capa fina que delega en `FormsSchemaService`.
+ *
+ * Las lecturas admiten también a los roles clínicos: el esquema de un
+ * formulario lo consulta quien lo va a completar, no sólo quien lo gobierna.
  */
 @ApiTags('forms-definition-sets')
 @ApiBearerAuth()
@@ -32,8 +50,43 @@ export class FormsDefinitionSetsController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param schemaService - Valor de schema service requerido por la operación.
+   * @param readService - Lecturas de sets, versiones y campos.
    */
-  constructor(private readonly schemaService: FormsSchemaService) {}
+  constructor(
+    private readonly schemaService: FormsSchemaService,
+    private readonly readService: FormsReadService,
+  ) {}
+
+  /** Fase 1 de lecturas: listar los sets visibles (globales y del tenant). */
+  @Get()
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Listar los sets de definiciones visibles' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tope del listado (por defecto 50)',
+  })
+  listDefinitionSets(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<DefinitionSetListResponseDto> {
+    return this.readService.listDefinitionSets(
+      getCurrentTenantId(),
+      limit ?? 50,
+    );
+  }
+
+  /** Fase 1 de lecturas: el esquema completo de un set, para render. */
+  @Get(':id')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @ApiOperation({
+    summary:
+      'Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones',
+  })
+  getDefinitionSet(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<DefinitionSetDetailResponseDto> {
+    return this.readService.getDefinitionSet(id, getCurrentTenantId());
+  }
 
   /** UC-09-01. */
   @Post()

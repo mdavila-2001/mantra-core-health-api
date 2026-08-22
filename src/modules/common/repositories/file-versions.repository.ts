@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { CONCEPTS } from '../../../common';
 import { FileVersions } from '../entities';
 
 /**
@@ -78,6 +79,26 @@ export class FileVersionsRepository {
     id: string,
   ): Promise<FileVersions | null> {
     return em.findOne(FileVersions, { id, fileId });
+  }
+
+  /**
+   * Versiones que siguen esperando escaneo, de la más antigua a la más nueva.
+   *
+   * Es el lote que consume el worker antimalware. Van primero las más viejas
+   * para que una ráfaga de subidas no deje atrás indefinidamente a las que ya
+   * llevaban rato esperando; el tope lo pone quien llama, porque el worker lee
+   * los bytes de cada una y un lote sin techo se comería su presupuesto de tick.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param limit - Tope de versiones a devolver.
+   * @returns Las versiones pendientes, ordenadas por antigüedad.
+   */
+  findPendingScan(em: EntityManager, limit: number): Promise<FileVersions[]> {
+    return em.find(
+      FileVersions,
+      { malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING },
+      { orderBy: { recordedAt: 'ASC' }, limit },
+    );
   }
 
   /**

@@ -9,19 +9,11 @@ import {
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
 
 /**
- * Identificadores deterministas de los canales de mensajería por defecto.
+ * Identificadores deterministas del canal de correo por defecto.
  *
  * Existen porque `notification_requests.channel_id` es una FK NOT NULL y el
  * módulo `messaging` no expone ningún caso de uso para dar de alta canales ni
- * proveedores: sin estas filas ningún flujo del backend puede pedir una
- * notificación por ese canal.
- *
- * Carril 18 amplía esto más allá de EMAIL con el canal **in-app** (que faltaba
- * por completo: sin proveedor ni configuración sembrados, ni siquiera la
- * bandeja interna funcionaba) y con WHATSAPP/SMS/PUSH — estos últimos solo como
- * *tipo* de canal disponible para que el doctor pueda declarar su preferencia;
- * ningún proveedor real los respalda todavía en este entorno (ver
- * `seedUnconfiguredChannel`).
+ * proveedores: sin estas filas ningún flujo del backend puede pedir un correo.
  */
 export const MESSAGING_SEED = {
   emailChannelId: deterministicId('seed:message-channel:email'),
@@ -30,70 +22,28 @@ export const MESSAGING_SEED = {
   emailProviderCode: 'DEFAULT_EMAIL',
   emailChannelConfigId: deterministicId('seed:provider-channel-config:email'),
 
+  /* --- Canal in-app (carril P1) -------------------------------------------
+     La campana necesita un canal igual que el correo, y por el mismo motivo:
+     `notification_requests.channel_id` es una FK NOT NULL y el módulo no
+     expone alta de canales. La diferencia es que este canal **no sale a
+     ningún proveedor** — su entrega es escribir en `in_app_notifications`,
+     que es lo que `deliverNotification` ya hacía para el tipo in-app y no
+     tenía canal con el que ejercitarse. */
   inAppChannelId: deterministicId('seed:message-channel:in-app'),
   inAppChannelCode: 'IN_APP',
   inAppProviderId: deterministicId('seed:messaging-provider:in-app'),
-  inAppProviderCode: 'INTERNAL_IN_APP',
+  inAppProviderCode: 'DEFAULT_IN_APP',
   inAppChannelConfigId: deterministicId('seed:provider-channel-config:in-app'),
-
-  whatsappChannelId: deterministicId('seed:message-channel:whatsapp'),
-  whatsappChannelCode: 'WHATSAPP',
-  smsChannelId: deterministicId('seed:message-channel:sms'),
-  smsChannelCode: 'SMS',
-  pushChannelId: deterministicId('seed:message-channel:push'),
-  pushChannelCode: 'PUSH',
 } as const;
 
-/** Un canal externo aún sin proveedor real conectado en este entorno. */
-interface UnconfiguredChannelSpec {
-  id: string;
-  code: string;
-  name: string;
-  channelTypeConceptId: string;
-}
-
-const UNCONFIGURED_CHANNELS: readonly UnconfiguredChannelSpec[] = [
-  {
-    id: MESSAGING_SEED.whatsappChannelId,
-    code: MESSAGING_SEED.whatsappChannelCode,
-    name: 'WhatsApp',
-    channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_WHATSAPP,
-  },
-  {
-    id: MESSAGING_SEED.smsChannelId,
-    code: MESSAGING_SEED.smsChannelCode,
-    name: 'SMS',
-    channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_SMS,
-  },
-  {
-    id: MESSAGING_SEED.pushChannelId,
-    code: MESSAGING_SEED.pushChannelCode,
-    name: 'Push',
-    channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_PUSH,
-  },
-];
-
 /**
- * Materializa los canales de mensajería que el backend necesita para poder
- * emitir notificaciones sin fingir infraestructura que no existe.
+ * Materializa el canal EMAIL con su proveedor y su configuración activa.
  *
- * - **EMAIL**: canal + proveedor + configuración activa. Quién entrega
- *   realmente el correo lo decide el worker por entorno (`GoogleEmailClient`
- *   si están las credenciales OAuth2, `mock-provider-server` si no); estas
- *   filas describen QUE existe un canal de correo con un proveedor
- *   configurado, no CÓMO se conecta.
- * - **IN_APP**: canal + proveedor + configuración activa, íntegramente
- *   interno (nunca sale a un tercero: `deliverNotification` escribe
- *   directamente en `in_app_notifications`). Antes de este seed la fila de
- *   configuración no existía, así que `deliverNotification` rechazaba
- *   cualquier notificación in-app con 412 — la bandeja interna no funcionaba
- *   ni siquiera en desarrollo.
- * - **WHATSAPP / SMS / PUSH**: solo el *canal* (para que exista un
- *   `channel_id` sobre el que declarar una preferencia); deliberadamente sin
- *   proveedor ni configuración, porque ninguno está conectado en este
- *   entorno. Intentar entregar por ellos falla honestamente con
- *   `'El canal no tiene configuración de proveedor activa'` en vez de
- *   simular un envío.
+ * Quién entrega realmente el correo lo decide el worker de mensajería por
+ * entorno (`GoogleEmailClient` si están las credenciales OAuth2,
+ * `mock-provider-server` si no): estas filas describen QUE existe un canal de
+ * correo con un proveedor configurado, no CÓMO se conecta. Por eso el proveedor
+ * declara `adapter_code = 'WORKER_DISPATCHED'` en vez de nombrar a Gmail.
  */
 @Injectable()
 export class MessagingSeedService {
@@ -131,9 +81,6 @@ export class MessagingSeedService {
     inserted += await this.seedProvider(em, now);
     inserted += await this.seedInAppChannel(em, now);
     inserted += await this.seedInAppProvider(em, now);
-    for (const spec of UNCONFIGURED_CHANNELS) {
-      inserted += await this.seedUnconfiguredChannel(em, now, spec);
-    }
     await em.flush();
 
     inserted += await this.seedChannelConfig(em, now);
@@ -143,16 +90,52 @@ export class MessagingSeedService {
     if (inserted > 0) {
       this.logger.info(
         { inserted },
-        'Canales de mensajería por defecto materializados',
+        'Canales por defecto (correo e in-app) materializados',
       );
     }
     return { inserted };
   }
 
   /** Canal lógico EMAIL. */
+  /**
+   * El id **vigente** de un canal, buscado por su código.
+   *
+   * Existe porque el id de esta fila puede no ser el que este seed calcula: el
+   * paquete de `salud-db` siembra los mismos canales con uuid derivados de otra
+   * forma, y el que gana es el que ya está en la base. Las filas hijas tienen
+   * que apuntar a ése o la FK las rechaza.
+   *
+   * @param em - Contexto de persistencia.
+   * @param code - Código del canal.
+   * @param porDefecto - El id que este seed usaría si tuviera que crearlo.
+   * @returns El id que hay que referenciar.
+   */
+  private async idDeCanal(
+    em: EntityManager,
+    code: string,
+    porDefecto: string,
+  ): Promise<string> {
+    const fila = await em.findOne(MessageChannels, { code });
+    return fila?.id ?? porDefecto;
+  }
+
+  /** El id vigente de un proveedor, por su código. Ver {@link idDeCanal}. */
+  private async idDeProveedor(
+    em: EntityManager,
+    code: string,
+    porDefecto: string,
+  ): Promise<string> {
+    const fila = await em.findOne(MessagingProviders, { code });
+    return fila?.id ?? porDefecto;
+  }
+
   private async seedChannel(em: EntityManager, now: Date): Promise<number> {
+    // Mismo criterio que {@link seedInAppChannel}: la clave natural es la que
+    // tiene única, y es la que decide si esta fila ya existe.
     if (
-      await em.findOne(MessageChannels, { id: MESSAGING_SEED.emailChannelId })
+      await em.findOne(MessageChannels, {
+        code: MESSAGING_SEED.emailChannelCode,
+      })
     )
       return 0;
     em.create(
@@ -176,7 +159,7 @@ export class MessagingSeedService {
   private async seedProvider(em: EntityManager, now: Date): Promise<number> {
     if (
       await em.findOne(MessagingProviders, {
-        id: MESSAGING_SEED.emailProviderId,
+        code: MESSAGING_SEED.emailProviderCode,
       })
     )
       return 0;
@@ -207,45 +190,26 @@ export class MessagingSeedService {
     return 1;
   }
 
-  /** Configuración activa que une proveedor y canal para el tenant por defecto. */
-  private async seedChannelConfig(
-    em: EntityManager,
-    now: Date,
-  ): Promise<number> {
-    if (
-      await em.findOne(ProviderChannelConfigs, {
-        id: MESSAGING_SEED.emailChannelConfigId,
-      })
-    )
-      return 0;
-    em.create(
-      ProviderChannelConfigs,
-      {
-        id: MESSAGING_SEED.emailChannelConfigId,
-        providerId: MESSAGING_SEED.emailProviderId,
-        channelId: MESSAGING_SEED.emailChannelId,
-        tenantId: SEED.tenantId,
-        priority: 1,
-        stateConceptId: CONCEPTS.STATE_ACTIVE,
-        adapterConfigVersion: 1,
-        trackingModeConceptId: CONCEPTS.MSG_TRACKING_MODE_NONE,
-        statusMappingVersion: 1,
-        enabledAt: now,
-        createdAt: now,
-        updatedAt: now,
-      },
-      { partial: true },
-    );
-    return 1;
-  }
-
-  /** Canal lógico IN_APP. */
+  /**
+   * Canal lógico IN_APP (carril P1).
+   *
+   * `supportsTemplates: false` a propósito: el texto de una notificación de la
+   * campana lo arma el módulo que la emite, con el nombre del médico o el de la
+   * receta ya resueltos. Una plantilla de `message_templates` acá obligaría a
+   * dar de alta una fila por disparador antes de poder emitir.
+   */
   private async seedInAppChannel(
     em: EntityManager,
     now: Date,
   ): Promise<number> {
+    // Por CÓDIGO y no por id: `uq_message_channels_code` es la restricción que
+    // existe, y el paquete de seeds ya sembró `IN_APP` con un uuid derivado de
+    // otra forma. Buscar por id no lo encontraba y el INSERT moría contra esa
+    // única — con el arnés de integración abortando la suite entera.
     if (
-      await em.findOne(MessageChannels, { id: MESSAGING_SEED.inAppChannelId })
+      await em.findOne(MessageChannels, {
+        code: MESSAGING_SEED.inAppChannelCode,
+      })
     )
       return 0;
     em.create(
@@ -253,7 +217,7 @@ export class MessagingSeedService {
       {
         id: MESSAGING_SEED.inAppChannelId,
         code: MESSAGING_SEED.inAppChannelCode,
-        name: 'Notificación interna',
+        name: 'In-app',
         channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
         supportsTemplates: false,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
@@ -265,14 +229,22 @@ export class MessagingSeedService {
     return 1;
   }
 
-  /** Proveedor in-app: la "entrega" es escribir en la bandeja propia, sin tercero. */
+  /**
+   * Proveedor del canal in-app: el propio backend.
+   *
+   * `adapter_code = 'IN_APP_DIRECT'` y no `'WORKER_DISPATCHED'` porque la
+   * diferencia es real y se lee en la auditoría: el correo lo entrega un
+   * tercero cuya latencia y cuyos fallos no controlamos, y esto lo entrega
+   * una escritura nuestra en la misma transacción. Todos los `supports*` van
+   * en `false`: no hay acuses de un proveedor que no existe.
+   */
   private async seedInAppProvider(
     em: EntityManager,
     now: Date,
   ): Promise<number> {
     if (
       await em.findOne(MessagingProviders, {
-        id: MESSAGING_SEED.inAppProviderId,
+        code: MESSAGING_SEED.inAppProviderCode,
       })
     )
       return 0;
@@ -281,16 +253,16 @@ export class MessagingSeedService {
       {
         id: MESSAGING_SEED.inAppProviderId,
         code: MESSAGING_SEED.inAppProviderCode,
-        name: 'Bandeja interna',
+        name: 'In-app delivery',
         providerTypeConceptId: CONCEPTS.MSG_PROVIDER_TYPE_IN_APP,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
-        adapterCode: 'IN_APP_INTERNAL',
+        adapterCode: 'IN_APP_DIRECT',
         adapterVersion: '1',
         isBuiltin: true,
         supportsWebhooks: false,
         supportsPolling: false,
         supportsDeliveryReceipts: false,
-        supportsReadReceipts: true,
+        supportsReadReceipts: false,
         supportsClickReceipts: false,
         supportsReplyReceipts: false,
         createdAt: now,
@@ -301,7 +273,7 @@ export class MessagingSeedService {
     return 1;
   }
 
-  /** Configuración activa que une el proveedor in-app con su canal, para el tenant por defecto. */
+  /** Configuración activa que une el proveedor in-app con su canal. */
   private async seedInAppChannelConfig(
     em: EntityManager,
     now: Date,
@@ -312,12 +284,22 @@ export class MessagingSeedService {
       })
     )
       return 0;
+    const channelId = await this.idDeCanal(
+      em,
+      MESSAGING_SEED.inAppChannelCode,
+      MESSAGING_SEED.inAppChannelId,
+    );
+    const providerId = await this.idDeProveedor(
+      em,
+      MESSAGING_SEED.inAppProviderCode,
+      MESSAGING_SEED.inAppProviderId,
+    );
     em.create(
       ProviderChannelConfigs,
       {
         id: MESSAGING_SEED.inAppChannelConfigId,
-        providerId: MESSAGING_SEED.inAppProviderId,
-        channelId: MESSAGING_SEED.inAppChannelId,
+        providerId,
+        channelId,
         tenantId: SEED.tenantId,
         priority: 1,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
@@ -333,26 +315,40 @@ export class MessagingSeedService {
     return 1;
   }
 
-  /**
-   * Canal externo sin proveedor: existe para que se pueda declarar una
-   * preferencia sobre él, pero un intento de entrega falla honestamente (no
-   * hay `provider_channel_configs` activa) en vez de simular un envío.
-   */
-  private async seedUnconfiguredChannel(
+  /** Configuración activa que une proveedor y canal para el tenant por defecto. */
+  private async seedChannelConfig(
     em: EntityManager,
     now: Date,
-    spec: UnconfiguredChannelSpec,
   ): Promise<number> {
-    if (await em.findOne(MessageChannels, { id: spec.id })) return 0;
+    if (
+      await em.findOne(ProviderChannelConfigs, {
+        id: MESSAGING_SEED.emailChannelConfigId,
+      })
+    )
+      return 0;
+    const channelId = await this.idDeCanal(
+      em,
+      MESSAGING_SEED.emailChannelCode,
+      MESSAGING_SEED.emailChannelId,
+    );
+    const providerId = await this.idDeProveedor(
+      em,
+      MESSAGING_SEED.emailProviderCode,
+      MESSAGING_SEED.emailProviderId,
+    );
     em.create(
-      MessageChannels,
+      ProviderChannelConfigs,
       {
-        id: spec.id,
-        code: spec.code,
-        name: spec.name,
-        channelTypeConceptId: spec.channelTypeConceptId,
-        supportsTemplates: false,
+        id: MESSAGING_SEED.emailChannelConfigId,
+        providerId,
+        channelId,
+        tenantId: SEED.tenantId,
+        priority: 1,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
+        adapterConfigVersion: 1,
+        trackingModeConceptId: CONCEPTS.MSG_TRACKING_MODE_NONE,
+        statusMappingVersion: 1,
+        enabledAt: now,
         createdAt: now,
         updatedAt: now,
       },

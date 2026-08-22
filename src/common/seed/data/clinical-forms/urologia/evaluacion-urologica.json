@@ -1,0 +1,128 @@
+{
+  "code": "URO_EVALUACION_BASE",
+  "name": "Evaluación urológica",
+  "specialty": {
+    "code": "UROLOGIA",
+    "display": "Urología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del aparato genitourinario",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen dirigido, diagnóstico y conducta. Son agregados propios de la especialidad los síntomas del tracto urinario inferior (disuria, hematuria, nicturia, urgencia, características del chorro), los antecedentes de litiasis e infecciones urinarias, y el examen genital y el tacto rectal descritos en prosa."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "sintomas_del_tracto_urinario_inferior",
+      "name": "Síntomas del tracto urinario inferior",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "disuria",
+      "name": "Disuria",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "hematuria",
+      "name": "Hematuria",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "nicturia",
+      "name": "Episodios de nicturia por noche",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "urgencia_miccional",
+      "name": "Urgencia miccional",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "caracteristicas_del_chorro_miccional",
+      "name": "Características del chorro miccional",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "dolor_lumbar",
+      "name": "Dolor lumbar",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "antecedentes_de_litiasis",
+      "name": "Antecedentes de litiasis",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "infecciones_urinarias_previas",
+      "name": "Infecciones urinarias previas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "cirugias_urologicas_previas",
+      "name": "Cirugías urológicas previas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "medicacion_habitual",
+      "name": "Medicación habitual",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_genital",
+      "name": "Examen genital",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "tacto_rectal",
+      "name": "Tacto rectal (hallazgos descritos)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examenes_complementarios",
+      "name": "Exámenes complementarios disponibles",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `billing`
 
-Referencia exhaustiva de 13 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 15 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `billing-operations`, `billing-payables`, `billing-receivables`
-- **Controladores:** `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`
+- **Etiquetas OpenAPI:** `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`
+- **Controladores:** `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -24,6 +24,8 @@ Referencia exhaustiva de 13 operación(es) del módulo `billing`, derivada del c
 11. [POST /billing/payments-received:apply](#11-post-billing-payments-received-apply) — Aplicar un pago recibido con asignación multi-factura
 12. [POST /billing/reconciliation:clear](#12-post-billing-reconciliation-clear) — Conciliar pagos vía documento de compensación
 13. [POST /billing/reimbursements:link](#13-post-billing-reimbursements-link) — Vincular reembolso de reclamo de seguro a la factura
+14. [GET /billing/service-catalog](#14-get-billing-service-catalog) — Listar el catálogo de servicios de la práctica
+15. [POST /billing/service-catalog](#15-post-billing-service-catalog) — Dar de alta un servicio en el catálogo maestro
 
 ---
 
@@ -2039,6 +2041,301 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/billing/reimbursements:link"
+}
+```
+
+---
+
+## 14. GET /billing/service-catalog
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-service-catalog`
+- **Nombre:** Listar el catálogo de servicios de la práctica
+- **Operation ID:** `BillingServiceCatalogController_search`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingServiceCatalogController.search](../../src/modules/billing/controllers/billing-service-catalog.controller.ts)
+
+### Descripción de negocio
+
+Listar el catálogo de servicios de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lista el catálogo de servicios de una práctica, buscable por código o nombre.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/service-catalog` en `BillingServiceCatalogController_search`. El controlador delega en `BillingServiceCatalogService.search`. No recibe body. El tipo de retorno estático es `Promise<SearchServiceCatalogResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | Sin restricción adicional declarada | Práctica (uuid) | `00000000-0000-4000-8000-000000000001` |
+| `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en el código o el nombre | `valor-ejemplo` |
+| `isActive` | query | No | `string` | Sin restricción adicional declarada | Filtra por servicios activos (`true`) o inactivos (`false`) | `valor-ejemplo` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Servicios por página (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/service-catalog?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/service-catalog?practiceId=00000000-0000-4000-8000-000000000001&q=valor-ejemplo&isActive=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SearchServiceCatalogResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SearchServiceCatalogResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SearchServiceCatalogResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SearchServiceCatalogResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SearchServiceCatalogResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SearchServiceCatalogResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchServiceCatalogResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practiceId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+      "defaultPrice": "valor-ejemplo",
+      "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "taxCodeId": "00000000-0000-4000-8000-000000000001",
+      "incomeAccountId": "00000000-0000-4000-8000-000000000001",
+      "isActive": true
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ServiceCatalogItemDto>` | Sin restricción adicional declarada | Servicios de esta página, ordenados por código. | `[{"id":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","defaultPrice":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","taxCodeId":"00000000-0000-4000-8000-000000000001","incomeAccountId":"00000000-0000-4000-8000-000000000001","isActive":true}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practiceId` | Sí | `string` | formato `uuid` | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Valor de code mantenido por la instancia. | `CODIGO_EJEMPLO` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
+| `items[].serviceConceptId` | No | `string` | formato `uuid` | Identificador asociado a service concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].defaultPrice` | Sí | `string` | Sin restricción adicional declarada | Valor de default price mantenido por la instancia. | `valor-ejemplo` |
+| `items[].currencyConceptId` | No | `string` | formato `uuid` | Identificador asociado a currency concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].taxCodeId` | No | `string` | formato `uuid` | Identificador asociado a tax code. | `00000000-0000-4000-8000-000000000001` |
+| `items[].incomeAccountId` | No | `string` | formato `uuid` | Identificador asociado a income account. | `00000000-0000-4000-8000-000000000001` |
+| `items[].isActive` | Sí | `boolean` | Sin restricción adicional declarada | Valor de is active mantenido por la instancia. | `true` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/service-catalog"
+}
+```
+
+---
+
+## 15. POST /billing/service-catalog
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-service-catalog`
+- **Nombre:** Dar de alta un servicio en el catálogo maestro
+- **Operation ID:** `BillingServiceCatalogController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingServiceCatalogController.create](../../src/modules/billing/controllers/billing-service-catalog.controller.ts)
+
+### Descripción de negocio
+
+Dar de alta un servicio en el catálogo maestro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crea un servicio nuevo en el catálogo maestro.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /billing/service-catalog` en `BillingServiceCatalogController_create`. El controlador delega en `BillingServiceCatalogService.create`. Valida el body como `CreateServiceCatalogItemDto` y consume `application/json`. El tipo de retorno estático es `Promise<ServiceCatalogItemDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateServiceCatalogItemDto`; los campos opcionales se omiten.
+
+```http
+POST /billing/service-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "defaultPrice": "100.00"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `practiceId` | Sí | `string` | formato `uuid` | Práctica (practice.practices) | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | longitud máxima 60 | Código interno del servicio | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | longitud máxima 200 | Nombre del servicio | `Nombre de ejemplo` |
+| `serviceConceptId` | No | `string` | formato `uuid` | Concepto de clasificación del servicio | `00000000-0000-4000-8000-000000000001` |
+| `defaultPrice` | Sí | `string` | Sin restricción adicional declarada | Precio de referencia; cada doctor puede cotizar otro precio | `100.00` |
+| `currencyConceptId` | No | `string` | formato `uuid` | Moneda (concepto) | `00000000-0000-4000-8000-000000000001` |
+| `taxCodeId` | No | `string` | formato `uuid` | Código de impuesto (billing.tax_codes) | `00000000-0000-4000-8000-000000000001` |
+| `incomeAccountId` | No | `string` | formato `uuid` | Cuenta de ingreso (accounting.accounts) | `00000000-0000-4000-8000-000000000001` |
+| `isActive` | No | `boolean` | Sin restricción adicional declarada | Si queda disponible para cotizar; por defecto true | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /billing/service-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+  "defaultPrice": "100.00",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxCodeId": "00000000-0000-4000-8000-000000000001",
+  "incomeAccountId": "00000000-0000-4000-8000-000000000001",
+  "isActive": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ServiceCatalogItemDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ServiceCatalogItemDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ServiceCatalogItemDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ServiceCatalogItemDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ServiceCatalogItemDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ServiceCatalogItemDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ServiceCatalogItemDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ServiceCatalogItemDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ServiceCatalogItemDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceCatalogItemDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+  "defaultPrice": "valor-ejemplo",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxCodeId": "00000000-0000-4000-8000-000000000001",
+  "incomeAccountId": "00000000-0000-4000-8000-000000000001",
+  "isActive": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | formato `uuid` | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Valor de code mantenido por la instancia. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
+| `serviceConceptId` | No | `string` | formato `uuid` | Identificador asociado a service concept. | `00000000-0000-4000-8000-000000000001` |
+| `defaultPrice` | Sí | `string` | Sin restricción adicional declarada | Valor de default price mantenido por la instancia. | `valor-ejemplo` |
+| `currencyConceptId` | No | `string` | formato `uuid` | Identificador asociado a currency concept. | `00000000-0000-4000-8000-000000000001` |
+| `taxCodeId` | No | `string` | formato `uuid` | Identificador asociado a tax code. | `00000000-0000-4000-8000-000000000001` |
+| `incomeAccountId` | No | `string` | formato `uuid` | Identificador asociado a income account. | `00000000-0000-4000-8000-000000000001` |
+| `isActive` | Sí | `boolean` | Sin restricción adicional declarada | Valor de is active mantenido por la instancia. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Ya existe un servicio con ese código en el catálogo | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/service-catalog"
 }
 ```
 

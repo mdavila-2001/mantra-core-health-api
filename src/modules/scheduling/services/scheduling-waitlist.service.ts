@@ -10,6 +10,7 @@ import {
   type PersistenceSession,
 } from '../../../persistence';
 import { SCHEDULING_MODULE } from '../scheduling.tokens';
+import { SchedulingAgendaNoticesService } from './scheduling-agenda-notices.service';
 import {
   WAITLIST_READ_PORT,
   WAITLIST_WRITE_PORT,
@@ -19,6 +20,8 @@ import {
 import {
   CreateWaitlistEntryDto,
   WaitlistEntryResponseDto,
+  ListWaitlistQueryDto,
+  ListWaitlistResponseDto,
   ScheduleRemindersDto,
   ScheduleRemindersResponseDto,
   WorkerBatchResultDto,
@@ -27,6 +30,9 @@ import {
 
 const DEFAULT_WORKER_BATCH = 100;
 const DEFAULT_PRIORITY = 0;
+
+/** Tope por omisión de la lectura de la lista de espera de un paciente. */
+const DEFAULT_LIST_LIMIT = 50;
 
 /**
  * Lista de espera y recordatorios de cita (UC-41-11/12/13/14).
@@ -49,6 +55,10 @@ export class SchedulingWaitlistService {
     private readonly reader: WaitlistReadPort,
     @Inject(WAITLIST_WRITE_PORT)
     private readonly writer: WaitlistWritePort,
+    // P8: el servicio declara **a quién** avisar; con qué texto y a qué cuenta
+    // lo resuelve el colaborador, que es quien puede leer entidades sin romper
+    // la migración a puertos de este módulo.
+    private readonly avisos: SchedulingAgendaNoticesService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingWaitlistService.name);
@@ -88,6 +98,48 @@ export class SchedulingWaitlistService {
   }
 
   /**
+   * UC-41-11 (lectura): en qué listas de espera está un paciente (P8).
+   *
+   * Faltaba entera: se podía anotar a alguien y no había forma de decirle que
+   * estaba anotado, así que la pantalla de turnos no podía mostrar «en espera»
+   * sin inventárselo. Por omisión trae sólo las activas —las cubiertas y las
+   * canceladas ya no son una espera— y con `includeClosed` las trae todas.
+   *
+   * @param query - Paciente, si incluir las cerradas y el tope de filas.
+   * @returns Sus entradas, de la más reciente a la más antigua.
+   */
+  async listForPatient(
+    query: ListWaitlistQueryDto,
+  ): Promise<ListWaitlistResponseDto> {
+    const estados =
+      query.includeClosed === 'true' ? undefined : [CONCEPTS.WAITLIST_ACTIVE];
+
+    const items = await this.reader.findEntriesForPatient(
+      query.patientProfileId,
+      estados,
+      query.limit ?? DEFAULT_LIST_LIMIT,
+    );
+
+    return {
+      items: items.map((item) => ({
+        id: item.id,
+        patientProfileId: item.patientProfileId,
+        ...(item.resourceId === undefined
+          ? {}
+          : { resourceId: item.resourceId }),
+        resourceLabel: item.resourceLabel,
+        ...(item.desiredFrom === undefined
+          ? {}
+          : { desiredFrom: item.desiredFrom }),
+        ...(item.desiredTo === undefined ? {} : { desiredTo: item.desiredTo }),
+        priority: item.priority,
+        statusConceptId: item.statusConceptId,
+        createdAt: item.createdAt,
+      })),
+    };
+  }
+
+  /**
    * UC-41-12 (worker): promueve candidatos de la lista de espera a un slot libre.
    *
    * La promoción **no reserva la cita**: marca al candidato como cubierto y deja
@@ -98,7 +150,7 @@ export class SchedulingWaitlistService {
     slotId: string,
     limit = DEFAULT_WORKER_BATCH,
   ): Promise<WorkerBatchResultDto> {
-    return this.session.transaction(
+    const promocion = await this.session.transaction(
       'promoteWaitlist',
       async (_em, transaction) => {
         const context = { transaction };
@@ -107,10 +159,7 @@ export class SchedulingWaitlistService {
           throw new ResourceNotFoundException('Slot no encontrado', { slotId });
         }
         if (slot.remainingCapacity <= 0) {
-          return {
-            processed: 0,
-            detail: 'El slot no tiene cupo libre para promover',
-          };
+          return { processed: 0, promotedIds: [] as string[] };
         }
 
         const candidates = await this.writer.findActiveCandidates(
@@ -135,10 +184,28 @@ export class SchedulingWaitlistService {
 
         return {
           processed: promoted,
-          detail: 'Candidatos notificados; la reserva la confirma el paciente',
+          // Los ids salen de la transacción para poder avisar fuera de ella: el
+          // aviso no puede deshacer una promoción que ya se confirmó.
+          promotedIds: promoted > 0 ? candidates.map((c) => c.id) : [],
         };
       },
     );
+
+    // P8 · aviso (1): «se liberó un horario con …». Hasta acá la promoción
+    // marcaba al candidato y no se lo decía a nadie — el cupo liberado existía
+    // en la base y no en la app de quien lo estaba esperando.
+    const avisados = await this.avisos.avisarCupoLiberado(
+      slotId,
+      promocion.promotedIds,
+    );
+
+    return {
+      processed: promocion.processed,
+      detail:
+        promocion.processed === 0
+          ? 'El slot no tenía candidatos que promover'
+          : `Candidatos promovidos y avisados (${avisados} de ${promocion.processed}); la reserva la confirma el paciente`,
+    };
   }
 
   /**
@@ -226,7 +293,7 @@ export class SchedulingWaitlistService {
   async dispatchReminders(
     limit = DEFAULT_WORKER_BATCH,
   ): Promise<WorkerBatchResultDto> {
-    return this.session.transaction(
+    const despacho = await this.session.transaction(
       'dispatchReminders',
       async (_em, transaction) => {
         const context = { transaction };
@@ -253,10 +320,24 @@ export class SchedulingWaitlistService {
 
         return {
           processed: dispatched,
-          detail:
-            'Recordatorios marcados como enviados; la entrega la ejecuta messaging (35)',
+          dispatchedIds: due.map((reminder) => reminder.id),
         };
       },
     );
+
+    // P8 · aviso (3): la entrega in-app. El comentario anterior decía «la
+    // entrega la ejecuta messaging (35)», y era cierto salvo que nadie la
+    // pedía: el recordatorio se marcaba enviado y no salía por ningún canal.
+    const avisados = await this.avisos.avisarRecordatorios(
+      despacho.dispatchedIds,
+    );
+
+    return {
+      processed: despacho.processed,
+      detail:
+        despacho.processed === 0
+          ? 'No había recordatorios vencidos'
+          : `Recordatorios despachados y entregados por el canal in-app (${avisados} de ${despacho.processed})`,
+    };
   }
 }

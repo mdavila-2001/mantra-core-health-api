@@ -26,20 +26,24 @@ function buildGroups() {
     listMembers: mockFn().mockResolvedValue([]),
     findById: mockFn(),
     findMember: mockFn().mockResolvedValue(null),
+    countMembersByStatus: mockFn().mockResolvedValue(0),
+    listTopics: mockFn().mockResolvedValue([]),
   };
   const visibility = {
     resolveActorProfileId: mockFn((_em: any, _actor: any, pedido?: string) =>
       Promise.resolve(pedido),
     ),
   };
+  const access = { resolve: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityGroupsReadService(
     em as any,
     groupsRepo as any,
     visibility as any,
+    access as any,
     logger as any,
   );
-  return { service, groupsRepo, visibility };
+  return { service, groupsRepo, visibility, access };
 }
 
 /**
@@ -83,6 +87,7 @@ describe('CommunityGroupsReadService', () => {
       COMM.GROUP_VISIBILITY_SECRET,
       undefined,
       11,
+      { topicId: undefined, query: undefined },
     );
   });
 

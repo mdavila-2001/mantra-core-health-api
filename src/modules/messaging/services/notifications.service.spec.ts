@@ -65,10 +65,14 @@ function build() {
     findReceipt: mockFn(() => Promise.resolve(null)),
     createInAppNotification: mockFn(() => ({ id: 'in-app-1' })),
     findInAppForUpdate: mockFn(),
-    listActiveChannels: mockFn(() => Promise.resolve([])),
-    listPreferencesForUser: mockFn(() => Promise.resolve([])),
-    upsertPreference: mockFn(),
-    listInAppForRecipient: mockFn(() => Promise.resolve([])),
+    // Carril P1 · la bandeja y la emisión in-app.
+    findActiveChannelByType: mockFn(() => Promise.resolve(null)),
+    findPreferences: mockFn(() => Promise.resolve([])),
+    createPreference: mockFn(() => ({ id: 'pref-1' })),
+    listInAppPage: mockFn(() => Promise.resolve([])),
+    countUnreadInApp: mockFn(() => Promise.resolve(0)),
+    findUnreadInApp: mockFn(() => Promise.resolve([])),
+    findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new NotificationsService(
@@ -203,7 +207,13 @@ describe('NotificationsService', () => {
     it('suppresses but still records when the recipient opted out', async () => {
       const d = build();
       d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
-      d.notificationsRepo.findPreference.mockResolvedValue({ optedIn: false });
+      // Carril P9: el emisor lee **todas** las preferencias del canal y elige
+      // la fila que corresponde. Antes leía sólo la de la categoría, y por eso
+      // la ventana de silencio —que vive en la fila sin categoría— no se
+      // aplicaba nunca.
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        { categoryConceptId: CATEGORY, optedIn: false },
+      ]);
 
       const res = await d.service.createRequest(dto, actor);
 
@@ -218,10 +228,13 @@ describe('NotificationsService', () => {
     it('suppresses inside the recipient quiet hours', async () => {
       const d = build();
       d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
-      d.notificationsRepo.findPreference.mockResolvedValue({
-        optedIn: true,
-        quietHoursJson: { start: '22:00', end: '07:00' },
-      });
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        {
+          categoryConceptId: CATEGORY,
+          optedIn: true,
+          quietHoursJson: { start: '22:00', end: '07:00' },
+        },
+      ]);
 
       const res = await d.service.createRequest(
         { ...dto, scheduledAt: '2026-07-20T23:30:00.000Z' },
@@ -234,10 +247,13 @@ describe('NotificationsService', () => {
     it('delivers outside the quiet hours that cross midnight', async () => {
       const d = build();
       d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
-      d.notificationsRepo.findPreference.mockResolvedValue({
-        optedIn: true,
-        quietHoursJson: { start: '22:00', end: '07:00' },
-      });
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        {
+          categoryConceptId: CATEGORY,
+          optedIn: true,
+          quietHoursJson: { start: '22:00', end: '07:00' },
+        },
+      ]);
 
       const res = await d.service.createRequest(
         { ...dto, scheduledAt: '2026-07-20T12:00:00.000Z' },
@@ -644,165 +660,6 @@ describe('NotificationsService', () => {
       await expect(
         d.service.markInAppRead('in-app-1', actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
-    });
-  });
-
-  describe('Carril 18 — autoservicio de preferencias y bandeja propia', () => {
-    it('listChannels proyecta los canales activos', async () => {
-      const d = build();
-      d.notificationsRepo.listActiveChannels.mockResolvedValue([
-        {
-          id: CHANNEL,
-          code: 'IN_APP',
-          name: 'Notificación interna',
-          channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
-        },
-      ]);
-
-      const res = await d.service.listChannels();
-
-      expect(res.items).toEqual([
-        {
-          id: CHANNEL,
-          code: 'IN_APP',
-          name: 'Notificación interna',
-          channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
-        },
-      ]);
-      expect(d.notificationsRepo.listActiveChannels).toHaveBeenCalledWith(
-        expect.anything(),
-        CONCEPTS.STATE_ACTIVE,
-      );
-    });
-
-    it('getMyPreferences proyecta solo las preferencias del actor', async () => {
-      const d = build();
-      d.notificationsRepo.listPreferencesForUser.mockResolvedValue([
-        {
-          id: 'pref-1',
-          channelId: CHANNEL,
-          categoryConceptId: CATEGORY,
-          optedIn: false,
-          quietHoursJson: { start: '22:00', end: '07:00' },
-        },
-      ]);
-
-      const res = await d.service.getMyPreferences(actor as any);
-
-      expect(res.items).toEqual([
-        {
-          id: 'pref-1',
-          channelId: CHANNEL,
-          categoryConceptId: CATEGORY,
-          optedIn: false,
-          quietHoursJson: { start: '22:00', end: '07:00' },
-        },
-      ]);
-      expect(d.notificationsRepo.listPreferencesForUser).toHaveBeenCalledWith(
-        expect.anything(),
-        actor.id,
-      );
-    });
-
-    it('setMyPreference lanza 404 si el canal no existe', async () => {
-      const d = build();
-      d.notificationsRepo.findChannelById.mockResolvedValue(null);
-
-      await expect(
-        d.service.setMyPreference(
-          { channelId: CHANNEL, optedIn: false } as any,
-          actor as any,
-        ),
-      ).rejects.toBeInstanceOf(ResourceNotFoundException);
-    });
-
-    it('setMyPreference delega el upsert en el repositorio con el actor como dueño', async () => {
-      const d = build();
-      d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
-      d.notificationsRepo.upsertPreference.mockResolvedValue({
-        id: 'pref-1',
-        channelId: CHANNEL,
-        categoryConceptId: CATEGORY,
-        optedIn: false,
-        quietHoursJson: undefined,
-      });
-
-      const res = await d.service.setMyPreference(
-        {
-          channelId: CHANNEL,
-          categoryConceptId: CATEGORY,
-          optedIn: false,
-        } as any,
-        actor as any,
-      );
-
-      expect(res.optedIn).toBe(false);
-      expect(d.notificationsRepo.upsertPreference).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          userId: actor.id,
-          channelId: CHANNEL,
-          categoryConceptId: CATEGORY,
-          optedIn: false,
-        }),
-      );
-      expect(d.tx.flush).toHaveBeenCalled();
-    });
-
-    it('listMyInApp pide la bandeja del actor autenticado, no de otro', async () => {
-      const d = build();
-      d.notificationsRepo.listInAppForRecipient.mockResolvedValue([
-        {
-          id: 'in-app-1',
-          categoryConceptId: CATEGORY,
-          subject: 'Asunto',
-          bodyText: 'Cuerpo',
-          payloadJson: { x: 1 },
-          statusConceptId: CONCEPTS.INAPP_UNREAD,
-          relatedResourceType: null,
-          relatedResourceId: null,
-          availableAt: new Date('2026-01-01T00:00:00.000Z'),
-          readAt: null,
-        },
-      ]);
-
-      const res = await d.service.listMyInApp(actor as any);
-
-      expect(res.count).toBe(1);
-      expect(res.items[0].id).toBe('in-app-1');
-      expect(d.notificationsRepo.listInAppForRecipient).toHaveBeenCalledWith(
-        expect.anything(),
-        actor.id,
-        50,
-      );
-    });
-  });
-
-  describe('Carril 18 — la preferencia de una categoría no afecta a otra (spec línea 1762)', () => {
-    it('un opt-out en PROMOTIONAL no suprime una notificación CLINICAL', async () => {
-      const d = build();
-      // La preferencia declarada es específicamente para PROMOTIONAL; la
-      // búsqueda por CLINICAL nunca la encuentra (findPreference filtra por
-      // categoryConceptId exacto), así que no hay nada que suprima el envío.
-      d.notificationsRepo.findPreference.mockResolvedValue(null);
-      d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
-
-      const res = await d.service.createRequest(
-        {
-          channelId: CHANNEL,
-          recipientUserId: RECIPIENT,
-          categoryConceptId: CONCEPTS.MSG_CATEGORY_CLINICAL,
-        } as any,
-        actor as any,
-      );
-
-      expect(res.suppressed).toBe(false);
-      expect(d.notificationsRepo.findPreference).toHaveBeenCalledWith(
-        expect.anything(),
-        RECIPIENT,
-        CHANNEL,
-        CONCEPTS.MSG_CATEGORY_CLINICAL,
-      );
     });
   });
 });

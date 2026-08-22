@@ -17,12 +17,19 @@ const dto: UploadFileDto = {
   sensitivity: FileSensitivity.PHI,
 };
 
+/** Cabeceras binarias auténticas de cada formato, tal como llegarían del cliente. */
+const MAGIC = {
+  jpeg: Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]),
+  png: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+  pdf: Buffer.from('%PDF-1.7\n'),
+};
+
 /** Archivo de multipart mínimo, con bytes reales. */
-function uploadedFile(content = 'carnet') {
+function uploadedFile(content: Buffer = MAGIC.jpeg) {
   return {
     originalname: 'carnet.jpg',
     mimetype: 'image/jpeg',
-    buffer: Buffer.from(content),
+    buffer: content,
   };
 }
 
@@ -105,6 +112,87 @@ describe('FileUploadService', () => {
         service.upload(oversized, dto, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(storage.store).not.toHaveBeenCalled();
+    });
+
+    it('rejects content that matches no known format, whatever el cliente declare', async () => {
+      const { service, storage } = build();
+      const disguised = {
+        originalname: 'payload.png',
+        mimetype: 'image/png',
+        buffer: Buffer.from('<script>alert(1)</script>'),
+      };
+
+      await expect(
+        service.upload(disguised, dto, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(storage.store).not.toHaveBeenCalled();
+    });
+
+    it('rejects a real PDF uploaded under the IMAGE category', async () => {
+      const { service, storage } = build();
+      const pdf = {
+        originalname: 'informe.pdf',
+        mimetype: 'application/pdf',
+        buffer: MAGIC.pdf,
+      };
+
+      await expect(service.upload(pdf, dto, actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      expect(storage.store).not.toHaveBeenCalled();
+    });
+
+    it('accepts that same PDF under the DOCUMENT category', async () => {
+      const { service, storage, filesService } = build();
+      storage.store.mockResolvedValue({
+        storageUri: 'file://local/pdf',
+        sizeBytes: 9,
+        contentHash: 'hash',
+      });
+      filesService.createFile.mockResolvedValue({ id: 'file-2' });
+
+      await service.upload(
+        {
+          originalname: 'informe.pdf',
+          mimetype: 'application/pdf',
+          buffer: MAGIC.pdf,
+        },
+        { ...dto, category: FileCategory.DOCUMENT },
+        actor,
+      );
+
+      expect(storage.store).toHaveBeenCalledWith(
+        expect.objectContaining({ mimeType: 'application/pdf' }),
+      );
+    });
+
+    it('persists the sniffed type, not the one the client declared', async () => {
+      const { service, storage, filesService } = build();
+      storage.store.mockResolvedValue({
+        storageUri: 'file://local/png',
+        sizeBytes: 8,
+        contentHash: 'hash',
+      });
+      filesService.createFile.mockResolvedValue({ id: 'file-3' });
+
+      await service.upload(
+        {
+          originalname: 'avatar.png',
+          // Lo que manda un navegador que no reconoce el formato.
+          mimetype: 'application/octet-stream',
+          buffer: MAGIC.png,
+        },
+        dto,
+        actor,
+      );
+
+      expect(storage.store).toHaveBeenCalledWith(
+        expect.objectContaining({ mimeType: 'image/png' }),
+      );
+      expect(filesService.createFile).toHaveBeenCalledWith(
+        expect.objectContaining({ mimeType: 'image/png' }),
+        actor,
+      );
     });
   });
 

@@ -71,6 +71,15 @@ COPY --chown=nodeapp:nodeapp --from=build /app/dist ./dist
 RUN mkdir -p storage/uploads node_modules/.cache \
   && chown -R nodeapp:nodeapp storage node_modules/.cache
 
+# Identidad del artefacto. Sin esto no hay forma de saber qué código tiene un
+# contenedor sin inspeccionarle el `dist/`, y una imagen que quedó atrás de la
+# rama se ve idéntica a una al día. Los defaults dejan la construcción sin
+# argumentos funcionando: informan "desconocido", que es honesto.
+ARG GIT_COMMIT=desconocido
+ARG BUILD_TIME=desconocido
+ARG APP_VERSION=desconocido
+ENV GIT_COMMIT=${GIT_COMMIT}     BUILD_TIME=${BUILD_TIME}     npm_package_version=${APP_VERSION}
+
 USER nodeapp
 
 # Por defecto arranca la API; docker-compose sobreescribe `command` para cada

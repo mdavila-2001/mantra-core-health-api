@@ -128,6 +128,30 @@ export class CreateMedicationRequestDto {
   @IsOptional()
   @IsDateString()
   validTo?: string;
+
+  /**
+   * Valor de patient instructions text mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3)',
+  })
+  @IsOptional()
+  @IsString()
+  patientInstructionsText?: string;
+
+  /**
+   * Diagnóstico que motiva la prescripción (Patch v4.1.6).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Condición clínica que motiva la prescripción — para qué es la receta. ' +
+      'Debe pertenecer al mismo paciente (Patch v4.1.6)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  indicationConditionId?: string;
 }
 
 /** Cuerpo de `POST /clinical/medication-records` (UC-08-11). */
@@ -316,6 +340,29 @@ export class EditMedicationRequestDraftDto {
   @IsOptional()
   @IsDateString()
   validTo?: string;
+
+  /**
+   * Diagnóstico que motiva la prescripción (Patch v4.1.6).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Condición que motiva la prescripción; debe ser del mismo paciente (Patch v4.1.6)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  indicationConditionId?: string;
+
+  /**
+   * Valor de patient instructions text mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Indicaciones al paciente impresas en la receta (Patch v4.1.3)',
+  })
+  @IsOptional()
+  @IsString()
+  patientInstructionsText?: string;
 }
 
 /** Cuerpo de `POST /clinical/medication-requests/:id/invalidate`. */

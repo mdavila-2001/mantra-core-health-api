@@ -112,10 +112,10 @@ export class DiagnosticUnitsController {
   }
 
   /**
-   * El buscador del paciente: centros publicados de toda la plataforma.
+   * El buscador del paciente: centros publicados de toda la plataforma — CARRIL 11.
    *
-   * Va declarado **antes** que `:id` porque Nest resuelve por orden de
-   * declaración y `search` sería capturado por el parámetro si fuese después.
+   * Va declarado **antes** que `:id` por el mismo motivo que la consola de
+   * administración: el parámetro lleva `ParseUUIDPipe` y se comería `search`.
    *
    * No lleva `@Roles` porque es un directorio de prestadores publicados, no
    * datos de nadie: qué centros hay, qué hacen y cuánto cuestan. Exigir un rol

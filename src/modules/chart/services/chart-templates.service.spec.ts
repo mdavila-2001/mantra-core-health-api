@@ -193,6 +193,55 @@ describe('ChartTemplatesService', () => {
       );
     });
 
+    it('hides the template of another tenant behind the same 404', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl1',
+        tenantId: 'tenant-ajeno',
+        sectionId: 'sec1',
+      });
+
+      // Saber el uuid no alcanza: la plantilla de otra organización responde
+      // igual que una inexistente.
+      await expect(
+        d.service.getTemplate('tpl1', 'tenant-propio'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('serves the template owned by the actor tenant', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl1',
+        specialtyConceptId: 'sp1',
+        tenantId: 'tenant-propio',
+        code: 'C1',
+        name: 'N1',
+        version: 1,
+        statusConceptId: CHART.TEMPLATE_ACTIVE,
+        sectionId: undefined,
+      });
+
+      const res = await d.service.getTemplate('tpl1', 'tenant-propio');
+      expect(res.id).toBe('tpl1');
+    });
+
+    it('serves a global template even without a tenant in the context', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl1',
+        specialtyConceptId: 'sp1',
+        tenantId: undefined,
+        code: 'C1',
+        name: 'N1',
+        version: 1,
+        statusConceptId: CHART.TEMPLATE_ACTIVE,
+        sectionId: undefined,
+      });
+
+      const res = await d.service.getTemplate('tpl1', undefined);
+      expect(res.id).toBe('tpl1');
+    });
+
     it('resolves the schema by joining assignments with their field definitions', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue({

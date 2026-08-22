@@ -6,7 +6,10 @@ import {
   FILE_STORAGE_ADAPTER,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UPLOAD_MIME_ALLOWLIST,
+  isMimeTypeAllowedForCategory,
   loadStorageEnv,
+  sniffMimeType,
   type AuthenticatedUser,
   type FileStorageAdapter,
 } from '../../../common';
@@ -77,12 +80,18 @@ export class FileUploadService {
   /**
    * Almacena los bytes recibidos y crea el archivo con su versión 1.
    *
+   * El tipo MIME que se persiste es el que delatan los bytes, no el que declaró
+   * el cliente: el multipart permite anunciar `image/png` para cualquier cosa, y
+   * ese valor terminaba siendo la cabecera `Content-Type` con la que después se
+   * sirve el archivo.
+   *
    * @param file - Contenido recibido por multipart.
    * @param dto - Clasificación funcional del archivo.
    * @param actor - Usuario autenticado que sube el archivo.
    * @returns El archivo recién creado.
-   * @throws PreconditionFailedException si el contenido viene vacío o excede el
-   *   máximo configurado.
+   * @throws PreconditionFailedException si el contenido viene vacío, excede el
+   *   máximo configurado, no corresponde a ningún formato reconocido o su
+   *   formato no está permitido para la categoría declarada.
    */
   async upload(
     file: UploadedFileBytes | undefined,
@@ -103,10 +112,43 @@ export class FileUploadService {
       );
     }
 
+    const detectedMimeType = sniffMimeType(file.buffer);
+    if (!detectedMimeType) {
+      throw new PreconditionFailedException(
+        'El contenido no corresponde a ningún formato de archivo permitido',
+        { allowedMimeTypes: UPLOAD_MIME_ALLOWLIST[dto.category] },
+      );
+    }
+    if (!isMimeTypeAllowedForCategory(dto.category, detectedMimeType)) {
+      throw new PreconditionFailedException(
+        'El formato del archivo no está permitido para esta categoría',
+        {
+          category: dto.category,
+          detectedMimeType,
+          allowedMimeTypes: UPLOAD_MIME_ALLOWLIST[dto.category],
+        },
+      );
+    }
+    if (file.mimetype !== detectedMimeType) {
+      // No es motivo de rechazo: los navegadores mandan `application/octet-stream`
+      // para formatos que no reconocen. Se registra porque la discrepancia
+      // sistemática distingue un cliente descuidado de un intento de evadir el
+      // filtro.
+      this.logger.warn(
+        {
+          operation: 'common.file.upload',
+          actorId: actor.id,
+          declaredMimeType: file.mimetype,
+          detectedMimeType,
+        },
+        'Declared content type does not match the file contents',
+      );
+    }
+
     const stored = await this.storage.store({
       buffer: file.buffer,
       originalName: file.originalname,
-      mimeType: file.mimetype,
+      mimeType: detectedMimeType,
     });
 
     this.logger.info(
@@ -114,6 +156,7 @@ export class FileUploadService {
         operation: 'common.file.upload',
         actorId: actor.id,
         sizeBytes: stored.sizeBytes,
+        mimeType: detectedMimeType,
       },
       'Uploaded file stored, registering metadata',
     );
@@ -123,7 +166,7 @@ export class FileUploadService {
         originalName: file.originalname,
         category: dto.category,
         sensitivity: dto.sensitivity,
-        mimeType: file.mimetype,
+        mimeType: detectedMimeType,
         sizeBytes: stored.sizeBytes,
         contentHash: stored.contentHash,
         storageUri: stored.storageUri,

@@ -29,14 +29,61 @@ describe('SchedulingController', () => {
       createException: mockFn(),
     };
     const bookingsService = { placeHold: mockFn(), confirmBooking: mockFn() };
-    const waitlistService = { enroll: mockFn() };
+    const waitlistService = { enroll: mockFn(), listForPatient: mockFn() };
+    // P8: los avisos de demora cuelgan del recurso, así que el controlador de
+    // configuración también los expone.
+    const delayService = { delayResource: mockFn() };
     const controller = new SchedulingController(
       catalogService as any,
       bookingsService as any,
       waitlistService as any,
+      delayService as any,
     );
-    return { controller, catalogService, bookingsService, waitlistService };
+    return {
+      controller,
+      catalogService,
+      bookingsService,
+      waitlistService,
+      delayService,
+    };
   }
+
+  it('expone la lectura de la lista de espera de un paciente (P8)', async () => {
+    const d = build();
+    d.waitlistService.listForPatient.mockResolvedValue({ items: [] });
+
+    const res = await d.controller.listWaitlist({
+      patientProfileId: 'paciente-1',
+    } as any);
+
+    expect(d.waitlistService.listForPatient).toHaveBeenCalledWith({
+      patientProfileId: 'paciente-1',
+    });
+    expect(res).toEqual({ items: [] });
+  });
+
+  it('delega la demora que alcanza a toda la agenda del recurso (P8)', async () => {
+    const d = build();
+    d.delayService.delayResource.mockResolvedValue({
+      notified: 3,
+      affected: 3,
+      bookingIds: [],
+      detail: 'ok',
+    });
+
+    const res = await d.controller.delayResource(
+      'res-1',
+      { delayMinutes: 20 },
+      actor as any,
+    );
+
+    expect(d.delayService.delayResource).toHaveBeenCalledWith(
+      'res-1',
+      { delayMinutes: 20 },
+      actor,
+    );
+    expect(res.affected).toBe(3);
+  });
 
   it('delegates resource creation (UC-41-01)', async () => {
     const d = build();
@@ -135,12 +182,33 @@ describe('SchedulingBookingsController', () => {
       checkIn: mockFn(),
     };
     const waitlistService = { scheduleReminders: mockFn() };
+    const delayService = { delayBooking: mockFn() };
     const controller = new SchedulingBookingsController(
       bookingsService as any,
       waitlistService as any,
+      delayService as any,
     );
-    return { controller, bookingsService, waitlistService };
+    return { controller, bookingsService, waitlistService, delayService };
   }
+
+  it('delega el aviso de demora sobre una cita (P8)', async () => {
+    const d = build();
+    d.delayService.delayBooking.mockResolvedValue({
+      notified: 1,
+      affected: 1,
+      bookingIds: [ID],
+      detail: 'ok',
+    });
+
+    const res = await d.controller.delay(ID, { delayMinutes: 20 }, actor);
+
+    expect(d.delayService.delayBooking).toHaveBeenCalledWith(
+      ID,
+      { delayMinutes: 20 },
+      actor,
+    );
+    expect(res.notified).toBe(1);
+  });
 
   it('delegates reschedule (UC-41-08)', async () => {
     const d = build();

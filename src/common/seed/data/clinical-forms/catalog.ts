@@ -15,6 +15,36 @@ import odontograma from './odontologia/odontograma-oms.json';
 import evaluacionSaludMental from './psiquiatria/evaluacion-de-salud-mental.json';
 import examenDermatologico from './dermatologia/examen-dermatologico.json';
 import evaluacionMedicinaInterna from './medicina-interna/evaluacion-de-medicina-interna.json';
+// v4.1.6 — las 27 especialidades que faltaban del value set vs_medical_specialty,
+// más la anamnesis odontológica (admisión), que es la ficha hermana del odontograma.
+import consultaMedicinaGeneral from './medicina-general/consulta-de-medicina-general.json';
+import consultaMedicinaFamiliar from './medicina-familiar/consulta-de-medicina-familiar.json';
+import evaluacionNeurologica from './neurologia/evaluacion-neurologica.json';
+import evaluacionEndocrinologica from './endocrinologia/evaluacion-endocrinologica.json';
+import evaluacionGastroenterologica from './gastroenterologia/evaluacion-gastroenterologica.json';
+import evaluacionNeumologica from './neumologia/evaluacion-neumologica.json';
+import evaluacionNefrologica from './nefrologia/evaluacion-nefrologica.json';
+import evaluacionReumatologica from './reumatologia/evaluacion-reumatologica.json';
+import evaluacionInfectologica from './infectologia/evaluacion-infectologica.json';
+import valoracionGeriatrica from './geriatria/valoracion-geriatrica.json';
+import evaluacionOncologica from './oncologia/evaluacion-oncologica.json';
+import evaluacionHematologica from './hematologia/evaluacion-hematologica.json';
+import evaluacionMedicinaIntensiva from './medicina-intensiva/evaluacion-en-medicina-intensiva.json';
+import atencionEnEmergencia from './medicina-emergencia/atencion-en-emergencia.json';
+import evaluacionCirugiaGeneral from './cirugia-general/evaluacion-de-cirugia-general.json';
+import evaluacionUrologica from './urologia/evaluacion-urologica.json';
+import evaluacionOtorrinolaringologica from './otorrinolaringologia/evaluacion-otorrinolaringologica.json';
+import valoracionPreanestesica from './anestesiologia/valoracion-preanestesica.json';
+import informeDeImagenes from './radiologia/informe-de-estudio-por-imagenes.json';
+import informeDePatologia from './patologia-clinica/informe-de-patologia.json';
+import informeDeLaboratorio from './bioquimica-clinica/informe-de-laboratorio.json';
+import evaluacionMedicinaDeportiva from './medicina-deportiva/evaluacion-de-medicina-deportiva.json';
+import evaluacionPsicologica from './psicologia-clinica/evaluacion-psicologica.json';
+import evaluacionNutricional from './nutricion/evaluacion-nutricional.json';
+import evaluacionKinesiologica from './fisioterapia/evaluacion-kinesiologica.json';
+import valoracionDeEnfermeria from './enfermeria/valoracion-de-enfermeria.json';
+import controlObstetrico from './obstetricia/control-obstetrico.json';
+import anamnesisOdontologica from './odontologia/anamnesis-odontologica.json';
 
 /**
  * Los tipos de dato que un formulario del catálogo puede declarar.
@@ -35,6 +65,19 @@ const TIPOS_ADMITIDOS = [
   'boolean',
   'date',
 ] as const satisfies readonly TechnicalDataType[];
+
+/**
+ * Los campos `json` que SÍ se admiten, por código.
+ *
+ * `json` no está entre los tipos generales por el mismo motivo de siempre: el
+ * bloque clínico no sabe dibujar un objeto arbitrario y el campo quedaría en
+ * pantalla sin poder completarse. La excepción es para los que tienen un
+ * control dedicado que sabe leer y escribir su forma — hoy, el odontograma
+ * FDI, cuyo valor es el mapa `{ "11": "1", … }` de pieza a estado OMS. Es una
+ * lista blanca y no una puerta abierta: agregar un código acá obliga a que
+ * exista el control que lo dibuja.
+ */
+const CODIGOS_JSON_CON_CONTROL = ['odontograma_fdi'] as const;
 
 /**
  * La ficha de catálogo de un formulario: de dónde salió.
@@ -74,8 +117,14 @@ export interface StandardFormSpecialty {
   display: string;
 }
 
-/** Tipo de dato admitido en un formulario del catálogo. */
-export type StandardFormDataType = (typeof TIPOS_ADMITIDOS)[number];
+/**
+ * Tipo de dato admitido en un formulario del catálogo.
+ *
+ * Los generales, más `json` para los campos de
+ * {@link CODIGOS_JSON_CON_CONTROL} — los que tienen un control dedicado que
+ * sabe dibujar su forma.
+ */
+export type StandardFormDataType = (typeof TIPOS_ADMITIDOS)[number] | 'json';
 
 /** Un campo del esquema, tal como lo acepta `POST /charts/templates`. */
 export interface StandardFormField {
@@ -126,7 +175,13 @@ type RawForm = Omit<StandardFormDefinition, 'fields'> & {
  */
 function validar(form: RawForm): StandardFormDefinition {
   const fields = form.fields.map((field) => {
-    if (!(TIPOS_ADMITIDOS as readonly string[]).includes(field.dataType)) {
+    const conControl =
+      field.dataType === 'json' &&
+      (CODIGOS_JSON_CON_CONTROL as readonly string[]).includes(field.code);
+    if (
+      !conControl &&
+      !(TIPOS_ADMITIDOS as readonly string[]).includes(field.dataType)
+    ) {
       throw new Error(
         `Formulario ${form.code}: el campo "${field.code}" declara el tipo ` +
           `"${field.dataType}", que no está entre los admitidos ` +
@@ -167,4 +222,36 @@ export const STANDARD_FORMS: readonly StandardFormDefinition[] = [
   evaluacionSaludMental,
   examenDermatologico,
   evaluacionMedicinaInterna,
+  // v4.1.6 — clínicas médicas
+  consultaMedicinaGeneral,
+  consultaMedicinaFamiliar,
+  evaluacionNeurologica,
+  evaluacionEndocrinologica,
+  evaluacionGastroenterologica,
+  evaluacionNeumologica,
+  evaluacionNefrologica,
+  evaluacionReumatologica,
+  evaluacionInfectologica,
+  valoracionGeriatrica,
+  evaluacionOncologica,
+  evaluacionHematologica,
+  evaluacionMedicinaIntensiva,
+  atencionEnEmergencia,
+  // v4.1.6 — quirúrgicas y de procedimiento
+  evaluacionCirugiaGeneral,
+  evaluacionUrologica,
+  evaluacionOtorrinolaringologica,
+  valoracionPreanestesica,
+  // v4.1.6 — fichas de informe (el estudio se pide y se informa; no hay consulta)
+  informeDeImagenes,
+  informeDePatologia,
+  informeDeLaboratorio,
+  // v4.1.6 — profesiones de la salud no médicas y ficha de admisión odontológica
+  evaluacionMedicinaDeportiva,
+  evaluacionPsicologica,
+  evaluacionNutricional,
+  evaluacionKinesiologica,
+  valoracionDeEnfermeria,
+  controlObstetrico,
+  anamnesisOdontologica,
 ].map(validar);

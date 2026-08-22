@@ -131,6 +131,20 @@ export const { seeds: FORMS_CONCEPT_SEEDS, ids: FORMS } = defineModuleConcepts(
       display: 'Patient resource',
     },
 
+    /**
+     * El recurso es un encuentro, no el paciente.
+     *
+     * Las fichas por especialidad se abren SOBRE la consulta: `resourceId` es
+     * el `encounters.id` y así lo lee la cara de lectura, que resuelve la
+     * propiedad cargando el encuentro. Hasta ahora viajaban tipadas como
+     * paciente porque era el único tipo declarado y el default silencioso de
+     * `openInstance` — el dato quedaba diciendo algo que no era.
+     */
+    RESOURCE_TYPE_ENCOUNTER: {
+      code: 'FORMS_RESOURCE_ENCOUNTER',
+      display: 'Encounter resource',
+    },
+
     // --- Enmascarado y estado de reglas de acceso (field_value_access_rules) ---
     ACCESS_RULE_ACTIVE: {
       code: 'FORMS_ACCESS_RULE_ACTIVE',

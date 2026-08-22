@@ -34,14 +34,20 @@ function build() {
     findActiveLocations: mockFn().mockResolvedValue([]),
   };
   const episodesRepo = { findById: mockFn() };
+  // Carril P1: el aviso in-app del cierre. Se dobla con un espía que no hace
+  // nada para que las pruebas del cierre sigan siendo del cierre.
+  const clinicalNotifications = {
+    encounterClosed: mockFn(() => Promise.resolve({ suppressed: false })),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new EncountersService(
     em as any,
     encountersRepo,
     episodesRepo as any,
+    clinicalNotifications as any,
     logger as any,
   );
-  return { service, tx, encountersRepo, episodesRepo };
+  return { service, tx, encountersRepo, episodesRepo, clinicalNotifications };
 }
 
 /**

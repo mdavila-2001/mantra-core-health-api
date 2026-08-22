@@ -361,6 +361,10 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ADDR_USE_HOME: def('common:addr-use:home', 'ADDR_HOME', 'Home address'),
   ADDR_TYPE_POSTAL: def('common:addr-type:postal', 'POSTAL', 'Postal'),
   COUNTRY_PE: def('common:country:pe', 'PE', 'Peru'),
+  // ALoVida es una plataforma boliviana (SEGIP, catálogo de municipios del
+  // INE): `addresses.service.ts` usaba PE como único país sembrado, lo que
+  // dejaba cada dirección creada apuntando al país equivocado.
+  COUNTRY_BO: def('common:country:bo', 'BO', 'Bolivia'),
 
   // --- Common: archivos ---
   FILE_CATEGORY_DOCUMENT: def(
@@ -556,6 +560,57 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   REL_IS_A: def('terminology:relationship:is-a', 'IS_A', 'Is a'),
   REL_PART_OF: def('terminology:relationship:part-of', 'PART_OF', 'Part of'),
+  // --- Terminology: relaciones tipadas del glosario médico (Carril 03) ------
+  // Aditivas a `REL_IS_A`/`REL_PART_OF`: la jerarquía genérica del catálogo no
+  // alcanza para expresar «este síntoma se asocia a esta enfermedad» o «este
+  // término se diagnostica con esta prueba». Semántica de cada una (documentada
+  // también en el encabezado del seed del glosario):
+  //  - RELATED_TERM: «ver también» genérico, sin direccionalidad implícita.
+  //  - DISEASE: el origen se asocia clínicamente a / es manifestación de / está
+  //    indicado para la enfermedad destino.
+  //  - PROCEDURE: el origen se asocia al procedimiento clínico destino.
+  //  - TREATMENT: el origen se trata mediante / involucra el tratamiento destino.
+  //  - ANATOMY: el origen se relaciona con la estructura anatómica destino.
+  //  - DIAGNOSTIC_TEST: el origen se diagnostica/monitorea mediante la prueba
+  //    diagnóstica destino.
+  REL_RELATED_TERM: def(
+    'terminology:relationship:related-term',
+    'RELATED_TERM',
+    'Related term',
+  ),
+  REL_DISEASE: def(
+    'terminology:relationship:disease',
+    'REL_DISEASE',
+    'Associated disease',
+  ),
+  // El código NO es `REL_PROCEDURE` aunque el símbolo sí: ese código ya lo ocupa
+  // `RELATEDNESS_PROCEDURE` (`periop:relatedness:procedure`), y
+  // `catalog_concepts` tiene UNIQUE(code_system_version_id, code). Los dos son
+  // conceptos distintos —acá «el término se asocia a un procedimiento», allá «el
+  // evento adverso se relaciona con el procedimiento»— así que no se unifican.
+  // Se movió éste y no el de periop porque el de periop ya está materializado en
+  // las bases existentes: cambiarlo dejaría el código de la fila viva divergido
+  // para siempre del catálogo, ya que el seed inserta pero nunca actualiza.
+  REL_PROCEDURE: def(
+    'terminology:relationship:procedure',
+    'REL_ASSOC_PROCEDURE',
+    'Associated procedure',
+  ),
+  REL_TREATMENT: def(
+    'terminology:relationship:treatment',
+    'REL_TREATMENT',
+    'Associated treatment',
+  ),
+  REL_ANATOMY: def(
+    'terminology:relationship:anatomy',
+    'REL_ANATOMY',
+    'Associated anatomy',
+  ),
+  REL_DIAGNOSTIC_TEST: def(
+    'terminology:relationship:diagnostic-test',
+    'REL_DIAGNOSTIC_TEST',
+    'Associated diagnostic test',
+  ),
   VS_OP_IN: def('terminology:vs-operator:in', 'IN', 'In'),
   VS_OP_IS_A: def(
     'terminology:vs-operator:is-a',
@@ -5610,65 +5665,69 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'MSG_PROV_EMAIL',
     'Email messaging provider',
   ),
-  // --- Carril 18: canales adicionales, proveedor in-app y categorías --------
-  // La spec (líneas 1751-1756) pide que el doctor pueda configurar el canal por
-  // categoría entre interna/correo/WhatsApp/SMS/push. WhatsApp/SMS/push no
-  // tienen un adaptador real conectado en este entorno (ninguna credencial de
-  // proveedor existe en el repo, igual que ya documenta `notification-delivery.job.ts`
-  // para email): se declara el TIPO de canal para que la preferencia se pueda
-  // fijar, pero deliberadamente NO se siembra un `messaging_providers`/
-  // `provider_channel_configs` para ellos — sin esa fila, `deliverNotification`
-  // rechaza el intento con 'El canal no tiene configuración de proveedor activa'
-  // en vez de fingir un envío. El canal in-app, en cambio, SÍ es 100% interno
-  // (nunca sale a un tercero) y se siembra completo, con proveedor propio.
-  CHANNEL_TYPE_WHATSAPP: def(
-    'messaging:channel-type:whatsapp',
-    'CHANNEL_WHATSAPP',
-    'WhatsApp channel',
-  ),
-  CHANNEL_TYPE_SMS: def(
-    'messaging:channel-type:sms',
-    'CHANNEL_SMS',
-    'SMS channel',
-  ),
-  CHANNEL_TYPE_PUSH: def(
-    'messaging:channel-type:push',
-    'CHANNEL_PUSH',
-    'Push notification channel',
-  ),
-  /** Proveedor que entrega el canal in-app: escribir en la bandeja propia, sin tercero. */
+  /**
+   * Tipo de proveedor del canal in-app. No hay nadie externo del otro lado: la
+   * «entrega» es escribir en `in_app_notifications`. Existe porque
+   * `provider_channel_configs` exige un proveedor y fingir que el in-app lo
+   * entrega el proveedor de correo mezclaría dos entregabilidades distintas en
+   * la misma métrica.
+   */
   MSG_PROVIDER_TYPE_IN_APP: def(
     'messaging:provider-type:in-app',
     'MSG_PROV_IN_APP',
-    'In-app (internal) messaging provider',
+    'In-app messaging provider',
   ),
+
+  /* --- Categorías de notificación (carril P1) -----------------------------
+     La categoría es la unidad de preferencia: `recipient_preferences` guarda
+     un opt-in por (usuario, canal, categoría), así que silenciar es silenciar
+     una de estas cuatro. Son cuatro y no una por disparador porque quien
+     configura razona en estos términos —«no me avises de lo social»— y una
+     categoría por evento produciría una pantalla de preferencias que nadie
+     termina de leer. Ver `messaging/notifications.contract.ts`. */
+  /** Receta emitida, encuentro cerrado, resultado disponible. */
+  NOTIF_CATEGORY_CLINICAL: def(
+    'messaging:notification-category:clinical',
+    'NOTIF_CAT_CLINICAL',
+    'Clinical notifications',
+  ),
+  /** Cupo liberado, demora del profesional, recordatorio, cambio de cita. */
+  NOTIF_CATEGORY_SCHEDULING: def(
+    'messaging:notification-category:scheduling',
+    'NOTIF_CAT_SCHEDULING',
+    'Appointment notifications',
+  ),
+  /** Mensajería directa entre personas. */
+  NOTIF_CATEGORY_MESSAGES: def(
+    'messaging:notification-category:messages',
+    'NOTIF_CAT_MESSAGES',
+    'Direct message notifications',
+  ),
+  /** Muro, reacciones, comentarios, grupos. */
+  NOTIF_CATEGORY_SOCIAL: def(
+    'messaging:notification-category:social',
+    'NOTIF_CAT_SOCIAL',
+    'Social notifications',
+  ),
+
   /**
-   * Categorías de notificación (spec línea 1761: "diferenciar notificaciones
-   * clínicas, administrativas, contables y promocionales"). Las promocionales
-   * son las únicas que dependen del opt-in del destinatario para lo crítico
-   * (línea 1762): `NotificationsService.evaluateSuppression` trata cualquier
-   * categoría distinta de `MSG_CATEGORY_PROMOTIONAL` como no supresible por
-   * preferencia cuando además está marcada `isCritical` en el request.
+   * Categorías de notificación de comunidad que consume la misma campana (P7).
+   *
+   * Se suman al mismo `category_concept_id` que las clínicas, y no a un canal
+   * aparte, porque el destinatario tiene una sola bandeja: separar el aviso de
+   * un grupo del de una receta obligaría a mirar dos lugares. Lo que sí las
+   * separa es la categoría, que es justamente lo que `recipient_preferences`
+   * necesita para que alguien silencie los grupos sin silenciar su receta.
    */
-  MSG_CATEGORY_CLINICAL: def(
-    'messaging:category:clinical',
-    'MSG_CAT_CLINICAL',
-    'Clinical notification category',
+  NOTIF_CAT_GROUP_JOIN_APPROVED: def(
+    'messaging:notification-category:group-join-approved',
+    'NOTIF_CAT_GRP_JOINED',
+    'Group membership approved',
   ),
-  MSG_CATEGORY_ADMINISTRATIVE: def(
-    'messaging:category:administrative',
-    'MSG_CAT_ADMIN',
-    'Administrative notification category',
-  ),
-  MSG_CATEGORY_ACCOUNTING: def(
-    'messaging:category:accounting',
-    'MSG_CAT_ACCOUNTING',
-    'Accounting notification category',
-  ),
-  MSG_CATEGORY_PROMOTIONAL: def(
-    'messaging:category:promotional',
-    'MSG_CAT_PROMOTIONAL',
-    'Promotional notification category',
+  NOTIF_CAT_GROUP_NEW_POST: def(
+    'messaging:notification-category:group-new-post',
+    'NOTIF_CAT_GRP_POST',
+    'New post in a group',
   ),
 
   // ==========================================================================

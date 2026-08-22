@@ -12,6 +12,8 @@ export { AuthTokenModule } from './auth/auth-token.module';
 export { TokenService } from './auth/token.service';
 export type { IssuedTokens, TokenDisplayData } from './auth/token.service';
 export { JwtAuthGuard } from './auth/jwt-auth.guard';
+export { WsJwtGuard } from './auth/ws-jwt.guard';
+export type { AuthenticatedSocketData } from './auth/ws-jwt.guard';
 export { RolesGuard } from './auth/roles.guard';
 export { CurrentUser } from './auth/current-user.decorator';
 export { Public } from './auth/public.decorator';
@@ -149,7 +151,25 @@ export { LocalDiskFileStorageAdapter } from './storage/local-disk-file-storage.a
 export { S3FileStorageAdapter } from './storage/s3-file-storage.adapter';
 export { storageEnvSchema, loadStorageEnv } from './storage/storage.env';
 export type { StorageEnv, FileStorageAdapterName } from './storage/storage.env';
+export {
+  UPLOAD_MIME_ALLOWLIST,
+  isMimeTypeAllowedForCategory,
+  sniffMimeType,
+} from './storage/upload-content-type';
+export type { SniffedMimeType } from './storage/upload-content-type';
 export { appSecurityEnvSchema } from './security/app-security.env';
+
+// Bypass de verificación DEV/TEST (corrección #12, contrato DEV_VERIFICATION_BYPASS.md)
+export { describeBuild, loadBuildInfo } from './build-info';
+export type { BuildInfo } from './build-info';
+export { VerificationBypassModule } from './verification/verification-bypass.module';
+export { VerificationBypassService } from './verification/verification-bypass.service';
+export {
+  verificationBypassEnvSchema,
+  loadVerificationBypassEnv,
+  assertVerificationBypassNotInProduction,
+} from './verification/verification-bypass.env';
+export type { VerificationBypassEnv } from './verification/verification-bypass.env';
 
 // Conceptos de dominio
 export {

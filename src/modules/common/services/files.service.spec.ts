@@ -49,6 +49,7 @@ describe('FilesService', () => {
       findById: fn(),
       findByFileAndId: fn(),
       maxVersionNumber: fn(),
+      findPendingScan: fn(() => Promise.resolve([])),
       create: fn(),
     };
     const fileDerivativesRepo = { create: fn() };

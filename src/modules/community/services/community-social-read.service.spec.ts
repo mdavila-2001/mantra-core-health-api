@@ -56,6 +56,10 @@ function build() {
       Promise.resolve(pedido),
     ),
   };
+  // El doble devuelve un mapa vacío: el recuento en sí se prueba en
+  // `community-engagement.service.spec.ts`, con los repositorios reales de por
+  // medio. Acá interesa que la lectura lo pida y con qué.
+  const engagement = { ofPosts: mockFn().mockResolvedValue(new Map()) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new CommunitySocialReadService(
@@ -69,10 +73,12 @@ function build() {
     blocksRepo as any,
     prestigeRepo as any,
     visibility as any,
+    engagement as any,
     logger as any,
   );
   return {
     service,
+    engagement,
     profilesRepo,
     postsRepo,
     commentsRepo,

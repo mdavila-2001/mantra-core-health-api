@@ -56,6 +56,7 @@ export const clinicalIndexes1: readonly IndexTuple[] = [
   ['conditions', 'ix_conditions_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
   ['conditions', 'ix_conditions_severity_concept_id', ['severity_concept_id'], false, 'btree'],
   ['conditions', 'ix_conditions_laterality_concept_id', ['laterality_concept_id'], false, 'btree'],
+  ['conditions', 'ix_conditions_clinical_course_concept_id', ['clinical_course_concept_id'], false, 'btree'],
   ['conditions', 'ix_conditions_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['conditions', 'ix_conditions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['conditions', 'ix_conditions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
@@ -144,6 +145,7 @@ export const clinicalIndexes1: readonly IndexTuple[] = [
   ['medication_requests', 'ix_medication_requests_prescriber_profile_id', ['prescriber_profile_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_route_concept_id', ['route_concept_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_unit_concept_id', ['unit_concept_id'], false, 'btree'],
+  ['medication_requests', 'ix_medication_requests_indication_condition_id', ['indication_condition_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_custodian_tenant_id_status_concept_id', ['custodian_tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
@@ -185,6 +187,4 @@ export const clinicalIndexes1: readonly IndexTuple[] = [
   ['observation_components', 'ix_observation_components_range_unit_concept_id', ['range_unit_concept_id'], false, 'btree'],
   ['observation_components', 'ix_observation_components_data_absent_reason_concept_id', ['data_absent_reason_concept_id'], false, 'btree'],
   ['observation_components', 'ix_observation_components_interpretation_concept_id', ['interpretation_concept_id'], false, 'btree'],
-  ['observation_components', 'ix_observation_components_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['observation_components', 'ix_observation_components_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
 ];

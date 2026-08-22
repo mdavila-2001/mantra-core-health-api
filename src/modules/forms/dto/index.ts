@@ -1,4 +1,5 @@
 export * from './responses.dto';
+export * from './read-responses.dto';
 export * from './create-definition-set.dto';
 export * from './publish-version.dto';
 export * from './create-field-definition.dto';

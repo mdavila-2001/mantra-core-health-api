@@ -248,6 +248,9 @@ export class IdentityChecksService {
     );
     return this.em.transactional(async (tx) => {
       const check = await this.loadCheck(tx, checkId);
+      // El veredicto es lo que cierra la conversación con la autoridad: el
+      // intento que quedó esperándolo se completa acá, antes de exigirlo.
+      await this.completeInFlightAttempt(tx, check.identityVerificationCaseId);
       const hasCompleted = await this.attemptsRepo.existsCompletedForCase(
         tx,
         check.identityVerificationCaseId,
@@ -293,6 +296,43 @@ export class IdentityChecksService {
         caseStatus,
       };
     });
+  }
+
+  /**
+   * Cierra el intento que estaba esperando el veredicto de la autoridad.
+   *
+   * El worker despacha el check y asienta un intento PENDIENTE —la autoridad
+   * encoló la solicitud pero todavía no resolvió—, y vuelve más tarde a recoger
+   * el veredicto. Ese segundo paso nunca cerraba el intento, así que la
+   * precondición de UC-27-06 («debe existir un intento completado») no se
+   * cumplía jamás por el camino automático: el resultado se rechazaba con 422 en
+   * cada tick, el check se quedaba en curso y el caso sin aserción. Es la mitad
+   * de H-01 que no arreglaba la aprobación manual, y la que sufre un paciente
+   * real, que se verifica sin que ningún administrador intervenga.
+   *
+   * El desenlace es SUCCESS también cuando el veredicto es negativo: mide si la
+   * autoridad contestó, no qué contestó. Que la identidad no coincida lo dice el
+   * resultado, que es el único que porta el veredicto.
+   *
+   * Se persiste antes de seguir para que las consultas posteriores —la
+   * precondición y la atribución de la autoridad emisora— vean el intento ya
+   * cerrado.
+   *
+   * @param tx - Transacción activa.
+   * @param caseId - Caso cuyo intento en vuelo se cierra.
+   */
+  private async completeInFlightAttempt(
+    tx: EntityManager,
+    caseId: string,
+  ): Promise<void> {
+    const latest = await this.attemptsRepo.findLatestByCase(tx, caseId);
+    if (!latest) return;
+    if (latest.completedAt) return;
+    if (latest.outcomeConceptId !== IDA.ATTEMPT_PENDING) return;
+
+    latest.completedAt = new Date();
+    latest.outcomeConceptId = IDA.ATTEMPT_SUCCESS;
+    await tx.flush();
   }
 
   /**

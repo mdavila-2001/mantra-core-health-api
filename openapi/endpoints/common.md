@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `common`
 
-Referencia exhaustiva de 14 operación(es) del módulo `common`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 15 operación(es) del módulo `common`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files`
 - **Controladores:** `CommonAddressesController`, `CommonContactPointsController`, `CommonFilesController`, `CommonIdentifiersController`, `InternalFilesController`
@@ -25,6 +25,7 @@ Referencia exhaustiva de 14 operación(es) del módulo `common`, derivada del co
 12. [POST /common/files/upload](#12-post-common-files-upload) — Subir el contenido de un archivo (multipart)
 13. [POST /common/identifiers](#13-post-common-identifiers) — Registrar un identificador oficial (UC-02-01)
 14. [POST /internal/files/versions/{vid}/scan-result](#14-post-internal-files-versions-vid-scan-result) — Registrar resultado de escaneo antimalware (UC-02-09)
+15. [GET /internal/files/versions/pending-scan](#15-get-internal-files-versions-pending-scan) — Listar versiones pendientes de escaneo antimalware
 
 ---
 
@@ -1624,6 +1625,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El contenido no corresponde a ningún formato de archivo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El formato del archivo no está permitido para esta categoría | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1823,7 +1826,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
 - Deben ser UUID válidos: `vid`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1899,7 +1902,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Versión de archivo no encontrada | Excepción explícita en src/modules/common/services/files.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1914,6 +1917,124 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/internal/files/versions/{vid}/scan-result"
+}
+```
+
+---
+
+## 15. GET /internal/files/versions/pending-scan
+
+- **Módulo:** `common`
+- **Etiqueta OpenAPI:** `internal/files`
+- **Nombre:** Listar versiones pendientes de escaneo antimalware
+- **Operation ID:** `InternalFilesController_pendingScan`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InternalFilesController.pendingScan](../../src/modules/common/controllers/internal-files.controller.ts)
+
+### Descripción de negocio
+
+Listar versiones pendientes de escaneo antimalware. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Versiones que esperan escaneo, para que el antivirus sepa qué mirar. Sin esto el circuito no cierra por ningún lado: el callback existía desde el principio y no había forma de descubrir qué faltaba escanear.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /internal/files/versions/pending-scan` en `InternalFilesController_pendingScan`. El controlador delega en `FilesService.listPendingScan`. No recibe body. El tipo de retorno estático es `Promise<PendingScanResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /internal/files/versions/pending-scan HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /internal/files/versions/pending-scan?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PendingScanResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PendingScanResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PendingScanResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PendingScanResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PendingScanResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PendingScanResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingScanResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "versionId": "00000000-0000-4000-8000-000000000001",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "storageUri": "valor-ejemplo",
+      "sizeBytes": 1,
+      "mimeType": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PendingScanItemDto>` | Sin restricción adicional declarada | Lote de versiones pendientes, de la más antigua a la más nueva. | `[{"versionId":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","storageUri":"valor-ejemplo","sizeBytes":1,"mimeType":"valor-ejemplo"}]` |
+| `items[].versionId` | Sí | `string` | formato `uuid` | Versión a escanear. | `00000000-0000-4000-8000-000000000001` |
+| `items[].fileId` | Sí | `string` | formato `uuid` | Archivo al que pertenece, para el rastro del resultado. | `00000000-0000-4000-8000-000000000001` |
+| `items[].storageUri` | Sí | `string` | Sin restricción adicional declarada | URI de almacenamiento (`s3://…` o `file://…`). | `valor-ejemplo` |
+| `items[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Tamaño declarado, para acotar el lote y descartar lo que excede al escáner. | `1` |
+| `items[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Tipo deducido de los bytes al subir. Va sólo para el registro. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/files/versions/pending-scan"
 }
 ```
 

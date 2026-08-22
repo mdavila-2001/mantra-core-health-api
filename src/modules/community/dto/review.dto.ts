@@ -11,6 +11,7 @@ import {
   Max,
   MaxLength,
   Min,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -40,22 +41,22 @@ export class ReviewDimensionInputDto {
 @ApiSchema({ name: 'CommunityCreateReviewDto' })
 export class CreateReviewDto {
   /**
-   * Identificador asociado a reviewer patient profile.
+   * La atención que respalda la reseña. **Obligatoria.**
+   *
+   * Era opcional, y sin ella la reseña salía marcada como «no verificada» pero
+   * salía igual: cualquiera podía calificar a cualquiera sin haberse atendido
+   * nunca. Ahora no hay reseña sin atención detrás, y el servidor comprueba que
+   * esa atención sea de quien reseña, con quien se califica, y esté terminada.
+   *
+   * Nunca se expone en las lecturas: publicarla diría que esa persona se
+   * atendió, ese día, con ese profesional.
    */
-  @ApiProperty({ description: 'Perfil de paciente que reseña', format: 'uuid' })
-  @IsUUID()
-  reviewerPatientProfileId!: string;
-
-  /**
-   * Identificador asociado a verified encounter.
-   */
-  @ApiPropertyOptional({
-    description: 'Encuentro verificado (nunca se expone públicamente)',
+  @ApiProperty({
+    description: 'Atención que respalda la reseña (nunca se expone)',
     format: 'uuid',
   })
-  @IsOptional()
   @IsUUID()
-  verifiedEncounterId?: string;
+  verifiedEncounterId!: string;
 
   /**
    * Valor de overall rating mantenido por la instancia.
@@ -100,4 +101,22 @@ export class CreateReviewDto {
   @ValidateNested({ each: true })
   @Type(() => ReviewDimensionInputDto)
   dimensions?: ReviewDimensionInputDto[];
+}
+
+/**
+ * Cuerpo de `POST /community/profiles/{profileId}/reviews/{reviewId}/responses`.
+ *
+ * `community.review_responses` existía como tabla y **no tenía endpoint**: un
+ * profesional podía ser calificado en público y no tenía forma de contestar.
+ */
+@ApiSchema({ name: 'CommunityCreateReviewResponseDto' })
+export class CreateReviewResponseDto {
+  /**
+   * Texto de la respuesta.
+   */
+  @ApiProperty({ description: 'Respuesta del profesional', maxLength: 4000 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(4000)
+  responseText!: string;
 }

@@ -26,6 +26,7 @@ import {
 import {
   SchedulingCatalogService,
   SchedulingBookingsService,
+  SchedulingDelayService,
   SchedulingWaitlistService,
 } from '../services';
 import {
@@ -34,6 +35,8 @@ import {
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   CreateTemplateDto,
+  AvailabilityExceptionListDto,
+  TemplateListDto,
   TemplateResponseDto,
   GenerateSlotsDto,
   GenerateSlotsResponseDto,
@@ -47,6 +50,10 @@ import {
   CreateWaitlistEntryDto,
   WaitlistEntryResponseDto,
   ResourceAgendaResponseDto,
+  ListWaitlistQueryDto,
+  ListWaitlistResponseDto,
+  DelayResourceDto,
+  DelayNoticeResponseDto,
 } from '../dto';
 
 /**
@@ -63,11 +70,13 @@ export class SchedulingController {
    * @param catalogService - Valor de catalog service requerido por la operación.
    * @param bookingsService - Valor de bookings service requerido por la operación.
    * @param waitlistService - Valor de waitlist service requerido por la operación.
+   * @param delayService - Avisos de demora del profesional (P8).
    */
   constructor(
     private readonly catalogService: SchedulingCatalogService,
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
+    private readonly delayService: SchedulingDelayService,
   ) {}
 
   /**
@@ -129,7 +138,12 @@ export class SchedulingController {
 
   /** UC-41-01. */
   @Post('resources')
-  @Roles('SCHEDULING_ADMIN')
+  // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
+  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
+  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // apertura, un profesional recién registrado no tenía forma de volverse
+  // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Dar de alta un recurso agendable' })
   createResource(
@@ -141,7 +155,12 @@ export class SchedulingController {
 
   /** UC-41-01. */
   @Post('booking-policies')
-  @Roles('SCHEDULING_ADMIN')
+  // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
+  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
+  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // apertura, un profesional recién registrado no tenía forma de volverse
+  // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Definir una política de reserva' })
   createPolicy(
@@ -153,7 +172,12 @@ export class SchedulingController {
 
   /** UC-41-02. */
   @Post('resources/:id/templates')
-  @Roles('SCHEDULING_ADMIN')
+  // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
+  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
+  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // apertura, un profesional recién registrado no tenía forma de volverse
+  // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar una plantilla de agenda con sus franjas' })
   createTemplate(
@@ -164,9 +188,37 @@ export class SchedulingController {
     return this.catalogService.createTemplate(id, dto, actor);
   }
 
+  /**
+   * UC-41-02 (lectura): las plantillas publicadas de un recurso.
+   *
+   * Vive junto a su POST hermano porque son las dos caras del mismo hecho. Sin
+   * esta lectura, publicar un horario era escribirlo en un papel y tirarlo:
+   * `scheduling` no tenía forma de volver a leer una plantilla, y por eso
+   * «Mi agenda» no podía existir.
+   *
+   * Un recurso sin plantillas devuelve `[]` con 200, no 404: existe y todavía
+   * no publicó horario.
+   */
+  @Get('resources/:id/templates')
+  // Mismo alcance que el POST: el servicio verifica que el recurso sea del
+  // actor (`assertRecursoDelActor`), así que un profesional sólo lee las suyas.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({ summary: 'Listar las plantillas de agenda de un recurso' })
+  listTemplates(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TemplateListDto> {
+    return this.catalogService.listTemplates(id, actor);
+  }
+
   /** UC-41-03. */
   @Post('templates/:id/generate-slots')
-  @Roles('SCHEDULING_ADMIN')
+  // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
+  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
+  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // apertura, un profesional recién registrado no tenía forma de volverse
+  // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Materializar los slots de la plantilla en una ventana',
@@ -179,6 +231,43 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<GenerateSlotsResponseDto> {
     return this.catalogService.generateSlots(id, dto, actor);
+  }
+
+  /**
+   * UC-41-04 (lectura): las excepciones de un recurso en una ventana.
+   *
+   * El hueco gemelo del `GET` de plantillas: se podían crear excepciones y no
+   * leerlas. Sin esto, el calendario del médico no puede distinguir un día
+   * **bloqueado** de un día **sin agenda** —los dos aparecen sin cupos—, y ésa
+   * es justamente la diferencia que hay que mostrarle.
+   */
+  @Get('resources/:id/exceptions')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Listar las excepciones de disponibilidad de un recurso',
+  })
+  @ApiQuery({
+    name: 'from',
+    required: true,
+    description: 'Inicio de la ventana (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'to',
+    required: true,
+    description: 'Fin de la ventana (ISO 8601)',
+  })
+  listExceptions(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AvailabilityExceptionListDto> {
+    return this.catalogService.listExceptions(
+      id,
+      new Date(from),
+      new Date(to),
+      actor,
+    );
   }
 
   /** UC-41-04. */
@@ -266,5 +355,52 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<WaitlistEntryResponseDto> {
     return this.waitlistService.enroll(dto, actor);
+  }
+
+  /**
+   * P8 · UC-41-11 (lectura): en qué listas de espera está un paciente.
+   *
+   * Faltaba: el módulo dejaba anotarse y no ofrecía forma de comprobarlo, así
+   * que «estás en espera» sólo podía ser una suposición del cliente.
+   */
+  @Get('waitlist')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({
+    summary: 'Listar las entradas de lista de espera de un paciente',
+  })
+  @ApiQuery({ name: 'patientProfileId', required: true, format: 'uuid' })
+  @ApiQuery({
+    name: 'includeClosed',
+    required: false,
+    description: 'Incluye las cubiertas y canceladas (por omisión, no)',
+  })
+  @ApiQuery({ name: 'limit', required: false })
+  listWaitlist(
+    @Query() query: ListWaitlistQueryDto,
+  ): Promise<ListWaitlistResponseDto> {
+    return this.waitlistService.listForPatient(query);
+  }
+
+  /**
+   * P8: «me demoro veinte minutos hoy».
+   *
+   * Es como el profesional lo dice en la práctica —la demora es de la jornada,
+   * no de un turno suelto— y por eso cuelga del recurso. Alcanza a las citas
+   * vigentes de la ventana informada; por omisión, de ahora al fin del día.
+   */
+  @Post('resources/:id/delay')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Informar una demora que alcanza a toda la agenda del recurso',
+    description:
+      'Avisa a los pacientes con cita vigente en la ventana. No mueve ningún turno ni toca los cupos.',
+  })
+  delayResource(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DelayResourceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DelayNoticeResponseDto> {
+    return this.delayService.delayResource(id, dto, actor);
   }
 }

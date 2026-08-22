@@ -268,6 +268,23 @@ export class BookingDecisionResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   occurredAt!: string;
+
+  /**
+   * Las solicitudes del paciente que este «sí» dejó sin efecto (regla 2 del
+   * choque de turnos): aceptar una cancela las pendientes que se superponen.
+   *
+   * Vacío es lo normal —la mayoría de las aceptaciones no desplazan nada—, y
+   * por eso viene siempre, en vez de omitirse: quien consume distingue «no
+   * desplazó ninguna» de «esta respuesta no lo cuenta». El servicio ya lo
+   * devolvía; faltaba declararlo acá, así que no salía en el contrato OpenAPI
+   * y el `accept` respondía con un campo que su propio tipo negaba.
+   */
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'Citas pendientes que quedaron canceladas por chocar con ésta',
+  })
+  desplazadas!: readonly string[];
 }
 
 /** Cuerpo de `POST /scheduling/bookings/{id}/reschedule` (UC-41-08). */
@@ -577,73 +594,203 @@ export class WaitlistCandidateSlotsResponseDto {
   slotIds!: string[];
 }
 
-/* ============================================================================
-    La decisión del prestador sobre una solicitud de reserva.
+/* ==========================================================================
+   P8 · Avisos de agenda — demora del médico y lectura de la lista de espera
+   ========================================================================== */
 
-    La especificación de centros de diagnóstico enumera exactamente lo que un
-    centro puede hacer con un pedido: confirmarlo, rechazarlo, proponer otro
-    horario, pedir documentación adicional, pedir una orden médica e informar
-    instrucciones de preparación. Las tres últimas no son estados distintos —son
-    la misma situación, «falta algo antes de confirmar»— así que se modelan como
-    un único paso a `PENDING_CONFIRMATION` con un motivo tipado, y no como tres
-    estados que después nadie sabe distinguir.
-    ========================================================================== */
+/**
+ * Tope de la demora que se puede informar de una vez.
+ *
+ * Cuatro horas. Más que eso no es una demora: es un turno que hay que
+ * reprogramar, y avisar «me demoro seis horas» dejaría a la persona esperando
+ * un turno que en la práctica ya no existe.
+ */
+export const MAX_DELAY_MINUTES = 240;
 
-/** Qué decidió el prestador sobre la solicitud. */
-export type BookingDecision =
-  'CONFIRM' | 'REJECT' | 'REQUEST_INFO' | 'PROPOSE_SCHEDULE';
+/** Mínimo con sentido: por debajo de cinco minutos el aviso molesta más de lo que informa. */
+export const MIN_DELAY_MINUTES = 5;
 
-export const BOOKING_DECISIONS: readonly BookingDecision[] = [
-  'CONFIRM',
-  'REJECT',
-  'REQUEST_INFO',
-  'PROPOSE_SCHEDULE',
-];
+/** Largo máximo del mensaje que acompaña a la demora. */
+export const MAX_DELAY_MESSAGE_LENGTH = 300;
 
-/** Qué le falta a la solicitud cuando el prestador pide información. */
-export type BookingInfoRequest =
-  'DOCUMENTATION' | 'MEDICAL_ORDER' | 'PREPARATION';
+/** Cuerpo de `POST /scheduling/bookings/{id}/delay` (P8, registro 3.5 y 4.2). */
+export class DelayBookingDto {
+  /**
+   * Cuántos minutos se estima la demora.
+   */
+  @ApiProperty({
+    description: 'Minutos de demora estimados',
+    minimum: MIN_DELAY_MINUTES,
+    maximum: MAX_DELAY_MINUTES,
+    example: 20,
+  })
+  @IsInt()
+  @Min(MIN_DELAY_MINUTES)
+  delayMinutes!: number;
 
-export const BOOKING_INFO_REQUESTS: readonly BookingInfoRequest[] = [
-  'DOCUMENTATION',
-  'MEDICAL_ORDER',
-  'PREPARATION',
-];
-
-/** Una decisión registrada sobre la reserva. */
-export class BookingDecisionItemDto {
-  /** Estado del que salió (concept id). */
-  @ApiPropertyOptional({ format: 'uuid' })
-  fromStateConceptId?: string;
-
-  /** Estado al que pasó (concept id). */
-  @ApiPropertyOptional({ format: 'uuid' })
-  toStateConceptId?: string;
-
-  /** La decisión, si la transición vino de una. */
-  @ApiPropertyOptional({ enum: BOOKING_DECISIONS })
-  decision?: BookingDecision;
-
-  /** Qué se pidió, si se pidió algo. */
-  @ApiPropertyOptional({ enum: BOOKING_INFO_REQUESTS })
-  infoRequested?: BookingInfoRequest;
-
-  /** Lo que el prestador escribió. */
-  @ApiPropertyOptional()
+  /**
+   * Lo que el profesional quiera agregar. Opcional a propósito: exigir un texto
+   * para avisar una demora es la forma más rápida de que nadie la avise.
+   */
+  @ApiPropertyOptional({
+    description: 'Mensaje del profesional para el paciente',
+    maxLength: MAX_DELAY_MESSAGE_LENGTH,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_DELAY_MESSAGE_LENGTH)
   message?: string;
-
-  /** Cuándo se registró. */
-  @ApiProperty({ type: String, format: 'date-time' })
-  recordedAt!: Date;
 }
 
-/** El historial de decisiones de una reserva. */
-export class BookingDecisionsResponseDto {
-  /** Reserva consultada. */
-  @ApiProperty({ format: 'uuid' })
-  bookingId!: string;
+/**
+ * Cuerpo de `POST /scheduling/resources/{id}/delay` (P8): «me demoro 20 minutos
+ * hoy», que es como el profesional lo dice en la práctica.
+ */
+export class DelayResourceDto {
+  /**
+   * Cuántos minutos se estima la demora.
+   */
+  @ApiProperty({
+    description: 'Minutos de demora estimados',
+    minimum: MIN_DELAY_MINUTES,
+    maximum: MAX_DELAY_MINUTES,
+    example: 20,
+  })
+  @IsInt()
+  @Min(MIN_DELAY_MINUTES)
+  delayMinutes!: number;
 
-  /** Las decisiones, de la más vieja a la más nueva. */
-  @ApiProperty({ type: [BookingDecisionItemDto] })
-  items!: BookingDecisionItemDto[];
+  /**
+   * Mensaje opcional para los pacientes afectados.
+   */
+  @ApiPropertyOptional({
+    description: 'Mensaje del profesional para los pacientes',
+    maxLength: MAX_DELAY_MESSAGE_LENGTH,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_DELAY_MESSAGE_LENGTH)
+  message?: string;
+
+  /**
+   * Desde cuándo alcanza la demora. Por omisión, ahora: una demora informada a
+   * las 10 no puede alcanzar al turno de las 8, que ya pasó.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Inicio de la ventana afectada (ISO 8601). Por omisión, ahora.',
+    format: 'date-time',
+  })
+  @IsOptional()
+  @IsISO8601()
+  from?: string;
+
+  /**
+   * Hasta cuándo. Por omisión, el fin del día del profesional: una demora se
+   * arrastra por la jornada, no por la semana.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Fin de la ventana afectada (ISO 8601). Por omisión, el fin del día.',
+    format: 'date-time',
+  })
+  @IsOptional()
+  @IsISO8601()
+  to?: string;
+}
+
+/** Resultado de informar una demora. */
+export class DelayNoticeResponseDto {
+  /**
+   * A cuántos pacientes se les avisó efectivamente (bandeja escrita).
+   */
+  @ApiProperty({ description: 'Pacientes que recibieron el aviso' })
+  notified!: number;
+
+  /**
+   * Cuántas citas quedaban dentro de la ventana afectada.
+   */
+  @ApiProperty({ description: 'Citas alcanzadas por la demora' })
+  affected!: number;
+
+  /**
+   * Las citas alcanzadas, para que la pantalla pueda decir cuáles fueron.
+   */
+  @ApiProperty({ type: [String], format: 'uuid' })
+  bookingIds!: string[];
+
+  /**
+   * Qué pasó, en una frase. Incluye por qué un aviso no llegó cuando no llegó.
+   */
+  @ApiProperty()
+  detail!: string;
+}
+
+/** Filtros de `GET /scheduling/waitlist` (P8). */
+export class ListWaitlistQueryDto {
+  /**
+   * Paciente cuya lista de espera se consulta.
+   */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  patientProfileId!: string;
+
+  /**
+   * `true` para incluir también las entradas ya cubiertas o canceladas.
+   */
+  @ApiPropertyOptional({
+    description: 'Incluye las entradas ya cubiertas (por omisión, no)',
+  })
+  @IsOptional()
+  @IsString()
+  includeClosed?: string;
+
+  /**
+   * Tope de filas.
+   */
+  @ApiPropertyOptional({ default: 50 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  limit?: number;
+}
+
+/** Una entrada de la lista de espera, como la ve quien se anotó. */
+export class WaitlistEntryItemDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  patientProfileId!: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  resourceId?: string;
+
+  /**
+   * Cómo se llama la agenda en la que espera. Sin esto la pantalla mostraría un
+   * uuid, que no le dice nada a quien está esperando un turno.
+   */
+  @ApiProperty({ description: 'Nombre del profesional o del recurso' })
+  resourceLabel!: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  desiredFrom?: Date;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  desiredTo?: Date;
+
+  @ApiProperty()
+  priority!: number;
+
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  createdAt!: Date;
+}
+
+/** Respuesta de `GET /scheduling/waitlist`. */
+export class ListWaitlistResponseDto {
+  @ApiProperty({ type: [WaitlistEntryItemDto] })
+  items!: WaitlistEntryItemDto[];
 }

@@ -12,3 +12,4 @@ export * from './create-transfer.dto';
 export * from './reverse-dispensation.dto';
 export * from './create-sync-batch.dto';
 export * from './responses.dto';
+export * from './read-responses.dto';

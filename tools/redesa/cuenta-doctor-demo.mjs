@@ -12,12 +12,16 @@
  * de activación de un solo uso.
  */
 
+// Correos reales: sembrar contra `@redesa.test` permitía comprobar que el
+// worker marca la entrega, y no que el correo llega. Ver `correos-reales.mjs`.
+import { CORREOS } from './correos-reales.mjs';
+
 const BASE = process.env.API_BASE_URL ?? 'http://localhost:3000';
-const ADMIN = process.env.BOOTSTRAP_ADMIN_EMAIL ?? 'admin@redesa.test';
+const ADMIN = process.env.BOOTSTRAP_ADMIN_EMAIL ?? CORREOS.admin;
 const ADMIN_PASS = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd';
 
 /** Credenciales fijas de la cuenta de prueba, para que el equipo las use. */
-const DOCTOR_EMAIL = process.env.DOCTOR_EMAIL ?? 'doctora.demo@redesa.test';
+const DOCTOR_EMAIL = process.env.DOCTOR_EMAIL ?? CORREOS.doctor;
 const DOCTOR_PASS = process.env.DOCTOR_PASSWORD ?? 'D3mo-passw0rd!';
 
 let ok = 0;
@@ -67,7 +71,8 @@ let alta = await call(
     token: adminToken,
     body: {
       email: DOCTOR_EMAIL,
-      displayName: 'Dra. Valeria Fuentes Aramayo',
+      // Sin honorífico: el registro real no lo escribe (ver seed-dev-data.mjs).
+      displayName: 'Valeria Fuentes Aramayo',
       licenseNumber: `LIC-DEMO-${sufijo}`,
       credentialNumber: `CRED-DEMO-${sufijo}`,
       professionalTitle: 'Medicina general',

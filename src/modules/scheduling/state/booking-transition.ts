@@ -47,18 +47,15 @@ export interface BookingTransitionSnapshot {
    */
   actorKind?: BookingActorKind;
   /**
-   * Qué resolvió el prestador sobre una solicitud (UC-41-17, carril 11).
+   * Minutos de demora informados por el profesional (P8).
    *
-   * Viaja en el mismo snapshot que la transición y no en una tabla aparte
-   * porque **es** el porqué de esa transición: sin él, el historial dice que la
-   * cita pasó a cancelada y no que el prestador la rechazó. Presente sólo en
-   * las transiciones que nacen de una decisión.
+   * Sólo lo trae la operación `HISTORY_OP_DELAY`. Vive en el mismo snapshot que
+   * el motivo porque una demora **es** una razón anotada sobre la cita, con su
+   * autor y su instante; lo único que la distingue es que no cambia el estado.
+   * Persistirla en columna exigiría el ciclo completo del modelo, que este
+   * carril no hace (ver `reports/P8.md`).
    */
-  decision?: string;
-  /** Qué documentación se pidió, cuando la decisión fue pedirla. */
-  infoRequested?: string;
-  /** Lo que el prestador le escribió al paciente al decidir. */
-  message?: string;
+  delayMinutes?: number;
 }
 
 /** Desde qué lado del mostrador se hizo el cambio. */

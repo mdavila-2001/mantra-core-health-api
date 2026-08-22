@@ -1,0 +1,128 @@
+{
+  "code": "MEDEP_EVALUACION_BASE",
+  "name": "Evaluación de medicina deportiva",
+  "specialty": {
+    "code": "MEDICINA_DEPORTIVA",
+    "display": "Medicina Deportiva"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen por aparatos y sistemas",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico por aparatos, diagnóstico y conducta. Son agregados propios de la especialidad el deporte practicado y su nivel, la carga de entrenamiento semanal, las lesiones deportivas previas, el examen dirigido del aparato locomotor, los antecedentes cardiovasculares con el antecedente familiar de muerte súbita, y la aptitud propuesta redactada en prosa."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "deporte_practicado",
+      "name": "Deporte practicado",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "nivel_de_practica",
+      "name": "Nivel de práctica",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "carga_entrenamiento_semanal_horas",
+      "name": "Carga de entrenamiento semanal (horas)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "lesiones_previas",
+      "name": "Lesiones deportivas previas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "dolor_actual",
+      "name": "Dolor actual: localización y características",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "antecedentes_cardiovasculares",
+      "name": "Antecedentes cardiovasculares personales",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "antecedente_familiar_muerte_subita",
+      "name": "Antecedente familiar de muerte súbita",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "sintomas_de_esfuerzo",
+      "name": "Síntomas referidos durante el esfuerzo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "suplementos_y_medicacion",
+      "name": "Suplementos y medicación en uso",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_general",
+      "name": "Examen físico general y signos vitales",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_cardiorrespiratorio",
+      "name": "Examen cardiorrespiratorio",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_aparato_locomotor",
+      "name": "Examen del aparato locomotor",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "exploraciones_complementarias",
+      "name": "Exploraciones complementarias disponibles",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "aptitud_propuesta",
+      "name": "Aptitud deportiva propuesta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "plan_de_tratamiento",
+      "name": "Plan de tratamiento y recomendaciones",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

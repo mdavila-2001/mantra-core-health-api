@@ -32,3 +32,4 @@ Dos niveles distintos, no uno solo:
 - [Variables de entorno](../getting-started/environment-variables.md)
 - [Ambientes](environments.md)
 - [Configurar Gmail como proveedor real de email](gmail-provider-setup.md)
+- [Configurar Google Analytics 4 como analítica web](google-analytics-setup.md)

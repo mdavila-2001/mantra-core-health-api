@@ -9,7 +9,9 @@ import {
   SEED,
   UnauthorizedException,
   canonicalJson,
+  decodeKeysetCursor,
   deriveWebhookSecret,
+  encodeKeysetCursor,
   touch,
   verifySignature,
   type AuthenticatedUser,
@@ -24,15 +26,21 @@ import {
   ProviderReceiptDto,
   ProviderReceiptResponseDto,
   InAppReadResponseDto,
-  ListChannelsResponseDto,
-  ListPreferencesResponseDto,
-  SetNotificationPreferenceDto,
-  NotificationPreferenceDto,
-  ListMyInAppResponseDto,
+  InAppNotificationPageDto,
+  MarkAllInAppReadResponseDto,
+  MyNotificationsQueryDto,
+  MyPreferencesDto,
+  UpdateMyPreferencesDto,
   type ReceiptType,
 } from '../dto';
-
-const DEFAULT_IN_APP_LIMIT = 50;
+import {
+  NOTIFICATION_CATEGORIES,
+  NOTIFICATION_CATEGORY_BY_CONCEPT,
+  NOTIFICATION_CATEGORY_CONCEPT,
+  type EmitInAppInput,
+  type EmitInAppResult,
+  type InAppNotificationEmitter,
+} from '../notifications.contract';
 
 const RECEIPT_TYPE_CONCEPT: Readonly<Record<ReceiptType, string>> = {
   DELIVERED: CONCEPTS.MSG_RECEIPT_DELIVERED,
@@ -56,6 +64,10 @@ const LIVE_REQUEST_STATES: readonly string[] = [
 ];
 
 const DEFAULT_PRIORITY = 5;
+/** Cuántas notificaciones trae la bandeja si nadie pide un tope. */
+const DEFAULT_INBOX_PAGE = 20;
+/** Tope de filas que marca de una vez «marcar todas como leídas». */
+const MARK_ALL_BATCH = 500;
 const DEFAULT_PENDING_BATCH = 50;
 /** Cuánto puede quedar `NOTIF_SENDING` antes de considerarse huérfana y reclamable de nuevo. */
 const SENDING_CLAIM_STALE_MS = 5 * 60_000;
@@ -66,7 +78,7 @@ const SENDING_CLAIM_STALE_MS = 5 * 60_000;
  * (UC-35-10 … 13).
  */
 @Injectable()
-export class NotificationsService {
+export class NotificationsService implements InAppNotificationEmitter {
   /**
    * Inicializa la instancia y sus dependencias.
    *
@@ -276,30 +288,26 @@ export class NotificationsService {
       }
       await tx.flush();
 
-      // Carril 18: el worker necesita saber si el canal es in-app (100%
-      // interno, sin proveedor externo) para no tratarlo como "sin adaptador
-      // conectado". Se resuelve en lote, no una consulta por solicitud.
-      const channelIds = [...new Set(requests.map((r) => r.channelId))];
-      const channelTypeById = new Map<string, string>();
-      for (const channelId of channelIds) {
+      // El tipo de canal se resuelve una vez por canal distinto del lote, no
+      // una por solicitud: un lote de cincuenta correos es un solo canal.
+      const channelTypes = new Map<string, string>();
+      for (const channelId of new Set(requests.map((r) => r.channelId))) {
         const channel = await this.notificationsRepo.findChannelById(
           tx,
           channelId,
         );
-        if (channel) {
-          channelTypeById.set(channelId, channel.channelTypeConceptId);
-        }
+        if (channel) channelTypes.set(channelId, channel.channelTypeConceptId);
       }
 
       return {
         requests: requests.map((request) => ({
           id: request.id,
           channelId: request.channelId,
+          channelTypeConceptId: channelTypes.get(request.channelId),
           statusConceptId: request.statusConceptId,
           payloadJson: request.payloadJson,
           recipientAddress: request.recipientAddress,
           recipientUserId: request.recipientUserId,
-          channelTypeConceptId: channelTypeById.get(request.channelId),
         })),
       };
     });
@@ -420,6 +428,15 @@ export class NotificationsService {
 
       // El canal in-app no sale a ningún proveedor: la entrega es escribir en
       // la bandeja del destinatario.
+      //
+      // La entrega se materializa **antes** de crear la fila de la bandeja, y
+      // no por gusto: `in_app_notifications.notification_delivery_id` es una FK
+      // NOT NULL a la entrega, y el orden en que la unidad de trabajo inserta
+      // no lo decide el orden en que se crean las entidades. Sin este `flush`,
+      // Postgres rechazaba la bandeja con
+      // `fk_in_app_notifications_notification_delivery_id` — es decir, **toda**
+      // notificación in-app fallaba. No se había visto porque hasta el carril
+      // P8 no existía ningún canal in-app sembrado y esta rama nunca corría.
       let inAppNotificationId: string | undefined;
       const channel = await this.notificationsRepo.findChannelById(
         tx,
@@ -435,6 +452,10 @@ export class NotificationsService {
             { requestId },
           );
         }
+
+        // Ver el comentario de arriba: la entrega tiene que existir en la base
+        // antes de que la bandeja la referencie.
+        await tx.flush();
 
         inAppNotificationId = this.notificationsRepo.createInAppNotification(
           tx,
@@ -654,107 +675,303 @@ export class NotificationsService {
     });
   }
 
-  // --- Carril 18: autoservicio de preferencias y bandeja del propio usuario ---
-
-  /** Los canales disponibles para configurar preferencia (spec línea 1751-1756). */
-  async listChannels(): Promise<ListChannelsResponseDto> {
-    const channels = await this.notificationsRepo.listActiveChannels(
-      this.em,
-      CONCEPTS.STATE_ACTIVE,
-    );
-    return {
-      items: channels.map((c) => ({
-        id: c.id,
-        code: c.code,
-        name: c.name,
-        channelTypeConceptId: c.channelTypeConceptId,
-      })),
-    };
+  /**
+   * Carril P1 · emite una notificación in-app. **No lanza.**
+   *
+   * ## Por qué la entrega es inmediata y no la hace el worker
+   *
+   * El resto de los canales pasan por `listDeliverable` → worker → proveedor →
+   * `deliverNotification`, porque del otro lado hay un tercero cuya latencia no
+   * controlamos y una transacción abierta esperándolo agota el pool. El canal
+   * in-app **no tiene tercero**: entregarlo es escribir una fila nuestra. Pasar
+   * por el worker le agregaría hasta un tic de demora a la campana sin comprar
+   * nada, y ataría la funcionalidad más visible del producto a que un proceso
+   * aparte esté vivo.
+   *
+   * Se escriben igual la solicitud y la entrega, con su intento y su proveedor
+   * `IN_APP_DIRECT`: la auditoría de mensajería sigue contando la misma
+   * historia para todos los canales, y una in-app se puede rastrear con las
+   * mismas consultas que un correo.
+   *
+   * ## Por qué no lanza
+   *
+   * Porque quien la llama está a mitad de emitir una receta o de guardar un
+   * mensaje. Si notificar pudiera fallar hacia arriba, un problema de la
+   * campana desharía un acto clínico. El fallo se registra y se devuelve en
+   * `failed`, que es donde una prueba lo puede afirmar.
+   *
+   * @param input - Destinatario, categoría, texto y destino navegable.
+   * @returns Qué se creó, o por qué no se creó nada.
+   */
+  async emitInApp(input: EmitInAppInput): Promise<EmitInAppResult> {
+    try {
+      return await this.em.transactional((tx) => this.writeInApp(tx, input));
+    } catch (error) {
+      // Un fallo acá no puede tumbar la receta que lo disparó: se registra con
+      // todo lo necesario para reconstruirlo y el caso de uso sigue.
+      this.logger.error(
+        {
+          operation: 'messaging.notification.emit-in-app',
+          recipientUserId: input.recipientUserId,
+          category: input.category,
+          err: error,
+        },
+        'No se pudo emitir la notificación in-app',
+      );
+      return { suppressed: false, failed: true };
+    }
   }
 
-  /** Las preferencias que el usuario autenticado ya declaró. */
-  async getMyPreferences(
+  /**
+   * Carril P1 · la bandeja de quien pregunta.
+   *
+   * Es la lectura que faltaba. `GET /internal/notifications/pending` reclama
+   * solicitudes para entregar —es del worker y devuelve trabajo, no avisos— y
+   * `POST /notifications/in-app/:id/read` ya permitía marcar una notificación
+   * que no había forma de listar. La campana necesitaba justamente esto.
+   *
+   * @param actor - Dueño de la bandeja. No se lee la de nadie más.
+   * @param query - Filtro de no leídas, cursor y tope.
+   * @returns La página pedida, con el total sin leer para el badge.
+   */
+  async listMine(
     actor: AuthenticatedUser,
-  ): Promise<ListPreferencesResponseDto> {
-    const preferences = await this.notificationsRepo.listPreferencesForUser(
-      this.em,
+    query: MyNotificationsQueryDto,
+  ): Promise<InAppNotificationPageDto> {
+    const em = this.em.fork();
+    const limit = query.limit ?? DEFAULT_INBOX_PAGE;
+
+    const after = query.cursor ? decodeKeysetCursor(query.cursor) : undefined;
+    const afterKey =
+      typeof after?.availableAt === 'string' && typeof after?.id === 'string'
+        ? { availableAt: new Date(after.availableAt), id: after.id }
+        : undefined;
+
+    // Se pide una de más para saber si hay página siguiente sin contar el total.
+    const rows = await this.notificationsRepo.listInAppPage(em, actor.id, {
+      unreadOnly: query.unread === true,
+      after: afterKey,
+      limit: limit + 1,
+      unreadStatusConceptId: CONCEPTS.INAPP_UNREAD,
+      now: new Date(),
+    });
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+
+    const unreadCount = await this.notificationsRepo.countUnreadInApp(
+      em,
       actor.id,
+      CONCEPTS.INAPP_UNREAD,
     );
+
     return {
-      items: preferences.map((p): NotificationPreferenceDto => ({
-        id: p.id,
-        channelId: p.channelId,
-        categoryConceptId: p.categoryConceptId ?? null,
-        optedIn: p.optedIn,
-        quietHoursJson: p.quietHoursJson,
+      items: page.map((row) => ({
+        id: row.id,
+        category:
+          NOTIFICATION_CATEGORY_BY_CONCEPT.get(row.categoryConceptId ?? '') ??
+          null,
+        subject: row.subject ?? null,
+        bodyText: row.bodyText ?? null,
+        destination: row.relatedResourceType
+          ? { type: row.relatedResourceType, id: row.relatedResourceId ?? '' }
+          : null,
+        payloadJson: row.payloadJson ?? null,
+        unread: row.statusConceptId !== CONCEPTS.INAPP_READ,
+        availableAt: row.availableAt.toISOString(),
+        readAt: row.readAt ? row.readAt.toISOString() : null,
       })),
+      count: page.length,
+      limit,
+      nextCursor:
+        hasMore && last
+          ? encodeKeysetCursor({
+              availableAt: last.availableAt.toISOString(),
+              id: last.id,
+            })
+          : null,
+      unreadCount,
     };
   }
 
   /**
-   * Fija una preferencia del usuario autenticado (alta o actualización, por
-   * `(canal, categoría)`). El canal debe existir; que exista o no un
-   * proveedor real detrás es irrelevante acá — eso lo decide la entrega, no
-   * la preferencia.
+   * Carril P1 · marca toda la bandeja como leída.
+   *
+   * Existe porque sin esto la única forma de bajar un badge de 40 es abrir 40
+   * notificaciones, y quien tiene 40 avisos viejos no los va a abrir: va a
+   * aprender a ignorar la campana, que es el modo en que una notificación deja
+   * de notificar.
+   *
+   * Acota el lote y devuelve cuántas quedan: con una bandeja enorme, dos
+   * llamadas terminan el trabajo y ninguna toma la tabla entera.
+   *
+   * @param actor - Dueño de la bandeja.
+   * @returns Cuántas se marcaron y cuántas quedan sin leer.
    */
-  async setMyPreference(
-    dto: SetNotificationPreferenceDto,
+  async markAllInAppRead(
     actor: AuthenticatedUser,
-  ): Promise<NotificationPreferenceDto> {
+  ): Promise<MarkAllInAppReadResponseDto> {
     return this.em.transactional(async (tx) => {
-      const channel = await this.notificationsRepo.findChannelById(
+      const pendientes = await this.notificationsRepo.findUnreadInApp(
         tx,
-        dto.channelId,
+        actor.id,
+        CONCEPTS.INAPP_UNREAD,
+        MARK_ALL_BATCH,
       );
-      if (!channel) {
-        throw new ResourceNotFoundException('Canal no encontrado', {
-          channelId: dto.channelId,
-        });
+
+      const readAt = new Date();
+      for (const notification of pendientes) {
+        notification.statusConceptId = CONCEPTS.INAPP_READ;
+        notification.readAt ??= readAt;
+        notification.openedAt ??= readAt;
+        touch(notification, actor.id, readAt);
       }
-      const preference = await this.notificationsRepo.upsertPreference(tx, {
-        userId: actor.id,
-        channelId: dto.channelId,
-        categoryConceptId: dto.categoryConceptId,
-        optedIn: dto.optedIn,
-        quietHoursJson: dto.quietHoursJson,
-        actorUserId: actor.id,
-      });
       await tx.flush();
-      return {
-        id: preference.id,
-        channelId: preference.channelId,
-        categoryConceptId: preference.categoryConceptId ?? null,
-        optedIn: preference.optedIn,
-        quietHoursJson: preference.quietHoursJson,
-      };
+
+      const unreadCount = await this.notificationsRepo.countUnreadInApp(
+        tx,
+        actor.id,
+        CONCEPTS.INAPP_UNREAD,
+      );
+      return { marked: pendientes.length, unreadCount };
     });
   }
 
-  /** La bandeja in-app del usuario autenticado, la más reciente primero. */
-  async listMyInApp(
-    actor: AuthenticatedUser,
-    limit?: number,
-  ): Promise<ListMyInAppResponseDto> {
-    const items = await this.notificationsRepo.listInAppForRecipient(
-      this.em,
-      actor.id,
-      limit ?? DEFAULT_IN_APP_LIMIT,
+  /**
+   * Carril P9 · las preferencias in-app de quien pregunta.
+   *
+   * **Siempre devuelve las cuatro categorías**, haya filas o no. Quien nunca
+   * tocó nada las recibe todas en `true`, que es lo que efectivamente le pasa:
+   * `evaluateSuppression` sólo suprime cuando encuentra un `opted_in = false`.
+   * Devolver una lista vacía obligaría a la pantalla a saber cuál es el
+   * comportamiento por defecto del emisor, y esa es exactamente la clase de
+   * conocimiento duplicado que después se desincroniza.
+   *
+   * @param actor - Dueño de las preferencias.
+   * @returns Las cuatro categorías y la ventana de silencio.
+   */
+  async readMyPreferences(actor: AuthenticatedUser): Promise<MyPreferencesDto> {
+    const em = this.em.fork();
+    const channel = await this.notificationsRepo.findActiveChannelByType(
+      em,
+      CONCEPTS.CHANNEL_TYPE_IN_APP,
+      CONCEPTS.STATE_ACTIVE,
     );
+    if (!channel) {
+      throw new PreconditionFailedException(
+        'No hay canal in-app activo: falta correr el seed de mensajería',
+        { userId: actor.id },
+      );
+    }
+
+    const filas = await this.notificationsRepo.findPreferences(
+      em,
+      actor.id,
+      channel.id,
+    );
+    const porCategoria = new Map(
+      filas
+        .filter((fila) => fila.categoryConceptId)
+        .map((fila) => [fila.categoryConceptId, fila]),
+    );
+
     return {
-      items: items.map((n) => ({
-        id: n.id,
-        categoryConceptId: n.categoryConceptId ?? null,
-        subject: n.subject ?? null,
-        bodyText: n.bodyText ?? null,
-        payloadJson: n.payloadJson,
-        statusConceptId: n.statusConceptId,
-        relatedResourceType: n.relatedResourceType ?? null,
-        relatedResourceId: n.relatedResourceId ?? null,
-        availableAt: n.availableAt,
-        readAt: n.readAt ?? null,
+      categories: NOTIFICATION_CATEGORIES.map((category) => ({
+        category,
+        optedIn:
+          porCategoria.get(NOTIFICATION_CATEGORY_CONCEPT[category])?.optedIn ??
+          true,
       })),
-      count: items.length,
+      quietHours: this.leerHorasDeSilencio(
+        filas.find((fila) => !fila.categoryConceptId)?.quietHoursJson,
+      ),
     };
+  }
+
+  /**
+   * Carril P9 · guarda las preferencias.
+   *
+   * Es un reemplazo **por categoría**: lo que no viene no se toca. Mandar el
+   * conjunto entero obligaría a la pantalla a reenviar decisiones que la
+   * persona no tocó, y a pisar las que hubiera cambiado en otra pestaña.
+   *
+   * La ventana de silencio vive en la fila **sin categoría**: es del canal
+   * entero. Guardarla por categoría permitiría configurar cuatro silencios
+   * distintos, que es una pantalla que nadie termina de leer y una regla que
+   * nadie sabría explicar.
+   *
+   * @param actor - Dueño de las preferencias.
+   * @param dto - Qué cambia.
+   * @returns Las preferencias ya guardadas.
+   */
+  async updateMyPreferences(
+    actor: AuthenticatedUser,
+    dto: UpdateMyPreferencesDto,
+  ): Promise<MyPreferencesDto> {
+    await this.em.transactional(async (tx) => {
+      const channel = await this.notificationsRepo.findActiveChannelByType(
+        tx,
+        CONCEPTS.CHANNEL_TYPE_IN_APP,
+        CONCEPTS.STATE_ACTIVE,
+      );
+      if (!channel) {
+        throw new PreconditionFailedException(
+          'No hay canal in-app activo: falta correr el seed de mensajería',
+          { userId: actor.id },
+        );
+      }
+
+      const filas = await this.notificationsRepo.findPreferences(
+        tx,
+        actor.id,
+        channel.id,
+      );
+
+      for (const cambio of dto.categories ?? []) {
+        const conceptId = NOTIFICATION_CATEGORY_CONCEPT[cambio.category];
+        const fila = filas.find(
+          (candidata) => candidata.categoryConceptId === conceptId,
+        );
+        if (fila) {
+          fila.optedIn = cambio.optedIn;
+          touch(fila, actor.id);
+        } else {
+          this.notificationsRepo.createPreference(tx, {
+            userId: actor.id,
+            channelId: channel.id,
+            categoryConceptId: conceptId,
+            optedIn: cambio.optedIn,
+            actorUserId: actor.id,
+          });
+        }
+      }
+
+      // `undefined` significa «no la toques»; `null`, «quitala».
+      if (dto.quietHours !== undefined) {
+        const valor =
+          dto.quietHours === null
+            ? undefined
+            : { start: dto.quietHours.start, end: dto.quietHours.end };
+        const fila = filas.find((candidata) => !candidata.categoryConceptId);
+        if (fila) {
+          fila.quietHoursJson = valor;
+          touch(fila, actor.id);
+        } else {
+          this.notificationsRepo.createPreference(tx, {
+            userId: actor.id,
+            channelId: channel.id,
+            // Sin categoría: gobierna el canal entero.
+            optedIn: true,
+            quietHoursJson: valor,
+            actorUserId: actor.id,
+          });
+        }
+      }
+
+      await tx.flush();
+    });
+
+    return this.readMyPreferences(actor);
   }
 
   // --- Apoyo ---
@@ -767,41 +984,143 @@ export class NotificationsService {
    */
   private async evaluateSuppression(
     tx: EntityManager,
-    dto: CreateNotificationRequestDto,
+    dto: {
+      /** Canal por el que saldría. */
+      channelId: string;
+      /** Destinatario interno, si lo hay. */
+      recipientUserId?: string;
+      /** Categoría, que es la unidad de preferencia. */
+      categoryConceptId?: string;
+      /** Cuándo saldría, para las horas de silencio. */
+      scheduledAt?: string;
+      /**
+       * Saltearse las horas de silencio (carril P9).
+       *
+       * Sólo lo pide el canal in-app, que las aplaza en vez de suprimirlas.
+       * Los canales externos las siguen respetando como supresión: un correo
+       * aplazado llegaría igual y sonaría el teléfono.
+       */
+      ignoreQuietHours?: boolean;
+    },
   ): Promise<string | undefined> {
     if (!dto.recipientUserId) return undefined;
 
-    // Carril 18 (spec línea 1762): "las alertas críticas de seguridad,
-    // emergencias o cambios en citas confirmadas no deberán depender de las
-    // preferencias promocionales". La búsqueda de preferencia ya es por
-    // `categoryConceptId` exacto: un opt-out de PROMOTIONAL nunca puede
-    // suprimir una notificación categorizada como CLINICAL/ADMINISTRATIVE/
-    // ACCOUNTING, porque `findPreference` busca esa categoría, no
-    // "cualquiera". Eso ya cumple la regla sin necesitar un bypass aparte —
-    // uno haría imposible que el doctor "active o desactive categorías de
-    // notificaciones" (línea 1760) para lo no-promocional, que si debe poder
-    // desactivarse.
-    const preference = await this.notificationsRepo.findPreference(
+    // Dos filas gobiernan la decisión y hay que mirar las dos (carril P9): la
+    // de la categoría dice si acepta ESE tipo de aviso, y la del canal —sin
+    // categoría— guarda la ventana de silencio, que es del canal entero.
+    // Mirando sólo la de la categoría, el silencio nocturno no se aplicaba
+    // nunca: la fila que lo guarda no coincidía con el filtro.
+    const preferences = await this.notificationsRepo.findPreferences(
       tx,
       dto.recipientUserId,
       dto.channelId,
-      dto.categoryConceptId,
     );
-    if (preference && preference.optedIn === false) {
+    const deCategoria = dto.categoryConceptId
+      ? preferences.find(
+          (preference) =>
+            preference.categoryConceptId === dto.categoryConceptId,
+        )
+      : undefined;
+    const deCanal = preferences.find(
+      (preference) => !preference.categoryConceptId,
+    );
+
+    if (deCategoria?.optedIn === false) {
       return 'El destinatario no acepta este canal para esta categoría';
     }
+    if (deCanal?.optedIn === false) {
+      return 'El destinatario no acepta este canal';
+    }
+
+    if (dto.ignoreQuietHours) return undefined;
 
     const scheduledAt = dto.scheduledAt
       ? new Date(dto.scheduledAt)
       : new Date();
-    if (
-      preference &&
-      this.inQuietHours(preference.quietHoursJson, scheduledAt)
-    ) {
+    const horasDeSilencio =
+      deCategoria?.quietHoursJson ?? deCanal?.quietHoursJson;
+    if (this.inQuietHours(horasDeSilencio, scheduledAt)) {
       return 'La notificación cae dentro de las horas de silencio del destinatario';
     }
 
     return undefined;
+  }
+
+  /**
+   * Cuándo queda visible una in-app: ahora, o al final del silencio nocturno.
+   *
+   * @param tx - Transacción activa.
+   * @param recipientUserId - Destinatario.
+   * @param channelId - Canal in-app.
+   * @param categoryConceptId - Categoría del aviso.
+   * @returns El instante desde el que se muestra.
+   */
+  private async aplazarPorSilencio(
+    tx: EntityManager,
+    recipientUserId: string,
+    channelId: string,
+    categoryConceptId: string,
+  ): Promise<Date> {
+    const ahora = new Date();
+    const preferences = await this.notificationsRepo.findPreferences(
+      tx,
+      recipientUserId,
+      channelId,
+    );
+    const ventana =
+      preferences.find(
+        (preference) => preference.categoryConceptId === categoryConceptId,
+      )?.quietHoursJson ??
+      preferences.find((preference) => !preference.categoryConceptId)
+        ?.quietHoursJson;
+
+    if (!this.inQuietHours(ventana, ahora)) return ahora;
+
+    const fin = this.finDeVentana(ventana);
+    if (fin === undefined) return ahora;
+
+    const disponible = new Date(ahora);
+    disponible.setUTCHours(Math.floor(fin / 60), fin % 60, 0, 0);
+    // Si el fin ya pasó hoy, la ventana cruza la medianoche: termina mañana.
+    if (disponible <= ahora) {
+      disponible.setUTCDate(disponible.getUTCDate() + 1);
+    }
+    return disponible;
+  }
+
+  /** Los minutos UTC en que termina la ventana, o `undefined`. */
+  private finDeVentana(quietHoursJson: unknown): number | undefined {
+    if (!quietHoursJson || typeof quietHoursJson !== 'object') return undefined;
+    const { end } = quietHoursJson as {
+      /** Hora de fin. */
+      end?: unknown;
+    };
+    if (typeof end !== 'string') return undefined;
+    const match = /^(\d{1,2}):(\d{2})$/.exec(end.trim());
+    return match ? Number(match[1]) * 60 + Number(match[2]) : undefined;
+  }
+
+  /**
+   * Lee la ventana de silencio guardada, o `null` si no hay una válida.
+   *
+   * Una ventana con formato roto se trata como ausente y no como error: el
+   * emisor ya la ignora con la misma lógica, y devolver un 500 al abrir la
+   * pantalla de preferencias por una fila vieja mal escrita dejaría a alguien
+   * sin poder arreglarla.
+   */
+  private leerHorasDeSilencio(
+    quietHoursJson: unknown,
+  ): { start: string; end: string } | null {
+    if (!quietHoursJson || typeof quietHoursJson !== 'object') return null;
+    const { start, end } = quietHoursJson as {
+      /** Hora de inicio. */
+      start?: unknown;
+      /** Hora de fin. */
+      end?: unknown;
+    };
+    return typeof start === 'string' && typeof end === 'string'
+      ? { start, end }
+      : null;
   }
 
   /**
@@ -843,5 +1162,216 @@ export class NotificationsService {
     return from <= to
       ? minutes >= from && minutes < to
       : minutes >= from || minutes < to;
+  }
+
+  /**
+   * La escritura de `emitInApp`, dentro de una sola transacción.
+   *
+   * Hace en un paso lo que para un canal externo son tres —solicitud, intento
+   * de entrega y fila de bandeja— porque para el in-app los tres ocurren a la
+   * vez, y separarlos sólo dejaría estados intermedios que nadie puede
+   * resolver: una solicitud in-app «pendiente» no está esperando a nadie.
+   */
+  private async writeInApp(
+    tx: EntityManager,
+    input: EmitInAppInput,
+  ): Promise<EmitInAppResult> {
+    const channel = await this.notificationsRepo.findActiveChannelByType(
+      tx,
+      CONCEPTS.CHANNEL_TYPE_IN_APP,
+      CONCEPTS.STATE_ACTIVE,
+    );
+    if (!channel) {
+      throw new PreconditionFailedException(
+        'No hay canal in-app activo: falta correr el seed de mensajería',
+        { recipientUserId: input.recipientUserId },
+      );
+    }
+
+    const categoryConceptId = NOTIFICATION_CATEGORY_CONCEPT[input.category];
+    const actorUserId = input.actorUserId ?? SEED.systemWorkerUserId;
+
+    // El rebote colapsa el mismo aviso repetido —diez mensajes seguidos en un
+    // hilo son un campanazo, no diez— y conserva el primero.
+    //
+    // Se mira si ya hay un aviso **sin leer** apuntando al mismo objeto, y no
+    // si la solicitud sigue «viva» como en los canales externos: una solicitud
+    // in-app nace `SENT` y se queda así para siempre, de modo que con aquel
+    // criterio una conversación habría avisado una sola vez en toda su
+    // historia. En cuanto la persona lo lee, el siguiente mensaje vuelve a
+    // avisar, que es lo que cualquiera espera de una bandeja.
+    if (input.destination) {
+      const sinLeer = await this.notificationsRepo.findUnreadInAppForResource(
+        tx,
+        input.recipientUserId,
+        input.destination.type,
+        input.destination.id,
+        CONCEPTS.INAPP_UNREAD,
+      );
+      if (sinLeer) {
+        return {
+          inAppNotificationId: sinLeer.id,
+          requestId: sinLeer.notificationRequestId,
+          suppressed: false,
+        };
+      }
+    }
+
+    const suppression = await this.evaluateSuppression(tx, {
+      channelId: channel.id,
+      recipientUserId: input.recipientUserId,
+      categoryConceptId,
+      // El in-app no se suprime por horario: se aplaza. Se pide la evaluación
+      // sin horas de silencio y el aplazamiento se calcula aparte.
+      ignoreQuietHours: true,
+    });
+
+    // Carril P9 · el silencio nocturno **aplaza, no borra**.
+    //
+    // Para un correo, caer en horas de silencio significa no mandarlo: llegaría
+    // igual y sonaría el teléfono. Una notificación in-app no suena — está
+    // esperando en una bandeja—, así que suprimirla haría que el paciente nunca
+    // se entere de algo que sí ocurrió. Se crea con `available_at` al final de
+    // la ventana y aparece a la mañana, que es literalmente lo que el carril
+    // pide: «no crece entre 22:00 y 07:00; se muestra a la mañana».
+    const availableAt = await this.aplazarPorSilencio(
+      tx,
+      input.recipientUserId,
+      channel.id,
+      categoryConceptId,
+    );
+
+    const contentSnapshotJson = {
+      subject: input.subject,
+      bodyText: input.bodyText ?? null,
+      categoryConceptId,
+    };
+    const now = new Date();
+
+    const request = this.notificationsRepo.createNotificationRequest(tx, {
+      tenantId: input.tenantId,
+      recipientUserId: input.recipientUserId,
+      channelId: channel.id,
+      payloadJson: input.payloadJson,
+      debounceKey: input.debounceKey,
+      priority: DEFAULT_PRIORITY,
+      categoryConceptId,
+      relatedResourceType: input.destination?.type,
+      relatedResourceId: input.destination?.id,
+      statusConceptId: suppression
+        ? CONCEPTS.NOTIF_SUPPRESSED
+        : CONCEPTS.NOTIF_SENT,
+      scheduledAt: now,
+      idempotencyKey: input.debounceKey ?? `in-app-${randomUUID()}`,
+      recipientTypeConceptId: CONCEPTS.NOTIF_RECIPIENT_USER,
+      recipientRefId: input.recipientUserId,
+      sourceConceptId: CONCEPTS.NOTIF_SOURCE_SYSTEM,
+      authorizedByUserId: actorUserId,
+      authorizationSnapshotJson: {
+        suppressed: suppression !== undefined,
+        suppressionReason: suppression ?? null,
+        evaluatedAt: now.toISOString(),
+        authorizedByUserId: actorUserId,
+      },
+      contentSnapshotJson,
+      contentHash: createHash('sha256')
+        .update(canonicalJson(contentSnapshotJson))
+        .digest('hex'),
+      actorUserId,
+    });
+    await tx.flush();
+
+    if (suppression) {
+      this.logger.info(
+        {
+          operation: 'messaging.notification.emit-in-app',
+          requestId: request.id,
+          reason: suppression,
+        },
+        'In-app notification suppressed by recipient preference',
+      );
+      return {
+        requestId: request.id,
+        suppressed: true,
+        suppressionReason: suppression,
+      };
+    }
+
+    // La entrega existe aunque no haya proveedor externo: es la fila que
+    // convierte «se pidió avisar» en «se avisó», y la que
+    // `in_app_notifications.notification_delivery_id` exige NOT NULL.
+    const configs = await this.notificationsRepo.findChannelConfigs(
+      tx,
+      channel.id,
+      CONCEPTS.STATE_ACTIVE,
+    );
+    const config = configs[0];
+    if (!config) {
+      throw new PreconditionFailedException(
+        'El canal in-app no tiene configuración de proveedor activa',
+        { channelId: channel.id },
+      );
+    }
+    const provider = await this.notificationsRepo.findProviderById(
+      tx,
+      config.providerId,
+    );
+    if (!provider) {
+      throw new ResourceNotFoundException(
+        'El proveedor configurado para el canal in-app no existe',
+        { providerId: config.providerId },
+      );
+    }
+
+    const delivery = this.notificationsRepo.createDelivery(tx, {
+      notificationRequestId: request.id,
+      providerId: config.providerId,
+      channelId: channel.id,
+      providerChannelConfigId: config.id,
+      adapterCode: provider.adapterCode,
+      adapterVersion: provider.adapterVersion,
+      attemptNumber: 1,
+      // DELIVERED y no SENT: en el resto de los canales «entregado» lo confirma
+      // un acuse del proveedor que acá no va a llegar nunca, porque el
+      // destinatario de la entrega es nuestra propia tabla.
+      statusConceptId: CONCEPTS.NOTIF_DELIVERY_DELIVERED,
+      sentAt: now,
+      actorUserId,
+    });
+    await tx.flush();
+
+    const inApp = this.notificationsRepo.createInAppNotification(tx, {
+      recipientUserId: input.recipientUserId,
+      tenantId: input.tenantId,
+      channelConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
+      categoryConceptId,
+      subject: input.subject,
+      bodyText: input.bodyText,
+      payloadJson: input.payloadJson,
+      relatedResourceType: input.destination?.type,
+      relatedResourceId: input.destination?.id,
+      statusConceptId: CONCEPTS.INAPP_UNREAD,
+      notificationRequestId: request.id,
+      notificationDeliveryId: delivery.id,
+      actorUserId,
+      availableAt,
+    });
+    await tx.flush();
+
+    this.logger.info(
+      {
+        operation: 'messaging.notification.emit-in-app',
+        requestId: request.id,
+        inAppNotificationId: inApp.id,
+        category: input.category,
+      },
+      'In-app notification delivered',
+    );
+
+    return {
+      requestId: request.id,
+      inAppNotificationId: inApp.id,
+      suppressed: false,
+    };
   }
 }
