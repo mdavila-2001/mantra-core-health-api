@@ -3,6 +3,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.service';
 import { AuthzPlatformPermissionsSeedService } from './authz-platform-permissions-seed.service';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
@@ -102,6 +103,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly clinicalRoles: AuthzClinicalRolesSeedService,
     private readonly platformPermissions: AuthzPlatformPermissionsSeedService,
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
+    private readonly providerAccounts: ProviderAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly logger: PinoLogger,
   ) {
@@ -230,6 +232,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     steps.push(
       await this.runStep('administrador de arranque', () =>
         this.bootstrapAdmin.run(),
+      ),
+    );
+
+    // Después del administrador y no antes: las cuentas de proveedor se crean
+    // con `IamUsersService`, que escribe `created_by_user_id` apuntando al
+    // actor semilla, y ese actor lo materializa el paso anterior.
+    steps.push(
+      await this.runStep('cuentas de proveedores', () =>
+        this.providerAccounts.run(),
       ),
     );
 

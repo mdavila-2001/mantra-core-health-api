@@ -52,6 +52,7 @@ import { VademecumSeedService } from './vademecum-seed.service';
 import { MessageQueues } from '../../modules/messaging/entities';
 import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
@@ -139,6 +140,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    ProviderAccountsSeedService,
     SeedBootstrapService,
     ClinicalFormsSeedService,
   ],
@@ -155,6 +157,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    ProviderAccountsSeedService,
     ClinicalFormsSeedService,
   ],
 })
