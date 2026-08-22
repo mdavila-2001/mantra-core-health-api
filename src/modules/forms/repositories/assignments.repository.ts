@@ -6,6 +6,7 @@ import {
   DynamicFieldSections,
 } from '../entities';
 import { createdBy } from '../../../common';
+import { FORMS } from '../forms.concepts';
 
 /** Alta de una sección por defecto para alojar asignaciones. */
 export interface CreateSectionData {
@@ -158,5 +159,65 @@ export class AssignmentsRepository {
       { ...rest, ...createdBy(actorUserId) },
       { partial: true },
     );
+  }
+
+  /**
+   * Asignaciones **activas** visibles para el tenant del actor —globales o
+   * propias—, opcionalmente acotadas por target, campo o sección.
+   *
+   * Solo el estado `FORMS.ASSIGNMENT_ACTIVE`: es el que usan todos los
+   * escritores conocidos —el alta de este módulo (UC-09-06), el motor de
+   * plantillas de chart (`createTemplate`) y el seed del catálogo clínico—,
+   * así que el filtro no deja fuera nada vigente y evita servir asignaciones
+   * desactivadas o históricas si algún flujo futuro las produce.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filtro - Acotaciones opcionales por target, campo o sección.
+   * @param tenantId - Tenant del actor, si el contexto lo fijó.
+   * @param limit - Tope de filas (el llamador pide una de más para declarar el recorte).
+   * @returns Asignaciones activas en orden de presentación.
+   */
+  findAssignments(
+    em: EntityManager,
+    filtro: {
+      /** Target al que se asignaron los campos. */
+      targetResourceConceptId?: string;
+      /** Campo asignado. */
+      fieldId?: string;
+      /** Sección que aloja las asignaciones. */
+      sectionId?: string;
+    },
+    tenantId: string | undefined,
+    limit: number,
+  ): Promise<FieldAssignments[]> {
+    return em.find(
+      FieldAssignments,
+      {
+        stateConceptId: FORMS.ASSIGNMENT_ACTIVE,
+        ...(filtro.targetResourceConceptId
+          ? { targetResourceConceptId: filtro.targetResourceConceptId }
+          : {}),
+        ...(filtro.fieldId ? { fieldId: filtro.fieldId } : {}),
+        ...(filtro.sectionId ? { sectionId: filtro.sectionId } : {}),
+        $or: [{ tenantId: null }, ...(tenantId ? [{ tenantId }] : [])],
+      },
+      { orderBy: { ordinal: 'ASC' }, limit },
+    );
+  }
+
+  /**
+   * Secciones por id, en lote, para nombrar las que las asignaciones o los
+   * miembros de un set referencian.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Ids de sección a resolver.
+   * @returns Secciones encontradas.
+   */
+  findSectionsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<DynamicFieldSections[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(DynamicFieldSections, { id: { $in: [...ids] } });
   }
 }

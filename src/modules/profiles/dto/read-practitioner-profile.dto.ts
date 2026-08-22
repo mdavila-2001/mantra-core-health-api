@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { AffiliationResponseDto } from './affiliation.dto';
 
 /* ============================================================================
     `GET /profiles/practitioners/me/summary` — el perfil profesional propio.
@@ -103,6 +104,14 @@ export class PractitionerCredentialDto {
    */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   verifiedAt?: Date;
+
+  /**
+   * Contra qué se comprobó la credencial (registro del colegio médico, portal
+   * de matrículas, etc). Ausente antes de verificar: es evidencia de la
+   * verificación, no del dato declarado.
+   */
+  @ApiPropertyOptional()
+  verificationSourceUri?: string;
 }
 
 /** Una matrícula: dónde está habilitado a ejercer y con qué número. */
@@ -230,6 +239,15 @@ export class PractitionerProfileSummaryDto {
 
   @ApiProperty({ type: [PractitionerLanguageDto] })
   languages!: PractitionerLanguageDto[];
+
+  /**
+   * Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único
+   * array de la más reciente a la más antigua, con `current` ya derivado en
+   * cada fila — pantalla la agrupa en fases (formación/histórico/actual), la
+   * lectura no necesita decidir eso.
+   */
+  @ApiProperty({ type: [AffiliationResponseDto] })
+  affiliations!: AffiliationResponseDto[];
 
   @ApiProperty({ type: PractitionerActivityDto })
   activity!: PractitionerActivityDto;

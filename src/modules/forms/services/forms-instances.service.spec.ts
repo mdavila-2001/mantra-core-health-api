@@ -22,7 +22,13 @@ const actor = { id: 'clin-1', roles: ['USER'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  // `findOne` responde `null`: el recurso no es un encuentro, así que la
+  // instancia se tipa como paciente — el default de siempre. El caso del
+  // encuentro tiene su propia prueba, que devuelve una fila.
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    findOne: mockFn().mockResolvedValue(null),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const instancesRepo = {
     findByResourceAndVersion: mockFn(),
@@ -35,7 +41,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new FormsInstancesService(
     em as any,
-    instancesRepo,
+    instancesRepo as any,
     valuesRepo as any,
     logger as any,
   );
@@ -66,6 +72,57 @@ describe('FormsInstancesService', () => {
       await expect(
         d.service.openInstance({ resourceId: 'r1' } as any, actor),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('types the instance as ENCOUNTER when the resource is one', async () => {
+      const d = build();
+      d.instancesRepo.findByResourceAndVersion.mockResolvedValue(null);
+      d.instancesRepo.create.mockReturnValue({ id: 'i1', schemaVersion: 1 });
+      // El recurso resulta ser un encuentro: el tipo lo resuelve el servidor,
+      // porque el cliente no puede llevar el uuid del concepto escrito.
+      d.tx.findOne.mockResolvedValue({ id: 'enc-1' });
+
+      await d.service.openInstance({ resourceId: 'enc-1' } as any, actor);
+
+      expect(d.instancesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          resourceTypeConceptId: FORMS.RESOURCE_TYPE_ENCOUNTER,
+        }),
+      );
+    });
+
+    it('respects the type the caller declares', async () => {
+      const d = build();
+      d.instancesRepo.findByResourceAndVersion.mockResolvedValue(null);
+      d.instancesRepo.create.mockReturnValue({ id: 'i1', schemaVersion: 1 });
+      d.tx.findOne.mockResolvedValue({ id: 'enc-1' });
+
+      await d.service.openInstance(
+        { resourceId: 'enc-1', resourceTypeConceptId: 'otro-tipo' } as any,
+        actor,
+      );
+
+      expect(d.instancesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ resourceTypeConceptId: 'otro-tipo' }),
+      );
+    });
+
+    it('the duplicate check ignores the resource type', async () => {
+      const d = build();
+      d.instancesRepo.findByResourceAndVersion.mockResolvedValue(null);
+      d.instancesRepo.create.mockReturnValue({ id: 'i1', schemaVersion: 1 });
+
+      await d.service.openInstance({ resourceId: 'r1' } as any, actor);
+
+      // Sin el tipo en la clave: una instancia vieja tipada como paciente
+      // sobre el mismo encuentro tiene que seguir chocando.
+      expect(d.instancesRepo.findByResourceAndVersion).toHaveBeenCalledWith(
+        d.tx,
+        'r1',
+        1,
+      );
     });
   });
 

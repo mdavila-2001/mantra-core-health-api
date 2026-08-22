@@ -38,7 +38,10 @@ export const MEDICO_SMOKE: SmokeCase[] = [
     body: (c) => ({
       email: email(c),
       password: 'S3cret-passw0rd',
-      displayName: 'Dra. Smoke',
+      name: 'Ana',
+      middleName: 'Smoke',
+      lastName: 'Rojas',
+      motherLastName: 'Paz',
       licenseNumber: `MP-${c.u}`,
       credentialNumber: `TIT-${c.u}`,
       phone: '+591 70012345',

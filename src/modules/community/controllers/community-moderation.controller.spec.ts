@@ -16,10 +16,24 @@ const actor = { id: 'mod-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const service = { report: mockFn(), decide: mockFn(), appeal: mockFn() };
+  const service = {
+    report: mockFn(),
+    decide: mockFn(),
+    appeal: mockFn(),
+    resolveAppeal: mockFn(),
+  };
+  const readService = {
+    listQueue: mockFn(),
+    listDecisions: mockFn(),
+    listAppeals: mockFn(),
+  };
   return {
-    controller: new CommunityModerationController(service as any),
+    controller: new CommunityModerationController(
+      service as any,
+      readService as any,
+    ),
     service,
+    readService,
   };
 }
 
@@ -43,5 +57,43 @@ describe('CommunityModerationController', () => {
     const dto = { appellantProfileId: 'p1', reasonText: 'x' };
     await d.controller.appeal('dec1', dto, actor);
     expect(d.service.appeal).toHaveBeenCalledWith('dec1', dto, actor);
+  });
+
+  it('delegates resolveAppeal (UC-19-10, cierre)', async () => {
+    const d = build();
+    const dto = { resolution: 'UPHELD' };
+    await d.controller.resolveAppeal('ap-1', dto as any, actor);
+    expect(d.service.resolveAppeal).toHaveBeenCalledWith('ap-1', dto, actor);
+  });
+
+  /**
+   * El tope por defecto se resuelve en el controlador y llega explícito al
+   * servicio: si el servicio tuviera su propio default, un `limit` omitido
+   * podría paginar distinto según por dónde entre la llamada.
+   */
+  it('delegates listQueue con el tope por defecto resuelto', async () => {
+    const d = build();
+    const query = { status: ['QUEUED'] };
+    await d.controller.listQueue(query as any);
+    expect(d.readService.listQueue).toHaveBeenCalledWith(query, 50);
+  });
+
+  it('delegates listQueue respetando el tope pedido', async () => {
+    const d = build();
+    const query = { limit: 10 };
+    await d.controller.listQueue(query as any);
+    expect(d.readService.listQueue).toHaveBeenCalledWith(query, 10);
+  });
+
+  it('delegates listDecisions y listAppeals', async () => {
+    const d = build();
+    await d.controller.listDecisions({} as any);
+    expect(d.readService.listDecisions).toHaveBeenCalledWith({}, 50);
+
+    await d.controller.listAppeals({ status: ['OPEN'] } as any);
+    expect(d.readService.listAppeals).toHaveBeenCalledWith(
+      { status: ['OPEN'] },
+      50,
+    );
   });
 });

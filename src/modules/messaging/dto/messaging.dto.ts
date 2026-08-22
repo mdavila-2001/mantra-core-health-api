@@ -819,6 +819,17 @@ export class PendingNotificationRequestDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   recipientUserId?: string;
+  /**
+   * Tipo del canal (correo, in-app…).
+   *
+   * Viaja con el lote porque el worker necesita saber si hay un tercero al que
+   * llamar **antes** de llamarlo: una notificación in-app no sale a ningún
+   * proveedor, y sin este dato el adaptador por defecto la marcaba `FAILED`
+   * con `PROVIDER_NOT_CONFIGURED` — un fallo inventado por preguntarle a un
+   * proveedor que para ese canal no tiene que existir.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  channelTypeConceptId?: string;
 }
 
 /** Respuesta de `GET /internal/notifications/pending`. */

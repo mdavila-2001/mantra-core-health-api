@@ -1,0 +1,12 @@
+export { MedicalVisitorsController } from './medical-visitors.controller';
+export { PharmaCatalogController } from './pharma-catalog.controller';
+export { PharmaLabSocialController } from './pharma-lab-social.controller';
+export { PharmaLabNoticesController } from './pharma-lab-notices.controller';
+export { PharmaLabReferenceController } from './pharma-lab-reference.controller';
+export { PharmaLabsController } from './pharma-labs.controller';
+export { PharmacovigilanceController } from './pharmacovigilance.controller';
+export { RegulatoryDocumentsController } from './regulatory-documents.controller';
+export { VisitAgendaController } from './visit-agenda.controller';
+export { VisitRecordsController } from './visit-records.controller';
+export { VisitRequestsController } from './visit-requests.controller';
+export { VisitSurveysController } from './visit-surveys.controller';

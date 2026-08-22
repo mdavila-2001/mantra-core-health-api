@@ -132,6 +132,94 @@ describe('IdentityChecksService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
+    /** Check en curso cuyo intento sigue esperando el veredicto. */
+    function checkConIntentoEnVuelo(
+      d: ReturnType<typeof build>,
+      attempt: Record<string, unknown>,
+    ) {
+      d.checksRepo.findById.mockResolvedValue({
+        id: 'ch1',
+        identityVerificationCaseId: 'k1',
+        statusConceptId: IDA.CHECK_IN_PROGRESS,
+        updatedAt: new Date(),
+      });
+      d.attemptsRepo.findLatestByCase.mockResolvedValue(attempt);
+      // Espeja la base: sólo cuenta como completado el que tiene fecha de cierre.
+      d.attemptsRepo.existsCompletedForCase.mockImplementation(() =>
+        Promise.resolve(Boolean(attempt.completedAt)),
+      );
+      d.resultsRepo.create.mockReturnValue({
+        id: 'r1',
+        resultVersion: 1,
+        resultConceptId: IDA.RESULT_MATCH,
+      });
+    }
+
+    // H-01: el worker asienta un intento PENDIENTE al despachar y vuelve luego
+    // con el veredicto. Si ese segundo paso no cierra el intento, la
+    // precondición no se cumple nunca y el paciente se queda sin aserción.
+    it('cierra el intento en vuelo, y así el veredicto deja de rechazarse (H-01)', async () => {
+      const d = build();
+      const attempt: Record<string, unknown> = {
+        id: 'at1',
+        outcomeConceptId: IDA.ATTEMPT_PENDING,
+        completedAt: undefined,
+      };
+      checkConIntentoEnVuelo(d, attempt);
+
+      await expect(
+        d.service.recordResult('ch1', { result: 'MATCH' } as any, actor),
+      ).resolves.toMatchObject({ checkStatus: IDA.CHECK_COMPLETED });
+
+      expect(attempt.completedAt).toBeInstanceOf(Date);
+      expect(attempt.outcomeConceptId).toBe(IDA.ATTEMPT_SUCCESS);
+    });
+
+    it('cierra el intento como exitoso aunque el veredicto sea negativo', async () => {
+      const d = build();
+      const attempt: Record<string, unknown> = {
+        id: 'at1',
+        outcomeConceptId: IDA.ATTEMPT_PENDING,
+        completedAt: undefined,
+      };
+      checkConIntentoEnVuelo(d, attempt);
+
+      await d.service.recordResult('ch1', { result: 'NO_MATCH' } as any, actor);
+
+      // El desenlace mide si la autoridad contestó, no qué contestó.
+      expect(attempt.outcomeConceptId).toBe(IDA.ATTEMPT_SUCCESS);
+      expect(attempt.completedAt).toBeInstanceOf(Date);
+    });
+
+    it('no reescribe la fecha de cierre de un intento ya completado', async () => {
+      const d = build();
+      const completadoEl = new Date('2026-08-01T10:00:00.000Z');
+      const attempt: Record<string, unknown> = {
+        id: 'at1',
+        outcomeConceptId: IDA.ATTEMPT_SUCCESS,
+        completedAt: completadoEl,
+      };
+      checkConIntentoEnVuelo(d, attempt);
+
+      await d.service.recordResult('ch1', { result: 'MATCH' } as any, actor);
+
+      expect(attempt.completedAt).toBe(completadoEl);
+    });
+
+    it('no resucita un intento que falló al despacharse', async () => {
+      const d = build();
+      const attempt: Record<string, unknown> = {
+        id: 'at1',
+        outcomeConceptId: IDA.ATTEMPT_FAILED,
+        completedAt: new Date('2026-08-01T10:00:00.000Z'),
+      };
+      checkConIntentoEnVuelo(d, attempt);
+
+      await d.service.recordResult('ch1', { result: 'MATCH' } as any, actor);
+
+      expect(attempt.outcomeConceptId).toBe(IDA.ATTEMPT_FAILED);
+    });
+
     it('appends a versioned result chaining supersede and completes the check', async () => {
       const d = build();
       const check: any = {

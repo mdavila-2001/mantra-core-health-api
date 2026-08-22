@@ -33,6 +33,7 @@ import {
   LinkedFilePageDto,
   LinkedFileResponseDto,
   ListFileLinksQueryDto,
+  PendingScanResponseDto,
   ScanResult,
   ScanResultDto,
 } from '../dto';
@@ -413,6 +414,38 @@ export class FilesService {
       }
       return this.versionToResponse(version);
     });
+  }
+
+  /**
+   * Lote de versiones que siguen esperando escaneo antimalware.
+   *
+   * ## Por qué existe
+   *
+   * `recordScanResult` esperaba un callback que **nadie emitía**: el despliegue
+   * no tenía antivirus, no había forma de descubrir qué faltaba escanear, y
+   * toda versión quedaba en `SCAN_PENDING` para siempre. Sin este descubrimiento
+   * el worker no tendría por dónde empezar.
+   *
+   * Devuelve el `storageUri` a propósito: el worker lee los bytes por el mismo
+   * adaptador de almacenamiento que la API —igual que hace el de audio—, no por
+   * HTTP. Mover un archivo de 10 MiB por una respuesta JSON lo obligaría a
+   * viajar en base64 y a cruzar la red dos veces.
+   *
+   * @param limit - Tope de versiones del lote.
+   * @returns Las versiones pendientes, de la más antigua a la más nueva.
+   */
+  async listPendingScan(limit: number): Promise<PendingScanResponseDto> {
+    const em = this.em.fork();
+    const versions = await this.fileVersionsRepo.findPendingScan(em, limit);
+    return {
+      items: versions.map((version) => ({
+        versionId: version.id,
+        fileId: version.fileId,
+        storageUri: version.storageUri,
+        sizeBytes: Number(version.sizeBytes),
+        mimeType: version.mimeType,
+      })),
+    };
   }
 
   /** UC-02-10: borrado lógico. Bloquea si hay retención legal vigente. */

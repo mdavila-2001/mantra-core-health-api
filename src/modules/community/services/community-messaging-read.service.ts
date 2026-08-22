@@ -8,8 +8,12 @@ import {
   encodeKeysetCursor,
   type AuthenticatedUser,
 } from '../../../common';
-import { ConversationsRepository } from '../repositories';
+import {
+  ConversationsRepository,
+  PublicProfilesRepository,
+} from '../repositories';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { COMM } from '../community.concepts';
 import type { ConversationPageDto, DirectMessagePageDto } from '../dto';
 
 /** Tope de conversaciones que devuelve la bandeja de una vez. */
@@ -30,12 +34,14 @@ export class CommunityMessagingReadService {
    *
    * @param em - Contexto de persistencia.
    * @param conversationsRepo - Acceso a conversaciones, participantes y mensajes.
+   * @param profilesRepo - Perfiles públicos, para nombrar el otro lado.
    * @param visibility - Reglas transversales de propiedad y bloqueo.
    * @param logger - Logger estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly conversationsRepo: ConversationsRepository,
+    private readonly profilesRepo: PublicProfilesRepository,
     private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
@@ -76,6 +82,31 @@ export class CommunityMessagingReadService {
       ]),
     );
 
+    // Los participantes de todas las conversaciones de la página, y sus
+    // perfiles, en **dos** consultas: una por fila multiplicaría la bandeja de
+    // alguien con cincuenta hilos por cincuenta.
+    const participantesPorConversacion = new Map<string, string[]>();
+    await Promise.all(
+      conversations.map(async (conversation) => {
+        const participantes = await this.conversationsRepo.findParticipants(
+          em,
+          conversation.id,
+        );
+        participantesPorConversacion.set(
+          conversation.id,
+          participantes
+            .map((participante) => participante.participantProfileId)
+            .filter((otro) => otro !== profileId),
+        );
+      }),
+    );
+    const perfiles = await this.profilesRepo.listByIds(em, [
+      ...new Set([...participantesPorConversacion.values()].flat()),
+    ]);
+    const nombrePorPerfil = new Map(
+      perfiles.map((perfil) => [perfil.id, perfil.displayName]),
+    );
+
     const items = await Promise.all(
       conversations.map(async (conversation) => {
         const [lastMessage, unreadCount] = await Promise.all([
@@ -87,6 +118,12 @@ export class CommunityMessagingReadService {
           ),
         ]);
         return {
+          peers: (participantesPorConversacion.get(conversation.id) ?? []).map(
+            (otro) => ({
+              profileId: otro,
+              displayName: nombrePorPerfil.get(otro) ?? null,
+            }),
+          ),
           id: conversation.id,
           conversationTypeConceptId: conversation.conversationTypeConceptId,
           groupId: conversation.groupId ?? null,
@@ -151,6 +188,11 @@ export class CommunityMessagingReadService {
       });
 
     await this.assertNoBlockWithPeers(em, conversationId, profileId);
+    const peerReadUpTo = await this.resolvePeerReadUpTo(
+      em,
+      conversationId,
+      profileId,
+    );
 
     const after = options.cursor
       ? decodeKeysetCursor(options.cursor)
@@ -191,7 +233,45 @@ export class CommunityMessagingReadService {
               id: last.id,
             })
           : null,
+      peerReadUpTo,
     };
+  }
+
+  /**
+   * Hasta qué `sentAt` leyó el otro lado, sólo tiene sentido en una directa.
+   *
+   * Un grupo no tiene "el otro lado" — son varios—, así que ahí siempre da
+   * `null`. `null` también cuando el peer todavía no marcó nada como leído.
+   */
+  private async resolvePeerReadUpTo(
+    em: EntityManager,
+    conversationId: string,
+    profileId: string,
+  ): Promise<Date | null> {
+    const conversation = await this.conversationsRepo.findConversationById(
+      em,
+      conversationId,
+    );
+    if (conversation?.conversationTypeConceptId !== COMM.CONVERSATION_DIRECT) {
+      return null;
+    }
+
+    const participants = await this.conversationsRepo.findParticipants(
+      em,
+      conversationId,
+    );
+    if (participants.length !== 2) return null;
+
+    const peer = participants.find(
+      (participant) => participant.participantProfileId !== profileId,
+    );
+    if (!peer?.lastReadMessageId) return null;
+
+    const lastRead = await this.conversationsRepo.findMessageById(
+      em,
+      peer.lastReadMessageId,
+    );
+    return lastRead?.sentAt ?? null;
   }
 
   /**

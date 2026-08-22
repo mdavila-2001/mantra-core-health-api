@@ -1,0 +1,34 @@
+{
+  "code": "MEDFAM_CONSULTA_BASE",
+  "name": "Consulta de medicina familiar",
+  "specialty": { "code": "MEDICINA_FAMILIAR", "display": "Medicina Familiar" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen físico de la atención ambulatoria",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, enfermedad actual, antecedentes personales y familiares, examen físico, diagnóstico y conducta. Son agregados propios de medicina familiar los campos de composición del grupo familiar, condiciones de la vivienda y convivencia, red de apoyo, ocupación y hábitos, y el seguimiento de controles preventivos e inmunizaciones."
+  },
+  "fields": [
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
+    { "code": "enfermedad_actual", "name": "Relato de la enfermedad actual", "dataType": "text", "required": true },
+    { "code": "antecedentes_personales", "name": "Antecedentes personales patológicos", "dataType": "text", "required": false },
+    { "code": "antecedentes_familiares", "name": "Antecedentes familiares", "dataType": "text", "required": false },
+    { "code": "medicacion_habitual", "name": "Medicación habitual", "dataType": "text", "required": false },
+    { "code": "composicion_grupo_familiar", "name": "Composición del grupo familiar", "dataType": "text", "required": false },
+    { "code": "numero_convivientes", "name": "Número de convivientes en el hogar", "dataType": "integer", "required": false },
+    { "code": "condiciones_de_vivienda", "name": "Condiciones de la vivienda y saneamiento", "dataType": "text", "required": false },
+    { "code": "red_de_apoyo", "name": "Red de apoyo y cuidador principal", "dataType": "text", "required": false },
+    { "code": "ocupacion", "name": "Ocupación actual", "dataType": "string", "required": false },
+    { "code": "habitos", "name": "Hábitos (alimentación, actividad física, tabaco, alcohol)", "dataType": "text", "required": false },
+    { "code": "controles_preventivos", "name": "Controles preventivos e inmunizaciones", "dataType": "text", "required": false },
+    { "code": "examen_fisico_general", "name": "Examen físico general", "dataType": "text", "required": false },
+    { "code": "examen_por_aparatos", "name": "Examen por aparatos y sistemas", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
+    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento y seguimiento familiar", "dataType": "text", "required": false }
+  ]
+}

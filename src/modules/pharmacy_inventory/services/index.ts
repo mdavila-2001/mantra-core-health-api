@@ -6,3 +6,4 @@ export * from './inventory-count.service';
 export * from './inventory-recall.service';
 export * from './inventory-transfers.service';
 export * from './inventory-sync.service';
+export * from './pharmacy-inventory-read.service';

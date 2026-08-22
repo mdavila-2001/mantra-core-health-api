@@ -14,15 +14,25 @@ name: Documentación
 # no reportaba ni un solo check —el equipo mergeaba a ciegas— y el trabajo
 # llegaba a `master` ya integrado, donde el fallo aparece tarde y mezclado con
 # el de otros.
+# Desde el 18/08 corre en un runner propio (ver más abajo), que es una máquina
+# del equipo y no una flota elástica: el disparo se acota a `pull_request` para
+# que el trabajo llegue en el momento en que sirve —antes de mergear— sin
+# duplicar cada corrida con el `push` que sigue al merge. `workflow_dispatch`
+# queda para lanzar la batería a mano sobre una rama cuando haga falta.
 on:
   pull_request:
     branches: [master, dev]
-  push:
-    branches: [master, dev]
+  workflow_dispatch:
 
 jobs:
   docs:
-    runs-on: ubuntu-latest
+    # Runner self-hosted: los minutos de GitHub están agotados por facturación
+    # desde el 14/08 y los jobs morían en 2 s sin máquina, así que ~30 PRs
+    # entraron sin un solo check. `marcelo-wsl-api` es Linux con Docker, que es
+    # lo que exigen los `services:` de acá abajo. Cuando la facturación se
+    # reponga, volver a `ubuntu-latest` es cambiar esta línea.
+    # Detalles y recuperación: docs/operations/ci-runner-self-hosted.md
+    runs-on: [self-hosted, linux, x64]
     env:
       # El heap por defecto de Node (~2 GB) no alcanza en este repositorio. El
       # lint type-aware sobre 60 módulos y ~1185 entidades muere con "JavaScript
@@ -75,12 +85,19 @@ jobs:
         env:
           discovery.type: single-node
           DISABLE_SECURITY_PLUGIN: "true"
+          # Medio giga en vez del gigabyte por defecto. Acá OpenSearch solo
+          # tiene que existir para que AppModule levante y se genere el
+          # contrato: no se indexa nada ni se consulta nada pesado. En el
+          # runner propio, que comparte memoria con lo que el equipo tenga
+          # abierto, pedir 1 GB de heap es lo que lo dejaba sin arrancar.
+          OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
         ports: ["9200:9200"]
         options: >-
           --health-cmd "curl -sf http://localhost:9200/_cluster/health || exit 1"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 15
+          --health-retries 20
+          --health-start-period 120s
 
     steps:
       - uses: actions/checkout@v4
@@ -91,8 +108,24 @@ jobs:
       # `packageManager: yarn@4.14.1`, ese yarn 1.22 aborta y el job muere en el
       # setup, antes de compilar nada. Usa el Node preinstalado del runner, que
       # es suficiente para activar los shims.
+      #
+      # Los shims van a un directorio del propio job y no al `bin` del Node
+      # global: `corepack enable` a secas escribe en `/usr/bin`, que en un runner
+      # hospedado pertenece al usuario del runner y en el propio no. Ahí moría
+      # con `EACCES: permission denied, symlink … -> '/usr/bin/pnpm'`, en el paso
+      # 4 de 30, dejando los otros 26 en `skipped` — o sea sin instalar
+      # dependencias ni mirar una línea de código.
+      #
+      # `$RUNNER_TEMP` es escribible por definición y se limpia solo entre jobs,
+      # así que esto sigue siendo correcto el día que se vuelva a `ubuntu-latest`.
+      #
+      # El `mkdir` no sobra: corepack no crea el directorio de destino, hace
+      # `realpath` sobre él y muere con `ENOENT` si no existe.
       - name: Habilitar Corepack
-        run: corepack enable
+        run: |
+          mkdir -p "$RUNNER_TEMP/corepack"
+          corepack enable --install-directory "$RUNNER_TEMP/corepack"
+          echo "$RUNNER_TEMP/corepack" >> "$GITHUB_PATH"
 
       - uses: actions/setup-node@v4
         with:
@@ -107,7 +140,21 @@ jobs:
         # MinIO no admite un command propio dentro de `services:` (solo el CMD
         # por defecto de la imagen, que requiere el argumento `server /data`) —
         # se levanta con `docker run` en vez de como service container.
+        #
+        # El `rm -f` de arriba no es defensivo porque sí: en un runner propio los
+        # contenedores **sobreviven al job**, y este no es un service container
+        # que el runner limpie. El primer job que muriera antes del `rm` de abajo
+        # dejaba un `minio` parado, y a partir de ahí TODA corrida del repo
+        # fallaba acá con `Conflict. The container name "/minio" is already in
+        # use` (exit 125), en el paso 7 de 30 y dejando los otros 23 en
+        # `skipped`. Pasó el 18/08: se llevó puestos los PRs #142, #149 y #150.
+        #
+        # No alcanza con limpiar al final: el job puede morir sin llegar ahí
+        # —cancelado, sin recursos, con la máquina apagada—, que es exactamente
+        # como se generó el contenedor huérfano. Por eso el arreglo va al
+        # principio, donde el estado sucio ya existe y hay que tolerarlo.
         run: |
+          docker rm -f minio 2>/dev/null || true
           docker run -d --name minio -p 9000:9000 \
             -e MINIO_ROOT_USER=mantra -e MINIO_ROOT_PASSWORD=mantra12345678 \
             minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
@@ -265,3 +312,16 @@ jobs:
             openapi/openapi.json
             asyncapi/asyncapi.yaml
           retention-days: 30
+
+      # `always()` para que corra también cuando el job falló o lo cancelaron:
+      # dejar MinIO andando en un runner propio le come memoria a la corrida
+      # siguiente —que comparte máquina con el stack de desarrollo del equipo— y
+      # le retiene el 9000. Los service containers de `services:` los limpia el
+      # runner; este, levantado a mano, es nuestro.
+      #
+      # El paso de arriba igual empieza con `rm -f`: esta limpieza es la que
+      # mantiene la máquina ordenada, no la que garantiza que el próximo job
+      # arranque.
+      - name: Retirar MinIO
+        if: always()
+        run: docker rm -f minio 2>/dev/null || true

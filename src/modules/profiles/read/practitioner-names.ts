@@ -1,9 +1,6 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
-import {
-  HealthPractitionerProfiles,
-  PersonProfiles,
-  Persons,
-} from '../entities';
+import { HealthPractitionerProfiles, Persons } from '../entities';
+import { composePersonDisplayName } from '../person-name';
 
 /**
  * Nombre legible de un lote de perfiles profesionales.
@@ -18,11 +15,15 @@ import {
  * grafo de inyección, y evita que cada módulo escriba su propia versión de los
  * dos saltos.
  *
- * ## Los dos saltos
+ * ## El salto
  *
- * El nombre no está en el perfil profesional: `health_practitioner_profiles`
- * comparte PK con `person_profiles`, que apunta a la persona, y es
- * `profiles.persons` la que guarda cómo se llama.
+ * El nombre no está en el perfil profesional: `health_practitioner_profiles.profile_id`
+ * referencia **directamente** a `profiles.persons(id)` —lo dice la FK y lo
+ * repiten los dos caminos de alta—, y es la persona la que guarda cómo se
+ * llama. La versión anterior pasaba por `person_profiles` suponiendo PK
+ * compartida con `persons`; medido contra la base: 0 de 14 filas la comparten,
+ * así que ese salto no resolvía un solo nombre — ni siquiera para los
+ * profesionales sembrados.
  *
  * @param em - Contexto de persistencia o transacción activa.
  * @param profileIds - Perfiles profesionales consultados.
@@ -35,27 +36,21 @@ export async function findPractitionerNames(
 ): Promise<Map<string, string>> {
   if (profileIds.length === 0) return new Map();
 
-  const practitioners = await em.find(HealthPractitionerProfiles, {
-    profileId: { $in: [...profileIds] },
-  });
+  const practitioners = await em.find(
+    HealthPractitionerProfiles,
+    { profileId: { $in: [...profileIds] } },
+    { fields: ['profileId'] },
+  );
   if (practitioners.length === 0) return new Map();
 
-  const perfiles = await em.find(PersonProfiles, {
+  const personas = await em.find(Persons, {
     id: { $in: practitioners.map((row) => row.profileId) },
   });
-  if (perfiles.length === 0) return new Map();
-
-  const personas = await em.find(Persons, {
-    id: { $in: perfiles.map((row) => row.personId) },
-  });
-  const nombrePorPersona = new Map(
-    personas.map((persona) => [persona.id, nombreDe(persona)]),
-  );
 
   const resultado = new Map<string, string>();
-  for (const perfil of perfiles) {
-    const nombre = nombrePorPersona.get(perfil.personId);
-    if (nombre !== undefined) resultado.set(perfil.id, nombre);
+  for (const persona of personas) {
+    const nombre = nombreDe(persona);
+    if (nombre !== undefined) resultado.set(persona.id, nombre);
   }
   return resultado;
 }
@@ -71,8 +66,5 @@ function nombreDe(persona: Persons): string | undefined {
   if (persona.displayName !== undefined && persona.displayName !== '') {
     return persona.displayName;
   }
-  const compuesto = [persona.name, persona.lastName, persona.motherLastName]
-    .filter((parte): parte is string => parte !== undefined && parte !== '')
-    .join(' ');
-  return compuesto === '' ? undefined : compuesto;
+  return composePersonDisplayName(persona);
 }

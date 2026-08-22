@@ -1,7 +1,7 @@
 import type { SchemaSpec } from './catalog.types';
 
 /**
- * Registro de los 58 esquemas PostgreSQL que compone el modelo canónico.
+ * Registro de los 60 esquemas PostgreSQL que compone el modelo canónico.
  * La capa 02 del arranque crea cada uno con CREATE SCHEMA IF NOT EXISTS antes de
  * que MikroORM sincronice tablas: sin el schema, el DDL de tablas fallaría.
  * Generado desde la bóveda SALUD; regenerar con `yarn orm:catalog`.
@@ -11,14 +11,14 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['accounting', 16, 'accounting', 42],
   ['ads', 43, 'ads', 73],
   ['audio_assets', 64, 'audio_assets', 4],
-  ['audit', 10, 'audit', 123],
+  ['audit', 10, 'audit', 131],
   ['auth_providers', 40, 'auth_providers', 9],
   ['authz', 6, 'authz', 15],
   ['automation', 48, 'automation', 16],
   ['billing', 17, 'billing', 20],
   ['chart', 15, 'chart', 11],
   ['clinical', 8, 'clinical', 22],
-  ['clinical_ext', 18, 'clinical_ext', 12],
+  ['clinical_ext', 18, 'clinical_ext', 13],
   ['common', 2, 'common', 7],
   ['community', 19, 'community', 38],
   ['consent', 7, 'consent', 10],
@@ -46,18 +46,20 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['object_storage', 60, 'object_storage', 17],
   ['organization_extensions', 22, 'organization_extensions', 6],
   ['payments', 42, 'payments', 53],
+  ['pharma_lab', null, 'pharma_lab', 31],
   ['pharmacy', 24, 'pharmacy', 9],
   ['pharmacy_inventory', 25, 'pharmacy_inventory', 20],
   ['platform_ops', 46, 'platform_ops', 38],
   ['polyglot_storage', 54, 'polyglot_storage', 20],
   ['practice', 14, 'practice', 11],
   ['procedures_perioperative', 53, 'procedures_perioperative', 37],
-  ['profiles', 5, 'profiles', 18],
+  ['profiles', 5, 'profiles', 19],
   ['promotions', 51, 'promotions', 11],
   ['qa_lab', 36, 'qa_lab', 13],
   ['read_models', 30, 'read_models', 13],
   ['reporting', 39, 'reporting', 12],
   ['scheduling', 41, 'scheduling', 16],
+  ['surveys', 65, 'surveys', 7],
   ['system_context', 45, 'system_context', 9],
   ['system_ops', 11, 'system_ops', 30],
   ['telemetry', 28, 'telemetry', 14],

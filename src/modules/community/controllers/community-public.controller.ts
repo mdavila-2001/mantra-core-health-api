@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { Public } from '../../../common';
+import { Public, ResourceNotFoundException } from '../../../common';
 import {
   CommunityPublicService,
   TARGET_CONCEPT_BY_SLUG_PREFIX,
@@ -186,6 +186,49 @@ export class CommunityPublicController {
       radiusKm: this.toFloat(radiusKm),
       limit: this.toInt(limit),
     });
+  }
+
+  /**
+   * Ficha pública por vertical, bajo el prefijo `/public`.
+   *
+   * ## Por qué existe además de las cinco rutas cortas
+   *
+   * Porque `/p/:slug` es a la vez **la URL de la página** y la de su dato. En
+   * el navegador eso choca: el servidor de desarrollo enruta por prefijo de
+   * texto, así que mandar `/p` a la API se come la ruta del router y abrir la
+   * ficha devuelve JSON en vez de la pantalla; no mandarla deja al cliente
+   * pidiendo `/p/:slug` al servidor de Angular, que responde el `index.html`
+   * con **200** y el cliente recibe HTML donde espera JSON. Las dos salidas
+   * rompen algo, y `check-client-prefixes.mjs` lo denuncia desde el 2026-08-17.
+   *
+   * Las cinco rutas cortas **se quedan**: son las que alguien pega en un
+   * mensaje y las que un rastreador sigue, y su contrato no cambia. Esta es la
+   * que llama el cliente, y no es ambigua porque cuelga de `/public`, que ya
+   * está enrutado.
+   *
+   * El comportamiento es idéntico, incluido el 404 del tipo equivocado: es el
+   * mismo servicio con el mismo concepto de sujeto, no una segunda
+   * implementación que pueda separarse de la primera.
+   *
+   * @param prefijo - `p` · `o` · `f` · `l` · `s`, el mismo que la ruta corta.
+   * @param slug - Slug estable del perfil.
+   * @throws ResourceNotFoundException si el prefijo no es uno de los cinco.
+   */
+  @Public()
+  @Get('public/profiles/:prefijo/:slug')
+  @ApiOperation({ summary: 'Ficha pública por prefijo de vertical' })
+  getProfileByPrefix(
+    @Param('prefijo') prefijo: string,
+    @Param('slug') slug: string,
+  ): Promise<PublicDirectoryProfileDto> {
+    const concepto = TARGET_CONCEPT_BY_SLUG_PREFIX[prefijo];
+    // Un prefijo inventado da el **mismo** 404 que un slug que no existe: en
+    // esta superficie nada distingue «no existe» de «no está publicado», y un
+    // 400 acá abriría esa distinción por la puerta de al lado.
+    if (concepto === undefined)
+      throw new ResourceNotFoundException('No encontrado', { slug });
+
+    return this.service.getBySlug(slug, concepto);
   }
 
   /** Ficha pública de un profesional. */

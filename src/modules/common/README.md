@@ -18,7 +18,8 @@ except for `files.tenant_id`, are **not** FK-enforced.
 | 6 | `POST /common/files/:id/versions` | Add a version | 201 | JWT |
 | 7 | `POST /common/files/:id/versions/:vid/derivatives` | Generate a derivative | 201 | JWT |
 | 8 | `POST /common/files/:id/links` | Link a file to an owner | 201 | JWT |
-| 9 | `POST /internal/files/versions/:vid/scan-result` | Antivirus callback | 200 | JWT + `SECURITY_ADMIN` |
+| 9 | `POST /internal/files/versions/:vid/scan-result` | Antivirus callback | 200 | JWT + `SYSTEM`/`SECURITY_ADMIN` |
+| 9b | `GET /internal/files/versions/pending-scan` | Batch awaiting the scanner | 200 | JWT + `SYSTEM`/`SECURITY_ADMIN` |
 | 10 | `DELETE /common/files/:id` | Soft-delete a file | 200 | JWT |
 | 11 | `POST /common/files/:id/download-url` | Issue a signed download URL | 201 | JWT |
 
@@ -39,7 +40,15 @@ except for `files.tenant_id`, are **not** FK-enforced.
 - **Derivatives only from clean sources**: source version must be `SCAN_CLEAN`,
   else `422 PreconditionFailedException`.
 - **Scan callback**: sets the version scan status; INFECTED logs a quarantine
-  warning.
+  warning. It accepts `SYSTEM` as well as `SECURITY_ADMIN` — the worker signs as
+  `SYSTEM`, and with only `SECURITY_ADMIN` the callback was unreachable for the
+  one process that can emit it.
+- **Who emits it**: `worker-files` (`src/worker/jobs/files/malware-scan.job.ts`).
+  It reads the pending batch, fetches the bytes through the same storage adapter
+  the API uses, streams them to ClamAV (`clamd`, INSTREAM) and posts the verdict.
+  A failed scan, an unreachable engine or a file above the size ceiling leave the
+  version **pending** — never `CLEAN`. Disabled by default
+  (`MALWARE_SCAN_ENABLED`), see `malware-scan.env.ts`.
 - **Legal hold**: a file with a future `legal_hold_until` cannot be soft-deleted
   → `422 PreconditionFailedException`.
 - **Download URL**: requires a non-deleted file whose current version is
@@ -56,8 +65,8 @@ encryption-at-rest.
 
 ## Permissions & logging
 
-Everything requires a valid JWT (global `JwtAuthGuard`). The scan-result callback
-additionally requires the `SECURITY_ADMIN` role (global `RolesGuard`). Services
+Everything requires a valid JWT (global `JwtAuthGuard`). The internal endpoints
+additionally require `SYSTEM` or `SECURITY_ADMIN` (global `RolesGuard`). Services
 emit structured Pino logs (`operation`, ids) for operation start, success,
 business-rule rejections and quarantine events. No secrets, tokens or full PHI are
 logged.

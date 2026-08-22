@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -8,6 +9,7 @@ import {
   Patch,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -38,6 +40,8 @@ import {
   PractitionerProfileSummaryDto,
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
+  SetPractitionerPhotoDto,
+  PractitionerOnboardingDto,
 } from '../dto';
 
 /**
@@ -83,6 +87,33 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerProfileSummaryDto> {
     return this.practitionersService.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * En qué punto del alta está el profesional de la sesión.
+   *
+   * Va **antes** de cualquier `practitioners/:profileId` por lo mismo que
+   * `me/summary`: Nest resuelve por orden de declaración y un parámetro
+   * capturaría `me`.
+   *
+   * Sin `@Roles`: el filtro real es tener perfil profesional, que es un dato de
+   * la cuenta y no un rol. Si no lo tiene, el servicio lo dice con un 422.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Las cinco etapas del alta y la primera incompleta.
+   */
+  @Get('practitioners/me/onboarding')
+  @ApiOperation({
+    summary: 'Qué le falta al profesional para completar su alta',
+    description:
+      'El paso se DERIVA de los datos que ya existen (matrícula, especialidad, ' +
+      'foto, afiliación o agenda propia): no hay columna de progreso, así que ' +
+      'retomar sale gratis y los perfiles anteriores aparecen completos sin migrar.',
+  })
+  getOwnOnboarding(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerOnboardingDto> {
+    return this.practitionersService.getOwnOnboarding(actor);
   }
 
   /**
@@ -168,6 +199,58 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerProfileSummaryDto> {
     return this.practitionersService.updateOwnPractitionerProfile(dto, actor);
+  }
+
+  /**
+   * Fijar la foto del perfil profesional.
+   *
+   * Va con `:profileId` y no con `me` a propósito: la misma ruta sirve al
+   * titular y a la plataforma, y quién puede lo decide
+   * `ProfileOwnershipService` —titular o rol de plataforma— en vez de
+   * duplicarse en dos superficies que después divergen. Con `me` la intención
+   * de un administrador que arregla la ficha de otro no quedaría escrita en
+   * ningún lado.
+   *
+   * `PUT` porque el resultado no depende de cuántas veces se pida: el perfil
+   * queda con esa foto.
+   *
+   * @param profileId - El perfil cuya foto se fija.
+   * @param dto - El archivo ya subido que pasa a ser la foto.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya con su foto.
+   */
+  @Put('practitioners/:profileId/photo')
+  @ApiOperation({ summary: 'Fijar la foto del perfil profesional' })
+  setPractitionerPhoto(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: SetPractitionerPhotoDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    return this.practitionersService.setPractitionerPhoto(
+      profileId,
+      dto,
+      actor,
+    );
+  }
+
+  /**
+   * Quitar la foto del perfil profesional.
+   *
+   * Quita la referencia; el archivo no se toca. Quien quiera borrar el archivo
+   * del almacenamiento tiene el camino de `common/files`, que lleva su propio
+   * borrado lógico.
+   *
+   * @param profileId - El perfil cuya foto se quita.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya sin foto.
+   */
+  @Delete('practitioners/:profileId/photo')
+  @ApiOperation({ summary: 'Quitar la foto del perfil profesional' })
+  removePractitionerPhoto(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    return this.practitionersService.removePractitionerPhoto(profileId, actor);
   }
 
   /** UC-05-03. */

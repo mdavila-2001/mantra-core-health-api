@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsBoolean,
   IsDateString,
   IsOptional,
@@ -69,6 +71,32 @@ export class CreatePractitionerDto {
   @IsString()
   @MaxLength(200)
   professionalTitle?: string;
+
+  /**
+   * Las especialidades que el profesional declara al registrarse (TJ-3).
+   *
+   * Van en el alta y no en una llamada aparte porque el registro es atómico
+   * (regla 11 del modelo) y porque la especialidad es lo que la persona tiene
+   * presente justo cuando se registra. Cada uuid tiene que ser miembro vigente
+   * del catálogo `VS_MEDICAL_SPECIALTY`; uno que no lo sea rechaza el alta
+   * entera con 422. La primera de la lista queda como principal.
+   *
+   * `professionalTitle` sigue existiendo y **no** se alimenta de esto: es texto
+   * libre heredado, y mezclarlos volvería a meter especialidades escritas a
+   * mano por la puerta de atrás.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Especialidades del catálogo VS_MEDICAL_SPECIALTY. La primera es la principal.',
+    type: [String],
+    format: 'uuid',
+    maxItems: 3,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  @IsUUID(undefined, { each: true })
+  specialtyConceptIds?: string[];
 
   /**
    * Presentación en prosa del profesional.

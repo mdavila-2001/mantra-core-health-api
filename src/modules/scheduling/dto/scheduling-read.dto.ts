@@ -163,6 +163,33 @@ export class BookingStatusReasonDto {
   changedAt!: Date;
 }
 
+/**
+ * La demora informada por el profesional sobre una cita (P8).
+ *
+ * Se devuelve junto a la cita —y no sólo como notificación— porque el aviso
+ * in-app puede no llegar: sin cuenta de portal, con la preferencia en contra o
+ * con la campana sin abrir. El turno tiene que poder explicarse solo.
+ */
+export class BookingDelayNoticeDto {
+  /**
+   * Minutos de demora que informó el profesional.
+   */
+  @ApiProperty({ description: 'Minutos de demora informados' })
+  delayMinutes!: number;
+
+  /**
+   * Lo que escribió el profesional, si escribió algo.
+   */
+  @ApiPropertyOptional({ description: 'Mensaje del profesional' })
+  message?: string;
+
+  /**
+   * Cuándo se informó.
+   */
+  @ApiProperty({ type: String, format: 'date-time' })
+  announcedAt!: Date;
+}
+
 /** Una cita, tal como la devuelven el listado y el detalle (UC-41-15). */
 export class BookingItemDto {
   /**
@@ -266,6 +293,28 @@ export class BookingItemDto {
   reasonText?: string;
 
   /**
+   * Nombre del paciente.
+   *
+   * Viaja con la **misma regla que el motivo de consulta**: lo ve el titular y
+   * el profesional que atiende en esa agenda, y no la vista de la organización.
+   * El médico necesita saber a quién espera —la agenda del día sin nombres es
+   * una lista de identificadores— y la organización ya opera con el perfil.
+   */
+  @ApiPropertyOptional()
+  patientName?: string;
+
+  /**
+   * De cuándo se movió, si la cita se reprogramó.
+   *
+   * Ausente cuando nunca se movió — que es distinto de «se movió y no sé
+   * desde cuándo». Es el instante ORIGINAL, no el id del cupo: la tarjeta dice
+   * «reprogramada desde el 20/08 a las 15:30», y resolverlo en la pantalla
+   * costaría una petición por cita para pintar una línea.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  rescheduledFrom?: Date;
+
+  /**
    * Por qué la cita está como está, cuando el último cambio lo explicó.
    *
    * Es la mitad que le faltaba a la cancelación y a la reprogramación
@@ -281,6 +330,17 @@ export class BookingItemDto {
       'Motivo del último cambio que lo exigía (cancelación, rechazo o reprogramación), con quién lo hizo y cuándo.',
   })
   statusReason?: BookingStatusReasonDto | null;
+
+  /**
+   * La última demora informada sobre esta cita (P8), si la hay.
+   */
+  @ApiPropertyOptional({
+    type: () => BookingDelayNoticeDto,
+    nullable: true,
+    description:
+      'Última demora informada por el profesional, con sus minutos y su mensaje.',
+  })
+  delayNotice?: BookingDelayNoticeDto | null;
 
   /**
    * Fecha y hora en que se creó el registro.

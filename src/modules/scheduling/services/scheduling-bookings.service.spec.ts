@@ -53,6 +53,15 @@ function build() {
     findBookingByIdForUpdate: mockFn(),
     // Las dos lecturas (UC-41-15): el detalle y el listado.
     findBookingById: mockFn(),
+    // TJ-2: la lectura del origen de una reprogramación. Sin filas, ninguna
+
+    // cita se declara reprogramada — que es el caso por defecto de estas pruebas.
+
+    latestRescheduleOrigins: mockFn().mockResolvedValue(new Map()),
+    findPatientNames: mockFn().mockResolvedValue(new Map()),
+    // Por omisión el paciente no tiene nada que choque: el camino feliz de
+    // reservar no puede depender de configurar esta lectura en cada prueba.
+    findPatientBookingsOverlapping: mockFn().mockResolvedValue([]),
     findBookings: mockFn(),
     countActiveBookingsForPatient: mockFn(),
     recordReschedule: mockFn(),
@@ -77,7 +86,25 @@ function build() {
     create: mockFn(() => ({ id: 'appt-1' })),
     findById: mockFn(),
   };
-  const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const logger = {
+    setContext: mockFn(),
+    info: mockFn(),
+    warn: mockFn(),
+    error: mockFn(),
+  };
+  // P8: las lecturas que redactan un aviso y el emisor. Por omisión la cita no
+  // se describe —`null`—, así que ninguna prueba de este archivo emite nada:
+  // las que sí lo comprueban devuelven un snapshot a propósito.
+  const noticeRepo = {
+    describeBooking: mockFn().mockResolvedValue(null),
+    describeSlot: mockFn().mockResolvedValue(null),
+    findResourceAccount: mockFn().mockResolvedValue(null),
+    findAccountForProfile: mockFn().mockResolvedValue(null),
+  };
+  const notices = {
+    emit: mockFn().mockResolvedValue({ delivered: true }),
+    emitMany: mockFn().mockResolvedValue([]),
+  };
 
   const service = new SchedulingBookingsService(
     em as any,
@@ -85,6 +112,8 @@ function build() {
     catalogRepo as any,
     historyRepo as any,
     appointmentsRepo as any,
+    noticeRepo as any,
+    notices as any,
     logger as any,
   );
   return {
@@ -94,6 +123,9 @@ function build() {
     catalogRepo,
     historyRepo,
     appointmentsRepo,
+    noticeRepo,
+    notices,
+    logger,
   };
 }
 
@@ -103,6 +135,16 @@ function build() {
  * @param overrides - Valor de overrides requerido por la operación.
  * @returns Resultado de open slot.
  */
+/**
+ * Un cupo del futuro cercano.
+ *
+ * Es relativo a `Date.now()` y no una fecha del calendario a propósito: desde
+ * que reservar el pasado es 422 (A-02), una fecha fija se pudre sola —el día
+ * que el reloj la pasa, catorce pruebas ajenas al cambio se ponen rojas sin que
+ * nadie haya tocado nada—. {@link cupoVencido} es su gemelo del otro lado.
+ */
+const EN_UNA_HORA = 60 * 60 * 1000;
+
 function openSlot(overrides: Record<string, unknown> = {}) {
   return {
     id: SLOT_ID,
@@ -110,10 +152,18 @@ function openSlot(overrides: Record<string, unknown> = {}) {
     capacity: 2,
     remainingCapacity: 2,
     statusConceptId: CONCEPTS.SLOT_OPEN,
-    startAt: new Date('2026-06-01T10:00:00Z'),
+    startAt: new Date(Date.now() + EN_UNA_HORA),
     scheduleTemplateId: undefined,
     ...overrides,
   };
+}
+
+/** El mismo cupo, pero con el horario ya pasado. */
+function cupoVencido(overrides: Record<string, unknown> = {}) {
+  return openSlot({
+    startAt: new Date(Date.now() - EN_UNA_HORA),
+    ...overrides,
+  });
 }
 
 describe('SchedulingBookingsService', () => {
@@ -124,7 +174,7 @@ describe('SchedulingBookingsService', () => {
       d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
       d.bookingsRepo.createHold.mockReturnValue({
         id: 'hold-1',
-        expiresAt: new Date('2026-06-01T09:05:00Z'),
+        expiresAt: new Date(Date.now() + EN_UNA_HORA),
       });
 
       const res = await d.service.placeHold(
@@ -178,6 +228,59 @@ describe('SchedulingBookingsService', () => {
       await expect(
         d.service.placeHold(SLOT_ID, {}, actor as any),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('A-02 · rechaza retener un cupo que ya empezó', async () => {
+      // La auditoría TJ-4 lo encontró devolviendo 201 con holdToken sobre un
+      // hueco de ayer: se podía reservar un turno del pasado.
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(cupoVencido());
+
+      // La frase importa: la lee un paciente, y decirle «anticipación mínima»
+      // sobre un turno de la semana pasada lo manda a buscar un problema que
+      // no tiene.
+      await expect(
+        d.service.placeHold(SLOT_ID, {}, actor as any),
+      ).rejects.toThrow('Ese horario ya pasó.');
+    });
+
+    it('A-02 · el cupo del futuro se sigue pudiendo retener', async () => {
+      // El contrapeso del caso anterior: el corte no puede llevarse puesto el
+      // camino bueno.
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(openSlot());
+      d.bookingsRepo.createHold.mockReturnValue({
+        id: 'hold-1',
+        expiresAt: new Date(Date.now() + EN_UNA_HORA),
+      });
+
+      await expect(
+        d.service.placeHold(SLOT_ID, {}, actor as any),
+      ).resolves.toHaveProperty('holdToken');
+    });
+
+    it('respeta la antelación mínima de la política, no sólo el reloj', async () => {
+      // `min_notice_minutes` ya existía en booking_policies y nadie lo miraba:
+      // un cupo que empieza en diez minutos es futuro, pero si la política pide
+      // treinta de aviso tampoco se puede pedir.
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({
+          startAt: new Date(Date.now() + 10 * 60 * 1000),
+          scheduleTemplateId: 'tpl-1',
+        }),
+      );
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        bookingPolicyId: 'pol-1',
+      });
+      d.catalogRepo.findPolicyById.mockResolvedValue({
+        minNoticeMinutes: 30,
+        holdTtlSeconds: 300,
+      });
+
+      await expect(
+        d.service.placeHold(SLOT_ID, {}, actor as any),
+      ).rejects.toThrow('al menos 30 minutos de anticipación');
     });
 
     it('enforces the per-patient active bookings limit from the policy', async () => {
@@ -235,6 +338,52 @@ describe('SchedulingBookingsService', () => {
         ...overrides,
       };
     }
+
+    /* -- Las reglas de choque de turnos ------------------------------------ */
+
+    it('REGLA 1 · no deja reservar encima de un turno YA CONFIRMADO', async () => {
+      // Pedirle a varios médicos la misma hora es legítimo mientras ninguno
+      // haya dicho que sí. Una vez que hay uno confirmado, el paciente ya tiene
+      // dónde estar: reservar otro encima es comprometerse a estar en dos
+      // lugares, y el que se queda esperando es el médico.
+      const d = build();
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(activeHold());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ remainingCapacity: 1 }),
+      );
+      d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([
+        {
+          id: 'otra-1',
+          startAt: new Date(Date.now() + EN_UNA_HORA),
+          endAt: new Date(Date.now() + 2 * EN_UNA_HORA),
+          statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+          resourceName: 'Consultorio del Dr. Paz',
+        },
+      ]);
+
+      // La frase nombra dónde tiene el otro turno: sin eso, «ya tenés un turno»
+      // manda a la persona a buscarlo a mano.
+      await expect(
+        d.service.confirmBooking('token', dto, actor),
+      ).rejects.toThrow(/Consultorio del Dr. Paz/);
+    });
+
+    it('REGLA 1 · sólo mira las confirmadas, no las que están esperando', async () => {
+      const d = build();
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(activeHold());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ remainingCapacity: 1 }),
+      );
+      d.bookingsRepo.createBooking.mockReturnValue({ id: 'booking-1' });
+
+      await d.service.confirmBooking('token', dto, actor);
+
+      const estados =
+        d.bookingsRepo.findPatientBookingsOverlapping.mock.calls[0][4];
+      expect(estados).toContain(CONCEPTS.BOOKING_CONFIRMED);
+      expect(estados).not.toContain(SCHED.BOOKING_REQUESTED);
+      expect(estados).not.toContain(SCHED.BOOKING_PENDING_CONFIRMATION);
+    });
 
     it('confirms the booking and consumes the hold', async () => {
       const d = build();
@@ -898,6 +1047,101 @@ describe('SchedulingBookingsService', () => {
       };
     }
 
+    /** Una solicitud del mismo paciente, con otro médico, a la misma hora. */
+    function solicitudQueChoca(id = 'booking-2') {
+      return {
+        id,
+        startAt: new Date(Date.now() + EN_UNA_HORA),
+        endAt: new Date(Date.now() + 2 * EN_UNA_HORA),
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        resourceName: 'Consultorio del Dr. Paz',
+      };
+    }
+
+    it('REGLA 2 · aceptar una cancela las pendientes que chocan', async () => {
+      // El caso que motiva la regla: el paciente pidió a tres médicos la misma
+      // hora, uno le dijo que sí, y las otras dos dejaron de ser posibles. Si
+      // nadie las cierra quedan esperando una respuesta que ya no importa, y
+      // reteniendo cupos que otra persona podría usar.
+      const d = build();
+      const aceptada = solicitudPendiente();
+      const otra = {
+        ...solicitudQueChoca(),
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+      };
+      d.bookingsRepo.findBookingByIdForUpdate
+        .mockResolvedValueOnce(aceptada)
+        .mockResolvedValueOnce({
+          id: 'booking-2',
+          bookableSlotId: 'slot-2',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+      d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([otra]);
+      const slotLiberado = openSlot({
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_HELD,
+      });
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slotLiberado);
+
+      const res = await d.service.accept('booking-1', {}, actor);
+
+      expect(res.desplazadas).toEqual(['booking-2']);
+      // Y el cupo que retenía vuelve a estar disponible: castigar al siguiente
+      // paciente por una cita que ya no existe no tiene sentido.
+      expect(slotLiberado.remainingCapacity).toBe(1);
+      expect(slotLiberado.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
+    it('REGLA 2 · nunca toca una cita que otro médico ya confirmó', async () => {
+      // Cancelar automáticamente algo ya comprometido sería decidir por el otro
+      // profesional. Ese caso se resuelve hablando, no con una regla.
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+
+      await d.service.accept('booking-1', {}, actor);
+
+      const estados =
+        d.bookingsRepo.findPatientBookingsOverlapping.mock.calls[0][4];
+      expect(estados).toContain(SCHED.BOOKING_PENDING_CONFIRMATION);
+      expect(estados).toContain(SCHED.BOOKING_REQUESTED);
+      expect(estados).not.toContain(CONCEPTS.BOOKING_CONFIRMED);
+      expect(estados).not.toContain(CONCEPTS.BOOKING_CHECKED_IN);
+    });
+
+    it('REGLA 2 · no se compara consigo misma', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+
+      await d.service.accept('booking-1', {}, actor);
+
+      const excepto =
+        d.bookingsRepo.findPatientBookingsOverlapping.mock.calls[0][5];
+      expect(excepto).toBe('booking-1');
+    });
+
+    it('REGLA 2 · sin choques, aceptar no cancela nada', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+
+      const res = await d.service.accept('booking-1', {}, actor);
+
+      expect(res.desplazadas).toEqual([]);
+    });
+
     it('aceptar confirma la cita y sella el compromiso', async () => {
       const d = build();
       const booking = solicitudPendiente();
@@ -977,6 +1221,208 @@ describe('SchedulingBookingsService', () => {
         d.service.reject('booking-1', {} as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+    });
+  });
+
+  /* ==========================================================================
+     P8 · los cambios de cita se avisan, y con el motivo
+     ========================================================================== */
+
+  describe('avisos de cambio de cita (P8)', () => {
+    /** La cita como la describe el repositorio de avisos. */
+    const descrita = {
+      bookingId: 'booking-1',
+      tenantId: 'tenant-1',
+      patientProfileId: PATIENT,
+      resourceId: 'res-1',
+      slotId: SLOT_ID,
+      startAt: new Date('2026-08-20T14:00:00.000Z'),
+      resourceLabel: 'Dra. Rivas',
+    };
+
+    /** Una cita vigente lista para cancelarse. */
+    function vigente() {
+      return {
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        resourceId: 'res-1',
+        patientProfileId: PATIENT,
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      };
+    }
+
+    it('cancelar avisa al paciente, con el motivo en el cuerpo', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(vigente());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue({
+        id: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      d.noticeRepo.describeBooking.mockResolvedValue(descrita);
+
+      await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PROVIDER', reasonText: MOTIVO },
+        actor,
+      );
+
+      const aviso = d.notices.emit.mock.calls[0][0];
+      expect(aviso.kind).toBe('BOOKING_STATE_CHANGED');
+      expect(aviso.payload.change).toBe('CANCELLED');
+      expect(aviso.recipient).toEqual({ patientProfileId: PATIENT });
+      expect(aviso.bodyText).toContain(MOTIVO);
+    });
+
+    it('rechazar avisa como rechazo, no como cancelación', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+        ...vigente(),
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+      });
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue({
+        id: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      d.noticeRepo.describeBooking.mockResolvedValue(descrita);
+
+      await d.service.reject('booking-1', { reasonText: MOTIVO }, actor);
+
+      expect(d.notices.emit.mock.calls[0][0].payload.change).toBe('REJECTED');
+    });
+
+    it('cuando cancela el paciente, el que se entera es el profesional', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(vigente());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue({
+        id: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      d.noticeRepo.describeBooking.mockResolvedValue(descrita);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+
+      await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PATIENT', reasonText: MOTIVO },
+        actor,
+      );
+
+      expect(d.notices.emit.mock.calls[0][0].recipient).toEqual({
+        userId: 'user-medico',
+      });
+    });
+
+    it('una sala no tiene a quién avisarle: no se emite y no se rompe', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(vigente());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue({
+        id: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      d.noticeRepo.describeBooking.mockResolvedValue(descrita);
+      d.noticeRepo.findResourceAccount.mockResolvedValue(null);
+
+      await expect(
+        d.service.cancel(
+          'booking-1',
+          { cancelledBy: 'PATIENT', reasonText: MOTIVO },
+          actor,
+        ),
+      ).resolves.toBeDefined();
+      expect(d.notices.emit).not.toHaveBeenCalled();
+    });
+
+    it('aceptar avisa la confirmación al paciente', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        resourceId: 'res-1',
+        appointmentId: 'appt-1',
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+      });
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue({
+        id: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+      });
+      d.noticeRepo.describeBooking.mockResolvedValue(descrita);
+
+      await d.service.accept('booking-1', {}, actor);
+
+      expect(d.notices.emit.mock.calls[0][0].payload.change).toBe('ACCEPTED');
+    });
+
+    it('aceptar programa por omisión los recordatorios de 24 h y 2 h', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        resourceId: 'res-1',
+        appointmentId: 'appt-1',
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+      });
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue({
+        id: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+      });
+
+      await d.service.accept('booking-1', {}, actor);
+
+      const antelaciones = d.bookingsRepo.createReminder.mock.calls.map(
+        (llamada: any[]) => llamada[1].offsetMinutes,
+      );
+      expect(antelaciones).toEqual([1440, 120]);
+    });
+
+    it('un `[]` explícito sigue significando «ningún recordatorio»', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        resourceId: 'res-1',
+        appointmentId: 'appt-1',
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+      });
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+
+      await d.service.accept(
+        'booking-1',
+        { reminderOffsetsMinutes: [] },
+        actor,
+      );
+
+      expect(d.bookingsRepo.createReminder).not.toHaveBeenCalled();
+    });
+
+    it('si el aviso no se puede redactar, la cancelación sigue en pie', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(vigente());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue({
+        id: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      // La cita ya no se puede describir (borrada por otra vía, por ejemplo).
+      d.noticeRepo.describeBooking.mockResolvedValue(null);
+
+      const res = await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PROVIDER', reasonText: MOTIVO },
+        actor,
+      );
+
+      expect(res.capacityReleased).toBe(true);
+      expect(d.notices.emit).not.toHaveBeenCalled();
     });
   });
 
@@ -1149,6 +1595,90 @@ describe('SchedulingBookingsService', () => {
       expect(res.statusReason).toBeUndefined();
     });
 
+    /** Un actor profesional, dueño o no de la agenda que se consulta. */
+    function medico(perfil: string) {
+      return {
+        id: `u-${perfil}`,
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: perfil,
+      };
+    }
+
+    /** Una página de una cita colgada del recurso `res-1`. */
+    function pagina(ids: readonly string[] = ['booking-1']) {
+      return {
+        rows: ids.map((id) => ({
+          booking: { ...guardada, id, resourceId: 'res-1' },
+          slot: null,
+        })),
+        fetchCapReached: false,
+      };
+    }
+
+    it('MAC-6 · el profesional de la agenda ve el nombre del paciente', async () => {
+      // Sin esto, la vista del día es una lista de identificadores. Es el
+      // pedido explícito del registro del cliente: «nombre completo del
+      // paciente» en el calendario del médico.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.bookingsRepo.findPatientNames.mockResolvedValue(
+        new Map([[PATIENT, 'Marisol Quispe']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      expect(res.items[0].patientName).toBe('Marisol Quispe');
+    });
+
+    it('MAC-6 · un profesional ajeno NO ve el nombre', async () => {
+      // Misma regla que el motivo de consulta: se omite, no se vacía.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-DE-OTRO',
+      });
+      d.bookingsRepo.findPatientNames.mockResolvedValue(
+        new Map([[PATIENT, 'Marisol Quispe']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-propio') as any,
+      );
+
+      expect(res.items[0].patientName).toBeUndefined();
+      expect(JSON.stringify(res)).not.toContain('Marisol');
+    });
+
+    it('MAC-6 · los nombres se piden UNA vez para toda la página', async () => {
+      // De a uno, una agenda de veinte turnos haría veinte consultas para
+      // pintar una pantalla.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina(['b1', 'b2']));
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+
+      await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      expect(d.bookingsRepo.findPatientNames).toHaveBeenCalledTimes(1);
+    });
+
     it('el listado por omisión incluye las pendientes y las completadas', async () => {
       const d = build();
       d.bookingsRepo.findBookings.mockResolvedValue({
@@ -1170,7 +1700,57 @@ describe('SchedulingBookingsService', () => {
       expect(estados).not.toContain(CONCEPTS.BOOKING_CANCELLED);
     });
 
-    it('el motivo de la página se lee en una sola consulta', async () => {
+    it('el detalle trae la demora informada, aunque el aviso no haya llegado (P8)', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue({
+        ...guardada,
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      });
+      // Primera consulta: el motivo (no hay). Segunda: la demora.
+      d.historyRepo.latestBySource
+        .mockResolvedValueOnce(new Map())
+        .mockResolvedValueOnce(
+          new Map([
+            [
+              'booking-1',
+              {
+                operationConceptId: SCHED.HISTORY_OP_DELAY,
+                recordedAt: new Date('2026-08-20T13:40:00Z'),
+                dataSnapshot: {
+                  bookingId: 'booking-1',
+                  delayMinutes: 20,
+                  reasonText: 'Estoy en una urgencia',
+                  actorKind: 'PROVIDER',
+                },
+              },
+            ],
+          ]),
+        );
+
+      const cita = await d.service.getBookingById('booking-1');
+
+      expect(cita.delayNotice).toEqual({
+        delayMinutes: 20,
+        message: 'Estoy en una urgencia',
+        announcedAt: new Date('2026-08-20T13:40:00Z'),
+      });
+    });
+
+    it('una cita sin demora no inventa una', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue(guardada);
+
+      const cita = await d.service.getBookingById('booking-1');
+
+      expect(cita.delayNotice).toBeUndefined();
+    });
+
+    // El invariante es que el coste **no crece con la página**, no que sea una
+    // sola consulta: P8 añadió la lectura de la demora, que es otro predicado
+    // sobre el mismo historial y `latestBySource` devuelve una revisión por
+    // agregado. Son dos consultas fijas para 2 citas y las mismas dos para 100;
+    // lo que esta prueba impide es volver a pedir el historial cita por cita.
+    it('los motivos y las demoras de la página se leen en consultas fijas, no una por cita', async () => {
       const d = build();
       d.bookingsRepo.findBookings.mockResolvedValue({
         rows: [
@@ -1185,11 +1765,10 @@ describe('SchedulingBookingsService', () => {
         50,
       );
 
-      expect(d.historyRepo.latestBySource).toHaveBeenCalledTimes(1);
-      expect(d.historyRepo.latestBySource.mock.calls[0][2]).toEqual([
-        'booking-1',
-        'booking-2',
-      ]);
+      expect(d.historyRepo.latestBySource).toHaveBeenCalledTimes(2);
+      for (const llamada of d.historyRepo.latestBySource.mock.calls) {
+        expect(llamada[2]).toEqual(['booking-1', 'booking-2']);
+      }
     });
   });
 

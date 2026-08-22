@@ -7,3 +7,8 @@ export {
 } from './scheduling-confirmation.service';
 
 export { SchedulingAgendaService } from './scheduling-agenda.service';
+
+/* P8 · avisos de agenda */
+export { SchedulingDelayService } from './scheduling-delay.service';
+export { SchedulingAgendaNoticesService } from './scheduling-agenda-notices.service';
+export * from './scheduling-tenant-agenda.service';

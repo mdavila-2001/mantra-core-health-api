@@ -1,0 +1,122 @@
+{
+  "code": "PATOL_INFORME_BASE",
+  "name": "Informe de anatomía patológica",
+  "specialty": {
+    "code": "PATOLOGIA_CLINICA",
+    "display": "Patología Clínica"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, informe de exámenes auxiliares y estudios anatomopatológicos",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma sale la estructura común del documento clínico: motivo o indicación del estudio, descripción de lo observado, conclusión diagnóstica y conducta o recomendación. Son agregados propios de la especialidad la trazabilidad de la muestra (tipo, procedencia anatómica, fecha de toma, tipo de fijación, estado de la muestra) y la separación entre descripción macroscópica, descripción microscópica y técnicas especiales."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo del estudio o indicación clínica",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "diagnostico_clinico_presuntivo",
+      "name": "Diagnóstico clínico presuntivo del solicitante",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "tipo_de_muestra",
+      "name": "Tipo de muestra",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "procedencia_anatomica",
+      "name": "Procedencia anatómica de la muestra",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "procedimiento_de_obtencion",
+      "name": "Procedimiento de obtención",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "fecha_de_toma",
+      "name": "Fecha de toma de la muestra",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "code": "fecha_de_recepcion",
+      "name": "Fecha de recepción en el laboratorio",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "code": "numero_de_frascos",
+      "name": "Número de frascos o contenedores recibidos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "tipo_de_fijacion",
+      "name": "Tipo de fijación y conservación",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "estado_de_la_muestra",
+      "name": "Estado de la muestra al recibirla",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "descripcion_macroscopica",
+      "name": "Descripción macroscópica",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "descripcion_microscopica",
+      "name": "Descripción microscópica",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tecnicas_especiales",
+      "name": "Técnicas especiales realizadas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "estudio_comparativo_previo",
+      "name": "Comparación con estudios anatomopatológicos previos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "observaciones",
+      "name": "Observaciones y limitaciones del estudio",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico anatomopatológico o conclusión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Recomendaciones y estudios complementarios sugeridos",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

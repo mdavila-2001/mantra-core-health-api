@@ -28,6 +28,8 @@ import { READ_MODELS_CONCEPT_SEEDS } from '../../modules/read_models/read_models
 import { INTEGRATION_CONTRACTS_CONCEPT_SEEDS } from '../../modules/integration_contracts/integration_contracts.concepts';
 import { SCHEDULING_CONCEPT_SEEDS } from '../../modules/scheduling/scheduling.concepts';
 import { PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS } from '../../modules/procedures_perioperative/procedures_perioperative.concepts';
+import { PHARMA_LAB_CONCEPT_SEEDS } from '../../modules/pharma_lab/pharma_lab.concepts';
+import { SURVEYS_CONCEPT_SEEDS } from '../../modules/surveys/surveys.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -70,4 +72,6 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...INTEGRATION_CONTRACTS_CONCEPT_SEEDS,
   ...SCHEDULING_CONCEPT_SEEDS,
   ...PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS,
+  ...PHARMA_LAB_CONCEPT_SEEDS,
+  ...SURVEYS_CONCEPT_SEEDS,
 ];

@@ -20,6 +20,7 @@ import {
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../repositories';
+import { CatalogRepository } from '../../insurance/repositories';
 import type { Tenants } from '../entities';
 import {
   CreateChildTenantDto,
@@ -27,8 +28,11 @@ import {
   StatusResultDto,
   SuspendTenantDto,
   TenantResponseDto,
+  UpdateTenantDto,
   VerifyTenantDto,
 } from '../dto';
+import { TenantAdministrationService } from './tenant-administration.service';
+import { PublicProfileProjectionService } from '../../community/services';
 
 /**
  * Resuelve el tipo de organización a su concept id.
@@ -69,6 +73,7 @@ export class DirectoryTenantsService {
    * @param tenantsRepo - Valor de tenants repo requerido por la operación.
    * @param membershipsRepo - Valor de memberships repo requerido por la operación.
    * @param branchesRepo - Valor de branches repo requerido por la operación.
+   * @param catalogRepo - Acceso a `insurance.insurance_carriers`, para editar el bloque `payer`.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -77,6 +82,13 @@ export class DirectoryTenantsService {
     private readonly membershipsRepo: TenantMembershipsRepository,
     private readonly branchesRepo: BranchesRepository,
     private readonly typeProfile: TenantTypeProfileService,
+    // Quién puede administrar una organización lo decide un solo lugar, el
+    // mismo que ya usan las lecturas: duplicar el criterio acá sería tener dos
+    // definiciones de «admin de la organización» que se separan con el tiempo.
+    private readonly tenantAdmin: TenantAdministrationService,
+    // La vitrina pública de la organización, que se crea al verificarla.
+    private readonly publicProfiles: PublicProfileProjectionService,
+    private readonly catalogRepo: CatalogRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryTenantsService.name);
@@ -192,10 +204,115 @@ export class DirectoryTenantsService {
         tenant.jurisdictionConceptId = dto.jurisdictionConceptId;
       touch(tenant, actor.id);
 
+      // TP-1: verificar es lo que la hace pública, y es el mismo patrón que ya
+      // usa `verify-and-publish` de las unidades de diagnóstico.
+      //
+      // Antes de esto, una organización jamás llegaba al directorio público:
+      // nadie proyectaba su vitrina, así que `GET /public/search/organizations`
+      // cumplía «la no verificada es invisible» por la peor de las razones —lo
+      // eran todas—. Colgarlo de la verificación deja las dos mitades del
+      // criterio ciertas a la vez: sin aprobar no aparece, aprobada aparece.
+      //
+      // El slug lleva el identificador y no el nombre a propósito: dos clínicas
+      // pueden llamarse igual y el slug es único; el nombre bonito es el
+      // `displayName`, que sí se puede repetir.
+      await this.publicProfiles.projectOrganization(tx, {
+        tenantId: tenant.id,
+        targetId: tenant.id,
+        slug: `organization-${tenant.id}`,
+        displayName: tenant.tradeName ?? tenant.legalName,
+        actorUserId: actor.id,
+      });
+
       this.logger.info(
         { operation: 'directory.tenant.verify', tenantId },
         'Tenant verified and activated',
       );
+      return this.toResponse(tenant);
+    });
+  }
+
+  /**
+   * TP-1: la organización corrige sus propios datos.
+   *
+   * ## Qué faltaba
+   *
+   * Una organización se aprovisionaba y después no había forma de tocarla: ni
+   * corregir la razón social mal tipeada, ni poner el nombre comercial con el
+   * que la conocen los pacientes, ni declarar su zona horaria —que no es
+   * cosmética, porque es la zona en la que se leen los horarios de sus
+   * agendas—. La única salida era escribir en la base.
+   *
+   * ## Quién puede
+   *
+   * `assertCanAdminister`: owner o admin **de esa** organización, o la
+   * plataforma. Un `staff` la ve y no la edita, que es la distinción que el
+   * prompt pide y que el modelo ya sabía hacer.
+   *
+   * ## Qué no se edita acá
+   *
+   * El estado y la verificación. Los mueve la plataforma por su propio
+   * endpoint; dejarlos acá haría de la verificación una declaración jurada de
+   * uno mismo. Y el logo tampoco: `directory.tenants` no tiene columna de
+   * archivo y la imagen de una organización ya vive en su perfil público, que
+   * es además la que se ve en el directorio. Inventar una segunda daría dos
+   * logos que se contradicen.
+   *
+   * `PATCH`: lo que no viene no se toca.
+   *
+   * @param tenantId - Organización a editar.
+   * @param dto - Los campos a cambiar.
+   * @param actor - Quien edita.
+   * @returns La ficha ya actualizada.
+   */
+  async updateTenant(
+    tenantId: string,
+    dto: UpdateTenantDto,
+    actor: AuthenticatedUser,
+  ): Promise<TenantResponseDto> {
+    this.logger.info(
+      { operation: 'directory.tenant.update', tenantId, actorId: actor.id },
+      'Updating tenant profile',
+    );
+    return this.em.transactional(async (tx) => {
+      const tenant = await this.tenantsRepo.findById(tx, tenantId);
+      // 404 antes que 403, igual que la lectura: lo contrario permitiría
+      // sondear qué identificadores existen midiendo el código de error.
+      if (!tenant) {
+        throw new ResourceNotFoundException('Organización no encontrada', {
+          tenantId,
+        });
+      }
+      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
+
+      if (dto.legalName !== undefined) tenant.legalName = dto.legalName;
+      if (dto.tradeName !== undefined) tenant.tradeName = dto.tradeName;
+      if (dto.timeZone !== undefined) tenant.timeZone = dto.timeZone;
+      if (dto.currencyConceptId !== undefined) {
+        tenant.currencyConceptId = dto.currencyConceptId;
+      }
+      touch(tenant, actor.id);
+
+      // El bloque `payer` sólo tiene dónde aterrizar si el tenant es una
+      // aseguradora; si no hay carrier, se ignora en vez de romper el resto
+      // de la actualización.
+      if (dto.payer) {
+        const carrier = await this.catalogRepo.findCarrierByTenantId(
+          tx,
+          tenantId,
+        );
+        if (carrier) {
+          if (dto.payer.sigla !== undefined) carrier.sigla = dto.payer.sigla;
+          if (dto.payer.address !== undefined) {
+            carrier.address = dto.payer.address;
+          }
+          if (dto.payer.regulatorIdentifier !== undefined) {
+            carrier.regulatorIdentifier = dto.payer.regulatorIdentifier;
+          }
+          touch(carrier, actor.id);
+        }
+      }
+
       return this.toResponse(tenant);
     });
   }

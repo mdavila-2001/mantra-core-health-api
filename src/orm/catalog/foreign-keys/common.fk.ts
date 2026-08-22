@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `common`.
- * 46 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 48 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const commonForeignKeys: readonly ForeignKeyTuple[] = [
@@ -10,6 +10,7 @@ export const commonForeignKeys: readonly ForeignKeyTuple[] = [
   ['addresses', 'administrative_area_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['addresses', 'country_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['addresses', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['addresses', 'municipality_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['addresses', 'owner_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['addresses', 'type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['addresses', 'updated_by_user_id', 'iam', 'users', 'id'],
@@ -47,6 +48,7 @@ export const commonForeignKeys: readonly ForeignKeyTuple[] = [
   ['file_versions', 'storage_region_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identifiers', 'assigner_tenant_id', 'directory', 'tenants', 'id'],
   ['identifiers', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['identifiers', 'issuer_administrative_area_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identifiers', 'issuer_country_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identifiers', 'owner_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identifiers', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],

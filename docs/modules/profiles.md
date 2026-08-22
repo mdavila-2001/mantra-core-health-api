@@ -9,7 +9,7 @@
 # Módulo `profiles`
 
 **Fuente:** [`src/modules/profiles/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/profiles/README.md)
-· 2 controllers · 3 services · 14 repositories · 19 entidades · 16 DTO
+· 2 controllers · 3 services · 14 repositories · 19 entidades · 17 DTO
 
 ---
 
@@ -42,6 +42,8 @@ and Pino logging.
 | 05-10 | `POST /profiles/patients/:profileId/related-persons` | Register related person / emergency contact | `SECURITY_ADMIN` | 201 |
 | 05-11 | `POST /profiles/patients/:profileId/portal-proxies` | Grant a portal proxy to a representative | `SECURITY_ADMIN` | 201 |
 | 05-12 | `POST /profiles/persons/:personId/decease` | Record decease and anonymization | `SECURITY_ADMIN` | 200 |
+| P5 §3 | `PUT /profiles/practitioners/:profileId/photo` | Set the practitioner profile photo from an already uploaded file | owner or platform | 200 |
+| P5 §3 | `DELETE /profiles/practitioners/:profileId/photo` | Clear the practitioner profile photo (the file is not deleted) | owner or platform | 200 |
 
 ## Entities (schema `profiles`)
 
@@ -56,6 +58,15 @@ and Pino logging.
 (`profile_id`). FKs are plain uuid columns, so writes flush parent-before-child.
 
 ## Key business rules
+
+- **Profile photo** — `health_practitioner_profiles.photo_file_id` is written
+  only through the photo endpoints. Two independent checks: the caller owns the
+  profile (or is platform), and the file is one the caller uploaded, still
+  alive, not flagged infected and of an image type recorded at upload time —
+  the same rule the social wall applies to post media
+  (`AttachableFileService`). Replacing the photo swaps the reference and leaves
+  the previous file untouched: deleting it here would dangle any other use of
+  the same file.
 
 - **Patient / practitioner uniqueness** — reject duplicate `patient_code` /
   `practitioner_code` (409).

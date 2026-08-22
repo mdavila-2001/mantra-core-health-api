@@ -7,13 +7,19 @@ import './observability/telemetry.bootstrap';
 import type { Server } from 'node:http';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import { Logger, PinoLogger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
-import { installProcessGuards, installShutdownWatchdog } from './common';
+import {
+  describeBuild,
+  installProcessGuards,
+  installShutdownWatchdog,
+  loadBuildInfo,
+} from './common';
 
 /**
  * Splash de arranque. Se escribe directo a stdout, no por el logger: es un
@@ -58,6 +64,13 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   app.flushLogs();
 
+  // Lo primero que se dice por el logger definitivo es QUÉ artefacto arrancó.
+  // Va antes que cualquier otra cosa a propósito: si algo del arranque falla,
+  // esta línea ya quedó escrita y el diagnóstico empieza sabiendo qué código
+  // corría, en vez de tener que inspeccionar el `dist/` del contenedor.
+  const build = loadBuildInfo();
+  app.get(Logger).log({ event: 'app.build', ...build }, describeBuild(build));
+
   const logger = await app.resolve(PinoLogger);
   logger.setContext('bootstrap');
 
@@ -98,6 +111,13 @@ async function bootstrap() {
   // CORS deshabilitado por defecto de forma explícita (deny-by-default). Cuando
   // haya un frontend con origen conocido, declarar aquí la allowlist de orígenes.
   app.enableCors({ origin: false });
+
+  // Mensajería en tiempo real (`CommunityMessagingGateway`). Sin este adaptador
+  // el `@WebSocketGateway` del módulo `community` queda declarado pero nunca
+  // escucha: Nest no monta socket.io sobre el servidor HTTP por defecto. Mismo
+  // criterio deny-by-default que el CORS de arriba — el gateway declara su
+  // propio `cors: { origin: false }`.
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // Validación global de DTO. `whitelist` + `forbidNonWhitelisted` cierran el
   // mass-assignment: cualquier propiedad no declarada en el DTO se rechaza en

@@ -24,14 +24,16 @@ function build() {
   const casesRepo = { findById: mockFn() };
   const fraudRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const effects = { applyRevoked: mockFn().mockResolvedValue(undefined) };
   const service = new IdentityAssertionsService(
     em as any,
     assertionsRepo as any,
     casesRepo as any,
     fraudRepo as any,
+    effects as any,
     logger as any,
   );
-  return { service, tx, assertionsRepo, casesRepo, fraudRepo };
+  return { service, tx, assertionsRepo, casesRepo, fraudRepo, effects };
 }
 
 describe('IdentityAssertionsService', () => {

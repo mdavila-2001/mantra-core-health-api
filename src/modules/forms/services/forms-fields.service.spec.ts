@@ -35,7 +35,11 @@ function build() {
     createAccessRule: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new FormsFieldsService(em as any, fieldsRepo, logger as any);
+  const service = new FormsFieldsService(
+    em as any,
+    fieldsRepo as any,
+    logger as any,
+  );
   return { service, tx, fieldsRepo };
 }
 

@@ -7,10 +7,20 @@ import {
   encodeKeysetCursor,
   type AuthenticatedUser,
 } from '../../../common';
+import { CONCEPTS } from '../../../common';
 import { GroupsRepository } from '../repositories';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityGroupAccessService } from './community-group-access.service';
 import { COMM } from '../community.concepts';
-import type { GroupPageDto, GroupMemberPageDto } from '../dto';
+import type {
+  GroupPageDto,
+  GroupMemberPageDto,
+  GroupDetailDto,
+  TopicPageDto,
+} from '../dto';
+
+/** Tope de temas que devuelve el listado del arbol. */
+const TOPICS_LIMIT = 200;
 
 /**
  * Cara de lectura de los grupos (UC-19-12).
@@ -27,12 +37,14 @@ export class CommunityGroupsReadService {
    * @param em - Contexto de persistencia.
    * @param groupsRepo - Acceso a `community.groups` y `group_members`.
    * @param visibility - Resuelve el perfil del lector contra la sesión.
+   * @param access - Reglas de quién ve qué dentro de un grupo.
    * @param logger - Logger estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly groupsRepo: GroupsRepository,
     private readonly visibility: CommunityVisibilityService,
+    private readonly access: CommunityGroupAccessService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityGroupsReadService.name);
@@ -56,6 +68,10 @@ export class CommunityGroupsReadService {
       cursor?: string;
       /** Tope de filas. */
       limit: number;
+      /** Tema por el que se acota el directorio (P7). */
+      topicId?: string;
+      /** Texto libre que se busca en nombre y descripción (P7). */
+      query?: string;
     },
   ): Promise<GroupPageDto> {
     const em = this.em.fork();
@@ -67,6 +83,7 @@ export class CommunityGroupsReadService {
       COMM.GROUP_VISIBILITY_SECRET,
       afterKey,
       options.limit + 1,
+      { topicId: options.topicId, query: options.query?.trim() || undefined },
     );
     const hasMore = rows.length > options.limit;
     const page = hasMore ? rows.slice(0, options.limit) : rows;
@@ -114,6 +131,8 @@ export class CommunityGroupsReadService {
       cursor?: string;
       /** Tope de filas. */
       limit: number;
+      /** Estado de membresía a filtrar (P7: la cola de pendientes). */
+      joinStatusConceptId?: string;
     },
   ): Promise<GroupMemberPageDto> {
     const em = this.em.fork();
@@ -143,6 +162,7 @@ export class CommunityGroupsReadService {
       groupId,
       afterKey,
       options.limit + 1,
+      options.joinStatusConceptId,
     );
     const hasMore = rows.length > options.limit;
     const page = hasMore ? rows.slice(0, options.limit) : rows;
@@ -160,6 +180,100 @@ export class CommunityGroupsReadService {
       count: page.length,
       limit: options.limit,
       nextCursor: this.encodeCreatedAtCursor(hasMore, last),
+    };
+  }
+
+  /**
+   * Ficha de un grupo, con la posición del lector frente a él (P7).
+   *
+   * Devuelve `viewer` —si es integrante, si puede publicar, si administra— en
+   * la misma respuesta y no en un endpoint aparte porque la pantalla del grupo
+   * necesita las dos cosas para pintarse una sola vez: sin eso, el botón
+   * «unirse» aparece por un instante frente a quien ya es integrante.
+   *
+   * `pendingCount` sólo viaja para quien administra: cuántas personas están
+   * esperando entrar a un grupo privado no es asunto de quien mira desde afuera.
+   *
+   * @param groupId - Grupo a leer.
+   * @param actor - Quien pide la ficha.
+   * @param requestedProfileId - Perfil del lector propuesto; se verifica.
+   * @returns Ficha del grupo.
+   * @throws ResourceNotFoundException si no existe, o es secreto y ajeno.
+   */
+  async getGroup(
+    groupId: string,
+    actor: AuthenticatedUser,
+    requestedProfileId?: string,
+  ): Promise<GroupDetailDto> {
+    const em = this.em.fork();
+    const access = await this.access.resolve(
+      em,
+      groupId,
+      actor,
+      requestedProfileId,
+    );
+    const group = access.group;
+
+    const pendingCount = access.canAdminister
+      ? await this.groupsRepo.countMembersByStatus(
+          em,
+          groupId,
+          COMM.GROUP_JOIN_PENDING,
+        )
+      : null;
+
+    return {
+      id: group.id,
+      tenantId: group.tenantId ?? null,
+      slug: group.slug,
+      name: group.name,
+      description: group.description ?? null,
+      visibilityConceptId: group.visibilityConceptId,
+      groupTypeConceptId: group.groupTypeConceptId,
+      topicId: group.topicId ?? null,
+      ownerProfileId: group.ownerProfileId ?? null,
+      coverFileId: group.coverFileId ?? null,
+      memberCount: group.memberCount ?? null,
+      postCount: group.postCount ?? null,
+      pendingCount,
+      statusConceptId: group.statusConceptId,
+      viewer: {
+        isMember: access.isMember,
+        canAdminister: access.canAdminister,
+        canPost: access.canPost,
+        membershipId: access.membership?.id ?? null,
+        memberRoleConceptId: access.membership?.memberRoleConceptId ?? null,
+        joinStatusConceptId: access.membership?.joinStatusConceptId ?? null,
+      },
+    };
+  }
+
+  /**
+   * Temas con los que se clasifican grupos y publicaciones (P7).
+   *
+   * No pagina: el árbol de temas de una plataforma médica se cuenta en decenas,
+   * y la pantalla que lo consume es un selector, no un listado infinito.
+   *
+   * @returns Temas activos, ordenados por nombre.
+   */
+  async listTopics(): Promise<TopicPageDto> {
+    const em = this.em.fork();
+    const rows = await this.groupsRepo.listTopics(
+      em,
+      CONCEPTS.STATE_ACTIVE,
+      TOPICS_LIMIT,
+    );
+
+    return {
+      items: rows.map((topic) => ({
+        id: topic.id,
+        code: topic.code,
+        name: topic.name,
+        parentTopicId: topic.parentTopicId ?? null,
+        specialtyConceptId: topic.specialtyConceptId ?? null,
+      })),
+      count: rows.length,
+      limit: TOPICS_LIMIT,
     };
   }
 

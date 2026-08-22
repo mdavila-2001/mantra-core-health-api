@@ -10,6 +10,7 @@ import {
 import { ModerationRepository } from '../repositories';
 import {
   COMM,
+  APPEAL_RESOLUTION_BY_CODE,
   REPORT_TARGET_CONCEPT_BY_CODE,
   REPORT_REASON_CONCEPT_BY_CODE,
   MODERATION_DECISION_BY_CODE,
@@ -19,10 +20,12 @@ import {
   CreateReportDto,
   ModerationDecisionDto,
   CreateAppealDto,
+  ResolveAppealDto,
   ReportResponseDto,
   ModerationDecisionResponseDto,
   IdResponseDto,
 } from '../dto';
+import { CommunityVisibilityService } from './community-visibility.service';
 
 /** Tipo de contenido para la cola de moderación derivado del target del reporte. */
 const CONTENT_TYPE_BY_TARGET: Record<string, string> = {
@@ -44,11 +47,13 @@ export class CommunityModerationService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param moderationRepo - Valor de moderation repo requerido por la operación.
+   * @param visibility - Propiedad del perfil con el que se firma la escritura.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly moderationRepo: ModerationRepository,
+    private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityModerationService.name);
@@ -180,6 +185,16 @@ export class CommunityModerationService {
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
+      // El apelante no lo elige el cliente. Sin esta comprobación, cualquiera
+      // podía abrir una apelación en nombre de otro — y como una decisión sólo
+      // admite una apelación abierta a la vez, además le quemaba la suya al
+      // sancionado, que después chocaba con un 409.
+      await this.visibility.assertActsAsProfile(
+        tx,
+        dto.appellantProfileId,
+        actor,
+      );
+
       const decision = await this.moderationRepo.findDecisionById(
         tx,
         decisionId,
@@ -226,6 +241,94 @@ export class CommunityModerationService {
         await tx.flush();
       }
 
+      return { id: appeal.id };
+    });
+  }
+
+  /**
+   * UC-19-10, cierre: resuelve una apelación abierta.
+   *
+   * ## Lo que faltaba
+   *
+   * Se podía apelar y no había forma de cerrar la apelación. Toda apelación
+   * quedaba abierta para siempre, y como apelar **re-encola** el contenido con
+   * prioridad alta, esa entrada de cola tampoco tenía salida: la cola crecía con
+   * trabajo que nadie podía terminar.
+   *
+   * ## Lo que se cierra y lo que no
+   *
+   * Se cierra la apelación y la entrada de cola que la apelación abrió. **No se
+   * revierte la decisión original**: `OVERTURNED` deja constancia de que la
+   * apelación prosperó, pero deshacer la sanción —restituir el contenido, anular
+   * el strike— es una política de producto que nadie definió, y ejecutarla acá
+   * sería inventarla. Queda registrada como decisión de producto pendiente en el
+   * reporte del carril.
+   *
+   * @param appealId - Apelación a resolver.
+   * @param dto - Resolución.
+   * @param actor - Moderador que resuelve.
+   * @returns El identificador de la apelación resuelta.
+   * @throws ResourceNotFoundException si la apelación no existe.
+   * @throws ConflictException si ya estaba resuelta.
+   */
+  async resolveAppeal(
+    appealId: string,
+    dto: ResolveAppealDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
+    this.logger.info(
+      {
+        operation: 'community.appeal.resolve',
+        appealId,
+        resolution: dto.resolution,
+      },
+      'Resolving appeal',
+    );
+    return this.em.transactional(async (tx) => {
+      const appeal = await this.moderationRepo.findAppealById(tx, appealId);
+      if (!appeal)
+        throw new ResourceNotFoundException('Apelación no encontrada', {
+          appealId,
+        });
+      if (appeal.statusConceptId !== COMM.APPEAL_OPEN) {
+        throw new ConflictException('La apelación ya está resuelta', {
+          appealId,
+        });
+      }
+
+      const resolucion = APPEAL_RESOLUTION_BY_CODE[dto.resolution];
+      appeal.statusConceptId = resolucion;
+      appeal.resolutionConceptId = resolucion;
+      appeal.reviewedByUserId = actor.id;
+      appeal.resolvedAt = new Date();
+      touch(appeal, actor.id);
+
+      // Apelar re-encola el contenido con prioridad alta. Si esa entrada no se
+      // cierra con la apelación, queda pidiendo para siempre una revisión que ya
+      // se hizo — y la cola crece con trabajo que nadie puede terminar.
+      const decision = await this.moderationRepo.findDecisionById(
+        tx,
+        appeal.moderationDecisionId,
+      );
+      const original = decision
+        ? await this.moderationRepo.findQueueById(
+            tx,
+            decision.moderationQueueId,
+          )
+        : null;
+      if (original) {
+        const reencolada = await this.moderationRepo.findOpenQueueForContent(
+          tx,
+          original.contentRefId,
+          COMM.QUEUE_RESOLVED,
+        );
+        if (reencolada) {
+          reencolada.statusConceptId = COMM.QUEUE_RESOLVED;
+          touch(reencolada, actor.id);
+        }
+      }
+
+      await tx.flush();
       return { id: appeal.id };
     });
   }

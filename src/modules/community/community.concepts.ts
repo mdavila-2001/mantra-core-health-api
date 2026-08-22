@@ -48,6 +48,57 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
       display: 'Profile visible only to authenticated sessions',
     },
 
+    // --- Sellos de verificación (P13) ---
+    //
+    // El sello «Verificado» no lo pone nadie a mano: lo emite el puente desde
+    // `identity_assurance` cuando el caso de verificación llega a
+    // `CASE_VERIFIED` contra una autoridad. Estos conceptos son los que hacen
+    // que el sello diga **qué** se verificó y **cómo**, en vez de ser un
+    // booleano sin procedencia.
+    BADGE_TYPE_LICENSE_VERIFIED: {
+      code: 'BADGE_TYPE_LICENSE_VERIFIED',
+      display: 'Practitioner licence verified against the issuing authority',
+    },
+    BADGE_TYPE_ORGANIZATION_VERIFIED: {
+      code: 'BADGE_TYPE_ORGANIZATION_VERIFIED',
+      display: 'Institution identity verified against the registry',
+    },
+    /** Verificación automática contra la fuente. Es el camino normal. */
+    BADGE_METHOD_AUTHORITY_CHECK: {
+      code: 'BADGE_METHOD_AUTHORITY_CHECK',
+      display: 'Verified against an external authority',
+    },
+    /**
+     * Alta manual de un `SECURITY_ADMIN`. Existe porque una autoridad puede
+     * estar caída o no tener API, no para saltarse la verificación: queda
+     * auditada en `audit.verified_badges_history` y **el sello dice que fue
+     * manual**, que es lo que permite auditarlo después.
+     */
+    BADGE_METHOD_MANUAL_ADMIN: {
+      code: 'BADGE_METHOD_MANUAL_ADMIN',
+      display: 'Granted manually by a security administrator',
+    },
+    /**
+     * Movimientos del sello en `audit.verified_badges_history`.
+     *
+     * El disparador de base ya anotaba la operación genérica (`INSERT`,
+     * `UPDATE`), que dice que la fila cambió pero no qué significó: un `UPDATE`
+     * sobre un sello puede ser una renovación o una revocación, y son cosas
+     * opuestas para quien audita. Estos conceptos son esa intención.
+     */
+    BADGE_HISTORY_OP_GRANTED: {
+      code: 'BADGE_HISTORY_OP_GRANTED',
+      display: 'Badge granted',
+    },
+    BADGE_HISTORY_OP_RENEWED: {
+      code: 'BADGE_HISTORY_OP_RENEWED',
+      display: 'Badge renewed after re-verification',
+    },
+    BADGE_HISTORY_OP_REVOKED: {
+      code: 'BADGE_HISTORY_OP_REVOKED',
+      display: 'Badge revoked or expired',
+    },
+
     // --- Posts ---
     POST_TYPE_TEXT: { code: 'POST_TYPE_TEXT', display: 'Text post' },
     POST_TYPE_POLL: { code: 'POST_TYPE_POLL', display: 'Poll post' },
@@ -117,6 +168,17 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
     CONTENT_TYPE_PROFILE: {
       code: 'CONTENT_TYPE_PROFILE',
       display: 'Profile content',
+    },
+    /**
+     * El grupo como cosa comentable (P7).
+     *
+     * El muro de un grupo son `comments` colgados del grupo, no `social_posts`:
+     * `social_posts` no tiene `group_id` en el modelo y este carril no crea
+     * esquema. Ver `CommunityGroupWallService` para el razonamiento completo.
+     */
+    CONTENT_TYPE_GROUP: {
+      code: 'CONTENT_TYPE_GROUP',
+      display: 'Group content',
     },
     CONTENT_TYPE_MESSAGE: {
       code: 'CONTENT_TYPE_MESSAGE',
@@ -368,6 +430,19 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
     },
     GROUP_ROLE_MEMBER: { code: 'GROUP_ROLE_MEMBER', display: 'Group member' },
     GROUP_ROLE_OWNER: { code: 'GROUP_ROLE_OWNER', display: 'Group owner' },
+    /**
+     * Modera y aprueba altas sin ser el dueño (P7).
+     *
+     * Un grupo privado necesita más de una persona que apruebe: si sólo el
+     * dueño puede hacerlo, la cola de pendientes se detiene el día que se toma
+     * vacaciones. `ADMIN` hace todo lo del dueño salvo existir sin él;
+     * `MODERATOR` sólo interviene sobre el contenido del muro.
+     */
+    GROUP_ROLE_ADMIN: { code: 'GROUP_ROLE_ADMIN', display: 'Group admin' },
+    GROUP_ROLE_MODERATOR: {
+      code: 'GROUP_ROLE_MODERATOR',
+      display: 'Group moderator',
+    },
     GROUP_JOIN_ACTIVE: {
       code: 'GROUP_JOIN_ACTIVE',
       display: 'Membership active',
@@ -375,6 +450,27 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
     GROUP_JOIN_PENDING: {
       code: 'GROUP_JOIN_PENDING',
       display: 'Membership pending',
+    },
+    /**
+     * Estados terminales de una membresía (P7).
+     *
+     * La fila no se borra: `LEFT` y `REMOVED` se distinguen porque volver a
+     * entrar a un grupo del que uno se fue es un alta común, y volver a entrar
+     * a uno del que lo expulsaron no debería serlo. Guardar el desenlace es lo
+     * que deja esa regla escribible más adelante sin inventar una tabla de
+     * historial.
+     */
+    GROUP_JOIN_REJECTED: {
+      code: 'GROUP_JOIN_REJECTED',
+      display: 'Membership rejected',
+    },
+    GROUP_JOIN_LEFT: {
+      code: 'GROUP_JOIN_LEFT',
+      display: 'Membership left',
+    },
+    GROUP_JOIN_REMOVED: {
+      code: 'GROUP_JOIN_REMOVED',
+      display: 'Membership removed by an admin',
     },
 
     // --- Blocks ---
@@ -409,6 +505,24 @@ export const REACTION_CONCEPT_BY_CODE: Record<string, string> = {
   CELEBRATE: COMM.REACTION_CELEBRATE,
   SUPPORT: COMM.REACTION_SUPPORT,
 };
+
+/**
+ * Concept id → código de reacción. Es la inversa de {@link REACTION_CONCEPT_BY_CODE}.
+ *
+ * **Por qué hace falta.** El módulo se escribe con la palabra (`LIKE`) y se leía
+ * sólo con el uuid del concepto. Una interfaz que recibe el uuid de «con qué
+ * reaccionaste» no puede marcar el botón correspondiente sin resolver
+ * terminología en cada render — y el DoD del módulo dice que ninguna respuesta
+ * expone un uuid interno que la interfaz no pueda resolver a etiqueta legible.
+ * Se deriva del mapa directo para que no puedan desincronizarse.
+ */
+export const REACTION_CODE_BY_CONCEPT: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(REACTION_CONCEPT_BY_CODE).map(([code, concept]) => [
+      concept,
+      code,
+    ]),
+  );
 
 /** Reactable/commentable/bookmarkable object type enum → concept id. */
 export const SOCIAL_OBJECT_CONCEPT_BY_CODE: Record<string, string> = {
@@ -458,6 +572,19 @@ export const FOLLOWABLE_CONCEPT_BY_CODE: Record<string, string> = {
   TOPIC: COMM.FOLLOWABLE_TOPIC,
   HASHTAG: COMM.FOLLOWABLE_HASHTAG,
   GROUP: COMM.FOLLOWABLE_GROUP,
+};
+
+/**
+ * Rol dentro de un grupo → concept id (P7).
+ *
+ * `OWNER` no está en el mapa a propósito: la propiedad de un grupo se otorga al
+ * crearlo, no por un `PATCH` de rol. Dejarlo entrar por acá permitiría que un
+ * administrador se coronara dueño de un grupo ajeno.
+ */
+export const GROUP_ROLE_CONCEPT_BY_CODE: Record<string, string> = {
+  MEMBER: COMM.GROUP_ROLE_MEMBER,
+  MODERATOR: COMM.GROUP_ROLE_MODERATOR,
+  ADMIN: COMM.GROUP_ROLE_ADMIN,
 };
 
 /** Report target type enum → concept id (UC-19-08). */
@@ -527,6 +654,47 @@ export const APPEAL_RESOLUTION_BY_CODE: Record<string, string> = {
   UPHELD: COMM.APPEAL_UPHELD,
   OVERTURNED: COMM.APPEAL_OVERTURNED,
   PARTIAL: COMM.APPEAL_PARTIAL,
+};
+
+/**
+ * Estado de apelación enum → concept id, para **filtrar** lecturas.
+ *
+ * Se distingue de `APPEAL_RESOLUTION_BY_CODE` en que incluye `OPEN`: una
+ * apelación abierta no tiene resolución, y es justamente la que un moderador
+ * busca cuando entra a trabajar.
+ */
+export const APPEAL_STATUS_BY_CODE: Record<string, string> = {
+  OPEN: COMM.APPEAL_OPEN,
+  ...APPEAL_RESOLUTION_BY_CODE,
+};
+
+/** Estado de la cola de moderación enum → concept id (UC-19-09, lectura). */
+export const QUEUE_STATUS_BY_CODE: Record<string, string> = {
+  QUEUED: COMM.QUEUE_QUEUED,
+  IN_REVIEW: COMM.QUEUE_IN_REVIEW,
+  RESOLVED: COMM.QUEUE_RESOLVED,
+};
+
+/** Prioridad de la cola enum → concept id (UC-19-09, lectura). */
+export const QUEUE_PRIORITY_BY_CODE: Record<string, string> = {
+  LOW: COMM.QUEUE_PRIORITY_LOW,
+  NORMAL: COMM.QUEUE_PRIORITY_NORMAL,
+  HIGH: COMM.QUEUE_PRIORITY_HIGH,
+};
+
+/**
+ * Tipo de contenido moderable enum → concept id.
+ *
+ * Es el mismo mapa que la escritura de reportes derivaba del target; se declara
+ * acá para que la lectura filtre por los mismos conceptos con los que se escribe
+ * y no por una segunda tabla equivalente.
+ */
+export const CONTENT_TYPE_BY_CODE: Record<string, string> = {
+  POST: COMM.CONTENT_TYPE_POST,
+  COMMENT: COMM.CONTENT_TYPE_COMMENT,
+  PROFILE: COMM.CONTENT_TYPE_PROFILE,
+  MESSAGE: COMM.CONTENT_TYPE_MESSAGE,
+  REVIEW: COMM.CONTENT_TYPE_REVIEW,
 };
 
 /** Review dimension enum → concept id (UC-19-11). */

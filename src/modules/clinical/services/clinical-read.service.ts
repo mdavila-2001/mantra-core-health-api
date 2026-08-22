@@ -16,8 +16,8 @@ import {
 // `EntityManager` por parámetro, así que no duplican fuente de verdad ni
 // arrastran el módulo de perfiles entero.
 import {
+  PatientProfilesRepository,
   PersonAccountLinksRepository,
-  PersonProfilesRepository,
 } from '../../profiles/repositories';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
 
@@ -56,7 +56,7 @@ export class ClinicalReadService {
     private readonly encountersRepo: EncountersRepository,
     private readonly episodesRepo: CareEpisodesRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
-    private readonly personProfilesRepo: PersonProfilesRepository,
+    private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ClinicalReadService.name);
@@ -77,6 +77,19 @@ export class ClinicalReadService {
    * activo entre la cuenta y su persona, y de ahí al perfil. Son dos consultas
    * y ocurren una vez por lectura.
    *
+   * ## Qué se compara, y por qué se comparaba mal
+   *
+   * `patient_profiles.profile_id` **es** el identificador de la persona: los
+   * subtipos de `profiles` se identifican por ella y no por una fila
+   * intermedia. Es la regla que `ProfileOwnershipService` ya declara para los
+   * mismos perfiles, y la que esta comprobación se había apartado: buscaba en
+   * `person_profiles` **por su `id`** usando un id de persona. Esa fila no
+   * existe nunca, así que el titular quedaba fuera de su propia historia con un
+   * 403 permanente — no en un caso borde, en todos.
+   *
+   * Comprobado sobre la base: de 16 perfiles de paciente, los 16 tienen
+   * `profile_id` apuntando a una persona y ninguno a un `person_profiles.id`.
+   *
    * ## Qué NO relaja el bypass de verificación
    *
    * Esto. El bypass de DEV (corrección #12) exime de estar verificado, no de
@@ -92,9 +105,12 @@ export class ClinicalReadService {
   ): Promise<void> {
     const em = this.em.fork();
     const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
-    const perfil = await this.personProfilesRepo.findById(em, patientProfileId);
+    const perfil = await this.patientProfilesRepo.findById(
+      em,
+      patientProfileId,
+    );
 
-    if (!link || !perfil || perfil.personId !== link.personId) {
+    if (!link || !perfil || perfil.profileId !== link.personId) {
       this.logger.warn(
         {
           operation: 'clinical.patient.read.denied',
@@ -158,8 +174,11 @@ export class ClinicalReadService {
           verificationStatusConceptId: row.verificationStatusConceptId,
           severityConceptId: row.severityConceptId,
           encounterId: row.encounterId,
+          clinicalCourseConceptId: row.clinicalCourseConceptId,
           onsetAt: row.onsetAt,
+          expectedResolutionAt: row.expectedResolutionAt,
           resolvedAt: row.resolvedAt,
+          noteText: row.noteText,
           createdAt: row.createdAt,
         }),
       ),
@@ -188,6 +207,8 @@ export class ClinicalReadService {
         frequencyText: row.frequencyText,
         validFrom: row.validFrom,
         validTo: row.validTo,
+        patientInstructionsText: row.patientInstructionsText,
+        indicationConditionId: row.indicationConditionId,
         signedAt: row.signedAt,
         issuedAt: row.issuedAt,
         createdAt: row.createdAt,

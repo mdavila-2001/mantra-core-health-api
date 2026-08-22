@@ -159,6 +159,62 @@ export class PostMentionDto {
   offsetEnd?: number | null;
 }
 
+/** Cuántas reacciones de cada tipo tiene un contenido. */
+export class ReactionTallyDto {
+  /** Concept id del tipo de reacción. */
+  @ApiProperty({ format: 'uuid' })
+  reactionTypeConceptId!: string;
+
+  /**
+   * El código del tipo (`LIKE`, `INSIGHTFUL`, …), el mismo con el que se escribe.
+   *
+   * Viaja junto al uuid porque el módulo **se escribe con la palabra y se leía
+   * sólo con el uuid**, y una interfaz que recibe el uuid no puede marcar el
+   * botón que le corresponde sin resolver terminología en cada render.
+   *
+   * Nulo sólo si la fila guarda un concepto que no está en el enum del módulo
+   * —dato viejo o escrito por fuera—: en ese caso se dice que no se pudo
+   * resolver, en lugar de inventar un código.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  reactionType?: string | null;
+
+  /** Cantidad de reacciones de ese tipo. */
+  @ApiProperty()
+  count!: number;
+}
+
+/** Resumen de reacciones de un contenido (UC-19-03, cara de lectura). */
+export class ReactionSummaryDto {
+  /** Recuento por tipo. */
+  @ApiProperty({ type: [ReactionTallyDto] })
+  tallies!: ReactionTallyDto[];
+
+  /** Total de reacciones. */
+  @ApiProperty()
+  total!: number;
+
+  /**
+   * Concept id de la reacción del propio actor, si preguntó por sí mismo.
+   *
+   * `null` distingue «no reaccionó» de `undefined` «no preguntó»: la interfaz
+   * necesita saber si puede pintar el botón como activo o si directamente no
+   * tiene esa información.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  actorReactionTypeConceptId?: string | null;
+
+  /**
+   * El código de la reacción del propio actor, resuelto del concepto.
+   *
+   * Es lo que la interfaz necesita para pintar activo el botón correcto tras
+   * recargar. Sigue la misma distinción que el campo de arriba: ausente si no se
+   * preguntó, `null` si no reaccionó.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  actorReactionType?: string | null;
+}
+
 /** Fila del muro: una publicación sin sus hijos. */
 export class PostListItemDto {
   /** Identificador de la publicación. */
@@ -192,6 +248,29 @@ export class PostListItemDto {
   /** Si fue editada, cuándo. */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   editedAt?: Date | null;
+
+  /**
+   * Reacciones de la publicación, con la del propio lector si tiene perfil.
+   *
+   * **Viaja con la fila y no en una lectura aparte** porque si no, la única
+   * forma de saber cuántas reacciones tiene cada publicación era pedir
+   * `GET /posts/{id}/reactions` una vez por tarjeta: cincuenta publicaciones,
+   * cincuenta peticiones. Sin esto, el conteo de la interfaz sólo podía ser el
+   * del gesto que el usuario acababa de hacer, y **al recargar volvía a cero**
+   * aunque la reacción estuviera guardada.
+   */
+  @ApiProperty({ type: ReactionSummaryDto })
+  reactions!: ReactionSummaryDto;
+
+  /**
+   * Comentarios vigentes del hilo completo, raíces y respuestas.
+   *
+   * Por la misma razón que el resumen de reacciones: el contador no existe como
+   * columna —y agregarla sería agregar esquema por comodidad de una lectura—, se
+   * calcula agrupado al leer la página.
+   */
+  @ApiProperty()
+  commentCount!: number;
 }
 
 /** Publicación con sus adjuntos, etiquetas y menciones (UC-19-01). */
@@ -280,38 +359,6 @@ export class CommentThreadPageDto {
   /** Cursor de la página siguiente, o `null`. */
   @ApiPropertyOptional({ nullable: true })
   nextCursor!: string | null;
-}
-
-/** Cuántas reacciones de cada tipo tiene un contenido. */
-export class ReactionTallyDto {
-  /** Concept id del tipo de reacción. */
-  @ApiProperty({ format: 'uuid' })
-  reactionTypeConceptId!: string;
-
-  /** Cantidad de reacciones de ese tipo. */
-  @ApiProperty()
-  count!: number;
-}
-
-/** Resumen de reacciones de un contenido (UC-19-03, cara de lectura). */
-export class ReactionSummaryDto {
-  /** Recuento por tipo. */
-  @ApiProperty({ type: [ReactionTallyDto] })
-  tallies!: ReactionTallyDto[];
-
-  /** Total de reacciones. */
-  @ApiProperty()
-  total!: number;
-
-  /**
-   * Concept id de la reacción del propio actor, si preguntó por sí mismo.
-   *
-   * `null` distingue «no reaccionó» de `undefined` «no preguntó»: la interfaz
-   * necesita saber si puede pintar el botón como activo o si directamente no
-   * tiene esa información.
-   */
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
-  actorReactionTypeConceptId?: string | null;
 }
 
 /** Un seguimiento vigente. */

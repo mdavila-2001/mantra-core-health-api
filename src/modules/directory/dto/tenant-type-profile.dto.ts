@@ -25,6 +25,28 @@ export class PayerProfileDto {
   carrierCode!: string;
 
   /**
+   * Sigla con la que se conoce a la aseguradora.
+   */
+  @ApiProperty({
+    description: 'Sigla de la aseguradora',
+    maxLength: 20,
+    example: 'BUPA',
+  })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(20)
+  sigla!: string;
+
+  /**
+   * Dirección de la aseguradora.
+   */
+  @ApiProperty({ description: 'Dirección de la aseguradora', maxLength: 300 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(300)
+  address!: string;
+
+  /**
    * Identificador ante el regulador de seguros (registro, matrícula, NIT).
    */
   @ApiProperty({

@@ -24,6 +24,7 @@ import {
 } from '../../../common';
 import {
   SchedulingBookingsService,
+  SchedulingDelayService,
   SchedulingWaitlistService,
 } from '../services';
 import {
@@ -42,6 +43,8 @@ import {
   ScheduleRemindersResponseDto,
   BookingItemDto,
   SearchBookingsResponseDto,
+  DelayBookingDto,
+  DelayNoticeResponseDto,
 } from '../dto';
 
 /** Operaciones sobre una cita ya confirmada. */
@@ -58,6 +61,7 @@ export class SchedulingBookingsController {
   constructor(
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
+    private readonly delayService: SchedulingDelayService,
   ) {}
 
   /**
@@ -97,6 +101,7 @@ export class SchedulingBookingsController {
     @Query('to', new ParseOptionalDatePipe()) to?: Date,
     @Query('includeCancelled') includeCancelled?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @CurrentUser() actor?: AuthenticatedUser,
   ): Promise<SearchBookingsResponseDto> {
     return this.bookingsService.searchBookings(
       {
@@ -107,6 +112,7 @@ export class SchedulingBookingsController {
         includeCancelled: includeCancelled === 'true',
       },
       limit ?? 100,
+      actor,
     );
   }
 
@@ -119,8 +125,13 @@ export class SchedulingBookingsController {
   @Get(':id')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({ summary: 'UC-41-15: consulta una cita' })
-  getBooking(@Param('id', ParseUUIDPipe) id: string): Promise<BookingItemDto> {
-    return this.bookingsService.getBookingById(id);
+  getBooking(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingItemDto> {
+    // El actor viaja para decidir si el motivo de consulta se incluye: sólo el
+    // titular y su médico lo ven (TJ-2).
+    return this.bookingsService.getBookingById(id, actor);
   }
 
   /**
@@ -288,6 +299,29 @@ export class SchedulingBookingsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CheckInResponseDto> {
     return this.bookingsService.checkIn(id, actor);
+  }
+
+  /**
+   * P8: el profesional avisa que se demora sobre **esta** cita.
+   *
+   * No cambia el estado de la cita ni toca su cupo: es comunicación. La demora
+   * queda en el historial del turno —así el paciente la ve aunque no abra la
+   * campana— y sale como aviso in-app.
+   */
+  @Post(':id/delay')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Informar una demora sobre una cita',
+    description:
+      'Sólo la informa quien atiende esa agenda. No mueve el turno: avisa que empieza más tarde.',
+  })
+  delay(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DelayBookingDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DelayNoticeResponseDto> {
+    return this.delayService.delayBooking(id, dto, actor);
   }
 
   /** UC-41-13. */

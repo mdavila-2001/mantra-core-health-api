@@ -36,6 +36,19 @@ export class CatalogRepository {
     return em.findOne(InsuranceCarriers, { id });
   }
   /**
+   * Obtiene find carrier by tenant id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador del tenant dueño de la aseguradora.
+   * @returns Resultado de find carrier by tenant id conforme al contrato `Promise<InsuranceCarriers | null>`.
+   */
+  findCarrierByTenantId(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<InsuranceCarriers | null> {
+    return em.findOne(InsuranceCarriers, { tenantId });
+  }
+  /**
    * Crea create carrier.
    *
    * @param em - Contexto de persistencia o transacción activa.

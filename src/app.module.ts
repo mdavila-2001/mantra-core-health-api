@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerGuard, ThrottlerModule, ThrottlerStorage } from '@nestjs/throttler';
+import {
+  ThrottlerGuard,
+  ThrottlerModule,
+  ThrottlerStorage,
+} from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppReadinessService } from './app-readiness.service';
@@ -19,11 +23,14 @@ import {
   AuthModule,
   FileStorageModule,
   TenantContextInterceptor,
+  VerificationBypassModule,
   appSecurityEnvSchema,
   authEnvSchema,
   storageEnvSchema,
+  verificationBypassEnvSchema,
 } from './common';
 import { SeedModule } from './common/seed/seed.module';
+import { seedBootEnvSchema } from './common/seed/seed-boot.env';
 import { IamModule } from './modules/iam/iam.module';
 import { DirectoryModule } from './modules/directory/directory.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
@@ -65,6 +72,7 @@ import { MessagingModule } from './modules/messaging/messaging.module';
 import { ObjectStorageModule } from './modules/object_storage/object_storage.module';
 import { OrganizationExtensionsModule } from './modules/organization_extensions/organization_extensions.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { PharmaLabModule } from './modules/pharma_lab/pharma_lab.module';
 import { PharmacyModule } from './modules/pharmacy/pharmacy.module';
 import { PharmacyInventoryModule } from './modules/pharmacy_inventory/pharmacy_inventory.module';
 import { PlatformOpsModule } from './modules/platform_ops/platform_ops.module';
@@ -76,9 +84,11 @@ import { QaLabModule } from './modules/qa_lab/qa_lab.module';
 import { ReadModelsModule } from './modules/read_models/read_models.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
+import { SurveysModule } from './modules/surveys/surveys.module';
 import { SystemContextModule } from './modules/system_context/system_context.module';
 import { SystemOpsModule } from './modules/system_ops/system_ops.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
+import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TimeSeriesModule } from './modules/time_series/time_series.module';
@@ -108,7 +118,10 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
         .concat(audioEnvSchema)
-        .concat(telemetryEnvSchema),
+        .concat(telemetryEnvSchema)
+        .concat(webAnalyticsEnvSchema)
+        .concat(verificationBypassEnvSchema)
+        .concat(seedBootEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
     // generoso (backstop); los endpoints sensibles (login/refresh) declaran un
@@ -139,6 +152,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // Almacenamiento de archivos: resuelve el adaptador activo (`local` en
     // disco por ahora) a partir de FILE_STORAGE_ADAPTER. Global.
     FileStorageModule,
+    // Bypass de verificación DEV/TEST (corrección #12): un solo `isActive()`
+    // que consumen los servicios de dominio que hoy filtran por verificación.
+    VerificationBypassModule,
     // Núcleo de persistencia: conexión, inyección idempotente del DDL en el
     // arranque, verificación de fidelidad y métricas del ORM. Ver src/orm.
     OrmModule,
@@ -191,6 +207,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ObjectStorageModule,
     OrganizationExtensionsModule,
     PaymentsModule,
+    PharmaLabModule,
     PharmacyModule,
     PharmacyInventoryModule,
     PlatformOpsModule,
@@ -202,6 +219,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ReadModelsModule,
     ReportingModule,
     SchedulingModule,
+    SurveysModule,
     SystemContextModule,
     SystemOpsModule,
     TelemetryModule,

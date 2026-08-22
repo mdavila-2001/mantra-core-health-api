@@ -127,6 +127,30 @@ export class MedicationRequests {
   validTo?: Date;
 
   /**
+   * Valor de patient instructions text mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'patient_instructions_text',
+    columnType: 'text',
+    nullable: true,
+  })
+  patientInstructionsText?: string;
+
+  /**
+   * Diagnóstico que motiva la prescripción: para qué es esta receta (v4.1.6).
+   *
+   * Compartir el encuentro con una condición dice cuándo se recetó, no para qué.
+   * Nullable a propósito: una receta sintomática o una profilaxis son actos
+   * clínicos legítimos sin condición codificada.
+   */
+  @Property({
+    fieldName: 'indication_condition_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → clinical.conditions
+  indicationConditionId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

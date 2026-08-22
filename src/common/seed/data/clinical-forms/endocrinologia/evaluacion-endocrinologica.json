@@ -1,0 +1,35 @@
+{
+  "code": "ENDO_EVALUACION_BASE",
+  "name": "Evaluación endocrinológica",
+  "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen físico con registro antropométrico",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico con peso y talla, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis dirigida de síntomas tiroideos y de alteración de la glucemia (poliuria, polidipsia, polifagia), el registro del cambio de peso y del perímetro abdominal, y el examen de tiroides, piel y anexos."
+  },
+  "fields": [
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
+    { "code": "enfermedad_actual", "name": "Relato de la enfermedad actual", "dataType": "text", "required": true },
+    { "code": "antecedentes_metabolicos_familiares", "name": "Antecedentes familiares metabólicos (diabetes, tiroides, obesidad)", "dataType": "text", "required": false },
+    { "code": "antecedentes_personales", "name": "Antecedentes personales y medicación habitual", "dataType": "text", "required": false },
+    { "code": "sintomas_tiroideos", "name": "Síntomas tiroideos (intolerancia al frío o calor, temblor, palpitaciones)", "dataType": "text", "required": false },
+    { "code": "poliuria", "name": "Poliuria", "dataType": "boolean", "required": false },
+    { "code": "polidipsia", "name": "Polidipsia", "dataType": "boolean", "required": false },
+    { "code": "polifagia", "name": "Polifagia", "dataType": "boolean", "required": false },
+    { "code": "cambio_de_peso", "name": "Cambio de peso referido (kg y tiempo)", "dataType": "string", "required": false },
+    { "code": "peso", "name": "Peso (kg)", "dataType": "decimal", "required": true },
+    { "code": "talla", "name": "Talla (cm)", "dataType": "decimal", "required": false },
+    { "code": "perimetro_abdominal", "name": "Perímetro abdominal (cm)", "dataType": "decimal", "required": false },
+    { "code": "presion_arterial", "name": "Presión arterial (mmHg)", "dataType": "string", "required": false },
+    { "code": "examen_de_tiroides", "name": "Examen de tiroides (tamaño, consistencia, nódulos)", "dataType": "text", "required": false },
+    { "code": "piel_y_anexos", "name": "Piel y anexos (sequedad, acantosis, distribución del vello)", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
+    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento", "dataType": "text", "required": false }
+  ]
+}

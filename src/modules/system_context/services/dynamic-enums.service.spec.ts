@@ -78,6 +78,9 @@ function draftDefinition(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/** La versión de value set que la versión de la enumeración congela. */
+const VALUE_SET_VERSION = '11111111-1111-4111-8111-111111111111';
+
 const OPTIONS = [
   { conceptId: CONCEPT_A, code: 'RED', display: 'Rojo', isDefault: true },
   { conceptId: CONCEPT_B, code: 'GREEN', display: 'Verde' },
@@ -134,7 +137,11 @@ describe('DynamicEnumsService', () => {
 
       const res = await d.service.draftVersion(
         DEFINITION,
-        { options: OPTIONS },
+        {
+          valueSetVersionId: VALUE_SET_VERSION,
+          schemaVersion: '1.0.0',
+          options: OPTIONS,
+        },
         actor,
       );
 
@@ -150,13 +157,59 @@ describe('DynamicEnumsService', () => {
       const d = build();
       wire(d);
 
-      await d.service.draftVersion(DEFINITION, { options: OPTIONS }, actor);
+      await d.service.draftVersion(
+        DEFINITION,
+        {
+          valueSetVersionId: VALUE_SET_VERSION,
+          schemaVersion: '1.0.0',
+          options: OPTIONS,
+        },
+        actor,
+      );
 
       expect(d.contextRepo.createEnumOption).toHaveBeenNthCalledWith(
         2,
         d.tx,
         expect.objectContaining({ code: 'GREEN', ordinal: 2, enabled: true }),
       );
+    });
+
+    /**
+     * La versión se escribe antes que sus opciones. Las opciones guardan el id
+     * de su versión como columna suelta, así que el ORM no ve la dependencia:
+     * sin el flush, Postgres rechaza los INSERT con
+     * `fk_dynamic_enum_options_dynamic_enum_version_id` y redactar una versión
+     * por API era imposible (F-19, 18/08/2026).
+     */
+    it('flushes the version before creating its options', async () => {
+      const d = build();
+      wire(d);
+      const orden: string[] = [];
+      d.tx.flush.mockImplementation(() => {
+        orden.push('flush');
+        return Promise.resolve();
+      });
+      const crearOpcion =
+        d.contextRepo.createEnumOption.getMockImplementation();
+      d.contextRepo.createEnumOption.mockImplementation(
+        (...args: unknown[]) => {
+          orden.push('option');
+          return crearOpcion?.(...args) ?? { id: 'o-1' };
+        },
+      );
+
+      await d.service.draftVersion(
+        DEFINITION,
+        {
+          valueSetVersionId: VALUE_SET_VERSION,
+          schemaVersion: '1.0.0',
+          options: OPTIONS,
+        },
+        actor,
+      );
+
+      expect(orden[0]).toBe('flush');
+      expect(orden).toContain('option');
     });
 
     it('continues the numbering from the latest version', async () => {
@@ -168,7 +221,11 @@ describe('DynamicEnumsService', () => {
 
       const res = await d.service.draftVersion(
         DEFINITION,
-        { options: OPTIONS },
+        {
+          valueSetVersionId: VALUE_SET_VERSION,
+          schemaVersion: '1.0.0',
+          options: OPTIONS,
+        },
         actor,
       );
 
@@ -234,7 +291,11 @@ describe('DynamicEnumsService', () => {
       await expect(
         d.service.draftVersion(
           DEFINITION,
-          { options: OPTIONS } as any,
+          {
+            valueSetVersionId: VALUE_SET_VERSION,
+            schemaVersion: '1.0.0',
+            options: OPTIONS,
+          } as any,
           actor as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -247,7 +308,11 @@ describe('DynamicEnumsService', () => {
       await expect(
         d.service.draftVersion(
           DEFINITION,
-          { options: OPTIONS } as any,
+          {
+            valueSetVersionId: VALUE_SET_VERSION,
+            schemaVersion: '1.0.0',
+            options: OPTIONS,
+          } as any,
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);

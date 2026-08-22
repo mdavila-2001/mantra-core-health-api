@@ -1,0 +1,1992 @@
+{
+  "sources": [
+    {
+      "id": "59259d49-9b9b-5e74-897c-832c248fbda4",
+      "code": "RXNORM",
+      "name": "RxNorm (NLM)",
+      "owner": "U.S. National Library of Medicine",
+      "official_url": "https://www.nlm.nih.gov/research/umls/rxnorm/",
+      "license": "Public domain (UMLS Metathesaurus license applies to some sources)"
+    },
+    {
+      "id": "4c20b059-a231-5198-9d68-68f99ffd46a1",
+      "code": "SNOMED_CT",
+      "name": "SNOMED CT",
+      "owner": "SNOMED International",
+      "official_url": "https://www.snomed.org/",
+      "license": "License required by jurisdiction"
+    },
+    {
+      "id": "63041c91-d988-5253-8bb2-4996d5d95b1f",
+      "code": "WHO_ATC",
+      "name": "WHO ATC/DDD Index",
+      "owner": "WHO Collaborating Centre for Drug Statistics Methodology",
+      "official_url": "https://www.whocc.no/atc_ddd_index/",
+      "license": "Use subject to WHOCC terms"
+    }
+  ],
+  "codeSystem": [
+    {
+      "id": "77e810a0-9ed6-2a29-8ac5-7960d7d9113b",
+      "source_id": "63041c91-d988-5253-8bb2-4996d5d95b1f",
+      "internal_code": "vademecum",
+      "name": "Mantra Vademécum (ATC-based medication catalog)",
+      "canonical_url": "https://mantracore.health/fhir/CodeSystem/vademecum",
+      "oid": null,
+      "case_sensitive": true,
+      "supports_composition": false
+    }
+  ],
+  "codeSystemVersion": [
+    {
+      "id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code_system_id": "77e810a0-9ed6-2a29-8ac5-7960d7d9113b",
+      "version": "2026.1",
+      "published_at": "2026-07-30T00:00:00.000Z",
+      "valid_from": null,
+      "checksum": null,
+      "is_default": true
+    }
+  ],
+  "concepts": [
+    {
+      "id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "A02BC01",
+      "display": "Omeprazole",
+      "definition": "Proton pump inhibitor (PPI).",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "A10BA02",
+      "display": "Metformin",
+      "definition": "Biguanide oral antihyperglycemic agent.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "B01AA03",
+      "display": "Warfarin",
+      "definition": "Coumarin oral anticoagulant (vitamin K antagonist).",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "B01AB05",
+      "display": "Enoxaparin",
+      "definition": "Low-molecular-weight heparin anticoagulant.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "C03CA01",
+      "display": "Furosemide",
+      "definition": "Loop diuretic.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "C08CA01",
+      "display": "Amlodipine",
+      "definition": "Dihydropyridine calcium channel blocker.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "d2167327-b864-5567-8e20-13772714fad9",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "C09CA01",
+      "display": "Losartan",
+      "definition": "Angiotensin II receptor blocker (ARB).",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "C10AA05",
+      "display": "Atorvastatin",
+      "definition": "HMG-CoA reductase inhibitor (statin).",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "J01CA04",
+      "display": "Amoxicillin",
+      "definition": "Aminopenicillin (broad-spectrum beta-lactam) antibiotic.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "J01DD04",
+      "display": "Ceftriaxone",
+      "definition": "Third-generation cephalosporin antibiotic.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "J01FA10",
+      "display": "Azithromycin",
+      "definition": "Macrolide antibiotic.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "J01GB03",
+      "display": "Gentamicin",
+      "definition": "Aminoglycoside antibiotic.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "J01MA02",
+      "display": "Ciprofloxacin",
+      "definition": "Fluoroquinolone antibiotic.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "J01XA01",
+      "display": "Vancomycin",
+      "definition": "Glycopeptide antibiotic active against Gram-positive bacteria including MRSA.",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "M01AE01",
+      "display": "Ibuprofen",
+      "definition": "Non-steroidal anti-inflammatory drug (NSAID).",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "N02BE01",
+      "display": "Paracetamol",
+      "definition": "Analgesic and antipyretic agent (acetaminophen).",
+      "abstract": false,
+      "selectable": true
+    },
+    {
+      "id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
+      "code": "R03AC02",
+      "display": "Salbutamol",
+      "definition": "Short-acting beta-2 adrenergic agonist (albuterol).",
+      "abstract": false,
+      "selectable": true
+    }
+  ],
+  "designations": [
+    {
+      "id": "ebf1c3f7-a2af-5ff2-a984-986d1a1fcc01",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Advil",
+      "preferred": false
+    },
+    {
+      "id": "8094d3d4-b318-5e33-99d2-ca00a34537df",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Albuterol",
+      "preferred": false
+    },
+    {
+      "id": "da777b87-4fe4-591e-8bc6-fda79acb42dc",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Amlodipine",
+      "preferred": true
+    },
+    {
+      "id": "43bbfe13-f1bb-5d5f-859f-3f9e46fc981d",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Amlodipino",
+      "preferred": false
+    },
+    {
+      "id": "09207b0e-4256-5c38-b6c2-ff9ef17ba629",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Amoxicilina",
+      "preferred": false
+    },
+    {
+      "id": "6a150c28-be39-73f9-936a-ecc555ab0d5c",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Amoxicillin",
+      "preferred": true
+    },
+    {
+      "id": "d11f9410-f5ee-5351-9b7a-6cc6c1e8a3e4",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Amoxil",
+      "preferred": false
+    },
+    {
+      "id": "c47e50c2-f595-5175-9f58-4167d4809b8c",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Atorvastatin",
+      "preferred": true
+    },
+    {
+      "id": "7502d9b4-79ab-5c8d-ac20-9f3b92e36d76",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Atorvastatina",
+      "preferred": false
+    },
+    {
+      "id": "97025ed9-a41e-5dcd-8690-7660a48df157",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Azithromycin",
+      "preferred": true
+    },
+    {
+      "id": "c4ab0350-aed8-5373-b44f-6dfb612c55de",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Azitromicina",
+      "preferred": false
+    },
+    {
+      "id": "18215c6c-89b3-531f-8a97-ee5d7986ade2",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Ceftriaxona",
+      "preferred": false
+    },
+    {
+      "id": "50c8b4e9-2ebd-5bc3-a395-1d0804a7e95f",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Ceftriaxone",
+      "preferred": true
+    },
+    {
+      "id": "9b1cf3ea-92dc-5fa4-8f6c-1ce59978f919",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Cipro",
+      "preferred": false
+    },
+    {
+      "id": "90021a4f-faa2-5877-b185-314ce3748c49",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Ciprofloxacin",
+      "preferred": true
+    },
+    {
+      "id": "b011c60d-3619-578e-8d67-b1523e947b0a",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Ciprofloxacino",
+      "preferred": false
+    },
+    {
+      "id": "158843e6-a279-5fbb-863e-e8c8d178daac",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Clexane",
+      "preferred": false
+    },
+    {
+      "id": "f0390321-a007-54f5-b6dc-10d9d0c947cb",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Coumadin",
+      "preferred": false
+    },
+    {
+      "id": "9333102b-42a4-3ae8-aea3-43d118876350",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Cozaar",
+      "preferred": false
+    },
+    {
+      "id": "4d828ea1-00f2-5ad6-9f4a-81aca10b96d2",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Enoxaparin",
+      "preferred": true
+    },
+    {
+      "id": "f1a15971-1321-547b-adc0-55a6700efb83",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Enoxaparina",
+      "preferred": false
+    },
+    {
+      "id": "bddd9fa4-4580-5bc4-9341-cdf45dcdd52a",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Furosemida",
+      "preferred": false
+    },
+    {
+      "id": "690e8284-9a0e-57d0-bb36-9d6dae731c38",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Furosemide",
+      "preferred": true
+    },
+    {
+      "id": "a350b515-200b-5198-b727-2db5726f7013",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Garamycin",
+      "preferred": false
+    },
+    {
+      "id": "9b234c7b-014c-5679-883f-3b1e55245ab0",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Gentamicin",
+      "preferred": true
+    },
+    {
+      "id": "2b9f6619-7451-537c-98fb-89ba2fd93978",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Gentamicina",
+      "preferred": false
+    },
+    {
+      "id": "0b24a2c2-52c5-5628-b059-b6ed5d3406a9",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Glucophage",
+      "preferred": false
+    },
+    {
+      "id": "432df0c7-4203-57cb-b670-24097ce49467",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Ibuprofen",
+      "preferred": true
+    },
+    {
+      "id": "2b5f5be2-9819-5641-b8e8-acce3e8d9546",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Ibuprofeno",
+      "preferred": false
+    },
+    {
+      "id": "9560fca1-dfa5-54f1-a498-efa6d634b97d",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Jantoven",
+      "preferred": false
+    },
+    {
+      "id": "9fb3dc0d-c8e6-53ce-8f88-0f3eb1959f27",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Lasix",
+      "preferred": false
+    },
+    {
+      "id": "a448cf27-c8cf-5418-8799-9a0391dc6e9f",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Lipitor",
+      "preferred": false
+    },
+    {
+      "id": "99513e16-f096-450f-9e03-6a7ff197039a",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Losartan",
+      "preferred": true
+    },
+    {
+      "id": "efa13de3-8f4a-5a7e-8d46-71762413f665",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Losartán",
+      "preferred": false
+    },
+    {
+      "id": "72086278-0f2f-5a48-84fb-737caafea456",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Losec",
+      "preferred": false
+    },
+    {
+      "id": "a4f376d7-5306-5482-97a8-861a7bcb0d26",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Lovenox",
+      "preferred": false
+    },
+    {
+      "id": "a97c8b7b-342e-5e24-8c8c-4ff3bb38272f",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Metformin",
+      "preferred": true
+    },
+    {
+      "id": "e727b8e8-ed53-55cf-a70a-58bea8127a27",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Metformina",
+      "preferred": false
+    },
+    {
+      "id": "9e8ca911-0676-88b9-8b01-6a797b322a4c",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Motrin",
+      "preferred": false
+    },
+    {
+      "id": "29bfbd8e-ba45-5bce-8cb5-bf3bc2155144",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Norvasc",
+      "preferred": false
+    },
+    {
+      "id": "8484e03e-4081-5886-a319-bce13145cf62",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Omeprazol",
+      "preferred": false
+    },
+    {
+      "id": "b12b3b31-0f24-5903-9777-80b5eb823fa9",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Omeprazole",
+      "preferred": true
+    },
+    {
+      "id": "b843e176-f9ee-5c38-ad30-8e3dc4c7b23b",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Panadol",
+      "preferred": false
+    },
+    {
+      "id": "3e6cdd70-7bd1-53a7-b07f-2423584ca92c",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Paracetamol",
+      "preferred": true
+    },
+    {
+      "id": "f35feb45-103b-53d1-8886-5b37a9deccb7",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Paracetamol",
+      "preferred": false
+    },
+    {
+      "id": "ee6b37fe-d53a-561d-99f4-e2697fa8c246",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Prilosec",
+      "preferred": false
+    },
+    {
+      "id": "a33fb832-18bf-5213-9487-681d65b6c39b",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "ProAir",
+      "preferred": false
+    },
+    {
+      "id": "80457037-fbf9-58d4-9159-93083bb0f82c",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Rocephin",
+      "preferred": false
+    },
+    {
+      "id": "c8b68fd3-9b77-56f4-80ba-4922f240bc68",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Salbutamol",
+      "preferred": true
+    },
+    {
+      "id": "8fe10246-0807-5c03-8666-495232fba925",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Trimox",
+      "preferred": false
+    },
+    {
+      "id": "8d299bf5-974b-55aa-9cf1-8c95d8ddbf73",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Tylenol",
+      "preferred": false
+    },
+    {
+      "id": "4042e073-55e9-7dbb-8658-04f385d2567b",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Vancocin",
+      "preferred": false
+    },
+    {
+      "id": "52acab01-1f3d-5915-af9c-ea5c2ffa3dac",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Vancomicina",
+      "preferred": false
+    },
+    {
+      "id": "42987bb8-aa30-53e6-8677-3bf4d1024229",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Vancomycin",
+      "preferred": true
+    },
+    {
+      "id": "ccf77452-93f7-188a-b1a9-5cf7148230ee",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Ventolin",
+      "preferred": false
+    },
+    {
+      "id": "ff3d8c5f-2302-57db-b345-405d4148d412",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "language_concept_id": "9907bae2-1a46-5346-8d92-4d1d5ca3ec7b",
+      "designation_type_concept_id": null,
+      "value": "Warfarin",
+      "preferred": true
+    },
+    {
+      "id": "d1f8fb75-4184-5012-ad85-ecc259aebdc5",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
+      "designation_type_concept_id": null,
+      "value": "Warfarina",
+      "preferred": false
+    },
+    {
+      "id": "841ae784-34e9-5a66-b3d6-714b6c8c424f",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Zithromax",
+      "preferred": false
+    },
+    {
+      "id": "c489a15e-3fdb-58cc-9b45-b342ecfd7191",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "language_concept_id": null,
+      "designation_type_concept_id": null,
+      "value": "Zmax",
+      "preferred": false
+    }
+  ],
+  "properties": [
+    {
+      "id": "e58b1002-5262-5ac8-ba01-3822ba3116ec",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": ["Bleeding", "Skin necrosis", "Purple toe syndrome"]
+    },
+    {
+      "id": "d8a0cb5f-4297-5456-9e21-e39e519c8bcd",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["Active bleeding", "Pregnancy", "Severe hepatic disease"]
+    },
+    {
+      "id": "d9cf4d2c-2fad-5d68-83c7-5e5c04ff347c",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["oral tablet"]
+    },
+    {
+      "id": "a50757ec-a3bb-295c-8d44-a0e1084348fd",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "Atrial fibrillation",
+        "Venous thromboembolism",
+        "Mechanical heart valves"
+      ]
+    },
+    {
+      "id": "d509dd2c-b142-5672-93a6-b458cb5c1783",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["INR", "Signs of bleeding"]
+    },
+    {
+      "id": "7e0f33ab-b244-57f3-8746-94b487e65242",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral"]
+    },
+    {
+      "id": "cb1e88c3-d01a-52b2-a731-da12e569dd88",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "11289"
+    },
+    {
+      "id": "e3ab1123-c3c6-5adc-b804-2d00c0264fe6",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["1 mg", "2 mg", "2.5 mg", "5 mg", "10 mg"]
+    },
+    {
+      "id": "c9c51f88-ad76-59ee-88e8-397ceaec7c96",
+      "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Coumarin anticoagulant (vitamin K antagonist)"
+    },
+    {
+      "id": "266b7c38-7524-547a-bcc0-5964bbadad98",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": [
+        "Diarrhea",
+        "Rash",
+        "Biliary pseudolithiasis",
+        "Hypersensitivity"
+      ]
+    },
+    {
+      "id": "001b0d9c-f51a-5aea-9aae-dc0d7a7c61b6",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": [
+        "Hypersensitivity to cephalosporins",
+        "Neonates with hyperbilirubinemia",
+        "Concomitant IV calcium in neonates"
+      ]
+    },
+    {
+      "id": "7e55f629-9582-50ec-9ecf-17c9c1299bcd",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["powder for solution for injection"]
+    },
+    {
+      "id": "9b762e1c-6e9a-3fe0-b6ef-314016170513",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "Meningitis",
+        "Community-acquired pneumonia",
+        "Gonorrhea",
+        "Sepsis"
+      ]
+    },
+    {
+      "id": "3fda0377-2247-65f1-9948-b28fd8c85ff5",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["Signs of hypersensitivity", "Renal and hepatic function"]
+    },
+    {
+      "id": "d128cc16-5d2d-508b-b80a-4a9e4f792d39",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["intravenous", "intramuscular"]
+    },
+    {
+      "id": "df317d81-7573-508c-a242-253e3614e412",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "2193"
+    },
+    {
+      "id": "1ce5825f-9913-520c-8945-8bfbc6ba1f3e",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["250 mg", "500 mg", "1 g", "2 g"]
+    },
+    {
+      "id": "c075839c-e06c-524b-bbe1-6ae4daa13598",
+      "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Third-generation cephalosporin"
+    },
+    {
+      "id": "274fade3-61b7-55bb-93c0-cc06f3ec1531",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": ["Peripheral edema", "Flushing", "Headache", "Dizziness"]
+    },
+    {
+      "id": "711ddf72-ebab-5975-8737-a1f9dd023eb4",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["Cardiogenic shock", "Severe aortic stenosis"]
+    },
+    {
+      "id": "2dec1f71-c0b3-5c89-ab00-e957be6fa497",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["oral tablet"]
+    },
+    {
+      "id": "6eb3c179-bba1-507c-b398-b9b8559b56d6",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": ["Hypertension", "Chronic stable angina"]
+    },
+    {
+      "id": "8f0b2340-995b-5be4-8022-6114b79b8901",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["Blood pressure", "Edema"]
+    },
+    {
+      "id": "63342196-09c1-5300-b0b6-46e9454ab1f9",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral"]
+    },
+    {
+      "id": "19b5d859-bb58-5d91-97e6-0ad71e392917",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "17767"
+    },
+    {
+      "id": "542ac249-f463-5276-bfa5-b6df805343ed",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["2.5 mg", "5 mg", "10 mg"]
+    },
+    {
+      "id": "0d569c3a-b98e-5c95-a59a-890ed5b00a23",
+      "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Dihydropyridine calcium channel blocker"
+    },
+    {
+      "id": "f60477a2-8abb-5f76-bfdb-fd10d0d276d4",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": ["Bleeding", "Thrombocytopenia", "Injection site hematoma"]
+    },
+    {
+      "id": "bf8a6f8e-94f6-5e73-a202-2c7ebd241c6c",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": [
+        "Active major bleeding",
+        "History of heparin-induced thrombocytopenia"
+      ]
+    },
+    {
+      "id": "f55afde2-4cfb-58f3-98b9-0631795b2c0e",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["prefilled syringe solution for injection"]
+    },
+    {
+      "id": "d8d19d38-e47a-52f0-b5d4-2f378e7edf4b",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "VTE prophylaxis",
+        "Treatment of DVT and PE",
+        "Acute coronary syndromes"
+      ]
+    },
+    {
+      "id": "c1e23482-55e6-563e-b201-d0ac3dc29b66",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": [
+        "Platelet count",
+        "Anti-Xa levels in select patients",
+        "Renal function"
+      ]
+    },
+    {
+      "id": "1184d962-fcb9-5fdb-aaf8-6880aa812607",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["subcutaneous", "intravenous"]
+    },
+    {
+      "id": "e43074cf-980e-5884-ad30-8f50b5b1f440",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "67108"
+    },
+    {
+      "id": "c417a6fb-33df-5692-aca5-0164d63104d4",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["40 mg", "60 mg", "80 mg", "100 mg"]
+    },
+    {
+      "id": "df474087-bf4a-546c-8228-66c245f62334",
+      "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Low-molecular-weight heparin"
+    },
+    {
+      "id": "b7f7caec-8afc-5d4d-9881-b3cf4537da97",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": ["Nephrotoxicity", "Ototoxicity", "Neuromuscular blockade"]
+    },
+    {
+      "id": "e20152c4-e422-5f2a-9cd4-71a2b18aa30d",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["Hypersensitivity to aminoglycosides", "Myasthenia gravis"]
+    },
+    {
+      "id": "ee28231c-e4de-53fe-88af-8d66bfab9a5d",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["solution for injection"]
+    },
+    {
+      "id": "b126a0c0-f06e-5dd7-930a-56e59dbedd83",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "Serious Gram-negative infections",
+        "Sepsis",
+        "Synergy in Gram-positive endocarditis"
+      ]
+    },
+    {
+      "id": "951c1a5d-1e21-56fb-ae33-a7667f8a49f8",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": [
+        "Peak and trough levels",
+        "Serum creatinine",
+        "Audiometry if prolonged"
+      ]
+    },
+    {
+      "id": "13ddd054-7156-5abd-b907-da351693feda",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["intravenous", "intramuscular"]
+    },
+    {
+      "id": "fa668f19-58c6-5904-920b-1443533f03fe",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "4815"
+    },
+    {
+      "id": "11fad3b9-a132-5b8e-a03f-c662454ac85e",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["40 mg/mL", "80 mg", "120 mg"]
+    },
+    {
+      "id": "d938e8d7-e542-5711-9cae-b5b249ac2303",
+      "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Aminoglycoside antibiotic"
+    },
+    {
+      "id": "93137b2f-ef75-5c85-b926-8491cbc40ed4",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": [
+        "Headache",
+        "Diarrhea",
+        "Hypomagnesemia",
+        "Increased fracture risk (long-term)"
+      ]
+    },
+    {
+      "id": "a47f9dbd-a24c-61bc-9fa7-6470c16c9d3e",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["Hypersensitivity to PPIs", "Concomitant rilpivirine"]
+    },
+    {
+      "id": "ae9bd150-a271-55e2-8a3c-b670f2c31761",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": [
+        "delayed-release capsule",
+        "oral tablet",
+        "powder for injection"
+      ]
+    },
+    {
+      "id": "4f0b587f-5934-57c3-99ff-d392867ef9a6",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "GERD",
+        "Peptic ulcer disease",
+        "Zollinger-Ellison syndrome"
+      ]
+    },
+    {
+      "id": "d5f1a4eb-a280-543d-9969-685451b55a13",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["Magnesium (long-term)", "Reassess need periodically"]
+    },
+    {
+      "id": "c860c8d6-a074-541c-a41c-3665bfddb9a2",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral", "intravenous"]
+    },
+    {
+      "id": "b9ed0b40-59c3-8e59-a51a-ea74b4947d9b",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "7646"
+    },
+    {
+      "id": "b6daaf63-f788-565d-a7d0-965b21d74464",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["10 mg", "20 mg", "40 mg"]
+    },
+    {
+      "id": "de158008-fe3f-5b68-b0ef-a28ded35acdf",
+      "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Proton pump inhibitor"
+    },
+    {
+      "id": "9cd11c61-6663-57d8-a26b-4458a3017cdc",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": ["Tremor", "Tachycardia", "Palpitations", "Hypokalemia"]
+    },
+    {
+      "id": "9b1c1362-35fd-56c8-91d7-49729c48f596",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["Hypersensitivity to salbutamol"]
+    },
+    {
+      "id": "82a111a7-22c6-5f3c-af62-165952c5ef68",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": [
+        "metered-dose inhaler",
+        "solution for nebulization",
+        "oral tablet"
+      ]
+    },
+    {
+      "id": "0d748204-59d2-5b8e-8f1b-8f71ce953851",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "Asthma",
+        "COPD bronchospasm",
+        "Exercise-induced bronchospasm"
+      ]
+    },
+    {
+      "id": "c7781b0a-3b20-5aea-80dc-2e7527335a37",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": [
+        "Heart rate",
+        "Serum potassium in high doses",
+        "Symptom control"
+      ]
+    },
+    {
+      "id": "963876eb-a4af-5fe5-a903-bdae5ac76744",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["inhalation", "oral"]
+    },
+    {
+      "id": "9305032f-0364-5957-b355-a59542077e37",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "435"
+    },
+    {
+      "id": "4d67b43c-c1ae-59a1-9800-e4479f75767a",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["100 mcg/actuation", "2.5 mg/2.5 mL", "5 mg/mL"]
+    },
+    {
+      "id": "1fa69a11-440e-5d8c-a669-0f293245e6e1",
+      "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Short-acting beta-2 agonist"
+    },
+    {
+      "id": "241111b4-678f-5627-903c-552012f35290",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": [
+        "Hyperkalemia",
+        "Hypotension",
+        "Dizziness",
+        "Renal impairment"
+      ]
+    },
+    {
+      "id": "019f789e-49a8-5c4b-a42c-7fd74ab6f639",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": [
+        "Pregnancy",
+        "Bilateral renal artery stenosis",
+        "Concomitant aliskiren in diabetes"
+      ]
+    },
+    {
+      "id": "c06b6f75-dbae-18ce-b0bb-bbf07f5e74a4",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["oral tablet"]
+    },
+    {
+      "id": "d91fd391-cc16-5471-aeba-ac4020d2db47",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": ["Hypertension", "Diabetic nephropathy", "Heart failure"]
+    },
+    {
+      "id": "f8337a0f-7419-790c-84c5-900d44c8b184",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["Serum potassium", "Renal function", "Blood pressure"]
+    },
+    {
+      "id": "1b5ce56f-019c-542c-9972-5a3e34ad8f58",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral"]
+    },
+    {
+      "id": "c5ff6a65-c996-55a0-91b3-57b874426b8b",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "52175"
+    },
+    {
+      "id": "c5577aaa-ca0a-5b40-8250-9048685d8613",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["25 mg", "50 mg", "100 mg"]
+    },
+    {
+      "id": "b0737e35-38fc-56f9-a4c9-5db1b154cbf3",
+      "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Angiotensin II receptor blocker (ARB)"
+    },
+    {
+      "id": "f42ba062-c8bf-5946-9c14-0a6b78a94bf8",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": ["Hepatotoxicity in overdose", "Rare skin reactions"]
+    },
+    {
+      "id": "2efd8c25-d20c-175b-80d1-2d45e1d7490b",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": [
+        "Severe hepatic impairment",
+        "Hypersensitivity to paracetamol"
+      ]
+    },
+    {
+      "id": "5aa5e208-0eac-5db0-a8e7-aa810b674d0f",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": [
+        "oral tablet",
+        "oral suspension",
+        "suppository",
+        "solution for infusion"
+      ]
+    },
+    {
+      "id": "e4489e22-11ce-566c-97c1-6dfe1661b75e",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": ["Mild to moderate pain", "Fever"]
+    },
+    {
+      "id": "f8664772-73ac-522c-845b-430d280b36cc",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["Total daily dose", "Liver function in high-risk patients"]
+    },
+    {
+      "id": "085af959-595d-5195-9578-dffd0c4dd11f",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral", "rectal", "intravenous"]
+    },
+    {
+      "id": "ab0f5ddb-086b-59a2-a02c-51fa81709ea8",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "161"
+    },
+    {
+      "id": "4e2854f4-8afd-5291-ae5b-5f435c40ba25",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["500 mg", "650 mg", "1 g"]
+    },
+    {
+      "id": "f1178981-80d8-5e67-8e7d-544ee01ad146",
+      "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Analgesic / antipyretic"
+    },
+    {
+      "id": "be454080-b3e1-5e40-999e-785f2bce1168",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": [
+        "Hypokalemia",
+        "Dehydration",
+        "Ototoxicity",
+        "Hyperuricemia"
+      ]
+    },
+    {
+      "id": "e4412267-439e-54fd-9318-44e7e06328f1",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["Anuria", "Severe hypokalemia", "Severe hyponatremia"]
+    },
+    {
+      "id": "a99aad03-d933-5bda-aa09-d5e09c6f3288",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["oral tablet", "oral solution", "solution for injection"]
+    },
+    {
+      "id": "21c93d54-8243-54c9-8d81-41b60b351849",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": ["Edema", "Heart failure", "Hypertension"]
+    },
+    {
+      "id": "9ec418a1-62b3-526f-93b0-0641ff2a83c7",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["Electrolytes", "Renal function", "Fluid balance"]
+    },
+    {
+      "id": "678658ec-2462-500d-aef2-36ea19c984f8",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral", "intravenous", "intramuscular"]
+    },
+    {
+      "id": "c9bea503-1b8e-55ac-8d75-ebfd85dbf88e",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "4603"
+    },
+    {
+      "id": "933f7d62-4f67-5f67-8842-42124d88d32b",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["20 mg", "40 mg", "80 mg", "10 mg/mL"]
+    },
+    {
+      "id": "c7d850c5-db95-5c27-ad0a-5ec0a7f42e9e",
+      "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Loop diuretic"
+    },
+    {
+      "id": "d4d5007f-9d26-5d11-91e7-98d8e4a4bf68",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": [
+        "GI upset",
+        "Lactic acidosis (rare)",
+        "Vitamin B12 deficiency"
+      ]
+    },
+    {
+      "id": "559660ef-02e7-5039-b909-85e4b08afdcb",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["eGFR below 30 mL/min/1.73m2", "Metabolic acidosis"]
+    },
+    {
+      "id": "763c7289-5027-5ea2-a664-54b5b8716c2e",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["oral tablet", "extended-release tablet"]
+    },
+    {
+      "id": "ff2d4fd2-1bbd-5400-b55f-1c9c1a5b127e",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": ["Type 2 diabetes mellitus"]
+    },
+    {
+      "id": "889787c7-332e-5546-9160-6972ab047759",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["Renal function", "HbA1c", "Vitamin B12 (long-term)"]
+    },
+    {
+      "id": "2b543a3f-d0f2-55ee-b32a-a6727c446042",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral"]
+    },
+    {
+      "id": "65010365-5109-5bc7-9e6c-9a69ef885406",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "6809"
+    },
+    {
+      "id": "cd0ac3fc-399d-56a0-8954-58ef5a56c932",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["500 mg", "850 mg", "1000 mg"]
+    },
+    {
+      "id": "fe28ffa0-452e-51cf-a634-3e9b25ba6d21",
+      "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Biguanide antidiabetic"
+    },
+    {
+      "id": "83f01afe-7398-54ba-8e83-2f7c0e0f3807",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": ["Diarrhea", "Rash", "Nausea", "Hypersensitivity reactions"]
+    },
+    {
+      "id": "eaa3da2c-0021-50b9-aeaa-84775c74462f",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["Hypersensitivity to penicillins"]
+    },
+    {
+      "id": "d0458ccc-c244-1438-b740-5e4242d88f26",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": [
+        "oral capsule",
+        "oral tablet",
+        "powder for oral suspension"
+      ]
+    },
+    {
+      "id": "6e41a7f8-ee74-5df7-bc8f-a92b88c85780",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "Respiratory tract infections",
+        "Otitis media",
+        "Urinary tract infections",
+        "Helicobacter pylori eradication"
+      ]
+    },
+    {
+      "id": "e592a963-d1cb-5c12-bd46-8e22140ef611",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": [
+        "Signs of hypersensitivity",
+        "Renal function in impairment"
+      ]
+    },
+    {
+      "id": "fb6a0535-0d85-5f98-b15a-02586e7ead58",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral"]
+    },
+    {
+      "id": "d788165b-9dfc-5ecf-889a-c9e62e364f6f",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "723"
+    },
+    {
+      "id": "afdad060-b747-5633-b640-3d6c812f6dc2",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["250 mg", "500 mg", "875 mg"]
+    },
+    {
+      "id": "159efb70-332a-5a9d-a6ad-bf52bac6af1e",
+      "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Penicillin / aminopenicillin"
+    },
+    {
+      "id": "e0330b99-5120-5cc0-8b48-6326511afb11",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": ["QT prolongation", "Diarrhea", "Nausea", "Hepatotoxicity"]
+    },
+    {
+      "id": "6cef3696-470e-85dd-bbcc-f6d50f5a7114",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": [
+        "Hypersensitivity to macrolides",
+        "History of cholestatic jaundice with azithromycin"
+      ]
+    },
+    {
+      "id": "582a86ca-b2af-5a51-9993-4b6135ca05ce",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": [
+        "oral tablet",
+        "powder for oral suspension",
+        "powder for injection"
+      ]
+    },
+    {
+      "id": "1c09f28f-562e-5cb7-9816-8162a1f141b0",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "Community-acquired pneumonia",
+        "Pharyngitis",
+        "Chlamydial infections"
+      ]
+    },
+    {
+      "id": "34c5dcf3-cda4-5b6f-b4c1-abb78a981969",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["QT interval in at-risk patients", "Liver function"]
+    },
+    {
+      "id": "b6c58872-7ceb-5a97-b2ea-7febe60446aa",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral", "intravenous"]
+    },
+    {
+      "id": "c3eb01dd-72dd-5f9a-895c-8f40bb923ac3",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "18631"
+    },
+    {
+      "id": "7416171c-b7c0-58f4-b80b-6b3cbeb16d35",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["250 mg", "500 mg", "600 mg"]
+    },
+    {
+      "id": "1014bf7f-40c0-5984-9d29-2a3720eb542e",
+      "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Macrolide antibiotic"
+    },
+    {
+      "id": "6e6add8e-f8a2-5fb8-bfca-0251138e220a",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": [
+        "Nephrotoxicity",
+        "Ototoxicity",
+        "Red man / infusion reaction",
+        "Neutropenia"
+      ]
+    },
+    {
+      "id": "27a68531-5e6e-50a3-99d3-fac50ca22f0c",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "atc_route_variants",
+      "data_type": "json",
+      "value_json": {
+        "oral": "A07AA09",
+        "ophthalmic": "S01AA28",
+        "intravenous": "J01XA01"
+      }
+    },
+    {
+      "id": "905d275f-e60d-5470-9504-663d2e0d4637",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["Hypersensitivity to glycopeptides"]
+    },
+    {
+      "id": "dc2d62b1-fa1c-5402-bbd0-91bbf1128aa1",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": [
+        "powder for solution for infusion",
+        "oral capsule",
+        "oral solution"
+      ]
+    },
+    {
+      "id": "e0ff3350-1918-5ec3-a21f-c419ba29cb0a",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "Serious Gram-positive infections including MRSA (IV)",
+        "Clostridioides difficile colitis (oral)"
+      ]
+    },
+    {
+      "id": "4e777031-601f-56f6-ac4e-c2c0d2e0da28",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["Trough serum levels", "Serum creatinine"]
+    },
+    {
+      "id": "001168b4-bfce-5530-9de8-ddc28c5e0bbd",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["intravenous", "oral", "ophthalmic"]
+    },
+    {
+      "id": "06f5d0fc-5e77-524a-b3f7-af260c91a769",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "11124"
+    },
+    {
+      "id": "e0f30155-543f-502e-b0f3-4b986372b03d",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "snomed_code",
+      "data_type": "json",
+      "value_json": "372735009"
+    },
+    {
+      "id": "3061e556-2f81-500d-a61d-571d2d17cc07",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": [
+        "500 mg",
+        "750 mg",
+        "1 g",
+        "1.25 g",
+        "1.5 g",
+        "1.75 g",
+        "2 g"
+      ]
+    },
+    {
+      "id": "d9107453-6d6c-5a72-a3ed-8e500dea1073",
+      "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Glycopeptide antibiotic"
+    },
+    {
+      "id": "0f7a20da-973b-58cf-a35c-70b270fed23d",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": [
+        "GI bleeding",
+        "Renal impairment",
+        "Hypertension",
+        "Cardiovascular risk"
+      ]
+    },
+    {
+      "id": "643adb7a-2337-57a2-b41a-f2fc532a0068",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": [
+        "Active GI bleeding",
+        "Severe heart failure",
+        "Third trimester of pregnancy"
+      ]
+    },
+    {
+      "id": "16a7b961-cdab-50c3-b192-9a9b7ad6dd76",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["oral tablet", "oral suspension", "solution for infusion"]
+    },
+    {
+      "id": "80c492ce-32a0-55f1-b3ec-ea730387e611",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": ["Pain", "Inflammation", "Fever"]
+    },
+    {
+      "id": "c9896f97-3cc0-5c91-b39d-0d02b1cb2c8b",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": ["Renal function", "Blood pressure", "GI symptoms"]
+    },
+    {
+      "id": "e74db939-cdcb-5648-8197-5e296e4918a9",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral", "intravenous"]
+    },
+    {
+      "id": "ff9c1b51-9bd0-5a35-b958-810777052af3",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "5640"
+    },
+    {
+      "id": "e67f0dfd-cf7e-580e-a539-c1a7c98ff528",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["200 mg", "400 mg", "600 mg", "800 mg"]
+    },
+    {
+      "id": "9c3f6f47-ae58-5970-96e8-9a91730d07cc",
+      "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "NSAID"
+    },
+    {
+      "id": "d90ed8d7-e90c-5df4-b2a5-194137ae83c2",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": [
+        "Myalgia",
+        "Rhabdomyolysis (rare)",
+        "Transaminase elevation"
+      ]
+    },
+    {
+      "id": "78c1df8e-c3ae-564a-a2cd-9ddef4807a00",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": ["Active liver disease", "Pregnancy", "Breastfeeding"]
+    },
+    {
+      "id": "cf28dd91-f6d2-28cd-abe6-e34e696ad142",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["oral tablet"]
+    },
+    {
+      "id": "a1dc9e08-5857-5683-b63a-102474c91d26",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": ["Hypercholesterolemia", "Cardiovascular risk reduction"]
+    },
+    {
+      "id": "f9a1d957-323a-50e1-a4c4-d8f525a52506",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": [
+        "Lipid panel",
+        "Liver enzymes",
+        "Creatine kinase if symptomatic"
+      ]
+    },
+    {
+      "id": "79b50d54-a813-5cdb-8b0d-c18bce8dfe71",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral"]
+    },
+    {
+      "id": "51890d6b-7763-55ca-a7be-291c9cfe8a98",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "83367"
+    },
+    {
+      "id": "6f558fa5-cffd-590e-8a38-fdb3eabafb51",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["10 mg", "20 mg", "40 mg", "80 mg"]
+    },
+    {
+      "id": "2e9e31d4-0b94-5cce-b9a2-e60c11705627",
+      "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Statin (HMG-CoA reductase inhibitor)"
+    },
+    {
+      "id": "92524db1-e91d-580e-9f33-8fbcf7b547c1",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "property_code": "adverse_effects",
+      "data_type": "json",
+      "value_json": [
+        "Tendon rupture",
+        "QT prolongation",
+        "CNS effects",
+        "GI upset"
+      ]
+    },
+    {
+      "id": "ef908250-1ea7-5374-b395-0c217a802f18",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "property_code": "contraindications",
+      "data_type": "json",
+      "value_json": [
+        "Hypersensitivity to fluoroquinolones",
+        "Concomitant tizanidine"
+      ]
+    },
+    {
+      "id": "77524f54-f5e8-5314-9554-48b3dbae9fa4",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "property_code": "dose_forms",
+      "data_type": "json",
+      "value_json": ["oral tablet", "oral suspension", "solution for infusion"]
+    },
+    {
+      "id": "39c1e5e6-e454-5d34-8936-e0579798d214",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "property_code": "indications",
+      "data_type": "json",
+      "value_json": [
+        "Urinary tract infections",
+        "Intra-abdominal infections",
+        "Bone and joint infections"
+      ]
+    },
+    {
+      "id": "a762be5a-a1cb-5ba0-b5f6-8b1bf58e080a",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "property_code": "monitoring",
+      "data_type": "json",
+      "value_json": [
+        "QT interval in at-risk patients",
+        "Tendon symptoms",
+        "Blood glucose"
+      ]
+    },
+    {
+      "id": "c3429445-c49b-7d77-a688-8ea77c6237f0",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "property_code": "routes",
+      "data_type": "json",
+      "value_json": ["oral", "intravenous"]
+    },
+    {
+      "id": "7d9a721e-513a-5ad4-a3ff-b3f998b4e78f",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "property_code": "rxnorm_cui",
+      "data_type": "json",
+      "value_json": "2551"
+    },
+    {
+      "id": "2adadd05-dd1e-29f7-bddf-6de4ad932c0e",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "property_code": "strengths",
+      "data_type": "json",
+      "value_json": ["250 mg", "500 mg", "750 mg"]
+    },
+    {
+      "id": "66d8b335-e00c-577a-a168-c4da49e70897",
+      "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "property_code": "therapeutic_class",
+      "data_type": "json",
+      "value_json": "Fluoroquinolone antibiotic"
+    }
+  ],
+  "interactions": [
+    {
+      "id": "58be67da-ded4-53e4-b137-1b40596385aa",
+      "substance_a_concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "substance_b_concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
+      "severity_concept_id": "f1c07d34-a212-52a6-932a-8e52c0ceabf6",
+      "mechanism_text": "Azithromycin may potentiate warfarin anticoagulant effect, raising INR.",
+      "management_text": "Monitor INR closely during co-administration.",
+      "evidence_level_concept_id": null,
+      "source": "Mantra Vademécum",
+      "source_version": "2026.1"
+    },
+    {
+      "id": "c355f9c9-783c-5e7f-ab11-ad4783a67a23",
+      "substance_a_concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
+      "substance_b_concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "severity_concept_id": "75edc384-8721-57f6-b56e-f198dca56a4c",
+      "mechanism_text": "Loop diuretic potentiates aminoglycoside oto- and nephrotoxicity.",
+      "management_text": "Avoid concurrent use where feasible; monitor hearing, renal function and hydration.",
+      "evidence_level_concept_id": null,
+      "source": "Mantra Vademécum",
+      "source_version": "2026.1"
+    },
+    {
+      "id": "3af0f0be-d411-57db-bee8-bebe015819fc",
+      "substance_a_concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "substance_b_concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
+      "severity_concept_id": "75edc384-8721-57f6-b56e-f198dca56a4c",
+      "mechanism_text": "Ciprofloxacin inhibits CYP1A2 and displaces warfarin, potentiating anticoagulant effect.",
+      "management_text": "Monitor INR closely; anticipate warfarin dose reduction.",
+      "evidence_level_concept_id": null,
+      "source": "Mantra Vademécum",
+      "source_version": "2026.1"
+    },
+    {
+      "id": "5247e3f1-92f8-5b1c-bd52-0cc98993b6af",
+      "substance_a_concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
+      "substance_b_concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
+      "severity_concept_id": "f1c07d34-a212-52a6-932a-8e52c0ceabf6",
+      "mechanism_text": "Amoxicillin may alter gut flora that synthesize vitamin K, enhancing warfarin effect.",
+      "management_text": "Monitor INR during and after the antibiotic course.",
+      "evidence_level_concept_id": null,
+      "source": "Mantra Vademécum",
+      "source_version": "2026.1"
+    },
+    {
+      "id": "adca6eff-e7e7-5062-afc0-48d02858559b",
+      "substance_a_concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
+      "substance_b_concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
+      "severity_concept_id": "75edc384-8721-57f6-b56e-f198dca56a4c",
+      "mechanism_text": "Additive nephrotoxicity and ototoxicity from concurrent glycopeptide and aminoglycoside.",
+      "management_text": "Avoid combination if possible; monitor renal function and drug levels; consider audiometry.",
+      "evidence_level_concept_id": null,
+      "source": "Mantra Vademécum",
+      "source_version": "2026.1"
+    }
+  ]
+}

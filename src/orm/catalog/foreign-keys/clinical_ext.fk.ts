@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `clinical_ext`.
- * 84 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 91 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalExtForeignKeys: readonly ForeignKeyTuple[] = [
@@ -67,6 +67,13 @@ export const clinicalExtForeignKeys: readonly ForeignKeyTuple[] = [
   ['order_set_items', 'item_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['order_set_items', 'order_set_id', 'clinical_ext', 'order_sets', 'id'],
   ['order_set_items', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['prescription_favorites', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['prescription_favorites', 'medication_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prescription_favorites', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['prescription_favorites', 'route_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prescription_favorites', 'substance_atc_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prescription_favorites', 'unit_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prescription_favorites', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['reference_ranges', 'code_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['reference_ranges', 'condition_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['reference_ranges', 'created_by_user_id', 'iam', 'users', 'id'],

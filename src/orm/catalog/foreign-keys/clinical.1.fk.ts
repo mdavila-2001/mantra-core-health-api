@@ -40,6 +40,7 @@ export const clinicalForeignKeys1: readonly ForeignKeyTuple[] = [
   ['care_episodes', 'type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_episodes', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['conditions', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['conditions', 'clinical_course_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['conditions', 'clinical_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['conditions', 'code_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['conditions', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -116,6 +117,7 @@ export const clinicalForeignKeys1: readonly ForeignKeyTuple[] = [
   ['medication_requests', 'created_by_user_id', 'iam', 'users', 'id'],
   ['medication_requests', 'custodian_tenant_id', 'directory', 'tenants', 'id'],
   ['medication_requests', 'encounter_id', 'clinical', 'encounters', 'id'],
+  ['medication_requests', 'indication_condition_id', 'clinical', 'conditions', 'id'],
   ['medication_requests', 'intent_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['medication_requests', 'medication_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['medication_requests', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
@@ -185,6 +187,4 @@ export const clinicalForeignKeys1: readonly ForeignKeyTuple[] = [
   ['procedures', 'parent_procedure_id', 'clinical', 'procedures', 'id'],
   ['procedures', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['procedures', 'performer_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
-  ['procedures', 'practice_site_id', 'practice', 'practice_sites', 'id'],
-  ['procedures', 'recorder_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
 ];

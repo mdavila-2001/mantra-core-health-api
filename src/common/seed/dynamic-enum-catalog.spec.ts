@@ -31,6 +31,19 @@ describe('DYNAMIC_ENUM_CATALOG', () => {
     expect(new Set(targets).size).toBe(targets.length);
   });
 
+  it('no vuelve a gobernar la especialidad del profesional', () => {
+    // La gobierna `VS_MEDICAL_SPECIALTY`, que siembra el paquete del modelo con
+    // sus 36 especialidades. Volver a declararla acá resucitaría el duplicado de
+    // una sola opción —el que causaba F-19— pero sólo en las bases nuevas: en las
+    // ya sembradas el seed no pisa, así que quedaría retirado. Dos entornos
+    // respondiendo distinto es peor que el defecto original.
+    const targets = DYNAMIC_ENUM_CATALOG.flatMap((entry) => entry.targets);
+
+    expect(targets).not.toContain(
+      'profiles.practitioner_specialties.specialty_concept_id',
+    );
+  });
+
   it('escribe todo destino como esquema.tabla.columna', () => {
     for (const entry of DYNAMIC_ENUM_CATALOG) {
       for (const target of entry.targets) {

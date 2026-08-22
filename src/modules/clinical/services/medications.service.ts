@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalNotificationsService } from './clinical-notifications.service';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -9,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import {
+  ConditionsRepository,
   MedicationRecordsRepository,
   MedicationRequestsRepository,
 } from '../repositories';
@@ -60,18 +62,43 @@ export class MedicationsService {
    * @param requestsRepo - Valor de requests repo requerido por la operación.
    * @param recordsRepo - Valor de records repo requerido por la operación.
    * @param signaturePolicies - Valor de signature policies requerido por la operación.
+   * @param clinicalNotifications - Emisión in-app del carril P1.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly requestsRepo: MedicationRequestsRepository,
     private readonly recordsRepo: MedicationRecordsRepository,
+    private readonly conditionsRepo: ConditionsRepository,
     private readonly signaturePolicies: PrescriptionSignaturePoliciesService,
     private readonly auditTrail: AuditTrailService,
     private readonly historyRepo: HistoryRepository,
+    private readonly clinicalNotifications: ClinicalNotificationsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(MedicationsService.name);
+  }
+
+  /**
+   * Valida que la indicación diagnóstica sea del mismo paciente (Patch v4.1.6).
+   *
+   * Una receta cuya indicación apunta a la condición de otro paciente no es un
+   * dato incompleto: es un dato falso, y viaja al papel impreso y a la validación
+   * farmacológica. Se rechaza con 422 (`PreconditionFailedException`), no con 404:
+   * el recurso que falla no es la receta sino la precondición del cuerpo.
+   */
+  private async assertIndicationBelongsToPatient(
+    tx: EntityManager,
+    conditionId: string,
+    patientProfileId: string,
+  ): Promise<void> {
+    const condition = await this.conditionsRepo.findById(tx, conditionId);
+    if (condition?.patientProfileId !== patientProfileId) {
+      throw new PreconditionFailedException(
+        'La condición indicada no existe o no pertenece a este paciente',
+        { conditionId, patientProfileId },
+      );
+    }
   }
 
   /** Snapshot del contenido clínico sellado, para la tabla de historial. */
@@ -87,6 +114,8 @@ export class MedicationsService {
       unitConceptId: request.unitConceptId,
       validFrom: request.validFrom ?? null,
       validTo: request.validTo ?? null,
+      patientInstructionsText: request.patientInstructionsText ?? null,
+      indicationConditionId: request.indicationConditionId ?? null,
       issuedAt: request.issuedAt ?? null,
       statusReasonText: request.statusReasonText ?? null,
     };
@@ -140,6 +169,13 @@ export class MedicationsService {
       'Prescribing medication (draft)',
     );
     return this.em.transactional(async (tx) => {
+      if (dto.indicationConditionId !== undefined) {
+        await this.assertIndicationBelongsToPatient(
+          tx,
+          dto.indicationConditionId,
+          dto.patientProfileId,
+        );
+      }
       const request = this.requestsRepo.create(tx, {
         custodianTenantId: dto.custodianTenantId,
         patientProfileId: dto.patientProfileId,
@@ -159,6 +195,8 @@ export class MedicationsService {
         unitConceptId: dto.unitConceptId,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
+        patientInstructionsText: dto.patientInstructionsText,
+        indicationConditionId: dto.indicationConditionId,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -212,6 +250,16 @@ export class MedicationsService {
       if (dto.validFrom !== undefined)
         request.validFrom = new Date(dto.validFrom);
       if (dto.validTo !== undefined) request.validTo = new Date(dto.validTo);
+      if (dto.patientInstructionsText !== undefined)
+        request.patientInstructionsText = dto.patientInstructionsText;
+      if (dto.indicationConditionId !== undefined) {
+        await this.assertIndicationBelongsToPatient(
+          tx,
+          dto.indicationConditionId,
+          request.patientProfileId,
+        );
+        request.indicationConditionId = dto.indicationConditionId;
+      }
       touch(request, actor.id);
       await tx.flush();
 
@@ -277,7 +325,7 @@ export class MedicationsService {
       { operation: 'clinical.medication.issue', requestId },
       'Issuing medication request',
     );
-    return this.em.transactional(async (tx) => {
+    const emitida = await this.em.transactional(async (tx) => {
       const request = await this.loadRequestOrThrow(tx, requestId);
       // CAN §6 (idempotencia): un reintento de la emisión con la MISMA clave sobre
       // una receta ya emitida devuelve el resultado sellado (replay), sin volver a
@@ -356,6 +404,19 @@ export class MedicationsService {
       );
       return this.toRequestResponse(request);
     });
+
+    // Carril P1 · peldaño 8 del flujo principal: «tu receta está lista».
+    //
+    // Va DESPUÉS del commit y no dentro, a propósito. La receta ya está sellada
+    // e inmutable cuando esto corre, así que ningún problema de la campana
+    // puede deshacerla. `prescriptionIssued` no lanza: el peor caso es una
+    // receta emitida sin su aviso, nunca un aviso sin su receta.
+    await this.clinicalNotifications.prescriptionIssued(
+      emitida.id,
+      emitida.patientProfileId,
+      actor.id,
+    );
+    return emitida;
   }
 
   /**
@@ -452,6 +513,10 @@ export class MedicationsService {
         unitConceptId: dto.unitConceptId ?? original.unitConceptId,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : original.validFrom,
         validTo: dto.validTo ? new Date(dto.validTo) : original.validTo,
+        patientInstructionsText: original.patientInstructionsText,
+        // La indicación se arrastra: reemplazar una receta corrige la prescripción,
+        // no cambia para qué era.
+        indicationConditionId: original.indicationConditionId,
         replacesRequestId: original.id,
         actorUserId: actor.id,
       });
@@ -534,6 +599,9 @@ export class MedicationsService {
         unitConceptId: source.unitConceptId,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
+        patientInstructionsText: source.patientInstructionsText,
+        // Renovar es seguir tratando lo mismo: la indicación viaja con la receta.
+        indicationConditionId: source.indicationConditionId,
         renewedFromRequestId: source.id,
         actorUserId: actor.id,
       });

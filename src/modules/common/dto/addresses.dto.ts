@@ -45,6 +45,23 @@ export class CreateAddressDto {
   city?: string;
 
   /**
+   * Municipio boliviano, miembro de `VS_BO_MUNICIPALITY` (catálogo del INE).
+   * Complementa `city` (texto libre) con un valor de catálogo consistente.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  municipalityConceptId?: string;
+
+  /**
+   * Departamento boliviano, miembro de `VS_BO_DEPARTMENT`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  administrativeAreaConceptId?: string;
+
+  /**
    * Valor de postal code mantenido por la instancia.
    */
   @ApiPropertyOptional()
@@ -56,7 +73,7 @@ export class CreateAddressDto {
   /**
    * Valor de country mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: "Código de país ISO. Por defecto 'PE'." })
+  @ApiPropertyOptional({ description: "Código de país ISO. Por defecto 'BO'." })
   @IsOptional()
   @IsString()
   @MaxLength(2)
@@ -102,6 +119,18 @@ export class AddressResponseDto {
    */
   @ApiPropertyOptional()
   city?: string;
+
+  /**
+   * Municipio boliviano, miembro de `VS_BO_MUNICIPALITY`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  municipalityConceptId?: string;
+
+  /**
+   * Departamento boliviano, miembro de `VS_BO_DEPARTMENT`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  administrativeAreaConceptId?: string;
 
   /**
    * Valor de postal code mantenido por la instancia.

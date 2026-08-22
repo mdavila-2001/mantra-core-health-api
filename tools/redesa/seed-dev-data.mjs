@@ -30,7 +30,7 @@
  * Además del padrón administrado por el admin, siembra **una práctica** (sin
  * ella `GET /practices` responde vacío y el selector de contabilidad no tiene
  * qué ofrecer) y **una cuenta de médico con login real**
- * (`DOCTOR_EMAIL` / `DOCTOR_PASSWORD`, por defecto `doctora.demo@redesa.test`
+ * (`DOCTOR_EMAIL` / `DOCTOR_PASSWORD`, por defecto el buzón real del padrón
  * / `D3mo-passw0rd!`): es el primer profesional del padrón, así que entra a
  * la aplicación y ve su propio consultorio con agenda, pacientes e historias
  * ya cargados — no una pantalla vacía a la espera de un segundo script.
@@ -42,9 +42,15 @@
  * consultorio y una tanda de pacientes y citas más.
  * Para volver a cero, `yarn smoke` trunca la base y vuelve a sembrar el admin.
  */
+// El `.env` del repo manda: la API del stack provisiona el administrador con
+// BOOTSTRAP_ADMIN_EMAIL/PASSWORD de ese archivo, y sin cargarlo este script caía a
+// sus defaults y el login moría con 401 en toda máquina que no exportara las
+// variables a mano. Mismo patrón que los demás scripts de tools/ que tocan el stack.
+import 'dotenv/config';
 import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { CORREOS, resumenDeCorreos } from './correos-reales.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../..');
@@ -64,7 +70,7 @@ const BASE = arg(
   'base-url',
   process.env.API_BASE_URL ?? 'http://localhost:3000',
 );
-const EMAIL = process.env.BOOTSTRAP_ADMIN_EMAIL ?? 'admin@redesa.test';
+const EMAIL = process.env.BOOTSTRAP_ADMIN_EMAIL ?? CORREOS.admin;
 const PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd';
 /**
  * Credenciales fijas del primer médico sembrado, para que el equipo tenga una
@@ -76,7 +82,7 @@ const PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd';
  * usaba ese script, una migración de credenciales no rompe nada que ya
  * estuviera anotado en algún lado.
  */
-const DOCTOR_EMAIL = process.env.DOCTOR_EMAIL ?? 'doctora.demo@redesa.test';
+const DOCTOR_EMAIL = process.env.DOCTOR_EMAIL ?? CORREOS.doctor;
 const DOCTOR_PASSWORD = process.env.DOCTOR_PASSWORD ?? 'D3mo-passw0rd!';
 const DOCTORS = Number(arg('doctors', 8));
 const PATIENTS = Number(arg('patients', 24));
@@ -244,12 +250,42 @@ const AUTORIDADES = [
 ];
 
 /**
+ * Hospitales previos, para la experiencia histórica del historial laboral
+ * (`practitioner_affiliations`). Distintos de `INSTITUCIONES` (universidades,
+ * de donde egresó) y de `SEDES` (dónde ejerce hoy, dentro de la plataforma):
+ * sin esto la pestaña Trayectoria no tiene de dónde sacar "experiencia
+ * histórica" y solo mostraría formación y actividad actual.
+ */
+const HOSPITALES_PREVIOS = [
+  'Hospital Obrero N.º 1',
+  'Hospital de Clínicas',
+  'Hospital Arco Iris',
+  'Clínica del Sur',
+  'Hospital Metodista',
+];
+
+/**
  * Posgrados: la segunda especialidad de quien tiene dos.
  *
  * No todos la reciben — la mitad, por índice par — porque un padrón donde
  * absolutamente todos tienen exactamente dos especialidades no ejercita el caso
  * de quien tiene una sola, que es el corriente.
  */
+/**
+ * Códigos de especialidad que el padrón usa y el catálogo nombra distinto.
+ *
+ * Sólo equivalencias **evidentes**: si no hay una, la especialidad se queda sin
+ * concepto y el informe la lista, para que se siembre en el catálogo en vez de
+ * atarla a un concepto parecido. Un profesional bajo la especialidad equivocada
+ * es peor que uno sin especialidad.
+ */
+const EQUIVALENCIAS_DE_ESPECIALIDAD = {
+  GINECOLOGIA: 'GINECOLOGIA_OBSTETRICIA',
+};
+
+/** Las especialidades del padrón que el catálogo todavía no tiene. */
+const especialidadesSinConcepto = new Set();
+
 const POSGRADOS = [
   ['Medicina interna', 'MEDICINA_INTERNA'],
   ['Medicina crítica', 'MEDICINA_CRITICA'],
@@ -274,6 +310,11 @@ const doctors = [];
 const patients = [];
 /** Citas confirmadas, con el estado al que se las llevó. */
 const bookings = [];
+// Declarada acá y no donde se resuelve (más abajo): `writeReport()` corre también
+// en el camino de error, y si la corrida muere antes de crear la práctica, una
+// `const` posterior está en zona muerta temporal y el reporte revienta con
+// ReferenceError en vez de escribirse.
+let practiceId = null;
 /** Historias clínicas completas (atención + receta + nota). */
 let historias = 0;
 /** Episodio abierto por paciente: `profileId → episodeId`. */
@@ -543,6 +584,102 @@ const conceptIds = (conceptPage.body?.items ?? []).map(
 );
 const conceptId = need(conceptIds[0], 'al menos un concepto del catálogo');
 
+// --- especialidades: el catálogo real, y que el selector las ofrezca ----------
+// F-19/F-27 (recorrida de QA, 18/08/2026): la Guía mostraba 34 profesionales en
+// un solo grupo, «Sin especialidad registrada», y el registro pedía la
+// especialidad como texto libre («Neurologo» junto a «Neurología»). La causa no
+// era la pantalla: la enumeración de
+// `profiles.practitioner_specialties.specialty_concept_id` tenía **una sola
+// opción publicada** —`SPECIALTY_GENERAL`, y en inglés—, así que el selector no
+// tenía qué ofrecer y el backend le ponía ese concepto por defecto a todo el
+// mundo. Los conceptos de especialidad SÍ existen en el catálogo, en castellano
+// (`clinical-forms:specialty:*`, sembrados con los formularios clínicos).
+//
+// Acá se publican como opciones de esa enumeración. No se inventa ningún
+// concepto: se usan los que el catálogo ya tiene, por su código.
+
+const especialidadesDelCatalogo = await call(
+  'Terminología',
+  'Conceptos de especialidad del catálogo',
+  'GET',
+  '/terminology/concepts?q=clinical-forms:specialty:&limit=50',
+);
+
+/** `CARDIOLOGIA → {conceptId, code, display}`, por el sufijo del código. */
+const especialidades = new Map();
+for (const item of especialidadesDelCatalogo.body?.items ?? []) {
+  const sufijo = String(item.code ?? '').split(':').pop();
+  // `TRANSVERSAL` no es una especialidad de nadie: es el comodín de los
+  // formularios clínicos («todas las especialidades»).
+  if (sufijo && sufijo !== 'TRANSVERSAL') {
+    especialidades.set(sufijo, item);
+  }
+}
+
+const enumEspecialidad = await call(
+  'Terminología',
+  'Enumeración de especialidad del profesional',
+  'GET',
+  '/system-context/dynamic-enums?target=profiles.practitioner_specialties.specialty_concept_id',
+);
+
+const definicionEspecialidad = enumEspecialidad.body?.definitionId ?? null;
+const opcionesPublicadas = enumEspecialidad.body?.options ?? [];
+
+// Se republica sólo si falta algo: la enumeración es inmutable por versión, y
+// una versión nueva por corrida sería basura de auditoría.
+const faltanOpciones = [...especialidades.keys()].some(
+  (codigo) =>
+    !opcionesPublicadas.some((opcion) => String(opcion.code ?? '').endsWith(codigo)),
+);
+
+// La versión de value set que la versión vigente congeló: redactar la siguiente
+// la exige, y es la misma —se agregan opciones sobre el mismo catálogo, no se
+// cambia de catálogo.
+const valueSetDeEspecialidad = enumEspecialidad.body?.valueSetVersionId ?? null;
+
+if (
+  definicionEspecialidad !== null &&
+  valueSetDeEspecialidad !== null &&
+  especialidades.size > 0 &&
+  faltanOpciones
+) {
+  const opciones = [...especialidades.values()].map((item, orden) => ({
+    conceptId: item.conceptId,
+    code: item.code,
+    display: item.display,
+    ordinal: orden + 1,
+  }));
+
+  const version = await call(
+    'Terminología',
+    `Versión de la enumeración de especialidad (${opciones.length} opciones)`,
+    'POST',
+    `/system-context/dynamic-enums/definitions/${definicionEspecialidad}/versions`,
+    {
+      body: {
+        valueSetVersionId: valueSetDeEspecialidad,
+        // La misma versión de esquema que la vigente: se agregan opciones, no
+        // cambia la forma de la enumeración.
+        schemaVersion: enumEspecialidad.body?.schemaVersion ?? '1.0.0',
+        options: opciones,
+      },
+      expect: [200, 201],
+    },
+  );
+
+  const numero = version.body?.versionNumber ?? null;
+  if (numero !== null) {
+    await call(
+      'Terminología',
+      `Publicación de la versión ${numero} de especialidades`,
+      'POST',
+      `/system-context/dynamic-enums/definitions/${definicionEspecialidad}/versions/${numero}/publish`,
+      { expect: [200, 201] },
+    );
+  }
+}
+
 // --- práctica -------------------------------------------------------------------
 // Sin esto, `GET /practices` responde `{items: []}` y la pantalla de
 // contabilidad no tiene qué ofrecer en su selector: no es que falte plan de
@@ -564,7 +701,7 @@ const practice = await call(
     expect: [200, 201],
   },
 );
-const practiceId = practice.ok ? practice.body.id : null;
+practiceId = practice.ok ? practice.body.id : null;
 
 if (practiceId) {
   for (const [siteIndex, sede] of SEDES.entries()) {
@@ -580,8 +717,20 @@ if (practiceId) {
 step('· Profesionales y sus agendas…');
 
 for (let index = 0; index < DOCTORS; index += 1) {
-  const [nombre, apellido, titulo] =
+  const [nombre, apellido, titulo, codigoEspecialidad] =
     NOMBRES_MEDICOS[index % NOMBRES_MEDICOS.length];
+  // El concepto de especialidad, cuando el catálogo lo tiene. Sin él la
+  // llamada no manda `specialtyConceptId` y el backend pone el general — que
+  // es exactamente el estado que F-19 reportó, pero ahora sólo para las
+  // especialidades que al catálogo le faltan, y queda dicho en el informe.
+  const conceptoEspecialidad =
+    especialidades.get(codigoEspecialidad)?.conceptId ??
+    especialidades.get(EQUIVALENCIAS_DE_ESPECIALIDAD[codigoEspecialidad] ?? '')
+      ?.conceptId ??
+    null;
+  if (conceptoEspecialidad === null) {
+    especialidadesSinConcepto.add(`${codigoEspecialidad} (${titulo})`);
+  }
   const suffix = `${U}-${index}`;
 
   const sede = SEDES[index % SEDES.length];
@@ -598,6 +747,15 @@ for (let index = 0; index < DOCTORS; index += 1) {
   // cuenta con la que entrar por la pantalla y ver un consultorio lleno.
   let profileId;
   let credentialId;
+  /**
+   * Token de sesión del propio médico. Solo existe para el índice 0 (la
+   * cuenta de prueba con login real) — es el único que puede llamar
+   * `POST /profiles/practitioners/me/affiliations`, deliberadamente
+   * self-service sin atajo de plataforma (ver `profile-ownership.service.ts`).
+   * Los demás médicos se dan de alta sin cuenta y quedan sin historial
+   * laboral sembrado, lo que además ejercita el estado "trayectoria vacía".
+   */
+  let doctorToken;
 
   if (index === 0) {
     const alta = await call(
@@ -608,7 +766,14 @@ for (let index = 0; index < DOCTORS; index += 1) {
       {
         body: {
           email: DOCTOR_EMAIL,
-          displayName: `Dr(a). ${nombre} ${apellido}`,
+          // Sin honorífico, y a propósito: el registro real no lo pide ni lo
+          // escribe, así que un seed que lo mete fabrica la inconsistencia que
+          // la analista funcional reportó —tarjetas con «Dr(a)», otras con
+          // «Dra», otras sin nada— sobre datos que en producción serían
+          // uniformes. El tratamiento, el día que el producto lo quiera, sale
+          // de un dato del profesional y lo pone la vista una sola vez, no cada
+          // origen de alta por su cuenta.
+          displayName: `${nombre} ${apellido}`,
           licenseNumber: `LIC-${suffix}`,
           credentialNumber: `CRED-${suffix}`,
           professionalTitle: titulo,
@@ -635,7 +800,7 @@ for (let index = 0; index < DOCTORS; index += 1) {
           expect: [200, 201],
         },
       );
-      const doctorToken = login.body?.accessToken;
+      doctorToken = login.body?.accessToken;
       profileId = doctorToken
         ? JSON.parse(
             Buffer.from(doctorToken.split('.')[1], 'base64url').toString('utf8'),
@@ -660,6 +825,20 @@ for (let index = 0; index < DOCTORS; index += 1) {
           expect: [200, 201, 204],
         },
       );
+      // La activación no devuelve sesión: hace falta un login propio para
+      // poder sembrar después el historial laboral vía `me/affiliations`.
+      const login = await call(
+        'Profesionales',
+        'Iniciar sesión como la cuenta de prueba recién activada',
+        'POST',
+        '/iam/auth/login',
+        {
+          auth: false,
+          body: { email: DOCTOR_EMAIL, password: DOCTOR_PASSWORD },
+          expect: [200, 201],
+        },
+      );
+      doctorToken = login.body?.accessToken;
     }
 
     if (!profileId) continue;
@@ -672,7 +851,14 @@ for (let index = 0; index < DOCTORS; index += 1) {
       {
         body: {
           practitionerCode: `MED-${suffix}`,
-          displayName: `Dr(a). ${nombre} ${apellido}`,
+          // Sin honorífico, y a propósito: el registro real no lo pide ni lo
+          // escribe, así que un seed que lo mete fabrica la inconsistencia que
+          // la analista funcional reportó —tarjetas con «Dr(a)», otras con
+          // «Dra», otras sin nada— sobre datos que en producción serían
+          // uniformes. El tratamiento, el día que el producto lo quiera, sale
+          // de un dato del profesional y lo pone la vista una sola vez, no cada
+          // origen de alta por su cuenta.
+          displayName: `${nombre} ${apellido}`,
           licenseNumber: `LIC-${suffix}`,
           credentialNumber: `CRED-${suffix}`,
           professionalTitle: titulo,
@@ -767,6 +953,12 @@ for (let index = 0; index < DOCTORS; index += 1) {
         // nada si lo tienen todos.
         boardCertified: index % 3 !== 0,
         supportingCredentialId: credentialId,
+        // La especialidad de verdad, no la general por defecto (F-19): es lo
+        // que hace que la Guía se agrupe en grillas con nombre en vez de en un
+        // único «Sin especialidad registrada».
+        ...(conceptoEspecialidad === null
+          ? {}
+          : { specialtyConceptId: conceptoEspecialidad }),
       },
       // Ninguna de las dos llamadas de esta sección declara
       // `specialtyConceptId` — el backend le pone un concepto por defecto
@@ -779,14 +971,21 @@ for (let index = 0; index < DOCTORS; index += 1) {
   );
 
   if (index % 2 === 0) {
-    const [posgrado] = POSGRADOS[index % POSGRADOS.length];
+    const [posgrado, codigoPosgrado] = POSGRADOS[index % POSGRADOS.length];
+    const conceptoPosgrado = especialidades.get(codigoPosgrado)?.conceptId ?? null;
     await call(
       'Profesionales',
       `Segunda especialidad de ${apellido} — ${posgrado}`,
       'POST',
       `/profiles/practitioners/${profileId}/specialties`,
       {
-        body: { isPrimary: false, boardCertified: false },
+        body: {
+          isPrimary: false,
+          boardCertified: false,
+          ...(conceptoPosgrado === null
+            ? {}
+            : { specialtyConceptId: conceptoPosgrado }),
+        },
         // Mismo motivo que arriba: sin concepto propio, choca con el que la
         // llamada anterior acaba de fijar por defecto.
         expect: [200, 201, 409],
@@ -813,6 +1012,71 @@ for (let index = 0; index < DOCTORS; index += 1) {
     );
   }
 
+
+  // --- historial laboral: experiencia histórica y actividad actual ---------
+  // Sin esto, la pestaña Trayectoria del perfil profesional no tiene de dónde
+  // sacar "experiencia histórica" ni "actividad actual" — solo formación.
+  // `POST .../me/affiliations` es self-service sin atajo de plataforma (ver
+  // `profile-ownership.service.ts`), así que solo puede sembrarse para el
+  // médico con sesión real (índice 0); los demás quedan con trayectoria
+  // vacía, que es el otro estado que la pantalla debe poder mostrar.
+  if (doctorToken) {
+    const adminToken = token;
+    token = doctorToken;
+    try {
+      const existentes = await call(
+        'Profesionales',
+        `Leer historial laboral previo de ${apellido}`,
+        'GET',
+        '/profiles/practitioners/me/affiliations',
+        { expect: [200] },
+      );
+      const yaTiene = (organizationName) =>
+        (existentes.body?.items ?? []).some(
+          (item) => item.organizationName === organizationName,
+        );
+
+      const hospitalPrevio =
+        HOSPITALES_PREVIOS[index % HOSPITALES_PREVIOS.length];
+      if (!yaTiene(hospitalPrevio)) {
+        await call(
+          'Profesionales',
+          `Experiencia histórica de ${apellido} — ${hospitalPrevio}`,
+          'POST',
+          '/profiles/practitioners/me/affiliations',
+          {
+            body: {
+              organizationName: hospitalPrevio,
+              roleTitle: `${titulo} residente`,
+              startDate: `${2008 + (index % 6)}-03-01`,
+              endDate: `${2013 + (index % 6)}-02-28`,
+            },
+            expect: [200, 201],
+          },
+        );
+      }
+
+      if (!yaTiene(sede)) {
+        await call(
+          'Profesionales',
+          `Actividad actual de ${apellido} — ${sede}`,
+          'POST',
+          '/profiles/practitioners/me/affiliations',
+          {
+            body: {
+              organizationName: sede,
+              roleTitle: titulo,
+              startDate: `${2019 + (index % 4)}-04-01`,
+              // Sin `endDate`: sigue vigente — es la fila que hace "actual".
+            },
+            expect: [200, 201],
+          },
+        );
+      }
+    } finally {
+      token = adminToken;
+    }
+  }
 
   // Política de reserva: es lo que hace que la agenda tenga reglas de negocio
   // (antelación mínima, ventana de cancelación) en vez de aceptar cualquier cosa.
@@ -1186,7 +1450,12 @@ for (const doctor of doctors) {
         'POST',
         `/scheduling/bookings/${bookingId}/cancel`,
         {
-          body: { cancelledBy: 'PATIENT', isNoShow: false },
+          body: {
+            cancelledBy: 'PATIENT',
+            isNoShow: false,
+            // Obligatorio desde la corrección #14: la otra parte lo lee en el detalle.
+            reasonText: 'No voy a poder asistir en ese horario',
+          },
           expect: [200, 201],
         },
       );
@@ -1197,7 +1466,11 @@ for (const doctor of doctors) {
         'POST',
         `/scheduling/bookings/${bookingId}/cancel`,
         {
-          body: { cancelledBy: 'PROVIDER', isNoShow: false },
+          body: {
+            cancelledBy: 'PROVIDER',
+            isNoShow: false,
+            reasonText: 'Reprogramación del consultorio por agenda del médico',
+          },
           expect: [200, 201],
         },
       );
@@ -1208,7 +1481,11 @@ for (const doctor of doctors) {
         'POST',
         `/scheduling/bookings/${bookingId}/cancel`,
         {
-          body: { cancelledBy: 'PROVIDER', isNoShow: true },
+          body: {
+            cancelledBy: 'PROVIDER',
+            isNoShow: true,
+            reasonText: 'El paciente no se presentó a la consulta',
+          },
           expect: [200, 201],
         },
       );
@@ -1243,7 +1520,12 @@ if (cancelada) {
     'POST',
     `/scheduling/bookings/${cancelada.bookingId}/cancel`,
     {
-      body: { cancelledBy: 'PATIENT' },
+      body: {
+        cancelledBy: 'PATIENT',
+        // Cuerpo válido a propósito: si la validación lo rechazara con 400, el caso
+        // nunca llegaría a la máquina de estados, que es lo que se quiere probar.
+        reasonText: 'no debería poder cancelarse dos veces',
+      },
       expect: [409, 422],
     },
   );
@@ -1839,8 +2121,19 @@ function writeReport() {
   console.log(
     `  Llamadas ${log.length} — ${log.length - failed.length} conformes, ${failed.length} fuera de lo esperado.`,
   );
+  // Lo que el catálogo no tiene se dice acá y no se resuelve a un concepto
+  // parecido: es la lista que hay que sembrar en terminología (F-19).
+  if (especialidadesSinConcepto.size > 0) {
+    console.log(
+      `  Especialidades sin concepto en el catálogo (van al general): ${[...especialidadesSinConcepto].join(', ')}`,
+    );
+  }
   console.log(`  Detalle completo: ${OUT}`);
   console.log(`  Cuenta de prueba:  ${DOCTOR_EMAIL} / ${DOCTOR_PASSWORD}`);
+  // Dónde mirar: sin esto hay que abrir `correos-reales.mjs` para saber a qué
+  // buzón llegó el correo de verificación que la siembra acaba de disparar.
+  console.log(`
+${resumenDeCorreos()}`);
 
   if (failed.length > 0) {
     console.log('\n  Fuera de lo esperado:');

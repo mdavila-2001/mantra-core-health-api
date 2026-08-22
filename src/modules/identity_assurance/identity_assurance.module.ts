@@ -3,6 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { DirectoryModule } from '../directory/directory.module';
+import { CommunityModule } from '../community/community.module';
 import {
   IdentityAuthoritiesController,
   IdentityPoliciesController,
@@ -51,6 +52,11 @@ import {
     // `IdentityVerificationEffectsService` con sus repositorios.
     ProfilesModule,
     DirectoryModule,
+    // P13: verificar una matrícula o una institución también emite el sello
+    // «Verificado» del perfil público. Community sabe qué significa el sello;
+    // este módulo sólo sabe que el caso quedó verificado. Sin ciclo: community
+    // no importa `identity_assurance`.
+    CommunityModule,
   ],
   controllers: [
     IdentityAuthoritiesController,

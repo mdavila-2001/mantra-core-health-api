@@ -132,6 +132,12 @@ export class DynamicEnumsService {
       definitionId: definition.id,
       valueSetId: definition.valueSetId,
       versionId: version.id,
+      // La versión del value set que esta versión congeló. Va en la respuesta
+      // porque redactar la siguiente la exige y no había forma de averiguarla
+      // por API: sin esto, agregar una opción a una enumeración publicada era
+      // imposible sin entrar a la base (18/08/2026).
+      valueSetVersionId: version.valueSetVersionId,
+      schemaVersion: version.schemaVersion,
       cacheToken: version.cacheToken,
       allowCustomValue: definition.allowCustomValue ?? false,
       options: options.map((option) => ({
@@ -330,6 +336,17 @@ export class DynamicEnumsService {
         statusConceptId: CONCEPTS.ENUM_VERSION_DRAFT,
         recordedByUserId: actor.id,
       });
+
+      // La versión se escribe ANTES que sus opciones. Las opciones guardan el
+      // identificador de su versión como columna suelta y no como relación, así
+      // que el ORM no ve la dependencia y puede ordenar los INSERT al revés:
+      // sin este `flush`, la petición muere con
+      // `fk_dynamic_enum_options_dynamic_enum_version_id` («la versión no
+      // existe») y redactar una versión nueva era imposible por API — que es
+      // como la enumeración de especialidades quedó con una sola opción
+      // (F-19, 18/08/2026). Sigue todo dentro de la misma transacción: si una
+      // opción falla, la versión tampoco queda.
+      await tx.flush();
 
       const optionIds = dto.options.map(
         (option, index) =>

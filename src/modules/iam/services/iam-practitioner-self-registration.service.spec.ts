@@ -12,7 +12,10 @@ import type { RegisterPractitionerDto } from '../dto';
 const dto: RegisterPractitionerDto = {
   email: 'dra.rojas@sanrafael.bo',
   password: 'password123',
-  displayName: 'Dra. Ana Rojas',
+  name: 'Ana',
+  middleName: 'Lucía',
+  lastName: 'Rojas',
+  motherLastName: 'Paz',
   licenseNumber: 'MP-45821',
   credentialNumber: 'TIT-99310',
 };
@@ -276,6 +279,56 @@ describe('IamPractitionerSelfRegistrationService', () => {
         userId: 'user-1',
         tenantId: SEED.tenantId,
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+      }),
+    );
+  });
+
+  it('persists the name in parts and composes the display name once', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    // La persona guarda las piezas; el compuesto se deriva de ellas.
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        name: 'Ana',
+        middleName: 'Lucía',
+        lastName: 'Rojas',
+        motherLastName: 'Paz',
+        displayName: 'Ana Lucía Rojas Paz',
+      }),
+    );
+    // La cuenta vive en otro esquema: si no recibiera el mismo valor, las dos
+    // filas podrían divergir.
+    expect(d.usersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ displayName: 'Ana Lucía Rojas Paz' }),
+    );
+  });
+
+  it('keeps honouring displayName for clients that still send it', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      email: dto.email,
+      password: dto.password,
+      licenseNumber: dto.licenseNumber,
+      credentialNumber: dto.credentialNumber,
+      displayName: 'Dra. Ana Rojas',
+    });
+
+    // Quien mandó la forma anterior tiene que ver exactamente lo que mandó.
+    expect(d.usersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ displayName: 'Dra. Ana Rojas' }),
+    );
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        displayName: 'Dra. Ana Rojas',
+        name: undefined,
+        lastName: undefined,
       }),
     );
   });

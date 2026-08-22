@@ -121,6 +121,17 @@ export class ResourceListItemDto {
   resourceRefId!: string;
 
   /**
+   * Nombre del profesional detrás del recurso, cuando la referencia apunta a un
+   * perfil profesional y la persona pudo resolverse. El selector del paciente
+   * pregunta «¿con quién te querés atender?» — la respuesta honesta es una
+   * persona, no el nombre interno de la agenda. `null` para salas, equipos, o
+   * cuando el perfil referido no existe: la ausencia es un estado real que el
+   * cliente debe poder distinguir.
+   */
+  @ApiProperty({ type: String, nullable: true })
+  practitionerName!: string | null;
+
+  /**
    * Identificador asociado a practice.
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })

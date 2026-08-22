@@ -1,0 +1,34 @@
+{
+  "code": "NEUMO_EVALUACION_BASE",
+  "name": "Evaluación neumológica",
+  "specialty": { "code": "NEUMOLOGIA", "display": "Neumología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del aparato respiratorio",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen por aparatos, diagnóstico y conducta. Son agregados propios de la especialidad la descripción dirigida de disnea, tos, expectoración y hemoptisis, el antecedente de tabaquismo, la auscultación pulmonar y la saturación de oxígeno."
+  },
+  "fields": [
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "tiempo_de_enfermedad", "name": "Tiempo de enfermedad", "dataType": "string", "required": true },
+    { "code": "disnea", "name": "Disnea", "dataType": "text", "required": false },
+    { "code": "tos", "name": "Tos", "dataType": "text", "required": false },
+    { "code": "expectoracion", "name": "Expectoración (aspecto y cantidad)", "dataType": "text", "required": false },
+    { "code": "hemoptisis", "name": "Hemoptisis", "dataType": "boolean", "required": false },
+    { "code": "dolor_toracico", "name": "Dolor torácico", "dataType": "text", "required": false },
+    { "code": "sibilancias", "name": "Sibilancias referidas", "dataType": "boolean", "required": false },
+    { "code": "tabaquismo", "name": "Antecedente de tabaquismo", "dataType": "text", "required": false },
+    { "code": "exposicion_ocupacional_o_ambiental", "name": "Exposición ocupacional o ambiental", "dataType": "text", "required": false },
+    { "code": "antecedentes_respiratorios", "name": "Antecedentes respiratorios previos", "dataType": "text", "required": false },
+    { "code": "frecuencia_respiratoria", "name": "Frecuencia respiratoria (por minuto)", "dataType": "integer", "required": false },
+    { "code": "saturacion_de_oxigeno", "name": "Saturación de oxígeno (%)", "dataType": "integer", "required": true },
+    { "code": "auscultacion_pulmonar", "name": "Auscultación pulmonar", "dataType": "text", "required": true },
+    { "code": "examenes_previos", "name": "Exámenes previos revisados", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
+    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+  ]
+}

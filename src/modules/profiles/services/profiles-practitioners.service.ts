@@ -5,6 +5,8 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UPLOAD_MIME_ALLOWLIST,
+  VerificationBypassService,
   decodeKeysetCursor,
   encodeKeysetCursor,
   getCurrentTenantId,
@@ -14,6 +16,10 @@ import {
 // Verificar la matrícula es lo que habilita a ejercer; el rol con el que se
 // ejerce lo custodia `authz`.
 import { AuthzEffectiveRolesService } from '../../authz/services';
+import {
+  MAX_SPECIALTIES_PER_PRACTITIONER,
+  MedicalSpecialtyCatalogService,
+} from './medical-specialty-catalog.service';
 // Lectura de SÓLO CONTEO sobre otros módulos, para la actividad del perfil.
 // Se importan las entidades y no sus servicios a propósito: lo único que se
 // hace con ellas es `em.count(...)` filtrando por el usuario que creó la fila,
@@ -23,6 +29,7 @@ import { AuthzEffectiveRolesService } from '../../authz/services';
 import { ClinicalNoteHeaders, DocumentRecords } from '../../chart/entities';
 import { Encounters, MedicationRequests } from '../../clinical/entities';
 import { PROF } from '../profiles.concepts';
+import type { OnboardingStepDto, PractitionerOnboardingDto } from '../dto';
 import {
   PersonsRepository,
   PersonProfilesRepository,
@@ -34,7 +41,13 @@ import {
   PractitionerAffiliationsRepository,
   PersonAccountLinksRepository,
 } from '../repositories';
-import type { PractitionerAffiliations } from '../entities';
+import { PractitionerAffiliations } from '../entities';
+// Misma licencia que las cuentas de actividad: se importan las ENTIDADES de
+// `scheduling` y no su servicio, y lo único que se hace con ellas es contar
+// filtrando por el perfil del propio actor. No sale ni una fila de agenda de
+// nadie, y `profiles` no queda atado al módulo entero para responder «¿ya
+// publicó horarios?».
+import { BookableSlots, SchedulableResources } from '../../scheduling/entities';
 import {
   CreatePractitionerDto,
   PractitionerResponseDto,
@@ -51,8 +64,11 @@ import {
   PractitionerActivityDto,
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
+  SetPractitionerPhotoDto,
 } from '../dto';
+import { AttachableFileService } from '../../common/services';
 import { ProfileOwnershipService } from './profile-ownership.service';
+import { ProfilesAffiliationsService } from './profiles-affiliations.service';
 
 /**
  * Casos de uso de la fuerza laboral de salud (regla GENERALIST): onboarding
@@ -62,6 +78,18 @@ import { ProfileOwnershipService } from './profile-ownership.service';
  * Todas las escrituras son `em.transactional` con `flush` padre-antes-de-hijo,
  * porque las FK son columnas uuid planas y MikroORM no ordena inserts.
  */
+/**
+ * La actividad de un perfil sin cuenta vinculada, y el vacío con el que se
+ * responde si el conteo no se pudo hacer. Cero es un dato legítimo acá: un
+ * perfil dado de alta por la organización nunca escribió nada.
+ */
+const SIN_ACTIVIDAD: PractitionerActivityDto = {
+  encounters: 0,
+  medicationRequests: 0,
+  clinicalNotes: 0,
+  documents: 0,
+};
+
 @Injectable()
 export class ProfilesPractitionersService {
   /**
@@ -76,8 +104,10 @@ export class ProfilesPractitionersService {
    * @param specialtiesRepo - Valor de specialties repo requerido por la operación.
    * @param languagesRepo - Valor de languages repo requerido por la operación.
    * @param affiliationsRepo - Historial laboral (afiliaciones institucionales).
+   * @param attachableFiles - La regla compartida de qué archivo se puede referenciar.
    * @param accountLinksRepo - Vínculo persona-cuenta del titular del perfil.
    * @param effectiveRoles - Concesión de roles asistenciales (`authz`).
+   * @param verificationBypass - Bypass DEV/TEST del filtro de verificación (corrección #12).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -91,8 +121,14 @@ export class ProfilesPractitionersService {
     private readonly languagesRepo: PractitionerLanguagesRepository,
     private readonly affiliationsRepo: PractitionerAffiliationsRepository,
     private readonly ownership: ProfileOwnershipService,
+    // TP-2: con qué estado nace un vínculo y cuáles se le pueden mostrar a un
+    // tercero se deciden en un solo lugar.
+    private readonly affiliations: ProfilesAffiliationsService,
+    private readonly attachableFiles: AttachableFileService,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
+    private readonly verificationBypass: VerificationBypassService,
+    private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
@@ -147,6 +183,139 @@ export class ProfilesPractitionersService {
   }
 
   /**
+   * En qué punto del alta está el profesional de la sesión.
+   *
+   * ## Por qué se calcula y no se guarda
+   *
+   * El asistente necesita saber «por dónde iba», y la tentación es una columna
+   * `onboarding_step`. No hace falta y sería peor: crearía un segundo estado
+   * que puede contradecir al primero —alguien carga su foto desde el perfil y
+   * el contador sigue diciendo que le falta— y obligaría a migrar a todos los
+   * profesionales que ya existen.
+   *
+   * Derivándolo de los datos, retomar sale gratis y los profesionales de antes
+   * aparecen completos sin tocar una fila.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Las cinco etapas y la primera incompleta.
+   */
+  async getOwnOnboarding(
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerOnboardingDto> {
+    const em = this.em.fork();
+
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene una persona vinculada',
+      );
+    }
+    const perfil = await this.practitionersRepo.findById(em, link.personId);
+    if (!perfil) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene perfil profesional',
+        { personId: link.personId },
+      );
+    }
+    const practitionerProfileId = perfil.profileId;
+
+    const [matriculas, especialidades, afiliaciones, recursos] =
+      await Promise.all([
+        this.authorizationsRepo.findByPractitioner(em, practitionerProfileId),
+        this.specialtiesRepo.findAllByPractitioner(em, practitionerProfileId),
+        em.find(PractitionerAffiliations, { practitionerProfileId }),
+        // La agenda propia: el recurso de scheduling que apunta a este perfil.
+        // Se mira desde acá y no se le pide al otro módulo porque es una
+        // pregunta de este —«¿ya publicó?»— y `resource_ref_id` es su vínculo.
+        em.find(SchedulableResources, { resourceRefId: practitionerProfileId }),
+      ]);
+
+    // Tener el recurso no es tener agenda. El asistente crea el recurso en su
+    // primer paso, así que darlo por «horarios publicados» daba por completa el
+    // alta de alguien a quien todavía no se le puede pedir turno — que es
+    // exactamente lo que este paso existe para evitar. Se cuentan todos los
+    // cupos y no sólo los futuros: si vencieran, un alta ya terminada volvería
+    // a mostrarse incompleta sola, y la agenda vencida es otro aviso, con su
+    // propia superficie.
+    const cupos =
+      recursos.length === 0
+        ? 0
+        : await em.count(BookableSlots, {
+            resourceId: { $in: recursos.map((recurso) => recurso.id) },
+          });
+
+    const tieneFoto =
+      perfil.photoFileId !== undefined && perfil.photoFileId !== null;
+
+    const faltaEnDatos: string[] = [];
+    if (!matriculas.some((fila) => fila.licenseNumber.trim() !== '')) {
+      faltaEnDatos.push('license-number');
+    }
+    if (especialidades.length === 0) faltaEnDatos.push('specialty');
+
+    const pasos: OnboardingStepDto[] = [
+      {
+        key: 'professional-data',
+        complete: faltaEnDatos.length === 0,
+        missing: faltaEnDatos,
+      },
+      {
+        key: 'photo',
+        // `!== undefined` no alcanza: la columna es nullable y MikroORM la
+        // hidrata como `null`, así que un profesional SIN foto daba el paso por
+        // cumplido —«Tu foto: completado» con `photo_file_id` en NULL, visto en
+        // pantalla—. Se comprueba la ausencia real, que son los dos valores.
+        complete: tieneFoto,
+        missing: tieneFoto ? [] : ['photo'],
+      },
+      {
+        // Vale una afiliación **o** una agenda propia: un profesional que
+        // atiende en su propio consultorio no está afiliado a nadie, y pedirle
+        // una afiliación lo dejaría trabado en un paso que no le corresponde.
+        key: 'organizations',
+        complete: afiliaciones.length > 0 || recursos.length > 0,
+        missing:
+          afiliaciones.length > 0 || recursos.length > 0 ? [] : ['affiliation'],
+      },
+      {
+        key: 'schedule',
+        complete: cupos > 0,
+        missing:
+          cupos > 0
+            ? []
+            : recursos.length === 0
+              ? ['published-schedule']
+              : ['slots'],
+      },
+    ];
+
+    // La revisión no pide nada propio: está cumplida cuando lo están las cuatro
+    // anteriores. Se declara igual para que la pantalla dibuje cinco pasos.
+    const previosCompletos = pasos.every((paso) => paso.complete);
+    pasos.push({
+      key: 'review',
+      complete: previosCompletos,
+      missing: previosCompletos ? [] : ['previous-steps'],
+    });
+
+    const primerIncompleto = pasos.find((paso) => !paso.complete);
+
+    this.logger.info(
+      {
+        operation: 'profiles.practitioner.onboarding',
+        firstIncomplete: primerIncompleto?.key ?? 'done',
+      },
+      'Calculando el avance del alta del profesional',
+    );
+
+    return {
+      practitionerProfileId,
+      steps: pasos,
+      firstIncomplete: primerIncompleto?.key ?? 'done',
+    };
+  }
+
+  /**
    * La guía de profesionales (carril R2-1): el listado que no existía.
    *
    * `profiles` tenía listado de pacientes y ninguna forma de listar
@@ -162,6 +331,18 @@ export class ProfilesPractitionersService {
    * transporte sólo necesita ser estable y sin huecos. El filtro por
    * especialidad considera únicamente las vigentes: presentar a alguien por
    * una especialidad que dejó de ejercer es decir algo falso.
+   *
+   * ## Filtro de verificación (corrección #12/#13)
+   *
+   * Fuera del bypass DEV/TEST, la guía solo lista profesionales con
+   * `verificationStatusConceptId = PRACT_VERIF_VERIFIED`: presentar a un
+   * paciente un profesional no verificado como si fuera elegible sería el
+   * mismo tipo de dato falso que una especialidad ya abandonada. Con el
+   * bypass activo (`VerificationBypassService.isActive()`), el filtro se
+   * suprime — los sembrados/registrados sin verificar deben poder probarse
+   * de punta a punta en DEV/TEST — pero el estado sigue viajando en cada
+   * fila (`verificationStatusConceptId`) como badge informativo, nunca como
+   * criterio de exclusión adicional.
    *
    * @param options - Filtro por especialidad, cursor y tope de página.
    * @returns Página de la guía con el cursor de la siguiente.
@@ -197,11 +378,15 @@ export class ProfilesPractitionersService {
       }
     }
 
+    const verificationStatusConceptId = this.verificationBypass.isActive()
+      ? undefined
+      : PROF.PRACT_VERIF_VERIFIED;
+
     // Una fila de más para saber si hay página siguiente sin pagar un COUNT
     // sobre toda la tabla en cada página.
     const rows = await this.practitionersRepo.listPage(
       em,
-      { afterCode, profileIds },
+      { afterCode, profileIds, verificationStatusConceptId },
       options.limit + 1,
     );
     const hasMore = rows.length > options.limit;
@@ -316,21 +501,68 @@ export class ProfilesPractitionersService {
     }
 
     const profileId = practitioner.profileId;
-    const [specialties, credentials, licenses, languages, activity] =
-      await Promise.all([
-        this.specialtiesRepo.findAllByPractitioner(em, profileId),
-        this.credentialsRepo.findByPractitioner(em, profileId),
-        this.authorizationsRepo.findByPractitioner(em, profileId),
-        this.languagesRepo.findByPractitioner(em, profileId),
-        subjectUserId === undefined
-          ? Promise.resolve({
-              encounters: 0,
-              medicationRequests: 0,
-              clinicalNotes: 0,
-              documents: 0,
-            })
-          : this.countActivity(em, subjectUserId),
-      ]);
+    // Cada pieza del perfil se lee **sin poder tumbar a las demás** (F-18,
+    // 18/08/2026). La ficha de la Guía devolvía 500 —con código de soporte a la
+    // vista del paciente— en cuanto una de estas seis lecturas fallaba sobre un
+    // perfil pelado, que es justo como quedan los del seeder técnico: sin
+    // credenciales, sin especialidad, sin foto. Un perfil incompleto es un
+    // perfil que se muestra incompleto, no un error: la pantalla ya sabe pintar
+    // vacíos dignos. Lo que no puede faltar —la persona y su perfil— sigue
+    // cortando arriba con 404.
+    const [
+      specialties,
+      credentials,
+      licenses,
+      languages,
+      affiliations,
+      activity,
+    ] = await Promise.all([
+      this.sinTumbarLaFicha(
+        () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'especialidades' },
+      ),
+      this.sinTumbarLaFicha(
+        () => this.credentialsRepo.findByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'credenciales' },
+      ),
+      this.sinTumbarLaFicha(
+        () => this.authorizationsRepo.findByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'matrículas' },
+      ),
+      this.sinTumbarLaFicha(
+        () => this.languagesRepo.findByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'idiomas' },
+      ),
+      // TP-2: el titular ve su trayectoria entera —incluida la solicitud que
+      // mandó y todavía nadie aceptó, que si no no sabría que la mandó—; quien
+      // mira la ficha de un colega ve sólo los vínculos aprobados. Decir que
+      // alguien trabaja en una clínica que no lo aceptó es afirmar algo falso,
+      // y era lo que esta lectura hacía.
+      //
+      // Va envuelta como las otras cinco (F-18): las dos correcciones son
+      // independientes —una elige QUÉ vínculos se ven, la otra impide que esa
+      // lectura tumbe la ficha entera— y quedarse con una sola habría
+      // reintroducido el defecto de la otra.
+      this.sinTumbarLaFicha(
+        () =>
+          subjectUserId === undefined
+            ? this.affiliations.visiblesDeTerceros(em, profileId)
+            : this.affiliationsRepo.findByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'afiliaciones' },
+      ),
+      subjectUserId === undefined
+        ? Promise.resolve(SIN_ACTIVIDAD)
+        : this.sinTumbarLaFicha(
+            () => this.countActivity(em, subjectUserId),
+            SIN_ACTIVIDAD,
+            { profileId, pieza: 'actividad' },
+          ),
+    ]);
 
     return {
       profileId,
@@ -364,6 +596,7 @@ export class ProfilesPractitionersService {
         expiryDate: credential.expiryDate,
         stateConceptId: credential.stateConceptId,
         verifiedAt: credential.verifiedAt,
+        verificationSourceUri: credential.verificationSourceUri,
       })),
       licenses: licenses.map((license) => ({
         id: license.id,
@@ -380,6 +613,7 @@ export class ProfilesPractitionersService {
         clinicalInterpretationAllowed:
           language.clinicalInterpretationAllowed ?? false,
       })),
+      affiliations: affiliations.map((row) => toAffiliation(row)),
       activity,
       createdAt: practitioner.createdAt,
     };
@@ -464,6 +698,140 @@ export class ProfilesPractitionersService {
   }
 
   /**
+   * Fija la foto del perfil profesional.
+   *
+   * ## El hueco que cierra
+   *
+   * `health_practitioner_profiles.photo_file_id` se **leía** —la ficha del
+   * profesional y el listado de la guía lo devuelven— y no lo escribía nadie:
+   * la columna existía, la FK existía, y no había forma de llenarla desde la
+   * API. Un profesional no podía ponerse una foto.
+   *
+   * ## Qué se comprueba, y por qué cada cosa
+   *
+   * - **Quién pide.** El titular del perfil o la plataforma
+   *   ({@link ProfileOwnershipService.assertOwnsPractitionerProfile}). La foto
+   *   es la cara de quien ejerce: ponerle a un colega la imagen que uno elija
+   *   es suplantación con otro nombre.
+   * - **De quién es el archivo.** La misma regla que usa el muro social para la
+   *   media de una publicación ({@link AttachableFileService}): sin ella, el
+   *   `fileId` sería un uuid que el cliente declara, y cualquiera podría
+   *   apuntar la foto de su perfil al documento de identidad de otra persona
+   *   —que después se sirve a quien abra la ficha—.
+   * - **Que sea una imagen.** El límite es el `mime_type` que quedó registrado
+   *   al subir, deducido de los bytes y no del encabezado del cliente. Un PDF
+   *   subido como `DOCUMENT` pasa las dos comprobaciones anteriores y no es una
+   *   foto.
+   *
+   * ## Reemplazo
+   *
+   * Se cambia la referencia y nada más: el archivo anterior sigue vivo en
+   * `common.files`, con sus versiones y sus vínculos. Borrarlo desde acá dejaría
+   * colgado a cualquier otro uso del mismo archivo —el borrado de archivos tiene
+   * su propio camino, con su borrado lógico—. Un `photo_file_id` que apunta a
+   * una fila que ya no está sería justamente la referencia corrupta que el
+   * contrato del carril prohíbe.
+   *
+   * @param profileId - Perfil profesional cuya foto se fija.
+   * @param dto - El archivo ya subido que pasa a ser la foto.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya con su foto.
+   * @throws ForbiddenException si no es el titular ni plataforma, o si el
+   *   archivo lo subió otra persona.
+   * @throws ResourceNotFoundException si el perfil o el archivo no existen.
+   * @throws PreconditionFailedException si el archivo está borrado, sin versión
+   *   vigente, infectado o no es una imagen.
+   */
+  async setPractitionerPhoto(
+    profileId: string,
+    dto: SetPractitionerPhotoDto,
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    this.logger.info(
+      {
+        operation: 'profiles.practitioner.setPhoto',
+        profileId,
+        actorId: actor.id,
+      },
+      'Setting practitioner profile photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
+      const practitioner = await this.practitionersRepo.findById(tx, profileId);
+      if (!practitioner) {
+        throw new ResourceNotFoundException('Profesional no encontrado', {
+          profileId,
+        });
+      }
+      // Dentro de la misma transacción que la escritura: comprobar contra un
+      // estado y escribir sobre otro no comprueba nada.
+      await this.attachableFiles.assertUsableBy(
+        tx,
+        dto.fileId,
+        actor,
+        {
+          allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+          operation: 'profiles.practitioner.setPhoto',
+        },
+        {
+          subject: 'El archivo de la foto',
+          notFound: 'El archivo de la foto no existe',
+        },
+      );
+      practitioner.photoFileId = dto.fileId;
+      touch(practitioner, actor.id);
+      await tx.flush();
+    });
+
+    return this.getPractitionerSummary(profileId);
+  }
+
+  /**
+   * Quita la foto del perfil profesional.
+   *
+   * Deja `photo_file_id` en nulo y no toca el archivo: quitar la foto de la
+   * ficha es una decisión de presentación, borrar un archivo del almacenamiento
+   * es otra cosa y tiene su propio camino. Es idempotente —quitar la foto de un
+   * perfil que no tiene se responde igual—, porque el resultado que el cliente
+   * pidió es el que queda.
+   *
+   * @param profileId - Perfil profesional cuya foto se quita.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya sin foto.
+   * @throws ForbiddenException si no es el titular ni plataforma.
+   * @throws ResourceNotFoundException si el perfil no existe.
+   */
+  async removePractitionerPhoto(
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    this.logger.info(
+      {
+        operation: 'profiles.practitioner.removePhoto',
+        profileId,
+        actorId: actor.id,
+      },
+      'Removing practitioner profile photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
+      const practitioner = await this.practitionersRepo.findById(tx, profileId);
+      if (!practitioner) {
+        throw new ResourceNotFoundException('Profesional no encontrado', {
+          profileId,
+        });
+      }
+      practitioner.photoFileId = undefined;
+      touch(practitioner, actor.id);
+      await tx.flush();
+    });
+
+    return this.getPractitionerSummary(profileId);
+  }
+
+  /**
    * Cuenta lo que el profesional dejó asentado, por el usuario que lo creó.
    *
    * Cuatro `count` y ni un `find`: no se trae ninguna fila, así que ningún dato
@@ -474,6 +842,33 @@ export class ProfilesPractitionersService {
    * @param userId - La cuenta cuya actividad se cuenta.
    * @returns Las cuatro cifras de actividad.
    */
+
+  /**
+   * Ejecuta una lectura accesoria de la ficha y, si revienta, devuelve el vacío
+   * en vez de propagar.
+   *
+   * Es deliberadamente estrecho: **sólo** para las piezas que la ficha muestra
+   * como lista o como conteo. Nada de lo que decide si el perfil existe pasa
+   * por acá — eso sigue siendo un 404 explícito. Se registra en `warn` con la
+   * pieza y el perfil, porque un vacío silencioso que en realidad es un fallo
+   * es peor que el 500 que reemplaza: el log es lo que lo hace visible.
+   */
+  private async sinTumbarLaFicha<T>(
+    leer: () => Promise<T>,
+    vacio: T,
+    contexto: { profileId: string; pieza: string },
+  ): Promise<T> {
+    try {
+      return await leer();
+    } catch (error) {
+      this.logger.warn(
+        { ...contexto, err: error },
+        'La ficha del profesional se devuelve sin esta pieza: la lectura falló',
+      );
+      return vacio;
+    }
+  }
+
   private async countActivity(
     em: EntityManager,
     userId: string,
@@ -590,6 +985,12 @@ export class ProfilesPractitionersService {
         clinicalInterpretationAllowed: true,
         actorUserId: actor.id,
       });
+      await this.declareSpecialties(
+        tx,
+        personId,
+        dto.specialtyConceptIds ?? [],
+        actor,
+      );
       await tx.flush();
 
       this.logger.info(
@@ -781,6 +1182,59 @@ export class ProfilesPractitionersService {
   }
 
   /** UC-05-06: agrega una especialidad con credencial de soporte verificada. */
+  /**
+   * Deja declaradas las especialidades que vinieron con el alta.
+   *
+   * Va **dentro de la transacción del registro** y no como llamadas sueltas
+   * después: es la regla 11 del modelo —el alta de un profesional es atómica—,
+   * y además es lo único que permite elegir la especialidad al registrarse, que
+   * es cuando la persona la tiene presente. Si una no pertenece al catálogo, el
+   * alta entera se rechaza: registrar a medias a un profesional con una
+   * especialidad inventada es peor que pedirle que la corrija.
+   *
+   * La primera de la lista queda como principal. No hay «cuál es la principal»
+   * en el alta a propósito: quien se registra ordena sus especialidades, y la
+   * primera es la que da la respuesta obvia a «¿de qué sos?».
+   *
+   * @param tx - La transacción del alta.
+   * @param profileId - El perfil profesional recién creado.
+   * @param specialtyConceptIds - Los conceptos declarados, ya sin repetidos.
+   * @param actor - Quién registra, para la autoría de las filas.
+   */
+  private async declareSpecialties(
+    tx: EntityManager,
+    profileId: string,
+    specialtyConceptIds: readonly string[],
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (specialtyConceptIds.length === 0) return;
+
+    const unicas = [...new Set(specialtyConceptIds)];
+    if (unicas.length > MAX_SPECIALTIES_PER_PRACTITIONER) {
+      throw new PreconditionFailedException(
+        `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
+        { declaradas: unicas.length },
+      );
+    }
+
+    const ahora = new Date();
+    for (const [orden, specialtyConceptId] of unicas.entries()) {
+      await this.specialtyCatalog.assertIsMedicalSpecialty(
+        tx,
+        specialtyConceptId,
+      );
+      this.specialtiesRepo.create(tx, {
+        practitionerProfileId: profileId,
+        specialtyConceptId,
+        isPrimary: orden === 0,
+        boardCertified: false,
+        verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+        validFrom: ahora,
+        actorUserId: actor.id,
+      });
+    }
+  }
+
   async addSpecialty(
     profileId: string,
     dto: AddSpecialtyDto,
@@ -822,8 +1276,35 @@ export class ProfilesPractitionersService {
         }
       }
 
-      const specialtyConceptId =
-        dto.specialtyConceptId ?? PROF.SPECIALTY_GENERAL;
+      // Omitir la especialidad ya no cae en «medicina general»: ese concepto
+      // venía de un catálogo paralelo de la API que NINGUNA fila usa, así que
+      // el default escribía en silencio una especialidad fuera del catálogo del
+      // modelo. Si no se dice cuál, no hay especialidad que registrar.
+      const specialtyConceptId = dto.specialtyConceptId;
+      if (specialtyConceptId === undefined) {
+        throw new PreconditionFailedException('Falta indicar la especialidad', {
+          profileId,
+        });
+      }
+      await this.specialtyCatalog.assertIsMedicalSpecialty(
+        tx,
+        specialtyConceptId,
+      );
+
+      // El tope es del registro del cliente, y se cuenta sobre las VIGENTES:
+      // una especialidad dada de baja no debería ocupar un lugar para siempre.
+      const vigentes = await this.specialtiesRepo.findAllByPractitioner(
+        tx,
+        profileId,
+      );
+      const activas = vigentes.filter((especialidad) => !especialidad.validTo);
+      if (activas.length >= MAX_SPECIALTIES_PER_PRACTITIONER) {
+        throw new PreconditionFailedException(
+          `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
+          { profileId, activas: activas.length },
+        );
+      }
+
       const duplicate = await this.specialtiesRepo.findActive(
         tx,
         profileId,
@@ -953,6 +1434,26 @@ export class ProfilesPractitionersService {
         );
       }
 
+      // TP-2: y pedir dos veces atender en la MISMA sede es lo mismo, aunque el
+      // cargo o la fecha se escriban distinto. `findSame` compara institución,
+      // cargo e inicio —sirve para no cargar dos veces la misma línea del
+      // currículum—, y con eso solo, reenviar el formulario con una coma de
+      // diferencia dejaba dos solicitudes para la misma sede en la bandeja de
+      // la organización.
+      if (dto.practiceSiteId) {
+        const yaPedida = await this.affiliationsRepo.findByPractitionerAndSite(
+          tx,
+          profileId,
+          dto.practiceSiteId,
+        );
+        if (yaPedida) {
+          throw new ConflictException('Ya pediste vincularte a esa sede', {
+            practiceSiteId: dto.practiceSiteId,
+            statusConceptId: yaPedida.statusConceptId,
+          });
+        }
+      }
+
       const affiliation = this.affiliationsRepo.create(tx, {
         practitionerProfileId: profileId,
         organizationName,
@@ -963,7 +1464,19 @@ export class ProfilesPractitionersService {
           dto.affiliationTypeConceptId ?? PROF.AFFILIATION_TYPE_EMPLOYMENT,
         startDate,
         endDate,
-        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        // TP-2: un vínculo a una sede ajena nace **pendiente**, no activo.
+        //
+        // Hasta acá, declarar una afiliación la daba por cierta en el acto:
+        // cualquiera podía decirse parte de una clínica y el sistema lo
+        // publicaba en su trayectoria y en su perfil, sin que nadie de esa
+        // clínica se enterara siquiera. Sin sede sigue naciendo activa —eso es
+        // historial laboral y no hay a quién pedirle permiso—, y con una sede
+        // propia también, porque pedirse permiso a uno mismo no es una regla.
+        statusConceptId: await this.affiliations.estadoInicial(
+          tx,
+          dto.practiceSiteId,
+          actor,
+        ),
         actorUserId: actor.id,
       });
       await tx.flush();
