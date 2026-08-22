@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { MikroORM } from '@mikro-orm/postgresql';
 import type { INestApplication } from '@nestjs/common';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import pg from 'pg';
 import { AppModule } from '../../src/app.module';
 import { CONCEPTS, SEED, TokenService, createdBy } from '../../src/common';
@@ -99,6 +100,13 @@ export interface TestContext {
   secretaryProfileId: string;
   patientSubtypeId: string;
   chartTemplateId: string;
+  /**
+   * Puerto real donde escucha la app, sólo si `opts.realtime` lo pidió. Los
+   * demás suites de integración usan `app.getHttpServer()` con `supertest` sin
+   * necesitar un puerto real — éste existe únicamente para que un cliente
+   * `socket.io-client` externo al proceso de Nest tenga a dónde conectarse.
+   */
+  httpPort?: number;
 }
 
 /** Id determinista del administrador de pruebas (FK válida para created_by). */
@@ -130,6 +138,13 @@ export async function bootstrapTestApp(
     reset?: boolean;
     /** Sustituto determinista del transporte HTTP para pruebas de contrato. */
     httpDispatch?: (input: unknown) => Promise<OutboundDispatchResult>;
+    /**
+     * Escucha en un puerto real (`app.listen(0)`) con el adaptador de
+     * socket.io ya montado. Sólo lo necesita la suite de mensajería en tiempo
+     * real: `supertest` no lo requiere, así que el resto sigue sin abrir
+     * puerto.
+     */
+    realtime?: boolean;
   } = {},
 ): Promise<TestContext> {
   process.env.ORM_SCHEMA_SYNC = process.env.ORM_SCHEMA_SYNC ?? 'off';
@@ -170,7 +185,20 @@ export async function bootstrapTestApp(
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+  // Mismo adaptador que `main.ts`. Tiene que ir antes de `init()`: es cuando
+  // Nest conecta cada `@WebSocketGateway` al servidor.
+  if (opts.realtime) {
+    app.useWebSocketAdapter(new IoAdapter(app));
+  }
   await app.init();
+
+  let httpPort: number | undefined;
+  if (opts.realtime) {
+    await app.listen(0);
+    const address = app.getHttpServer().address();
+    httpPort =
+      typeof address === 'object' && address ? address.port : undefined;
+  }
 
   // Sin el parámetro de tipo explícito, `app.get` infiere el genérico con una
   // tupla `readonly` de entidades que no es asignable al `MikroORM` mutable que
@@ -221,6 +249,7 @@ export async function bootstrapTestApp(
     secretaryProfileId: FIX.secPerson,
     patientSubtypeId: FIX.patPerson,
     chartTemplateId: FIX.chartTemplate,
+    httpPort,
   };
 }
 

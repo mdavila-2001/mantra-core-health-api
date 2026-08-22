@@ -445,6 +445,19 @@ export class ConversationsRepository {
   }
 
   /**
+   * Un mensaje por id, para resolver hasta cuándo leyó el peer (doble check ✓✓).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del mensaje.
+   */
+  findMessageById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DirectMessages | null> {
+    return em.findOne(DirectMessages, { id });
+  }
+
+  /**
    * Crea create receipt.
    *
    * @param em - Contexto de persistencia o transacción activa.

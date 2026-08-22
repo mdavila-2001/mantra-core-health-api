@@ -626,6 +626,70 @@ export class SchedulingBookingsRepository {
    * @param patientProfileIds - Perfiles cuyos nombres se buscan.
    * @returns Los nombres hallados, por perfil; los que no tienen no aparecen.
    */
+  /**
+   * Las citas del paciente que **pisan** una franja, con su horario.
+   *
+   * Cruza por solape y no por igualdad: dos turnos de médicos distintos no
+   * empiezan a la misma hora, se montan. Tocarse en el extremo no cuenta
+   * —salir de uno a las 10:00 y entrar al otro a las 10:00 es apretado pero
+   * posible—, mismo criterio que la validación de agendas del profesional.
+   *
+   * Va con SQL directo porque el horario vive en el cupo y no en la cita: son
+   * dos tablas, y resolverlo con el ORM traería todas las citas del paciente
+   * para filtrarlas en memoria.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente cuyas citas se miran.
+   * @param desde - Inicio de la franja que se quiere ocupar.
+   * @param hasta - Fin de la franja.
+   * @param estados - Estados que cuentan como choque.
+   * @param excepto - Cita que no se compara consigo misma, si aplica.
+   * @returns Las citas que se cruzan, de la más próxima a la más lejana.
+   */
+  async findPatientBookingsOverlapping(
+    em: EntityManager,
+    patientProfileId: string,
+    desde: Date,
+    hasta: Date,
+    estados: readonly string[],
+    excepto?: string,
+  ): Promise<
+    {
+      id: string;
+      startAt: Date;
+      endAt: Date;
+      statusConceptId: string;
+      resourceName: string | null;
+    }[]
+  > {
+    if (estados.length === 0) return [];
+
+    return em.getConnection().execute(
+      `SELECT b.id,
+              s.start_at        AS "startAt",
+              s.end_at          AS "endAt",
+              b.status_concept_id AS "statusConceptId",
+              r.name            AS "resourceName"
+         FROM scheduling.appointment_bookings b
+         JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
+    LEFT JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
+        WHERE b.patient_profile_id = ?
+          AND b.status_concept_id IN (?)
+          AND s.start_at < ?
+          AND s.end_at   > ?
+          AND (? IS NULL OR b.id <> ?)
+        ORDER BY s.start_at ASC`,
+      [
+        patientProfileId,
+        [...estados],
+        hasta,
+        desde,
+        excepto ?? null,
+        excepto ?? null,
+      ],
+    );
+  }
+
   async findPatientNames(
     em: EntityManager,
     patientProfileIds: readonly string[],

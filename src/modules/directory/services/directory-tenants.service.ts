@@ -20,6 +20,7 @@ import {
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../repositories';
+import { CatalogRepository } from '../../insurance/repositories';
 import type { Tenants } from '../entities';
 import {
   CreateChildTenantDto,
@@ -72,6 +73,7 @@ export class DirectoryTenantsService {
    * @param tenantsRepo - Valor de tenants repo requerido por la operación.
    * @param membershipsRepo - Valor de memberships repo requerido por la operación.
    * @param branchesRepo - Valor de branches repo requerido por la operación.
+   * @param catalogRepo - Acceso a `insurance.insurance_carriers`, para editar el bloque `payer`.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -86,6 +88,7 @@ export class DirectoryTenantsService {
     private readonly tenantAdmin: TenantAdministrationService,
     // La vitrina pública de la organización, que se crea al verificarla.
     private readonly publicProfiles: PublicProfileProjectionService,
+    private readonly catalogRepo: CatalogRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryTenantsService.name);
@@ -289,6 +292,26 @@ export class DirectoryTenantsService {
         tenant.currencyConceptId = dto.currencyConceptId;
       }
       touch(tenant, actor.id);
+
+      // El bloque `payer` sólo tiene dónde aterrizar si el tenant es una
+      // aseguradora; si no hay carrier, se ignora en vez de romper el resto
+      // de la actualización.
+      if (dto.payer) {
+        const carrier = await this.catalogRepo.findCarrierByTenantId(
+          tx,
+          tenantId,
+        );
+        if (carrier) {
+          if (dto.payer.sigla !== undefined) carrier.sigla = dto.payer.sigla;
+          if (dto.payer.address !== undefined) {
+            carrier.address = dto.payer.address;
+          }
+          if (dto.payer.regulatorIdentifier !== undefined) {
+            carrier.regulatorIdentifier = dto.payer.regulatorIdentifier;
+          }
+          touch(carrier, actor.id);
+        }
+      }
 
       return this.toResponse(tenant);
     });

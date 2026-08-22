@@ -365,6 +365,10 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ADDR_USE_HOME: def('common:addr-use:home', 'ADDR_HOME', 'Home address'),
   ADDR_TYPE_POSTAL: def('common:addr-type:postal', 'POSTAL', 'Postal'),
   COUNTRY_PE: def('common:country:pe', 'PE', 'Peru'),
+  // ALoVida es una plataforma boliviana (SEGIP, catálogo de municipios del
+  // INE): `addresses.service.ts` usaba PE como único país sembrado, lo que
+  // dejaba cada dirección creada apuntando al país equivocado.
+  COUNTRY_BO: def('common:country:bo', 'BO', 'Bolivia'),
 
   // --- Common: archivos ---
   FILE_CATEGORY_DOCUMENT: def(

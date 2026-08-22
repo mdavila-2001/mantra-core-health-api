@@ -59,16 +59,16 @@ export class Identifiers {
   issuerCountryConceptId?: string;
 
   /**
-   * Departamento de expedición del documento (la «extensión» del carnet
-   * boliviano: SC, LP, CB…). Dato informativo del registro: no participa del
-   * login ni de la unicidad. Value set `vs_administrative_area` (v4.1.4).
+   * Departamento boliviano que emitió el documento (miembro de
+   * `VS_BO_DEPARTMENT`), para no confundir cédulas homónimas de distinto
+   * departamento (SALUD/Arquitectura/alovida-backlog-procesos.md, T-01).
    */
   @Property({
-    fieldName: 'issuing_administrative_area_concept_id',
+    fieldName: 'issuer_administrative_area_concept_id',
     type: 'uuid',
     nullable: true,
   }) // FK → terminology.catalog_concepts
-  issuingAdministrativeAreaConceptId?: string;
+  issuerAdministrativeAreaConceptId?: string;
 
   /**
    * Identificador asociado a assigner tenant.

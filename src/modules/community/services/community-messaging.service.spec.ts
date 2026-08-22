@@ -42,15 +42,29 @@ function build() {
   const messageNotifications = {
     mensajeNuevo: mockFn().mockResolvedValue(undefined),
   };
+  // El gateway WS, doblado: se prueba que se llame, no lo que hace socket.io.
+  const gateway = {
+    emitMessage: mockFn(),
+    emitRead: mockFn(),
+    emitNewConversation: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityMessagingService(
     em as any,
     conversationsRepo as any,
     blocksRepo as any,
     messageNotifications as any,
+    gateway as any,
     logger as any,
   );
-  return { service, tx, conversationsRepo, blocksRepo, messageNotifications };
+  return {
+    service,
+    tx,
+    conversationsRepo,
+    blocksRepo,
+    messageNotifications,
+    gateway,
+  };
 }
 
 describe('CommunityMessagingService', () => {
@@ -63,6 +77,10 @@ describe('CommunityMessagingService', () => {
     );
     expect(res).toEqual({ id: 'conv1' });
     expect(d.conversationsRepo.createParticipant).toHaveBeenCalledTimes(2);
+    expect(d.gateway.emitNewConversation).toHaveBeenCalledWith('conv1', [
+      'p1',
+      'p2',
+    ]);
   });
 
   /* --- Carril P2 · la conversación directa deja de duplicarse ------------- */
@@ -83,6 +101,8 @@ describe('CommunityMessagingService', () => {
     expect(res).toEqual({ id: 'conv-vieja' });
     expect(d.conversationsRepo.createConversation).not.toHaveBeenCalled();
     expect(d.conversationsRepo.createParticipant).not.toHaveBeenCalled();
+    // Reutilizada no es una novedad para nadie: nada que avisar por WS.
+    expect(d.gateway.emitNewConversation).not.toHaveBeenCalled();
   });
 
   it('no reutiliza nada cuando es un grupo: dos foros del mismo equipo son dos foros', async () => {
@@ -188,6 +208,11 @@ describe('CommunityMessagingService', () => {
       expect(res.id).toBe('msg1');
       expect(conversation.messageCount).toBe(5);
       expect(d.conversationsRepo.createReceipt).toHaveBeenCalled();
+      // El empuje WS es aditivo a la notificación in-app, no un sustituto.
+      expect(d.gateway.emitMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'msg1', conversationId: 'conv1' }),
+        ['p2'],
+      );
     });
   });
 
@@ -211,6 +236,11 @@ describe('CommunityMessagingService', () => {
       );
       expect(res).toEqual({ receiptsRecorded: 1, lastReadMessageId: 'msg9' });
       expect(participant.lastReadMessageId).toBe('msg9');
+      expect(d.gateway.emitRead).toHaveBeenCalledWith({
+        conversationId: 'conv1',
+        profileId: 'p1',
+        lastReadMessageId: 'msg9',
+      });
     });
   });
 });

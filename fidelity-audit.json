@@ -1,374 +1,47 @@
 {
   "resumen": {
-    "entidadesBoveda": 1339,
-    "conjuntosDeIndicesBoveda": 1228,
-    "entidadesMapeadas": 1237,
-    "entidadesFaltantes": 3,
-    "entidadesSobrantes": 46,
-    "columnasFaltantes": 6,
-    "columnasSobrantes": 0,
+    "entidadesBoveda": 1335,
+    "conjuntosDeIndicesBoveda": 1224,
+    "entidadesMapeadas": 1190,
+    "entidadesFaltantes": 0,
+    "entidadesSobrantes": 0,
+    "columnasFaltantes": 0,
+    "columnasSobrantes": 4,
     "tiposDivergentes": 0,
-    "obligatoriedadDivergente": 23,
+    "obligatoriedadDivergente": 0,
     "vistasNoMaterializadas": 78,
-    "indicesDeclarados": 7764,
-    "indicesEnCatalogo": 7696,
-    "fkDeclaradas": 6632,
-    "fkEnCatalogo": 6632
+    "indicesDeclarados": 7743,
+    "indicesEnCatalogo": 7686,
+    "fkDeclaradas": 6622,
+    "fkEnCatalogo": 6622
   },
-  "entidadesFaltantes": [
+  "entidadesFaltantes": [],
+  "entidadesSobrantes": [],
+  "columnasFaltantes": [],
+  "columnasSobrantes": [
     {
-      "key": "payments.subscription_invoices",
-      "tipo": "plain",
-      "campos": 23
+      "key": "profiles.persons",
+      "columna": "name",
+      "archivo": "profiles/entities/persons.entity.ts"
     },
     {
-      "key": "payments.subscription_ledger_bridge",
-      "tipo": "plain",
-      "campos": 18
+      "key": "profiles.persons",
+      "columna": "middle_name",
+      "archivo": "profiles/entities/persons.entity.ts"
     },
     {
-      "key": "payments.subscription_seats",
-      "tipo": "plain",
-      "campos": 14
+      "key": "profiles.persons",
+      "columna": "last_name",
+      "archivo": "profiles/entities/persons.entity.ts"
+    },
+    {
+      "key": "profiles.persons",
+      "columna": "mother_last_name",
+      "archivo": "profiles/entities/persons.entity.ts"
     }
   ],
-  "entidadesSobrantes": [
-    {
-      "key": "audit.informational_materials_history",
-      "archivo": "audit/entities/informational_materials_history.entity.ts"
-    },
-    {
-      "key": "audit.medical_visitors_history",
-      "archivo": "audit/entities/medical_visitors_history.entity.ts"
-    },
-    {
-      "key": "audit.pharmacovigilance_reports_history",
-      "archivo": "audit/entities/pharmacovigilance_reports_history.entity.ts"
-    },
-    {
-      "key": "audit.pharma_labs_history",
-      "archivo": "audit/entities/pharma_labs_history.entity.ts"
-    },
-    {
-      "key": "audit.pharma_lab_staff_history",
-      "archivo": "audit/entities/pharma_lab_staff_history.entity.ts"
-    },
-    {
-      "key": "audit.pharma_products_history",
-      "archivo": "audit/entities/pharma_products_history.entity.ts"
-    },
-    {
-      "key": "audit.regulatory_documents_history",
-      "archivo": "audit/entities/regulatory_documents_history.entity.ts"
-    },
-    {
-      "key": "audit.visit_requests_history",
-      "archivo": "audit/entities/visit_requests_history.entity.ts"
-    },
-    {
-      "key": "pharma_lab.doctor_visit_blocks",
-      "archivo": "pharma_lab/entities/doctor_visit_blocks.entity.ts"
-    },
-    {
-      "key": "pharma_lab.doctor_visit_policies",
-      "archivo": "pharma_lab/entities/doctor_visit_policies.entity.ts"
-    },
-    {
-      "key": "pharma_lab.doctor_visit_windows",
-      "archivo": "pharma_lab/entities/doctor_visit_windows.entity.ts"
-    },
-    {
-      "key": "pharma_lab.informational_materials",
-      "archivo": "pharma_lab/entities/informational_materials.entity.ts"
-    },
-    {
-      "key": "pharma_lab.material_approvals",
-      "archivo": "pharma_lab/entities/material_approvals.entity.ts"
-    },
-    {
-      "key": "pharma_lab.material_assets",
-      "archivo": "pharma_lab/entities/material_assets.entity.ts"
-    },
-    {
-      "key": "pharma_lab.medical_visitors",
-      "archivo": "pharma_lab/entities/medical_visitors.entity.ts"
-    },
-    {
-      "key": "pharma_lab.medical_visitor_products",
-      "archivo": "pharma_lab/entities/medical_visitor_products.entity.ts"
-    },
-    {
-      "key": "pharma_lab.medical_visitor_specialties",
-      "archivo": "pharma_lab/entities/medical_visitor_specialties.entity.ts"
-    },
-    {
-      "key": "pharma_lab.pharmacovigilance_actions",
-      "archivo": "pharma_lab/entities/pharmacovigilance_actions.entity.ts"
-    },
-    {
-      "key": "pharma_lab.pharmacovigilance_reports",
-      "archivo": "pharma_lab/entities/pharmacovigilance_reports.entity.ts"
-    },
-    {
-      "key": "pharma_lab.pharma_cost_allocations",
-      "archivo": "pharma_lab/entities/pharma_cost_allocations.entity.ts"
-    },
-    {
-      "key": "pharma_lab.pharma_labs",
-      "archivo": "pharma_lab/entities/pharma_labs.entity.ts"
-    },
-    {
-      "key": "pharma_lab.pharma_lab_link_events",
-      "archivo": "pharma_lab/entities/pharma_lab_link_events.entity.ts"
-    },
-    {
-      "key": "pharma_lab.pharma_lab_notices",
-      "archivo": "pharma_lab/entities/pharma_lab_notices.entity.ts"
-    },
-    {
-      "key": "pharma_lab.pharma_lab_staff",
-      "archivo": "pharma_lab/entities/pharma_lab_staff.entity.ts"
-    },
-    {
-      "key": "pharma_lab.pharma_products",
-      "archivo": "pharma_lab/entities/pharma_products.entity.ts"
-    },
-    {
-      "key": "pharma_lab.regulatory_documents",
-      "archivo": "pharma_lab/entities/regulatory_documents.entity.ts"
-    },
-    {
-      "key": "pharma_lab.regulatory_document_access_log",
-      "archivo": "pharma_lab/entities/regulatory_document_access_log.entity.ts"
-    },
-    {
-      "key": "pharma_lab.regulatory_document_versions",
-      "archivo": "pharma_lab/entities/regulatory_document_versions.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visitor_post_submissions",
-      "archivo": "pharma_lab/entities/visitor_post_submissions.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_ratings",
-      "archivo": "pharma_lab/entities/visit_ratings.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_records",
-      "archivo": "pharma_lab/entities/visit_records.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_record_materials",
-      "archivo": "pharma_lab/entities/visit_record_materials.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_requests",
-      "archivo": "pharma_lab/entities/visit_requests.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_request_events",
-      "archivo": "pharma_lab/entities/visit_request_events.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_request_topics",
-      "archivo": "pharma_lab/entities/visit_request_topics.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_surveys",
-      "archivo": "pharma_lab/entities/visit_surveys.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_survey_answers",
-      "archivo": "pharma_lab/entities/visit_survey_answers.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_survey_questions",
-      "archivo": "pharma_lab/entities/visit_survey_questions.entity.ts"
-    },
-    {
-      "key": "pharma_lab.visit_survey_responses",
-      "archivo": "pharma_lab/entities/visit_survey_responses.entity.ts"
-    },
-    {
-      "key": "surveys.survey_answers",
-      "archivo": "surveys/entities/survey_answers.entity.ts"
-    },
-    {
-      "key": "surveys.survey_assignments",
-      "archivo": "surveys/entities/survey_assignments.entity.ts"
-    },
-    {
-      "key": "surveys.survey_invitations",
-      "archivo": "surveys/entities/survey_invitations.entity.ts"
-    },
-    {
-      "key": "surveys.survey_questions",
-      "archivo": "surveys/entities/survey_questions.entity.ts"
-    },
-    {
-      "key": "surveys.survey_responses",
-      "archivo": "surveys/entities/survey_responses.entity.ts"
-    },
-    {
-      "key": "surveys.survey_templates",
-      "archivo": "surveys/entities/survey_templates.entity.ts"
-    },
-    {
-      "key": "surveys.survey_versions",
-      "archivo": "surveys/entities/survey_versions.entity.ts"
-    }
-  ],
-  "columnasFaltantes": [
-    {
-      "key": "directory.tenants",
-      "columna": "is_platform_house",
-      "archivo": "directory/entities/tenants.entity.ts"
-    },
-    {
-      "key": "payments.subscriptions",
-      "columna": "account_model_concept_id",
-      "archivo": "payments/entities/subscriptions.entity.ts"
-    },
-    {
-      "key": "payments.subscriptions",
-      "columna": "seat_count",
-      "archivo": "payments/entities/subscriptions.entity.ts"
-    },
-    {
-      "key": "payments.subscriptions",
-      "columna": "provider_tenant_id",
-      "archivo": "payments/entities/subscriptions.entity.ts"
-    },
-    {
-      "key": "payments.subscription_plans",
-      "columna": "audience_concept_id",
-      "archivo": "payments/entities/subscription_plans.entity.ts"
-    },
-    {
-      "key": "payments.subscription_plans",
-      "columna": "revenue_account_role_concept_id",
-      "archivo": "payments/entities/subscription_plans.entity.ts"
-    }
-  ],
-  "columnasSobrantes": [],
   "tiposDivergentes": [],
-  "obligatoriedadDivergente": [
-    {
-      "key": "object_storage.archive_manifests",
-      "columna": "verified_at",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.dicom_instance_manifests",
-      "columna": "sop_class_uid",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.dicom_instance_manifests",
-      "columna": "instance_number",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.dicom_instance_manifests",
-      "columna": "transfer_syntax_uid",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.dicom_instance_manifests",
-      "columna": "frame_count",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.dicom_instance_manifests",
-      "columna": "metadata_json",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.dicom_series_manifests",
-      "columna": "body_part_examined",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.dicom_series_manifests",
-      "columna": "thumbnail_object_manifest_id",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.dicom_study_manifests",
-      "columna": "study_date",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.dicom_study_manifests",
-      "columna": "modality_codes",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.object_checksums",
-      "columna": "verified_at",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.object_legal_holds",
-      "columna": "released_at",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.object_locations",
-      "columna": "verified_at",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.object_manifests",
-      "columna": "patient_profile_id",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.object_manifests",
-      "columna": "current_version_id",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.object_manifests",
-      "columna": "retention_policy_code",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "object_storage.object_retention_locks",
-      "columna": "released_at",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "polyglot_storage.collection_definitions",
-      "columna": "routing_key_expression",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "polyglot_storage.collection_definitions",
-      "columna": "shard_key_expression",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "polyglot_storage.residency_policies",
-      "columna": "forbidden_country_codes",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "polyglot_storage.residency_policies",
-      "columna": "allowed_region_codes",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "polyglot_storage.residency_policies",
-      "columna": "cross_border_transfer_basis",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    },
-    {
-      "key": "polyglot_storage.storage_capabilities",
-      "columna": "verified_at",
-      "detalle": "bóveda NOT NULL, entidad opcional"
-    }
-  ],
+  "obligatoriedadDivergente": [],
   "vistasNoMaterializadas": [
     {
       "key": "billing.receivables_aging_view",

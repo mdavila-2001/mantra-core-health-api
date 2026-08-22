@@ -41,9 +41,11 @@ export class AddressesService {
       'Creating address',
     );
 
-    // Solo existe el concepto de país PE en el catálogo; cualquier otro se ignora
-    // y se usa el valor por defecto para no romper la FK a catalog_concepts.
-    const countryConceptId = CONCEPTS.COUNTRY_PE;
+    // ALoVida es una plataforma boliviana: el único país sembrado que tiene
+    // sentido por defecto es BO, no PE. Cualquier otro valor de `dto.country`
+    // se ignora y se usa el valor por defecto para no romper la FK a
+    // catalog_concepts (no hay más países sembrados hoy).
+    const countryConceptId = CONCEPTS.COUNTRY_BO;
 
     return this.em.transactional(async (tx) => {
       const address = this.addressesRepo.create(tx, {
@@ -53,6 +55,8 @@ export class AddressesService {
         city: dto.city,
         postalCode: dto.postalCode,
         countryConceptId,
+        municipalityConceptId: dto.municipalityConceptId,
+        administrativeAreaConceptId: dto.administrativeAreaConceptId,
         useConceptId: CONCEPTS.ADDR_USE_HOME,
         typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
         actorUserId: actor.id,
@@ -85,7 +89,9 @@ export class AddressesService {
       lines: entity.lines ? entity.lines.split(LINE_SEPARATOR) : [],
       city: entity.city,
       postalCode: entity.postalCode,
-      country: 'PE',
+      country: 'BO',
+      municipalityConceptId: entity.municipalityConceptId,
+      administrativeAreaConceptId: entity.administrativeAreaConceptId,
       createdAt: entity.createdAt,
     };
   }

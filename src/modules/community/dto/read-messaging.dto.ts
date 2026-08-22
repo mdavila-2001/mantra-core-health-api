@@ -157,4 +157,14 @@ export class DirectMessagePageDto {
   /** Cursor de la página siguiente, o `null`. */
   @ApiPropertyOptional({ nullable: true })
   nextCursor!: string | null;
+
+  /**
+   * Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT.
+   *
+   * `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada
+   * todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios
+   * cuyo `sentAt` sea anterior o igual a esta marca.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  peerReadUpTo?: Date | null;
 }

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `common`.
- * 50 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 51 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const commonIndexes: readonly IndexTuple[] = [
@@ -11,6 +11,7 @@ export const commonIndexes: readonly IndexTuple[] = [
   ['addresses', 'ix_addresses_use_concept_id', ['use_concept_id'], false, 'btree'],
   ['addresses', 'ix_addresses_type_concept_id', ['type_concept_id'], false, 'btree'],
   ['addresses', 'ix_addresses_administrative_area_concept_id', ['administrative_area_concept_id'], false, 'btree'],
+  ['addresses', 'ix_addresses_municipality_concept_id', ['municipality_concept_id'], false, 'btree'],
   ['addresses', 'ix_addresses_country_concept_id', ['country_concept_id'], false, 'btree'],
   ['addresses', 'ix_addresses_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['addresses', 'ix_addresses_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
@@ -52,7 +53,7 @@ export const commonIndexes: readonly IndexTuple[] = [
   ['identifiers', 'ix_identifiers_use_concept_id', ['use_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_type_concept_id', ['type_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_issuer_country_concept_id', ['issuer_country_concept_id'], false, 'btree'],
-  ['identifiers', 'ix_identifiers_issuing_administrative_area_concept_id', ['issuing_administrative_area_concept_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_issuer_administrative_area_concept_id', ['issuer_administrative_area_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_assigner_tenant_id', ['assigner_tenant_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_created_by_user_id', ['created_by_user_id'], false, 'btree'],

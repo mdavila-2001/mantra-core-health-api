@@ -59,6 +59,9 @@ function build() {
 
     latestRescheduleOrigins: mockFn().mockResolvedValue(new Map()),
     findPatientNames: mockFn().mockResolvedValue(new Map()),
+    // Por omisión el paciente no tiene nada que choque: el camino feliz de
+    // reservar no puede depender de configurar esta lectura en cada prueba.
+    findPatientBookingsOverlapping: mockFn().mockResolvedValue([]),
     findBookings: mockFn(),
     countActiveBookingsForPatient: mockFn(),
     recordReschedule: mockFn(),
@@ -335,6 +338,52 @@ describe('SchedulingBookingsService', () => {
         ...overrides,
       };
     }
+
+    /* -- Las reglas de choque de turnos ------------------------------------ */
+
+    it('REGLA 1 · no deja reservar encima de un turno YA CONFIRMADO', async () => {
+      // Pedirle a varios médicos la misma hora es legítimo mientras ninguno
+      // haya dicho que sí. Una vez que hay uno confirmado, el paciente ya tiene
+      // dónde estar: reservar otro encima es comprometerse a estar en dos
+      // lugares, y el que se queda esperando es el médico.
+      const d = build();
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(activeHold());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ remainingCapacity: 1 }),
+      );
+      d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([
+        {
+          id: 'otra-1',
+          startAt: new Date(Date.now() + EN_UNA_HORA),
+          endAt: new Date(Date.now() + 2 * EN_UNA_HORA),
+          statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+          resourceName: 'Consultorio del Dr. Paz',
+        },
+      ]);
+
+      // La frase nombra dónde tiene el otro turno: sin eso, «ya tenés un turno»
+      // manda a la persona a buscarlo a mano.
+      await expect(
+        d.service.confirmBooking('token', dto, actor),
+      ).rejects.toThrow(/Consultorio del Dr. Paz/);
+    });
+
+    it('REGLA 1 · sólo mira las confirmadas, no las que están esperando', async () => {
+      const d = build();
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(activeHold());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ remainingCapacity: 1 }),
+      );
+      d.bookingsRepo.createBooking.mockReturnValue({ id: 'booking-1' });
+
+      await d.service.confirmBooking('token', dto, actor);
+
+      const estados =
+        d.bookingsRepo.findPatientBookingsOverlapping.mock.calls[0][4];
+      expect(estados).toContain(CONCEPTS.BOOKING_CONFIRMED);
+      expect(estados).not.toContain(SCHED.BOOKING_REQUESTED);
+      expect(estados).not.toContain(SCHED.BOOKING_PENDING_CONFIRMATION);
+    });
 
     it('confirms the booking and consumes the hold', async () => {
       const d = build();
@@ -997,6 +1046,101 @@ describe('SchedulingBookingsService', () => {
         statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
       };
     }
+
+    /** Una solicitud del mismo paciente, con otro médico, a la misma hora. */
+    function solicitudQueChoca(id = 'booking-2') {
+      return {
+        id,
+        startAt: new Date(Date.now() + EN_UNA_HORA),
+        endAt: new Date(Date.now() + 2 * EN_UNA_HORA),
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        resourceName: 'Consultorio del Dr. Paz',
+      };
+    }
+
+    it('REGLA 2 · aceptar una cancela las pendientes que chocan', async () => {
+      // El caso que motiva la regla: el paciente pidió a tres médicos la misma
+      // hora, uno le dijo que sí, y las otras dos dejaron de ser posibles. Si
+      // nadie las cierra quedan esperando una respuesta que ya no importa, y
+      // reteniendo cupos que otra persona podría usar.
+      const d = build();
+      const aceptada = solicitudPendiente();
+      const otra = {
+        ...solicitudQueChoca(),
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+      };
+      d.bookingsRepo.findBookingByIdForUpdate
+        .mockResolvedValueOnce(aceptada)
+        .mockResolvedValueOnce({
+          id: 'booking-2',
+          bookableSlotId: 'slot-2',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+      d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([otra]);
+      const slotLiberado = openSlot({
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_HELD,
+      });
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slotLiberado);
+
+      const res = await d.service.accept('booking-1', {}, actor);
+
+      expect(res.desplazadas).toEqual(['booking-2']);
+      // Y el cupo que retenía vuelve a estar disponible: castigar al siguiente
+      // paciente por una cita que ya no existe no tiene sentido.
+      expect(slotLiberado.remainingCapacity).toBe(1);
+      expect(slotLiberado.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
+    it('REGLA 2 · nunca toca una cita que otro médico ya confirmó', async () => {
+      // Cancelar automáticamente algo ya comprometido sería decidir por el otro
+      // profesional. Ese caso se resuelve hablando, no con una regla.
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+
+      await d.service.accept('booking-1', {}, actor);
+
+      const estados =
+        d.bookingsRepo.findPatientBookingsOverlapping.mock.calls[0][4];
+      expect(estados).toContain(SCHED.BOOKING_PENDING_CONFIRMATION);
+      expect(estados).toContain(SCHED.BOOKING_REQUESTED);
+      expect(estados).not.toContain(CONCEPTS.BOOKING_CONFIRMED);
+      expect(estados).not.toContain(CONCEPTS.BOOKING_CHECKED_IN);
+    });
+
+    it('REGLA 2 · no se compara consigo misma', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+
+      await d.service.accept('booking-1', {}, actor);
+
+      const excepto =
+        d.bookingsRepo.findPatientBookingsOverlapping.mock.calls[0][5];
+      expect(excepto).toBe('booking-1');
+    });
+
+    it('REGLA 2 · sin choques, aceptar no cancela nada', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+
+      const res = await d.service.accept('booking-1', {}, actor);
+
+      expect(res.desplazadas).toEqual([]);
+    });
 
     it('aceptar confirma la cita y sella el compromiso', async () => {
       const d = build();
