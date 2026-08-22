@@ -1,6 +1,7 @@
 import { CONCEPTS } from '../constants/concepts';
 import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
+import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
 
@@ -2583,6 +2584,64 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Sucursal de sociedad extranjera',
       definition:
         'Establecimiento en Bolivia de una sociedad constituida en otro país, inscrito en el registro de comercio.',
+    },
+  ],
+  /* --- la nota clínica narrativa (v4.1.4) -----------------------------------
+     Se veían en inglés en la pestaña «Notas» del expediente, que es justo donde
+     el médico va a buscar lo que acaba de escribir. */
+  [
+    CHART.NOTE_TYPE_PROGRESS,
+    {
+      display: 'Nota de evolución',
+      definition:
+        'El registro corriente de una consulta: qué pasó, qué se encontró y qué se decidió.',
+    },
+  ],
+  [
+    CHART.NOTE_LIFECYCLE_DRAFT,
+    {
+      display: 'Borrador',
+      definition:
+        'La nota está escrita pero todavía sin firmar. Se puede seguir editando y no cuenta como registro definitivo.',
+    },
+  ],
+  [
+    CHART.NOTE_LIFECYCLE_SIGNED,
+    {
+      display: 'Firmada',
+      definition:
+        'La nota quedó firmada por su autor. Desde acá no se edita: corregirla es enmendarla, y la enmienda dice por qué.',
+    },
+  ],
+  [
+    CHART.NOTE_LIFECYCLE_AMENDED,
+    {
+      display: 'Enmendada',
+      definition:
+        'La nota se corrigió después de firmarla. La versión anterior sigue en la historia con su motivo de enmienda.',
+    },
+  ],
+  [
+    CHART.RELEASE_NOT_RELEASED,
+    {
+      display: 'No compartida con el paciente',
+      definition:
+        'La nota es visible para el equipo de salud pero todavía no para la persona atendida.',
+    },
+  ],
+  [
+    CHART.RELEASE_RELEASED,
+    {
+      display: 'Compartida con el paciente',
+      definition: 'La persona atendida puede leer esta nota desde su historia.',
+    },
+  ],
+  [
+    CHART.RELEASE_WITHHELD,
+    {
+      display: 'Retenida',
+      definition:
+        'El profesional decidió que esta nota no se comparta con la persona atendida, aunque el resto de su historia sí.',
     },
   ],
 ];

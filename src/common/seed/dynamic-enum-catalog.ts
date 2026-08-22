@@ -1,6 +1,7 @@
 import { CONCEPTS, CONCEPT_DEFS, deterministicId } from '../constants/concepts';
 import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
+import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
 
@@ -973,6 +974,46 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     ],
     defaultConceptId: CLIN.SERVICE_REQUEST_DRAFT,
     targets: ['clinical.service_requests.status_concept_id'],
+  },
+
+  /* --- chart.clinical_note_* ------------------------------------------------
+     La nota narrativa. Sus tres ejes de catálogo no estaban publicados, así que
+     la pestaña «Notas» del expediente mostraba «Progress note type» y «Clinical
+     note draft» tal como los nombra el code system interno —en inglés, porque es
+     un catálogo—, justo donde el médico va a buscar lo que acaba de escribir. */
+  {
+    code: 'clinical-note-type',
+    name: 'Tipo de nota',
+    description: 'Qué clase de registro narrativo es la nota.',
+    concepts: [CHART.NOTE_TYPE_PROGRESS],
+    defaultConceptId: CHART.NOTE_TYPE_PROGRESS,
+    targets: ['chart.clinical_note_headers.note_type_concept_id'],
+  },
+  {
+    code: 'clinical-note-lifecycle',
+    name: 'Estado de la nota',
+    description:
+      'Borrador mientras se escribe, firmada cuando su autor la sella, enmendada si se corrigió después de firmarla.',
+    concepts: [
+      CHART.NOTE_LIFECYCLE_DRAFT,
+      CHART.NOTE_LIFECYCLE_SIGNED,
+      CHART.NOTE_LIFECYCLE_AMENDED,
+    ],
+    defaultConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+    targets: ['chart.clinical_note_headers.lifecycle_status_concept_id'],
+  },
+  {
+    code: 'clinical-note-patient-release',
+    name: 'Visibilidad para el paciente',
+    description:
+      'Si la persona atendida puede leer la nota. Una nota a medio escribir no debería aparecerle mientras dura la consulta.',
+    concepts: [
+      CHART.RELEASE_NOT_RELEASED,
+      CHART.RELEASE_RELEASED,
+      CHART.RELEASE_WITHHELD,
+    ],
+    defaultConceptId: CHART.RELEASE_NOT_RELEASED,
+    targets: ['chart.clinical_note_headers.patient_release_status_concept_id'],
   },
 ];
 
