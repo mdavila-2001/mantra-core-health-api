@@ -98,6 +98,7 @@ export class SchedulingBookingsController {
     @Query('to', new ParseOptionalDatePipe()) to?: Date,
     @Query('includeCancelled') includeCancelled?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @CurrentUser() actor?: AuthenticatedUser,
   ): Promise<SearchBookingsResponseDto> {
     return this.bookingsService.searchBookings(
       {
@@ -108,6 +109,7 @@ export class SchedulingBookingsController {
         includeCancelled: includeCancelled === 'true',
       },
       limit ?? 100,
+      actor,
     );
   }
 
@@ -120,8 +122,13 @@ export class SchedulingBookingsController {
   @Get(':id')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({ summary: 'UC-41-15: consulta una cita' })
-  getBooking(@Param('id', ParseUUIDPipe) id: string): Promise<BookingItemDto> {
-    return this.bookingsService.getBookingById(id);
+  getBooking(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingItemDto> {
+    // El actor viaja para decidir si el motivo de consulta se incluye: sólo el
+    // titular y su médico lo ven (TJ-2).
+    return this.bookingsService.getBookingById(id, actor);
   }
 
   /**

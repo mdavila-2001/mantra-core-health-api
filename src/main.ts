@@ -7,6 +7,7 @@ import './observability/telemetry.bootstrap';
 import type { Server } from 'node:http';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import { Logger, PinoLogger } from 'nestjs-pino';
@@ -110,6 +111,13 @@ async function bootstrap() {
   // CORS deshabilitado por defecto de forma explícita (deny-by-default). Cuando
   // haya un frontend con origen conocido, declarar aquí la allowlist de orígenes.
   app.enableCors({ origin: false });
+
+  // Mensajería en tiempo real (`CommunityMessagingGateway`). Sin este adaptador
+  // el `@WebSocketGateway` del módulo `community` queda declarado pero nunca
+  // escucha: Nest no monta socket.io sobre el servidor HTTP por defecto. Mismo
+  // criterio deny-by-default que el CORS de arriba — el gateway declara su
+  // propio `cors: { origin: false }`.
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // Validación global de DTO. `whitelist` + `forbidNonWhitelisted` cierran el
   // mass-assignment: cualquier propiedad no declarada en el DTO se rechaza en

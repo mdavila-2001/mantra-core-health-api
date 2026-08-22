@@ -6,6 +6,11 @@ export {
   ScheduleRuleDto,
   CreateTemplateDto,
   TemplateResponseDto,
+  TemplateRuleDto,
+  TemplateDetailDto,
+  TemplateListDto,
+  AvailabilityExceptionDto,
+  AvailabilityExceptionListDto,
   GenerateSlotsDto,
   GenerateSlotsResponseDto,
   CreateExceptionDto,
@@ -78,3 +83,4 @@ export {
   SlotListItemDto,
   ListSlotsResponseDto,
 } from './scheduling-agenda.dto';
+export * from './tenant-agenda.dto';

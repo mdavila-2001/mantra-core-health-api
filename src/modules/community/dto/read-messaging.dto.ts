@@ -19,6 +19,24 @@ export class ConversationPreviewMessageDto {
   sentAt?: Date | null;
 }
 
+/**
+ * El otro lado de una conversación.
+ *
+ * Carril P2. La bandeja devolvía la conversación sin decir **con quién** es:
+ * una lista de «Conversación · hace 2 h» no es una bandeja, es un registro de
+ * actividad. El nombre no puede resolverlo el cliente sin una llamada por
+ * fila, así que viaja con la lectura.
+ */
+export class ConversationPeerDto {
+  /** Perfil público del participante. */
+  @ApiProperty({ format: 'uuid' })
+  profileId!: string;
+
+  /** Cómo se llama, para poder pintar la fila. */
+  @ApiPropertyOptional()
+  displayName?: string | null;
+}
+
 /** Una conversación de la bandeja del actor. */
 export class ConversationListItemDto {
   /** Identificador de la conversación. */
@@ -48,6 +66,16 @@ export class ConversationListItemDto {
   /** Cuántos mensajes le quedan sin leer al actor. */
   @ApiProperty()
   unreadCount!: number;
+
+  /**
+   * Los demás participantes, sin el propio.
+   *
+   * Sin el propio porque la bandeja se lee desde un lado: incluirse a uno
+   * mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra
+   * «Conversación con vos».
+   */
+  @ApiProperty({ type: [ConversationPeerDto] })
+  peers!: ConversationPeerDto[];
 }
 
 /** Bandeja de conversaciones (UC-19-14, cara de lectura). */
@@ -129,4 +157,14 @@ export class DirectMessagePageDto {
   /** Cursor de la página siguiente, o `null`. */
   @ApiPropertyOptional({ nullable: true })
   nextCursor!: string | null;
+
+  /**
+   * Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT.
+   *
+   * `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada
+   * todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios
+   * cuyo `sentAt` sea anterior o igual a esta marca.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  peerReadUpTo?: Date | null;
 }

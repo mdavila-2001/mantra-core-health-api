@@ -11,7 +11,9 @@ import { FormsDefinitionSetsController } from './forms-definition-sets.controlle
 import { FormsFieldsController } from './forms-fields.controller';
 import { FormsAssignmentsController } from './forms-assignments.controller';
 import { FormsInstancesController } from './forms-instances.controller';
+import { FormsMeController } from './forms-me.controller';
 import { FormsValuesController } from './forms-values.controller';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -255,6 +257,51 @@ describe('FormsInstancesController', () => {
     const d = build();
     await d.controller.closeInstance('i1', actor);
     expect(d.instancesService.closeInstance).toHaveBeenCalledWith('i1', actor);
+  });
+});
+
+describe('FormsMeController', () => {
+  const paciente = { id: 'u-1', patientProfileId: 'pp-1' } as any;
+
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
+  function build() {
+    const readService = {
+      listMyInstances: mockFn(),
+      getMyInstance: mockFn(),
+    };
+    return {
+      controller: new FormsMeController(readService as any),
+      readService,
+    };
+  }
+
+  it('delegates listMyInstances with the actor and the default limit', async () => {
+    const d = build();
+    await d.controller.listMyInstances(paciente, undefined);
+    expect(d.readService.listMyInstances).toHaveBeenCalledWith(paciente, 50);
+  });
+
+  it('delegates getMyInstance with the actor of the session', async () => {
+    const d = build();
+    await d.controller.getMyInstance('i1', paciente);
+    expect(d.readService.getMyInstance).toHaveBeenCalledWith('i1', paciente);
+  });
+
+  it('declares no role requirement: the filter is the patient claim', () => {
+    // Igual que surveys/me: sin @Roles ni en la clase ni en los handlers — el
+    // guard de roles deja pasar y el servicio exige el perfil de paciente.
+    const rolesDe = (handler: string): unknown =>
+      Reflect.getMetadata(
+        ROLES_KEY,
+        Object.getOwnPropertyDescriptor(FormsMeController.prototype, handler)!
+          .value,
+      );
+    expect(Reflect.getMetadata(ROLES_KEY, FormsMeController)).toBeUndefined();
+    expect(rolesDe('listMyInstances')).toBeUndefined();
+    expect(rolesDe('getMyInstance')).toBeUndefined();
   });
 });
 

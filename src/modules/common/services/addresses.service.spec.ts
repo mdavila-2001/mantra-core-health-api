@@ -35,10 +35,10 @@ describe('AddressesService', () => {
     ownerType: OwnerType.PATIENT,
     ownerId: '11111111-1111-1111-1111-111111111111',
     lines: ['Av. Siempre Viva 742', 'Dpto 3'],
-    city: 'Lima',
+    city: 'La Paz',
   };
 
-  it('creates an address, joining lines and defaulting country to PE', async () => {
+  it('creates an address, joining lines and defaulting country to BO', async () => {
     const { service, tx, repo } = build();
     repo.create.mockImplementation(
       (
@@ -69,7 +69,7 @@ describe('AddressesService', () => {
     );
     expect(result).toMatchObject({
       id: 'addr-1',
-      country: 'PE',
+      country: 'BO',
       ownerType: OwnerType.PATIENT,
     });
     expect(result.lines).toEqual(dto.lines);

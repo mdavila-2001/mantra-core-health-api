@@ -68,6 +68,14 @@ export interface CreateMedicationRequestData {
    */
   validTo?: Date;
   /**
+   * Valor de patient instructions text mantenido por la instancia.
+   */
+  patientInstructionsText?: string;
+  /**
+   * Condición que motiva la prescripción (Patch v4.1.6).
+   */
+  indicationConditionId?: string;
+  /**
    * Valor de issued at mantenido por la instancia.
    */
   issuedAt?: Date;
@@ -176,6 +184,8 @@ export class MedicationRequestsRepository {
         unitConceptId: data.unitConceptId,
         validFrom: data.validFrom,
         validTo: data.validTo,
+        patientInstructionsText: data.patientInstructionsText,
+        indicationConditionId: data.indicationConditionId,
         issuedAt: data.issuedAt,
         statusReasonText: data.statusReasonText,
         replacesRequestId: data.replacesRequestId,

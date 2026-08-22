@@ -59,6 +59,18 @@ export class Addresses {
   administrativeAreaConceptId?: string;
 
   /**
+   * Municipio boliviano (miembro de `VS_BO_MUNICIPALITY`), catálogo del INE.
+   * `administrativeAreaConceptId` sigue siendo el departamento; este es el
+   * nivel de detalle que `city` (texto libre) no puede garantizar consistente.
+   */
+  @Property({
+    fieldName: 'municipality_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  municipalityConceptId?: string;
+
+  /**
    * Valor de postal code mantenido por la instancia.
    */
   @Property({ fieldName: 'postal_code', columnType: 'varchar', nullable: true })

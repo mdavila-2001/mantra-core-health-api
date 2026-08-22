@@ -230,22 +230,28 @@ export class DraftEnumVersionDto {
   /**
    * Identificador asociado a value set version.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     format: 'uuid',
     description: 'Versión del value set que se congela',
   })
-  @IsOptional()
+  // Obligatoria, aunque el DTO la declaraba opcional: la entidad
+  // `DynamicEnumVersions` la exige, así que omitirla no producía una versión
+  // sin value set — producía un 500 del ORM ya dentro de la transacción, con
+  // un mensaje que sólo se entiende leyendo el modelo (18/08/2026). Una
+  // versión de enumeración *es* el congelado de una versión de value set: sin
+  // ella no hay nada que congelar.
   @IsUUID()
-  valueSetVersionId?: string;
+  valueSetVersionId!: string;
 
   /**
    * Valor de schema version mantenido por la instancia.
    */
-  @ApiPropertyOptional({ maxLength: 50 })
-  @IsOptional()
+  @ApiProperty({ maxLength: 50 })
+  // Obligatoria por el mismo motivo que `valueSetVersionId`: la entidad la
+  // exige y omitirla moría con un 500 del ORM dentro de la transacción.
   @IsString()
   @MaxLength(50)
-  schemaVersion?: string;
+  schemaVersion!: string;
 
   /**
    * Valor de options mantenido por la instancia.
@@ -1241,6 +1247,19 @@ export class ReadDynamicEnumResponseDto {
    */
   @ApiProperty({ format: 'uuid' })
   versionId!: string;
+
+  /**
+   * Versión del value set que la versión vigente congeló.
+   *
+   * Es lo que hay que volver a mandar para redactar la siguiente: la entidad la
+   * exige y ninguna otra lectura la exponía.
+   */
+  @ApiProperty({ format: 'uuid' })
+  valueSetVersionId!: string;
+
+  /** Versión de esquema que la versión vigente declara. Se repite al redactar. */
+  @ApiProperty({ maxLength: 50 })
+  schemaVersion!: string;
 
   /**
    * Testigo de caché de la versión publicada.

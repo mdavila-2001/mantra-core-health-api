@@ -1,0 +1,110 @@
+{
+  "code": "RADIO_INFORME_BASE",
+  "name": "Informe de estudio por imágenes",
+  "specialty": {
+    "code": "RADIOLOGIA",
+    "display": "Radiología e Imagenología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, informe de exámenes auxiliares por imágenes",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma sale el molde común del documento clínico: motivo o indicación del estudio, descripción de lo observado, conclusión diagnóstica y conducta o recomendación. Son agregados propios de la especialidad los ítems de identificación técnica del estudio (estudio realizado, región anatómica, técnica y proyecciones, uso de medio de contraste, calidad del estudio) y la comparación con estudios previos."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo del estudio o indicación clínica",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "antecedentes_relevantes",
+      "name": "Antecedentes relevantes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "estudio_realizado",
+      "name": "Estudio realizado",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "region_anatomica",
+      "name": "Región anatómica explorada",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "fecha_del_estudio",
+      "name": "Fecha del estudio",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "code": "tecnica_y_proyecciones",
+      "name": "Técnica y proyecciones realizadas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "uso_de_contraste",
+      "name": "Uso de medio de contraste",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "medio_de_contraste_utilizado",
+      "name": "Medio de contraste utilizado y vía de administración",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "calidad_del_estudio",
+      "name": "Calidad del estudio y limitaciones técnicas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "comparacion_estudios_previos",
+      "name": "Comparación con estudios previos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "hallazgos",
+      "name": "Hallazgos",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "hallazgos_incidentales",
+      "name": "Hallazgos incidentales",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "incidentes_durante_el_estudio",
+      "name": "Incidentes durante el estudio",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Impresión diagnóstica o conclusión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Recomendaciones y estudios complementarios sugeridos",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

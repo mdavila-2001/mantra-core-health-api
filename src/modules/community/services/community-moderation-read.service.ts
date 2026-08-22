@@ -73,6 +73,12 @@ export class CommunityModerationReadService {
   /**
    * Página de la cola de moderación, con su contexto de reporte.
    *
+   * Se acota al tenant del contexto: `SECURITY_ADMIN` es un rol global de
+   * plataforma, así que sin esto un moderador veía el contenido reportado de
+   * todas las organizaciones. Si el request no fijó tenant, `requireTenantId()`
+   * lo dice (422) en vez de devolver una página vacía, que sería mentir sobre
+   * el motivo.
+   *
    * @param query - Filtros, cursor y tope.
    * @param limit - Tope efectivo ya resuelto por el controlador.
    * @returns Página de entradas con el reporte que las originó.
@@ -81,6 +87,7 @@ export class CommunityModerationReadService {
     query: ModerationQueueQueryDto,
     limit: number,
   ): Promise<ModerationQueuePageDto> {
+    const tenantId = requireTenantId();
     const em = this.em.fork();
 
     const after = query.cursor ? decodeKeysetCursor(query.cursor) : undefined;
@@ -92,10 +99,7 @@ export class CommunityModerationReadService {
     // Una fila de más para saber si hay página siguiente sin contar la tabla.
     const rows = await this.moderationRepo.listQueuePage(
       em,
-      // Exigido, no opcional: sin tenant la única respuesta correcta es decirlo,
-      // porque servir la cola sin acotar sería la fuga y servirla vacía sería
-      // mentir sobre el motivo.
-      requireTenantId(),
+      tenantId,
       {
         statusConceptIds: query.status?.map(
           (code) => QUEUE_STATUS_BY_CODE[code],

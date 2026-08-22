@@ -471,14 +471,16 @@ for (const file of repoFiles) {
     )
       continue;
 
-    // Ventana generosa alrededor de la llamada: firma del método suele caber
-    // en ±20 líneas (mismo margen crudo que el resto del archivo usa para
-    // "near"). Si `tenantId` aparece ahí (parámetro o spread condicional), la
-    // llamada ya está acotada.
-    const windowStart = Math.max(0, i - 20);
-    const windowEnd = Math.min(lines.length, i + 10);
-    const window = lines.slice(windowStart, windowEnd).join(' ');
-    if (/\btenantId\b/.test(window)) continue;
+    // Se busca `tenantId` en el MÉTODO ENTERO, no en una ventana de líneas
+    // alrededor de la llamada. La ventana de ±20 era una aproximación al
+    // método, y fallaba justo donde el método es largo: `listQueuePage` de
+    // `moderation.repository.ts` arma `const where = { tenantId }` veinti**una**
+    // líneas antes del `em.find`, así que la consulta —que sí está acotada—
+    // se reportaba como bloqueante por una línea de diferencia. Un límite
+    // arbitrario que depende de cuántos filtros opcionales tenga el método no
+    // distingue una fuga de tenant de una firma con JSDoc largo.
+    const methodBody = enclosingMethodBody(lines, i);
+    if (/\btenantId\b/.test(methodBody)) continue;
 
     // El criterio ya acota por un id de principal/recurso puntual (patrón PDP:
     // userId, patientProfileId, consentId, resourceId, ...) — no es un listado

@@ -1,0 +1,34 @@
+{
+  "code": "PSICO_EVALUACION_BASE",
+  "name": "Evaluación psicológica",
+  "specialty": { "code": "PSICOLOGIA_CLINICA", "display": "Psicología Clínica" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes personales y familiares y examen mental",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma se toma la estructura común de la historia clínica: motivo de consulta, tiempo de evolución, antecedentes personales y familiares, examen, diagnóstico y conducta. Son agregados propios de la especialidad la descripción en prosa del estado de ánimo y la ansiedad, el sueño, el apetito, la situación vital actual, la red de apoyo y el riesgo referido, tomados de la entrevista psicológica de consultorio."
+  },
+  "fields": [
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
+    { "code": "antecedentes_tratamiento_psicologico", "name": "Antecedentes de tratamiento psicológico", "dataType": "text", "required": false },
+    { "code": "antecedentes_tratamiento_psiquiatrico", "name": "Antecedentes de tratamiento psiquiátrico", "dataType": "text", "required": false },
+    { "code": "medicacion_actual", "name": "Medicación actual", "dataType": "text", "required": false },
+    { "code": "antecedentes_familiares_salud_mental", "name": "Antecedentes familiares de salud mental", "dataType": "text", "required": false },
+    { "code": "situacion_vital_actual", "name": "Situación vital actual", "dataType": "text", "required": false },
+    { "code": "estado_de_animo", "name": "Estado de ánimo referido", "dataType": "text", "required": true },
+    { "code": "ansiedad", "name": "Ansiedad referida", "dataType": "text", "required": false },
+    { "code": "sueno", "name": "Sueño", "dataType": "text", "required": false },
+    { "code": "apetito", "name": "Apetito", "dataType": "text", "required": false },
+    { "code": "consumo_de_sustancias", "name": "Consumo de sustancias referido", "dataType": "text", "required": false },
+    { "code": "red_de_apoyo", "name": "Red de apoyo", "dataType": "text", "required": false },
+    { "code": "riesgo_referido", "name": "Riesgo referido en la entrevista", "dataType": "text", "required": false },
+    { "code": "observaciones_de_la_entrevista", "name": "Observaciones de la entrevista", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Impresión diagnóstica", "dataType": "text", "required": true },
+    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento", "dataType": "text", "required": false }
+  ]
+}

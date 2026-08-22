@@ -1,5 +1,4 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { TableNotFoundException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -260,36 +259,28 @@ export class SurveysResponsesService {
   }
 
   /**
-   * Las invitaciones del paciente, tolerando que la tabla todavía no exista.
+   * Las invitaciones del paciente.
    *
-   * TODO(F-14 · bloqueador de esquema a Marcelo, M4): el módulo nació con las
-   * entidades y sin DDL —no hay `.puml` ni nada en `SQL/`—, así que en toda
-   * base construida por el pipeline el schema `surveys` no existe y esta
-   * lectura reventaba con 500 en la primera pantalla que abre un paciente
-   * recién registrado. Hasta que el esquema se materialice por el camino
-   * canónico, «no hay tabla» se responde como «no hay cuestionarios» y se deja
-   * aviso en el log. Quitar el `catch` cuando el esquema exista: a partir de
-   * ahí una tabla ausente vuelve a ser un despliegue roto, no un caso vacío.
+   * Tuvo un `catch` de `TableNotFoundException` que respondía «no hay
+   * cuestionarios» cuando el esquema no existía: el módulo había nacido con las
+   * entidades y sin DDL, y esta lectura reventaba con 500 en la primera
+   * pantalla que abría un paciente recién registrado (F-14). Ese parche se
+   * retira acá porque **el esquema ya está en el modelo**: el módulo 65 se
+   * promovió por el camino canónico y sus 7 tablas se materializan en toda base
+   * que el pipeline construya.
+   *
+   * Se retira y no se deja «por las dudas» a propósito: mientras estuviera, una
+   * tabla que falte —un patch sin aplicar, un despliegue a medias— seguiría
+   * pareciendo un paciente sin cuestionarios en vez de lo que es, y ese es
+   * justamente el error que costó descubrir la primera vez.
    *
    * @param patientProfileId - Paciente de la sesión.
-   * @returns Sus invitaciones, o ninguna si el esquema aún no está.
+   * @returns Sus invitaciones.
    */
   private async listInvitationsOf(
     patientProfileId: string,
   ): Promise<SurveyInvitations[]> {
-    try {
-      return await this.invitationsRepo.listByPatient(
-        this.em,
-        patientProfileId,
-      );
-    } catch (error) {
-      if (!(error instanceof TableNotFoundException)) throw error;
-      this.logger.warn(
-        { operation: 'surveys.me.invitations', error: error.message },
-        'El esquema surveys no está materializado: se responde sin cuestionarios',
-      );
-      return [];
-    }
+    return this.invitationsRepo.listByPatient(this.em, patientProfileId);
   }
 
   /** Carga la invitación comprobando que sea del paciente de la sesión. */

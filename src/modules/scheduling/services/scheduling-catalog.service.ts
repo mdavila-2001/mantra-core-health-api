@@ -10,13 +10,17 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { SchedulingCatalogRepository } from '../repositories';
+import type { SchedulableResources } from '../entities';
 import {
   CreateResourceDto,
   ResourceResponseDto,
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   CreateTemplateDto,
+  AvailabilityExceptionListDto,
+  TemplateListDto,
   TemplateResponseDto,
+  TemplateRuleDto,
   GenerateSlotsDto,
   GenerateSlotsResponseDto,
   CreateExceptionDto,
@@ -26,6 +30,7 @@ import {
   type ExceptionType,
 } from '../dto';
 import { diasLocalesQueCoinciden, horaLocalAUtc } from '../scheduling-time';
+import type { DiaLocal } from '../scheduling-time';
 
 /**
  * Roles que administran el catálogo de agendas de terceros por oficio.
@@ -215,6 +220,7 @@ export class SchedulingCatalogService {
         });
       }
       this.assertRecursoDelActor(resource, actor);
+      await this.assertSinSolapeConSusOtrasAgendas(tx, resource, dto);
 
       const template = this.catalogRepo.createTemplate(tx, {
         resourceId,
@@ -512,7 +518,11 @@ export class SchedulingCatalogService {
       resourceId,
       options.from,
       options.to,
-      { onlyAvailable: options.onlyAvailable, limit: options.limit + 1 },
+      {
+        onlyAvailable: options.onlyAvailable,
+        ahora: new Date(),
+        limit: options.limit + 1,
+      },
     );
     const truncated = rows.length > options.limit;
     const page = truncated ? rows.slice(0, options.limit) : rows;
@@ -558,6 +568,131 @@ export class SchedulingCatalogService {
    * el tenant tiene que ser uno de los suyos, porque `GET /scheduling/resources`
    * filtra por tenant y un recurso creado en otro sería invisible para siempre.
    */
+  /**
+   * Rechaza publicar una franja que choca con otra agenda del mismo profesional.
+   *
+   * ## Por qué el choque importa
+   *
+   * Un médico con dos consultorios puede declarar «lunes 9 a 12» en los dos, y
+   * el motor genera cupos simultáneos en ambos. No hay error visible hasta que
+   * dos pacientes reservan la misma hora en lugares distintos y alguien tiene
+   * que llamar a uno de los dos. El conflicto no es de datos: es que **una
+   * persona no puede estar en dos lugares**.
+   *
+   * Se valida al publicar la plantilla y no al generar los cupos porque es el
+   * momento en que la persona todavía está decidiendo su horario: rechazar
+   * recién al materializar sería avisarle cuando ya lo dio por hecho.
+   *
+   * ## Por qué se comparan instantes y no textos
+   *
+   * Las franjas declaran horas de **pared** y cada sede puede estar en otra
+   * zona, así que comparar «09:00» con «09:00» compara dos cosas distintas: a
+   * las nueve de La Paz son las diez en São Paulo. Comparando textos no sólo
+   * sobran rechazos —que se resuelven editando—, sino que **faltan**: La Paz
+   * 13–15 y São Paulo 14–16 no se tocan como texto y son el mismo rato. Un
+   * falso permiso termina en dos pacientes citados, que es justo lo que esta
+   * comprobación existe para evitar.
+   *
+   * Las dos franjas se proyectan sobre una **semana de referencia** —la del
+   * `validFrom` de la plantilla, o la de hoy— con los mismos helpers que usa la
+   * generación de cupos, y se comparan como instantes. Es una simplificación
+   * consciente: en las dos semanas del año en que una zona cambia de horario,
+   * dos franjas al filo podrían evaluarse con el desplazamiento de la semana
+   * equivocada. Recorrer todas las semanas de vigencia es mucho trabajo para un
+   * borde de una hora.
+   *
+   * ## Qué NO comprueba
+   *
+   * Sólo recursos que apuntan al mismo `resource_ref_id`. Una sala o un equipo
+   * no tienen este problema —dos salas sí pueden abrir a la misma hora— y por
+   * eso la comprobación se saltea cuando el recurso no referencia un perfil
+   * profesional.
+   *
+   * Tampoco las plantillas en borrador (todavía no ocupan horario) ni las
+   * vencidas: una cuyo `validTo` ya pasó no puede chocar con nada que se
+   * publique hoy, y hacerla chocar dejaría trabado a quien cambió de sede.
+   */
+  private async assertSinSolapeConSusOtrasAgendas(
+    tx: EntityManager,
+    resource: SchedulableResources,
+    dto: CreateTemplateDto,
+  ): Promise<void> {
+    const semana = semanaDeReferencia(
+      dto.validFrom ? new Date(dto.validFrom) : new Date(),
+    );
+    const zonaPropia = resource.timeZone ?? 'UTC';
+
+    const nuevas = dto.rules.map((rule) => ({
+      etiqueta: etiquetaDeFranja(rule),
+      ...intervaloEnSemana(
+        semana,
+        rule.dayOfWeek,
+        rule.startTime,
+        rule.endTime,
+        zonaPropia,
+      ),
+    }));
+
+    // Primero contra sí mismas: dos franjas del mismo envío que se pisan son el
+    // caso más frecuente, y detectarlo no cuesta una consulta.
+    for (let i = 0; i < nuevas.length; i += 1) {
+      for (let j = i + 1; j < nuevas.length; j += 1) {
+        if (seSolapan(nuevas[i], nuevas[j])) {
+          throw new PreconditionFailedException(
+            'Dos franjas de esta agenda se solapan entre sí',
+            { nueva: nuevas[i].etiqueta, existente: nuevas[j].etiqueta },
+          );
+        }
+      }
+    }
+
+    if (!TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
+      return;
+    }
+
+    const ajenas = await this.catalogRepo.findRulesByResourceOwner(
+      tx,
+      resource.resourceRefId,
+      CONCEPTS.TEMPLATE_PUBLISHED,
+      resource.id,
+    );
+
+    for (const otra of ajenas) {
+      if (estaVencida(otra.validTo, semana.inicio)) continue;
+
+      const existente = {
+        etiqueta: etiquetaDeFranja(otra.rule),
+        ...intervaloEnSemana(
+          semana,
+          otra.rule.dayOfWeek,
+          otra.rule.startTime,
+          otra.rule.endTime,
+          otra.timeZone ?? 'UTC',
+        ),
+      };
+
+      const choque = nuevas.find((nueva) => seSolapan(nueva, existente));
+      if (choque) {
+        // El mensaje dice CUÁL agenda y CUÁNDO, no sólo que hay un choque.
+        // Antes era «Ya tenés una agenda publicada que se superpone con esa
+        // franja» y el detalle viajaba en `details`, que el traductor de
+        // errores del front descarta: la persona leía que no podía publicar
+        // y no tenía forma de saber contra qué. Con varias agendas por
+        // médico en los datos sembrados, eso es un callejón sin salida.
+        throw new PreconditionFailedException(
+          `Ya tenés «${otra.resourceName}» el ${existente.etiqueta}, que se cruza con este ` +
+            'horario. Cambiá el horario o el día, o editá esa otra agenda.',
+          {
+            dayOfWeek: otra.rule.dayOfWeek,
+            nueva: choque.etiqueta,
+            existente: existente.etiqueta,
+            agenda: otra.resourceName,
+          },
+        );
+      }
+    }
+  }
+
   private assertPuedeCrearRecurso(
     dto: CreateResourceDto,
     actor: AuthenticatedUser,
@@ -587,6 +722,148 @@ export class SchedulingCatalogService {
    * tuya»: la referencia del recurso apunta al perfil del token, aceptando las
    * dos formas de `resourceRefType` que conviven en los datos.
    */
+  /**
+   * UC-41-02 (lectura): las plantillas publicadas de un recurso, con sus franjas.
+   *
+   * Es la lectura que faltaba. Hasta ahora `scheduling` sólo exponía los dos
+   * POST de plantilla, así que quien publicaba un horario no podía volver a
+   * verlo nunca más: por eso «Mi agenda» no existía y el nombre de la plantilla
+   * que el alta pedía era una etiqueta a ciegas.
+   *
+   * Un recurso sin plantillas devuelve una lista vacía, no 404: el recurso
+   * existe y todavía no publicó horario, que es un estado normal recién creada
+   * la agenda.
+   *
+   * @param resourceId - Recurso cuyas plantillas se leen.
+   * @param actor - Quien consulta; sólo el dueño del recurso o el catálogo.
+   * @returns Sus plantillas, de la más reciente a la más vieja.
+   */
+  async listTemplates(
+    resourceId: string,
+    actor: AuthenticatedUser,
+  ): Promise<TemplateListDto> {
+    const em = this.em.fork();
+    const resource = await this.catalogRepo.findResourceById(em, resourceId);
+    if (!resource) {
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId,
+      });
+    }
+    this.assertRecursoDelActor(resource, actor);
+
+    const plantillas = await this.catalogRepo.findTemplatesByResource(
+      em,
+      resourceId,
+    );
+    const franjas = await this.catalogRepo.findRulesByTemplates(
+      em,
+      plantillas.map((plantilla) => plantilla.id),
+    );
+
+    // Se agrupan en memoria porque ya vinieron todas en una consulta: volver a
+    // filtrar por plantilla sería una consulta por fila.
+    const porPlantilla = new Map<string, TemplateRuleDto[]>();
+    for (const franja of franjas) {
+      const lista = porPlantilla.get(franja.scheduleTemplateId) ?? [];
+      lista.push({
+        dayOfWeek: franja.dayOfWeek,
+        startTime: franja.startTime,
+        endTime: franja.endTime,
+        // `== null` a propósito: una columna anulable que nadie completó
+        // vuelve de MikroORM como `null`, no como `undefined`, y compararla
+        // contra `undefined` la deja pasar. Es el mismo defecto que en el paso
+        // de la foto del alta (#165), encontrado igual: probando contra la base
+        // y no leyendo el diff.
+        ...(franja.slotMinutes == null
+          ? {}
+          : { slotMinutes: franja.slotMinutes }),
+        ...(franja.capacityPerSlot == null
+          ? {}
+          : { capacityPerSlot: franja.capacityPerSlot }),
+      });
+      porPlantilla.set(franja.scheduleTemplateId, lista);
+    }
+
+    const items = plantillas.map((plantilla) => ({
+      id: plantilla.id,
+      name: plantilla.name,
+      rules: porPlantilla.get(plantilla.id) ?? [],
+      ...(plantilla.slotMinutes == null
+        ? {}
+        : { slotMinutes: plantilla.slotMinutes }),
+      ...(plantilla.validFrom == null
+        ? {}
+        : { validFrom: plantilla.validFrom.toISOString() }),
+      ...(plantilla.validTo == null
+        ? {}
+        : { validTo: plantilla.validTo.toISOString() }),
+      ...(plantilla.bookingPolicyId == null
+        ? {}
+        : { bookingPolicyId: plantilla.bookingPolicyId }),
+      statusConceptId: plantilla.statusConceptId,
+    }));
+
+    return { items, count: items.length };
+  }
+
+  /**
+   * UC-41-04 (lectura): las excepciones de un recurso en una ventana.
+   *
+   * Es el hueco gemelo del `GET` de plantillas: se podían **crear** excepciones
+   * y no leerlas. Sin esta lectura, el calendario del médico no puede
+   * distinguir un día bloqueado de un día sin agenda —los dos aparecen sin
+   * cupos—, y esa diferencia es justamente lo que hay que mostrar: uno es «no
+   * atiendo los miércoles» y el otro «ese miércoles no atiendo, y por esto».
+   *
+   * @param resourceId - Recurso cuyas excepciones se leen.
+   * @param from - Inicio de la ventana.
+   * @param to - Fin de la ventana.
+   * @param actor - Quien consulta; sólo el dueño del recurso o el catálogo.
+   * @returns Las excepciones que se solapan con la ventana.
+   */
+  async listExceptions(
+    resourceId: string,
+    from: Date,
+    to: Date,
+    actor: AuthenticatedUser,
+  ): Promise<AvailabilityExceptionListDto> {
+    if (!(from < to)) {
+      throw new PreconditionFailedException(
+        'La ventana debe empezar antes de terminar',
+        { from: from.toISOString(), to: to.toISOString() },
+      );
+    }
+
+    const em = this.em.fork();
+    const resource = await this.catalogRepo.findResourceById(em, resourceId);
+    if (!resource) {
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId,
+      });
+    }
+    this.assertRecursoDelActor(resource, actor);
+
+    const filas = await this.catalogRepo.findExceptionsByResourceInRange(
+      em,
+      resourceId,
+      from,
+      to,
+    );
+
+    const items = filas.map((fila) => ({
+      id: fila.id,
+      exceptionTypeConceptId: fila.exceptionTypeConceptId,
+      startAt: fila.startAt.toISOString(),
+      endAt: fila.endAt.toISOString(),
+      // `== null` y no `=== undefined`: una columna anulable sin completar
+      // vuelve como `null`, y la guarda estricta la dejaría pasar (#174).
+      ...(fila.reason == null ? {} : { reason: fila.reason }),
+      ...(fila.isAvailable == null ? {} : { isAvailable: fila.isAvailable }),
+    }));
+
+    return { items, count: items.length };
+  }
+
   private assertRecursoDelActor(
     resource: { resourceRefType: string; resourceRefId: string },
     actor: AuthenticatedUser,
@@ -652,4 +929,120 @@ const ALIAS_DE_TABLA: Readonly<Record<string, string>> = {
 
 function canonicalRefType(refType: string): string {
   return ALIAS_DE_TABLA[refType] ?? refType;
+}
+
+/** Milisegundos de un día del calendario. */
+const UN_DIA_MS = 24 * 60 * 60 * 1000;
+
+/** Los siete días de la semana, para nombrar la franja que choca. */
+const NOMBRE_DEL_DIA: readonly string[] = [
+  'domingo',
+  'lunes',
+  'martes',
+  'miércoles',
+  'jueves',
+  'viernes',
+  'sábado',
+];
+
+/**
+ * Una semana concreta del calendario sobre la que proyectar franjas semanales.
+ *
+ * Las reglas de una plantilla no tienen fecha —dicen «los lunes»—, y dos horas
+ * de pared de zonas distintas no se pueden comparar sin aterrizarlas en un
+ * instante. Esta es esa tierra: siete fechas reales, una por día de la semana.
+ */
+interface SemanaDeReferencia {
+  /** Fecha del calendario de cada día de la semana, indexada 0 = domingo. */
+  readonly fechas: readonly DiaLocal[];
+  /** Domingo de la semana, como instante, para descartar plantillas vencidas. */
+  readonly inicio: Date;
+}
+
+/**
+ * La semana del calendario que contiene el instante dado.
+ *
+ * Las fechas se toman del calendario UTC porque lo único que se necesita de
+ * ellas es que sean siete días consecutivos con el día de semana correcto: la
+ * zona entra después, al convertir cada hora de pared sobre esas fechas.
+ *
+ * @param desde - Instante de referencia.
+ * @returns Las siete fechas de esa semana y su domingo.
+ */
+function semanaDeReferencia(desde: Date): SemanaDeReferencia {
+  const base = Date.UTC(
+    desde.getUTCFullYear(),
+    desde.getUTCMonth(),
+    desde.getUTCDate(),
+  );
+  const domingo = base - new Date(base).getUTCDay() * UN_DIA_MS;
+
+  const fechas = Array.from({ length: 7 }, (_, indice) => {
+    const fecha = new Date(domingo + indice * UN_DIA_MS);
+    return {
+      year: fecha.getUTCFullYear(),
+      month: fecha.getUTCMonth() + 1,
+      day: fecha.getUTCDate(),
+    };
+  });
+
+  return { fechas, inicio: new Date(domingo) };
+}
+
+/**
+ * Proyecta una franja semanal sobre la semana de referencia.
+ *
+ * @param semana - Semana sobre la que aterrizar.
+ * @param diaSemana - Día de la regla, 0 = domingo.
+ * @param inicio - Hora de pared de comienzo.
+ * @param fin - Hora de pared de fin.
+ * @param zona - Zona de la sede donde esa hora de pared se lee.
+ */
+function intervaloEnSemana(
+  semana: SemanaDeReferencia,
+  diaSemana: number,
+  inicio: string,
+  fin: string,
+  zona: string,
+): { desde: number; hasta: number } {
+  const fecha = semana.fechas[((diaSemana % 7) + 7) % 7];
+  return {
+    desde: horaLocalAUtc(fecha, inicio, zona).getTime(),
+    hasta: horaLocalAUtc(fecha, fin, zona).getTime(),
+  };
+}
+
+/**
+ * Si dos franjas comparten algún instante.
+ *
+ * Los extremos no cuentan: terminar a las 12:00 en una sede y empezar a las
+ * 12:00 en otra no es estar en dos lados a la vez.
+ */
+function seSolapan(
+  a: { desde: number; hasta: number },
+  b: { desde: number; hasta: number },
+): boolean {
+  return a.desde < b.hasta && b.desde < a.hasta;
+}
+
+/** Cómo se nombra una franja cuando hay que decir con cuál choca. */
+function etiquetaDeFranja(rule: {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}): string {
+  const dia = NOMBRE_DEL_DIA[((rule.dayOfWeek % 7) + 7) % 7] ?? '?';
+  return `${dia} ${rule.startTime}–${rule.endTime}`;
+}
+
+/**
+ * Si la plantilla dejó de estar vigente antes de la semana que se evalúa.
+ *
+ * Una plantilla vencida no puede chocar con nada que se publique hoy, y
+ * hacerla chocar dejaría trabado a quien cambió de sede el mes pasado.
+ */
+function estaVencida(validTo: Date | undefined, inicioSemana: Date): boolean {
+  return validTo !== undefined && validTo !== null
+    ? validTo.getTime() < inicioSemana.getTime()
+    : false;
 }

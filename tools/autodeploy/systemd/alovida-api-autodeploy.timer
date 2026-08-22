@@ -1,0 +1,17 @@
+# Cada dos minutos, como el sondeo de un proveedor de despliegue continuo.
+#
+# `Persistent=false` a propósito: tras un apagón no interesa recuperar las pasadas perdidas, sólo
+# el último commit de `dev` — y la primera pasada tras el arranque ya lo despliega. `OnBootSec` le
+# deja a docker tiempo de tener en pie a postgres, mongo y compañía antes de recrear nada.
+[Unit]
+Description=Vigila dev y redespliega la API de ALOVIDA cuando hay commits nuevos
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=2min
+AccuracySec=15s
+Persistent=false
+Unit=alovida-api-autodeploy.service
+
+[Install]
+WantedBy=timers.target

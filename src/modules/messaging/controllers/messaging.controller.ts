@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Put,
   HttpCode,
   HttpStatus,
   Param,
@@ -23,6 +24,8 @@ import {
   InAppNotificationPageDto,
   MarkAllInAppReadResponseDto,
   MyNotificationsQueryDto,
+  MyPreferencesDto,
+  UpdateMyPreferencesDto,
 } from '../dto';
 
 /** Endpoints de mensajería que consumen los módulos de negocio y los usuarios. */
@@ -134,6 +137,43 @@ export class MessagingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MarkAllInAppReadResponseDto> {
     return this.notificationsService.markAllInAppRead(actor);
+  }
+
+  /**
+   * Carril P9 · qué avisos quiere recibir.
+   *
+   * Devuelve **siempre las cuatro categorías**, haya filas o no: quien nunca
+   * las tocó las recibe todas aceptadas, que es lo que efectivamente le pasa.
+   */
+  @Get('notifications/preferences/me')
+  @Roles('USER', 'MESSAGING_ADMIN')
+  @ApiOperation({
+    summary: 'Mis preferencias de notificación in-app',
+    description: 'Las cuatro categorías y la ventana de silencio.',
+  })
+  readMyPreferences(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyPreferencesDto> {
+    return this.notificationsService.readMyPreferences(actor);
+  }
+
+  /**
+   * Carril P9 · guardar las preferencias.
+   *
+   * Reemplazo **por categoría**: lo que no viene no se toca. `quietHours`
+   * ausente significa «no la toques» y `null`, «quitala».
+   */
+  @Put('notifications/preferences/me')
+  @Roles('USER', 'MESSAGING_ADMIN')
+  @ApiOperation({
+    summary: 'Guardar mis preferencias de notificación in-app',
+    description: 'Reemplaza sólo las categorías que vienen en el cuerpo.',
+  })
+  updateMyPreferences(
+    @Body() dto: UpdateMyPreferencesDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyPreferencesDto> {
+    return this.notificationsService.updateMyPreferences(actor, dto);
   }
 
   /** UC-35-13. */

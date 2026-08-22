@@ -334,14 +334,13 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     defaultConceptId: PROF.AUTH_PENDING,
     targets: ['profiles.jurisdiction_authorizations.state_concept_id'],
   },
-  {
-    code: 'practitioner-specialty',
-    name: 'Especialidad',
-    description: 'Especialidad clínica declarada por el profesional.',
-    concepts: [PROF.SPECIALTY_GENERAL],
-    defaultConceptId: PROF.SPECIALTY_GENERAL,
-    targets: ['profiles.practitioner_specialties.specialty_concept_id'],
-  },
+  // `profiles.practitioner_specialties.specialty_concept_id` no tiene enumeración
+  // dinámica a propósito: la gobierna `VS_MEDICAL_SPECIALTY` —las 36 especialidades
+  // que siembra el paquete del modelo—, y el front y `MedicalSpecialtyCatalogService`
+  // la resuelven por terminología. Acá hubo un duplicado (`practitioner-specialty`,
+  // un solo miembro en inglés) que era el único atado a la columna: por eso pedir el
+  // catálogo por campo destino devolvía una sola opción y un médico no podía decir
+  // que es cardiólogo (F-19). Re-declararlo lo resucitaría sólo en bases nuevas.
   {
     code: 'practitioner-specialty-role',
     name: 'Rol de la especialidad',
@@ -577,7 +576,8 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'medication',
     name: 'Medicamento',
     description:
-      'Vademécum inicial para prescribir (ATC). Se reemplaza publicando una versión nueva del conjunto, sin tocar el amarre.',
+      'Vademécum esencial para prescribir (LINAME / lista modelo OMS, códigos ATC). ' +
+      'Se amplía publicando una versión nueva del conjunto, sin tocar el amarre.',
     concepts: [
       CLIN.MEDICATION_PARACETAMOL,
       CLIN.MEDICATION_IBUPROFENO,
@@ -591,6 +591,56 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CLIN.MEDICATION_ATORVASTATINA,
       CLIN.MEDICATION_SALBUTAMOL,
       CLIN.MEDICATION_LORATADINA,
+      CLIN.MEDICATION_ACIDO_ACETILSALICILICO,
+      CLIN.MEDICATION_DICLOFENACO,
+      CLIN.MEDICATION_NAPROXENO,
+      CLIN.MEDICATION_TRAMADOL,
+      CLIN.MEDICATION_MORFINA,
+      CLIN.MEDICATION_AMOXICILINA_CLAVULANICO,
+      CLIN.MEDICATION_BENCILPENICILINA,
+      CLIN.MEDICATION_CEFTRIAXONA,
+      CLIN.MEDICATION_CLARITROMICINA,
+      CLIN.MEDICATION_CIPROFLOXACINO,
+      CLIN.MEDICATION_COTRIMOXAZOL,
+      CLIN.MEDICATION_DOXICICLINA,
+      CLIN.MEDICATION_GENTAMICINA,
+      CLIN.MEDICATION_METRONIDAZOL,
+      CLIN.MEDICATION_NITROFURANTOINA,
+      CLIN.MEDICATION_FLUCONAZOL,
+      CLIN.MEDICATION_ALBENDAZOL,
+      CLIN.MEDICATION_MEBENDAZOL,
+      CLIN.MEDICATION_AMLODIPINO,
+      CLIN.MEDICATION_ATENOLOL,
+      CLIN.MEDICATION_BISOPROLOL,
+      CLIN.MEDICATION_FUROSEMIDA,
+      CLIN.MEDICATION_HIDROCLOROTIAZIDA,
+      CLIN.MEDICATION_ESPIRONOLACTONA,
+      CLIN.MEDICATION_SIMVASTATINA,
+      CLIN.MEDICATION_DIGOXINA,
+      CLIN.MEDICATION_WARFARINA,
+      CLIN.MEDICATION_INSULINA_NPH,
+      CLIN.MEDICATION_INSULINA_RAPIDA,
+      CLIN.MEDICATION_GLIBENCLAMIDA,
+      CLIN.MEDICATION_LEVOTIROXINA,
+      CLIN.MEDICATION_PREDNISONA,
+      CLIN.MEDICATION_DEXAMETASONA,
+      CLIN.MEDICATION_METOCLOPRAMIDA,
+      CLIN.MEDICATION_SALES_REHIDRATACION,
+      CLIN.MEDICATION_CETIRIZINA,
+      CLIN.MEDICATION_BUDESONIDA,
+      CLIN.MEDICATION_IPRATROPIO,
+      CLIN.MEDICATION_DIAZEPAM,
+      CLIN.MEDICATION_CLONAZEPAM,
+      CLIN.MEDICATION_CARBAMAZEPINA,
+      CLIN.MEDICATION_ACIDO_VALPROICO,
+      CLIN.MEDICATION_FENITOINA,
+      CLIN.MEDICATION_FLUOXETINA,
+      CLIN.MEDICATION_SERTRALINA,
+      CLIN.MEDICATION_AMITRIPTILINA,
+      CLIN.MEDICATION_HALOPERIDOL,
+      CLIN.MEDICATION_SULFATO_FERROSO,
+      CLIN.MEDICATION_ACIDO_FOLICO,
+      CLIN.MEDICATION_ALOPURINOL,
     ],
     // Sin preseleccionado a propósito: un medicamento por omisión es la clase de
     // ayuda que termina prescrita sin que nadie la haya elegido.
@@ -689,6 +739,44 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CLIN.CONDITION_LATERALITY_BILATERAL,
     ],
     targets: ['clinical.conditions.laterality_concept_id'],
+  },
+  /* Patch v4.0.8 — estado clínico y cronicidad. `condition-clinical-status`
+     gobierna la transición que ofrece `POST /clinical/conditions/:id/change-status`
+     (no el alta: el alta sigue fijando `CONDITION_ACTIVE` sin preguntar). Antes de
+     este patch el catálogo sólo traía `CONDITION_ACTIVE`, así que una condición no
+     tenía a dónde ir. */
+  {
+    code: 'condition-clinical-status',
+    name: 'Estado clínico del diagnóstico',
+    description:
+      'Ciclo de vida clínico de una condición (HL7 condition-clinical). Gobierna tanto el alta como la transición.',
+    concepts: [
+      CLIN.CONDITION_ACTIVE,
+      CLIN.CONDITION_RECURRENCE,
+      CLIN.CONDITION_RELAPSE,
+      CLIN.CONDITION_INACTIVE,
+      CLIN.CONDITION_REMISSION,
+      CLIN.CONDITION_RESOLVED,
+    ],
+    defaultConceptId: CLIN.CONDITION_ACTIVE,
+    targets: ['clinical.conditions.clinical_status_concept_id'],
+  },
+  {
+    code: 'condition-clinical-course',
+    name: 'Curso clínico del diagnóstico',
+    description:
+      'Si la condición es aguda (con resolución esperada) o crónica (seguimiento continuo, sin resolución). Eje distinto del estado clínico.',
+    concepts: [
+      CLIN.CONDITION_COURSE_ACUTE,
+      CLIN.CONDITION_COURSE_CHRONIC,
+      CLIN.CONDITION_COURSE_SUBACUTE,
+      CLIN.CONDITION_COURSE_RECURRENT,
+      CLIN.CONDITION_COURSE_UNKNOWN,
+    ],
+    // Sin preseleccionado a propósito, como el diagnóstico: no declarar el curso
+    // clínico es un dato legítimo (`CONDITION_COURSE_UNKNOWN` está para eso), no
+    // un olvido que convenga rellenar con un valor por omisión.
+    targets: ['clinical.conditions.clinical_course_concept_id'],
   },
 ];
 

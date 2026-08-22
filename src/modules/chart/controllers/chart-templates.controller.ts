@@ -72,9 +72,16 @@ export class ChartTemplatesController {
     return this.templatesService.createTemplate(dto, actor);
   }
 
-  /** Carril 2 · punto 1: listar las plantillas por especialidad. */
+  /**
+   * Carril 2 · punto 1: listar las plantillas por especialidad.
+   *
+   * Lectura abierta a los roles clínicos (Fase 3 del carril de consulta): el
+   * expediente necesita el esquema para pintar el formulario de especialidad, y
+   * pedirle SECURITY_ADMIN a quien atiende era pedirle el rol equivocado. Los
+   * POST administrativos siguen siendo del administrador.
+   */
   @Get()
-  @Roles('SECURITY_ADMIN')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @ApiOperation({ summary: 'Listar las plantillas de chart por especialidad' })
   @ApiQuery({ name: 'specialtyId', required: false, format: 'uuid' })
   listTemplates(
@@ -89,11 +96,13 @@ export class ChartTemplatesController {
 
   /** Carril 2 · punto 1: leer el esquema completo de una plantilla. */
   @Get(':id')
-  @Roles('SECURITY_ADMIN')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @ApiOperation({ summary: 'Leer el esquema de una plantilla de chart' })
   getTemplate(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ChartTemplateResponseDto> {
-    return this.templatesService.getTemplate(id);
+    // El mismo aislamiento que el listado: global o del tenant propio. Sin él,
+    // saber el uuid bastaba para leer la plantilla de otra organización.
+    return this.templatesService.getTemplate(id, getCurrentTenantId());
   }
 }

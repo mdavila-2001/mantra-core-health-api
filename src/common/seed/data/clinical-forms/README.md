@@ -22,6 +22,30 @@ donde el equipo guarde los adjuntos. Un formulario clínico guardado como imagen
 formulario: es un adjunto. Lo que sirve —y lo que este directorio contiene— es la transcripción a
 campos, que es lo que el motor captura.
 
+## Cobertura (v4.1.6 · 2026-08-21)
+
+**43 formularios**: 4 transversales —que sirven para cualquier consulta— y 39 repartidos entre las
+**36 especialidades** de `VS_MEDICAL_SPECIALTY`, que quedan **todas cubiertas**. Antes eran 15
+sobre 9 especialidades: a un neurólogo, a un nutricionista o a un radiólogo el selector no le
+ofrecía nada suyo.
+
+Tres criterios que se aplicaron al escribir las 28 nuevas y que conviene respetar al agregar más:
+
+- **La base común es la NT 022 del MINSA**, que ya sostenía 8 de las fichas originales: la
+  estructura de toda historia clínica (motivo, evolución, examen dirigido, diagnóstico, conducta)
+  sale de ahí, y cada ficha declara en su `note` qué ítems son agregado propio de la disciplina.
+  No se incorporó ninguna fuente nueva.
+- **Las escalas van como campo libre, nunca como catálogo.** ASA, ECOG, Mallampati o el dolor
+  0-10 se registran como `string`/`integer`: un value set nuevo es vocabulario del modelo y entra
+  por el pipeline canónico, no por un `.json` de contenido.
+- **Emergencia no promete tiempos.** `EMERG_ATENCION_BASE` registra prioridad como texto libre y
+  **no** enumera niveles de triage ni compromete tiempos de atención: es una decisión de producto
+  que nadie tomó (regla 6 del diagnóstico del documento ecosistémico).
+
+Las tres fichas de **informe** (radiología, patología, laboratorio) respetan igual el molde
+—empiezan en `motivo_consulta`, cierran en `diagnostico`— aunque ahí signifiquen «indicación del
+estudio» y «conclusión»: el motor y el selector no distinguen tipos de ficha.
+
 ## Agregar un formulario
 
 1. Crear `<especialidad>/<formulario>.json` con la forma de `StandardFormDefinition`.
@@ -46,15 +70,15 @@ de ministerios de salud. Lo que no cumple, no entra.
 
 ### Fuentes usadas
 
-| Organismo | Documento | Licencia |
-| --- | --- | --- |
-| OMS | [Patrones de crecimiento infantil](https://www.who.int/es/news-room/questions-and-answers/item/child-growth-standards) | CC BY-NC-SA 3.0 IGO |
-| OMS | [Oral health surveys: basic methods, 5.ª ed.](https://www.who.int/publications/i/item/9789241548649) | CC BY-NC-SA 3.0 IGO |
-| OPS/OMS | [Directrices para la evaluación y el manejo del riesgo cardiovascular](https://www.paho.org/sites/default/files/2023-10/directrices-evaluacion-manejo-riesgo-cv-oms.pdf) | CC BY-NC-SA 3.0 IGO |
-| OPS/OMS · CLAP/SMR | [Historia Clínica Perinatal simplificada](https://iris.paho.org/handle/10665.2/17048) | CC BY-NC-SA 3.0 IGO |
-| MINSA (Perú) | [NT N.º 022-MINSA/DGSP-V.02, Gestión de la Historia Clínica](https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf) | Norma técnica estatal, acceso público |
-| MinSalud (Colombia) | [Resolución 1995 de 1999](https://www.minsalud.gov.co/normatividad_nuevo/resoluci%C3%93n%201995%20de%201999.pdf) | Norma estatal, acceso público |
-| MinSalud (Colombia) | [Modelo de consentimiento informado, Res. 1738](https://www.minsalud.gov.co/sites/rid/Lists/BibliotecaDigital/RIDE/VS/ED/VSP/modelo-consentimiento-informado-resolucion-1738.pdf) | Documento oficial, acceso público |
+| Organismo           | Documento                                                                                                                                                                         | Licencia                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| OMS                 | [Patrones de crecimiento infantil](https://www.who.int/es/news-room/questions-and-answers/item/child-growth-standards)                                                            | CC BY-NC-SA 3.0 IGO                   |
+| OMS                 | [Oral health surveys: basic methods, 5.ª ed.](https://www.who.int/publications/i/item/9789241548649)                                                                              | CC BY-NC-SA 3.0 IGO                   |
+| OPS/OMS             | [Directrices para la evaluación y el manejo del riesgo cardiovascular](https://www.paho.org/sites/default/files/2023-10/directrices-evaluacion-manejo-riesgo-cv-oms.pdf)          | CC BY-NC-SA 3.0 IGO                   |
+| OPS/OMS · CLAP/SMR  | [Historia Clínica Perinatal simplificada](https://iris.paho.org/handle/10665.2/17048)                                                                                             | CC BY-NC-SA 3.0 IGO                   |
+| MINSA (Perú)        | [NT N.º 022-MINSA/DGSP-V.02, Gestión de la Historia Clínica](https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf)                                                                   | Norma técnica estatal, acceso público |
+| MinSalud (Colombia) | [Resolución 1995 de 1999](https://www.minsalud.gov.co/normatividad_nuevo/resoluci%C3%93n%201995%20de%201999.pdf)                                                                  | Norma estatal, acceso público         |
+| MinSalud (Colombia) | [Modelo de consentimiento informado, Res. 1738](https://www.minsalud.gov.co/sites/rid/Lists/BibliotecaDigital/RIDE/VS/ED/VSP/modelo-consentimiento-informado-resolucion-1738.pdf) | Documento oficial, acceso público     |
 
 ## 🟡 Lo que quedó afuera por licencia, y con qué se reemplazaría
 
@@ -62,15 +86,15 @@ de ministerios de salud. Lo que no cumple, no entra.
 **no se cargaron** porque son propiedad de un tercero. El cliente decide: consigue la licencia, o
 se queda el reemplazo libre.
 
-| Instrumento | Titular | Por qué no entró | Reemplazo libre propuesto |
-| --- | --- | --- | --- |
-| PHQ-9 (Cuestionario de Salud del Paciente) | Pfizer Inc. | Los PDF que circulan llevan «Copyright © Pfizer Inc.». El permiso de reproducción es amplio pero **no consta por escrito para uso comercial incorporado a un producto** | **SRQ-20** de la OMS, tamizaje de trastornos mentales comunes en atención primaria, publicado por la propia OMS |
-| GAD-7 (Ansiedad Generalizada) | Pfizer Inc. | Mismo caso que PHQ-9 | Sección de ansiedad del **SRQ-20** |
-| Inventario de Depresión de Beck (BDI-II) | Pearson / NCS Pearson | Instrumento comercial con licencia por uso | **SRQ-20** de la OMS |
-| Mini-Mental State Examination (MMSE) | PAR Inc. | Licenciado por PAR desde 2001; se cobra por formulario | **Prueba cognitiva breve de dominio público** a definir con el cliente; no se cargó ninguna por las dudas |
-| AUDIT (versión editorial ilustrada) | Ediciones derivadas | El instrumento base es de la OMS, pero las versiones ilustradas que circulan son ediciones con derechos propios | **AUDIT publicado por la OMS**, pendiente de fichar la URL oficial antes de cargarlo |
-| Escalas funcionales de traumatología (p. ej. las de sociedades ortopédicas) | Sociedades científicas | Licencia por institución | Se cargó la **evaluación musculoesquelética base** (rango de movilidad, fuerza, estabilidad, estado neurovascular), sin escala con puntaje |
-| Escalas de riesgo de sociedades de cardiología | Sociedades científicas | Licencia por institución | **Tablas de predicción de riesgo cardiovascular OMS/OPS**, ya cargadas |
+| Instrumento                                                                 | Titular                | Por qué no entró                                                                                                                                                        | Reemplazo libre propuesto                                                                                                                  |
+| --------------------------------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| PHQ-9 (Cuestionario de Salud del Paciente)                                  | Pfizer Inc.            | Los PDF que circulan llevan «Copyright © Pfizer Inc.». El permiso de reproducción es amplio pero **no consta por escrito para uso comercial incorporado a un producto** | **SRQ-20** de la OMS, tamizaje de trastornos mentales comunes en atención primaria, publicado por la propia OMS                            |
+| GAD-7 (Ansiedad Generalizada)                                               | Pfizer Inc.            | Mismo caso que PHQ-9                                                                                                                                                    | Sección de ansiedad del **SRQ-20**                                                                                                         |
+| Inventario de Depresión de Beck (BDI-II)                                    | Pearson / NCS Pearson  | Instrumento comercial con licencia por uso                                                                                                                              | **SRQ-20** de la OMS                                                                                                                       |
+| Mini-Mental State Examination (MMSE)                                        | PAR Inc.               | Licenciado por PAR desde 2001; se cobra por formulario                                                                                                                  | **Prueba cognitiva breve de dominio público** a definir con el cliente; no se cargó ninguna por las dudas                                  |
+| AUDIT (versión editorial ilustrada)                                         | Ediciones derivadas    | El instrumento base es de la OMS, pero las versiones ilustradas que circulan son ediciones con derechos propios                                                         | **AUDIT publicado por la OMS**, pendiente de fichar la URL oficial antes de cargarlo                                                       |
+| Escalas funcionales de traumatología (p. ej. las de sociedades ortopédicas) | Sociedades científicas | Licencia por institución                                                                                                                                                | Se cargó la **evaluación musculoesquelética base** (rango de movilidad, fuerza, estabilidad, estado neurovascular), sin escala con puntaje |
+| Escalas de riesgo de sociedades de cardiología                              | Sociedades científicas | Licencia por institución                                                                                                                                                | **Tablas de predicción de riesgo cardiovascular OMS/OPS**, ya cargadas                                                                     |
 
 Ninguno de estos siete se puede cargar «mientras tanto» y sacar después: una vez que el catálogo
 sale con material licenciado, sacarlo es un incidente, no un commit.

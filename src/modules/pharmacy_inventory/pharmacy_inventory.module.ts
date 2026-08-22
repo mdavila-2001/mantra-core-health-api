@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { PharmacyModule } from '../pharmacy/pharmacy.module';
 import * as entities from './entities';
 import {
   PharmacyProcurementController,
   PharmacyInventoryController,
   PharmacyDispensingController,
   PharmacyInventoryInternalController,
+  PharmacyInventoryReadController,
 } from './controllers';
 import {
   InventoryLocationsService,
@@ -16,6 +18,7 @@ import {
   InventoryRecallService,
   InventoryTransfersService,
   InventorySyncService,
+  PharmacyInventoryReadService,
 } from './services';
 import {
   SuppliersRepository,
@@ -31,6 +34,7 @@ import {
   RecallHoldsRepository,
   SerialsRepository,
   SyncRepository,
+  InventoryReadRepository,
 } from './repositories';
 
 /**
@@ -42,12 +46,19 @@ import {
  * cada movimiento.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // La cara de lectura del directorio de farmacias (módulo 24): la
+    // disponibilidad reutiliza sus filtros de publicación y precios en vez de
+    // duplicarlos.
+    PharmacyModule,
+  ],
   controllers: [
     PharmacyProcurementController,
     PharmacyInventoryController,
     PharmacyDispensingController,
     PharmacyInventoryInternalController,
+    PharmacyInventoryReadController,
   ],
   providers: [
     // Repositorios
@@ -64,6 +75,7 @@ import {
     RecallHoldsRepository,
     SerialsRepository,
     SyncRepository,
+    InventoryReadRepository,
     // Servicios
     InventoryLocationsService,
     PharmacyProcurementService,
@@ -73,6 +85,7 @@ import {
     InventoryRecallService,
     InventoryTransfersService,
     InventorySyncService,
+    PharmacyInventoryReadService,
   ],
 })
 export class PharmacyInventoryModule {}

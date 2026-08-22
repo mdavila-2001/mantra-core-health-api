@@ -21,34 +21,48 @@ const db = new pg.Client({
 
 const requestedTenant = process.env.DIAGNOSTIC_UNITS_SEED_TENANT_ID ?? null;
 
-const REQUIRED_CONCEPT_CODES = [
-  'DU_TYPE_LAB',
-  'DU_TYPE_IMAGING',
-  'DU_OWN_PRIVATE',
-  'DU_VERIF_VERIFIED',
-  'DU_UNIT_ACTIVE',
-  'DU_SITE_PRIMARY',
-  'DU_SITE_COLLECTION',
-  'DU_SITE_ACTIVE',
-  'DU_STUDY_CBC',
-  'DU_STUDY_GLUCOSE',
-  'DU_STUDY_PCR',
-  'DU_STUDY_CHEST_XRAY',
-  'DU_STUDY_ABDOMINAL_ULTRASOUND',
-  'DU_MODALITY_LAB',
-  'DU_MODALITY_XRAY',
-  'DU_MODALITY_ULTRASOUND',
-  'DU_OFFER_ACTIVE',
-  'DU_PS_STANDARD',
-  'DU_CUR_BOB',
-  'DU_SCHED_ACTIVE',
-  'DU_PRICE_ACTIVE',
-  'DU_ACC_ISO15189',
-  'DU_EQ_ANALYZER',
-  'DU_EQ_XRAY',
-  'DU_EQ_ULTRASOUND',
-  'DU_EQ_OPERATIONAL',
-];
+/**
+ * Alias del script → código real del catálogo.
+ *
+ * El script nombraba los conceptos con alias cortos (`DU_TYPE_LAB`) que el seed
+ * de terminología nunca materializó: los suyos van prefijados por módulo
+ * (`diagnostic_units:UNIT_TYPE_LABORATORY`). Por eso este seeder abortaba con
+ * «faltan conceptos» y el directorio de laboratorios seguía vacío (F-15,
+ * 18/08/2026) — no faltaba el seed de terminología, faltaba la traducción.
+ *
+ * Se mantiene el alias como clave para no tocar las treinta llamadas a
+ * `concept(...)` que hay más abajo: lo que cambia es contra qué se resuelve.
+ */
+const CONCEPTOS = {
+  DU_TYPE_LAB: 'diagnostic_units:UNIT_TYPE_LABORATORY',
+  DU_TYPE_IMAGING: 'diagnostic_units:UNIT_TYPE_IMAGING',
+  DU_OWN_PRIVATE: 'diagnostic_units:OWNERSHIP_PRIVATE',
+  DU_VERIF_VERIFIED: 'diagnostic_units:VERIFICATION_VERIFIED',
+  DU_UNIT_ACTIVE: 'diagnostic_units:UNIT_ACTIVE',
+  DU_SITE_PRIMARY: 'diagnostic_units:SITE_ROLE_PRIMARY',
+  DU_SITE_COLLECTION: 'diagnostic_units:SITE_ROLE_COLLECTION',
+  DU_SITE_ACTIVE: 'diagnostic_units:SITE_ACTIVE',
+  DU_STUDY_CBC: 'diagnostic_units:STUDY_COMPLETE_BLOOD_COUNT',
+  DU_STUDY_GLUCOSE: 'diagnostic_units:STUDY_GLUCOSE',
+  DU_STUDY_PCR: 'diagnostic_units:STUDY_PCR',
+  DU_STUDY_CHEST_XRAY: 'diagnostic_units:STUDY_CHEST_XRAY',
+  DU_STUDY_ABDOMINAL_ULTRASOUND: 'diagnostic_units:STUDY_ABDOMINAL_ULTRASOUND',
+  DU_MODALITY_LAB: 'diagnostic_units:MODALITY_LABORATORY',
+  DU_MODALITY_XRAY: 'diagnostic_units:MODALITY_XRAY',
+  DU_MODALITY_ULTRASOUND: 'diagnostic_units:MODALITY_ULTRASOUND',
+  DU_OFFER_ACTIVE: 'diagnostic_units:OFFERING_ACTIVE',
+  DU_PS_STANDARD: 'diagnostic_units:PRICE_SCHEDULE_STANDARD',
+  DU_CUR_BOB: 'diagnostic_units:CURRENCY_BOB',
+  DU_SCHED_ACTIVE: 'diagnostic_units:SCHEDULE_ACTIVE',
+  DU_PRICE_ACTIVE: 'diagnostic_units:PRICE_ACTIVE',
+  DU_ACC_ISO15189: 'diagnostic_units:ACCREDITATION_ISO15189',
+  DU_EQ_ANALYZER: 'diagnostic_units:EQUIPMENT_TYPE_ANALYZER',
+  DU_EQ_XRAY: 'diagnostic_units:EQUIPMENT_TYPE_XRAY',
+  DU_EQ_ULTRASOUND: 'diagnostic_units:EQUIPMENT_TYPE_ULTRASOUND',
+  DU_EQ_OPERATIONAL: 'diagnostic_units:EQUIPMENT_OPERATIONAL',
+};
+
+const REQUIRED_CONCEPT_CODES = Object.keys(CONCEPTOS);
 
 function stableId(tenantId, key) {
   const hex = createHash('md5')
@@ -96,9 +110,15 @@ async function loadConcepts() {
     `SELECT id, code
        FROM terminology.catalog_concepts
       WHERE code = ANY($1::varchar[])`,
-    [REQUIRED_CONCEPT_CODES],
+    [Object.values(CONCEPTOS)],
   );
-  const concepts = new Map(rows.map((row) => [row.code, row.id]));
+  // Indexado por el alias del script, no por el código del catálogo.
+  const porCodigo = new Map(rows.map((row) => [row.code, row.id]));
+  const concepts = new Map(
+    REQUIRED_CONCEPT_CODES.filter((alias) => porCodigo.has(CONCEPTOS[alias])).map(
+      (alias) => [alias, porCodigo.get(CONCEPTOS[alias])],
+    ),
+  );
   const missing = REQUIRED_CONCEPT_CODES.filter((code) => !concepts.has(code));
   if (missing.length > 0) {
     throw new Error(
@@ -395,6 +415,137 @@ async function main() {
         ],
       },
       {
+        // Tres unidades más para que el directorio se vea como un directorio y
+        // no como una lista de ejemplo (F-15): con nombres bolivianos, y con
+        // los mismos estudios del catálogo — no se inventan conceptos nuevos.
+        code: 'LAB-SUR',
+        name: 'Laboratorio Clínico Zona Sur',
+        type: 'DU_TYPE_LAB',
+        practiceSiteId: secondary,
+        acceptsExternalOrders: true,
+        walkInAvailable: true,
+        homeCollectionAvailable: false,
+        role: 'DU_SITE_PRIMARY',
+        sampleCollection: true,
+        imaging: false,
+        prefix: 'LCS',
+        offerings: [
+          {
+            key: 'lab-sur-cbc',
+            code: 'HEM-COMP',
+            study: 'DU_STUDY_CBC',
+            modality: 'DU_MODALITY_LAB',
+            name: 'Hemograma completo',
+            description: 'Conteo automatizado de células sanguíneas.',
+            preparation: 'No requiere ayuno.',
+            duration: 15,
+            turnaround: 300,
+            requiresOrder: false,
+            homeCollection: false,
+            amount: '75.00',
+          },
+        ],
+        equipment: [
+          {
+            key: 'lab-sur-analyzer',
+            type: 'DU_EQ_ANALYZER',
+            modality: 'DU_MODALITY_LAB',
+            manufacturer: 'DemoLab',
+            model: 'Analyzer 300',
+          },
+        ],
+      },
+      {
+        code: 'LAB-MIRAFLORES',
+        name: 'Laboratorio Miraflores',
+        type: 'DU_TYPE_LAB',
+        practiceSiteId: primary,
+        acceptsExternalOrders: false,
+        walkInAvailable: true,
+        homeCollectionAvailable: true,
+        role: 'DU_SITE_COLLECTION',
+        sampleCollection: true,
+        imaging: false,
+        prefix: 'LMF',
+        offerings: [
+          {
+            key: 'lab-miraflores-glucose',
+            code: 'GLUC',
+            study: 'DU_STUDY_GLUCOSE',
+            modality: 'DU_MODALITY_LAB',
+            name: 'Glucosa en sangre',
+            description: 'Determinación cuantitativa de glucosa.',
+            preparation: 'Ayuno de 8 horas.',
+            duration: 10,
+            turnaround: 120,
+            requiresOrder: false,
+            homeCollection: true,
+            amount: '30.00',
+          },
+          {
+            key: 'lab-miraflores-pcr',
+            code: 'PCR',
+            study: 'DU_STUDY_PCR',
+            modality: 'DU_MODALITY_LAB',
+            name: 'Proteína C reactiva',
+            description: 'Marcador de inflamación aguda.',
+            preparation: 'No requiere ayuno.',
+            duration: 10,
+            turnaround: 360,
+            requiresOrder: false,
+            homeCollection: true,
+            amount: '95.00',
+          },
+        ],
+        equipment: [
+          {
+            key: 'lab-miraflores-analyzer',
+            type: 'DU_EQ_ANALYZER',
+            modality: 'DU_MODALITY_LAB',
+            manufacturer: 'DemoLab',
+            model: 'Analyzer 200',
+          },
+        ],
+      },
+      {
+        code: 'IMG-SOPOCACHI',
+        name: 'Centro de Imagenología Sopocachi',
+        type: 'DU_TYPE_IMAGING',
+        practiceSiteId: secondary,
+        acceptsExternalOrders: true,
+        walkInAvailable: false,
+        homeCollectionAvailable: false,
+        role: 'DU_SITE_PRIMARY',
+        sampleCollection: false,
+        imaging: true,
+        prefix: 'CIS',
+        offerings: [
+          {
+            key: 'imaging-sopocachi-ultrasound',
+            code: 'ECO-ABD',
+            study: 'DU_STUDY_ABDOMINAL_ULTRASOUND',
+            modality: 'DU_MODALITY_ULTRASOUND',
+            name: 'Ecografía abdominal',
+            description: 'Evaluación ecográfica de órganos abdominales.',
+            preparation: 'Ayuno de 6 horas.',
+            duration: 30,
+            turnaround: 180,
+            requiresOrder: true,
+            homeCollection: false,
+            amount: '190.00',
+          },
+        ],
+        equipment: [
+          {
+            key: 'imaging-sopocachi-ultrasound',
+            type: 'DU_EQ_ULTRASOUND',
+            modality: 'DU_MODALITY_ULTRASOUND',
+            manufacturer: 'Demo Imaging',
+            model: 'US-2',
+          },
+        ],
+      },
+      {
         code: 'IMG-CENTRAL',
         name: 'Imagen Diagnóstica Mantra',
         type: 'DU_TYPE_IMAGING',
@@ -496,7 +647,7 @@ async function main() {
 
     await db.query('COMMIT');
     console.log(
-      `✓ diagnostic_units demo: 3 unidades idempotentes para tenant ${context.tenantId}`,
+      `✓ diagnostic_units demo: ${definitions.length} unidades idempotentes para tenant ${context.tenantId}`,
     );
   } catch (error) {
     await db.query('ROLLBACK');

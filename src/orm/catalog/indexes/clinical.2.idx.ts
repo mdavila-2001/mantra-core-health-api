@@ -2,11 +2,13 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical` (parte 2/2).
- * 53 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 55 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['observation_components', 'ix_observation_components_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['observation_components', 'ix_observation_components_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['observation_notes', 'ix_observation_notes_observation_id', ['observation_id'], false, 'btree'],
   ['observation_notes', 'ix_observation_notes_author_user_id', ['author_user_id'], false, 'btree'],
   ['observation_performers', 'ix_observation_performers_observation_id', ['observation_id'], false, 'btree'],

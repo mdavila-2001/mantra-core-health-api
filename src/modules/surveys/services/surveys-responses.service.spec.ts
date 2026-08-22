@@ -190,10 +190,13 @@ describe('SurveysResponsesService', () => {
       expect(d.logger.warn).not.toHaveBeenCalled();
     });
 
-    // F-14: el esquema `surveys` todavía no está materializado por el pipeline
-    // y la primera pantalla del paciente reventaba con 500. Mientras dure el
-    // bloqueador (M4), «no hay tabla» se lee como «no hay cuestionarios».
-    it('si la tabla todavía no existe responde vacío y lo avisa, en vez de un 500', async () => {
+    // Antes esto respondía `[]` con un aviso: el módulo había nacido sin DDL y
+    // la primera pantalla del paciente reventaba con 500 (F-14). Con el
+    // esquema ya promovido al modelo (módulo 65), una tabla ausente vuelve a
+    // ser lo que es —un despliegue roto, un patch sin aplicar— y no un paciente
+    // sin cuestionarios. Este test fija esa vuelta atrás para que el parche no
+    // regrese silenciosamente.
+    it('si la tabla no existe el error sube: es un despliegue roto, no una lista vacía', async () => {
       const d = build();
       d.invitationsRepo.listByPatient.mockRejectedValue(
         new TableNotFoundException(
@@ -201,10 +204,9 @@ describe('SurveysResponsesService', () => {
         ),
       );
 
-      await expect(d.service.listMyInvitations(patientActor)).resolves.toEqual(
-        [],
+      await expect(d.service.listMyInvitations(patientActor)).rejects.toThrow(
+        TableNotFoundException,
       );
-      expect(d.logger.warn).toHaveBeenCalledTimes(1);
     });
 
     it('cualquier otro fallo de la base sigue subiendo', async () => {

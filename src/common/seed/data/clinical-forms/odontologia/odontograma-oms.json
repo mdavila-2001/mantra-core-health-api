@@ -5,7 +5,7 @@
     "code": "ODONTOLOGIA",
     "display": "Odontología"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Oral health surveys: basic methods — 5th edition (formularios de evaluación bucodental)",
     "organization": "Organización Mundial de la Salud (OMS)",
@@ -13,7 +13,7 @@
     "license": "Publicación OMS de acceso abierto (CC BY-NC-SA 3.0 IGO)",
     "sourceVersion": "5.ª edición, 2013",
     "retrievedAt": "2026-08-14",
-    "note": "Transcripción de los ítems del formulario de evaluación. El estado por pieza dentaria se registra en el campo de texto estructurado `estado_por_pieza` hasta que exista un control de odontograma dedicado."
+    "note": "Transcripción de los ítems del formulario de evaluación. Desde la v2 el estado por pieza se registra en `odontograma_fdi`, un mapa de pieza FDI a código de estado de la OMS (0-9, T) que dibuja el control de odontograma; `estado_por_pieza` queda como observaciones en prosa y dejó de ser obligatorio. Las respuestas capturadas con la v1 se siguen leyendo tal cual."
   },
   "fields": [
     {
@@ -29,10 +29,16 @@
       "required": false
     },
     {
+      "code": "odontograma_fdi",
+      "name": "Odontograma (estado por pieza, notación FDI)",
+      "dataType": "json",
+      "required": false
+    },
+    {
       "code": "estado_por_pieza",
-      "name": "Estado por pieza dentaria (notación FDI)",
+      "name": "Observaciones del estado dentario",
       "dataType": "text",
-      "required": true
+      "required": false
     },
     {
       "code": "dientes_cariados",

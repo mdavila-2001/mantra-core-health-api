@@ -19,9 +19,6 @@ import {
   QUEUE_STATUS_BY_CODE,
 } from '../community.concepts';
 
-/** Tenant del contexto: la cola se acota a él, así que las pruebas lo fijan. */
-const TENANT = '11111111-1111-1111-1111-111111111111';
-
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
@@ -58,11 +55,48 @@ const fila = (id: string, extra: Record<string, unknown> = {}) => ({
   ...extra,
 });
 
+/** Tenant del contexto para las lecturas que lo exigen. */
+const TENANT = '3f2b6c14-0000-5000-8000-000000000001';
+
+/**
+ * Llama a `listQueue` dentro de un contexto de tenant.
+ *
+ * La cola se acota al tenant del request, así que el servicio lo pide con
+ * `requireTenantId()`: sin contexto no hay lectura que valga, y el doble tiene
+ * que reproducir esa condición en vez de esquivarla.
+ *
+ * @param d - Sistema bajo prueba y sus dobles.
+ * @param query - Filtros y cursor.
+ * @param limit - Tope efectivo.
+ * @returns La página, como la devuelve el servicio.
+ */
+const listQueueEnTenant = (d: any, query: any, limit: number): Promise<any> =>
+  runWithTenant(TENANT, () => d.service.listQueue(query, limit));
+
 describe('CommunityModerationReadService', () => {
   describe('listQueue', () => {
+    it('exige tenant en el contexto: sin él no devuelve una página vacía', async () => {
+      const d = build();
+      await expect(d.service.listQueue({} as any, 20)).rejects.toThrow();
+      expect(d.moderationRepo.listQueuePage).not.toHaveBeenCalled();
+    });
+
+    it('acota la cola al tenant del contexto', async () => {
+      const d = build();
+      await listQueueEnTenant(d, {} as any, 20);
+
+      expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
+        expect.anything(),
+        TENANT,
+        expect.anything(),
+        undefined,
+        21,
+      );
+    });
+
     it('pide una fila más que el tope, para saber si hay siguiente', async () => {
       const d = build();
-      await runWithTenant(TENANT, () => d.service.listQueue({} as any, 20));
+      await listQueueEnTenant(d, {} as any, 20);
 
       expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
         expect.anything(),
@@ -79,15 +113,14 @@ describe('CommunityModerationReadService', () => {
      */
     it('traduce los códigos de filtro a conceptos', async () => {
       const d = build();
-      await runWithTenant(TENANT, () =>
-        d.service.listQueue(
-          {
-            status: ['QUEUED', 'IN_REVIEW'],
-            priority: ['HIGH'],
-            contentType: ['POST'],
-          } as any,
-          20,
-        ),
+      await listQueueEnTenant(
+        d,
+        {
+          status: ['QUEUED', 'IN_REVIEW'],
+          priority: ['HIGH'],
+          contentType: ['POST'],
+        } as any,
+        20,
       );
 
       expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
@@ -112,11 +145,8 @@ describe('CommunityModerationReadService', () => {
      */
     it('traduce la antigüedad en horas a un instante', async () => {
       const d = build();
-      await runWithTenant(TENANT, () =>
-        d.service.listQueue({ minAgeHours: 24 } as any, 20),
-      );
+      await listQueueEnTenant(d, { minAgeHours: 24 } as any, 20);
 
-      // `[2]` y no `[1]`: el tenant va ahora entre el `em` y los filtros.
       const filtros = d.moderationRepo.listQueuePage.mock.calls[0][2];
       expect(filtros.queuedBefore).toBeInstanceOf(Date);
       const horas =
@@ -130,9 +160,7 @@ describe('CommunityModerationReadService', () => {
       const d = build();
       d.moderationRepo.listQueuePage.mockResolvedValue([fila('q1')]);
 
-      const page = await runWithTenant(TENANT, () =>
-        d.service.listQueue({} as any, 20),
-      );
+      const page = await listQueueEnTenant(d, {} as any, 20);
 
       expect(page.count).toBe(1);
       expect(page.nextCursor).toBeNull();
@@ -145,9 +173,7 @@ describe('CommunityModerationReadService', () => {
         fila('q2'),
       ]);
 
-      const page = await runWithTenant(TENANT, () =>
-        d.service.listQueue({} as any, 1),
-      );
+      const page = await listQueueEnTenant(d, {} as any, 1);
 
       expect(page.count).toBe(1);
       expect(page.items[0]!.id).toBe('q1');
@@ -171,9 +197,7 @@ describe('CommunityModerationReadService', () => {
         fila('q2'),
       ]);
 
-      const page = await runWithTenant(TENANT, () =>
-        d.service.listQueue({} as any, 1),
-      );
+      const page = await listQueueEnTenant(d, {} as any, 1);
 
       expect(decodeKeysetCursor(page.nextCursor!)).toEqual({
         queuedAt: '2026-08-01T08:00:00.000Z',
@@ -202,9 +226,7 @@ describe('CommunityModerationReadService', () => {
         },
       ]);
 
-      const page = await runWithTenant(TENANT, () =>
-        d.service.listQueue({} as any, 20),
-      );
+      const page = await listQueueEnTenant(d, {} as any, 20);
 
       expect(page.items[0]!.reportCount).toBe(7);
       expect(page.items[0]!.report?.detailText).toBe(
@@ -212,40 +234,11 @@ describe('CommunityModerationReadService', () => {
       );
     });
 
-    /**
-     * La cola se listaba **sin filtro de tenant**: un moderador de una clínica
-     * veía los reportes de todas las demás —el contenido denunciado, quién lo
-     * denunció y por qué—. Es la prueba que impide que vuelva a pasar.
-     */
-    it('acota la cola al tenant del contexto', async () => {
-      const d = build();
-
-      await runWithTenant(TENANT, () => d.service.listQueue({} as any, 20));
-
-      expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
-        expect.anything(),
-        TENANT,
-        expect.anything(),
-        undefined,
-        21,
-      );
-    });
-
-    it('sin tenant en el contexto falla en vez de servir la cola de todos', async () => {
-      const d = build();
-
-      // Servir vacío mentiría sobre el motivo; servir sin acotar sería la fuga.
-      await expect(d.service.listQueue({} as any, 20)).rejects.toThrow();
-      expect(d.moderationRepo.listQueuePage).not.toHaveBeenCalled();
-    });
-
     it('una entrada sin reporte asociado trae report en null, no undefined', async () => {
       const d = build();
       d.moderationRepo.listQueuePage.mockResolvedValue([fila('q1')]);
 
-      const page = await runWithTenant(TENANT, () =>
-        d.service.listQueue({} as any, 20),
-      );
+      const page = await listQueueEnTenant(d, {} as any, 20);
 
       expect(page.items[0]!.report).toBeNull();
       expect(page.items[0]!.reportCount).toBe(0);

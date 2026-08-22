@@ -20,6 +20,8 @@ describe('Terminology (integración)', () => {
   let versionId: string;
   let conceptA: string;
   let conceptB: string;
+  let valueSetId: string;
+  const valueSetCode = `vs-${uniq}`;
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
@@ -146,7 +148,7 @@ describe('Terminology (integración)', () => {
       .post('/terminology/value-sets')
       .set(bearer(ctx.adminToken))
       .send({
-        internalCode: `vs-${uniq}`,
+        internalCode: valueSetCode,
         name: 'Infectious diseases',
         canonicalUrl: `http://x/vs/${uniq}`,
         rules: [
@@ -162,6 +164,36 @@ describe('Terminology (integración)', () => {
       .expect(201);
     expect(res.body.versionId).toEqual(expect.any(String));
     expect(res.body.rulesCount).toBe(1);
+    valueSetId = res.body.id;
+  });
+
+  /**
+   * El catálogo se lee sin sesión: el registro público resuelve su desplegable
+   * de departamentos (`VS_BO_DEPARTMENT`) antes de que exista un token, y con
+   * las dos lecturas autenticadas esa pantalla recibía 401 antes de pintar el
+   * primer campo.
+   *
+   * Van los dos pasos en la misma prueba porque son una sola lectura partida en
+   * dos viajes: resolver el conjunto por su código y leer sus miembros. Abrir
+   * sólo el primero deja al formulario con un uuid y sin opciones.
+   */
+  it('lee el catálogo de conjuntos de valores sin autenticación (200)', async () => {
+    const lista = await http()
+      .get('/terminology/value-sets')
+      .query({ code: valueSetCode })
+      .expect(200);
+
+    expect(lista.body.items).toHaveLength(1);
+    expect(lista.body.items[0]).toMatchObject({
+      id: valueSetId,
+      internalCode: valueSetCode,
+    });
+
+    const expansion = await http()
+      .get(`/terminology/value-sets/${valueSetId}/$expand`)
+      .expect(200);
+
+    expect(Array.isArray(expansion.body.items)).toBe(true);
   });
 
   it('rechaza sin autenticación (401)', async () => {

@@ -4,6 +4,7 @@ import {
   diaLocalDe,
   diasLocalesQueCoinciden,
   horaLocalAUtc,
+  inicioDeLoReservable,
 } from './scheduling-time';
 
 describe('horaLocalAUtc', () => {
@@ -142,5 +143,39 @@ describe('diasLocalesQueCoinciden', () => {
     );
     const claves = dias.map((d) => `${d.year}-${d.month}-${d.day}`);
     expect(claves.length).toBe(new Set(claves).size);
+  });
+});
+
+describe('inicioDeLoReservable', () => {
+  const AYER = new Date('2026-08-19T09:00:00.000Z');
+  const AHORA = new Date('2026-08-20T10:00:00.000Z');
+  const MANANA = new Date('2026-08-21T09:00:00.000Z');
+
+  it('adelanta el inicio hasta ahora cuando la ventana arranca en el pasado', () => {
+    // Es el corazón de A-03: pedir «desde ayer, sólo disponibles» no puede
+    // devolver los huecos de ayer.
+    expect(inicioDeLoReservable(AYER, AHORA)).toBe(AHORA);
+  });
+
+  it('respeta el inicio pedido cuando ya es futuro', () => {
+    // Quien pregunta por la semana que viene no quiere que le corran la ventana.
+    expect(inicioDeLoReservable(MANANA, AHORA)).toBe(MANANA);
+  });
+
+  it('con la ventana empezando justo ahora, devuelve ese mismo instante', () => {
+    const mismo = new Date(AHORA.getTime());
+    expect(inicioDeLoReservable(mismo, AHORA).getTime()).toBe(AHORA.getTime());
+  });
+
+  it('no depende del huso: compara instantes, no horas de pared', () => {
+    // `start_at` es timestamptz. El mismo instante escrito con dos husos
+    // distintos tiene que dar el mismo resultado, o el corte mentiría según
+    // dónde esté la sede.
+    const enLaPaz = new Date('2026-08-20T06:00:00.000-04:00');
+    const enUtc = new Date('2026-08-20T10:00:00.000Z');
+    expect(enLaPaz.getTime()).toBe(enUtc.getTime());
+    expect(inicioDeLoReservable(enLaPaz, AHORA).getTime()).toBe(
+      inicioDeLoReservable(enUtc, AHORA).getTime(),
+    );
   });
 });
