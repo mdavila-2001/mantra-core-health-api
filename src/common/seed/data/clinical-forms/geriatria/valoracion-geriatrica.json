@@ -13,23 +13,113 @@
     "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la autonomía en actividades de la vida diaria, el antecedente de caídas, el recuento de fármacos en uso, la descripción en prosa del estado cognitivo y del ánimo, la continencia y el soporte social."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_enfermedad", "name": "Tiempo de enfermedad", "dataType": "string", "required": true },
-    { "code": "antecedentes_personales", "name": "Antecedentes personales relevantes", "dataType": "text", "required": false },
-    { "code": "autonomia_actividades_basicas", "name": "Autonomía en actividades básicas de la vida diaria", "dataType": "text", "required": true },
-    { "code": "autonomia_actividades_instrumentales", "name": "Autonomía en actividades instrumentales de la vida diaria", "dataType": "text", "required": false },
-    { "code": "marcha_y_equilibrio", "name": "Marcha y equilibrio", "dataType": "text", "required": false },
-    { "code": "caidas_en_el_ultimo_ano", "name": "Caídas en el último año (número)", "dataType": "integer", "required": false },
-    { "code": "numero_de_farmacos_en_uso", "name": "Número de fármacos en uso", "dataType": "integer", "required": false },
-    { "code": "farmacos_en_uso", "name": "Fármacos en uso", "dataType": "text", "required": false },
-    { "code": "estado_cognitivo", "name": "Estado cognitivo (descripción)", "dataType": "text", "required": false },
-    { "code": "estado_de_animo", "name": "Estado de ánimo (descripción)", "dataType": "text", "required": false },
-    { "code": "continencia", "name": "Continencia urinaria y fecal", "dataType": "text", "required": false },
-    { "code": "alimentacion_y_peso", "name": "Alimentación y cambios de peso", "dataType": "text", "required": false },
-    { "code": "vision_y_audicion", "name": "Visión y audición", "dataType": "text", "required": false },
-    { "code": "soporte_social", "name": "Soporte social y convivencia", "dataType": "text", "required": false },
-    { "code": "examen_fisico", "name": "Examen físico", "dataType": "text", "required": true },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento", "dataType": "text", "required": false }
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_de_enfermedad",
+      "name": "Tiempo de enfermedad",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "antecedentes_personales",
+      "name": "Antecedentes personales relevantes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "autonomia_actividades_basicas",
+      "name": "Autonomía en actividades básicas de la vida diaria",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "autonomia_actividades_instrumentales",
+      "name": "Autonomía en actividades instrumentales de la vida diaria",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "marcha_y_equilibrio",
+      "name": "Marcha y equilibrio",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "caidas_en_el_ultimo_ano",
+      "name": "Caídas en el último año (número)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "numero_de_farmacos_en_uso",
+      "name": "Número de fármacos en uso",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "farmacos_en_uso",
+      "name": "Fármacos en uso",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "estado_cognitivo",
+      "name": "Estado cognitivo (descripción)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "estado_de_animo",
+      "name": "Estado de ánimo (descripción)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "continencia",
+      "name": "Continencia urinaria y fecal",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "alimentacion_y_peso",
+      "name": "Alimentación y cambios de peso",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "vision_y_audicion",
+      "name": "Visión y audición",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "soporte_social",
+      "name": "Soporte social y convivencia",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_fisico",
+      "name": "Examen físico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "plan_de_tratamiento",
+      "name": "Plan de tratamiento",
+      "dataType": "text",
+      "required": false
+    }
   ]
 }

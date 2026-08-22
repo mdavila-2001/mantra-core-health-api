@@ -13,23 +13,113 @@
     "note": "De la norma salen la estructura común de la consulta y el apartado de funciones biológicas y examen del abdomen: motivo, tiempo de evolución, antecedentes, examen, diagnóstico y conducta. Son agregados propios de la especialidad el desglose de las características del dolor abdominal, el hábito intestinal, los signos de hemorragia digestiva y el examen del abdomen separado en inspección, auscultación, palpación y tacto rectal."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
-    { "code": "enfermedad_actual", "name": "Relato de la enfermedad actual", "dataType": "text", "required": true },
-    { "code": "antecedentes_digestivos", "name": "Antecedentes digestivos personales y quirúrgicos", "dataType": "text", "required": false },
-    { "code": "medicacion_habitual", "name": "Medicación habitual (antiinflamatorios, antiácidos, otros)", "dataType": "text", "required": false },
-    { "code": "dolor_abdominal", "name": "Dolor abdominal (presencia)", "dataType": "boolean", "required": false },
-    { "code": "caracteristicas_del_dolor", "name": "Características del dolor (localización, tipo, irradiación, relación con las comidas)", "dataType": "text", "required": false },
-    { "code": "habito_intestinal", "name": "Hábito intestinal (frecuencia y consistencia de las deposiciones)", "dataType": "text", "required": false },
-    { "code": "nauseas_o_vomitos", "name": "Náuseas o vómitos", "dataType": "boolean", "required": false },
-    { "code": "pirosis_o_reflujo", "name": "Pirosis o reflujo", "dataType": "boolean", "required": false },
-    { "code": "hemorragia_digestiva", "name": "Signos de hemorragia digestiva (hematemesis, melena, rectorragia)", "dataType": "text", "required": false },
-    { "code": "ictericia", "name": "Ictericia", "dataType": "boolean", "required": false },
-    { "code": "inspeccion_del_abdomen", "name": "Inspección del abdomen", "dataType": "text", "required": false },
-    { "code": "auscultacion_del_abdomen", "name": "Auscultación (ruidos hidroaéreos)", "dataType": "text", "required": false },
-    { "code": "palpacion_del_abdomen", "name": "Palpación (dolor, defensa, visceromegalias)", "dataType": "text", "required": true },
-    { "code": "tacto_rectal", "name": "Tacto rectal", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "enfermedad_actual",
+      "name": "Relato de la enfermedad actual",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "antecedentes_digestivos",
+      "name": "Antecedentes digestivos personales y quirúrgicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "medicacion_habitual",
+      "name": "Medicación habitual (antiinflamatorios, antiácidos, otros)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "dolor_abdominal",
+      "name": "Dolor abdominal (presencia)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "caracteristicas_del_dolor",
+      "name": "Características del dolor (localización, tipo, irradiación, relación con las comidas)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "habito_intestinal",
+      "name": "Hábito intestinal (frecuencia y consistencia de las deposiciones)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "nauseas_o_vomitos",
+      "name": "Náuseas o vómitos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "pirosis_o_reflujo",
+      "name": "Pirosis o reflujo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "hemorragia_digestiva",
+      "name": "Signos de hemorragia digestiva (hematemesis, melena, rectorragia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "ictericia",
+      "name": "Ictericia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "inspeccion_del_abdomen",
+      "name": "Inspección del abdomen",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "auscultacion_del_abdomen",
+      "name": "Auscultación (ruidos hidroaéreos)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "palpacion_del_abdomen",
+      "name": "Palpación (dolor, defensa, visceromegalias)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tacto_rectal",
+      "name": "Tacto rectal",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
   ]
 }

@@ -1,7 +1,10 @@
 {
   "code": "MEDINT_UCI_EVALUACION",
   "name": "Evaluación en medicina intensiva",
-  "specialty": { "code": "MEDICINA_INTENSIVA", "display": "Medicina Intensiva" },
+  "specialty": {
+    "code": "MEDICINA_INTENSIVA",
+    "display": "Medicina Intensiva"
+  },
   "version": 1,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, notas de evolución y registro de la atención hospitalaria",
@@ -13,23 +16,113 @@
     "note": "De la norma se transcribe la estructura común del registro: motivo, fecha de ingreso, signos vitales, evolución, diagnóstico y conducta. Son agregados propios de la especialidad el motivo de ingreso a la unidad, los días de estancia, el soporte ventilatorio, el soporte vasoactivo, la sedación, el balance hídrico y la evolución del turno."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "motivo_de_ingreso_a_la_unidad", "name": "Motivo de ingreso a la unidad", "dataType": "text", "required": true },
-    { "code": "fecha_de_ingreso_a_la_unidad", "name": "Fecha de ingreso a la unidad", "dataType": "date", "required": false },
-    { "code": "dias_de_estancia_en_la_unidad", "name": "Días de estancia en la unidad", "dataType": "integer", "required": false },
-    { "code": "estado_de_conciencia", "name": "Estado de conciencia", "dataType": "string", "required": false },
-    { "code": "soporte_ventilatorio", "name": "Soporte ventilatorio", "dataType": "boolean", "required": false },
-    { "code": "descripcion_del_soporte_ventilatorio", "name": "Descripción del soporte ventilatorio", "dataType": "text", "required": false },
-    { "code": "soporte_vasoactivo", "name": "Soporte vasoactivo", "dataType": "boolean", "required": false },
-    { "code": "descripcion_del_soporte_vasoactivo", "name": "Descripción del soporte vasoactivo", "dataType": "text", "required": false },
-    { "code": "sedacion", "name": "Sedación", "dataType": "boolean", "required": false },
-    { "code": "presion_arterial", "name": "Presión arterial", "dataType": "string", "required": false },
-    { "code": "frecuencia_cardiaca", "name": "Frecuencia cardíaca", "dataType": "integer", "required": false },
-    { "code": "saturacion_de_oxigeno", "name": "Saturación de oxígeno (%)", "dataType": "integer", "required": false },
-    { "code": "temperatura", "name": "Temperatura (°C)", "dataType": "decimal", "required": false },
-    { "code": "balance_hidrico_del_turno", "name": "Balance hídrico del turno", "dataType": "string", "required": false },
-    { "code": "evolucion_del_turno", "name": "Evolución del turno", "dataType": "text", "required": true },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "motivo_de_ingreso_a_la_unidad",
+      "name": "Motivo de ingreso a la unidad",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "fecha_de_ingreso_a_la_unidad",
+      "name": "Fecha de ingreso a la unidad",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "code": "dias_de_estancia_en_la_unidad",
+      "name": "Días de estancia en la unidad",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "estado_de_conciencia",
+      "name": "Estado de conciencia",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "soporte_ventilatorio",
+      "name": "Soporte ventilatorio",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "descripcion_del_soporte_ventilatorio",
+      "name": "Descripción del soporte ventilatorio",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "soporte_vasoactivo",
+      "name": "Soporte vasoactivo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "descripcion_del_soporte_vasoactivo",
+      "name": "Descripción del soporte vasoactivo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "sedacion",
+      "name": "Sedación",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "presion_arterial",
+      "name": "Presión arterial",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "temperatura",
+      "name": "Temperatura (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "balance_hidrico_del_turno",
+      "name": "Balance hídrico del turno",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "evolucion_del_turno",
+      "name": "Evolución del turno",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
   ]
 }

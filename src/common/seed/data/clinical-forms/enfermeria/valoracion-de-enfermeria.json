@@ -13,23 +13,113 @@
     "note": "De la norma se toman la estructura común (motivo de la valoración, antecedentes, examen, diagnóstico y conducta) y el registro de funciones vitales de la nota de enfermería. Son agregados propios de la especialidad el dolor referido en escala de 0 a 10, el estado de la piel, la presencia de accesos vasculares, la descripción en prosa del riesgo de caídas, el grado de autonomía, las necesidades identificadas y las intervenciones realizadas."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de la valoración", "dataType": "text", "required": true },
-    { "code": "antecedentes_relevantes", "name": "Antecedentes relevantes", "dataType": "text", "required": false },
-    { "code": "alergias_referidas", "name": "Alergias referidas", "dataType": "text", "required": false },
-    { "code": "medicacion_actual", "name": "Medicación actual", "dataType": "text", "required": false },
-    { "code": "presion_arterial", "name": "Presión arterial (mmHg)", "dataType": "string", "required": true },
-    { "code": "frecuencia_cardiaca", "name": "Frecuencia cardíaca (lpm)", "dataType": "integer", "required": false },
-    { "code": "frecuencia_respiratoria", "name": "Frecuencia respiratoria (rpm)", "dataType": "integer", "required": false },
-    { "code": "temperatura_c", "name": "Temperatura (°C)", "dataType": "decimal", "required": false },
-    { "code": "saturacion_de_oxigeno", "name": "Saturación de oxígeno (%)", "dataType": "integer", "required": false },
-    { "code": "dolor_intensidad_referida", "name": "Intensidad del dolor referida (0 a 10)", "dataType": "integer", "required": false },
-    { "code": "estado_de_conciencia", "name": "Estado de conciencia", "dataType": "text", "required": false },
-    { "code": "estado_de_la_piel", "name": "Estado de la piel", "dataType": "text", "required": false },
-    { "code": "accesos_vasculares", "name": "Accesos vasculares", "dataType": "boolean", "required": false },
-    { "code": "riesgo_de_caidas", "name": "Riesgo de caídas", "dataType": "text", "required": false },
-    { "code": "autonomia", "name": "Autonomía para las actividades básicas", "dataType": "text", "required": false },
-    { "code": "necesidades_identificadas", "name": "Necesidades identificadas", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico de enfermería", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Intervenciones de enfermería", "dataType": "text", "required": false }
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de la valoración",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "antecedentes_relevantes",
+      "name": "Antecedentes relevantes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "alergias_referidas",
+      "name": "Alergias referidas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "medicacion_actual",
+      "name": "Medicación actual",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "presion_arterial",
+      "name": "Presión arterial (mmHg)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "temperatura_c",
+      "name": "Temperatura (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "dolor_intensidad_referida",
+      "name": "Intensidad del dolor referida (0 a 10)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "estado_de_conciencia",
+      "name": "Estado de conciencia",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "estado_de_la_piel",
+      "name": "Estado de la piel",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "accesos_vasculares",
+      "name": "Accesos vasculares",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "riesgo_de_caidas",
+      "name": "Riesgo de caídas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "autonomia",
+      "name": "Autonomía para las actividades básicas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "necesidades_identificadas",
+      "name": "Necesidades identificadas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico de enfermería",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Intervenciones de enfermería",
+      "dataType": "text",
+      "required": false
+    }
   ]
 }

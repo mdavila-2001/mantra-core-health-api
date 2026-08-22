@@ -13,22 +13,107 @@
     "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la caracterización del dolor articular y su ritmo, la rigidez matinal en minutos, el detalle de las articulaciones comprometidas y la tumefacción, y el compromiso cutáneo asociado."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_enfermedad", "name": "Tiempo de enfermedad", "dataType": "string", "required": true },
-    { "code": "dolor_articular", "name": "Dolor articular (descripción)", "dataType": "text", "required": false },
-    { "code": "ritmo_del_dolor", "name": "Ritmo del dolor (inflamatorio o mecánico)", "dataType": "string", "required": false },
-    { "code": "rigidez_matinal_minutos", "name": "Rigidez matinal (minutos)", "dataType": "integer", "required": false },
-    { "code": "articulaciones_comprometidas", "name": "Articulaciones comprometidas", "dataType": "text", "required": true },
-    { "code": "patron_de_compromiso", "name": "Patrón de compromiso (simétrico, asimétrico, axial)", "dataType": "string", "required": false },
-    { "code": "tumefaccion_articular", "name": "Tumefacción articular", "dataType": "text", "required": false },
-    { "code": "limitacion_funcional", "name": "Limitación funcional referida", "dataType": "text", "required": false },
-    { "code": "compromiso_cutaneo", "name": "Compromiso cutáneo", "dataType": "text", "required": false },
-    { "code": "sintomas_sistemicos", "name": "Síntomas sistémicos asociados", "dataType": "text", "required": false },
-    { "code": "antecedentes_familiares_reumatologicos", "name": "Antecedentes familiares reumatológicos", "dataType": "text", "required": false },
-    { "code": "tratamientos_previos", "name": "Tratamientos previos recibidos", "dataType": "text", "required": false },
-    { "code": "examen_osteoarticular", "name": "Examen osteoarticular", "dataType": "text", "required": true },
-    { "code": "examenes_previos", "name": "Exámenes previos revisados", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento", "dataType": "text", "required": false }
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_de_enfermedad",
+      "name": "Tiempo de enfermedad",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "dolor_articular",
+      "name": "Dolor articular (descripción)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "ritmo_del_dolor",
+      "name": "Ritmo del dolor (inflamatorio o mecánico)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "rigidez_matinal_minutos",
+      "name": "Rigidez matinal (minutos)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "articulaciones_comprometidas",
+      "name": "Articulaciones comprometidas",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "patron_de_compromiso",
+      "name": "Patrón de compromiso (simétrico, asimétrico, axial)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "tumefaccion_articular",
+      "name": "Tumefacción articular",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "limitacion_funcional",
+      "name": "Limitación funcional referida",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "compromiso_cutaneo",
+      "name": "Compromiso cutáneo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "sintomas_sistemicos",
+      "name": "Síntomas sistémicos asociados",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "antecedentes_familiares_reumatologicos",
+      "name": "Antecedentes familiares reumatológicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "tratamientos_previos",
+      "name": "Tratamientos previos recibidos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_osteoarticular",
+      "name": "Examen osteoarticular",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "examenes_previos",
+      "name": "Exámenes previos revisados",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "plan_de_tratamiento",
+      "name": "Plan de tratamiento",
+      "dataType": "text",
+      "required": false
+    }
   ]
 }

@@ -13,23 +13,113 @@
     "note": "De la norma se transcriben la estructura común (motivo, antecedentes, examen, diagnóstico y conducta) y los campos del registro prenatal: fecha de última menstruación, edad gestacional, fórmula obstétrica, altura uterina, latidos fetales y presión arterial. Son agregados propios de la especialidad los movimientos fetales referidos, la presencia de edemas, las molestias referidas y el registro de controles previos. Los valores se anotan tal como se miden: la ficha no calcula fechas probables ni interpreta resultados."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "fecha_ultima_menstruacion", "name": "Fecha de última menstruación", "dataType": "date", "required": false },
-    { "code": "edad_gestacional_semanas", "name": "Edad gestacional (semanas)", "dataType": "integer", "required": true },
-    { "code": "gestas", "name": "Gestas", "dataType": "integer", "required": false },
-    { "code": "partos", "name": "Partos", "dataType": "integer", "required": false },
-    { "code": "cesareas", "name": "Cesáreas", "dataType": "integer", "required": false },
-    { "code": "abortos", "name": "Abortos", "dataType": "integer", "required": false },
-    { "code": "antecedentes_relevantes", "name": "Antecedentes relevantes", "dataType": "text", "required": false },
-    { "code": "controles_previos", "name": "Controles prenatales previos", "dataType": "text", "required": false },
-    { "code": "peso_kg", "name": "Peso (kg)", "dataType": "decimal", "required": false },
-    { "code": "presion_arterial", "name": "Presión arterial (mmHg)", "dataType": "string", "required": true },
-    { "code": "altura_uterina_cm", "name": "Altura uterina (cm)", "dataType": "decimal", "required": false },
-    { "code": "latidos_fetales", "name": "Latidos fetales (lpm)", "dataType": "integer", "required": false },
-    { "code": "movimientos_fetales", "name": "Movimientos fetales referidos", "dataType": "boolean", "required": false },
-    { "code": "edemas", "name": "Edemas", "dataType": "text", "required": false },
-    { "code": "molestias_referidas", "name": "Molestias referidas", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "fecha_ultima_menstruacion",
+      "name": "Fecha de última menstruación",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "code": "edad_gestacional_semanas",
+      "name": "Edad gestacional (semanas)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "gestas",
+      "name": "Gestas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "partos",
+      "name": "Partos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "cesareas",
+      "name": "Cesáreas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "abortos",
+      "name": "Abortos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "antecedentes_relevantes",
+      "name": "Antecedentes relevantes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "controles_previos",
+      "name": "Controles prenatales previos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "presion_arterial",
+      "name": "Presión arterial (mmHg)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "altura_uterina_cm",
+      "name": "Altura uterina (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "latidos_fetales",
+      "name": "Latidos fetales (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "movimientos_fetales",
+      "name": "Movimientos fetales referidos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "edemas",
+      "name": "Edemas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "molestias_referidas",
+      "name": "Molestias referidas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
   ]
 }

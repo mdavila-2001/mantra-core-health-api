@@ -13,23 +13,113 @@
     "note": "De la norma se transcribe la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, medicación, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad los ítems del síndrome anémico, los sangrados, las adenopatías con su localización, la esplenomegalia y las transfusiones previas."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": false },
-    { "code": "astenia", "name": "Astenia", "dataType": "boolean", "required": false },
-    { "code": "palidez", "name": "Palidez", "dataType": "boolean", "required": false },
-    { "code": "fiebre", "name": "Fiebre", "dataType": "boolean", "required": false },
-    { "code": "sangrados", "name": "Sangrados (descripción y localización)", "dataType": "text", "required": false },
-    { "code": "transfusiones_previas", "name": "Transfusiones previas", "dataType": "boolean", "required": false },
-    { "code": "detalle_de_transfusiones_previas", "name": "Detalle de las transfusiones previas", "dataType": "text", "required": false },
-    { "code": "medicacion_actual", "name": "Medicación actual", "dataType": "text", "required": false },
-    { "code": "antecedentes_familiares_hematologicos", "name": "Antecedentes familiares hematológicos", "dataType": "text", "required": false },
-    { "code": "adenopatias", "name": "Adenopatías", "dataType": "boolean", "required": false },
-    { "code": "localizacion_de_las_adenopatias", "name": "Localización de las adenopatías", "dataType": "string", "required": false },
-    { "code": "esplenomegalia", "name": "Esplenomegalia", "dataType": "boolean", "required": false },
-    { "code": "hepatomegalia", "name": "Hepatomegalia", "dataType": "boolean", "required": false },
-    { "code": "examen_fisico", "name": "Examen físico", "dataType": "text", "required": true },
-    { "code": "estudios_de_laboratorio_recientes", "name": "Estudios de laboratorio recientes", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "astenia",
+      "name": "Astenia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "palidez",
+      "name": "Palidez",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "sangrados",
+      "name": "Sangrados (descripción y localización)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "transfusiones_previas",
+      "name": "Transfusiones previas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "detalle_de_transfusiones_previas",
+      "name": "Detalle de las transfusiones previas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "medicacion_actual",
+      "name": "Medicación actual",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "antecedentes_familiares_hematologicos",
+      "name": "Antecedentes familiares hematológicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "adenopatias",
+      "name": "Adenopatías",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "localizacion_de_las_adenopatias",
+      "name": "Localización de las adenopatías",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "esplenomegalia",
+      "name": "Esplenomegalia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "hepatomegalia",
+      "name": "Hepatomegalia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "examen_fisico",
+      "name": "Examen físico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "estudios_de_laboratorio_recientes",
+      "name": "Estudios de laboratorio recientes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
   ]
 }

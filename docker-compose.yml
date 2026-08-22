@@ -111,6 +111,10 @@ x-app-env: &app-env
   # comportamiento que debe tener un compose que alguien copie sin leer.
   BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
   BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+  # Cuentas de demostración de los socios comerciales (farmacia, laboratorio,
+  # imagen, aseguradora). Sin esta variable el seed no crea ninguna.
+  SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
+  SEED_DEMO_ALLOW_PRODUCTION: ${SEED_DEMO_ALLOW_PRODUCTION:-}
   BOOTSTRAP_ADMIN_ALLOW_PRODUCTION: ${BOOTSTRAP_ADMIN_ALLOW_PRODUCTION:-false}
   # Entrega del refresh token como cookie httpOnly. Apagado por defecto: cambia
   # el contrato del cliente (deja de venir en el cuerpo) y exige la allowlist de

@@ -13,23 +13,113 @@
     "note": "De la norma salen la estructura común de la consulta y el apartado de examen del sistema nervioso: motivo, tiempo de evolución, antecedentes, examen, diagnóstico y conducta. Son agregados propios de la especialidad el desglose del examen neurológico en campos separados (estado de conciencia, pares craneales, fuerza muscular, sensibilidad, reflejos, coordinación y marcha) y la anamnesis dirigida de cefalea y episodios convulsivos."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
-    { "code": "enfermedad_actual", "name": "Relato de la enfermedad actual", "dataType": "text", "required": true },
-    { "code": "antecedentes_neurologicos", "name": "Antecedentes neurológicos personales y familiares", "dataType": "text", "required": false },
-    { "code": "cefalea", "name": "Cefalea (presencia)", "dataType": "boolean", "required": false },
-    { "code": "caracteristicas_cefalea", "name": "Características de la cefalea (localización, tipo, irradiación, factores)", "dataType": "text", "required": false },
-    { "code": "convulsiones", "name": "Episodios convulsivos (presencia)", "dataType": "boolean", "required": false },
-    { "code": "descripcion_convulsiones", "name": "Descripción de los episodios convulsivos", "dataType": "text", "required": false },
-    { "code": "mareo_o_vertigo", "name": "Mareo o vértigo", "dataType": "boolean", "required": false },
-    { "code": "estado_de_conciencia", "name": "Estado de conciencia y orientación", "dataType": "text", "required": true },
-    { "code": "lenguaje", "name": "Lenguaje y habla", "dataType": "text", "required": false },
-    { "code": "pares_craneales", "name": "Examen de pares craneales", "dataType": "text", "required": false },
-    { "code": "fuerza_muscular", "name": "Fuerza muscular por segmentos", "dataType": "text", "required": false },
-    { "code": "sensibilidad", "name": "Sensibilidad superficial y profunda", "dataType": "text", "required": false },
-    { "code": "reflejos_osteotendinosos", "name": "Reflejos osteotendinosos", "dataType": "text", "required": false },
-    { "code": "coordinacion_y_marcha", "name": "Coordinación, equilibrio y marcha", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "enfermedad_actual",
+      "name": "Relato de la enfermedad actual",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "antecedentes_neurologicos",
+      "name": "Antecedentes neurológicos personales y familiares",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "cefalea",
+      "name": "Cefalea (presencia)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "caracteristicas_cefalea",
+      "name": "Características de la cefalea (localización, tipo, irradiación, factores)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "convulsiones",
+      "name": "Episodios convulsivos (presencia)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "descripcion_convulsiones",
+      "name": "Descripción de los episodios convulsivos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "mareo_o_vertigo",
+      "name": "Mareo o vértigo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "estado_de_conciencia",
+      "name": "Estado de conciencia y orientación",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "lenguaje",
+      "name": "Lenguaje y habla",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "pares_craneales",
+      "name": "Examen de pares craneales",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "fuerza_muscular",
+      "name": "Fuerza muscular por segmentos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "sensibilidad",
+      "name": "Sensibilidad superficial y profunda",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "reflejos_osteotendinosos",
+      "name": "Reflejos osteotendinosos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "coordinacion_y_marcha",
+      "name": "Coordinación, equilibrio y marcha",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
   ]
 }
