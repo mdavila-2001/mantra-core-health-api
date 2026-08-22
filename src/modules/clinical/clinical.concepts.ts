@@ -852,4 +852,355 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'F41.1',
       display: 'Trastorno de ansiedad generalizada',
     },
+
+    /* --- CIE-10 ambulatorio ampliado -----------------------------------------
+       Los doce de arriba eran un mínimo para poder ejercitar el diagnóstico. En
+       pantalla se veía lo que eran: un desplegable con doce entradas donde un
+       médico no encuentra lo que busca y termina eligiendo lo más parecido, que
+       es peor que no tener catálogo.
+
+       Éstos llevan la lista a la consulta real: los motivos más frecuentes de
+       la atención ambulatoria y de urgencias en Bolivia, por aparato, más los
+       síntomas y signos (R) para lo que se registra antes de tener diagnóstico,
+       y los motivos de contacto sin enfermedad (Z) —control sano, vacunación,
+       certificado— que son consulta pura y no caben en ninguna otra letra.
+
+       Siguen siendo CIE-10 reales de la OMS, por lo mismo que los doce
+       primeros: el día que se cargue la clasificación completa, esto es un
+       subconjunto suyo y no un renombrado. */
+
+    // infecciosas y parasitarias
+    CONDITION_DIARREA_INFECCIOSA: {
+      code: 'A09',
+      display: 'Diarrea y gastroenteritis de presunto origen infeccioso',
+    },
+    CONDITION_FIEBRE_TIFOIDEA: { code: 'A01.0', display: 'Fiebre tifoidea' },
+    CONDITION_AMEBIASIS: {
+      code: 'A06.0',
+      display: 'Amebiasis intestinal aguda',
+    },
+    CONDITION_TUBERCULOSIS_PULMONAR: {
+      code: 'A15.0',
+      display: 'Tuberculosis pulmonar',
+    },
+    CONDITION_CHAGAS_CRONICA: {
+      code: 'B57.2',
+      display: 'Enfermedad de Chagas crónica con compromiso cardíaco',
+    },
+    CONDITION_DENGUE: { code: 'A90', display: 'Dengue clásico' },
+    CONDITION_VARICELA: { code: 'B01.9', display: 'Varicela' },
+    CONDITION_HERPES_ZOSTER: { code: 'B02.9', display: 'Herpes zóster' },
+    CONDITION_CANDIDIASIS: { code: 'B37.9', display: 'Candidiasis' },
+    CONDITION_MICOSIS_SUPERFICIAL: { code: 'B35.9', display: 'Dermatofitosis' },
+    CONDITION_PARASITOSIS_INTESTINAL: {
+      code: 'B82.9',
+      display: 'Parasitosis intestinal',
+    },
+    CONDITION_VIH: {
+      code: 'B24',
+      display: 'Enfermedad por VIH sin otra especificación',
+    },
+
+    // sangre
+    CONDITION_ANEMIA_NO_ESPECIFICADA: {
+      code: 'D64.9',
+      display: 'Anemia no especificada',
+    },
+    CONDITION_TROMBOCITOPENIA: {
+      code: 'D69.6',
+      display: 'Trombocitopenia no especificada',
+    },
+
+    // endocrinas, nutricionales y metabólicas
+    CONDITION_DIABETES_TIPO_1: {
+      code: 'E10.9',
+      display: 'Diabetes mellitus tipo 1',
+    },
+    CONDITION_DIABETES_GESTACIONAL: {
+      code: 'O24.4',
+      display: 'Diabetes mellitus del embarazo',
+    },
+    CONDITION_HIPERTIROIDISMO: { code: 'E05.9', display: 'Hipertiroidismo' },
+    CONDITION_BOCIO: { code: 'E04.9', display: 'Bocio no tóxico' },
+    CONDITION_OBESIDAD: { code: 'E66.9', display: 'Obesidad' },
+    CONDITION_SOBREPESO: { code: 'E66.3', display: 'Sobrepeso' },
+    CONDITION_DISLIPIDEMIA: {
+      code: 'E78.5',
+      display: 'Hiperlipidemia no especificada',
+    },
+    CONDITION_HIPERCOLESTEROLEMIA: {
+      code: 'E78.0',
+      display: 'Hipercolesterolemia pura',
+    },
+    CONDITION_DESNUTRICION: {
+      code: 'E46',
+      display: 'Desnutrición proteico-calórica no especificada',
+    },
+    CONDITION_DEFICIENCIA_VITAMINA_D: {
+      code: 'E55.9',
+      display: 'Deficiencia de vitamina D',
+    },
+    CONDITION_HIPERURICEMIA: {
+      code: 'E79.0',
+      display: 'Hiperuricemia sin signos de artritis inflamatoria',
+    },
+    CONDITION_SINDROME_METABOLICO: {
+      code: 'E88.81',
+      display: 'Síndrome metabólico',
+    },
+
+    // mentales y del comportamiento
+    CONDITION_DEPRESION: { code: 'F32.9', display: 'Episodio depresivo' },
+    CONDITION_TRASTORNO_SUENO: {
+      code: 'F51.0',
+      display: 'Insomnio no orgánico',
+    },
+    CONDITION_TRASTORNO_PANICO: {
+      code: 'F41.0',
+      display: 'Trastorno de pánico',
+    },
+    CONDITION_DEMENCIA: { code: 'F03', display: 'Demencia no especificada' },
+    CONDITION_TDAH: { code: 'F90.9', display: 'Trastorno hipercinético' },
+    CONDITION_DEPENDENCIA_ALCOHOL: {
+      code: 'F10.2',
+      display: 'Dependencia del alcohol',
+    },
+    CONDITION_DEPENDENCIA_TABACO: {
+      code: 'F17.2',
+      display: 'Dependencia del tabaco',
+    },
+
+    // sistema nervioso
+    CONDITION_CEFALEA_TENSIONAL: {
+      code: 'G44.2',
+      display: 'Cefalea tensional',
+    },
+    CONDITION_EPILEPSIA: { code: 'G40.9', display: 'Epilepsia' },
+    CONDITION_NEUROPATIA_DIABETICA: {
+      code: 'G63.2',
+      display: 'Polineuropatía diabética',
+    },
+    CONDITION_PARKINSON: { code: 'G20', display: 'Enfermedad de Parkinson' },
+    CONDITION_VERTIGO: {
+      code: 'H81.1',
+      display: 'Vértigo paroxístico benigno',
+    },
+    CONDITION_SINDROME_TUNEL_CARPIANO: {
+      code: 'G56.0',
+      display: 'Síndrome del túnel carpiano',
+    },
+    CONDITION_CIATICA: { code: 'M54.3', display: 'Ciática' },
+
+    // ojo y oído
+    CONDITION_CONJUNTIVITIS: { code: 'H10.9', display: 'Conjuntivitis' },
+    CONDITION_CATARATA: { code: 'H25.9', display: 'Catarata senil' },
+    CONDITION_GLAUCOMA: { code: 'H40.9', display: 'Glaucoma' },
+    CONDITION_MIOPIA: { code: 'H52.1', display: 'Miopía' },
+    CONDITION_OTITIS_MEDIA: { code: 'H66.9', display: 'Otitis media' },
+    CONDITION_HIPOACUSIA: { code: 'H91.9', display: 'Hipoacusia' },
+
+    // circulatorio
+    CONDITION_INSUFICIENCIA_CARDIACA: {
+      code: 'I50.9',
+      display: 'Insuficiencia cardíaca',
+    },
+    CONDITION_FIBRILACION_AURICULAR: {
+      code: 'I48',
+      display: 'Fibrilación auricular',
+    },
+    CONDITION_CARDIOPATIA_ISQUEMICA: {
+      code: 'I25.9',
+      display: 'Cardiopatía isquémica crónica',
+    },
+    CONDITION_INFARTO_AGUDO_MIOCARDIO: {
+      code: 'I21.9',
+      display: 'Infarto agudo de miocardio',
+    },
+    CONDITION_ANGINA: { code: 'I20.9', display: 'Angina de pecho' },
+    CONDITION_ACV: { code: 'I64', display: 'Accidente cerebrovascular agudo' },
+    CONDITION_VARICES: {
+      code: 'I83.9',
+      display: 'Várices de miembros inferiores',
+    },
+    CONDITION_TROMBOSIS_VENOSA: {
+      code: 'I80.2',
+      display: 'Trombosis venosa profunda',
+    },
+    CONDITION_HIPOTENSION: { code: 'I95.9', display: 'Hipotensión' },
+
+    // respiratorio
+    CONDITION_FARINGITIS: { code: 'J02.9', display: 'Faringitis aguda' },
+    CONDITION_AMIGDALITIS: { code: 'J03.9', display: 'Amigdalitis aguda' },
+    CONDITION_SINUSITIS: { code: 'J01.9', display: 'Sinusitis aguda' },
+    CONDITION_BRONQUITIS_AGUDA: { code: 'J20.9', display: 'Bronquitis aguda' },
+    CONDITION_NEUMONIA: { code: 'J18.9', display: 'Neumonía' },
+    CONDITION_EPOC: {
+      code: 'J44.9',
+      display: 'Enfermedad pulmonar obstructiva crónica',
+    },
+    CONDITION_RINITIS_ALERGICA: { code: 'J30.4', display: 'Rinitis alérgica' },
+    CONDITION_INFLUENZA: {
+      code: 'J11.1',
+      display: 'Influenza con manifestaciones respiratorias',
+    },
+    CONDITION_COVID19: {
+      code: 'U07.1',
+      display: 'COVID-19 confirmado por laboratorio',
+    },
+
+    // digestivo
+    CONDITION_ERGE: {
+      code: 'K21.9',
+      display: 'Enfermedad por reflujo gastroesofágico',
+    },
+    CONDITION_ULCERA_PEPTICA: { code: 'K27.9', display: 'Úlcera péptica' },
+    CONDITION_SINDROME_INTESTINO_IRRITABLE: {
+      code: 'K58.9',
+      display: 'Síndrome del intestino irritable',
+    },
+    CONDITION_ESTRENIMIENTO: { code: 'K59.0', display: 'Estreñimiento' },
+    CONDITION_HEMORROIDES: { code: 'K64.9', display: 'Hemorroides' },
+    CONDITION_COLELITIASIS: {
+      code: 'K80.2',
+      display: 'Colelitiasis sin colecistitis',
+    },
+    CONDITION_APENDICITIS: { code: 'K35.8', display: 'Apendicitis aguda' },
+    CONDITION_HERNIA_INGUINAL: { code: 'K40.9', display: 'Hernia inguinal' },
+    CONDITION_HIGADO_GRASO: { code: 'K76.0', display: 'Esteatosis hepática' },
+    CONDITION_PANCREATITIS: { code: 'K85.9', display: 'Pancreatitis aguda' },
+    CONDITION_CARIES: { code: 'K02.9', display: 'Caries dental' },
+    CONDITION_GINGIVITIS: { code: 'K05.1', display: 'Gingivitis crónica' },
+    CONDITION_PERIODONTITIS: {
+      code: 'K05.3',
+      display: 'Periodontitis crónica',
+    },
+
+    // piel
+    CONDITION_ACNE: { code: 'L70.0', display: 'Acné vulgar' },
+    CONDITION_PSORIASIS: { code: 'L40.9', display: 'Psoriasis' },
+    CONDITION_URTICARIA: { code: 'L50.9', display: 'Urticaria' },
+    CONDITION_CELULITIS: { code: 'L03.9', display: 'Celulitis' },
+    CONDITION_DERMATITIS_CONTACTO: {
+      code: 'L23.9',
+      display: 'Dermatitis alérgica de contacto',
+    },
+    CONDITION_ALOPECIA: { code: 'L65.9', display: 'Alopecia no cicatricial' },
+
+    // musculoesquelético
+    CONDITION_ARTROSIS_RODILLA: { code: 'M17.9', display: 'Gonartrosis' },
+    CONDITION_ARTROSIS_CADERA: { code: 'M16.9', display: 'Coxartrosis' },
+    CONDITION_ARTRITIS_REUMATOIDE: {
+      code: 'M06.9',
+      display: 'Artritis reumatoide',
+    },
+    CONDITION_GOTA: { code: 'M10.9', display: 'Gota' },
+    CONDITION_OSTEOPOROSIS: { code: 'M81.9', display: 'Osteoporosis' },
+    CONDITION_CERVICALGIA: { code: 'M54.2', display: 'Cervicalgia' },
+    CONDITION_TENDINITIS_HOMBRO: {
+      code: 'M75.3',
+      display: 'Tendinitis calcificante del hombro',
+    },
+    CONDITION_ESGUINCE_TOBILLO: {
+      code: 'S93.4',
+      display: 'Esguince de tobillo',
+    },
+    CONDITION_FIBROMIALGIA: { code: 'M79.7', display: 'Fibromialgia' },
+    CONDITION_ESCOLIOSIS: { code: 'M41.9', display: 'Escoliosis' },
+
+    // genitourinario
+    CONDITION_ENFERMEDAD_RENAL_CRONICA: {
+      code: 'N18.9',
+      display: 'Enfermedad renal crónica',
+    },
+    CONDITION_LITIASIS_RENAL: { code: 'N20.0', display: 'Cálculo del riñón' },
+    CONDITION_HIPERPLASIA_PROSTATICA: {
+      code: 'N40',
+      display: 'Hiperplasia prostática benigna',
+    },
+    CONDITION_VAGINITIS: { code: 'N76.0', display: 'Vaginitis aguda' },
+    CONDITION_MIOMA_UTERINO: { code: 'D25.9', display: 'Leiomioma del útero' },
+    CONDITION_DISMENORREA: { code: 'N94.6', display: 'Dismenorrea' },
+    CONDITION_MENOPAUSIA: { code: 'N95.1', display: 'Estado menopáusico' },
+    CONDITION_INFERTILIDAD: { code: 'N97.9', display: 'Infertilidad femenina' },
+
+    // embarazo, parto y puerperio
+    CONDITION_EMBARAZO_NORMAL: {
+      code: 'Z34.9',
+      display: 'Supervisión de embarazo normal',
+    },
+    CONDITION_PREECLAMPSIA: { code: 'O14.9', display: 'Preeclampsia' },
+    CONDITION_AMENAZA_ABORTO: { code: 'O20.0', display: 'Amenaza de aborto' },
+    CONDITION_ANEMIA_EMBARAZO: {
+      code: 'O99.0',
+      display: 'Anemia que complica el embarazo',
+    },
+
+    // perinatal y pediatría
+    CONDITION_ICTERICIA_NEONATAL: {
+      code: 'P59.9',
+      display: 'Ictericia neonatal',
+    },
+    CONDITION_BAJO_PESO_NACER: { code: 'P07.1', display: 'Bajo peso al nacer' },
+    CONDITION_BRONQUIOLITIS: { code: 'J21.9', display: 'Bronquiolitis aguda' },
+    CONDITION_OTITIS_EXTERNA: { code: 'H60.9', display: 'Otitis externa' },
+
+    // síntomas y signos
+    CONDITION_FIEBRE: { code: 'R50.9', display: 'Fiebre no especificada' },
+    CONDITION_DOLOR_ABDOMINAL: { code: 'R10.4', display: 'Dolor abdominal' },
+    CONDITION_DOLOR_TORACICO: { code: 'R07.4', display: 'Dolor torácico' },
+    CONDITION_DISNEA: { code: 'R06.0', display: 'Disnea' },
+    CONDITION_TOS: { code: 'R05', display: 'Tos' },
+    CONDITION_MAREO: { code: 'R42', display: 'Mareo y desvanecimiento' },
+    CONDITION_ASTENIA: { code: 'R53', display: 'Malestar y fatiga' },
+    CONDITION_EDEMA: { code: 'R60.9', display: 'Edema' },
+    CONDITION_PERDIDA_PESO: {
+      code: 'R63.4',
+      display: 'Pérdida anormal de peso',
+    },
+    CONDITION_SINCOPE: { code: 'R55', display: 'Síncope y colapso' },
+    CONDITION_PALPITACIONES: { code: 'R00.2', display: 'Palpitaciones' },
+
+    // lesiones
+    CONDITION_FRACTURA_ANTEBRAZO: {
+      code: 'S52.9',
+      display: 'Fractura del antebrazo',
+    },
+    CONDITION_HERIDA_CORTANTE: {
+      code: 'T14.1',
+      display: 'Herida abierta de región no especificada',
+    },
+    CONDITION_QUEMADURA: {
+      code: 'T30.0',
+      display: 'Quemadura de región no especificada',
+    },
+    CONDITION_CONTUSION: {
+      code: 'T14.0',
+      display: 'Contusión de región no especificada',
+    },
+    CONDITION_TRAUMATISMO_CRANEAL: {
+      code: 'S06.9',
+      display: 'Traumatismo intracraneal',
+    },
+
+    // motivos de contacto sin enfermedad
+    CONDITION_CONTROL_SALUD: {
+      code: 'Z00.0',
+      display: 'Examen médico general',
+    },
+    CONDITION_VACUNACION: {
+      code: 'Z23',
+      display: 'Contacto para inmunización',
+    },
+    CONDITION_ANTICONCEPCION: {
+      code: 'Z30.9',
+      display: 'Atención para la anticoncepción',
+    },
+    CONDITION_CERTIFICADO_MEDICO: {
+      code: 'Z02.7',
+      display: 'Emisión de certificado médico',
+    },
+    CONDITION_CONTROL_NINO_SANO: {
+      code: 'Z00.1',
+      display: 'Control de salud de rutina del niño',
+    },
   });
