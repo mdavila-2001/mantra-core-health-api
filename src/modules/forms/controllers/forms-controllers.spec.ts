@@ -161,7 +161,10 @@ describe('FormsAssignmentsController', () => {
    */
   function build() {
     const assignmentsService = { createAssignment: mockFn() };
-    const readService = { listAssignments: mockFn() };
+    const readService = {
+      listAssignments: mockFn(),
+      getExtensionBudget: mockFn(),
+    };
     return {
       controller: new FormsAssignmentsController(
         assignmentsService as any,
@@ -189,6 +192,36 @@ describe('FormsAssignmentsController', () => {
       { targetResourceConceptId: 'rt', fieldId: 'f1', sectionId: undefined },
       undefined,
       50,
+    );
+  });
+
+  it('delegates getBudget with the tenant of the context', async () => {
+    const d = build();
+    await d.controller.getBudget('rt');
+    expect(d.readService.getExtensionBudget).toHaveBeenCalledWith(
+      'rt',
+      undefined,
+    );
+  });
+
+  it('deja asignar a quien atiende, no sólo a quien administra', () => {
+    // El generador de formularios vive de esto: un doctor podía declarar un
+    // campo y no colgarlo de ningún sitio. Los límites de tenant y política los
+    // aplica el servicio; acá se comprueba que la puerta del rol esté abierta,
+    // que es lo que se cerró sin querer si alguien recorta este decorador.
+    const rolesDe = (handler: string): string[] =>
+      Reflect.getMetadata(
+        ROLES_KEY,
+        Object.getOwnPropertyDescriptor(
+          FormsAssignmentsController.prototype,
+          handler,
+        )!.value,
+      ) as string[];
+    expect(rolesDe('createAssignment')).toEqual(
+      expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
+    );
+    expect(rolesDe('getBudget')).toEqual(
+      expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
     );
   });
 });

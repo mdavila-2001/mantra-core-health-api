@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ResourceNotFoundException,
+  getCurrentTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -180,6 +181,8 @@ export class ChartTemplatesService {
           valueSetId: field.valueSetId,
           required: assignment.required,
           ordinal: assignment.ordinal,
+          // Recién creada por un administrador: propia si nació con tenant.
+          own: assignment.tenantId != null,
         });
       }
 
@@ -252,6 +255,7 @@ export class ChartTemplatesService {
     const assignments = await this.templatesRepo.findFieldAssignmentsBySection(
       this.em,
       sectionId,
+      getCurrentTenantId(),
     );
     if (assignments.length === 0) return { fields: [] };
 
@@ -284,6 +288,9 @@ export class ChartTemplatesService {
         valueSetId: field.valueSetId,
         required: assignment.required,
         ordinal: assignment.ordinal,
+        // Los del estándar son globales; los que agregó la organización llevan
+        // su tenant. La consulta ya trajo sólo esos dos grupos.
+        own: assignment.tenantId != null,
       });
     }
 
@@ -305,6 +312,7 @@ export class ChartTemplatesService {
       name: string;
       version: number;
       statusConceptId: string;
+      sectionId?: string;
     },
     schema: ResolvedSchema,
   ): ChartTemplateResponseDto {
@@ -316,6 +324,8 @@ export class ChartTemplatesService {
       name: template.name,
       version: template.version,
       statusConceptId: template.statusConceptId,
+      sectionId: template.sectionId,
+      fieldTargetConceptId: CHART.TEMPLATE_FIELD_TARGET,
       fields: schema.fields,
       provenance: schema.provenance,
     };

@@ -10,7 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ChartTemplatesService } from './chart-templates.service';
 import { CHART } from '../chart.concepts';
 import { FORMS } from '../../forms/forms.concepts';
-import { ResourceNotFoundException } from '../../../common';
+import { ResourceNotFoundException, runWithTenant } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -276,8 +276,31 @@ describe('ChartTemplatesService', () => {
           valueSetId: undefined,
           required: true,
           ordinal: 0,
+          own: false,
         },
       ]);
+    });
+    it('pide a la sección sólo lo global y lo del tenant de la sesión', async () => {
+      // El campo que una organización agrega a la ficha de su especialidad es
+      // suyo. Sin el tenant en la consulta, la sección es compartida y el campo
+      // aparecería en la ficha de cualquier otra.
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl1',
+        specialtyConceptId: 'sp1',
+        code: 'C1',
+        name: 'N1',
+        version: 1,
+        statusConceptId: CHART.TEMPLATE_ACTIVE,
+        sectionId: 'sec1',
+      });
+      d.templatesRepo.findFieldAssignmentsBySection.mockResolvedValue([]);
+
+      await runWithTenant('tenant-a', () => d.service.getTemplate('tpl1'));
+
+      expect(
+        d.templatesRepo.findFieldAssignmentsBySection,
+      ).toHaveBeenCalledWith(d.em, 'sec1', 'tenant-a');
     });
   });
 });

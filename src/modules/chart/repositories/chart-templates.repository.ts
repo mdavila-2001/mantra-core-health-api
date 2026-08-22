@@ -255,10 +255,20 @@ export class ChartTemplatesRepository {
   findFieldAssignmentsBySection(
     em: EntityManager,
     sectionId: string,
+    tenantId: string | undefined,
   ): Promise<FieldAssignments[]> {
     return em.find(
       FieldAssignments,
-      { sectionId },
+      {
+        sectionId,
+        // Los campos de la plantilla estándar son globales (`tenant_id` nulo) y
+        // los ve todo el mundo; los que una organización agrega son suyos y de
+        // nadie más. Sin este filtro, el campo que un consultorio añade a la
+        // ficha de su especialidad aparecería en la ficha del consultorio de
+        // enfrente — que es exactamente lo que deja de ser hipotético desde que
+        // `POST /forms/assignments` acepta a quien atiende.
+        $or: [{ tenantId: null }, { tenantId: tenantId ?? null }],
+      },
       { orderBy: { ordinal: 'ASC' } },
     );
   }

@@ -9,7 +9,9 @@ import { SpecialtyChartTemplates } from '../../modules/chart/entities';
 import {
   DynamicFieldDefinitions,
   DynamicFieldSections,
+  ExtensionTargetPolicies,
   FieldAssignments,
+  FieldDefinitionSets,
 } from '../../modules/forms/entities';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { FORMS } from '../../modules/forms/forms.concepts';
@@ -44,6 +46,20 @@ const VALUE_SET_ESPECIALIDADES = 'VS_MEDICAL_SPECIALTY';
  * especialidad, y el selector del bloque clínico los deja siempre a mano.
  */
 export const CODIGO_TRANSVERSAL = 'TRANSVERSAL';
+
+/**
+ * Cuántos campos propios puede colgar una organización de una plantilla estándar.
+ *
+ * Doce son tres páginas del motor de formularios sobre el formulario estándar,
+ * que ya trae las suyas. Es un techo de gobernanza, no una restricción técnica:
+ * existe para que la ficha de una especialidad no se convierta en un
+ * cuestionario de cincuenta preguntas por acumulación, y para que exista un
+ * número que el generador pueda mostrar antes de que alguien escriba nada.
+ *
+ * Se puede subir por organización escribiendo una `extension_target_policies`
+ * con su `tenant_id`: la escritura prefiere la del tenant sobre esta global.
+ */
+export const MAX_CAMPOS_PROPIOS_POR_PLANTILLA = 12;
 
 /**
  * Siembra el **contenido** del catálogo de formularios clínicos: la versión
@@ -132,9 +148,18 @@ export class ClinicalFormsSeedService {
     const specialties = await this.seedSpecialties(em, delModelo, now);
     const reasignadas = await this.reapuntarAlModelo(em, delModelo);
 
+    const politica = await this.seedExtensionPolicy(em, now);
+
     let templates = 0;
     for (const form of STANDARD_FORMS) {
       templates += await this.seedForm(em, form, delModelo, now);
+    }
+
+    if (politica) {
+      this.logger.info(
+        { maximumFields: MAX_CAMPOS_PROPIOS_POR_PLANTILLA },
+        'Política de extensión de plantillas de chart materializada',
+      );
     }
 
     if (templates > 0 || specialties > 0 || reasignadas > 0) {
@@ -255,6 +280,72 @@ export class ClinicalFormsSeedService {
       );
     }
     return reasignadas;
+  }
+
+  /**
+   * La política que permite a una organización extender las plantillas de chart.
+   *
+   * Sin una política activa, `POST /forms/assignments` le niega el campo a quien
+   * atiende —«sin presupuesto» no es «presupuesto infinito»—, así que el
+   * generador de formularios no funcionaría en una base recién sembrada. Es
+   * global (`tenant_id` nulo): rige para toda organización que no haya negociado
+   * la suya.
+   *
+   * `definition_set_id` es NOT NULL y las plantillas de chart no nacen de un set
+   * de definiciones, así que se siembra uno que representa exactamente esto —el
+   * gobierno de las extensiones del target— y no se le cuelga ningún campo.
+   *
+   * @param em - Contexto de persistencia.
+   * @param now - Instante de la corrida.
+   * @returns true si se creó en esta corrida.
+   */
+  private async seedExtensionPolicy(
+    em: EntityManager,
+    now: Date,
+  ): Promise<boolean> {
+    const policyId = deterministicId(
+      `${ORIGIN}:extension-policy:chart-template`,
+    );
+    if (await em.findOne(ExtensionTargetPolicies, { id: policyId })) {
+      return false;
+    }
+
+    const setId = deterministicId(`${ORIGIN}:definition-set:chart-template`);
+    if (!(await em.findOne(FieldDefinitionSets, { id: setId }))) {
+      em.create(
+        FieldDefinitionSets,
+        {
+          id: setId,
+          namespaceUri: 'urn:alovida:forms:chart-template-extensions',
+          code: 'CHART_TEMPLATE_EXTENSIONS',
+          name: 'Extensiones de plantillas de chart',
+          targetDomainConceptId: FORMS.TARGET_DOMAIN_GENERIC,
+          statusConceptId: FORMS.SET_STATUS_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      await em.flush();
+    }
+
+    em.create(
+      ExtensionTargetPolicies,
+      {
+        id: policyId,
+        targetResourceConceptId: CHART.TEMPLATE_FIELD_TARGET,
+        definitionSetId: setId,
+        allowTenantFields: true,
+        allowVendorFields: false,
+        maximumFields: MAX_CAMPOS_PROPIOS_POR_PLANTILLA,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    await em.flush();
+    return true;
   }
 
   /**

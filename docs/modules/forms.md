@@ -29,7 +29,7 @@ gobernadas por política, instancias de formulario, captura/curación de valores
 | UC-09-03 | `POST /forms/definition-sets/:id/versions/:ver/publish` | `SECURITY_ADMIN` | Compone miembros y publica la versión |
 | UC-09-04 | `POST /forms/fields/:id/dependencies` | autenticado | Define dependencia condicional entre campos |
 | UC-09-05 | `PUT /forms/fields/:id/localizations/:lang` | autenticado | Upsert de localización i18n (`es`/`en`) |
-| UC-09-06 | `POST /forms/assignments` | `SECURITY_ADMIN` | Asigna campo a target con enforcement de política |
+| UC-09-06 | `POST /forms/assignments` | clínico o `SECURITY_ADMIN` | Asigna campo a target con enforcement de política. Quien atiende, sólo en su tenant y con política que lo permita |
 | UC-09-07 | `POST /forms/instances` | autenticado | Abre instancia de formulario para un recurso |
 | UC-09-08 | `POST /forms/instances/:id/values` | autenticado | Captura valores (value[x] exclusivo) |
 | UC-09-09 | `PATCH /forms/values/:id` | autenticado | Corrige valor con supersede y snapshot inmutable |
@@ -42,6 +42,7 @@ gobernadas por política, instancias de formulario, captura/curación de valores
 | Lectura | `GET /forms/instances?encounter=` | `CLINICIAN`/`PRACTITIONER` | Instancias del encuentro (anclado a su tenant) |
 | Lectura | `GET /forms/instances/:id` | `CLINICIAN`/`PRACTITIONER` | Instancia con valores vigentes, `value[x]` resuelto por tipo |
 | Lectura | `GET /forms/assignments` | clínico o `SECURITY_ADMIN` | Asignaciones activas visibles con secciones resueltas |
+| Lectura | `GET /forms/assignments/budget?targetResourceConceptId=` | clínico o `SECURITY_ADMIN` | Tope, consumo y resto del presupuesto de extensión del tenant |
 
 ## Entidades (schema `forms`)
 

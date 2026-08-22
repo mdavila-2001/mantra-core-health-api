@@ -784,3 +784,51 @@ export class FieldAssignmentListResponseDto {
   })
   truncated!: boolean;
 }
+
+/**
+ * El presupuesto de extensión de un target, visto por un tenant.
+ *
+ * Existe para que la pantalla del generador **no tenga que adivinarlo**. Sin
+ * esto sólo podía ofrecer «Añadir campo» y descubrir el techo cuando el `POST`
+ * volvía con un 412 — que es enterarse tarde y con el trabajo escrito.
+ */
+export class ExtensionBudgetResponseDto {
+  /**
+   * Target sobre el que se consultó el presupuesto.
+   */
+  @ApiProperty({ format: 'uuid' })
+  targetResourceConceptId!: string;
+
+  /**
+   * Valor de allow tenant fields mantenido por la instancia.
+   */
+  @ApiProperty({
+    description:
+      '¿La política deja que la organización cuelgue campos propios? Sin política activa es false',
+  })
+  allowTenantFields!: boolean;
+
+  /**
+   * Tope de campos que declara la política, si declara alguno.
+   */
+  @ApiPropertyOptional({
+    description: 'Tope de la política; ausente significa sin tope declarado',
+    nullable: true,
+  })
+  maximumFields?: number;
+
+  /**
+   * Asignaciones activas que el tenant ya consumió.
+   */
+  @ApiProperty({ description: 'Campos activos que el tenant ya colgó' })
+  used!: number;
+
+  /**
+   * Lo que queda, cuando hay tope.
+   */
+  @ApiPropertyOptional({
+    description: 'Campos que quedan; ausente cuando no hay tope declarado',
+    nullable: true,
+  })
+  remaining?: number;
+}
