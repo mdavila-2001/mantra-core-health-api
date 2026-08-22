@@ -44,6 +44,60 @@ corrida con el `push` posterior al merge.
 Si el equipo necesita CI a toda hora, las salidas son reponer la facturación o mover el runner a
 una máquina que esté siempre prendida.
 
+## El job muere sin marcar ningún paso como fallo — memoria, no código
+
+**Cómo se reconoce:** mirá los pasos del job. Si los últimos aparecen **en blanco** —ni ✓ ni ✗— en
+vez de rojo, y `gh run view --log` contesta `log not found`, el job no falló: **lo mataron**. Un
+check en rojo siempre tiene un paso marcado.
+
+Pasó tres veces el 18/08 (#150, #151 y una corrida de #142), siempre en el mismo lugar: **`Lint
+TypeScript`**, el paso más pesado del job.
+
+**La causa es el presupuesto de memoria de WSL, no el workflow.** Las cuentas:
+
+| | |
+|---|---|
+| RAM del host | 23,3 GiB |
+| `.wslconfig` | **no existe** → WSL2 toma el **50 %** por defecto ≈ **11,6 GiB** |
+| Con quién se comparte | **las dos** distros: `docker-desktop` (la VM de Docker) **y** `Ubuntu` (el runner) |
+| Techo de heap del job | `NODE_OPTIONS=--max-old-space-size=6144` → **6 GiB** para un solo proceso |
+
+O sea: el lint puede pedir 6 GiB dentro de una distro que comparte 11,6 GiB con la VM de Docker
+—que a su vez hospeda los almacenes del propio job **y** el stack de desarrollo si está levantado—.
+Cuando no alcanza, el kernel mata procesos, la distro `Ubuntu` se cae, el runner desaparece a mitad
+del job y sus logs nunca se suben. Exactamente la firma de arriba.
+
+**El `6144` no es el error y no hay que bajarlo a ciegas**: está puesto porque el lint type-aware
+sobre 60 módulos y ~1 185 entidades muere con el heap por defecto (`exit 129`, sin emitir un solo
+diagnóstico). Bajarlo cambia una muerte silenciosa por un `JavaScript heap out of memory` — más
+honesto, pero sigue sin haber check.
+
+### Qué hacer, en orden
+
+1. **Darle a WSL un presupuesto explícito.** Crear `%USERPROFILE%\.wslconfig`:
+
+   ```ini
+   [wsl2]
+   memory=16GB
+   swap=8GB
+   ```
+
+   Deja 7 GiB para Windows y le da aire a las dos distros. **Requiere `wsl --shutdown` para tomar
+   efecto**, que mata el runner y cualquier job en curso: hacerlo con la cola vacía.
+
+2. **No tener el stack de desarrollo completo arriba mientras el runner trabaja.** Un
+   `docker compose up` pelado levanta la API **y sus 17 workers** (~1,5 GiB) más el OpenSearch de
+   dev (~1,3 GiB), y ninguno hace falta para nada de lo que el CI corre. `rebuild_stack.py` levanta
+   **solo la infraestructura** justamente por esto. Son ~2,8 GiB recuperables.
+
+3. **Si aun así se cae**, acotar los workers de Jest en CI (`--maxWorkers=2`): cada worker es un
+   proceso Node que hereda el mismo techo de 6 GiB.
+
+> **Ojo con confundirlo con el otro fallo del mismo día:** el `Conflict. The container name
+> "/minio" is already in use` **sí** era un paso en rojo (exit 125) y se arregló en el workflow. La
+> relación entre los dos es de causa a efecto: los jobs que la memoria mató dejaron el contenedor
+> `minio` huérfano, y ese huérfano después bloqueó a todos los demás.
+
 ## Operación
 
 ```bash
