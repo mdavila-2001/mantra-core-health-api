@@ -120,6 +120,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
       DynamicFieldSections,
       DynamicFieldDefinitions,
       FieldAssignments,
+      AuthzPermissions,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar

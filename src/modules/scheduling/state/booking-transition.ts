@@ -47,6 +47,14 @@ export interface BookingTransitionSnapshot {
    */
   actorKind?: BookingActorKind;
   /**
+   * Qué se le pidió a la persona antes de aceptar, cuando el cambio viene de
+   * `request-info` (carril 11). Ausente en el resto de los cambios.
+   *
+   * Va acá y no en una columna por lo mismo que el motivo: son varios a lo
+   * largo de la vida de una solicitud, y una columna sólo guarda el último.
+   */
+  infoRequested?: BookingInfoRequestKind;
+  /**
    * Minutos de demora informados por el profesional (P8).
    *
    * Sólo lo trae la operación `HISTORY_OP_DELAY`. Vive en el mismo snapshot que
@@ -57,6 +65,10 @@ export interface BookingTransitionSnapshot {
    */
   delayMinutes?: number;
 }
+
+/** Qué le falta a la solicitud cuando el centro pide algo antes de aceptar. */
+export type BookingInfoRequestKind =
+  'DOCUMENTATION' | 'MEDICAL_ORDER' | 'PREPARATION';
 
 /** Desde qué lado del mostrador se hizo el cambio. */
 export type BookingActorKind = 'PATIENT' | 'PROVIDER';
