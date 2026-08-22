@@ -2644,6 +2644,1022 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
         'El profesional decidió que esta nota no se comparta con la persona atendida, aunque el resto de su historia sí.',
     },
   ],
+
+  /* --- CIE-10 ambulatorio ampliado (v4.1.5) ---------------------------------
+     Ciento treinta diagnósticos más. La explicación no es para el médico —que
+     sabe qué es una gonartrosis— sino para el glosario que lee el paciente. */
+  [
+    CLIN.CONDITION_DIARREA_INFECCIOSA,
+    {
+      display: 'Diarrea y gastroenteritis de presunto origen infeccioso',
+      definition:
+        'Deposiciones líquidas frecuentes por una infección del intestino. CIE-10: A09.',
+    },
+  ],
+  [
+    CLIN.CONDITION_FIEBRE_TIFOIDEA,
+    {
+      display: 'Fiebre tifoidea',
+      definition:
+        'Infección intestinal por Salmonella typhi, con fiebre prolongada. CIE-10: A01.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_AMEBIASIS,
+    {
+      display: 'Amebiasis intestinal aguda',
+      definition:
+        'Infección del intestino por amebas, con diarrea que puede tener sangre. CIE-10: A06.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_TUBERCULOSIS_PULMONAR,
+    {
+      display: 'Tuberculosis pulmonar',
+      definition:
+        'Infección del pulmón por el bacilo de Koch, con tos de más de dos semanas. CIE-10: A15.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CHAGAS_CRONICA,
+    {
+      display: 'Enfermedad de Chagas crónica con compromiso cardíaco',
+      definition:
+        'Fase tardía de la infección por Trypanosoma cruzi, cuando afecta al corazón. CIE-10: B57.2.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DENGUE,
+    {
+      display: 'Dengue clásico',
+      definition:
+        'Infección viral transmitida por el mosquito Aedes, con fiebre y dolor de cuerpo. CIE-10: A90.',
+    },
+  ],
+  [
+    CLIN.CONDITION_VARICELA,
+    {
+      display: 'Varicela',
+      definition:
+        'Infección viral con ampollas en la piel que pican, frecuente en la infancia. CIE-10: B01.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HERPES_ZOSTER,
+    {
+      display: 'Herpes zóster',
+      definition:
+        'Reactivación del virus de la varicela, con ampollas dolorosas en una franja de piel. CIE-10: B02.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CANDIDIASIS,
+    {
+      display: 'Candidiasis',
+      definition:
+        'Infección por el hongo Candida, en boca, piel o zona genital. CIE-10: B37.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_MICOSIS_SUPERFICIAL,
+    {
+      display: 'Dermatofitosis',
+      definition:
+        'Infección por hongos en la piel, las uñas o el cuero cabelludo. CIE-10: B35.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_PARASITOSIS_INTESTINAL,
+    {
+      display: 'Parasitosis intestinal',
+      definition: 'Presencia de parásitos en el intestino. CIE-10: B82.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_VIH,
+    {
+      display: 'Enfermedad por VIH sin otra especificación',
+      definition:
+        'Infección por el virus de la inmunodeficiencia humana. CIE-10: B24.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ANEMIA_NO_ESPECIFICADA,
+    {
+      display: 'Anemia no especificada',
+      definition:
+        'Falta de glóbulos rojos o hemoglobina, sin causa aún establecida. CIE-10: D64.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_TROMBOCITOPENIA,
+    {
+      display: 'Trombocitopenia no especificada',
+      definition:
+        'Plaquetas bajas, lo que favorece hematomas y sangrados. CIE-10: D69.6.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DIABETES_TIPO_1,
+    {
+      display: 'Diabetes mellitus tipo 1',
+      definition:
+        'El páncreas deja de producir insulina; requiere insulina de por vida. CIE-10: E10.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DIABETES_GESTACIONAL,
+    {
+      display: 'Diabetes mellitus del embarazo',
+      definition: 'Azúcar alta que aparece durante el embarazo. CIE-10: O24.4.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HIPERTIROIDISMO,
+    {
+      display: 'Hipertiroidismo',
+      definition:
+        'La tiroides trabaja de más: baja de peso, palpitaciones, nerviosismo. CIE-10: E05.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_BOCIO,
+    {
+      display: 'Bocio no tóxico',
+      definition:
+        'Aumento del tamaño de la tiroides sin alteración de su función. CIE-10: E04.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_OBESIDAD,
+    {
+      display: 'Obesidad',
+      definition:
+        'Exceso de grasa corporal que aumenta el riesgo de otras enfermedades. CIE-10: E66.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_SOBREPESO,
+    {
+      display: 'Sobrepeso',
+      definition:
+        'Peso por encima de lo saludable, sin llegar a obesidad. CIE-10: E66.3.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DISLIPIDEMIA,
+    {
+      display: 'Hiperlipidemia no especificada',
+      definition: 'Grasas altas en la sangre. CIE-10: E78.5.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HIPERCOLESTEROLEMIA,
+    {
+      display: 'Hipercolesterolemia pura',
+      definition: 'Colesterol alto en la sangre. CIE-10: E78.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DESNUTRICION,
+    {
+      display: 'Desnutrición proteico-calórica no especificada',
+      definition:
+        'Falta de energía y proteínas para las necesidades del cuerpo. CIE-10: E46.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DEFICIENCIA_VITAMINA_D,
+    {
+      display: 'Deficiencia de vitamina D',
+      definition:
+        'Vitamina D baja, que afecta al hueso y al músculo. CIE-10: E55.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HIPERURICEMIA,
+    {
+      display: 'Hiperuricemia sin signos de artritis inflamatoria',
+      definition: 'Ácido úrico alto sin ataque de gota todavía. CIE-10: E79.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_SINDROME_METABOLICO,
+    {
+      display: 'Síndrome metabólico',
+      definition:
+        'Conjunto de obesidad abdominal, azúcar, presión y grasas altas. CIE-10: E88.81.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DEPRESION,
+    {
+      display: 'Episodio depresivo',
+      definition:
+        'Ánimo bajo y pérdida de interés que duran semanas e interfieren con la vida diaria. CIE-10: F32.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_TRASTORNO_SUENO,
+    {
+      display: 'Insomnio no orgánico',
+      definition:
+        'Dificultad para dormir sin una causa física que lo explique. CIE-10: F51.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_TRASTORNO_PANICO,
+    {
+      display: 'Trastorno de pánico',
+      definition:
+        'Crisis de miedo intenso que aparecen de golpe y sin motivo aparente. CIE-10: F41.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DEMENCIA,
+    {
+      display: 'Demencia no especificada',
+      definition:
+        'Pérdida progresiva de memoria y otras funciones mentales. CIE-10: F03.',
+    },
+  ],
+  [
+    CLIN.CONDITION_TDAH,
+    {
+      display: 'Trastorno hipercinético',
+      definition:
+        'Dificultad sostenida para prestar atención, con inquietud e impulsividad. CIE-10: F90.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DEPENDENCIA_ALCOHOL,
+    {
+      display: 'Dependencia del alcohol',
+      definition:
+        'Consumo de alcohol que la persona ya no logra controlar. CIE-10: F10.2.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DEPENDENCIA_TABACO,
+    {
+      display: 'Dependencia del tabaco',
+      definition: 'Adicción a la nicotina. CIE-10: F17.2.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CEFALEA_TENSIONAL,
+    {
+      display: 'Cefalea tensional',
+      definition:
+        'Dolor de cabeza opresivo, como una banda, ligado a la tensión muscular. CIE-10: G44.2.',
+    },
+  ],
+  [
+    CLIN.CONDITION_EPILEPSIA,
+    {
+      display: 'Epilepsia',
+      definition:
+        'Tendencia a repetir convulsiones por descargas anormales del cerebro. CIE-10: G40.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_NEUROPATIA_DIABETICA,
+    {
+      display: 'Polineuropatía diabética',
+      definition:
+        'Daño de los nervios por la diabetes, con hormigueo o pérdida de sensibilidad. CIE-10: G63.2.',
+    },
+  ],
+  [
+    CLIN.CONDITION_PARKINSON,
+    {
+      display: 'Enfermedad de Parkinson',
+      definition:
+        'Enfermedad del cerebro con temblor, rigidez y lentitud de movimientos. CIE-10: G20.',
+    },
+  ],
+  [
+    CLIN.CONDITION_VERTIGO,
+    {
+      display: 'Vértigo paroxístico benigno',
+      definition:
+        'Sensación de giro al mover la cabeza, por un problema del oído interno. CIE-10: H81.1.',
+    },
+  ],
+  [
+    CLIN.CONDITION_SINDROME_TUNEL_CARPIANO,
+    {
+      display: 'Síndrome del túnel carpiano',
+      definition:
+        'Compresión de un nervio en la muñeca, con hormigueo en la mano. CIE-10: G56.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CIATICA,
+    {
+      display: 'Ciática',
+      definition:
+        'Dolor que baja por la pierna desde la espalda, por compresión del nervio ciático. CIE-10: M54.3.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CONJUNTIVITIS,
+    {
+      display: 'Conjuntivitis',
+      definition:
+        'Inflamación de la membrana que cubre el ojo: enrojecimiento y secreción. CIE-10: H10.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CATARATA,
+    {
+      display: 'Catarata senil',
+      definition:
+        'El cristalino del ojo se vuelve opaco con la edad y la visión se nubla. CIE-10: H25.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_GLAUCOMA,
+    {
+      display: 'Glaucoma',
+      definition:
+        'Daño del nervio óptico, casi siempre por presión alta dentro del ojo. CIE-10: H40.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_MIOPIA,
+    {
+      display: 'Miopía',
+      definition: 'Se ve borroso de lejos y bien de cerca. CIE-10: H52.1.',
+    },
+  ],
+  [
+    CLIN.CONDITION_OTITIS_MEDIA,
+    {
+      display: 'Otitis media',
+      definition:
+        'Infección del oído medio, con dolor y a veces fiebre. CIE-10: H66.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HIPOACUSIA,
+    {
+      display: 'Hipoacusia',
+      definition: 'Disminución de la audición. CIE-10: H91.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_INSUFICIENCIA_CARDIACA,
+    {
+      display: 'Insuficiencia cardíaca',
+      definition:
+        'El corazón no bombea lo suficiente: cansancio, falta de aire e hinchazón. CIE-10: I50.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_FIBRILACION_AURICULAR,
+    {
+      display: 'Fibrilación auricular',
+      definition:
+        'Latido irregular del corazón que aumenta el riesgo de trombos. CIE-10: I48.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CARDIOPATIA_ISQUEMICA,
+    {
+      display: 'Cardiopatía isquémica crónica',
+      definition:
+        'Las arterias del corazón llevan menos sangre de la necesaria. CIE-10: I25.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_INFARTO_AGUDO_MIOCARDIO,
+    {
+      display: 'Infarto agudo de miocardio',
+      definition:
+        'Una arteria del corazón se tapa y parte del músculo cardíaco muere. CIE-10: I21.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ANGINA,
+    {
+      display: 'Angina de pecho',
+      definition:
+        'Dolor en el pecho por falta momentánea de sangre al corazón, casi siempre con el esfuerzo. CIE-10: I20.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ACV,
+    {
+      display: 'Accidente cerebrovascular agudo',
+      definition:
+        'Interrupción de la sangre al cerebro por obstrucción o hemorragia. CIE-10: I64.',
+    },
+  ],
+  [
+    CLIN.CONDITION_VARICES,
+    {
+      display: 'Várices de miembros inferiores',
+      definition:
+        'Venas dilatadas en las piernas, con pesadez e hinchazón. CIE-10: I83.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_TROMBOSIS_VENOSA,
+    {
+      display: 'Trombosis venosa profunda',
+      definition:
+        'Coágulo en una vena profunda, casi siempre de la pierna. CIE-10: I80.2.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HIPOTENSION,
+    {
+      display: 'Hipotensión',
+      definition: 'Presión arterial más baja de lo normal. CIE-10: I95.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_FARINGITIS,
+    {
+      display: 'Faringitis aguda',
+      definition:
+        'Inflamación de la garganta, con dolor al tragar. CIE-10: J02.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_AMIGDALITIS,
+    {
+      display: 'Amigdalitis aguda',
+      definition:
+        'Infección de las amígdalas, con dolor de garganta y fiebre. CIE-10: J03.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_SINUSITIS,
+    {
+      display: 'Sinusitis aguda',
+      definition:
+        'Infección de los senos paranasales, con congestión y dolor facial. CIE-10: J01.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_BRONQUITIS_AGUDA,
+    {
+      display: 'Bronquitis aguda',
+      definition:
+        'Inflamación de los bronquios, con tos que suele durar días. CIE-10: J20.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_NEUMONIA,
+    {
+      display: 'Neumonía',
+      definition:
+        'Infección del pulmón, con fiebre, tos y falta de aire. CIE-10: J18.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_EPOC,
+    {
+      display: 'Enfermedad pulmonar obstructiva crónica',
+      definition:
+        'Obstrucción permanente del flujo de aire, ligada sobre todo al tabaco. CIE-10: J44.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_RINITIS_ALERGICA,
+    {
+      display: 'Rinitis alérgica',
+      definition:
+        'Estornudos, congestión y picazón nasal por alergia. CIE-10: J30.4.',
+    },
+  ],
+  [
+    CLIN.CONDITION_INFLUENZA,
+    {
+      display: 'Influenza con manifestaciones respiratorias',
+      definition:
+        'Gripe, con fiebre, dolor de cuerpo y síntomas respiratorios. CIE-10: J11.1.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COVID19,
+    {
+      display: 'COVID-19 confirmado por laboratorio',
+      definition:
+        'Infección por SARS-CoV-2 confirmada con prueba de laboratorio. CIE-10: U07.1.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ERGE,
+    {
+      display: 'Enfermedad por reflujo gastroesofágico',
+      definition:
+        'El contenido del estómago sube al esófago y produce ardor. CIE-10: K21.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ULCERA_PEPTICA,
+    {
+      display: 'Úlcera péptica',
+      definition: 'Llaga en la pared del estómago o el duodeno. CIE-10: K27.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_SINDROME_INTESTINO_IRRITABLE,
+    {
+      display: 'Síndrome del intestino irritable',
+      definition:
+        'Dolor abdominal y cambios del ritmo intestinal sin lesión que los explique. CIE-10: K58.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ESTRENIMIENTO,
+    {
+      display: 'Estreñimiento',
+      definition: 'Evacuaciones poco frecuentes o difíciles. CIE-10: K59.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HEMORROIDES,
+    {
+      display: 'Hemorroides',
+      definition:
+        'Venas dilatadas del ano y el recto, con dolor o sangrado. CIE-10: K64.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COLELITIASIS,
+    {
+      display: 'Colelitiasis sin colecistitis',
+      definition:
+        'Cálculos en la vesícula, sin infección todavía. CIE-10: K80.2.',
+    },
+  ],
+  [
+    CLIN.CONDITION_APENDICITIS,
+    {
+      display: 'Apendicitis aguda',
+      definition:
+        'Inflamación del apéndice; es una urgencia quirúrgica. CIE-10: K35.8.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HERNIA_INGUINAL,
+    {
+      display: 'Hernia inguinal',
+      definition:
+        'Parte del intestino se sale por un punto débil de la ingle. CIE-10: K40.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HIGADO_GRASO,
+    {
+      display: 'Esteatosis hepática',
+      definition: 'Acumulación de grasa en el hígado. CIE-10: K76.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_PANCREATITIS,
+    {
+      display: 'Pancreatitis aguda',
+      definition:
+        'Inflamación del páncreas, con dolor abdominal intenso. CIE-10: K85.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CARIES,
+    {
+      display: 'Caries dental',
+      definition:
+        'Destrucción del esmalte y la dentina por bacterias de la boca. CIE-10: K02.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_GINGIVITIS,
+    {
+      display: 'Gingivitis crónica',
+      definition:
+        'Inflamación de las encías, que sangran al cepillarse. CIE-10: K05.1.',
+    },
+  ],
+  [
+    CLIN.CONDITION_PERIODONTITIS,
+    {
+      display: 'Periodontitis crónica',
+      definition:
+        'La inflamación llegó al hueso que sostiene el diente. CIE-10: K05.3.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ACNE,
+    {
+      display: 'Acné vulgar',
+      definition:
+        'Granos y espinillas por obstrucción e inflamación de los poros. CIE-10: L70.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_PSORIASIS,
+    {
+      display: 'Psoriasis',
+      definition:
+        'Placas rojas con escamas, por recambio acelerado de la piel. CIE-10: L40.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_URTICARIA,
+    {
+      display: 'Urticaria',
+      definition: 'Ronchas que pican y aparecen y desaparecen. CIE-10: L50.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CELULITIS,
+    {
+      display: 'Celulitis',
+      definition:
+        'Infección bacteriana de la piel y el tejido de debajo. CIE-10: L03.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DERMATITIS_CONTACTO,
+    {
+      display: 'Dermatitis alérgica de contacto',
+      definition:
+        'Reacción de la piel al contacto con una sustancia a la que se es alérgico. CIE-10: L23.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ALOPECIA,
+    {
+      display: 'Alopecia no cicatricial',
+      definition:
+        'Caída del cabello sin destrucción del folículo. CIE-10: L65.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ARTROSIS_RODILLA,
+    {
+      display: 'Gonartrosis',
+      definition:
+        'Desgaste del cartílago de la rodilla, con dolor al caminar. CIE-10: M17.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ARTROSIS_CADERA,
+    {
+      display: 'Coxartrosis',
+      definition: 'Desgaste del cartílago de la cadera. CIE-10: M16.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ARTRITIS_REUMATOIDE,
+    {
+      display: 'Artritis reumatoide',
+      definition:
+        'Enfermedad autoinmune que inflama las articulaciones de forma simétrica. CIE-10: M06.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_GOTA,
+    {
+      display: 'Gota',
+      definition:
+        'Ataques de dolor articular por cristales de ácido úrico. CIE-10: M10.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_OSTEOPOROSIS,
+    {
+      display: 'Osteoporosis',
+      definition: 'Huesos frágiles por pérdida de masa ósea. CIE-10: M81.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CERVICALGIA,
+    {
+      display: 'Cervicalgia',
+      definition: 'Dolor en el cuello. CIE-10: M54.2.',
+    },
+  ],
+  [
+    CLIN.CONDITION_TENDINITIS_HOMBRO,
+    {
+      display: 'Tendinitis calcificante del hombro',
+      definition:
+        'Depósito de calcio en un tendón del hombro, con dolor al levantar el brazo. CIE-10: M75.3.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ESGUINCE_TOBILLO,
+    {
+      display: 'Esguince de tobillo',
+      definition:
+        'Estiramiento o desgarro de los ligamentos del tobillo. CIE-10: S93.4.',
+    },
+  ],
+  [
+    CLIN.CONDITION_FIBROMIALGIA,
+    {
+      display: 'Fibromialgia',
+      definition:
+        'Dolor generalizado y cansancio persistentes, sin lesión que los explique. CIE-10: M79.7.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ESCOLIOSIS,
+    {
+      display: 'Escoliosis',
+      definition: 'Desviación lateral de la columna. CIE-10: M41.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ENFERMEDAD_RENAL_CRONICA,
+    {
+      display: 'Enfermedad renal crónica',
+      definition:
+        'Pérdida progresiva y permanente de la función de los riñones. CIE-10: N18.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_LITIASIS_RENAL,
+    {
+      display: 'Cálculo del riñón',
+      definition:
+        'Piedra en el riñón, que puede producir cólico. CIE-10: N20.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HIPERPLASIA_PROSTATICA,
+    {
+      display: 'Hiperplasia prostática benigna',
+      definition:
+        'Agrandamiento de la próstata que dificulta orinar. CIE-10: N40.',
+    },
+  ],
+  [
+    CLIN.CONDITION_VAGINITIS,
+    {
+      display: 'Vaginitis aguda',
+      definition:
+        'Inflamación de la vagina, con flujo y molestias. CIE-10: N76.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_MIOMA_UTERINO,
+    {
+      display: 'Leiomioma del útero',
+      definition: 'Tumor benigno del músculo del útero. CIE-10: D25.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DISMENORREA,
+    {
+      display: 'Dismenorrea',
+      definition: 'Dolor menstrual. CIE-10: N94.6.',
+    },
+  ],
+  [
+    CLIN.CONDITION_MENOPAUSIA,
+    {
+      display: 'Estado menopáusico',
+      definition: 'Etapa posterior al cese de la menstruación. CIE-10: N95.1.',
+    },
+  ],
+  [
+    CLIN.CONDITION_INFERTILIDAD,
+    {
+      display: 'Infertilidad femenina',
+      definition:
+        'Dificultad para lograr un embarazo tras un año de intentarlo. CIE-10: N97.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_EMBARAZO_NORMAL,
+    {
+      display: 'Supervisión de embarazo normal',
+      definition:
+        'Control de un embarazo que transcurre sin complicaciones. CIE-10: Z34.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_PREECLAMPSIA,
+    {
+      display: 'Preeclampsia',
+      definition:
+        'Presión alta y proteína en la orina durante el embarazo. CIE-10: O14.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_AMENAZA_ABORTO,
+    {
+      display: 'Amenaza de aborto',
+      definition:
+        'Sangrado en el primer tramo del embarazo, con el embarazo aún viable. CIE-10: O20.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ANEMIA_EMBARAZO,
+    {
+      display: 'Anemia que complica el embarazo',
+      definition: 'Hemoglobina baja durante la gestación. CIE-10: O99.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ICTERICIA_NEONATAL,
+    {
+      display: 'Ictericia neonatal',
+      definition:
+        'Color amarillo de la piel del recién nacido por bilirrubina alta. CIE-10: P59.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_BAJO_PESO_NACER,
+    {
+      display: 'Bajo peso al nacer',
+      definition: 'Recién nacido con menos de 2 500 gramos. CIE-10: P07.1.',
+    },
+  ],
+  [
+    CLIN.CONDITION_BRONQUIOLITIS,
+    {
+      display: 'Bronquiolitis aguda',
+      definition:
+        'Infección viral de los bronquios pequeños, típica del lactante. CIE-10: J21.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_OTITIS_EXTERNA,
+    {
+      display: 'Otitis externa',
+      definition: 'Infección del conducto auditivo externo. CIE-10: H60.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_FIEBRE,
+    {
+      display: 'Fiebre no especificada',
+      definition:
+        'Temperatura elevada sin causa aún establecida. CIE-10: R50.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DOLOR_ABDOMINAL,
+    {
+      display: 'Dolor abdominal',
+      definition:
+        'Dolor en el abdomen, sin diagnóstico definitivo todavía. CIE-10: R10.4.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DOLOR_TORACICO,
+    {
+      display: 'Dolor torácico',
+      definition:
+        'Dolor en el pecho, pendiente de estudiar su causa. CIE-10: R07.4.',
+    },
+  ],
+  [
+    CLIN.CONDITION_DISNEA,
+    {
+      display: 'Disnea',
+      definition: 'Sensación de falta de aire. CIE-10: R06.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_TOS,
+    {
+      display: 'Tos',
+      definition:
+        'Tos como motivo de consulta, sin causa aún establecida. CIE-10: R05.',
+    },
+  ],
+  [
+    CLIN.CONDITION_MAREO,
+    {
+      display: 'Mareo y desvanecimiento',
+      definition:
+        'Sensación de inestabilidad o de estar por desmayarse. CIE-10: R42.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ASTENIA,
+    {
+      display: 'Malestar y fatiga',
+      definition: 'Cansancio persistente sin causa identificada. CIE-10: R53.',
+    },
+  ],
+  [
+    CLIN.CONDITION_EDEMA,
+    {
+      display: 'Edema',
+      definition: 'Hinchazón por acumulación de líquido. CIE-10: R60.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_PERDIDA_PESO,
+    {
+      display: 'Pérdida anormal de peso',
+      definition:
+        'Baja de peso no buscada, que hay que estudiar. CIE-10: R63.4.',
+    },
+  ],
+  [
+    CLIN.CONDITION_SINCOPE,
+    {
+      display: 'Síncope y colapso',
+      definition:
+        'Pérdida breve del conocimiento con recuperación completa. CIE-10: R55.',
+    },
+  ],
+  [
+    CLIN.CONDITION_PALPITACIONES,
+    {
+      display: 'Palpitaciones',
+      definition:
+        'Percepción del propio latido, acelerado o irregular. CIE-10: R00.2.',
+    },
+  ],
+  [
+    CLIN.CONDITION_FRACTURA_ANTEBRAZO,
+    {
+      display: 'Fractura del antebrazo',
+      definition:
+        'Rotura de uno o los dos huesos del antebrazo. CIE-10: S52.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_HERIDA_CORTANTE,
+    {
+      display: 'Herida abierta de región no especificada',
+      definition: 'Corte que atraviesa la piel. CIE-10: T14.1.',
+    },
+  ],
+  [
+    CLIN.CONDITION_QUEMADURA,
+    {
+      display: 'Quemadura de región no especificada',
+      definition:
+        'Lesión de la piel por calor, químicos o electricidad. CIE-10: T30.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CONTUSION,
+    {
+      display: 'Contusión de región no especificada',
+      definition:
+        'Golpe sin herida abierta, con dolor y moretón. CIE-10: T14.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_TRAUMATISMO_CRANEAL,
+    {
+      display: 'Traumatismo intracraneal',
+      definition:
+        'Golpe en la cabeza con posible compromiso del cerebro. CIE-10: S06.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CONTROL_SALUD,
+    {
+      display: 'Examen médico general',
+      definition:
+        'Consulta de control en una persona sin enfermedad. CIE-10: Z00.0.',
+    },
+  ],
+  [
+    CLIN.CONDITION_VACUNACION,
+    {
+      display: 'Contacto para inmunización',
+      definition: 'Consulta cuyo motivo es aplicar una vacuna. CIE-10: Z23.',
+    },
+  ],
+  [
+    CLIN.CONDITION_ANTICONCEPCION,
+    {
+      display: 'Atención para la anticoncepción',
+      definition:
+        'Consulta para elegir o controlar un método anticonceptivo. CIE-10: Z30.9.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CERTIFICADO_MEDICO,
+    {
+      display: 'Emisión de certificado médico',
+      definition:
+        'Consulta cuyo motivo es emitir un certificado. CIE-10: Z02.7.',
+    },
+  ],
+  [
+    CLIN.CONDITION_CONTROL_NINO_SANO,
+    {
+      display: 'Control de salud de rutina del niño',
+      definition:
+        'Control periódico de crecimiento y desarrollo. CIE-10: Z00.1.',
+    },
+  ],
 ];
 
 /**

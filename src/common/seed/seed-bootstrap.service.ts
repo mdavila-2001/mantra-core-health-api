@@ -8,6 +8,7 @@ import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
+import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
@@ -87,6 +88,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *   Santa Cruz (`VS_BO_HEALTH_FACILITY`).
    * @param boliviaInsurance - Aseguradoras bolivianas con su producto de
    *   salud y sus planes.
+   * @param boliviaFeeSchedule - Nomenclador de procedimientos con su precio de
+   *   referencia (`VS_BO_MEDICAL_PROCEDURE`).
    * @param messaging - Datos estructurales de mensajería.
    * @param audioAssets - Colas y plantillas de audio.
    * @param vademecum - Catálogo de medicamentos para prescribir.
@@ -104,6 +107,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly boGeography: BoGeographySeedService,
     private readonly boliviaFacilities: BoliviaFacilitiesSeedService,
     private readonly boliviaInsurance: BoliviaInsuranceSeedService,
+    private readonly boliviaFeeSchedule: BoliviaFeeScheduleSeedService,
     private readonly messaging: MessagingSeedService,
     private readonly audioAssets: AudioAssetsSeedService,
     private readonly vademecum: VademecumSeedService,
@@ -212,6 +216,13 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     steps.push(
       await this.runStep('aseguradoras de Bolivia', () =>
         this.boliviaInsurance.run(),
+      ),
+    );
+    // El nomenclador va con los otros catálogos de referencia. Es el más grande
+    // de todos —4 408 procedimientos— y por eso siembra e indaga por bloques.
+    steps.push(
+      await this.runStep('nomenclador de procedimientos', () =>
+        this.boliviaFeeSchedule.run(),
       ),
     );
     // Mismo motivo que el glosario: amplía el motor de terminología con un code
