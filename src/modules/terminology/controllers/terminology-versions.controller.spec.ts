@@ -14,8 +14,9 @@ describe('TerminologyVersionsController', () => {
       importConcepts: jest.fn(),
       publishVersion: jest.fn(),
     } as any;
-    const controller = new TerminologyVersionsController(service);
-    return { controller, service };
+    const fileImport = { importFromFile: jest.fn() } as any;
+    const controller = new TerminologyVersionsController(service, fileImport);
+    return { controller, service, fileImport };
   }
 
   it('importConcepts delega con el id de versión', async () => {
@@ -43,5 +44,31 @@ describe('TerminologyVersionsController', () => {
 
     expect(service.publishVersion).toHaveBeenCalledWith('v-1', user);
     expect(result).toBe(expected);
+  });
+
+  it('importConceptsFile delega el archivo al importador', async () => {
+    const { controller, fileImport } = build();
+    const esperado = {
+      batchId: 'b-1',
+      totalRead: 3,
+      inserted: 2,
+      skipped: 1,
+      errors: 0,
+      errorSamples: [],
+    };
+    fileImport.importFromFile.mockResolvedValue(esperado);
+
+    const result = await controller.importConceptsFile(
+      'v-1',
+      { buffer: Buffer.from('x'), originalname: 'c.ndjson' },
+      user,
+    );
+
+    expect(fileImport.importFromFile).toHaveBeenCalledWith(
+      'v-1',
+      expect.any(Buffer),
+      user,
+    );
+    expect(result).toBe(esperado);
   });
 });

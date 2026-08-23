@@ -16,6 +16,8 @@ import {
   ValueSetsService,
   ConceptMapsService,
   TenantCatalogService,
+  ConceptFileImportService,
+  CodeSystemsReadService,
 } from './services';
 import {
   TerminologySourcesRepository,
@@ -54,6 +56,8 @@ import {
     ValueSetsService,
     ConceptMapsService,
     TenantCatalogService,
+    ConceptFileImportService,
+    CodeSystemsReadService,
     TerminologySourcesRepository,
     CodeSystemsRepository,
     CodeSystemVersionsRepository,

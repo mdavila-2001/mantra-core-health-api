@@ -42,6 +42,33 @@ export interface SeedRunSummary {
   tookMs: number;
   /** Detalle por paso, en orden de ejecución. */
   steps: SeedStepResult[];
+  /**
+   * Pasos de contenido que no se intentaron por `SEED_CONTENT_ON_BOOT=false`.
+   *
+   * Opcional para que el campo no cambie la forma del resumen en la corrida
+   * normal: quien lo lea con el contenido encendido ve exactamente lo de antes.
+   */
+  skippedContent?: number;
+}
+
+/**
+ * Qué clase de paso es, y por lo tanto si el entorno puede saltearlo.
+ *
+ * `core` es lo que la base necesita para aceptar una escritura: sin esos pasos
+ * la aplicación queda en pie pero incapaz de persistir. `content` es material
+ * curado —catálogos de negocio, glosario, formularios— que un despliegue puede
+ * preferir cargar por su cuenta; saltearlo no rompe nada estructural.
+ */
+type SeedStepKind = 'core' | 'content';
+
+/** Un paso de la cadena, con lo necesario para decidir si corre. */
+interface SeedStepDescriptor {
+  /** Nombre legible, el mismo que aparece en el log. */
+  readonly name: string;
+  /** Si el entorno puede saltearlo. */
+  readonly kind: SeedStepKind;
+  /** La corrida del seed. */
+  readonly run: () => Promise<unknown>;
 }
 
 /**
@@ -56,7 +83,7 @@ export interface SeedRunSummary {
  * @param result - Lo que devolvió el seed.
  * @returns El total, o `null` si el seed no devolvió contadores.
  */
-function contarInsertados(result: unknown): number | null {
+export function contarInsertados(result: unknown): number | null {
   if (typeof result !== 'object' || result === null) return null;
   const numeros = Object.entries(result as Record<string, unknown>)
     // No todo contador numérico cuenta filas escritas: el glosario devuelve
@@ -76,6 +103,9 @@ function contarInsertados(result: unknown): number | null {
 export class SeedBootstrapService implements OnApplicationBootstrap {
   /** Si la cadena corre sola al arrancar; ver `seed-boot.env.ts`. */
   private readonly seedOnBoot: boolean;
+
+  /** Si los pasos de contenido corren junto con los de núcleo. */
+  private readonly contentOnBoot: boolean;
 
   /**
    * Inicializa el orquestador.
@@ -120,7 +150,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
-    this.seedOnBoot = loadSeedBootEnv().enabled;
+    const entorno = loadSeedBootEnv();
+    this.seedOnBoot = entorno.enabled;
+    this.contentOnBoot = entorno.contentEnabled;
   }
 
   /**
@@ -158,9 +190,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     const arranque = Date.now();
     const steps: SeedStepResult[] = [];
 
-    // El catálogo de conceptos no es un paso más: es la precondición de los
-    // otros diez. Si falla, seguir sería sembrar contra FKs que no existen —y
-    // el error real quedaría sepultado bajo nueve fallos derivados.
+    // El catálogo de conceptos no es un paso más: es la precondición de todos
+    // los demás. Si falla, seguir sería sembrar contra FKs que no existen —y el
+    // error real quedaría sepultado bajo una cascada de fallos derivados.
     const catalogo = await this.runStep('catálogo de conceptos', () =>
       this.terminology.run(),
     );
@@ -171,116 +203,151 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       this.logger.error(
         { event: 'seed.aborted', ...resumen },
         'Seeds estructurales omitidos: el catálogo de terminología no quedó ' +
-          'disponible, así que los diez seeds dependientes ni se intentaron.',
+          'disponible, así que los seeds dependientes ni se intentaron.',
       );
       return resumen;
     }
 
-    // Va inmediatamente después del catálogo porque sus miembros y opciones son
-    // FK a los conceptos que aquél acaba de materializar, y porque sin él ningún
-    // formulario puede poblar sus campos de catálogo.
-    steps.push(
-      await this.runStep('enumeraciones dinámicas', () =>
-        this.dynamicEnums.run(),
-      ),
-    );
-    // Depende de `SEED.codeSystemVersionId`, ya materializado por el catálogo
-    // de conceptos. No depende de las enumeraciones dinámicas ni al revés,
-    // pero va justo después de ellas para agrupar los seeds que amplían el
-    // motor de terminología antes de los dominios operativos.
-    steps.push(
-      await this.runStep('glosario médico', () => this.glossary.run()),
-    );
-    // Mismo motivo que el glosario: materializa un conjunto de valores sobre el
-    // catálogo que el paso anterior acaba de sembrar (`SEED.codeSystemVersionId`
-    // para los conceptos, `CONCEPTS.LANG_ES` para sus designaciones). Va acá y
-    // no más abajo porque el registro público —la primera pantalla que ve
-    // cualquiera— lee `VS_BO_DEPARTMENT` para su desplegable de departamentos.
-    steps.push(
-      await this.runStep('departamentos de Bolivia', () =>
-        this.boGeography.run(),
-      ),
-    );
-    // Junto a los departamentos y por lo mismo: son catálogos de referencia de
-    // Bolivia que las pantallas resuelven por el código del conjunto. El
-    // directorio de establecimientos es el que le permite al médico decir en qué
-    // hospital está de turno y en qué clínica atiende.
-    steps.push(
-      await this.runStep('establecimientos de salud', () =>
-        this.boliviaFacilities.run(),
-      ),
-    );
-    // Las aseguradoras van después del catálogo de conceptos porque su estado y
-    // su tipo de producto salen de `insurance:*`, y antes que nada que registre
-    // una cobertura: `patient_coverages` apunta al plan, no a la compañía.
-    steps.push(
-      await this.runStep('aseguradoras de Bolivia', () =>
-        this.boliviaInsurance.run(),
-      ),
-    );
-    // El nomenclador va con los otros catálogos de referencia. Es el más grande
-    // de todos —4 408 procedimientos— y por eso siembra e indaga por bloques.
-    steps.push(
-      await this.runStep('nomenclador de procedimientos', () =>
-        this.boliviaFeeSchedule.run(),
-      ),
-    );
-    // Mismo motivo que el glosario: amplía el motor de terminología con un code
-    // system propio. Depende del catálogo de conceptos por los idiomas de cada
-    // designación (`EN`/`ES`) y por las severidades `clinical_ext:SEVERITY_*` de
-    // las interacciones: aplicado antes, viola esas FK. Vivía como patch SQL
-    // fuera de `apply_all.sql`, así que una base reconstruida no lo traía.
-    steps.push(
-      await this.runStep('vademécum de medicamentos', () =>
-        this.vademecum.run(),
-      ),
-    );
-    steps.push(await this.runStep('mensajería', () => this.messaging.run()));
-    steps.push(
-      await this.runStep('audio assets', () => this.audioAssets.run()),
-    );
-    steps.push(
-      await this.runStep('verificación de identidad', () =>
-        this.identityVerification.run(),
-      ),
-    );
-    // Depende de los conceptos de rol base y de ámbito del catálogo `authz`.
-    steps.push(
-      await this.runStep('roles asistenciales', () => this.clinicalRoles.run()),
-    );
-    // Mismo motivo que los roles: sus conceptos de acción, ámbito y estado los
-    // acaba de materializar el catálogo.
-    steps.push(
-      await this.runStep('permisos de plataforma', () =>
-        this.platformPermissions.run(),
-      ),
-    );
-    // Carril R2-5. Depende del catálogo de conceptos —siembra sus propias
-    // especialidades sobre el mismo sistema de códigos— y es contenido, no
-    // estructura: si falla, el resto del arranque sigue en pie.
-    steps.push(
-      await this.runStep('formularios clínicos estándar', () =>
-        this.clinicalForms.run(),
-      ),
-    );
-    // Va el último a propósito: el alta del administrador referencia conceptos
-    // de estado y el tenant por defecto, que los sembra el catálogo.
-    steps.push(
-      await this.runStep('administrador de arranque', () =>
-        this.bootstrapAdmin.run(),
-      ),
-    );
+    let skippedContent = 0;
+    for (const paso of this.pasosDependientes()) {
+      if (paso.kind === 'content' && !this.contentOnBoot) {
+        skippedContent += 1;
+        this.logger.info(
+          { event: 'seed.step.skipped', name: paso.name },
+          'Seed de contenido salteado (SEED_CONTENT_ON_BOOT=false): ' +
+            paso.name,
+        );
+        continue;
+      }
+      steps.push(await this.runStep(paso.name, paso.run));
+    }
 
-    // Después del administrador y no antes: las cuentas de proveedor se crean
-    // con `IamUsersService`, que escribe `created_by_user_id` apuntando al
-    // actor semilla, y ese actor lo materializa el paso anterior.
-    steps.push(
-      await this.runStep('cuentas de proveedores', () =>
-        this.providerAccounts.run(),
-      ),
-    );
+    return this.resumir(steps, arranque, skippedContent);
+  }
 
-    return this.resumir(steps, arranque);
+  /**
+   * Los pasos que corren después del catálogo, en orden y ya clasificados.
+   *
+   * El orden es el contrato: cada paso depende de lo que materializaron los
+   * anteriores, y los comentarios de cada entrada dicen de qué. La
+   * clasificación es una decisión del orquestador y no de cada servicio,
+   * porque «esto es núcleo» solo tiene sentido mirando la cadena entera.
+   */
+  private pasosDependientes(): readonly SeedStepDescriptor[] {
+    return [
+      // Va inmediatamente después del catálogo porque sus miembros y opciones son
+      // FK a los conceptos que aquél acaba de materializar, y porque sin él ningún
+      // formulario puede poblar sus campos de catálogo.
+      {
+        name: 'enumeraciones dinámicas',
+        kind: 'core',
+        run: () => this.dynamicEnums.run(),
+      },
+      // Depende de `SEED.codeSystemVersionId`, ya materializado por el catálogo
+      // de conceptos. No depende de las enumeraciones dinámicas ni al revés,
+      // pero va justo después de ellas para agrupar los seeds que amplían el
+      // motor de terminología antes de los dominios operativos.
+      {
+        name: 'glosario médico',
+        kind: 'content',
+        run: () => this.glossary.run(),
+      },
+      // Mismo motivo que el glosario: materializa un conjunto de valores sobre el
+      // catálogo que el paso anterior acaba de sembrar (`SEED.codeSystemVersionId`
+      // para los conceptos, `CONCEPTS.LANG_ES` para sus designaciones). Va acá y
+      // no más abajo porque el registro público —la primera pantalla que ve
+      // cualquiera— lee `VS_BO_DEPARTMENT` para su desplegable de departamentos.
+      // Es núcleo por eso mismo: sin departamentos no hay alta de nadie.
+      {
+        name: 'departamentos de Bolivia',
+        kind: 'core',
+        run: () => this.boGeography.run(),
+      },
+      // Junto a los departamentos y por lo mismo: son catálogos de referencia de
+      // Bolivia que las pantallas resuelven por el código del conjunto. El
+      // directorio de establecimientos es el que le permite al médico decir en qué
+      // hospital está de turno y en qué clínica atiende.
+      {
+        name: 'establecimientos de salud',
+        kind: 'content',
+        run: () => this.boliviaFacilities.run(),
+      },
+      // Las aseguradoras van después del catálogo de conceptos porque su estado y
+      // su tipo de producto salen de `insurance:*`, y antes que nada que registre
+      // una cobertura: `patient_coverages` apunta al plan, no a la compañía.
+      {
+        name: 'aseguradoras de Bolivia',
+        kind: 'content',
+        run: () => this.boliviaInsurance.run(),
+      },
+      // El nomenclador va con los otros catálogos de referencia. Es el más grande
+      // de todos —4 408 procedimientos— y por eso siembra e indaga por bloques.
+      {
+        name: 'nomenclador de procedimientos',
+        kind: 'content',
+        run: () => this.boliviaFeeSchedule.run(),
+      },
+      // Mismo motivo que el glosario: amplía el motor de terminología con un code
+      // system propio. Depende del catálogo de conceptos por los idiomas de cada
+      // designación (`EN`/`ES`) y por las severidades `clinical_ext:SEVERITY_*` de
+      // las interacciones: aplicado antes, viola esas FK. Vivía como patch SQL
+      // fuera de `apply_all.sql`, así que una base reconstruida no lo traía.
+      {
+        name: 'vademécum de medicamentos',
+        kind: 'content',
+        run: () => this.vademecum.run(),
+      },
+      // Núcleo: los canales que siembra tienen id fijo y el código de producción
+      // los referencia directo —verificación de correo, restablecimiento, avisos
+      // de agenda—, así que sin ellos esas escrituras violan su FK.
+      { name: 'mensajería', kind: 'core', run: () => this.messaging.run() },
+      {
+        name: 'audio assets',
+        kind: 'core',
+        run: () => this.audioAssets.run(),
+      },
+      {
+        name: 'verificación de identidad',
+        kind: 'core',
+        run: () => this.identityVerification.run(),
+      },
+      // Depende de los conceptos de rol base y de ámbito del catálogo `authz`.
+      {
+        name: 'roles asistenciales',
+        kind: 'core',
+        run: () => this.clinicalRoles.run(),
+      },
+      // Mismo motivo que los roles: sus conceptos de acción, ámbito y estado los
+      // acaba de materializar el catálogo.
+      {
+        name: 'permisos de plataforma',
+        kind: 'core',
+        run: () => this.platformPermissions.run(),
+      },
+      // Carril R2-5. Depende del catálogo de conceptos —siembra sus propias
+      // especialidades sobre el mismo sistema de códigos— y es contenido, no
+      // estructura: si falla, el resto del arranque sigue en pie.
+      {
+        name: 'formularios clínicos estándar',
+        kind: 'content',
+        run: () => this.clinicalForms.run(),
+      },
+      // Va el último a propósito: el alta del administrador referencia conceptos
+      // de estado y el tenant por defecto, que los sembra el catálogo.
+      {
+        name: 'administrador de arranque',
+        kind: 'core',
+        run: () => this.bootstrapAdmin.run(),
+      },
+      // Después del administrador y no antes: las cuentas de proveedor se crean
+      // con `IamUsersService`, que escribe `created_by_user_id` apuntando al
+      // actor semilla, y ese actor lo materializa el paso anterior.
+      {
+        name: 'cuentas de proveedores',
+        kind: 'content',
+        run: () => this.providerAccounts.run(),
+      },
+    ];
   }
 
   /**
@@ -336,9 +403,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *
    * @param steps - Los pasos ya medidos.
    * @param arranque - Marca de tiempo del inicio de la cadena.
+   * @param skippedContent - Pasos de contenido que el entorno salteó.
    * @returns El resumen agregado.
    */
-  private resumir(steps: SeedStepResult[], arranque: number): SeedRunSummary {
+  private resumir(
+    steps: SeedStepResult[],
+    arranque: number,
+    skippedContent = 0,
+  ): SeedRunSummary {
     const failed = steps.filter((paso) => paso.failed).length;
     const summary: SeedRunSummary = {
       ok: steps.length - failed,
@@ -346,6 +418,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       inserted: steps.reduce((total, paso) => total + (paso.inserted ?? 0), 0),
       tookMs: Date.now() - arranque,
       steps,
+      // Solo cuando hubo salteados: con el contenido encendido el resumen
+      // conserva exactamente la forma que tenía antes de que el flag existiera.
+      ...(skippedContent > 0 ? { skippedContent } : {}),
     };
 
     const linea =
@@ -355,6 +430,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       steps.length +
       ' ok' +
       (failed > 0 ? ' · ' + failed + ' omitidos' : '') +
+      (skippedContent > 0
+        ? ' · ' + skippedContent + ' de contenido salteados'
+        : '') +
       ' · ' +
       summary.inserted +
       ' filas · ' +
