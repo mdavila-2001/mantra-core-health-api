@@ -32,6 +32,7 @@ import {
 import { SeedModule } from './common/seed/seed.module';
 import { seedBootEnvSchema } from './common/seed/seed-boot.env';
 import { IamModule } from './modules/iam/iam.module';
+import { ContentPacksModule } from './modules/content_packs/content_packs.module';
 import { DirectoryModule } from './modules/directory/directory.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
 import { TerminologyModule } from './modules/terminology/terminology.module';
@@ -168,6 +169,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // OrmModule para que el esquema esté materializado cuando corre el seed.
     SeedModule,
     IamModule,
+    ContentPacksModule,
     DirectoryModule,
     ProfilesModule,
     TerminologyModule,

@@ -126,6 +126,26 @@ describe('CodeSystemVersionsService', () => {
       );
     });
 
+    it('publica una versión sin estado, como las que dejan los ETL', async () => {
+      // Los siete importadores de `tools/terminology-import/` no fijan
+      // `state_concept_id` ni en la versión ni en sus conceptos. Con el estado
+      // ausente tratado como «no es borrador», esas versiones quedaban en un
+      // limbo cerrado: sus ~450 000 conceptos invisibles a toda expansión y la
+      // única puerta para activarlos respondiendo 422.
+      const { service, versionsRepo, conceptsRepo } = build();
+      const version: any = { id: 'v-etl', stateConceptId: null };
+      versionsRepo.findById.mockResolvedValue(version);
+      const concepts = [{ id: 'c-1', stateConceptId: null }];
+      conceptsRepo.findPromotableByVersion.mockResolvedValue(concepts);
+
+      const result = await service.publishVersion('v-etl', actor);
+
+      expect(version.stateConceptId).toBe(CONCEPTS.TERM_ACTIVE);
+      expect(result.state).toBe('TERM_ACTIVE');
+      // Y sus conceptos se promueven igual que los de una versión en borrador.
+      expect(concepts[0].stateConceptId).toBe(CONCEPTS.TERM_ACTIVE);
+    });
+
     it('rechaza publicar una versión ya activa (Conflict)', async () => {
       const { service, versionsRepo } = build();
       versionsRepo.findById.mockResolvedValue({

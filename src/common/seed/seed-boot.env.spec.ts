@@ -22,6 +22,32 @@ describe('loadSeedBootEnv', () => {
     expect(loadSeedBootEnv({ SEED_ON_BOOT: 'no' }).enabled).toBe(true);
     expect(loadSeedBootEnv({ SEED_ON_BOOT: '' }).enabled).toBe(true);
   });
+
+  it('siembra el contenido por defecto', () => {
+    // Mismo criterio que `enabled`: un entorno que no declara la variable tiene
+    // que comportarse como antes de que el corte núcleo/contenido existiera.
+    expect(loadSeedBootEnv({}).contentEnabled).toBe(true);
+  });
+
+  it('saltea el contenido solo con el literal "false"', () => {
+    expect(
+      loadSeedBootEnv({ SEED_CONTENT_ON_BOOT: 'false' }).contentEnabled,
+    ).toBe(false);
+    expect(
+      loadSeedBootEnv({ SEED_CONTENT_ON_BOOT: 'true' }).contentEnabled,
+    ).toBe(true);
+    expect(loadSeedBootEnv({ SEED_CONTENT_ON_BOOT: '' }).contentEnabled).toBe(
+      true,
+    );
+  });
+
+  it('los dos interruptores son independientes', () => {
+    // Apagar el contenido no apaga la cadena: es justo el modo que interesa,
+    // una instalación operable sin catálogos de negocio heredados.
+    const soloNucleo = loadSeedBootEnv({ SEED_CONTENT_ON_BOOT: 'false' });
+    expect(soloNucleo.enabled).toBe(true);
+    expect(soloNucleo.contentEnabled).toBe(false);
+  });
 });
 
 describe('seedBootEnvSchema', () => {
@@ -43,6 +69,21 @@ describe('seedBootEnvSchema', () => {
   it('rechaza un valor que no es booleano', () => {
     expect(
       seedBootEnvSchema.validate({ SEED_ON_BOOT: 'quizás' }).error,
+    ).toBeDefined();
+  });
+
+  it('resuelve el interruptor de contenido encendido cuando falta', () => {
+    const { error, value } = seedBootEnvSchema.validate({});
+    expect(error).toBeUndefined();
+    expect(value.SEED_CONTENT_ON_BOOT).toBe(true);
+  });
+
+  it('acepta los literales del interruptor de contenido y rechaza lo demás', () => {
+    expect(
+      seedBootEnvSchema.validate({ SEED_CONTENT_ON_BOOT: 'false' }).error,
+    ).toBeUndefined();
+    expect(
+      seedBootEnvSchema.validate({ SEED_CONTENT_ON_BOOT: 'quizás' }).error,
     ).toBeDefined();
   });
 
