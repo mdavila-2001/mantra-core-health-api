@@ -429,6 +429,15 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    PROF.JURISDICTION_SEDES_SANTA_CRUZ,
+    {
+      display: 'SEDES — Santa Cruz',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de la Gobernación de Santa Cruz. ' +
+        'Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
     PROF.AUTH_PENDING,
     {
       display: 'Habilitación pendiente',

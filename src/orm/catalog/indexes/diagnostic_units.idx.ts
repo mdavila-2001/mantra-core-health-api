@@ -2,8 +2,17 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `diagnostic_units`.
- * 73 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 72 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
+ *
+ * Excepción documentada (2026-08-23): la fila
+ * `uq_diagnostic_units_tenant_id_code` se editó a mano, y no con
+ * `yarn orm:catalog`, porque regenerar el catálogo entero hoy es destructivo por
+ * **B-10** —la bóveda no tiene las notas del módulo 65, y `surveys` volvería a
+ * módulo `null` con 1 de sus 36 FKs—. Es exactamente la fila que el generador
+ * emitiría, en la posición en que la emitiría: el orden sigue el `<<INDEX_SET>>`
+ * de la nota de bóveda, que ya declara la clave compuesta. Mismo criterio que el
+ * commit `8ba2ebf9` para el índice de la ocupación.
  */
 export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
@@ -40,8 +49,7 @@ export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
   ['diagnostic_study_prices', 'ix_diagnostic_study_prices_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['diagnostic_study_prices', 'ix_diagnostic_study_prices_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['diagnostic_study_prices', 'uq_diagnostic_study_prices_price_schedule_id_version_number', ['price_schedule_id', 'version_number'], true, 'btree'],
-  ['diagnostic_units', 'uq_diagnostic_units_tenant_id', ['tenant_id'], true, 'btree'],
-  ['diagnostic_units', 'uq_diagnostic_units_code', ['code'], true, 'btree'],
+  ['diagnostic_units', 'uq_diagnostic_units_tenant_id_code', ['tenant_id', 'code'], true, 'btree'],
   ['diagnostic_units', 'ix_diagnostic_units_tenant_id', ['tenant_id'], false, 'btree'],
   ['diagnostic_units', 'ix_diagnostic_units_practice_id', ['practice_id'], false, 'btree'],
   ['diagnostic_units', 'ix_diagnostic_units_primary_practice_site_id', ['primary_practice_site_id'], false, 'btree'],
