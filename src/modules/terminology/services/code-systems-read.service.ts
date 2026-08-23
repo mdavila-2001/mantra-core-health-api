@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { PinoLogger } from 'nestjs-pino';
 
 import { CONCEPTS } from '../../../common';
 import { CodeSystems, CodeSystemVersions } from '../entities';
@@ -39,8 +40,14 @@ export class CodeSystemsReadService {
    * Inicializa el servicio.
    *
    * @param em - Contexto de persistencia.
+   * @param logger - Logger estructurado.
    */
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(CodeSystemsReadService.name);
+  }
 
   /**
    * Los sistemas de codificación registrados.
@@ -74,13 +81,29 @@ export class CodeSystemsReadService {
   async listVersions(
     codeSystemId: string,
   ): Promise<CodeSystemVersionListItemDto[]> {
-    const filas = await this.em
-      .fork()
-      .find(
-        CodeSystemVersions,
-        { codeSystemId },
-        { orderBy: { version: 'desc' }, limit: TOPE },
+    const filas = await this.em.fork().find(
+      CodeSystemVersions,
+      { codeSystemId },
+      {
+        // Se ordena por fecha de alta y NO por `version`, que es texto libre:
+        // ordenarlo alfabéticamente pone «10» antes que «9» y «2026-01» antes
+        // que «2026», así que la más nueva no quedaba arriba justo en los
+        // sistemas que numeran en vez de fechar. `version` queda de desempate
+        // para que el orden sea estable entre corridas.
+        orderBy: { createdAt: 'desc', version: 'desc' },
+        limit: TOPE,
+      },
+    );
+
+    if (filas.length === TOPE) {
+      // El tope existe para que esto no se convierta en una consulta sin
+      // límite, pero recortar en silencio es la forma en que una lista de
+      // administración empieza a mentir por omisión.
+      this.logger.warn(
+        { operation: 'terminology.versions.list', codeSystemId, tope: TOPE },
+        'El listado de versiones llegó al tope: puede haber más sin mostrar',
       );
+    }
 
     return filas.map((version) => ({
       id: version.id,

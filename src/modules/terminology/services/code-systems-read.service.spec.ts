@@ -20,9 +20,12 @@ function armar(versiones: readonly Record<string, unknown>[]) {
     find: jest.fn<() => Promise<unknown>>().mockResolvedValue(versiones),
   };
   const em = { fork: jest.fn(() => fork) };
+  const logger = { setContext: jest.fn(), warn: jest.fn(), info: jest.fn() };
 
   return {
-    service: new CodeSystemsReadService(em as never),
+    fork,
+    logger,
+    service: new CodeSystemsReadService(em as never, logger as never),
   };
 }
 
@@ -77,5 +80,33 @@ describe('CodeSystemsReadService', () => {
     expect(retirada.acceptsConcepts).toBe(false);
     expect(obsoleta.state).toBe('DEPRECATED');
     expect(obsoleta.acceptsConcepts).toBe(false);
+  });
+  it('ordena por fecha de alta y no alfabéticamente por versión', async () => {
+    // `version` es texto libre: ordenarlo alfabéticamente pone «10» antes que
+    // «9», así que en un sistema que numera en vez de fechar la versión más
+    // nueva no quedaba arriba.
+    const { service, fork } = armar([]);
+
+    await service.listVersions('cs-1');
+
+    expect(fork.find).toHaveBeenCalledWith(
+      expect.anything(),
+      { codeSystemId: 'cs-1' },
+      expect.objectContaining({
+        orderBy: { createdAt: 'desc', version: 'desc' },
+      }),
+    );
+  });
+
+  it('avisa cuando el listado llega al tope en vez de recortar callado', async () => {
+    // Recortar en silencio es la forma en que una lista de administración
+    // empieza a mentir por omisión.
+    const { service, logger } = armar(
+      Array.from({ length: 200 }, () => version(CONCEPTS.TERM_DRAFT)),
+    );
+
+    await service.listVersions('cs-1');
+
+    expect(logger.warn).toHaveBeenCalled();
   });
 });

@@ -289,6 +289,15 @@ export class ConceptFileImportService {
         problema('«definition» no es texto.');
         return;
       }
+      // El NUL es el único carácter que un `text` de Postgres no puede guardar
+      // —`\u0000` es JSON válido, así que llega hasta acá sin que nada más lo
+      // pare— y rechazarlo recién al escribir hacía volar la tanda entera de 500
+      // conceptos buenos, y con ella toda la importación. Como problema de línea
+      // cuesta una línea; como error de escritura costaba el archivo.
+      if (contieneNul(code) || contieneNul(display) || contieneNul(definition)) {
+        problema('La línea contiene un carácter NUL, que la base no puede guardar.');
+        return;
+      }
       // Un código repetido dentro del mismo archivo es un error del archivo, no
       // un concepto que «ya existía»: conviene que quien lo armó se entere.
       if (vistos.has(code)) {
@@ -433,4 +442,13 @@ export class ConceptFileImportService {
     });
     await forked.flush();
   }
+}
+
+/**
+ * Si el texto trae un NUL, que Postgres no admite en una columna `text`.
+ *
+ * @param valor - El texto a revisar; `undefined` para los campos opcionales.
+ */
+function contieneNul(valor: unknown): boolean {
+  return typeof valor === 'string' && valor.includes('\u0000');
 }
