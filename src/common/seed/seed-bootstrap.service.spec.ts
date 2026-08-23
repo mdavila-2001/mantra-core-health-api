@@ -2,6 +2,14 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 
 /** Los dieciséis seeds de la cadena, en el orden en que el orquestador los corre. */
+/**
+ * Los pasos de la cadena, **en el orden real** de `pasosDependientes()`.
+ *
+ * Para armar los dobles alcanzaría con la lista sin ordenar, pero esta constante
+ * es lo primero que se lee al abrir el archivo y se toma como la documentación
+ * del orden: tenerla desalineada —`clinicalForms` figuraba al final cuando corre
+ * antes del administrador de arranque— enseña un orden que no existe.
+ */
 const PASOS = [
   'terminology',
   'dynamicEnums',
@@ -16,9 +24,9 @@ const PASOS = [
   'identityVerification',
   'clinicalRoles',
   'platformPermissions',
+  'clinicalForms',
   'bootstrapAdmin',
   'providerAccounts',
-  'clinicalForms',
 ] as const;
 
 type Paso = (typeof PASOS)[number];

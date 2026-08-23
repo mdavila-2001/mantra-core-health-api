@@ -17,7 +17,18 @@ import { CodeSystemsReadService } from './code-systems-read.service';
  */
 function armar(versiones: readonly Record<string, unknown>[]) {
   const fork = {
-    find: jest.fn<() => Promise<unknown>>().mockResolvedValue(versiones),
+    // Tipado con sus tres argumentos y no como `() => …`: sin ellos
+    // `toHaveBeenCalledWith(entidad, filtro, opciones)` es un error de tipos que
+    // jest no ve —transpila sin chequear— y aparece recién en `yarn typecheck`.
+    find: jest
+      .fn<
+        (
+          entidad: unknown,
+          filtro: unknown,
+          opciones: unknown,
+        ) => Promise<unknown>
+      >()
+      .mockResolvedValue(versiones),
   };
   const em = { fork: jest.fn(() => fork) };
   const logger = { setContext: jest.fn(), warn: jest.fn(), info: jest.fn() };

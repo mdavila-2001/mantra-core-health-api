@@ -234,6 +234,19 @@ export class ConceptFileImportService {
    * entra. Un archivo de cien mil líneas con tres rotas es un archivo con tres
    * líneas rotas, no un archivo inservible.
    *
+   * ## Es síncrono a propósito, y eso tiene un techo
+   *
+   * Materializa el archivo entero en memoria (`toString` + `split`) y lo recorre
+   * sin ceder el hilo: con el tope de 10 MiB de `FILE_STORAGE_MAX_SIZE_BYTES`
+   * son ~100 000 líneas y unas decenas de MB de pico, y el bucle bloquea el
+   * event loop mientras dura. Es aceptable **porque el tope existe** y porque es
+   * un endpoint de administración que se usa de a una vez, no una ruta caliente.
+   *
+   * Si algún día se sube ese tope, esto deja de ser aceptable antes que
+   * cualquier otra cosa del importador: la salida es leer por streaming
+   * (`readline` sobre el `Readable` de multer) y emitir por tandas, no agrandar
+   * la memoria.
+   *
    * @param buffer - El contenido del archivo.
    * @returns Los conceptos leídos y los problemas encontrados.
    */
@@ -294,8 +307,14 @@ export class ConceptFileImportService {
       // pare— y rechazarlo recién al escribir hacía volar la tanda entera de 500
       // conceptos buenos, y con ella toda la importación. Como problema de línea
       // cuesta una línea; como error de escritura costaba el archivo.
-      if (contieneNul(code) || contieneNul(display) || contieneNul(definition)) {
-        problema('La línea contiene un carácter NUL, que la base no puede guardar.');
+      if (
+        contieneNul(code) ||
+        contieneNul(display) ||
+        contieneNul(definition)
+      ) {
+        problema(
+          'La línea contiene un carácter NUL, que la base no puede guardar.',
+        );
         return;
       }
       // Un código repetido dentro del mismo archivo es un error del archivo, no
