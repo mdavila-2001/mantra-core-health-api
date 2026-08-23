@@ -130,12 +130,17 @@ export class ConceptFileImportService {
     const { conceptos, errores } = this.leer(buffer);
 
     // Ni una línea utilizable: el archivo no es lo que dice ser, y escribir un
-    // lote de cero conceptos con cien mil errores no ayuda a nadie.
-    if (conceptos.length === 0 && errores.length > 0) {
+    // lote de cero conceptos no ayuda a nadie. Se corta también cuando NO hubo
+    // errores —un archivo de puros saltos de línea pesa más de cero bytes y no
+    // produce ni un problema—: sin esto respondía 201 con todo en cero y dejaba
+    // un lote fantasma en `catalog_import_batches` que después nadie sabe leer.
+    if (conceptos.length === 0) {
       throw new PreconditionFailedException(
-        'Ninguna línea del archivo es un concepto válido: se esperaba NDJSON ' +
-          'con «code» y «display» por línea.',
-        { primerError: errores[0] },
+        errores.length > 0
+          ? 'Ninguna línea del archivo es un concepto válido: se esperaba ' +
+              'NDJSON con «code» y «display» por línea.'
+          : 'El archivo no tiene ninguna línea con contenido.',
+        errores.length > 0 ? { primerError: errores[0] } : { versionId },
       );
     }
 

@@ -147,6 +147,19 @@ describe('ConceptFileImportService', () => {
     expect(resultado.errors).toBe(0);
   });
 
+  it('un archivo de puros saltos de línea no deja un lote fantasma', async () => {
+    // Pesa más de cero bytes, así que esquivaba el corte por archivo vacío, y
+    // no produce ni un error, así que también esquivaba el corte por «ninguna
+    // línea válida»: respondía 201 con todo en cero y escribía en
+    // `catalog_import_batches` un lote que no importó nada.
+    const { service, archivo, lotes } = armar();
+
+    await expect(
+      service.importFromFile('v-1', archivo('\n\n\n'), actor),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(lotes).toHaveLength(0);
+  });
+
   it('una línea rota no arrastra a las buenas', async () => {
     const { service, archivo, creados } = armar();
     const contenido = archivo(

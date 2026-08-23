@@ -41,9 +41,13 @@ export class CodeSystemVersionListItemDto {
    *
    * `UNKNOWN` es el caso real de las versiones que dejaron los importadores
    * externos sin fijar estado: no es un error, y admiten conceptos igual.
+   * `RETIRED` y `DEPRECATED` se nombran aparte porque **no** los admiten, y
+   * agruparlos bajo `UNKNOWN` los hacía pasar por el caso que sí.
    */
-  @ApiProperty({ enum: ['DRAFT', 'ACTIVE', 'UNKNOWN'] })
-  state!: 'DRAFT' | 'ACTIVE' | 'UNKNOWN';
+  @ApiProperty({
+    enum: ['DRAFT', 'ACTIVE', 'RETIRED', 'DEPRECATED', 'UNKNOWN'],
+  })
+  state!: 'DRAFT' | 'ACTIVE' | 'RETIRED' | 'DEPRECATED' | 'UNKNOWN';
 
   /** Si es la versión por defecto del sistema. */
   @ApiProperty({ description: 'Si es la versión por defecto' })

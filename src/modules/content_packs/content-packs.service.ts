@@ -158,6 +158,13 @@ export class ContentPacksService {
         return this.clinicalForms.run();
       case 'CUENTAS_DEMO':
         return this.correrCuentasDemo(demoPassword);
+      default:
+        // El catálogo y este `switch` son dos listas que tienen que decir lo
+        // mismo, y nada las ataba: agregar un paquete y olvidar su rama
+        // devolvía `undefined`, que aguas abajo se cuenta como cero filas y se
+        // anuncia como «ya estaba cargado». Este `never` lo vuelve un error de
+        // compilación.
+        return paqueteSinRama(code);
     }
   }
 
@@ -180,6 +187,28 @@ export class ContentPacksService {
         { code: 'CUENTAS_DEMO' },
       );
     }
-    return this.providerAccounts.run(password);
+
+    const resultado = await this.providerAccounts.run(password);
+    // El seed se planta solo en producción y devuelve cero creadas. Ese cero es
+    // indistinguible de «ya estaban», así que la pantalla anunciaba «ya estaba
+    // cargado» sobre algo que no se intentó siquiera. Decir que no se hizo, y
+    // por qué, es lo único honesto.
+    if (resultado.skipped === 'production-not-allowed') {
+      throw new PreconditionFailedException(
+        'Las cuentas de demostración no se crean en producción. Si de verdad ' +
+          'las querés acá, hace falta habilitarlo explícitamente en el entorno.',
+        { code: 'CUENTAS_DEMO' },
+      );
+    }
+    return resultado;
   }
+}
+
+/**
+ * Falla en compilación si un paquete del catálogo se quedó sin rama.
+ *
+ * @param code - El código que no tiene rama; su tipo es `never` si están todas.
+ */
+function paqueteSinRama(code: never): never {
+  throw new Error(`Paquete de contenido sin implementación: ${String(code)}`);
 }

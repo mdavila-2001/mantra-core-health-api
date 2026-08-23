@@ -88,9 +88,7 @@ export class CodeSystemsReadService {
       state: estadoLegible(version.stateConceptId),
       isDefault: version.isDefault === true,
       publishedAt: version.publishedAt ?? null,
-      // Una versión sin estado admite conceptos igual que un borrador: es el
-      // mismo criterio con el que la importación y la publicación la aceptan.
-      acceptsConcepts: version.stateConceptId !== CONCEPTS.TERM_ACTIVE,
+      acceptsConcepts: admiteConceptos(version.stateConceptId),
     }));
   }
 }
@@ -98,13 +96,34 @@ export class CodeSystemsReadService {
 /**
  * Traduce el concepto de estado a una palabra.
  *
+ * `RETIRED` y `DEPRECATED` se nombran: caían en `UNKNOWN`, que acá significa
+ * «versión sin estado» —el hueco que dejan los ETL— y por eso pasaban por
+ * versiones abiertas cuando son exactamente lo contrario.
+ *
  * @param stateConceptId - El estado tal como está guardado.
  * @returns La palabra que la pantalla puede mostrar.
  */
 function estadoLegible(
   stateConceptId: string | null | undefined,
-): 'DRAFT' | 'ACTIVE' | 'UNKNOWN' {
+): 'DRAFT' | 'ACTIVE' | 'RETIRED' | 'DEPRECATED' | 'UNKNOWN' {
   if (stateConceptId === CONCEPTS.TERM_ACTIVE) return 'ACTIVE';
   if (stateConceptId === CONCEPTS.TERM_DRAFT) return 'DRAFT';
+  if (stateConceptId === CONCEPTS.TERM_RETIRED) return 'RETIRED';
+  if (stateConceptId === CONCEPTS.TERM_DEPRECATED) return 'DEPRECATED';
   return 'UNKNOWN';
+}
+
+/**
+ * Si a esa versión se le pueden importar conceptos.
+ *
+ * Es **el mismo criterio** que aplica el importador
+ * (`ConceptFileImportService`): sólo borrador o sin estado. Decía
+ * `!== TERM_ACTIVE`, que dejaba pasar retiradas y obsoletas — el desplegable las
+ * ofrecía y el 422 llegaba recién al enviar el archivo, que es justo el modo de
+ * fallo que esta lista existe para evitar.
+ *
+ * @param stateConceptId - El estado tal como está guardado.
+ */
+function admiteConceptos(stateConceptId: string | null | undefined): boolean {
+  return stateConceptId == null || stateConceptId === CONCEPTS.TERM_DRAFT;
 }
