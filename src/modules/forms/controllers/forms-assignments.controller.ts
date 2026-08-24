@@ -24,6 +24,7 @@ import {
 import { FormsAssignmentsService, FormsReadService } from '../services';
 import {
   CreateAssignmentDto,
+  ExtensionBudgetResponseDto,
   FieldAssignmentListResponseDto,
   IdResponseDto,
 } from '../dto';
@@ -35,6 +36,12 @@ import {
  *
  * La lectura admite también a los roles clínicos: qué campos van en qué
  * sección lo consulta quien dibuja el formulario, no sólo quien lo asigna.
+ *
+ * Y desde el generador de formularios, **la escritura también**: un doctor
+ * puede colgar campos propios dentro de su organización, con la política de
+ * extensión como techo. Los tres límites que eso implica los aplica
+ * `FormsAssignmentsService`, no este controlador — acá sólo se abre la puerta
+ * del rol.
  */
 @ApiTags('forms-assignments')
 @ApiBearerAuth()
@@ -93,9 +100,36 @@ export class FormsAssignmentsController {
     );
   }
 
+  /**
+   * Cuánto puede extender el tenant este target, antes de escribir nada.
+   *
+   * Va acá y no en un controlador propio porque es la misma regla que aplica el
+   * `POST` de al lado; separarlas es lo que hace que una diga que sí y la otra
+   * que no.
+   */
+  @Get('budget')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Presupuesto de extensión del target para el tenant actual',
+  })
+  @ApiQuery({
+    name: 'targetResourceConceptId',
+    required: true,
+    description: 'Target cuyo presupuesto se consulta',
+  })
+  getBudget(
+    @Query('targetResourceConceptId', new ParseUUIDPipe())
+    targetResourceConceptId: string,
+  ): Promise<ExtensionBudgetResponseDto> {
+    return this.readService.getExtensionBudget(
+      targetResourceConceptId,
+      getCurrentTenantId(),
+    );
+  }
+
   /** UC-09-06. */
   @Post()
-  @Roles('SECURITY_ADMIN')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Asignar campos a un target con política de extensión',

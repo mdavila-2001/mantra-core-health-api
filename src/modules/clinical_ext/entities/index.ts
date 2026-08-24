@@ -7,6 +7,7 @@ export * from './drug_interactions.entity';
 export * from './immunization_schedules.entity';
 export * from './order_set_items.entity';
 export * from './order_sets.entity';
+export * from './prescription_favorites.entity';
 export * from './reference_ranges.entity';
 export * from './referrals.entity';
 export * from './virtual_encounters.entity';

@@ -1,0 +1,128 @@
+{
+  "code": "BIOQ_INFORME_BASE",
+  "name": "Informe de laboratorio bioquímico",
+  "specialty": {
+    "code": "BIOQUIMICA_CLINICA",
+    "display": "Bioquímica Clínica"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, registro e informe de exámenes auxiliares de laboratorio",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma sale el molde común del documento clínico: motivo o indicación del estudio, resultado de lo observado, conclusión y conducta o recomendación. Son agregados propios de la especialidad los ítems de la fase preanalítica (tipo de muestra, condiciones de la toma, ayuno, fecha y hora de toma, medicación en curso) y la distinción entre determinaciones solicitadas, resultados en prosa, valores fuera del rango de referencia y observaciones preanalíticas."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo del estudio o indicación clínica",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "diagnostico_presuntivo_solicitante",
+      "name": "Diagnóstico presuntivo del solicitante",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "determinaciones_solicitadas",
+      "name": "Determinaciones solicitadas",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tipo_de_muestra",
+      "name": "Tipo de muestra",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "condiciones_de_la_toma",
+      "name": "Condiciones de la toma",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "ayuno",
+      "name": "Paciente en ayuno",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "horas_de_ayuno",
+      "name": "Horas de ayuno referidas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "fecha_de_toma",
+      "name": "Fecha de toma de la muestra",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "code": "hora_de_toma",
+      "name": "Hora de toma de la muestra",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "medicacion_en_curso",
+      "name": "Medicación en curso referida por el paciente",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "estado_de_la_muestra",
+      "name": "Estado de la muestra al recibirla",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "metodo_analitico",
+      "name": "Método analítico utilizado",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "resultados",
+      "name": "Resultados",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "valores_fuera_de_rango",
+      "name": "Valores fuera del rango de referencia",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "observaciones_preanaliticas",
+      "name": "Observaciones preanalíticas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "comparacion_con_estudios_previos",
+      "name": "Comparación con estudios previos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Conclusión o interpretación del informe",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Recomendaciones y estudios complementarios sugeridos",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `profiles`.
- * 128 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 129 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const profilesIndexes: readonly IndexTuple[] = [
@@ -75,6 +75,7 @@ export const profilesIndexes: readonly IndexTuple[] = [
   ['persons', 'ix_persons_vital_status_concept_id', ['vital_status_concept_id'], false, 'btree'],
   ['persons', 'ix_persons_nationality_concept_id', ['nationality_concept_id'], false, 'btree'],
   ['persons', 'ix_persons_preferred_language_concept_id', ['preferred_language_concept_id'], false, 'btree'],
+  ['persons', 'ix_persons_occupation_concept_id', ['occupation_concept_id'], false, 'btree'],
   ['persons', 'ix_persons_merge_survivor_person_id', ['merge_survivor_person_id'], false, 'btree'],
   ['persons', 'ix_persons_photo_file_id', ['photo_file_id'], false, 'btree'],
   ['persons', 'ix_persons_created_by_user_id', ['created_by_user_id'], false, 'btree'],

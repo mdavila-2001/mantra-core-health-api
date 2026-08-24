@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `profiles`.
- * 123 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 124 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
@@ -70,6 +70,7 @@ export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
   ['persons', 'gender_identity_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['persons', 'merge_survivor_person_id', 'profiles', 'persons', 'id'],
   ['persons', 'nationality_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['persons', 'occupation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['persons', 'person_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['persons', 'photo_file_id', 'common', 'files', 'id'],
   ['persons', 'preferred_language_concept_id', 'terminology', 'catalog_concepts', 'id'],

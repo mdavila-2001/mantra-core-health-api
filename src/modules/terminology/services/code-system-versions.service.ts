@@ -152,7 +152,19 @@ export class CodeSystemVersionsService {
           versionId,
         });
       }
-      if (version.stateConceptId !== CONCEPTS.TERM_DRAFT) {
+      // El `null` pasa por el mismo motivo por el que `findPromotableByVersion`
+      // ya promovía los conceptos sin estado: las versiones que crearon los ETL
+      // de `tools/terminology-import/` no fijan `state_concept_id`, y ese hueco
+      // es un olvido del importador, no una decisión sobre la versión.
+      //
+      // Sin esto quedaban en un limbo cerrado: sus conceptos son invisibles a
+      // toda expansión —que sólo selecciona activos— y la única puerta para
+      // activarlos respondía 422. Son ~450 000 conceptos ya cargados; la
+      // alternativa era volver a correr las siete herramientas.
+      if (
+        version.stateConceptId != null &&
+        version.stateConceptId !== CONCEPTS.TERM_DRAFT
+      ) {
         throw new PreconditionFailedException(
           'Solo se puede publicar una versión en borrador',
           { versionId },

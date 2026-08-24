@@ -9,7 +9,7 @@ contienen reglas de negocio; solo construcción de consultas y `em.create`
 |-------------|-----------|---------------|
 | `definition-sets.repository.ts` | `FieldDefinitionSets`, `FieldDefinitionSetVersions`, `FieldSetMembers` | `findSetById/ByNamespace`, `createSet`, `findVersionById`, `createVersion`, `createMember` |
 | `field-definitions.repository.ts` | `DynamicFieldDefinitions`, `FieldValidationRules`, `FieldDependencies`, `FieldDefinitionLocalizations`, `FieldValueAccessRules` | `findFieldById/ByCode`, `createField`, `createValidationRule`, `findDependency`, `createDependency`, `findLocalization`, `createLocalization`, `createAccessRule` |
-| `assignments.repository.ts` | `FieldAssignments`, `ExtensionTargetPolicies`, `DynamicFieldSections` | `findActivePolicy`, `countActiveAssignments`, `createSection`, `createAssignment` |
+| `assignments.repository.ts` | `FieldAssignments`, `ExtensionTargetPolicies`, `DynamicFieldSections` | `findActivePolicyForTenant`, `countActiveAssignments`, `createSection`, `createAssignment` |
 | `form-instances.repository.ts` | `FormInstances` | `findById`, `findByResourceAndVersion`, `create` |
 | `field-values.repository.ts` | `FieldValues`, `FieldValueAudit`, `FieldValueProvenance` | `findById`, `findPreliminaryByInstance`, `create`, `createAudit`, `createProvenance` |
 | `migrations.repository.ts` | `FieldSchemaMigrations` | `findById`, `create` |

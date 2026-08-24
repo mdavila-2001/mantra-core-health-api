@@ -185,6 +185,30 @@ export class PostJournalDto {
   reference?: string;
 
   /**
+   * Tipo del documento origen que motiva el asiento (p. ej. `'INVOICE'`,
+   * `'APPOINTMENT'`, `'EXPENSE'`). Carril 18 — es lo que permite asociar
+   * automáticamente un ingreso con la cita/factura pagada que lo originó
+   * (spec: "asociar automáticamente los ingresos con las citas pagadas"),
+   * sin inventar una FK nueva: la columna ya existía en `journal_transactions`
+   * pero ningún DTO la exponía.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Tipo del documento origen (p. ej. INVOICE, APPOINTMENT, EXPENSE)',
+    maxLength: 40,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  sourceDocumentType?: string;
+
+  /** Identificador del documento origen (p. ej. `billing.invoices.id`). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  sourceDocumentId?: string;
+
+  /**
    * Valor de lines mantenido por la instancia.
    */
   @ApiProperty({

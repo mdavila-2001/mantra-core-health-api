@@ -197,8 +197,7 @@ export class RegisterPatientDto {
    */
   @ApiPropertyOptional({
     maxLength: 200,
-    description:
-      'Ocupación en texto libre, para cuando no está en el catálogo',
+    description: 'Ocupación en texto libre, para cuando no está en el catálogo',
   })
   @IsOptional()
   @IsString()

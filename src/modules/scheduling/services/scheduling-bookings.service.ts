@@ -52,6 +52,9 @@ import {
   RequestBookingDto,
   AcceptBookingDto,
   RejectBookingDto,
+  RequestBookingInfoDto,
+  ProposeScheduleDto,
+  ProposeScheduleResponseDto,
   BookingDecisionResponseDto,
   BookingResponseDto,
   RescheduleBookingDto,
@@ -114,6 +117,12 @@ const ACTIVE_BOOKING_STATES: readonly string[] = [
  * Quedan fuera solo las dos terminales que el filtro nombra: cancelada y
  * ausencia.
  */
+/** Estados en los que la solicitud todavía espera la respuesta del prestador. */
+const PENDING_DECISION_STATES: readonly string[] = [
+  SCHED.BOOKING_REQUESTED,
+  SCHED.BOOKING_PENDING_CONFIRMATION,
+];
+
 const VISIBLE_BOOKING_STATES: readonly string[] = [
   SCHED.BOOKING_REQUESTED,
   SCHED.BOOKING_PENDING_CONFIRMATION,
@@ -1179,6 +1188,203 @@ export class SchedulingBookingsService {
       actor,
       'REJECTED',
     );
+  }
+
+  /**
+   * El centro **pide algo** antes de aceptar la solicitud — CARRIL 11.
+   *
+   * La especificación de centros de diagnóstico enumera tres cosas que un
+   * centro puede pedir antes de confirmar: documentación adicional, una orden
+   * médica, o avisar cómo hay que prepararse. Las tres son la misma situación
+   * —falta algo— así que son una sola operación con un motivo tipado, y no tres
+   * estados que después nadie sabe distinguir.
+   *
+   * **No cambia de estado si ya estaba pendiente.** La solicitud nace en
+   * `PENDING_CONFIRMATION` y pedir un segundo papel no la mueve a ningún lado:
+   * lo que cambia es el mensaje. La máquina rechaza `X → X` con razón, así que
+   * la transición sólo se valida cuando de verdad la hay.
+   *
+   * **El cupo se mantiene tomado.** Pedirle un papel a alguien no es motivo
+   * para regalarle su horario a otra persona mientras lo consigue.
+   *
+   * @param bookingId - Solicitud sobre la que se pide.
+   * @param dto - Qué falta y el mensaje para la persona.
+   * @param actor - Quien pide, del lado del prestador.
+   * @returns El estado en el que quedó la solicitud.
+   */
+  async requestInfo(
+    bookingId: string,
+    dto: RequestBookingInfoDto,
+    actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    const motivo = requireReason(dto.reasonText, 'pedir documentación');
+
+    this.logger.info(
+      {
+        operation: 'scheduling.booking.request-info',
+        bookingId,
+        infoRequested: dto.infoRequested,
+      },
+      'Requesting information before accepting',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const fromState = booking.statusConceptId;
+      this.asegurarPendiente(fromState, bookingId);
+
+      const ocurrioEn = new Date();
+      if (fromState !== SCHED.BOOKING_PENDING_CONFIRMATION) {
+        this.assertTransition(fromState, SCHED.BOOKING_PENDING_CONFIRMATION);
+        booking.statusConceptId = SCHED.BOOKING_PENDING_CONFIRMATION;
+        touch(booking, actor.id);
+      }
+
+      await this.recordTransition(tx, booking, actor, {
+        bookingId: booking.id,
+        fromStateConceptId: fromState,
+        toStateConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        reasonText: motivo,
+        actorKind: 'PROVIDER',
+        infoRequested: dto.infoRequested,
+      });
+
+      return {
+        bookingId: booking.id,
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        occurredAt: ocurrioEn.toISOString(),
+        // Pedir documentación no acepta la solicitud, así que no puede chocar
+        // con ninguna otra ni desplazarla: la lista va vacía a propósito, igual
+        // que en las demás operaciones que dejan la cita pendiente.
+        desplazadas: [],
+      };
+    });
+  }
+
+  /**
+   * El centro **propone otro horario** para la solicitud — CARRIL 11.
+   *
+   * Mueve el cupo tomado al propuesto y deja la solicitud pendiente: proponer
+   * no es acordar, y la persona todavía tiene que poder mirar el horario nuevo.
+   * Por eso no confirma nada y el cupo queda tomado, no reservado.
+   *
+   * Se distingue de `reschedule` en quién y desde dónde: aquélla mueve una cita
+   * **vigente** a pedido de quien la tiene, ésta contrapropone sobre una
+   * solicitud que todavía no se aceptó.
+   *
+   * @param bookingId - Solicitud sobre la que se propone.
+   * @param dto - El cupo propuesto y por qué.
+   * @param actor - Quien propone, del lado del prestador.
+   * @returns El cupo en el que quedó la solicitud.
+   */
+  async proposeSchedule(
+    bookingId: string,
+    dto: ProposeScheduleDto,
+    actor: AuthenticatedUser,
+  ): Promise<ProposeScheduleResponseDto> {
+    const motivo = requireReason(dto.reasonText, 'proponer otro horario');
+
+    this.logger.info(
+      {
+        operation: 'scheduling.booking.propose-schedule',
+        bookingId,
+        toSlotId: dto.proposedSlotId,
+      },
+      'Proposing another slot for the request',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const fromState = booking.statusConceptId;
+      this.asegurarPendiente(fromState, bookingId);
+
+      const origenId = booking.bookableSlotId;
+      if (dto.proposedSlotId === origenId) {
+        throw new PreconditionFailedException(
+          'El horario propuesto es el que ya tiene la solicitud',
+          { bookingId },
+        );
+      }
+
+      const destino = await this.bookingsRepo.findSlotForUpdate(
+        tx,
+        dto.proposedSlotId,
+      );
+      if (!destino) {
+        throw new ResourceNotFoundException('Cupo propuesto no encontrado', {
+          slotId: dto.proposedSlotId,
+        });
+      }
+      if (destino.remainingCapacity <= 0) {
+        throw new ConflictException('El cupo propuesto no tiene lugar', {
+          slotId: dto.proposedSlotId,
+        });
+      }
+
+      const origen = await this.bookingsRepo.findSlotForUpdate(tx, origenId);
+      if (origen) {
+        origen.remainingCapacity += 1;
+        if (origen.statusConceptId !== CONCEPTS.SLOT_BLOCKED) {
+          origen.statusConceptId = CONCEPTS.SLOT_OPEN;
+        }
+        touch(origen, actor.id);
+      }
+      destino.remainingCapacity -= 1;
+      if (destino.remainingCapacity === 0) {
+        destino.statusConceptId = CONCEPTS.SLOT_HELD;
+      }
+      touch(destino, actor.id);
+
+      booking.bookableSlotId = dto.proposedSlotId;
+      if (fromState !== SCHED.BOOKING_PENDING_CONFIRMATION) {
+        this.assertTransition(fromState, SCHED.BOOKING_PENDING_CONFIRMATION);
+        booking.statusConceptId = SCHED.BOOKING_PENDING_CONFIRMATION;
+      }
+      touch(booking, actor.id);
+
+      this.bookingsRepo.recordReschedule(tx, {
+        bookingId,
+        fromSlotId: origenId,
+        toSlotId: dto.proposedSlotId,
+        rescheduledByUserId: actor.id,
+        occurredAt: new Date(),
+      });
+      await this.recordTransition(tx, booking, actor, {
+        bookingId: booking.id,
+        fromStateConceptId: fromState,
+        toStateConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        fromSlotId: origenId,
+        toSlotId: dto.proposedSlotId,
+        reasonText: motivo,
+        actorKind: 'PROVIDER',
+      });
+
+      return {
+        bookingId,
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        fromSlotId: origenId,
+        toSlotId: dto.proposedSlotId,
+      };
+    });
+  }
+
+  /**
+   * Exige que la solicitud siga esperando una respuesta del prestador.
+   *
+   * Pedir documentación o proponer otro horario sobre una cita ya aceptada, ya
+   * rechazada o ya atendida no es una operación tardía: es otra cosa, y tiene
+   * sus propios caminos (`reschedule`, `cancel`).
+   *
+   * @param fromState - Estado en el que está la reserva.
+   * @param bookingId - Reserva evaluada, para el detalle del error.
+   */
+  private asegurarPendiente(fromState: string, bookingId: string): void {
+    if (!PENDING_DECISION_STATES.includes(fromState)) {
+      throw new PreconditionFailedException(
+        'Sólo se opera así sobre una solicitud pendiente',
+        { bookingId, statusConceptId: fromState },
+      );
+    }
   }
 
   /**

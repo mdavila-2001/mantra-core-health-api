@@ -32,6 +32,7 @@ import {
 import { SeedModule } from './common/seed/seed.module';
 import { seedBootEnvSchema } from './common/seed/seed-boot.env';
 import { IamModule } from './modules/iam/iam.module';
+import { ContentPacksModule } from './modules/content_packs/content_packs.module';
 import { DirectoryModule } from './modules/directory/directory.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
 import { TerminologyModule } from './modules/terminology/terminology.module';
@@ -55,6 +56,7 @@ import { CrossStoreConsistencyModule } from './modules/cross_store_consistency/c
 import { DelegatedAccessModule } from './modules/delegated_access/delegated_access.module';
 import { DiagnosticUnitsModule } from './modules/diagnostic_units/diagnostic_units.module';
 import { DiagnosticsModule } from './modules/diagnostics/diagnostics.module';
+import { SurveysModule } from './modules/surveys/surveys.module';
 import { EducationModule } from './modules/education/education.module';
 import { ErpModule } from './modules/erp/erp.module';
 import { FormsModule } from './modules/forms/forms.module';
@@ -84,7 +86,6 @@ import { QaLabModule } from './modules/qa_lab/qa_lab.module';
 import { ReadModelsModule } from './modules/read_models/read_models.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
-import { SurveysModule } from './modules/surveys/surveys.module';
 import { SystemContextModule } from './modules/system_context/system_context.module';
 import { SystemOpsModule } from './modules/system_ops/system_ops.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
@@ -168,6 +169,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // OrmModule para que el esquema esté materializado cuando corre el seed.
     SeedModule,
     IamModule,
+    ContentPacksModule,
     DirectoryModule,
     ProfilesModule,
     TerminologyModule,

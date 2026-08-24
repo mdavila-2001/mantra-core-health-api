@@ -70,15 +70,31 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
+  // Carril 18: por defecto, sin prácticas activas — los tests con actor
+  // SECURITY_ADMIN/ACCOUNTING_APPROVER nunca la consultan (short-circuit en
+  // `assertPractitionerOwnsPractice`); los tests de PRACTITIONER la fijan.
+  const practiceTenantLookup = {
+    findActivePracticeIdsForPractitioner: mockFn().mockResolvedValue([]),
+  };
   const service = new LedgerService(
     em as any,
     journalRepo,
     accountsRepo as any,
     fiscalRepo as any,
     auditTrail as any,
+    practiceTenantLookup as any,
     logger as any,
   );
-  return { service, tx, em, journalRepo, accountsRepo, fiscalRepo, auditTrail };
+  return {
+    service,
+    tx,
+    em,
+    journalRepo,
+    accountsRepo,
+    fiscalRepo,
+    auditTrail,
+    practiceTenantLookup,
+  };
 }
 
 describe('LedgerService', () => {
@@ -344,6 +360,106 @@ describe('LedgerService', () => {
       await expect(
         d.service.classify('nope', {}, actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('Carril 18 — auto-servicio del PRACTITIONER en el asiento', () => {
+    const practitioner = {
+      id: 'doc-1',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'hpp-1',
+    } as any;
+    const balanced = {
+      practiceId: 'p1',
+      transactionDate: '2026-01-31',
+      lines: [
+        { accountId: 'acc-d', direction: 'DEBIT', amount: '100.00' },
+        { accountId: 'acc-c', direction: 'CREDIT', amount: '100.00' },
+      ],
+    };
+
+    it('createDraft rechaza (422) a un profesional sin vinculación activa con esa práctica', async () => {
+      const d = build();
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['other-practice'],
+      );
+      await expect(
+        d.service.createDraft(balanced as any, practitioner),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(
+        d.practiceTenantLookup.findActivePracticeIdsForPractitioner,
+      ).toHaveBeenCalledWith('hpp-1');
+    });
+
+    it('createDraft acepta a un profesional vinculado a la práctica, y persiste sourceDocumentType/Id', async () => {
+      const d = build();
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['p1'],
+      );
+      const res = await d.service.createDraft(
+        {
+          ...balanced,
+          sourceDocumentType: 'INVOICE',
+          sourceDocumentId: 'inv-1',
+        } as any,
+        practitioner,
+      );
+      expect(res.status).toBe(ACCT.TXN_DRAFT);
+      expect(d.journalRepo.createTransaction).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          sourceDocumentType: 'INVOICE',
+          sourceDocumentId: 'inv-1',
+        }),
+      );
+    });
+
+    it('createDraft rechaza (422) a un PRACTITIONER sin perfil profesional en el JWT', async () => {
+      const d = build();
+      const noProfile = { id: 'doc-2', roles: ['PRACTITIONER'] } as any;
+      await expect(
+        d.service.createDraft(balanced as any, noProfile),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(
+        d.practiceTenantLookup.findActivePracticeIdsForPractitioner,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('SECURITY_ADMIN nunca consulta la pertenencia del profesional (no-op)', async () => {
+      const d = build();
+      await d.service.createDraft(balanced as any, actor);
+      expect(
+        d.practiceTenantLookup.findActivePracticeIdsForPractitioner,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('classify rechaza (422) si el asiento es de una práctica ajena al profesional', async () => {
+      const d = build();
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't1',
+        statusConceptId: ACCT.TXN_DRAFT,
+        practiceId: 'other-practice',
+      });
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['p1'],
+      );
+      await expect(
+        d.service.classify('t1', {}, practitioner),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('attachFile rechaza (422) si el asiento es de una práctica ajena al profesional', async () => {
+      const d = build();
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't1',
+        practiceId: 'other-practice',
+      });
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['p1'],
+      );
+      await expect(
+        d.service.attachFile('t1', { fileId: 'f1' } as any, practitioner),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 

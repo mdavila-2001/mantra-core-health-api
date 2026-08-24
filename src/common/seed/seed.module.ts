@@ -52,9 +52,13 @@ import { VademecumSeedService } from './vademecum-seed.service';
 import { MessageQueues } from '../../modules/messaging/entities';
 import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
+import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
+import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 import { SpecialtyChartTemplates } from '../../modules/chart/entities';
 import {
@@ -120,6 +124,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
       DynamicFieldSections,
       DynamicFieldDefinitions,
       FieldAssignments,
+      AuthzPermissions,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar
@@ -131,6 +136,9 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     DynamicEnumSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    BoliviaFacilitiesSeedService,
+    BoliviaFeeScheduleSeedService,
+    BoliviaInsuranceSeedService,
     MessagingSeedService,
     AudioAssetsSeedService,
     VademecumSeedService,
@@ -138,6 +146,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    ProviderAccountsSeedService,
     SeedBootstrapService,
     ClinicalFormsSeedService,
   ],
@@ -147,6 +156,9 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     DynamicEnumSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    BoliviaFacilitiesSeedService,
+    BoliviaFeeScheduleSeedService,
+    BoliviaInsuranceSeedService,
     MessagingSeedService,
     AudioAssetsSeedService,
     VademecumSeedService,
@@ -154,6 +166,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    ProviderAccountsSeedService,
     ClinicalFormsSeedService,
   ],
 })

@@ -5,3 +5,4 @@ export * from './order-sets.controller';
 export * from './referrals.controller';
 export * from './care-gaps.controller';
 export * from './virtual-encounters.controller';
+export * from './prescription-favorites.controller';

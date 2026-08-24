@@ -153,6 +153,19 @@ export class RegisterPractitionerDto {
   regulatoryAuthority?: string;
 
   /**
+   * Fecha de inscripción de la matrícula (ISO `YYYY-MM-DD`). Es el `valid_from`
+   * de la autorización jurisdiccional: sin esto la única forma de declararla era
+   * agregar una segunda autorización después del alta.
+   */
+  @ApiPropertyOptional({
+    description: 'Fecha de inscripción de la matrícula (ISO)',
+    format: 'date',
+  })
+  @IsOptional()
+  @IsISO8601()
+  licenseIssueDate?: string;
+
+  /**
    * Título profesional visible (p. ej. "Dra.", "Lic.").
    */
   @ApiPropertyOptional({ maxLength: 100 })
@@ -220,19 +233,6 @@ export class RegisterPractitionerDto {
   @IsOptional()
   @IsUUID()
   residenceMunicipalityConceptId?: string;
-
-  /**
-   * Fecha en que se inscribió la matrícula, en ISO-8601.
-   *
-   * Va a `jurisdiction_authorizations.valid_from`, que es desde cuándo vale la
-   * habilitación —no a `professional_credentials.issue_date`, que es la fecha
-   * del título, otro documento—. También lo mandaba ya el formulario y también
-   * volvía como `400 … should not exist`.
-   */
-  @ApiPropertyOptional({ format: 'date' })
-  @IsOptional()
-  @IsISO8601()
-  licenseIssueDate?: string;
 
   /**
    * Teléfono de contacto profesional.

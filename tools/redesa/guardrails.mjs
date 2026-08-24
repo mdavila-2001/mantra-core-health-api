@@ -361,6 +361,15 @@ const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
   'src/modules/tracking/repositories/tracking.repository.ts#findOpenSubjectsForScan',
   'src/modules/vector_rag/repositories/vector-catalog.repository.ts#findQueuedJobs',
   'src/modules/workflow/repositories/workflow-runtime.repository.ts#findDueInstancesForUpdate',
+  // Directorio público (P10, 2026-08-18): `community.public_profiles` es la
+  // vitrina que se sirve **sin sesión y a través de todos los tenants** —nadie
+  // busca «un cardiólogo dentro de la clínica X» sin saber que X existe—, así
+  // que acotar por tenant devolvería un directorio vacío. La barrera acá no es
+  // el tenant sino el par `visibility = PUBLIC AND status = ACTIVE`, que las
+  // dos consultas aplican y el propio repositorio documenta arriba de todo.
+  // `countIndexable` es el denominador de «indexados N de N» del reindexado,
+  // que corre como SYSTEM desde `internal/community/search/reindex`.
+  'src/modules/community/repositories/public-search.repository.ts#countIndexable',
 ]);
 
 /**
