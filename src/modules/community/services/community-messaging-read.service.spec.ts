@@ -75,6 +75,30 @@ describe('CommunityMessagingReadService', () => {
       expect(res.items[0].unreadCount).toBe(3);
     });
 
+    it('cuenta los no leídos de los OTROS, no los propios', async () => {
+      // Contaba todos los mensajes de la conversación, así que quien escribía
+      // se sumaba a sí mismo: con uno de cada lado, los dos veían «2» y el que
+      // acababa de escribir volvía a la bandeja con un aviso de su propio
+      // mensaje. Lo que fija esta prueba es que el lector viaja hasta el
+      // repositorio, que es lo único que le permite excluirse.
+      const d = build();
+      d.conversationsRepo.listActiveParticipationsOf.mockResolvedValue([
+        { conversationId: 'c-1', lastReadMessageId: 'm-0' },
+      ]);
+      d.conversationsRepo.listConversationsByIds.mockResolvedValue([
+        { id: 'c-1', conversationTypeConceptId: 'ct' },
+      ]);
+
+      await d.service.listConversations('p-1', actor, 20);
+
+      expect(d.conversationsRepo.countUnread).toHaveBeenCalledWith(
+        expect.anything(),
+        'c-1',
+        'p-1',
+        'm-0',
+      );
+    });
+
     it('exige ser el titular del perfil', async () => {
       const d = build();
       d.visibility.assertOwnProfile.mockRejectedValue(new Error('prohibido'));
