@@ -2,6 +2,14 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 
 /** Los dieciséis seeds de la cadena, en el orden en que el orquestador los corre. */
+/**
+ * Los pasos de la cadena, **en el orden real** de `pasosDependientes()`.
+ *
+ * Para armar los dobles alcanzaría con la lista sin ordenar, pero esta constante
+ * es lo primero que se lee al abrir el archivo y se toma como la documentación
+ * del orden: tenerla desalineada —`clinicalForms` figuraba al final cuando corre
+ * antes del administrador de arranque— enseña un orden que no existe.
+ */
 const PASOS = [
   'terminology',
   'dynamicEnums',
@@ -16,9 +24,9 @@ const PASOS = [
   'identityVerification',
   'clinicalRoles',
   'platformPermissions',
+  'clinicalForms',
   'bootstrapAdmin',
   'providerAccounts',
-  'clinicalForms',
 ] as const;
 
 type Paso = (typeof PASOS)[number];
@@ -78,12 +86,33 @@ function armar(fallan: Paso[] = []) {
   return { service, dobles, logger };
 }
 
+/** Los pasos de contenido, que `SEED_CONTENT_ON_BOOT=false` saltea. */
+const CONTENIDO: readonly Paso[] = [
+  'glossary',
+  'boliviaFacilities',
+  'boliviaInsurance',
+  'boliviaFeeSchedule',
+  'vademecum',
+  'clinicalForms',
+  'providerAccounts',
+];
+
+/** Los pasos de núcleo, que corren siempre que la cadena corra. */
+const NUCLEO: readonly Paso[] = PASOS.filter(
+  (nombre) => !CONTENIDO.includes(nombre),
+);
+
 describe('SeedBootstrapService', () => {
   const entornoOriginal = process.env.SEED_ON_BOOT;
+  const contenidoOriginal = process.env.SEED_CONTENT_ON_BOOT;
 
   afterEach(() => {
     if (entornoOriginal === undefined) delete process.env.SEED_ON_BOOT;
     else process.env.SEED_ON_BOOT = entornoOriginal;
+
+    if (contenidoOriginal === undefined)
+      delete process.env.SEED_CONTENT_ON_BOOT;
+    else process.env.SEED_CONTENT_ON_BOOT = contenidoOriginal;
   });
 
   describe('interruptor de arranque', () => {
@@ -112,6 +141,66 @@ describe('SeedBootstrapService', () => {
 
       expect(dobles.terminology.run).toHaveBeenCalledTimes(1);
       expect(dobles.clinicalForms.run).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('interruptor de contenido', () => {
+    it('con SEED_CONTENT_ON_BOOT=false corre el núcleo y saltea el contenido', async () => {
+      process.env.SEED_CONTENT_ON_BOOT = 'false';
+      const { service, dobles } = armar();
+
+      const summary = await service.run();
+
+      for (const nombre of NUCLEO) {
+        expect(dobles[nombre].run).toHaveBeenCalledTimes(1);
+      }
+      for (const nombre of CONTENIDO) {
+        expect(dobles[nombre].run).not.toHaveBeenCalled();
+      }
+      expect(summary.ok).toBe(NUCLEO.length);
+      expect(summary.steps).toHaveLength(NUCLEO.length);
+    });
+
+    it('lo salteado se informa aparte y no cuenta como omitido', async () => {
+      // La diferencia importa: `failed` significa «se intentó y explotó», y
+      // teñir de rojo un arranque que hizo exactamente lo que se le pidió
+      // convierte el resumen en ruido que nadie mira.
+      process.env.SEED_CONTENT_ON_BOOT = 'false';
+      const { service, logger } = armar();
+
+      const summary = await service.run();
+
+      expect(summary.failed).toBe(0);
+      expect(summary.skippedContent).toBe(CONTENIDO.length);
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'seed.step.skipped' }),
+        expect.stringContaining('SEED_CONTENT_ON_BOOT=false'),
+      );
+    });
+
+    it('el administrador de arranque es núcleo: se siembra igual', async () => {
+      // Es el punto del modo: una instalación sin catálogos de negocio pero con
+      // alguien que pueda entrar a cargarlos.
+      process.env.SEED_CONTENT_ON_BOOT = 'false';
+      const { service, dobles } = armar();
+
+      await service.run();
+
+      expect(dobles.bootstrapAdmin.run).toHaveBeenCalledTimes(1);
+    });
+
+    it('sin la variable declarada corre la cadena entera', async () => {
+      delete process.env.SEED_CONTENT_ON_BOOT;
+      const { service, dobles } = armar();
+
+      const summary = await service.run();
+
+      for (const nombre of PASOS) {
+        expect(dobles[nombre].run).toHaveBeenCalledTimes(1);
+      }
+      // Sin salteados el resumen conserva la forma que tenía antes del flag.
+      expect(summary.skippedContent).toBeUndefined();
     });
   });
 

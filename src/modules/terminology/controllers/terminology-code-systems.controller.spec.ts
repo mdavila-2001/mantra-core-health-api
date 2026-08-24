@@ -14,8 +14,15 @@ describe('TerminologyCodeSystemsController', () => {
       createCodeSystem: jest.fn(),
       createVersion: jest.fn(),
     } as any;
-    const controller = new TerminologyCodeSystemsController(service);
-    return { controller, service };
+    const readService = {
+      listCodeSystems: jest.fn(),
+      listVersions: jest.fn(),
+    } as any;
+    const controller = new TerminologyCodeSystemsController(
+      service,
+      readService,
+    );
+    return { controller, service, readService };
   }
 
   it('createCodeSystem delega en el servicio', async () => {
@@ -46,5 +53,25 @@ describe('TerminologyCodeSystemsController', () => {
 
     expect(service.createVersion).toHaveBeenCalledWith('cs-1', dto, user);
     expect(result).toBe(expected);
+  });
+
+  it('lista los sistemas de códigos', async () => {
+    const { controller, readService } = build();
+    const items = [{ id: 'cs-1', internalCode: 'icd10cm' }];
+    readService.listCodeSystems.mockResolvedValue(items);
+
+    await expect(controller.listCodeSystems()).resolves.toEqual({ items });
+  });
+
+  it('lista las versiones de un sistema, diciendo cuáles admiten conceptos', async () => {
+    const { controller, readService } = build();
+    const items = [
+      { id: 'v-1', version: '2026', state: 'DRAFT', acceptsConcepts: true },
+      { id: 'v-0', version: '2025', state: 'ACTIVE', acceptsConcepts: false },
+    ];
+    readService.listVersions.mockResolvedValue(items);
+
+    await expect(controller.listVersions('cs-1')).resolves.toEqual({ items });
+    expect(readService.listVersions).toHaveBeenCalledWith('cs-1');
   });
 });
