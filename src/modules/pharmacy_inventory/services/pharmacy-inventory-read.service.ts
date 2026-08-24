@@ -11,6 +11,7 @@ import type {
   PharmacySites,
 } from '../../pharmacy/entities';
 import { PharmacyReadRepository } from '../../pharmacy/repositories';
+import { isRetailList } from '../../pharmacy/services/pharmacy-read.service';
 import type { InventoryStockPositions } from '../entities';
 import type {
   AvailabilityPriceDto,
@@ -134,7 +135,6 @@ export class PharmacyInventoryReadService {
           medication: optionalConcept(conceptById, product.medicationConceptId),
           onHandQuantity: stock.onHand,
           reservedQuantity: stock.reserved,
-          quarantineQuantity: stock.quarantine,
           availableQuantity: stock.available,
           locationCount: stock.locationCount,
         };
@@ -196,7 +196,7 @@ export class PharmacyInventoryReadService {
     const sites = await this.pharmacyRepo.findActiveSites(em, ownerIds);
 
     const now = new Date();
-    const [locations, priceLists, practiceContext] = await Promise.all([
+    const [locations, allPriceLists, practiceContext] = await Promise.all([
       this.inventoryRepo.findActiveLocationsBySites(
         em,
         sites.map((site) => site.id),
@@ -204,6 +204,9 @@ export class PharmacyInventoryReadService {
       this.pharmacyRepo.findCurrentPublicPriceLists(em, ownerIds, now),
       this.resolveAddresses(em, sites),
     ]);
+    // El repo ya excluye lo ligado a aseguradora; el filtro acá vuelve a
+    // afirmarlo: al directorio sólo llega precio de mostrador.
+    const priceLists = allPriceLists.filter(isRetailList);
     const [positions, prices] = await Promise.all([
       this.inventoryRepo.findStockPositions(
         em,
@@ -497,14 +500,51 @@ function totalOf(
   const currencies = new Set(priced.map((price) => price.currency?.code));
   if (currencies.size > 1) return { totalAmount: null, currency: null };
 
-  const total = priced.reduce(
-    (sum, price) => sum + quantity(price.patientAmount ?? price.unitAmount),
-    0,
-  );
   return {
-    totalAmount: total.toFixed(2),
+    totalAmount: sumAmounts(
+      priced.map((price) => price.patientAmount ?? price.unitAmount),
+    ),
     currency: priced[0].currency ?? null,
   };
+}
+
+/** Un importe `numeric` de BD bien formado: dígitos y a lo sumo un punto. */
+const DECIMAL_PATTERN = /^-?\d+(?:\.\d+)?$/;
+
+/** Cuántos decimales trae un importe. */
+function decimalsOf(value: string): number {
+  const dot = value.indexOf('.');
+  return dot === -1 ? 0 : value.length - dot - 1;
+}
+
+/** El importe como entero a la escala dada; lo ilegible cuenta 0. */
+function scaledAmount(value: string, scale: number): bigint {
+  if (!DECIMAL_PATTERN.test(value)) return 0n;
+  const negative = value.startsWith('-');
+  const [whole, fraction = ''] = (negative ? value.slice(1) : value).split('.');
+  const digits = whole + fraction.padEnd(scale, '0').slice(0, scale);
+  return negative ? -BigInt(digits) : BigInt(digits);
+}
+
+/**
+ * Suma exacta de importes `numeric` (strings de BD): se alinean los decimales
+ * y se suma en enteros — el punto flotante binario no sabe sumar dinero
+ * decimal. El resultado se sirve con 2 decimales (half-up), el formato del
+ * contrato.
+ */
+function sumAmounts(values: readonly string[]): string {
+  const amounts = values.map((value) => value.trim());
+  const scale = Math.max(2, ...amounts.map(decimalsOf));
+  const total = amounts.reduce(
+    (sum, amount) => sum + scaledAmount(amount, scale),
+    0n,
+  );
+  const rest = 10n ** BigInt(scale - 2);
+  const half = total < 0n ? -(rest / 2n) : rest / 2n;
+  const cents = (total + half) / rest;
+  const sign = cents < 0n ? '-' : '';
+  const abs = cents < 0n ? -cents : cents;
+  return `${sign}${(abs / 100n).toString()}.${(abs % 100n).toString().padStart(2, '0')}`;
 }
 
 /** El orden de candidatura: completas, cerca, baratas, y por nombre. */
@@ -543,13 +583,16 @@ function unique(values: readonly string[]): string[] {
   return [...new Set(values)];
 }
 
-/** Agrega posiciones por producto: sumas y en cuántas ubicaciones está. */
+/**
+ * Agrega posiciones por producto: sumas y en cuántas ubicaciones está. La
+ * cuarentena no sale de acá: es estado interno del ledger, no dato del
+ * directorio — ya está descontada del `available`.
+ */
 function aggregateStock(positions: readonly InventoryStockPositions[]): Map<
   string,
   {
     onHand: number;
     reserved: number;
-    quarantine: number;
     available: number;
     locationCount: number;
   }
@@ -559,7 +602,6 @@ function aggregateStock(positions: readonly InventoryStockPositions[]): Map<
     {
       onHand: number;
       reserved: number;
-      quarantine: number;
       available: number;
       // Ubicaciones DISTINTAS: dos lotes en el mismo estante son una sola.
       locations: Set<string>;
@@ -569,13 +611,11 @@ function aggregateStock(positions: readonly InventoryStockPositions[]): Map<
     const current = sums.get(position.pharmacyProductId) ?? {
       onHand: 0,
       reserved: 0,
-      quarantine: 0,
       available: 0,
       locations: new Set<string>(),
     };
     current.onHand += quantity(position.onHandQuantity);
     current.reserved += quantity(position.reservedQuantity);
-    current.quarantine += quantity(position.quarantineQuantity);
     current.available += quantity(position.availableQuantity);
     current.locations.add(position.inventoryLocationId);
     sums.set(position.pharmacyProductId, current);
@@ -586,7 +626,6 @@ function aggregateStock(positions: readonly InventoryStockPositions[]): Map<
       {
         onHand: sum.onHand,
         reserved: sum.reserved,
-        quarantine: sum.quarantine,
         available: sum.available,
         locationCount: sum.locations.size,
       },
