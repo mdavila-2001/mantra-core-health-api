@@ -179,6 +179,62 @@ export class RegisterPractitionerDto {
   nationalId?: string;
 
   /**
+   * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`).
+   *
+   * Mismo campo, mismo catálogo y mismo destino que en `RegisterPatientDto`: la
+   * terminación LP/CB/SC… que distingue cédulas homónimas de departamentos
+   * distintos (backlog T-01). Faltaba sólo acá, y el formulario de alta de
+   * profesional **ya lo mandaba**: con `forbidNonWhitelisted` la petición volvía
+   * `400 property issuerAdministrativeAreaConceptId should not exist`, así que
+   * elegir el departamento rompía el alta entera en vez de enriquecerla.
+   *
+   * Se ignora sin `nationalId`: sin documento no hay identificador al que
+   * atarle un departamento de emisión.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)',
+  })
+  @IsOptional()
+  @IsUUID()
+  issuerAdministrativeAreaConceptId?: string;
+
+  /**
+   * Municipio de residencia (miembro de `VS_BO_MUNICIPALITY`).
+   *
+   * **Sólo el municipio, sin el departamento.** El código del INE de un
+   * municipio lleva adentro el de su departamento, así que el departamento se
+   * deriva acá y no se recibe: un par (departamento, municipio) enviado por el
+   * cliente puede llegar incoherente —el municipio de un departamento con el
+   * departamento de otro— y no habría forma de saber cuál de los dos es el que
+   * la persona quiso decir.
+   *
+   * Es opcional, como el resto del domicilio: nadie queda fuera del alta por no
+   * decir dónde vive.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Municipio de residencia (catálogo VS_BO_MUNICIPALITY)',
+  })
+  @IsOptional()
+  @IsUUID()
+  residenceMunicipalityConceptId?: string;
+
+  /**
+   * Fecha en que se inscribió la matrícula, en ISO-8601.
+   *
+   * Va a `jurisdiction_authorizations.valid_from`, que es desde cuándo vale la
+   * habilitación —no a `professional_credentials.issue_date`, que es la fecha
+   * del título, otro documento—. También lo mandaba ya el formulario y también
+   * volvía como `400 … should not exist`.
+   */
+  @ApiPropertyOptional({ format: 'date' })
+  @IsOptional()
+  @IsISO8601()
+  licenseIssueDate?: string;
+
+  /**
    * Teléfono de contacto profesional.
    */
   @ApiPropertyOptional({

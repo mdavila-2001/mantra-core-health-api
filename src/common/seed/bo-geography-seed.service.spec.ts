@@ -10,13 +10,24 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import {
+  BO_DEPARTMENT_BY_INE_PREFIX,
   BO_DEPARTMENT_VALUE_SET,
   BO_DEPARTMENTS,
+  BO_MUNICIPALITIES,
+  BO_MUNICIPALITY_VALUE_SET,
   boDepartmentConceptId,
   boDepartmentMemberId,
   boDepartmentValueSetId,
   boDepartmentVersionId,
+  boMunicipalityByConceptId,
+  boMunicipalityConceptCode,
+  boMunicipalityConceptId,
+  boMunicipalityValueSetId,
+  boMunicipalityVersionId,
 } from './bo-geography.catalog';
+
+/** Cuántos municipios declara el catálogo; el resto de las cuentas sale de acá. */
+const MUNICIPIOS = BO_MUNICIPALITIES.length;
 
 /**
  * Construye el seed con un contexto de persistencia controlado — el mismo
@@ -58,32 +69,46 @@ function build(existing: Set<string> = new Set()) {
 
 describe('BoGeographySeedService', () => {
   describe('primera corrida sobre una base vacía', () => {
-    it('materializa el conjunto, su versión vigente y los nueve departamentos', async () => {
+    it('materializa los dos conjuntos, sus versiones vigentes y todo el árbol', async () => {
       const { service, rowsOf } = build();
 
       const counters = await service.run();
 
       expect(counters).toEqual({
-        valueSets: 1,
-        versions: 1,
+        // Dos conjuntos: departamentos y municipios.
+        valueSets: 2,
+        versions: 2,
         departments: 9,
-        designations: 9,
-        properties: 9,
-        memberships: 9,
+        municipalities: MUNICIPIOS,
+        // Una designación preferida por concepto, de los dos niveles.
+        designations: 9 + MUNICIPIOS,
+        // El ISO de cada departamento, más provincia y padre de cada municipio.
+        properties: 9 + MUNICIPIOS * 2,
+        memberships: 9 + MUNICIPIOS,
       });
 
-      const [conjunto] = rowsOf('ValueSets');
-      expect(conjunto).toMatchObject({
+      const [departamentos, municipios] = rowsOf('ValueSets');
+      expect(departamentos).toMatchObject({
         id: boDepartmentValueSetId(),
         internalCode: BO_DEPARTMENT_VALUE_SET,
+      });
+      expect(municipios).toMatchObject({
+        id: boMunicipalityValueSetId(),
+        internalCode: BO_MUNICIPALITY_VALUE_SET,
       });
 
       // Sin `isDefault`, `readExpansion` sin versión explícita devolvería 404
       // aunque el conjunto y sus miembros existan: es lo que pide el desplegable.
-      const [version] = rowsOf('ValueSetVersions');
-      expect(version).toMatchObject({
+      const [versionDepartamentos, versionMunicipios] =
+        rowsOf('ValueSetVersions');
+      expect(versionDepartamentos).toMatchObject({
         id: boDepartmentVersionId(),
         valueSetId: boDepartmentValueSetId(),
+        isDefault: true,
+      });
+      expect(versionMunicipios).toMatchObject({
+        id: boMunicipalityVersionId(),
+        valueSetId: boMunicipalityValueSetId(),
         isDefault: true,
       });
     });
@@ -93,7 +118,11 @@ describe('BoGeographySeedService', () => {
 
       await service.run();
 
-      const nombres = rowsOf('CatalogConcepts').map((fila) => fila.display);
+      // Los nueve primeros conceptos son los departamentos; detrás vienen los
+      // municipios, que tienen su propia prueba.
+      const nombres = rowsOf('CatalogConcepts')
+        .slice(0, 9)
+        .map((fila) => fila.display);
       expect(nombres).toEqual([
         'Chuquisaca',
         'La Paz',
@@ -117,7 +146,7 @@ describe('BoGeographySeedService', () => {
 
       await service.run();
 
-      const miembros = rowsOf('ValueSetMembers');
+      const miembros = rowsOf('ValueSetMembers').slice(0, 9);
       expect(miembros.map((fila) => fila.ordinal)).toEqual([
         0, 1, 2, 3, 4, 5, 6, 7, 8,
       ]);
@@ -139,7 +168,9 @@ describe('BoGeographySeedService', () => {
 
       await service.run();
 
-      const isos = rowsOf('ConceptProperties').map((fila) => fila.valueJson);
+      const isos = rowsOf('ConceptProperties')
+        .slice(0, 9)
+        .map((fila) => fila.valueJson);
       expect(isos).toEqual([
         'BO-H',
         'BO-L',
@@ -173,6 +204,7 @@ describe('BoGeographySeedService', () => {
         valueSets: 0,
         versions: 0,
         departments: 0,
+        municipalities: 0,
         designations: 0,
         properties: 0,
         memberships: 0,
@@ -190,12 +222,66 @@ describe('BoGeographySeedService', () => {
 
       const counters = await service.run();
 
-      expect(counters.valueSets).toBe(0);
-      expect(counters.versions).toBe(0);
+      // El conjunto de municipios sigue faltando entero, así que ése sí se crea.
+      expect(counters.valueSets).toBe(1);
+      expect(counters.versions).toBe(1);
       expect(counters.departments).toBe(9);
-      expect(counters.memberships).toBe(9);
-      expect(rowsOf('ValueSets')).toHaveLength(0);
-      expect(rowsOf('ValueSetVersions')).toHaveLength(0);
+      expect(counters.municipalities).toBe(MUNICIPIOS);
+      expect(counters.memberships).toBe(9 + MUNICIPIOS);
+      expect(rowsOf('ValueSets')).toHaveLength(1);
+      expect(rowsOf('ValueSetVersions')).toHaveLength(1);
+    });
+  });
+
+  describe('los municipios', () => {
+    it('siembra los 340 con su código del INE por código de concepto', async () => {
+      const { service, rowsOf } = build();
+
+      await service.run();
+
+      const municipios = rowsOf('CatalogConcepts').slice(9);
+      expect(municipios).toHaveLength(MUNICIPIOS);
+      expect(municipios[0]).toMatchObject({
+        id: boMunicipalityConceptId('010101'),
+        code: boMunicipalityConceptCode('010101'),
+        display: 'Sucre',
+        selectable: true,
+      });
+    });
+
+    it('cada municipio apunta al concepto de su departamento', async () => {
+      const { service, rowsOf } = build();
+
+      await service.run();
+
+      const propiedades = rowsOf('ConceptProperties').slice(9);
+      // Dos por municipio: provincia y departamento padre, en ese orden.
+      expect(propiedades).toHaveLength(MUNICIPIOS * 2);
+      expect(propiedades[0]).toMatchObject({
+        conceptId: boMunicipalityConceptId('010101'),
+        propertyCode: 'geo:bo:province',
+        valueJson: 'Oropeza',
+      });
+      expect(propiedades[1]).toMatchObject({
+        conceptId: boMunicipalityConceptId('010101'),
+        propertyCode: 'geo:bo:department',
+        valueJson: boDepartmentConceptId('CH'),
+      });
+    });
+
+    it('la expansión los numera desde cero, aparte de la de departamentos', async () => {
+      const { service, rowsOf } = build();
+
+      await service.run();
+
+      const miembros = rowsOf('ValueSetMembers').slice(9);
+      expect(miembros).toHaveLength(MUNICIPIOS);
+      expect(miembros[0]).toMatchObject({
+        conceptId: boMunicipalityConceptId('010101'),
+        valueSetVersionId: boMunicipalityVersionId(),
+        ordinal: 0,
+      });
+      expect(miembros[MUNICIPIOS - 1].ordinal).toBe(MUNICIPIOS - 1);
     });
   });
 
@@ -204,6 +290,37 @@ describe('BoGeographySeedService', () => {
       expect(BO_DEPARTMENTS).toHaveLength(9);
       const siglas = BO_DEPARTMENTS.map((department) => department.code);
       expect(new Set(siglas).size).toBe(9);
+    });
+
+    it('todo municipio cuelga del departamento que dice su código del INE', () => {
+      // Es la invariante de la que vive el árbol del frontend: arma los grupos
+      // con el prefijo del código, así que un municipio cuyo prefijo y cuyo
+      // departamento declarado no coincidan aparecería bajo el departamento
+      // equivocado.
+      const siglas = new Set(BO_DEPARTMENTS.map((d) => d.code));
+      for (const municipality of BO_MUNICIPALITIES) {
+        expect(siglas.has(municipality.department)).toBe(true);
+        expect(BO_DEPARTMENT_BY_INE_PREFIX.get(municipality.ine.slice(0, 2))).toBe(
+          municipality.department,
+        );
+      }
+    });
+
+    it('no repite códigos del INE, aunque sí repita nombres', () => {
+      const codigos = BO_MUNICIPALITIES.map((m) => m.ine);
+      expect(new Set(codigos).size).toBe(MUNICIPIOS);
+      // Y justamente por eso la clave es el código: hay nombres repetidos entre
+      // departamentos, y sobre el nombre no se puede construir una identidad.
+      const nombres = new Set(BO_MUNICIPALITIES.map((m) => m.name));
+      expect(nombres.size).toBeLessThan(MUNICIPIOS);
+    });
+
+    it('el camino inverso resuelve el municipio desde el uuid de su concepto', () => {
+      const sucre = boMunicipalityByConceptId(boMunicipalityConceptId('010101'));
+      expect(sucre).toMatchObject({ ine: '010101', name: 'Sucre', department: 'CH' });
+      // Un uuid que no es de un municipio no resuelve: es lo que impide escribir
+      // una FK colgando en `common.addresses`.
+      expect(boMunicipalityByConceptId(boDepartmentConceptId('CH'))).toBeUndefined();
     });
 
     it('los ids son deterministas: dos derivaciones dan el mismo uuid', () => {

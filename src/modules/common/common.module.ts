@@ -64,6 +64,9 @@ import {
   exports: [
     IdentifiersRepository,
     ContactPointsRepository,
+    // El alta pública escribe el domicilio del municipio elegido, y vive en
+    // `iam`: sin exportarlo, ese módulo no puede inyectarlo.
+    AddressesRepository,
     FilesRepository,
     FileVersionsRepository,
     AttachableFileService,
