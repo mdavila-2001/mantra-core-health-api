@@ -260,6 +260,14 @@ describe('PharmacyReadService', () => {
         pharmacySiteId: 'site-9',
         code: 'OTRA',
       },
+      // Lista ligada a aseguradora: no es precio de mostrador, aunque el
+      // repo mockeado la deje pasar marcada como pública.
+      {
+        id: 'list-aseg',
+        pharmacyId: '1',
+        code: 'ASEGURADORA',
+        insurerTenantId: 'tenant-aseguradora',
+      },
     ]);
     d.repo.findCurrentPrices.mockResolvedValue([
       {
@@ -291,7 +299,8 @@ describe('PharmacyReadService', () => {
       d.service.getSitePrices('site-1'),
     );
 
-    // Las listas que se consultan son sólo las que aplican a la sede.
+    // Las listas que se consultan son sólo las que aplican a la sede — y
+    // nunca una ligada a aseguradora.
     const listIds = d.repo.findCurrentPrices.mock.calls[0][1];
     expect(listIds).toEqual(['list-pharm', 'list-site']);
     expect(result.count).toBe(1);
@@ -303,5 +312,53 @@ describe('PharmacyReadService', () => {
       display: CURRENCY.display,
     });
     expect(result.pharmacyName).toBe('Farmacia 1');
+  });
+
+  it('keeps a normal public list visible and excludes an insurer-linked one marked public', async () => {
+    const d = build();
+    d.repo.findActiveSiteById.mockResolvedValue({
+      id: 'site-1',
+      pharmacyId: '1',
+      name: 'Sede Centro',
+    });
+    d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
+    d.repo.findCurrentPublicPriceLists.mockResolvedValue([
+      {
+        id: 'list-publica',
+        pharmacyId: '1',
+        code: 'PUBLICA',
+        currencyConceptId: CURRENCY.id,
+      },
+      // Marcada pública Y ligada a aseguradora: un acuerdo entre partes no
+      // se vuelve precio de mostrador por un flag mal puesto.
+      {
+        id: 'list-aseg',
+        pharmacyId: '1',
+        code: 'ASEGURADORA',
+        insurerTenantId: 'tenant-aseguradora',
+        currencyConceptId: CURRENCY.id,
+      },
+    ]);
+    d.repo.findCurrentPrices.mockResolvedValue([
+      {
+        pharmacyPriceListId: 'list-publica',
+        pharmacyProductId: 'prod-1',
+        unitAmount: '10.00',
+        effectiveFrom: new Date('2026-08-01T00:00:00.000Z'),
+      },
+    ]);
+    d.repo.findActiveProductsByIds.mockResolvedValue([
+      { id: 'prod-1', productCode: 'AMOX-500', genericName: 'Amoxicilina' },
+    ]);
+    d.repo.findConcepts.mockResolvedValue([CURRENCY]);
+
+    const result = await runWithTenant('tenant-a', () =>
+      d.service.getSitePrices('site-1'),
+    );
+
+    // A la consulta de precios sólo entra la pública normal.
+    expect(d.repo.findCurrentPrices.mock.calls[0][1]).toEqual(['list-publica']);
+    expect(result.count).toBe(1);
+    expect(result.items[0].priceListCode).toBe('PUBLICA');
   });
 });

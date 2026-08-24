@@ -215,9 +215,11 @@ export class PharmacyReadService {
     }
 
     const now = new Date();
+    // El repo ya excluye lo ligado a aseguradora; el filtro acá vuelve a
+    // afirmarlo: por esta cara sólo pasa precio de mostrador.
     const lists = (
       await this.readRepo.findCurrentPublicPriceLists(em, [pharmacy.id], now)
-    ).filter((list) => appliesToSite(list, siteId));
+    ).filter((list) => isRetailList(list) && appliesToSite(list, siteId));
 
     const prices = await this.readRepo.findCurrentPrices(
       em,
@@ -419,6 +421,11 @@ export function coordinate(value: string | undefined): number | null {
   if (value === undefined) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** Si una lista es de mostrador: sin aseguradora de por medio. */
+export function isRetailList(list: PharmacyPriceLists): boolean {
+  return !list.insurerTenantId;
 }
 
 /** Si una lista aplica a una sede: es de la farmacia entera o de esa sede. */

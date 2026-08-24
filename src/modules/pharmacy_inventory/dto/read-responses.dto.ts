@@ -80,13 +80,9 @@ export class SiteStockItemDto {
   reservedQuantity!: number;
 
   /**
-   * En cuarentena (recall/hold): no se vende.
-   */
-  @ApiProperty()
-  quarantineQuantity!: number;
-
-  /**
-   * Lo realmente vendible: la columna `available` que mantiene el ledger.
+   * Lo realmente vendible: la columna `available` que mantiene el ledger, que
+   * ya descuenta reservas y cuarentenas — el detalle de cuarentena es estado
+   * interno y no se sirve.
    */
   @ApiProperty()
   availableQuantity!: number;
