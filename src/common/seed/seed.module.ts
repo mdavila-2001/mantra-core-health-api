@@ -67,6 +67,7 @@ import {
   FieldAssignments,
 } from '../../modules/forms/entities';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import { ProviderDirectorySeedService } from './provider-directory-seed.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -149,6 +150,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     ProviderAccountsSeedService,
     SeedBootstrapService,
     ClinicalFormsSeedService,
+    ProviderDirectorySeedService,
   ],
   exports: [
     SeedBootstrapService,
@@ -168,6 +170,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     BootstrapAdminSeedService,
     ProviderAccountsSeedService,
     ClinicalFormsSeedService,
+    ProviderDirectorySeedService,
   ],
 })
 export class SeedModule {}

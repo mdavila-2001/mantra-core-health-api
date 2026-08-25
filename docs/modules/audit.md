@@ -78,6 +78,6 @@ Pino estructurado por operación (`audit.event.record`, `audit.integrity.verify`
 ## Tests
 
 - Unit: `services/*.service.spec.ts` (mockean repos/`em`) y `controllers/*.controller.spec.ts`
-  (mockean servicios). `jest src/modules/audit` verde.
+  (mockean servicios). `yarn test src/modules/audit` verde.
 - Smoke transversal: `test/smoke/modules/audit.smoke.ts` (`AUDIT_SMOKE`).
 

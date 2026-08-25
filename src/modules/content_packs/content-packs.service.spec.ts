@@ -25,6 +25,7 @@ function armar() {
   const dobles = {
     glossary: seed(),
     facilities: seed(),
+    providerDirectory: seed(),
     insurance: seed(),
     feeSchedule: seed(),
     vademecum: seed(),
@@ -43,6 +44,7 @@ function armar() {
   const service = new ContentPacksService(
     dobles.glossary as never,
     dobles.facilities as never,
+    dobles.providerDirectory as never,
     dobles.insurance as never,
     dobles.feeSchedule as never,
     dobles.vademecum as never,

@@ -16,6 +16,7 @@ import { AudioAssetsSeedService } from './audio-assets-seed.service';
 import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import { ProviderDirectorySeedService } from './provider-directory-seed.service';
 import { loadSeedBootEnv } from './seed-boot.env';
 
 /** Resultado de un paso de la cadena, ya medido. */
@@ -128,6 +129,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param platformPermissions - Permisos de sistema en `authz.permissions`.
    * @param bootstrapAdmin - Primer `SECURITY_ADMIN`, si el entorno lo pide.
    * @param clinicalForms - Catálogo de formularios clínicos estándar.
+   * @param providerDirectory - Directorio de médicos habilitados (`VS_BO_PROVIDER_DIRECTORY`).
    * @param logger - Logger estructurado del arranque.
    */
   constructor(
@@ -147,6 +149,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
     private readonly providerAccounts: ProviderAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
+    private readonly providerDirectory: ProviderDirectorySeedService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
@@ -271,6 +274,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'establecimientos de salud',
         kind: 'content',
         run: () => this.boliviaFacilities.run(),
+      },
+      // Directorio de médicos habilitados en las redes de Alianza y Nacional Seguros.
+      // Son 961 profesionales reales sin cuenta de usuario, para que la APP los muestre
+      // al buscar especialistas habilitados (PACIENTE §3.2).
+      {
+        name: 'directorio de médicos habilitados',
+        kind: 'content',
+        run: () => this.providerDirectory.run(),
       },
       // Las aseguradoras van después del catálogo de conceptos porque su estado y
       // su tipo de producto salen de `insurance:*`, y antes que nada que registre

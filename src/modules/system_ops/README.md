@@ -81,6 +81,6 @@ Pino estructurado (`operation`, ids); nunca secretos ni PHI.
 ## Tests
 
 - Unit: `services/*.service.spec.ts` y `controllers/*.spec.ts` (repos/em/servicios
-  mockeados). `npx jest src/modules/system_ops`.
+  mockeados). `yarn test src/modules/system_ops`.
 - Smoke de contrato: `test/smoke/modules/system_ops.smoke.ts`
   (`export const SYSTEM_OPS_SMOKE`).

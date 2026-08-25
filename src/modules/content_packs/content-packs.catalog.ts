@@ -30,6 +30,7 @@
 export const CONTENT_PACK_CODES = [
   'GLOSARIO',
   'ESTABLECIMIENTOS_BO',
+  'DIRECTORIO_MEDICOS_BO',
   'ASEGURADORAS_BO',
   'ARANCEL_BO',
   'VADEMECUM',
@@ -81,6 +82,14 @@ export const CONTENT_PACKS: readonly ContentPackDefinition[] = [
       'Directorio de establecimientos de Santa Cruz. Es lo que le permite a un profesional ' +
       'decir en qué hospital está de turno y en qué clínica atiende.',
     approxRows: 503,
+  },
+  {
+    code: 'DIRECTORIO_MEDICOS_BO',
+    name: 'Directorio de médicos habilitados',
+    description:
+      'Los médicos de las redes de Alianza y Nacional Seguros, con sus sedes, especialidades y ' +
+      'planes. Son fichas de consulta: no traen correo, así que no pueden iniciar sesión.',
+    approxRows: 5343,
   },
   {
     code: 'ASEGURADORAS_BO',

@@ -7,6 +7,7 @@ import {
 } from '../../common';
 import { BoGeographySeedService } from '../../common/seed/bo-geography-seed.service';
 import { BoliviaFacilitiesSeedService } from '../../common/seed/bolivia-facilities-seed.service';
+import { ProviderDirectorySeedService } from '../../common/seed/provider-directory-seed.service';
 import { BoliviaFeeScheduleSeedService } from '../../common/seed/bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from '../../common/seed/bolivia-insurance-seed.service';
 import { ClinicalFormsSeedService } from '../../common/seed/clinical-forms-seed.service';
@@ -70,6 +71,7 @@ export class ContentPacksService {
   constructor(
     private readonly glossary: GlossarySeedService,
     private readonly facilities: BoliviaFacilitiesSeedService,
+    private readonly providerDirectory: ProviderDirectorySeedService,
     private readonly insurance: BoliviaInsuranceSeedService,
     private readonly feeSchedule: BoliviaFeeScheduleSeedService,
     private readonly vademecum: VademecumSeedService,
@@ -143,6 +145,8 @@ export class ContentPacksService {
         return this.glossary.run();
       case 'ESTABLECIMIENTOS_BO':
         return this.facilities.run();
+      case 'DIRECTORIO_MEDICOS_BO':
+        return this.providerDirectory.run();
       case 'ASEGURADORAS_BO':
         // Los departamentos son núcleo y ya están sembrados, pero las
         // aseguradoras declaran domicilio con uno de ellos: correrlo antes es

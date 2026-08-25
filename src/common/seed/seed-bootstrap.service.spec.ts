@@ -16,6 +16,7 @@ const PASOS = [
   'glossary',
   'boGeography',
   'boliviaFacilities',
+  'providerDirectory',
   'boliviaInsurance',
   'boliviaFeeSchedule',
   'vademecum',
@@ -80,6 +81,7 @@ function armar(fallan: Paso[] = []) {
     dobles.bootstrapAdmin as never,
     dobles.providerAccounts as never,
     dobles.clinicalForms as never,
+    dobles.providerDirectory as never,
     logger as never,
   );
 
@@ -90,6 +92,7 @@ function armar(fallan: Paso[] = []) {
 const CONTENIDO: readonly Paso[] = [
   'glossary',
   'boliviaFacilities',
+  'providerDirectory',
   'boliviaInsurance',
   'boliviaFeeSchedule',
   'vademecum',
