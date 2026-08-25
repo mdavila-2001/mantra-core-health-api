@@ -10,7 +10,6 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ForbiddenException } from '@nestjs/common';
 import { SchedulingCatalogService } from './scheduling-catalog.service';
-import { ESTADO_DEL_VINCULO } from '../../profiles/services/profiles-affiliations.service';
 import {
   CONCEPTS,
   ConflictException,
@@ -65,12 +64,16 @@ function buildCatalog() {
     findOpenSlotsInWindow: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // La regla de pertenencia vive en su propio servicio y tiene specs propios;
+  // acá sólo importa qué hace el catálogo con cada veredicto.
+  const vinculos = { evaluar: mockFn(async () => 'sin-vinculos') };
   const service = new SchedulingCatalogService(
     em as any,
     catalogRepo,
     logger as any,
+    vinculos as any,
   );
-  return { service, tx, catalogRepo, em };
+  return { service, tx, catalogRepo, em, vinculos };
 }
 
 describe('SchedulingCatalogService', () => {
@@ -362,42 +365,13 @@ describe('SchedulingCatalogService', () => {
       name: 'Agenda propia',
     };
 
-    /** Deja al profesional con un vínculo a una sede del tenant indicado. */
-    function conVinculo(
+    /** Programa el veredicto que devolverá la regla de pertenencia. */
+    function conVeredicto(
       d: ReturnType<typeof buildCatalog>,
-      estado: string,
-      tenantDeLaSede: string = TENANT,
+      veredicto: string,
     ): void {
-      d.em.find.mockResolvedValue([
-        {
-          practiceSiteId: 'sede-1',
-          statusConceptId: estado,
-          organizationName: 'Hospital de prueba',
-        },
-      ] as never);
-      d.em.execute.mockResolvedValue([{ tenant_id: tenantDeLaSede }] as never);
+      d.vinculos.evaluar.mockResolvedValue(veredicto as never);
     }
-
-    it('con vinculos de solo texto libre publica igual', async () => {
-      // Las afiliaciones vivas se piden escribiendo el nombre del hospital a
-      // mano: `practice_site_id` es nulo en TODAS las de la base. Un vínculo sin
-      // sede no dice nada sobre ningún tenant, así que no puede ser la prueba de
-      // que al médico no lo aceptaron: tratarlo como negativa lo dejaría sin
-      // poder publicar ni siquiera en su propio consultorio.
-      const d = buildCatalog();
-      d.em.find.mockResolvedValue([
-        {
-          practiceSiteId: null,
-          statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
-          organizationName: 'Hospital Obrero N.º 1',
-        },
-      ] as never);
-      d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
-
-      await d.service.createResource(dtoPropio as never, profesional as never);
-
-      expect(d.catalogRepo.createResource).toHaveBeenCalled();
-    });
 
     it('sin ninguna afiliacion registrada publica igual', async () => {
       // El consultorio propio nunca pidió permiso a nadie, y un médico recién
@@ -413,7 +387,7 @@ describe('SchedulingCatalogService', () => {
 
     it('con vinculo APROBADO a una sede de esa organizacion, publica', async () => {
       const d = buildCatalog();
-      conVinculo(d, ESTADO_DEL_VINCULO.APROBADO);
+      conVeredicto(d, 'aprobado');
       d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
 
       await d.service.createResource(dtoPropio as never, profesional as never);
@@ -425,7 +399,7 @@ describe('SchedulingCatalogService', () => {
       // El mensaje importa tanto como el bloqueo: quien está esperando
       // aprobación no tiene nada distinto que hacer, y merece saberlo.
       const d = buildCatalog();
-      conVinculo(d, ESTADO_DEL_VINCULO.PENDIENTE);
+      conVeredicto(d, 'pendiente');
 
       await expect(
         d.service.createResource(dtoPropio as never, profesional as never),
@@ -437,7 +411,7 @@ describe('SchedulingCatalogService', () => {
       // El caso real del médico multi-sede: tiene aprobación en el hospital
       // donde está de turno, y eso no lo habilita en la clínica de al lado.
       const d = buildCatalog();
-      conVinculo(d, ESTADO_DEL_VINCULO.APROBADO, 'otro-tenant');
+      conVeredicto(d, 'ausente');
 
       await expect(
         d.service.createResource(dtoPropio as never, profesional as never),
@@ -449,7 +423,7 @@ describe('SchedulingCatalogService', () => {
       // camino existe y es corto. `PreconditionFailedException` responde 422 en
       // este proyecto, no 412.
       const d = buildCatalog();
-      conVinculo(d, ESTADO_DEL_VINCULO.PENDIENTE);
+      conVeredicto(d, 'pendiente');
 
       await expect(
         d.service.createResource(dtoPropio as never, profesional as never),
@@ -460,7 +434,7 @@ describe('SchedulingCatalogService', () => {
       // El seeder de demo y el admin de la organización publican agendas de
       // otros: exigirles vínculo propio les quitaría lo que su rol ya concede.
       const d = buildCatalog();
-      conVinculo(d, ESTADO_DEL_VINCULO.PENDIENTE);
+      conVeredicto(d, 'pendiente');
       d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
 
       await d.service.createResource(
