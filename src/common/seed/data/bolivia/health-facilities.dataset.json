@@ -6635,6 +6635,292 @@
       "tipo": "CENTRO_SALUD",
       "nivel": 1,
       "naturaleza": "PUBLICA"
+    },
+    {
+      "code": "BO_EST_FARMACORP_S_A",
+      "nombre": "FARMACORP S.A.",
+      "razonSocial": "Farmacias Corporativas S.A.",
+      "nit": "1015447026",
+      "direccion": null,
+      "telefonos": [],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "FARMACIA",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_FARMACIA_CHAVEZ",
+      "nombre": "FARMACIA CHAVEZ",
+      "razonSocial": "Farmacia Chávez S.A.",
+      "nit": "133795023",
+      "direccion": null,
+      "telefonos": [],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "FARMACIA",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_FARMACIA_HIPERMAXI",
+      "nombre": "FARMACIA HIPERMAXI",
+      "razonSocial": "HIPERMAXI S.A.",
+      "nit": "1028627025",
+      "direccion": null,
+      "telefonos": [],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "FARMACIA",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_FARMACIA_NOSTAS",
+      "nombre": "FARMACIA NOSTAS",
+      "razonSocial": "FARMACIA NOSTAS S.R.L.",
+      "nit": "364402022",
+      "direccion": null,
+      "telefonos": [],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "FARMACIA",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_FARMACIA_TELCHI",
+      "nombre": "FARMACIA TELCHI",
+      "razonSocial": "TELCHI LITEL LTDA.",
+      "nit": "1015307021",
+      "direccion": null,
+      "telefonos": [],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "FARMACIA",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_FARMACIA_ARTESANAL",
+      "nombre": "FARMACIA ARTESANAL",
+      "razonSocial": "FARMACIA E IMPORTADORA ARTESANAL S.R.L.",
+      "nit": "1012471029",
+      "direccion": null,
+      "telefonos": [],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "FARMACIA",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_FARMACIA_OKINAWA",
+      "nombre": "FARMACIA OKINAWA",
+      "razonSocial": "FARMACIA OKINAWA S.R.L.",
+      "nit": "345298024",
+      "direccion": null,
+      "telefonos": [],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "FARMACIA",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_LABORATORIO_IBC",
+      "nombre": "Laboratorio IBC",
+      "razonSocial": "INSTITUTO BIO-CLÍNICO CRUCEÑO LTDA.",
+      "nit": "189982028",
+      "direccion": "Calle España esquina Andrés Ibáñez N° S/N, Zona Central (Casco Viejo), Santa Cruz de la Sierra",
+      "telefonos": [
+        "3371222"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_LABORATORIO_BIO_CELL",
+      "nombre": "Laboratorio BIO-CELL",
+      "razonSocial": "PALACIOS VEGA FLORINDA",
+      "nit": "3209949014",
+      "direccion": "Av. Cañoto #700, Esquina calle México (1er Anillo)",
+      "telefonos": [
+        "3546281"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_PLEXUS_LABORATORIO",
+      "nombre": "Plexus Laboratorio",
+      "razonSocial": "PLEXUS LABORATORIOS S.R.L.",
+      "nit": "351478025",
+      "direccion": "Av. Marcelo Terceros Bánzer #24 (Zona Equipetrol)",
+      "telefonos": [],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_LABORATORIO_DR_ZUNA",
+      "nombre": "Laboratorio Dr. Zuna",
+      "razonSocial": "LABORATORIO DR. ZUNA S.R.L.",
+      "nit": "1476497010",
+      "direccion": "Av. Alemana #2065 (a dos cuadras del 2do Anillo)",
+      "telefonos": [
+        "3441838"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_L_E_S_ENDOGENETICA",
+      "nombre": "L.E.S. Endogenética",
+      "razonSocial": "ENDOGENETICA SANTA CRUZ S.R.L.",
+      "nit": "1013877027",
+      "direccion": "Calle Sara N° 439, entre Cuéllar y Seoane",
+      "telefonos": [
+        "3364746"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_LABORATORIO_CLINICO_ANTELO_S_R_L",
+      "nombre": "Laboratorio Clínico Antelo S.R.L.",
+      "razonSocial": "BARRIOS ANTELO S.R.L.",
+      "nit": "147446021",
+      "direccion": "Calle Libertad N° 402, esquina Florida (Zona Central / Casco Viejo)",
+      "telefonos": [
+        "3324546"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_LABOGEN_S_R_L",
+      "nombre": "LABOGEN S.R.L.",
+      "razonSocial": "LABORATORIO DE GENÉTICA Y DIAGNÓSTICO MOLECULAR LABOGEN S.R.L.",
+      "nit": "192916023",
+      "direccion": "Calle Macororó N° 4 (casi Av. Alemana, entre 3er y 4to Anillo)",
+      "telefonos": [
+        "77506494"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_LABORATORIO_MULTIFUNCIONAL_SAN_PEDRO",
+      "nombre": "Laboratorio Multifuncional San Pedro",
+      "razonSocial": "CLINICA SAN PEDRO S.R.L.",
+      "nit": "1023211026",
+      "direccion": "Tercer Anillo Externo #3105 (o N° 37), Radial 15, Zona Alto San Pedro, Santa Cruz de la Sierra",
+      "telefonos": [
+        "3579232"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_LABORATORIO_CATEDRAL",
+      "nombre": "Laboratorio Catedral",
+      "razonSocial": "LABORATORIO CATEDRAL SEC. PAT. CLÍNICA S.R.L.",
+      "nit": "1012539022",
+      "direccion": "Calle Andrés Ibáñez N° 115 (Zona Central / Casco Viejo)",
+      "telefonos": [
+        "3333305"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_LABORATORIO_OMEGA",
+      "nombre": "LABORATORIO OMEGA",
+      "razonSocial": "LABORATORIO DE ANÁLISIS CLÍNICOS OMEGA S.R.L.",
+      "nit": null,
+      "direccion": "Av. Cañoto N° 604, esquina calle Cuéllar, Santa Cruz de la Sierra.",
+      "telefonos": [
+        "3327610"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "LABORATORIO",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_FUTURE_IMAGENES_MEDICAS",
+      "nombre": "FUTURE - IMAGENES MEDICAS",
+      "razonSocial": "FUTURE S.R.L.",
+      "nit": null,
+      "direccion": "Av. Cañoto N° 580, Planta Baja (dentro de las instalaciones del Centro Médico Niño Jesús).",
+      "telefonos": [
+        "3143333",
+        "72193615"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "IMAGEN",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_DIACOR_S_A",
+      "nombre": "DIACOR S.A.",
+      "razonSocial": "DIACOR S.A.",
+      "nit": null,
+      "direccion": "Av. Irala N° 534",
+      "telefonos": [
+        "3362244"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "IMAGEN",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
+    },
+    {
+      "code": "BO_EST_INSTITUTO_DE_DIAGNOSTICO_MEDICO_IDM",
+      "nombre": "Instituto de Diagnóstico Médico (IDM)",
+      "razonSocial": null,
+      "nit": null,
+      "direccion": "Av. Landívar N° 456.",
+      "telefonos": [
+        "3368811",
+        "77047134"
+      ],
+      "departamento": "SC",
+      "municipio": "SANTA CRUZ DE LA SIERRA",
+      "tipo": "IMAGEN",
+      "nivel": null,
+      "naturaleza": "PRIVADA"
     }
   ]
 }
