@@ -20,6 +20,29 @@ export class AffiliationRequestDto {
   @ApiProperty({ format: 'uuid' })
   practitionerProfileId!: string;
 
+  /**
+   * Cómo se llama quien pide, para poder decidir.
+   *
+   * Sin esto la bandeja mostraba cargo, institución y fecha, y ningún nombre:
+   * quien administra la organización tenía que aprobar o rechazar a un
+   * identificador. Nadie acepta a alguien que no sabe quién es —y si acepta
+   * igual, es peor—, así que el pedido viaja identificado.
+   *
+   * `null` si el profesional no tiene nombre cargado, que la pantalla debe
+   * contar como dato faltante y no como una persona anónima.
+   */
+  @ApiProperty({ type: String, nullable: true })
+  practitionerName!: string | null;
+
+  /**
+   * Matrícula del Ministerio, que es lo que lo habilita a ejercer.
+   *
+   * Es el dato con el que una organización verifica de verdad a quien le pide
+   * entrar: el nombre dice quién dice ser, la matrícula dice si puede.
+   */
+  @ApiProperty({ type: String, nullable: true })
+  practitionerLicense!: string | null;
+
   /** Institución tal como la declaró el profesional. */
   @ApiProperty()
   organizationName!: string;

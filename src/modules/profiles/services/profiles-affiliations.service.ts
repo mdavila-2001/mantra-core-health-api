@@ -14,6 +14,7 @@ import {
 // `practice` —igual que hace `profiles` con `chart` y `clinical`— porque lo
 // único que se necesita de allá es resolver ese salto.
 import { PracticeSites } from '../../practice/entities';
+import { JurisdictionAuthorizations, Persons } from '../entities';
 import { TenantAdministrationService } from '../../directory/services';
 import { PROF } from '../profiles.concepts';
 import { PractitionerAffiliationsRepository } from '../repositories';
@@ -198,18 +199,76 @@ export class ProfilesAffiliationsService {
       [ESTADO_DEL_VINCULO.PENDIENTE],
     );
 
+    const quienes = await this.identidadDe(
+      em,
+      solicitudes.map((fila) => fila.practitionerProfileId),
+    );
+
     return {
-      items: solicitudes.map((fila) => ({
-        id: fila.id,
-        practitionerProfileId: fila.practitionerProfileId,
-        organizationName: fila.organizationName,
-        roleTitle: fila.roleTitle,
-        practiceSiteId: fila.practiceSiteId ?? null,
-        startDate: fila.startDate,
-        statusConceptId: fila.statusConceptId,
-        createdAt: fila.createdAt,
-      })),
+      items: solicitudes.map((fila) => {
+        const quien = quienes.get(fila.practitionerProfileId);
+        return {
+          id: fila.id,
+          practitionerProfileId: fila.practitionerProfileId,
+          practitionerName: quien?.nombre ?? null,
+          practitionerLicense: quien?.matricula ?? null,
+          organizationName: fila.organizationName,
+          roleTitle: fila.roleTitle,
+          practiceSiteId: fila.practiceSiteId ?? null,
+          startDate: fila.startDate,
+          statusConceptId: fila.statusConceptId,
+          createdAt: fila.createdAt,
+        };
+      }),
     };
+  }
+
+  /**
+   * Quiénes son los profesionales de un lote de solicitudes.
+   *
+   * Dos consultas para toda la bandeja en vez de dos por solicitud: una
+   * organización con veinte pedidos haría cuarenta viajes a la base cada vez
+   * que alguien abre la pantalla.
+   *
+   * La matrícula se resuelve por `practitioner_profile_id`; si hay más de una
+   * —jurisdicciones distintas— gana cualquiera, porque lo que la bandeja
+   * necesita es poder verificar que existe, no cuál de todas.
+   *
+   * @param em - Contexto de persistencia.
+   * @param perfiles - Los profesionales a identificar.
+   * @returns Nombre y matrícula por perfil.
+   */
+  private async identidadDe(
+    em: EntityManager,
+    perfiles: readonly string[],
+  ): Promise<Map<string, { nombre: string | null; matricula: string | null }>> {
+    const identidades = new Map<
+      string,
+      { nombre: string | null; matricula: string | null }
+    >();
+    if (perfiles.length === 0) return identidades;
+
+    const ids = [...new Set(perfiles)];
+    const [personas, matriculas] = await Promise.all([
+      em.find(Persons, { id: { $in: ids } }),
+      em.find(JurisdictionAuthorizations, {
+        practitionerProfileId: { $in: ids },
+      }),
+    ]);
+
+    const matriculaPorPerfil = new Map(
+      matriculas.map((fila) => [
+        fila.practitionerProfileId,
+        fila.licenseNumber,
+      ]),
+    );
+    for (const persona of personas) {
+      identidades.set(persona.id, {
+        nombre: nombreVisible(persona),
+        matricula: matriculaPorPerfil.get(persona.id) ?? null,
+      });
+    }
+    return identidades;
   }
 
   /** La organización acepta el vínculo. */
@@ -318,4 +377,24 @@ export class ProfilesAffiliationsService {
       );
     });
   }
+}
+
+/**
+ * El nombre de una persona, tal como se le muestra a quien decide.
+ *
+ * Prefiere `display_name` porque es lo que la propia persona eligió mostrar;
+ * si no lo tiene, se arma con las partes. Devuelve `null` y no una cadena vacía
+ * cuando no hay nada: la pantalla debe poder distinguir «sin nombre cargado» de
+ * un nombre en blanco.
+ */
+function nombreVisible(persona: Persons): string | null {
+  if (persona.displayName !== undefined && persona.displayName !== null) {
+    const propio = persona.displayName.trim();
+    if (propio !== '') return propio;
+  }
+  const partes = [persona.name, persona.lastName, persona.motherLastName]
+    .filter((parte): parte is string => typeof parte === 'string')
+    .map((parte) => parte.trim())
+    .filter((parte) => parte !== '');
+  return partes.length === 0 ? null : partes.join(' ');
 }
