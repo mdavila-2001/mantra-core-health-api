@@ -378,6 +378,27 @@ describe('SchedulingCatalogService', () => {
       d.em.execute.mockResolvedValue([{ tenant_id: tenantDeLaSede }] as never);
     }
 
+    it('con vinculos de solo texto libre publica igual', async () => {
+      // Las afiliaciones vivas se piden escribiendo el nombre del hospital a
+      // mano: `practice_site_id` es nulo en TODAS las de la base. Un vínculo sin
+      // sede no dice nada sobre ningún tenant, así que no puede ser la prueba de
+      // que al médico no lo aceptaron: tratarlo como negativa lo dejaría sin
+      // poder publicar ni siquiera en su propio consultorio.
+      const d = buildCatalog();
+      d.em.find.mockResolvedValue([
+        {
+          practiceSiteId: null,
+          statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+          organizationName: 'Hospital Obrero N.º 1',
+        },
+      ] as never);
+      d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
+
+      await d.service.createResource(dtoPropio as never, profesional as never);
+
+      expect(d.catalogRepo.createResource).toHaveBeenCalled();
+    });
+
     it('sin ninguna afiliacion registrada publica igual', async () => {
       // El consultorio propio nunca pidió permiso a nadie, y un médico recién
       // llegado todavía no pertenece a ninguna institución. La regla aprieta

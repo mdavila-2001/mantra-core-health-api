@@ -770,25 +770,35 @@ export class SchedulingCatalogService {
       { fields: ['practiceSiteId', 'statusConceptId', 'organizationName'] },
     );
 
-    // Sin ninguna afiliación registrada no se bloquea: es el consultorio propio,
-    // que nunca pidió permiso a nadie, y el médico recién llegado que todavía no
-    // pertenece a ninguna institución. La regla aprieta cuando la organización
-    // existe como tenant, no antes.
-    if (vinculos.length === 0) return;
+    // Sólo un vínculo que apunta a una sede dice algo sobre un tenant. Hoy el
+    // médico pide la afiliación escribiendo el nombre de la institución a mano
+    // —`organization_name` es obligatorio y `practice_site_id` opcional, y en la
+    // base viva es nulo en todas—, así que la mayoría de los vínculos no
+    // identifica ninguna organización de la plataforma. Tomar uno de ésos como
+    // negativa sería castigar al médico por haber declarado dónde trabaja: lo
+    // dejaría sin publicar ni siquiera en su propio consultorio.
+    const conSede = vinculos.filter(
+      (v): v is (typeof vinculos)[number] & { practiceSiteId: string } =>
+        v.practiceSiteId !== undefined && v.practiceSiteId !== null,
+    );
+
+    // Sin vínculos con sede no se bloquea: es el consultorio propio, que nunca
+    // pidió permiso a nadie, y el médico recién llegado que todavía no pertenece
+    // a ninguna institución. La regla aprieta cuando hay un vínculo que nombra
+    // una organización de la plataforma, no antes.
+    if (conSede.length === 0) return;
 
     const tenantsAprobados = await this.tenantsDeSedes(
-      vinculos
+      conSede
         .filter((v) => v.statusConceptId === ESTADO_DEL_VINCULO.APROBADO)
-        .map((v) => v.practiceSiteId)
-        .filter((id): id is string => id !== undefined && id !== null),
+        .map((v) => v.practiceSiteId),
     );
     if (tenantsAprobados.has(tenantId)) return;
 
     const pendientes = await this.tenantsDeSedes(
-      vinculos
+      conSede
         .filter((v) => v.statusConceptId === ESTADO_DEL_VINCULO.PENDIENTE)
-        .map((v) => v.practiceSiteId)
-        .filter((id): id is string => id !== undefined && id !== null),
+        .map((v) => v.practiceSiteId),
     );
 
     throw new PreconditionFailedException(
