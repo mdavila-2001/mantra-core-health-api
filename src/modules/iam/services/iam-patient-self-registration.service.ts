@@ -30,6 +30,7 @@ import {
 } from '../../profiles/repositories';
 import { composeAccountDisplayName } from '../../profiles/person-name';
 import {
+  AddressesRepository,
   ContactPointsRepository,
   IdentifiersRepository,
 } from '../../common/repositories';
@@ -49,6 +50,7 @@ import {
   VerifyEmailDto,
   VerifyEmailResponseDto,
 } from '../dto';
+import { createResidenceAddress } from './residence-address';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
@@ -109,6 +111,7 @@ export class IamPatientSelfRegistrationService {
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly addressesRepo: AddressesRepository,
     private readonly notificationsService: NotificationsService,
     private readonly tenantMembershipsRepo: TenantMembershipsRepository,
     private readonly logger: PinoLogger,
@@ -316,6 +319,14 @@ export class IamPatientSelfRegistrationService {
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
+        actorUserId: user.id,
+      });
+
+      // Domicilio: el municipio elegido en el alta. El departamento lo deriva
+      // el ayudante del código del INE, no viene del cliente.
+      createResidenceAddress(this.addressesRepo, tx, {
+        personId: person.id,
+        municipalityConceptId: dto.residenceMunicipalityConceptId,
         actorUserId: user.id,
       });
 

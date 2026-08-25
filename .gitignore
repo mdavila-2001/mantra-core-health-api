@@ -42,6 +42,11 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+# Los respaldos que se hacen antes de tocar el entorno —`.env.bak-20260819-023207`
+# y compañía—. Tienen exactamente el mismo contenido que `.env`, así que
+# ignorarlo a él y no a su copia deja la puerta abierta por el costado; apareció
+# uno suelto en `git status` el 24/08/2026.
+.env.bak*
 # El entorno del seed E2E lleva contraseñas de cuentas reales de la máquina que
 # lo corre: se versiona el ejemplo (`.env.e2e.example`), nunca el archivo.
 .env.e2e

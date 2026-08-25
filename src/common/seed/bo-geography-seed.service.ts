@@ -23,26 +23,60 @@ import {
   boDepartmentMemberId,
   boDepartmentValueSetId,
   boDepartmentVersionId,
+  BO_DEPARTMENT_BY_INE_PREFIX,
+  BO_MUNICIPALITIES,
+  BO_MUNICIPALITY_VALUE_SET,
+  BO_MUNICIPALITY_VALUE_SET_NAME,
+  BO_MUNICIPALITY_VERSION,
+  boMunicipalityCanonicalUrl,
+  boMunicipalityConceptCode,
+  boMunicipalityConceptId,
+  boMunicipalityDesignationId,
+  boMunicipalityMemberId,
+  boMunicipalityParentPropertyId,
+  boMunicipalityProvincePropertyId,
+  boMunicipalityValueSetId,
+  boMunicipalityVersionId,
 } from './bo-geography.catalog';
 
 /** Código de la propiedad que guarda el ISO 3166-2 de cada departamento. */
 export const BO_DEPARTMENT_ISO_PROPERTY_CODE = 'geo:iso-3166-2';
 
+/** Código de la propiedad que guarda la provincia de cada municipio. */
+export const BO_MUNICIPALITY_PROVINCE_PROPERTY_CODE = 'geo:bo:province';
+
+/**
+ * Código de la propiedad que apunta al concepto del departamento padre.
+ *
+ * Es la arista del árbol, guardada como el uuid del departamento y no como su
+ * sigla: quien lea el concepto suelto —fuera de la expansión— tiene ahí el
+ * padre sin tener que interpretar un código. El selector del registro **no**
+ * la usa: arma el árbol con el prefijo del código del INE, porque la expansión
+ * de un conjunto no devuelve propiedades (ver `boMunicipalityConceptCode`).
+ */
+export const BO_MUNICIPALITY_PARENT_PROPERTY_CODE = 'geo:bo:department';
+
 /** Tipo de dato de la propiedad ISO, en el vocabulario de `concept_properties`. */
 const STRING_DATA_TYPE = 'string';
 
 /**
- * Materializa el catálogo geográfico de Bolivia: el conjunto de valores
- * `VS_BO_DEPARTMENT` con sus nueve departamentos.
+ * Materializa el catálogo geográfico de Bolivia: `VS_BO_DEPARTMENT` con sus
+ * nueve departamentos y `VS_BO_MUNICIPALITY` con los 340 municipios.
  *
  * ## Por qué existe
  *
- * El registro público pregunta «departamento que emitió tu documento» y
- * resuelve las opciones por el **código** del conjunto, no por campo destino
- * (ver `bo-geography.catalog.ts`). Sin el conjunto sembrado, esa lectura
- * devuelve una página vacía y el desplegable queda en su estado de fallo:
- * la persona se registra igual —el campo es opcional— pero nunca puede
- * completarlo.
+ * El registro público pregunta «departamento que emitió tu documento» y «dónde
+ * vivís», y resuelve las opciones por el **código** del conjunto, no por campo
+ * destino (ver `bo-geography.catalog.ts`). Sin el conjunto sembrado, esa
+ * lectura devuelve una página vacía y el desplegable queda en su estado de
+ * fallo: la persona se registra igual —los dos campos son opcionales— pero
+ * nunca puede completarlos.
+ *
+ * ## Por qué los dos conjuntos van en el mismo seeder
+ *
+ * Porque son un solo árbol y comparten la comprobación de unicidad: un
+ * municipio sin su departamento sembrado es una arista colgando. Corriendo
+ * juntos, o están los dos o no está ninguno.
  *
  * El catálogo lo declaraba un patch del paquete del modelo que nunca llegó al
  * repositorio, así que el conjunto no existía en ninguna base. Vive acá por lo
@@ -88,9 +122,11 @@ export class BoGeographySeedService {
     versions: number;
     /** Conceptos de departamento creados. */
     departments: number;
+    /** Conceptos de municipio creados. */
+    municipalities: number;
     /** Designaciones preferidas (ES) creadas. */
     designations: number;
-    /** Propiedades ISO 3166-2 creadas. */
+    /** Propiedades de concepto creadas (ISO, provincia, departamento padre). */
     properties: number;
     /** Membresías de la expansión creadas. */
     memberships: number;
@@ -103,6 +139,7 @@ export class BoGeographySeedService {
       valueSets: 0,
       versions: 0,
       departments: 0,
+      municipalities: 0,
       designations: 0,
       properties: 0,
       memberships: 0,
@@ -200,6 +237,15 @@ export class BoGeographySeedService {
     // --- Nivel 6: la expansión, en el orden oficial ---
     counters.memberships += await this.seedMemberships(em, now);
 
+    // --- Los municipios, que cuelgan de los conceptos recién sembrados ---
+    const municipios = await this.runMunicipalities(em, now);
+    counters.valueSets += municipios.valueSets;
+    counters.versions += municipios.versions;
+    counters.municipalities += municipios.municipalities;
+    counters.designations += municipios.designations;
+    counters.properties += municipios.properties;
+    counters.memberships += municipios.memberships;
+
     const total = Object.values(counters).reduce(
       (suma, valor) => suma + valor,
       0,
@@ -207,7 +253,7 @@ export class BoGeographySeedService {
     if (total > 0) {
       this.logger.info(
         { operation: 'seed.bo-geography', ...counters },
-        'Catálogo de departamentos de Bolivia materializado',
+        'Catálogo geográfico de Bolivia materializado',
       );
     }
     return counters;
@@ -231,6 +277,293 @@ export class BoGeographySeedService {
       }
       vistas.add(department.code);
     }
+
+    const siglas = new Set(BO_DEPARTMENTS.map((department) => department.code));
+    const codigos = new Set<string>();
+    for (const municipality of BO_MUNICIPALITIES) {
+      if (codigos.has(municipality.ine)) {
+        throw new Error(
+          `El catálogo geográfico declara el código INE "${municipality.ine}" más de una vez`,
+        );
+      }
+      codigos.add(municipality.ine);
+
+      // Un municipio cuyo departamento no está en el catálogo dejaría una FK
+      // apuntando a un concepto que nadie siembra: la fila entra y la lectura
+      // revienta después, lejos de acá. Mejor no arrancar.
+      if (!siglas.has(municipality.department)) {
+        throw new Error(
+          `El municipio "${municipality.name}" (${municipality.ine}) cuelga del ` +
+            `departamento "${municipality.department}", que no está en el catálogo`,
+        );
+      }
+
+      // El prefijo del código del INE ES el departamento: si los dos no
+      // coinciden, el árbol que arma el cliente —que sólo mira el prefijo—
+      // pondría el municipio bajo otro departamento.
+      const porPrefijo = BO_DEPARTMENT_BY_INE_PREFIX.get(
+        municipality.ine.slice(0, 2),
+      );
+      if (porPrefijo !== municipality.department) {
+        throw new Error(
+          `El municipio "${municipality.name}" declara el departamento ` +
+            `"${municipality.department}" pero su código INE ${municipality.ine} ` +
+            `corresponde a "${porPrefijo ?? 'ninguno'}"`,
+        );
+      }
+    }
+  }
+
+  /**
+   * El conjunto de municipios completo: conjunto, versión, conceptos,
+   * designaciones, propiedades y expansión.
+   *
+   * Mismo esqueleto de seis niveles que los departamentos, en un método aparte
+   * porque son 340 filas por nivel y mezclarlos en el `run` lo volvía ilegible.
+   *
+   * @param em - Contexto de persistencia ya bifurcado.
+   * @param now - Marca de tiempo única de la pasada.
+   * @returns Cuántas filas insertó, por nivel.
+   */
+  private async runMunicipalities(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+  ): Promise<{
+    valueSets: number;
+    versions: number;
+    municipalities: number;
+    designations: number;
+    properties: number;
+    memberships: number;
+  }> {
+    const counters = {
+      valueSets: 0,
+      versions: 0,
+      municipalities: 0,
+      designations: 0,
+      properties: 0,
+      memberships: 0,
+    };
+
+    const valueSetIdentifier = boMunicipalityValueSetId();
+    const existingValueSets = await this.existingIds(em, ValueSets, [
+      valueSetIdentifier,
+    ]);
+    if (!existingValueSets.has(valueSetIdentifier)) {
+      em.create(
+        ValueSets,
+        {
+          id: valueSetIdentifier,
+          internalCode: BO_MUNICIPALITY_VALUE_SET,
+          name: BO_MUNICIPALITY_VALUE_SET_NAME,
+          canonicalUrl: boMunicipalityCanonicalUrl(),
+          stateConceptId: CONCEPTS.TERM_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      counters.valueSets += 1;
+    }
+    await em.flush();
+
+    const versionIdentifier = boMunicipalityVersionId();
+    const existingVersions = await this.existingIds(em, ValueSetVersions, [
+      versionIdentifier,
+    ]);
+    if (!existingVersions.has(versionIdentifier)) {
+      em.create(
+        ValueSetVersions,
+        {
+          id: versionIdentifier,
+          valueSetId: valueSetIdentifier,
+          version: BO_MUNICIPALITY_VERSION,
+          validFrom: now,
+          isDefault: true,
+          stateConceptId: CONCEPTS.TERM_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      counters.versions += 1;
+    }
+    await em.flush();
+
+    const existingConcepts = await this.existingIds(
+      em,
+      CatalogConcepts,
+      BO_MUNICIPALITIES.map((municipality) =>
+        boMunicipalityConceptId(municipality.ine),
+      ),
+    );
+    for (const municipality of BO_MUNICIPALITIES) {
+      const id = boMunicipalityConceptId(municipality.ine);
+      if (existingConcepts.has(id)) continue;
+      em.create(
+        CatalogConcepts,
+        {
+          id,
+          codeSystemVersionId: SEED.codeSystemVersionId,
+          code: boMunicipalityConceptCode(municipality.ine),
+          // Sólo el nombre, sin el departamento pegado: quien lo muestra ya
+          // sabe en qué rama del árbol está, y un «Sucre (Chuquisaca)» dentro
+          // del grupo «Chuquisaca» dice dos veces lo mismo.
+          display: municipality.name,
+          abstract: false,
+          selectable: true,
+          stateConceptId: CONCEPTS.TERM_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      counters.municipalities += 1;
+    }
+    await em.flush();
+
+    counters.designations += await this.seedMunicipalityDesignations(em, now);
+    counters.properties += await this.seedMunicipalityProperties(em, now);
+    counters.memberships += await this.seedMunicipalityMemberships(em, now);
+
+    return counters;
+  }
+
+  /** Designación preferida (ES) de cada municipio. */
+  private async seedMunicipalityDesignations(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+  ): Promise<number> {
+    const existing = await this.existingIds(
+      em,
+      ConceptDesignations,
+      BO_MUNICIPALITIES.map((municipality) =>
+        boMunicipalityDesignationId(municipality.ine),
+      ),
+    );
+
+    let creadas = 0;
+    for (const municipality of BO_MUNICIPALITIES) {
+      const id = boMunicipalityDesignationId(municipality.ine);
+      if (existing.has(id)) continue;
+      em.create(
+        ConceptDesignations,
+        {
+          id,
+          conceptId: boMunicipalityConceptId(municipality.ine),
+          value: municipality.name,
+          languageConceptId: CONCEPTS.LANG_ES,
+          designationTypeConceptId: CONCEPTS.DESIG_PREFERRED,
+          preferred: true,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      creadas += 1;
+    }
+    await em.flush();
+    return creadas;
+  }
+
+  /**
+   * Las dos propiedades de cada municipio: su provincia y su departamento padre.
+   *
+   * El padre va como el **uuid** del concepto del departamento, no como su
+   * sigla: es una arista del árbol y las aristas apuntan a identidades. La
+   * provincia va como texto porque no hay catálogo de provincias —hoy nadie
+   * pide una— y guardarla igual evita tener que volver a la fuente del INE el
+   * día que alguien la necesite.
+   */
+  private async seedMunicipalityProperties(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+  ): Promise<number> {
+    const ids = BO_MUNICIPALITIES.flatMap((municipality) => [
+      boMunicipalityProvincePropertyId(municipality.ine),
+      boMunicipalityParentPropertyId(municipality.ine),
+    ]);
+    const existing = await this.existingIds(em, ConceptProperties, ids);
+
+    let creadas = 0;
+    for (const municipality of BO_MUNICIPALITIES) {
+      const conceptId = boMunicipalityConceptId(municipality.ine);
+
+      const provinceId = boMunicipalityProvincePropertyId(municipality.ine);
+      if (!existing.has(provinceId)) {
+        em.create(
+          ConceptProperties,
+          {
+            id: provinceId,
+            conceptId,
+            propertyCode: BO_MUNICIPALITY_PROVINCE_PROPERTY_CODE,
+            dataType: STRING_DATA_TYPE,
+            valueJson: municipality.province,
+            createdAt: now,
+            updatedAt: now,
+          },
+          { partial: true },
+        );
+        creadas += 1;
+      }
+
+      const parentId = boMunicipalityParentPropertyId(municipality.ine);
+      if (!existing.has(parentId)) {
+        em.create(
+          ConceptProperties,
+          {
+            id: parentId,
+            conceptId,
+            propertyCode: BO_MUNICIPALITY_PARENT_PROPERTY_CODE,
+            dataType: STRING_DATA_TYPE,
+            valueJson: boDepartmentConceptId(municipality.department),
+            createdAt: now,
+            updatedAt: now,
+          },
+          { partial: true },
+        );
+        creadas += 1;
+      }
+    }
+    await em.flush();
+    return creadas;
+  }
+
+  /** La expansión de municipios, en el orden del INE. */
+  private async seedMunicipalityMemberships(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+  ): Promise<number> {
+    const existing = await this.existingIds(
+      em,
+      ValueSetMembers,
+      BO_MUNICIPALITIES.map((municipality) =>
+        boMunicipalityMemberId(municipality.ine),
+      ),
+    );
+
+    let creadas = 0;
+    const versionIdentifier = boMunicipalityVersionId();
+    BO_MUNICIPALITIES.forEach((municipality, ordinal) => {
+      const id = boMunicipalityMemberId(municipality.ine);
+      if (existing.has(id)) return;
+      em.create(
+        ValueSetMembers,
+        {
+          id,
+          valueSetVersionId: versionIdentifier,
+          conceptId: boMunicipalityConceptId(municipality.ine),
+          included: true,
+          ordinal,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      creadas += 1;
+    });
+    await em.flush();
+    return creadas;
   }
 
   /** Designación preferida (ES) de cada departamento. */

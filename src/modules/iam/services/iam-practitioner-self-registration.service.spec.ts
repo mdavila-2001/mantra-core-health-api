@@ -20,6 +20,13 @@ const dto: RegisterPractitionerDto = {
   credentialNumber: 'TIT-99310',
 };
 
+/**
+ * Un concepto de `VS_BO_DEPARTMENT`, el que siembra `BoGeographySeedService`
+ * para Santa Cruz. Va literal y no importado del seeder: la prueba comprueba
+ * que el servicio pasa el uuid tal cual llega, no que sepa derivarlo.
+ */
+const DEPARTAMENTO_SANTA_CRUZ = '51fcbf8e-b4ea-5ba9-8aec-0df7be617c69';
+
 describe('IamPractitionerSelfRegistrationService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
 
@@ -63,6 +70,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const accountLinksRepo = { create: fn() };
     const identifiersRepo = { create: fn() };
     const contactPointsRepo = { create: fn() };
+    const addressesRepo = { create: fn() };
     const tenantMembershipsRepo = { create: fn() };
     const notificationsService = {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
@@ -93,6 +101,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       accountLinksRepo as never,
       identifiersRepo as never,
       contactPointsRepo as never,
+      addressesRepo as never,
       tenantMembershipsRepo as never,
       effectiveRoles as never,
       notificationsService as never,
@@ -374,6 +383,42 @@ describe('IamPractitionerSelfRegistrationService', () => {
       expect.objectContaining({
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
         value: '4821993',
+      }),
+    );
+  });
+
+  it('ata el departamento emisor al identificador, no a la persona', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      nationalId: '4821993',
+      issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+    });
+
+    expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        value: '4821993',
+        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+      }),
+    );
+  });
+
+  it('guarda la fecha de inscripción como validez de la matrícula', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      licenseIssueDate: '2019-03-14',
+    });
+
+    expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        validFrom: new Date('2019-03-14'),
+        // La fecha no adelanta la verificación: sigue PENDIENTE.
+        stateConceptId: PROF.AUTH_PENDING,
       }),
     );
   });

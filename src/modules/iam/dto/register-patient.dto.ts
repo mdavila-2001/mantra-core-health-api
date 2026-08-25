@@ -58,6 +58,27 @@ export class RegisterPatientDto {
   issuerAdministrativeAreaConceptId?: string;
 
   /**
+   * Municipio de residencia (miembro de `VS_BO_MUNICIPALITY`).
+   *
+   * **Sólo el municipio, sin el departamento.** El código del INE de un
+   * municipio lleva adentro el de su departamento, así que el departamento se
+   * deriva acá y no se recibe: un par (departamento, municipio) enviado por el
+   * cliente puede llegar incoherente —el municipio de un departamento con el
+   * departamento de otro— y no habría forma de saber cuál de los dos es el que
+   * la persona quiso decir.
+   *
+   * Es opcional, como el resto del domicilio: nadie queda fuera del alta por no
+   * decir dónde vive.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Municipio de residencia (catálogo VS_BO_MUNICIPALITY)',
+  })
+  @IsOptional()
+  @IsUUID()
+  residenceMunicipalityConceptId?: string;
+
+  /**
    * Valor de password mantenido por la instancia.
    */
   @ApiProperty({ minLength: 8, maxLength: 200 })

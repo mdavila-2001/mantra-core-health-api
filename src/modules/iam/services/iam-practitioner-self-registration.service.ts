@@ -36,6 +36,7 @@ import {
   ProfessionalCredentialsRepository,
 } from '../../profiles/repositories';
 import {
+  AddressesRepository,
   ContactPointsRepository,
   IdentifiersRepository,
 } from '../../common/repositories';
@@ -56,6 +57,7 @@ import {
   RegisterPractitionerDto,
   RegisterPractitionerResponseDto,
 } from '../dto';
+import { createResidenceAddress } from './residence-address';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
@@ -135,6 +137,7 @@ export class IamPractitionerSelfRegistrationService {
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly addressesRepo: AddressesRepository,
     private readonly tenantMembershipsRepo: TenantMembershipsRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly notificationsService: NotificationsService,
@@ -378,10 +381,14 @@ export class IamPractitionerSelfRegistrationService {
           dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
         licenseNumber: dto.licenseNumber,
         regulatoryAuthority: dto.regulatoryAuthority,
-        stateConceptId: PROF.AUTH_PENDING,
+        // Desde cuándo vale la habilitación. Que la matrícula nazca PENDIENTE
+        // de verificación no contradice la fecha: una cosa es desde cuándo la
+        // declara el profesional y otra desde cuándo la plataforma la dio por
+        // buena, que es lo que resuelve `stateConceptId`.
         validFrom: dto.licenseIssueDate
           ? new Date(dto.licenseIssueDate)
           : undefined,
+        stateConceptId: PROF.AUTH_PENDING,
         actorUserId: user.id,
       });
       const credential = this.professionalCredentialsRepo.create(tx, {
@@ -420,11 +427,21 @@ export class IamPractitionerSelfRegistrationService {
           value: dto.nationalId,
           useConceptId: CONCEPTS.USE_OFFICIAL,
           stateConceptId: CONCEPTS.STATE_ACTIVE,
+          // Sólo tiene sentido dentro de este `if`: es el departamento que
+          // emitió ESTE documento, no un dato suelto de la persona.
           issuerAdministrativeAreaConceptId:
             dto.issuerAdministrativeAreaConceptId,
           actorUserId: user.id,
         });
       }
+
+      // Domicilio: el municipio elegido en el alta. El departamento lo deriva
+      // el ayudante del código del INE, no viene del cliente.
+      createResidenceAddress(this.addressesRepo, tx, {
+        personId: person.id,
+        municipalityConceptId: dto.residenceMunicipalityConceptId,
+        actorUserId: user.id,
+      });
 
       // 6) Contacto: el correo siempre, el teléfono si lo aportó.
       this.contactPointsRepo.create(tx, {

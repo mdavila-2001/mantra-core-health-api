@@ -56,6 +56,7 @@ describe('IamPatientSelfRegistrationService', () => {
     const accountLinksRepo = { create: fn() };
     const identifiersRepo = { create: fn() };
     const contactPointsRepo = { create: fn() };
+    const addressesRepo = { create: fn() };
     const notificationsService = {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
     };
@@ -75,6 +76,7 @@ describe('IamPatientSelfRegistrationService', () => {
       accountLinksRepo as never,
       identifiersRepo as never,
       contactPointsRepo as never,
+      addressesRepo as never,
       notificationsService as never,
       tenantMembershipsRepo as never,
       logger as never,
