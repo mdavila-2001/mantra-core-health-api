@@ -357,7 +357,11 @@ async function sembrarMedico(medico, indice, tenantId) {
     body: {
       tenantId,
       slug,
-      displayName: `${medico.titulo.startsWith('Médic') ? '' : 'Dr'}${medico.nombre} ${medico.apellido}`.trim(),
+      // El nombre, y nada más. Un prefijo armado a mano daba «DrPatricia
+      // Vargas» —sin espacio y en el género equivocado—, y el tratamiento ya
+      // viaja en el `headline` («Dermatóloga · Dermatología»), que es donde
+      // corresponde y donde no hay que adivinarle el género a nadie.
+      displayName: `${medico.nombre} ${medico.apellido}`,
       headline: `${medico.titulo} · ${medico.especialidad}`,
       biography: medico.bio,
       visibility: 'PUBLIC',
