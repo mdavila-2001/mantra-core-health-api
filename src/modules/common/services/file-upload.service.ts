@@ -17,6 +17,7 @@ import {
 /** Roles cuyo trabajo exige leer archivos que no subieron ellos mismos (p. ej. revisar evidencia de identidad). */
 const FILE_REVIEWER_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
 import { FileVersionsRepository, FilesRepository } from '../repositories';
+import type { Files } from '../entities/files.entity';
 import { FilesService } from './files.service';
 import type { FileContentDto, FileResponseDto, UploadFileDto } from '../dto';
 
@@ -195,6 +196,28 @@ export class FileUploadService {
    * @throws ForbiddenException si el actor no subió el archivo ni tiene un rol
    *   de revisión (`SECURITY_ADMIN`/`SUPERADMIN`).
    */
+  /**
+   * Los bytes de un archivo **sin actor**, para servir medios públicos.
+   *
+   * No comprueba propiedad ni roles: quien la llama ya decidió que ese archivo
+   * es público —hoy, sólo el retrato o la portada de una vitrina publicada— y
+   * esa decisión es suya. Sí conserva las comprobaciones que no dependen de
+   * quién mira: borrado, versión vigente y análisis de malware. Un archivo
+   * infectado no se sirve aunque cuelgue de un perfil público.
+   *
+   * Es `private` de propósito general y `public` de TypeScript porque el
+   * módulo `community` la necesita; el guardián real es que nadie más que la
+   * vitrina pública sabe qué `fileId` pedir.
+   */
+  async retrieveForPublic(fileId: string): Promise<FileContentDto> {
+    const forked = this.em.fork();
+    const file = await this.filesRepo.findById(forked, fileId);
+    if (!file) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+    }
+    return this.leerVigente(forked, file, fileId);
+  }
+
   async download(
     fileId: string,
     actor: AuthenticatedUser,
@@ -217,6 +240,23 @@ export class FileUploadService {
     ) {
       throw new ForbiddenException('No tiene acceso a este archivo');
     }
+    return this.leerVigente(forked, file, fileId);
+  }
+
+  /**
+   * Lo que hay que comprobar de un archivo pase quien pase: que no esté
+   * borrado, que tenga versión vigente y que esa versión no esté infectada.
+   *
+   * Vive aparte porque lo necesitan la descarga con sesión y la lectura
+   * pública, y son exactamente las comprobaciones que **no** dependen de quién
+   * mira. Duplicarlas dejaría una de las dos puertas sin el análisis de
+   * malware, que es la que no se puede dejar sin él.
+   */
+  private async leerVigente(
+    forked: EntityManager,
+    file: Files,
+    fileId: string,
+  ): Promise<FileContentDto> {
     if (
       file.deletedAt ||
       file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED

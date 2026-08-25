@@ -1,6 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+
+import { PublicProfilesRepository } from '../repositories';
+import { FileUploadService } from '../../common/services/file-upload.service';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import type { PublicProfiles, VerifiedBadges } from '../entities';
 import { PublicSearchRepository } from '../repositories';
@@ -161,6 +164,8 @@ export class CommunityPublicService {
     private readonly searchIndex: SearchIndexService,
     private readonly verification: CommunityVerificationService,
     private readonly stats: CommunityProfileStatsService,
+    private readonly profilesRepo: PublicProfilesRepository,
+    private readonly uploads: FileUploadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityPublicService.name);
@@ -759,6 +764,38 @@ export class CommunityPublicService {
    */
   private fileUrl(fileId?: string): string | null {
     return fileId ? `/public/media/${fileId}` : null;
+  }
+
+  /**
+   * Los bytes de un retrato o una portada de vitrina **publicada**.
+   *
+   * Existe porque `fileUrl()` viene prometiendo `/public/media/<id>` en cada
+   * ficha desde siempre y **esa ruta no estaba implementada**: toda foto de
+   * perfil respondía 404, y por eso todas las fichas se veían con iniciales. La
+   * promesa estaba en el contrato y nadie la cumplía.
+   *
+   * **No es un servidor de archivos abierto.** La pregunta no es «¿existe este
+   * archivo?» sino «¿lo está publicando alguien?»: si ninguna vitrina PÚBLICA
+   * lo usa como retrato o portada, se responde 404 — el mismo 404 que un id
+   * inventado, para no confirmar que el archivo existe.
+   *
+   * Las comprobaciones que no dependen de quién mira —borrado, versión vigente,
+   * malware— las conserva `retrieveForPublic`.
+   */
+  async readPublicMedia(
+    fileId: string,
+  ): Promise<{ buffer: Buffer; mimeType: string }> {
+    const em = this.em.fork();
+    const vitrina = await this.profilesRepo.findPublicByMedia(
+      em,
+      fileId,
+      COMM.PROFILE_VISIBILITY_PUBLIC,
+    );
+    if (!vitrina) {
+      throw new ResourceNotFoundException('Medio no encontrado', { fileId });
+    }
+    const contenido = await this.uploads.retrieveForPublic(fileId);
+    return { buffer: contenido.buffer, mimeType: contenido.mimeType };
   }
 
   /** Recorta el tope pedido en vez de rechazarlo: el contrato lo promete así. */

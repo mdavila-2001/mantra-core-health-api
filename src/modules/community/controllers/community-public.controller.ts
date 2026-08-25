@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  Res,
+} from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Public, ResourceNotFoundException } from '../../../common';
@@ -232,6 +240,29 @@ export class CommunityPublicController {
   }
 
   /** Ficha pública de un profesional. */
+  /**
+   * El retrato o la portada de una vitrina publicada.
+   *
+   * `fileUrl()` venía prometiendo `/public/media/<id>` en cada ficha desde
+   * siempre y **esta ruta no existía**: toda foto de perfil respondía 404, y
+   * por eso todas las fichas se veían con iniciales.
+   *
+   * `Cache-Control` de un día: los bytes de un archivo no cambian —subir otra
+   * foto crea otro id—, así que revalidar cada vez sería tráfico regalado.
+   */
+  @Public()
+  @Get('public/media/:fileId')
+  @ApiOperation({ summary: 'Retrato o portada de una vitrina publicada' })
+  async media(
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const medio = await this.service.readPublicMedia(fileId);
+    res.setHeader('Content-Type', medio.mimeType);
+    res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+    res.send(medio.buffer);
+  }
+
   @Public()
   @Get('p/:slug')
   @ApiOperation({ summary: 'Ficha pública de un profesional' })

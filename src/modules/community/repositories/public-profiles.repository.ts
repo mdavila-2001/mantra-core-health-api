@@ -26,6 +26,10 @@ export interface CreatePublicProfileData {
    */
   displayName: string;
   /**
+   * Archivo de la foto de perfil, si la vitrina nace con una.
+   */
+  avatarFileId?: string;
+  /**
    * Valor de headline mantenido por la instancia.
    */
   headline?: string;
@@ -197,6 +201,29 @@ export class PublicProfilesRepository {
    */
   findBySlug(em: EntityManager, slug: string): Promise<PublicProfiles | null> {
     return em.findOne(PublicProfiles, { slug });
+  }
+
+  /**
+   * La vitrina **publicada** que usa ese archivo como retrato o portada.
+   *
+   * Es lo que autoriza a servir esos bytes sin sesión: no se pregunta «¿existe
+   * este archivo?» sino «¿lo está publicando alguien?». Un archivo que nadie
+   * publica no se sirve, y por eso `/public/media` no es un servidor de
+   * archivos abierto sino la cara visible de una vitrina.
+   *
+   * La visibilidad se compara acá y no en el servicio: una consulta que
+   * devolviera perfiles privados dejaría la decisión en manos de quien la use,
+   * y basta olvidarla una vez.
+   */
+  findPublicByMedia(
+    em: EntityManager,
+    fileId: string,
+    visibilidadPublica: string,
+  ): Promise<PublicProfiles | null> {
+    return em.findOne(PublicProfiles, {
+      visibilityConceptId: visibilidadPublica,
+      $or: [{ avatarFileId: fileId }, { coverFileId: fileId }],
+    });
   }
 
   create(em: EntityManager, data: CreatePublicProfileData): PublicProfiles {

@@ -319,6 +319,12 @@ export class CommunitySocialService {
           existente.visibilityConceptId =
             PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility];
         }
+        // Mismo criterio que `visibility`: omitirlo conserva la foto que haya
+        // —una pantalla que edita el titular no le borra el retrato a nadie— y
+        // un `null` explícito la quita.
+        if (dto.avatarFileId !== undefined) {
+          existente.avatarFileId = dto.avatarFileId ?? undefined;
+        }
         touch(existente, actor.id);
       } else {
         this.profilesRepo.create(tx, {
@@ -337,6 +343,7 @@ export class CommunitySocialService {
               ? undefined
               : PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility],
           acceptsReviews: dto.acceptsReviews,
+          avatarFileId: dto.avatarFileId ?? undefined,
           actorUserId: actor.id,
         });
       }

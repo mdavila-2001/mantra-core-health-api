@@ -62,6 +62,11 @@ import {
   // tiene que poder comprobar dentro de su propia transacción que ese archivo
   // existe y es de quien lo adjunta.
   exports: [
+    // `community` sirve el retrato de una vitrina pública por
+    // `/public/media/:fileId`, y para eso necesita leer los bytes. Sin exportar
+    // esto, Nest no puede construir `CommunityPublicService` y la aplicación
+    // entera no arranca.
+    FileUploadService,
     IdentifiersRepository,
     ContactPointsRepository,
     FilesRepository,

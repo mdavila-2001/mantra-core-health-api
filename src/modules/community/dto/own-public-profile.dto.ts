@@ -8,6 +8,7 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 /** Visibilidad declarable de una vitrina pública. */
@@ -114,6 +115,32 @@ export class UpsertOwnPublicProfileDto {
   @IsOptional()
   @IsIn(['PUBLIC', 'PRIVATE'])
   visibility?: ProfileVisibility;
+
+  /**
+   * El archivo de la foto de perfil, ya subido por `POST /common/files/upload`.
+   *
+   * Se recibe el **id del archivo** y no los bytes: la vitrina es un `PUT` de
+   * JSON idempotente, y meterle un `multipart` la obligaría a hablar dos
+   * idiomas y a reenviar la foto entera cada vez que alguien corrige su
+   * biografía. Subir y adjuntar son dos gestos distintos, y así se quedan.
+   *
+   * **Omitirlo conserva la que haya**, igual que `visibility`: una pantalla que
+   * edita el titular no le borra la foto a nadie. Para quitarla se manda `null`
+   * explícito.
+   *
+   * Hasta ahora este campo no existía en ninguna de las dos escrituras, así que
+   * la foto podía subirse pero no colgarse de la vitrina — es el pendiente P17
+   * de `PENDIENTES-BACKEND.md`.
+   */
+  @ApiPropertyOptional({
+    description: 'Archivo de la foto de perfil, ya subido',
+    format: 'uuid',
+    nullable: true,
+  })
+  @IsOptional()
+  @ValidateIf((_, valor) => valor !== null)
+  @IsUUID()
+  avatarFileId?: string | null;
 }
 
 /**
