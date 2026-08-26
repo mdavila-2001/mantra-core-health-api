@@ -114,6 +114,27 @@ export class UpsertOwnPublicProfileDto {
   @IsOptional()
   @IsIn(['PUBLIC', 'PRIVATE'])
   visibility?: ProfileVisibility;
+
+  /**
+   * El avatar de la vitrina, ya subido.
+   *
+   * Es un id de archivo y no bytes: esos ya tienen su puerta,
+   * `POST /common/files/upload`. Que sea del titular, esté vivo y sea una
+   * imagen lo comprueba `AttachableFileService` —la misma regla que ya exige
+   * la foto profesional, para no duplicarla—.
+   *
+   * `null` explícito lo quita; **omitirlo conserva el que ya tenga**, misma
+   * regla que `visibility`: un `PUT` idempotente que no lo menciona no puede
+   * significar «borrame la foto».
+   */
+  @ApiPropertyOptional({
+    description: 'Archivo ya subido que será el avatar; null lo quita',
+    format: 'uuid',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsUUID()
+  avatarFileId?: string | null;
 }
 
 /**

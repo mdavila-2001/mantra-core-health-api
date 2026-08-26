@@ -58,6 +58,20 @@ export interface ProfileLocation {
   readonly lng: number | null;
 }
 
+/** Un vínculo laboral de la trayectoria pública de un profesional. */
+export interface ProfileAffiliation {
+  /** Institución, tal como la declaró el profesional. */
+  readonly organizationName: string;
+  /** Cargo ejercido. */
+  readonly roleTitle: string;
+  /** Servicio o departamento, si lo declaró. */
+  readonly departmentText: string | null;
+  /** Inicio del vínculo, como fecha ISO (`YYYY-MM-DD`). */
+  readonly startDate: string;
+  /** Fin del vínculo, o `null` si sigue vigente. */
+  readonly endDate: string | null;
+}
+
 @Injectable()
 export class PublicSearchRepository {
   /**
@@ -404,6 +418,56 @@ export class PublicSearchRepository {
       if (!fila.display) continue;
       const previas = salida.get(fila.practitioner_profile_id) ?? [];
       if (!previas.includes(fila.display)) previas.push(fila.display);
+      salida.set(fila.practitioner_profile_id, previas);
+    }
+    return salida;
+  }
+
+  /**
+   * Trayectoria laboral pública de un profesional: dónde trabajó, con qué
+   * cargo y en qué período. La misma tabla que `profiles.practitioner_affiliations`
+   * (`GET /profiles/practitioners/me/affiliations`), leída sin sesión.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileIds - Sujetos de los perfiles del lote.
+   * @returns Mapa `practitionerProfileId → afiliaciones`, de la más reciente a la más antigua.
+   */
+  async affiliationsByPractitioner(
+    em: EntityManager,
+    practitionerProfileIds: string[],
+  ): Promise<Map<string, ProfileAffiliation[]>> {
+    const salida = new Map<string, ProfileAffiliation[]>();
+    if (practitionerProfileIds.length === 0) return salida;
+
+    const filas = await em.getConnection().execute<
+      {
+        practitioner_profile_id: string;
+        organization_name: string;
+        role_title: string;
+        department_text: string | null;
+        start_date: string;
+        end_date: string | null;
+      }[]
+    >(
+      `SELECT practitioner_profile_id, organization_name, role_title,
+              department_text, start_date, end_date
+         FROM profiles.practitioner_affiliations
+        WHERE practitioner_profile_id IN (?)
+          AND status_concept_id = ?
+        ORDER BY start_date DESC`,
+      [practitionerProfileIds, CONCEPTS.STATE_ACTIVE],
+      'all',
+    );
+
+    for (const fila of filas) {
+      const previas = salida.get(fila.practitioner_profile_id) ?? [];
+      previas.push({
+        organizationName: fila.organization_name,
+        roleTitle: fila.role_title,
+        departmentText: fila.department_text,
+        startDate: fila.start_date,
+        endDate: fila.end_date,
+      });
       salida.set(fila.practitioner_profile_id, previas);
     }
     return salida;

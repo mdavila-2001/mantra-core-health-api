@@ -35,6 +35,10 @@ export class ConversationPeerDto {
   /** Cómo se llama, para poder pintar la fila. */
   @ApiPropertyOptional()
   displayName?: string | null;
+
+  /** Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. */
+  @ApiPropertyOptional({ nullable: true })
+  avatarUrl?: string | null;
 }
 
 /** Una conversación de la bandeja del actor. */

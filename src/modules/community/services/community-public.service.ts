@@ -4,7 +4,10 @@ import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import type { PublicProfiles, VerifiedBadges } from '../entities';
 import { PublicSearchRepository } from '../repositories';
-import type { ProfileLocation } from '../repositories/public-search.repository';
+import type {
+  ProfileAffiliation,
+  ProfileLocation,
+} from '../repositories/public-search.repository';
 import {
   COMMUNITY_PUBLIC_PROFILES_INDEX,
   PUBLIC_DIRECTORY_TENANT,
@@ -98,6 +101,7 @@ export const PUBLIC_PROFILE_KEYS = [
   'address',
   'location',
   'specialties',
+  'trajectory',
   'ratingAverage',
   'ratingCount',
   'acceptsReviews',
@@ -284,14 +288,17 @@ export class CommunityPublicService {
       throw new ResourceNotFoundException('No encontrado', { slug });
 
     const kind = this.kindOf(profile) as PublicDirectoryProfileDto['kind'];
-    const [señales, posts, especialidades] = await Promise.all([
+    // Sólo un profesional tiene especialidad y trayectoria laboral; pedirlas
+    // para el resto sería un viaje que siempre vuelve vacío.
+    const [señales, posts, especialidades, trayectoria] = await Promise.all([
       this.señalesDe(em, [profile]),
       this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
-      // Sólo un profesional tiene especialidad; pedirla para el resto sería un
-      // viaje que siempre vuelve vacío.
       kind === 'PRACTITIONER'
         ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
         : Promise.resolve(new Map<string, string[]>()),
+      kind === 'PRACTITIONER'
+        ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
+        : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
     ]);
     const rating = señales.ratings.get(profile.id);
     const badge = this.verification.readBadge(
@@ -321,6 +328,7 @@ export class CommunityPublicService {
           ? { lat: ubicacion.lat, lng: ubicacion.lng }
           : null,
       specialties: especialidades.get(profile.targetId) ?? [],
+      trajectory: trayectoria.get(profile.targetId) ?? [],
       ratingAverage: rating?.average ?? null,
       ratingCount: rating?.count ?? 0,
       acceptsReviews: profile.acceptsReviews ?? false,

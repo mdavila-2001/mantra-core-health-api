@@ -106,6 +106,9 @@ export class CommunityMessagingReadService {
     const nombrePorPerfil = new Map(
       perfiles.map((perfil) => [perfil.id, perfil.displayName]),
     );
+    const avatarPorPerfil = new Map(
+      perfiles.map((perfil) => [perfil.id, this.fileUrl(perfil.avatarFileId)]),
+    );
 
     const items = await Promise.all(
       conversations.map(async (conversation) => {
@@ -122,6 +125,7 @@ export class CommunityMessagingReadService {
             (otro) => ({
               profileId: otro,
               displayName: nombrePorPerfil.get(otro) ?? null,
+              avatarUrl: avatarPorPerfil.get(otro) ?? null,
             }),
           ),
           id: conversation.id,
@@ -301,5 +305,13 @@ export class CommunityMessagingReadService {
           conversationId,
         });
     }
+  }
+
+  /**
+   * URL pública de un archivo, o `null`. Misma ruta y misma regla que la ficha
+   * pública (`community-public.service`): nunca el identificador del archivo.
+   */
+  private fileUrl(fileId?: string): string | null {
+    return fileId ? `/public/media/${fileId}` : null;
   }
 }
