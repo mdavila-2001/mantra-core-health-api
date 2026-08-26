@@ -145,7 +145,7 @@ describe('PractitionerAffiliationGateService', () => {
     expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
   });
 
-  it('un vinculo rechazado no habilita ni figura como pendiente', async () => {
+  it('un vinculo rechazado da NO-VIGENTE, que es una negativa dicha', async () => {
     const d = build();
     conVinculos(d, [
       {
@@ -155,7 +155,7 @@ describe('PractitionerAffiliationGateService', () => {
     ]);
     sedesDe(d, TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('no-vigente');
   });
 
   it('resuelve las sedes en una sola consulta, no una por sede', async () => {
@@ -230,7 +230,7 @@ describe('PractitionerAffiliationGateService', () => {
     expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
   });
 
-  it('un vinculo REVOCADO no habilita', async () => {
+  it('un vinculo REVOCADO da NO-VIGENTE', async () => {
     const d = build();
     conVinculos(d, [
       {
@@ -239,6 +239,23 @@ describe('PractitionerAffiliationGateService', () => {
       },
     ]);
     sedesDe(d, TENANT);
+
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('no-vigente');
+  });
+
+  it('sin vinculo con ESTA organizacion el veredicto es ausente, no negativa', async () => {
+    // Es la distinción que cuesta caro confundir: «nadie dijo nada sobre esta
+    // organización» no es lo mismo que «esta organización dijo que no». Tratar
+    // lo primero como negativa dejaba a un médico sin publicar en su propio
+    // consultorio por haber declarado que trabaja en un hospital.
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+      },
+    ]);
+    sedesDe(d, OTRO_TENANT);
 
     expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
   });

@@ -407,15 +407,28 @@ describe('SchedulingCatalogService', () => {
       expect(d.catalogRepo.createResource).not.toHaveBeenCalled();
     });
 
-    it('con vinculos en OTRAS organizaciones, no publica en esta', async () => {
-      // El caso real del médico multi-sede: tiene aprobación en el hospital
-      // donde está de turno, y eso no lo habilita en la clínica de al lado.
+    it('con vinculos SOLO en otras organizaciones, publica igual en la suya', async () => {
+      // Defecto encontrado ejecutando: un médico que declaraba trabajar en un
+      // hospital perdía la capacidad de publicar en SU PROPIO consultorio,
+      // porque su único vínculo con sede apuntaba a otra organización y eso se
+      // leía como negativa. Nadie negó nada: nadie dijo nada.
       const d = buildCatalog();
       conVeredicto(d, 'ausente');
+      d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
+
+      await d.service.createResource(dtoPropio as never, profesional as never);
+
+      expect(d.catalogRepo.createResource).toHaveBeenCalled();
+    });
+
+    it('con el vinculo NO VIGENTE en esta organizacion, no publica', async () => {
+      // Rechazado o revocado sí es una negativa, y la dijo alguien.
+      const d = buildCatalog();
+      conVeredicto(d, 'no-vigente');
 
       await expect(
         d.service.createResource(dtoPropio as never, profesional as never),
-      ).rejects.toThrow(/te acepte como profesional suyo/);
+      ).rejects.toThrow(/no está vigente/);
     });
 
     it('el error de vinculo es 422, no 403', async () => {

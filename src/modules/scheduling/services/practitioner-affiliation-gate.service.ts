@@ -20,7 +20,9 @@ export type VeredictoDelVinculo =
   /** Pidió el vínculo y todavía no le respondieron. */
   | 'pendiente'
   /** Tiene vínculos con sede, pero ninguno con esta organización. */
-  | 'ausente';
+  | 'ausente'
+  /** Tiene un vínculo con esta organización y no está vigente. */
+  | 'no-vigente';
 
 /**
  * La regla de pertenencia del profesional a una organización.
@@ -91,7 +93,21 @@ export class PractitionerAffiliationGateService {
         .filter((v) => esEstado(v.statusConceptId, 'PENDIENTE'))
         .map((v) => v.practiceSiteId),
     );
-    return pendientes.has(tenantId) ? 'pendiente' : 'ausente';
+    if (pendientes.has(tenantId)) return 'pendiente';
+
+    // Rechazado o revocado con ESTA organización es una negativa suya, y se
+    // distingue de no tener vínculo: lo primero lo dijo alguien, lo segundo no
+    // lo dijo nadie.
+    const negados = await this.tenantsDeSedes(
+      conSede
+        .filter(
+          (v) =>
+            esEstado(v.statusConceptId, 'RECHAZADO') ||
+            esEstado(v.statusConceptId, 'REVOCADO'),
+        )
+        .map((v) => v.practiceSiteId),
+    );
+    return negados.has(tenantId) ? 'no-vigente' : 'ausente';
   }
 
   /**
