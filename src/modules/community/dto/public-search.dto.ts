@@ -241,6 +241,45 @@ export class PublicPostSummaryDto {
 }
 
 /** Ficha pública completa servida por `/p/:slug` y sus cuatro hermanas. */
+/**
+ * Un vínculo laboral de la trayectoria pública de un profesional.
+ *
+ * Misma tabla y mismos campos que `AffiliationResponseDto`
+ * (`GET /profiles/practitioners/me/affiliations`), leída sin sesión y sin sus
+ * identificadores internos (`id`, `practiceSiteId`) — acá nadie necesita
+ * referenciar el registro, sólo leerlo.
+ */
+export class PublicAffiliationDto {
+  @ApiProperty({
+    description: 'Institución, tal como la declaró el profesional',
+  })
+  organizationName!: string;
+
+  @ApiProperty({ description: 'Cargo ejercido' })
+  roleTitle!: string;
+
+  @ApiProperty({
+    nullable: true,
+    description: 'Servicio o departamento, si lo declaró',
+  })
+  departmentText!: string | null;
+
+  @ApiProperty({
+    type: String,
+    format: 'date',
+    description: 'Inicio del vínculo',
+  })
+  startDate!: string;
+
+  @ApiProperty({
+    type: String,
+    format: 'date',
+    nullable: true,
+    description: 'Fin del vínculo, o null si sigue vigente',
+  })
+  endDate!: string | null;
+}
+
 export class PublicDirectoryProfileDto {
   @ApiProperty()
   kind!: Exclude<PublicResultKind, 'MEDICATION'>;
@@ -277,6 +316,13 @@ export class PublicDirectoryProfileDto {
 
   @ApiProperty({ type: [String] })
   specialties!: string[];
+
+  @ApiProperty({
+    type: [PublicAffiliationDto],
+    description:
+      'Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional',
+  })
+  trajectory!: PublicAffiliationDto[];
 
   @ApiProperty({ nullable: true })
   ratingAverage!: number | null;

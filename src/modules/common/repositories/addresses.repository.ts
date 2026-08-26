@@ -48,6 +48,10 @@ export interface CreateAddressData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Latitud del punto, si se conoce. */
+  latitude?: string;
+  /** Longitud del punto, si se conoce. */
+  longitude?: string;
 }
 
 /**
@@ -73,6 +77,8 @@ export class AddressesRepository {
         administrativeAreaConceptId: data.administrativeAreaConceptId,
         useConceptId: data.useConceptId,
         typeConceptId: data.typeConceptId,
+        latitude: data.latitude,
+        longitude: data.longitude,
         ...createdBy(data.actorUserId),
         // `partial: true`: la columna `row_version` (version: true) tiene DEFAULT en
         // BD y la gestiona MikroORM; el tipo la exigiría sin este relajo.

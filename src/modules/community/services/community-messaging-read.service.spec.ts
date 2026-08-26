@@ -75,6 +75,54 @@ describe('CommunityMessagingReadService', () => {
       expect(res.items[0].unreadCount).toBe(3);
     });
 
+    it('trae el avatar del otro lado, por la misma ruta que la ficha pública', async () => {
+      const d = build();
+      d.conversationsRepo.listActiveParticipationsOf.mockResolvedValue([
+        { conversationId: 'c-1', lastReadMessageId: 'm-0' },
+      ]);
+      d.conversationsRepo.listConversationsByIds.mockResolvedValue([
+        { id: 'c-1', conversationTypeConceptId: 'ct' },
+      ]);
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p-1' },
+        { participantProfileId: 'p-2' },
+      ]);
+      d.profilesRepo.listByIds.mockResolvedValue([
+        { id: 'p-2', displayName: 'Andrea Peña', avatarFileId: 'file-9' },
+      ]);
+
+      const res = await d.service.listConversations('p-1', actor, 20);
+
+      expect(res.items[0].peers).toEqual([
+        {
+          profileId: 'p-2',
+          displayName: 'Andrea Peña',
+          avatarUrl: '/public/media/file-9',
+        },
+      ]);
+    });
+
+    it('sin avatar el peer viaja con avatarUrl en null, no ausente', async () => {
+      const d = build();
+      d.conversationsRepo.listActiveParticipationsOf.mockResolvedValue([
+        { conversationId: 'c-1', lastReadMessageId: 'm-0' },
+      ]);
+      d.conversationsRepo.listConversationsByIds.mockResolvedValue([
+        { id: 'c-1', conversationTypeConceptId: 'ct' },
+      ]);
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p-1' },
+        { participantProfileId: 'p-2' },
+      ]);
+      d.profilesRepo.listByIds.mockResolvedValue([
+        { id: 'p-2', displayName: 'Andrea Peña' },
+      ]);
+
+      const res = await d.service.listConversations('p-1', actor, 20);
+
+      expect(res.items[0].peers[0].avatarUrl).toBeNull();
+    });
+
     it('cuenta los no leídos de los OTROS, no los propios', async () => {
       // Contaba todos los mensajes de la conversación, así que quien escribía
       // se sumaba a sí mismo: con uno de cada lado, los dos veían «2» y el que
