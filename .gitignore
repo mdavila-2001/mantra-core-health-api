@@ -107,6 +107,8 @@ CLAUDE.md
 # Reporte de la siembra de datos de desarrollo (`yarn seed:dev`): es el
 # resultado de una corrida concreta contra una base concreta, no fuente.
 /output.seed-dev.json
+# Ídem para `yarn seed:vitrina`.
+/output.seed-vitrina.json
 site/
 dist-docs/
 
