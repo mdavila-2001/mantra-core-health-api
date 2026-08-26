@@ -50,6 +50,21 @@ export class PractitionerAffiliationGateService {
    * organización de la plataforma, así que no puede servir de prueba en
    * ninguna de las dos direcciones — ni para dejar pasar ni para bloquear.
    *
+   * ## La pregunta es por ESTA organización, no por el profesional entero
+   *
+   * Antes la mano se abría sólo para quien no tuviera **ningún** vínculo con
+   * sede, y eso producía un absurdo: en cuanto una institución le aprobaba el
+   * vínculo, el médico dejaba de poder publicar en **su propio consultorio**
+   * —donde no hay vínculo que pedir ni nadie a quien pedírselo—, porque su
+   * consultorio pasaba a leerse como una organización más de la que «faltaba»
+   * el vínculo. Tener un vínculo aprobado en otro lado lo dejaba peor que no
+   * tener ninguno.
+   *
+   * Ahora la excepción se evalúa por organización: si no hay ningún vínculo con
+   * sede que apunte a **ésta**, el veredicto es el mismo que el de quien no
+   * tiene ninguno. Lo que bloquea sigue bloqueando: un vínculo pedido y no
+   * resuelto es `pendiente`, y uno rechazado es `ausente`.
+   *
    * @param tenantId - La organización en cuestión.
    * @param actor - Quien pretende actuar en ella.
    * @returns El veredicto; el llamador decide qué hacer con él.
@@ -72,39 +87,61 @@ export class PractitionerAffiliationGateService {
     );
     if (conSede.length === 0) return 'sin-vinculos';
 
-    const aprobados = await this.tenantsDeSedes(
-      conSede
-        .filter((v) => v.statusConceptId === ESTADO_DEL_VINCULO.APROBADO)
-        .map((v) => v.practiceSiteId),
+    // Una sola consulta para todas las sedes: resolver el tenant de cada una
+    // por separado sería N+1 sobre el mismo puente.
+    const tenantPorSede = await this.tenantDeCadaSede(
+      conSede.map((v) => v.practiceSiteId),
     );
-    if (aprobados.has(tenantId)) return 'aprobado';
+    const deEstaOrganizacion = conSede.filter(
+      (v) => tenantPorSede.get(v.practiceSiteId) === tenantId,
+    );
+    if (deEstaOrganizacion.length === 0) return 'sin-vinculos';
 
-    const pendientes = await this.tenantsDeSedes(
-      conSede
-        .filter((v) => v.statusConceptId === ESTADO_DEL_VINCULO.PENDIENTE)
-        .map((v) => v.practiceSiteId),
+    const aprobado = deEstaOrganizacion.some(
+      (v) => v.statusConceptId === ESTADO_DEL_VINCULO.APROBADO,
     );
-    return pendientes.has(tenantId) ? 'pendiente' : 'ausente';
+    if (aprobado) return 'aprobado';
+
+    return deEstaOrganizacion.some(
+      (v) => v.statusConceptId === ESTADO_DEL_VINCULO.PENDIENTE,
+    )
+      ? 'pendiente'
+      : 'ausente';
   }
 
   /**
-   * Las organizaciones a cargo de un conjunto de sedes.
+   * La organización a cargo de cada sede.
    *
    * El vínculo apunta a una sede y la agenda a una organización; el puente es
-   * `sede -> práctica -> organización`.
+   * `sede -> práctica -> organización`. Devuelve un mapa y no un conjunto
+   * porque hace falta saber **de cuál** organización es cada vínculo, no sólo
+   * qué organizaciones aparecen entre todos.
+   *
+   * `managing_tenant_id` manda sobre el tenant de la práctica: es la columna que
+   * dice quién administra ESTA sede, y es la que miran tanto la aprobación del
+   * vínculo como el cargador del padrón. Preguntar sólo por la práctica dejaba
+   * dos respuestas posibles para el mismo hecho —hoy coinciden porque el
+   * cargador las escribe juntas, pero una sede cedida a otra organización las
+   * separaría, y entonces el gate y la aprobación disentirían—. El `COALESCE`
+   * conserva el camino viejo para las sedes que no declaran administrador.
    *
    * @param sedes - Ids de sede.
-   * @returns Los tenants que las administran.
+   * @returns Mapa `sede -> organización que la administra`.
    */
-  private async tenantsDeSedes(sedes: string[]): Promise<Set<string>> {
-    if (sedes.length === 0) return new Set();
-    const filas = await this.em.execute<{ tenant_id: string }[]>(
-      `SELECT DISTINCT p.tenant_id
+  private async tenantDeCadaSede(
+    sedes: string[],
+  ): Promise<Map<string, string>> {
+    if (sedes.length === 0) return new Map();
+    const filas = await this.em.execute<
+      { site_id: string; tenant_id: string }[]
+    >(
+      `SELECT s.id AS site_id,
+              COALESCE(s.managing_tenant_id, p.tenant_id) AS tenant_id
          FROM practice.practice_sites s
          JOIN practice.practices p ON p.id = s.practice_id
         WHERE s.id IN (?)`,
       [sedes],
     );
-    return new Set(filas.map((fila) => fila.tenant_id));
+    return new Map(filas.map((fila) => [fila.site_id, fila.tenant_id]));
   }
 }

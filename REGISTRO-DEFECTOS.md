@@ -260,7 +260,7 @@ No son verdes ni rojos: son huecos. Anotarlos como verdes sería mentir.
 | P12 · cancelar devuelve el cupo | Depende de confirmar una reserva, y la confirmación no llegó a completarse en la corrida. | Revisar el ciclo `hold → confirm` con datos propios. |
 | P08 · grupo vacío desaparece · dos salidas simultáneas | Encadenan con A-04: sin miembros no hay a quién sacar. | Se ponen verdes solos cuando A-04 se cierre. |
 | P05 · foto con tipo no permitido | **`POST /object-storage/files` no existe**: `404 Cannot POST /object-storage/files`. Hueco de superficie, no defecto de validación. | Decidir por qué ruta sube una foto de perfil, o anotar que no hay. |
-| P03 · médico sin vínculo aprobado | Marcado `fixme`: la aprobación del vínculo todavía no existe (TP-2, Pablo). | Se pone verde solo cuando esa tarea mergee. |
+| P03 · médico sin vínculo aprobado | Marcado `fixme`: la aprobación del vínculo todavía no existe (TP-2, Pablo). | **La causa raíz está cerrada (2026-08-26):** aprobar el vínculo ya concede membresía asistencial y habilita publicar agenda en esa organización — `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts`, 13/13, y `docs/model-handoff/2026-08-26_membresia-asistencial-respuesta.md`. Falta sacar el `fixme` del e2e del front y volver a medirlo. |
 | P04 · alta por pasos | Marcado `fixme`: el alta retomable todavía no existe (TJ-1). | Ídem. |
 | P04 · no distinguir «no existe» de «clave mala» | El limitador de `/iam/auth/login` (10/min por IP) quedó activo de la corrida anterior. La suite lo trata como **no medible**, no como defecto. | Correr la suite espaciada, o con el limitador desactivado en el entorno de prueba. |
 

@@ -56,20 +56,42 @@ function build() {
     findBySites: mockFn().mockResolvedValue([]),
     findById: mockFn().mockResolvedValue(null),
   };
+  // Por defecto el profesional tiene cuenta: es el caso corriente. Las pruebas
+  // que hablan del perfil sin cuenta lo devuelven a `null` explícitamente.
+  const accountLinksRepo = {
+    findActiveByPerson: mockFn().mockResolvedValue({ userId: 'user-med' }),
+  };
   // Quién administra una organización se prueba en su propio spec; acá el doble
   // deja pasar salvo cuando la prueba habla justamente del permiso.
   const tenantAdmin = {
     assertCanAdminister: mockFn().mockResolvedValue(undefined),
+  };
+  const memberships = {
+    ensureMembresiaAsistencial: mockFn().mockResolvedValue({
+      membership: { id: 'memb-1' },
+      creada: true,
+    }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ProfilesAffiliationsService(
     em,
     affiliationsRepo as any,
+    accountLinksRepo as any,
     tenantAdmin as any,
+    memberships as any,
     logger as any,
   );
-  return { service, em, tx, affiliationsRepo, tenantAdmin };
+  return {
+    service,
+    em,
+    tx,
+    affiliationsRepo,
+    accountLinksRepo,
+    tenantAdmin,
+    memberships,
+    logger,
+  };
 }
 
 describe('ProfilesAffiliationsService (TP-2)', () => {
@@ -281,6 +303,109 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       await expect(
         d.service.aprobar(TENANT, 'af-1', orgAdmin),
       ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+  });
+
+  /**
+   * El eslabón que faltaba (MAC-VINCULO).
+   *
+   * Aprobar cambiaba el estado del vínculo y nada más, así que el médico seguía
+   * sin poder publicar agenda en esa organización: el claim `tenants` del token
+   * sale de las membresías, y sin una el interceptor de contexto lo rechazaba
+   * antes de que la regla del vínculo llegara a mirarlo. La aprobación se
+   * quedaba sin efecto.
+   */
+  describe('la aprobación concede membresía', () => {
+    /** Una solicitud pendiente sobre una sede de esta organización. */
+    function conSolicitud(d: ReturnType<typeof build>): any {
+      const solicitud = {
+        id: 'af-1',
+        practitionerProfileId: 'pp-1',
+        practiceSiteId: SEDE,
+        statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
+      };
+      d.affiliationsRepo.findById.mockResolvedValue(solicitud);
+      d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: TENANT });
+      return solicitud;
+    }
+
+    it('aprobar le da al profesional la llave de esa organización', async () => {
+      const d = build();
+      conSolicitud(d);
+
+      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+
+      expect(d.accountLinksRepo.findActiveByPerson).toHaveBeenCalledWith(
+        d.tx,
+        'pp-1',
+      );
+      expect(d.memberships.ensureMembresiaAsistencial).toHaveBeenCalledWith(
+        d.tx,
+        { userId: 'user-med', tenantId: TENANT, actorUserId: orgAdmin.id },
+      );
+    });
+
+    /**
+     * La membresía se escribe en la MISMA transacción que el estado: si una
+     * fallara y la otra no, la organización habría aprobado a alguien que no
+     * puede entrar, o al revés.
+     */
+    it('la membresía viaja en la transacción de la decisión', async () => {
+      const d = build();
+      conSolicitud(d);
+
+      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+
+      const [tx] = d.memberships.ensureMembresiaAsistencial.mock.calls.at(-1);
+      expect(tx).toBe(d.tx);
+    });
+
+    /**
+     * Un perfil cargado por la organización puede no tener todavía una cuenta
+     * que lo encarne. La decisión de la organización vale igual: negar la
+     * aprobación por eso sería dejarla sin efecto por un motivo que no es suyo.
+     */
+    it('un profesional sin cuenta se aprueba igual, y queda avisado', async () => {
+      const d = build();
+      const solicitud = conSolicitud(d);
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue(null);
+
+      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+
+      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(d.memberships.ensureMembresiaAsistencial).not.toHaveBeenCalled();
+      expect(d.logger.warn).toHaveBeenCalled();
+    });
+
+    /** Rechazar no abre ninguna puerta: es la mitad del sentido de rechazar. */
+    it('rechazar no concede nada', async () => {
+      const d = build();
+      conSolicitud(d);
+
+      await d.service.rechazar(
+        TENANT,
+        'af-1',
+        { reason: 'No trabaja acá' } as any,
+        orgAdmin,
+      );
+
+      expect(d.accountLinksRepo.findActiveByPerson).not.toHaveBeenCalled();
+      expect(d.memberships.ensureMembresiaAsistencial).not.toHaveBeenCalled();
+    });
+
+    /**
+     * La membresía se concede sobre la organización que decide, no sobre la que
+     * el vínculo nombre: es la misma acotación que ya protege a la sede.
+     */
+    it('la membresía es de la organización que aprueba', async () => {
+      const d = build();
+      conSolicitud(d);
+
+      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+
+      const [, params] =
+        d.memberships.ensureMembresiaAsistencial.mock.calls.at(-1);
+      expect(params.tenantId).toBe(TENANT);
     });
   });
 });
