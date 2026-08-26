@@ -29,7 +29,7 @@ import {
 import { ClinicalNoteHeaders, DocumentRecords } from '../../chart/entities';
 import { Encounters, MedicationRequests } from '../../clinical/entities';
 import { PROF } from '../profiles.concepts';
-import { ESTADO_DEL_VINCULO } from './profiles-affiliations.service';
+import { esEstado } from './profiles-affiliations.service';
 import type { OnboardingStepDto, PractitionerOnboardingDto } from '../dto';
 import {
   PersonsRepository,
@@ -1515,6 +1515,7 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
     current: row.endDate === undefined || row.endDate === null,
     status: row.statusConceptId,
     statusKind: estadoLegible(row.statusConceptId),
+    decisionReasonText: row.decisionReasonText ?? null,
     createdAt: row.createdAt,
   };
 }
@@ -1530,9 +1531,17 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
  */
 function estadoLegible(
   conceptId: string,
-): 'pendiente' | 'aprobado' | 'rechazado' | 'desconocido' {
-  if (conceptId === ESTADO_DEL_VINCULO.PENDIENTE) return 'pendiente';
-  if (conceptId === ESTADO_DEL_VINCULO.APROBADO) return 'aprobado';
-  if (conceptId === ESTADO_DEL_VINCULO.RECHAZADO) return 'rechazado';
+):
+  | 'pendiente'
+  | 'declarado'
+  | 'aprobado'
+  | 'rechazado'
+  | 'revocado'
+  | 'desconocido' {
+  if (esEstado(conceptId, 'PENDIENTE')) return 'pendiente';
+  if (esEstado(conceptId, 'DECLARADO')) return 'declarado';
+  if (esEstado(conceptId, 'APROBADO')) return 'aprobado';
+  if (esEstado(conceptId, 'RECHAZADO')) return 'rechazado';
+  if (esEstado(conceptId, 'REVOCADO')) return 'revocado';
   return 'desconocido';
 }

@@ -761,14 +761,29 @@ export class SchedulingCatalogService {
     if (this.esAdministradorDeCatalogo(actor)) return;
 
     const veredicto = await this.vinculos.evaluar(tenantId, actor);
-    if (veredicto === 'sin-vinculos' || veredicto === 'aprobado') return;
+
+    // `ausente` NO es una negativa: significa que nadie dijo nada sobre esta
+    // organización. Quien llega hasta acá ya pasó el aislamiento de tenant, o
+    // sea que la organización es suya — y la membresía ya lo autorizó.
+    //
+    // Tratarlo como negativa era un defecto con consecuencia visible: un médico
+    // que declaraba trabajar en un hospital perdía la capacidad de publicar en
+    // **su propio consultorio**, porque su único vínculo con sede apuntaba a
+    // otra organización. Se encontró ejecutándolo, no leyéndolo.
+    if (
+      veredicto === 'sin-vinculos' ||
+      veredicto === 'aprobado' ||
+      veredicto === 'ausente'
+    ) {
+      return;
+    }
 
     throw new PreconditionFailedException(
       veredicto === 'pendiente'
         ? 'Tu vínculo con esta organización todavía está pendiente de ' +
             'aprobación. Cuando la acepten vas a poder publicar tu agenda acá.'
-        : 'Para publicar tu agenda en esta organización primero necesitás que ' +
-            'te acepte como profesional suyo. Pedí el vínculo desde tu perfil.',
+        : 'Tu vínculo con esta organización no está vigente, así que no podés ' +
+            'publicar agenda acá. Hablá con ellos para reactivarlo.',
       { tenantId, vinculo: veredicto },
     );
   }

@@ -175,8 +175,33 @@ export class AffiliationResponseDto {
    * `declarado`— las pantallas que ya distinguen los casos conocidos no van a
    * mentir sobre el nuevo, van a decir que no lo reconocen.
    */
-  @ApiProperty({ enum: ['pendiente', 'aprobado', 'rechazado', 'desconocido'] })
-  statusKind!: 'pendiente' | 'aprobado' | 'rechazado' | 'desconocido';
+  @ApiProperty({
+    enum: [
+      'pendiente',
+      'declarado',
+      'aprobado',
+      'rechazado',
+      'revocado',
+      'desconocido',
+    ],
+  })
+  statusKind!:
+    | 'pendiente'
+    | 'declarado'
+    | 'aprobado'
+    | 'rechazado'
+    | 'revocado'
+    | 'desconocido';
+
+  /**
+   * Por qué la organización rechazó o dio de baja el vínculo.
+   *
+   * **Lo lee el profesional**, no es una nota interna. Un rechazo sin motivo es
+   * mudo para quien lo recibe, y quien lo escribe tiene que saber que se lee.
+   * `null` en cualquier otro estado.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  decisionReasonText!: string | null;
 
   /**
    * Fecha y hora en que se creó el registro.

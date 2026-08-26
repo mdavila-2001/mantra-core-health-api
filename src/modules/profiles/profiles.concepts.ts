@@ -177,6 +177,23 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       code: 'AFFILIATION_RETRACTED',
       display: 'Practitioner affiliation retracted',
     },
+    // Categorías de aviso del circuito del vínculo. Son el
+    // `category_concept_id` de `messaging.notification_requests`, y existen como
+    // conceptos propios porque la preferencia por categoría se declara contra
+    // uno: sin él, «no me avises de esto» no se puede expresar.
+    NOTICE_AFFILIATION_APPROVED: {
+      code: 'AFFILIATION_NOTICE_APPROVED',
+      display: 'Affiliation notice: approved',
+    },
+    NOTICE_AFFILIATION_REJECTED: {
+      code: 'AFFILIATION_NOTICE_REJECTED',
+      display: 'Affiliation notice: rejected',
+    },
+    NOTICE_AFFILIATION_REVOKED: {
+      code: 'AFFILIATION_NOTICE_REVOKED',
+      display: 'Affiliation notice: revoked',
+    },
+
     AFFILIATION_TYPE_EMPLOYMENT: {
       code: 'AFFILIATION_TYPE_EMPLOYMENT',
       display: 'Employment affiliation type',

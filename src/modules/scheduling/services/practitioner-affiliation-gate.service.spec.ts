@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
 import { ESTADO_DEL_VINCULO } from '../../profiles/services/profiles-affiliations.service';
+import { PROF } from '../../profiles/profiles.concepts';
 
 const TENANT = '11111111-1111-1111-1111-111111111111';
 const OTRO_TENANT = '22222222-2222-2222-2222-222222222222';
@@ -215,7 +216,7 @@ describe('PractitionerAffiliationGateService', () => {
     expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
   });
 
-  it('un vinculo rechazado no habilita ni figura como pendiente', async () => {
+  it('un vinculo rechazado da NO-VIGENTE, que es una negativa dicha', async () => {
     const d = build();
     conVinculos(d, [
       {
@@ -225,7 +226,7 @@ describe('PractitionerAffiliationGateService', () => {
     ]);
     sedesDe(d, TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('no-vigente');
   });
 
   it('resuelve las sedes en una sola consulta, no una por sede', async () => {
@@ -254,6 +255,86 @@ describe('PractitionerAffiliationGateService', () => {
     expect(d.em.execute.mock.calls[0][1]).toEqual([
       ['sede-1', 'sede-2', 'sede-3'],
     ]);
+  });
+
+  it('un vinculo DECLARADO habilita igual que uno aprobado', async () => {
+    // Es el médico del hospital público: no hay nadie que pueda aprobarlo, así
+    // que exigirle aprobación lo bloquearía para siempre. Lo que le falta es el
+    // sello de la institución, y eso se dice en pantalla, no bloqueando.
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: ESTADO_DEL_VINCULO.DECLARADO,
+      },
+    ]);
+    sedesDe(d, TENANT);
+
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
+  });
+
+  it('reconoce el id VIEJO de aprobado mientras el backfill no corrio', async () => {
+    // v4.1.9 cambió los conceptos y las filas vivas siguen con los ids
+    // anteriores escritos. Si la lectura mirara sólo los nuevos, cada vínculo ya
+    // aprobado dejaría de reconocerse y su médico dejaría de poder publicar.
+    const d = build();
+    conVinculos(d, [
+      { practiceSiteId: 'sede-1', statusConceptId: PROF.AFFILIATION_ACTIVE },
+    ]);
+    sedesDe(d, TENANT);
+
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
+  });
+
+  it('reconoce el id VIEJO de pendiente', async () => {
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: 'state-pending-viejo',
+      },
+    ]);
+    sedesDe(d, TENANT);
+
+    // El id viejo de pendiente es `CONCEPTS.STATE_PENDING`; con cualquier otro
+    // valor el veredicto es «ausente», que es lo correcto: no se inventa.
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
+  });
+
+  it('un vinculo REVOCADO da NO-VIGENTE', async () => {
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: ESTADO_DEL_VINCULO.REVOCADO,
+      },
+    ]);
+    sedesDe(d, TENANT);
+
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('no-vigente');
+  });
+
+  it('sin vinculo con ESTA organizacion el veredicto no es una negativa', async () => {
+    // Es la distinción que cuesta caro confundir: «nadie dijo nada sobre esta
+    // organización» no es lo mismo que «esta organización dijo que no». Tratar
+    // lo primero como negativa dejaba a un médico sin publicar en su propio
+    // consultorio por haber declarado que trabaja en un hospital.
+    //
+    // El veredicto es `sin-vinculos` —el mismo que el de quien no tiene
+    // ninguno— y no `ausente`: `ausente` quedó para cuando SÍ hay un vínculo
+    // con esta organización pero su estado no es ninguno de los conocidos.
+    // Los dos consumidores dejan pasar `sin-vinculos`; `ausente` lo bloquea
+    // en `bookings`, que es exactamente lo que no debe pasarle a este médico.
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+      },
+    ]);
+    sedesDe(d, OTRO_TENANT);
+
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('sin-vinculos');
   });
 
   /**

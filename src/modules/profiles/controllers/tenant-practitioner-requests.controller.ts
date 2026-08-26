@@ -89,4 +89,32 @@ export class TenantPractitionerRequestsController {
   ): Promise<void> {
     return this.affiliations.rechazar(tenantId, affiliationId, dto, actor);
   }
+
+  /**
+   * La organización da de baja un vínculo que ya había aprobado.
+   *
+   * Faltaba: `AFFILIATION_REVOKED` existía desde v4.1.9 y no había forma de
+   * llegar a ese estado por la API. Aprobar era irreversible por omisión.
+   *
+   * **Las citas ya confirmadas no se cancelan.** Dejarlas caer en bloque
+   * plantaría a pacientes que tenían un turno prometido, por un trámite del que
+   * no fueron parte. Lo que sí ocurre desde ya: no puede aceptar turnos nuevos
+   * ni publicar más agenda acá.
+   */
+  @Post(':tenantId/practitioner-requests/:affiliationId/revoke')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Dar de baja un vínculo ya aprobado',
+    description:
+      'Las citas ya confirmadas siguen en pie; lo que se corta es aceptar ' +
+      'turnos nuevos y publicar agenda.',
+  })
+  revoke(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('affiliationId', ParseUUIDPipe) affiliationId: string,
+    @Body() dto: RejectAffiliationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.affiliations.revocar(tenantId, affiliationId, dto, actor);
+  }
 }

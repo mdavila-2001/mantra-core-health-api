@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../common';
 import { PractitionerAffiliations } from '../../profiles/entities';
-import { ESTADO_DEL_VINCULO } from '../../profiles/services/profiles-affiliations.service';
+import { esEstado } from '../../profiles/services/profiles-affiliations.service';
 
 /**
  * En qué situación está el profesional respecto de una organización.
@@ -20,7 +20,9 @@ export type VeredictoDelVinculo =
   /** Pidió el vínculo y todavía no le respondieron. */
   | 'pendiente'
   /** Tiene vínculos con sede, pero ninguno con esta organización. */
-  | 'ausente';
+  | 'ausente'
+  /** Tiene un vínculo con esta organización y no está vigente. */
+  | 'no-vigente';
 
 /**
  * La regla de pertenencia del profesional a una organización.
@@ -63,7 +65,15 @@ export class PractitionerAffiliationGateService {
    * Ahora la excepción se evalúa por organización: si no hay ningún vínculo con
    * sede que apunte a **ésta**, el veredicto es el mismo que el de quien no
    * tiene ninguno. Lo que bloquea sigue bloqueando: un vínculo pedido y no
-   * resuelto es `pendiente`, y uno rechazado es `ausente`.
+   * resuelto es `pendiente`, y uno negado es `no-vigente`.
+   *
+   * ## Los estados se comparan con `esEstado`, no con `===`
+   *
+   * v4.1.9 cambió los conceptos del vínculo y el backfill todavía no corrió:
+   * las filas vivas tienen escritos los ids viejos. Un `===` contra el id
+   * nuevo no reconocería ningún vínculo ya aprobado, y todo médico que hoy
+   * publica dejaría de poder. `esEstado` acepta los dos mientras dure la
+   * transición.
    *
    * @param tenantId - La organización en cuestión.
    * @param actor - Quien pretende actuar en ella.
@@ -97,15 +107,30 @@ export class PractitionerAffiliationGateService {
     );
     if (deEstaOrganizacion.length === 0) return 'sin-vinculos';
 
+    // `DECLARADO` habilita igual que `APROBADO`: es el médico del hospital
+    // público, donde no hay nadie que pueda aprobar. Lo que le falta es el
+    // sello de la institución, y eso se dice en pantalla, no bloqueando.
     const aprobado = deEstaOrganizacion.some(
-      (v) => v.statusConceptId === ESTADO_DEL_VINCULO.APROBADO,
+      (v) =>
+        esEstado(v.statusConceptId, 'APROBADO') ||
+        esEstado(v.statusConceptId, 'DECLARADO'),
     );
     if (aprobado) return 'aprobado';
 
+    const pendiente = deEstaOrganizacion.some((v) =>
+      esEstado(v.statusConceptId, 'PENDIENTE'),
+    );
+    if (pendiente) return 'pendiente';
+
+    // Rechazado o revocado con ESTA organización es una negativa suya, y se
+    // distingue de no tener vínculo: lo primero lo dijo alguien, lo segundo no
+    // lo dijo nadie.
     return deEstaOrganizacion.some(
-      (v) => v.statusConceptId === ESTADO_DEL_VINCULO.PENDIENTE,
+      (v) =>
+        esEstado(v.statusConceptId, 'RECHAZADO') ||
+        esEstado(v.statusConceptId, 'REVOCADO'),
     )
-      ? 'pendiente'
+      ? 'no-vigente'
       : 'ausente';
   }
 

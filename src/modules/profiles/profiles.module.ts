@@ -40,6 +40,9 @@ import {
 } from './repositories';
 import { ProfileOwnershipService } from './services';
 import { LinkableOrganizationsService } from './services/linkable-organizations.service';
+import { MessagingAffiliationNoticeAdapter } from './adapters/messaging-affiliation-notice.adapter';
+import { AFFILIATION_NOTICE_PORT } from './ports/affiliation-notice.port';
+import { MessagingModule } from '../messaging/messaging.module';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -60,6 +63,7 @@ import { LinkableOrganizationsService } from './services/linkable-organizations.
     // una especialidad válida vive en terminología, no en una lista de acá.
     TerminologyModule,
     DirectoryModule,
+    MessagingModule,
   ],
   controllers: [
     ProfilesPatientsController,
@@ -71,6 +75,13 @@ import { LinkableOrganizationsService } from './services/linkable-organizations.
     MedicalSpecialtyCatalogService,
     ProfilesAffiliationsService,
     LinkableOrganizationsService,
+    // El emisor de avisos del vínculo entra por su puerto: el servicio que
+    // decide no sabe que existe un canal in-app, y eso es lo que deja probar la
+    // decisión sin levantar mensajería.
+    {
+      provide: AFFILIATION_NOTICE_PORT,
+      useClass: MessagingAffiliationNoticeAdapter,
+    },
     // Repositorios
     PersonsRepository,
     PersonProfilesRepository,
