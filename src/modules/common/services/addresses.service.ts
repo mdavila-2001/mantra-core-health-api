@@ -59,6 +59,9 @@ export class AddressesService {
         administrativeAreaConceptId: dto.administrativeAreaConceptId,
         useConceptId: CONCEPTS.ADDR_USE_HOME,
         typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+        latitude: dto.latitude !== undefined ? String(dto.latitude) : undefined,
+        longitude:
+          dto.longitude !== undefined ? String(dto.longitude) : undefined,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -92,6 +95,10 @@ export class AddressesService {
       country: 'BO',
       municipalityConceptId: entity.municipalityConceptId,
       administrativeAreaConceptId: entity.administrativeAreaConceptId,
+      latitude:
+        entity.latitude !== undefined ? Number(entity.latitude) : undefined,
+      longitude:
+        entity.longitude !== undefined ? Number(entity.longitude) : undefined,
       createdAt: entity.createdAt,
     };
   }
