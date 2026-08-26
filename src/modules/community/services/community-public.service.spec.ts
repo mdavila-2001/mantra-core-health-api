@@ -69,6 +69,7 @@ function build(opciones?: {
     badgesByProfiles: mockFn().mockResolvedValue(new Map()),
     agendaByPractitioner: mockFn().mockResolvedValue(new Map()),
     locationsByOwner: mockFn().mockResolvedValue(new Map()),
+    specialtiesByPractitioner: mockFn().mockResolvedValue(new Map()),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // Por omisión el índice falla: así estas pruebas ejercen el camino SQL —el

@@ -42,6 +42,14 @@ import { COMM } from '../community.concepts';
  */
 /** Ciudad y punto de un sujeto; sin coordenadas, `lat`/`lng` van en nulo. */
 export interface ProfileLocation {
+  /**
+   * La calle, tal como se escribe en un sobre.
+   *
+   * Es `common.addresses.lines`, y va aparte de la ciudad porque la ficha las
+   * muestra juntas pero el mapa sólo entiende el punto: quien no tiene
+   * coordenadas todavía puede leer dónde queda.
+   */
+  readonly address: string | null;
   /** Ciudad legible, tal como se muestra. */
   readonly city: string | null;
   /** Latitud, o `null` si la dirección no la tiene cargada. */
@@ -313,12 +321,13 @@ export class PublicSearchRepository {
     const filas = await em.getConnection().execute<
       {
         owner_id: string;
+        lines: string | null;
         city: string | null;
         latitude: string | null;
         longitude: string | null;
       }[]
     >(
-      `SELECT DISTINCT ON (owner_id) owner_id, city, latitude, longitude
+      `SELECT DISTINCT ON (owner_id) owner_id, lines, city, latitude, longitude
            FROM common.addresses
           WHERE owner_id IN (?)
             AND (valid_to IS NULL OR valid_to >= CURRENT_DATE)
@@ -338,12 +347,24 @@ export class PublicSearchRepository {
         Number.isFinite(lat) &&
         Number.isFinite(lng);
       if (!geoValida) {
-        if (fila.city) {
-          salida.set(fila.owner_id, { city: fila.city, lat: null, lng: null });
+        // Sin punto pero con texto la dirección **sigue sirviendo**: la ficha
+        // escribe dónde atiende aunque no pueda dibujar el mapa.
+        if (fila.city || fila.lines) {
+          salida.set(fila.owner_id, {
+            address: fila.lines,
+            city: fila.city,
+            lat: null,
+            lng: null,
+          });
         }
         continue;
       }
-      salida.set(fila.owner_id, { city: fila.city, lat, lng });
+      salida.set(fila.owner_id, {
+        address: fila.lines,
+        city: fila.city,
+        lat,
+        lng,
+      });
     }
     return salida;
   }
