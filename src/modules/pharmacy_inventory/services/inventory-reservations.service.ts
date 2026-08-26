@@ -180,56 +180,92 @@ export class InventoryReservationsService {
         reservation.releasedAt = new Date();
         touch(reservation, actor.id);
 
-        const lines = await this.reservationsRepo.findLinesByReservation(
-          tx,
-          reservation.id,
-        );
-        for (const rl of lines) {
-          rl.statusConceptId = PINV.RES_LINE_RELEASED;
-          touch(rl, actor.id);
-
-          if (rl.inventoryLocationId) {
-            const position = await this.stockRepo.findByKeyForUpdate(tx, {
-              inventoryLocationId: rl.inventoryLocationId,
-              pharmacyProductId: rl.pharmacyProductId,
-              inventoryLotId: rl.inventoryLotId,
-            });
-            const sequence = await this.ledgerRepo.nextSequence(
-              tx,
-              reservation.pharmacyId,
-            );
-            this.ledgerRepo.append(tx, {
-              pharmacyId: reservation.pharmacyId,
-              pharmacySiteId: reservation.pharmacySiteId,
-              inventoryLocationId: rl.inventoryLocationId,
-              pharmacyProductId: rl.pharmacyProductId,
-              inventoryLotId: rl.inventoryLotId,
-              ledgerSequence: sequence,
-              movementTypeConceptId: PINV.MV_RESERVATION_RELEASE,
-              quantityDelta: '0',
-              reservationDelta: String(-num(rl.reservedQuantity)),
-              sourceId: reservation.id,
-              recordedByUserId: actor.id,
-            });
-            if (position) {
-              position.reservedQuantity = String(
-                num(position.reservedQuantity) - num(rl.reservedQuantity),
-              );
-              position.availableQuantity = recompute(
-                position.onHandQuantity,
-                position.reservedQuantity,
-                position.quarantineQuantity,
-              );
-              position.lastLedgerSequence = sequence;
-              position.updatedAt = new Date();
-            }
-          }
-        }
+        await this.releaseConfirmedLines(tx, reservation, actor);
         count += 1;
       }
       await tx.flush();
 
       return { expiredCount: count };
     });
+  }
+
+  /**
+   * Libera las líneas CONFIRMED de una reserva: marca cada una como
+   * `RES_LINE_RELEASED`, asienta `MV_RESERVATION_RELEASE` en el ledger y
+   * recalcula la posición de stock. Es la única contabilidad de liberación del
+   * módulo: la usan la expiración (UC-25-05) y la cancelación/vencimiento del
+   * pedido de paciente (FAR-E1) — duplicarla sería tener dos ledgers.
+   *
+   * Solo toca líneas en `RES_LINE_CONFIRMED`: una ya liberada no se libera dos
+   * veces, y una ya FULFILLED no tiene reserva que devolver. El **estado de la
+   * cabecera lo decide el llamador** (EXPIRED, `PINV_ORDER_CANCELADO`,
+   * `PINV_ORDER_VENCIDO`…): esta primitiva solo devuelve stock.
+   *
+   * @param tx - Transacción activa del caso de uso.
+   * @param reservation - Reserva/pedido cuya reserva de stock se devuelve.
+   * @param actor - Quien provoca la liberación.
+   * @returns Cuántas líneas se liberaron.
+   */
+  async releaseConfirmedLines(
+    tx: EntityManager,
+    reservation: {
+      /** Reserva a la que pertenecen las líneas. */
+      id: string;
+      /** Farmacia del ledger. */
+      pharmacyId: string;
+      /** Sede del asiento. */
+      pharmacySiteId: string;
+    },
+    actor: AuthenticatedUser,
+  ): Promise<number> {
+    const lines = await this.reservationsRepo.findLinesByReservation(
+      tx,
+      reservation.id,
+    );
+    let released = 0;
+    for (const rl of lines) {
+      if (rl.statusConceptId !== PINV.RES_LINE_CONFIRMED) continue;
+      rl.statusConceptId = PINV.RES_LINE_RELEASED;
+      touch(rl, actor.id);
+      released += 1;
+
+      if (rl.inventoryLocationId) {
+        const position = await this.stockRepo.findByKeyForUpdate(tx, {
+          inventoryLocationId: rl.inventoryLocationId,
+          pharmacyProductId: rl.pharmacyProductId,
+          inventoryLotId: rl.inventoryLotId,
+        });
+        const sequence = await this.ledgerRepo.nextSequence(
+          tx,
+          reservation.pharmacyId,
+        );
+        this.ledgerRepo.append(tx, {
+          pharmacyId: reservation.pharmacyId,
+          pharmacySiteId: reservation.pharmacySiteId,
+          inventoryLocationId: rl.inventoryLocationId,
+          pharmacyProductId: rl.pharmacyProductId,
+          inventoryLotId: rl.inventoryLotId,
+          ledgerSequence: sequence,
+          movementTypeConceptId: PINV.MV_RESERVATION_RELEASE,
+          quantityDelta: '0',
+          reservationDelta: String(-num(rl.reservedQuantity)),
+          sourceId: reservation.id,
+          recordedByUserId: actor.id,
+        });
+        if (position) {
+          position.reservedQuantity = String(
+            num(position.reservedQuantity) - num(rl.reservedQuantity),
+          );
+          position.availableQuantity = recompute(
+            position.onHandQuantity,
+            position.reservedQuantity,
+            position.quarantineQuantity,
+          );
+          position.lastLedgerSequence = sequence;
+          position.updatedAt = new Date();
+        }
+      }
+    }
+    return released;
   }
 }
