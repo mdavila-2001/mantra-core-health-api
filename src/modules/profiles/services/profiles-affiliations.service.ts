@@ -15,14 +15,20 @@ import {
 // único que se necesita de allá es resolver ese salto.
 import { PracticeSites } from '../../practice/entities';
 import { JurisdictionAuthorizations, Persons } from '../entities';
-import { TenantAdministrationService } from '../../directory/services';
+import {
+  DirectoryMembershipsService,
+  TenantAdministrationService,
+} from '../../directory/services';
 import { PROF } from '../profiles.concepts';
 import {
   AFFILIATION_NOTICE_PORT,
   type AffiliationNoticeKind,
   type AffiliationNoticePort,
 } from '../ports/affiliation-notice.port';
-import { PractitionerAffiliationsRepository } from '../repositories';
+import {
+  PersonAccountLinksRepository,
+  PractitionerAffiliationsRepository,
+} from '../repositories';
 import type { PractitionerAffiliations } from '../entities';
 import type { AffiliationRequestListDto, RejectAffiliationDto } from '../dto';
 
@@ -152,13 +158,17 @@ export class ProfilesAffiliationsService {
    *
    * @param em - Contexto de persistencia.
    * @param affiliationsRepo - Acceso a `profiles.practitioner_affiliations`.
+   * @param accountLinksRepo - Qué usuario encarna a cada profesional.
    * @param tenantAdmin - Quién administra cada organización.
+   * @param memberships - Membresías del directorio (la aprobación concede una).
    * @param logger - Logger estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly affiliationsRepo: PractitionerAffiliationsRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly tenantAdmin: TenantAdministrationService,
+    private readonly memberships: DirectoryMembershipsService,
     private readonly logger: PinoLogger,
     @Inject(AFFILIATION_NOTICE_PORT)
     private readonly avisos: AffiliationNoticePort,
@@ -497,6 +507,10 @@ export class ProfilesAffiliationsService {
       // que es el rastro que el prompt pide y el que la tabla ya sabe guardar.
       touch(solicitud, actor.id);
 
+      if (decision.destino === ESTADO_DEL_VINCULO.APROBADO) {
+        await this.concederMembresia(tx, solicitud, tenantId, actor);
+      }
+
       this.logger.info(
         {
           operation: decision.operacion,
@@ -582,6 +596,85 @@ export class ProfilesAffiliationsService {
       [practitionerProfileId],
     );
     return filas[0]?.user_id ?? null;
+  }
+
+  /**
+   * Le da al profesional aprobado la llave de la organización.
+   *
+   * ## Por qué aprobar no alcanzaba
+   *
+   * El aislamiento multi-tenant se resuelve por **membresía**: el claim
+   * `tenants` del token se arma leyendo `directory.tenant_memberships`, y el
+   * interceptor de contexto rechaza cualquier petición que nombre un tenant que
+   * no esté ahí. El vínculo aprobado no participaba de esa cuenta, así que la
+   * organización aprobaba y el médico seguía sin poder publicar agenda en ella:
+   * la petición moría en el interceptor, antes de que la regla del vínculo
+   * —que sí existía y sí lo habría dejado pasar— llegara a mirarlo.
+   *
+   * ## Por qué un rol propio y no `STAFF`
+   *
+   * Lo que la organización aceptó fue que el profesional **atienda**, no que
+   * administre. `DIR.ROLE_PRACTITIONER` queda fuera de los roles que
+   * administran, así que la membresía abre el tenant para su agenda y deja
+   * cerrada la gestión de personas, sedes y configuración.
+   *
+   * ## Sin cuenta no hay membresía, y no es un error
+   *
+   * Un perfil dado de alta por la organización puede no tener todavía una
+   * cuenta que lo encarne. En ese caso la aprobación es válida igual —el
+   * vínculo queda aprobado, que es lo que la organización decidió— y la
+   * membresía llegará cuando la persona vincule su cuenta. Se registra el aviso
+   * para que quede rastro y no se descubra por la ausencia.
+   *
+   * Un fallo al **crear** la membresía, en cambio, sí tumba la transacción:
+   * aprobar en silencio sin conceder acceso reproduce el defecto original de
+   * forma invisible.
+   *
+   * @param tx - Transacción de la decisión, ya validada.
+   * @param solicitud - El vínculo recién aprobado.
+   * @param tenantId - Organización que aprueba.
+   * @param actor - Quien aprueba.
+   */
+  private async concederMembresia(
+    tx: EntityManager,
+    solicitud: PractitionerAffiliations,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const cuenta = await this.accountLinksRepo.findActiveByPerson(
+      tx,
+      solicitud.practitionerProfileId,
+    );
+    if (!cuenta) {
+      this.logger.warn(
+        {
+          operation: 'profiles.affiliation.approve.membership',
+          affiliationId: solicitud.id,
+          tenantId,
+          practitionerProfileId: solicitud.practitionerProfileId,
+        },
+        'Vínculo aprobado sin cuenta activa: la membresía queda pendiente',
+      );
+      return;
+    }
+
+    const { membership, creada } =
+      await this.memberships.ensureMembresiaAsistencial(tx, {
+        userId: cuenta.userId,
+        tenantId,
+        actorUserId: actor.id,
+      });
+
+    this.logger.info(
+      {
+        operation: 'profiles.affiliation.approve.membership',
+        affiliationId: solicitud.id,
+        tenantId,
+        membershipId: membership.id,
+        outcome: creada ? 'creada' : 'ya-existia',
+      },
+      'Membership granted for approved affiliation',
+    );
   }
 }
 

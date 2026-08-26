@@ -129,8 +129,16 @@ desplegar() {
 
   # Las imágenes viejas se acumulan a 660 MB por commit. Se conservan las tres últimas por si
   # hace falta volver a mano a una de ayer.
+  #
+  # Es limpieza de mejor esfuerzo y su resultado NO decide el del despliegue: una de esas etiquetas
+  # puede seguir referenciada por un contenedor de otro proyecto, y entonces `docker rmi` falla. Sin
+  # el `return 0` de abajo, ese fallo era el valor de retorno de la función —la última orden de un
+  # cuerpo sin `return` explícito— y `una_vez` anotaba como fallido un commit que estaba sirviendo
+  # bien, dejando el despliegue congelado hasta que `dev` avanzara.
   docker images "$IMAGEN" --format '{{.Tag}} {{.ID}}' | grep -v '^local ' | tail -n +4 \
     | while read -r _ id; do docker rmi "$id" >/dev/null 2>&1; done
+
+  return 0
 }
 
 una_vez() {

@@ -265,4 +265,74 @@ export class FileUploadService {
       originalName: file.originalName,
     };
   }
+
+  /**
+   * Contenido de un archivo servido al internet anónimo (`GET /public/media/:id`).
+   *
+   * No es `download()` con el chequeo de dueño quitado: son dos superficies
+   * con dueños distintos de la decisión. Acá no hay actor que demuestre nada,
+   * así que lo que autoriza es lo que el archivo **es**: imagen, sensibilidad
+   * normal — nunca `PHI` — y su versión vigente ya escaneada y limpia. Que
+   * además esté colgado de una vitrina pública lo comprueba el llamador
+   * (`community`), que es quien sabe qué es una vitrina.
+   *
+   * @param fileId - Archivo a servir.
+   * @returns Bytes y tipo MIME para servirlos por HTTP.
+   * @throws ResourceNotFoundException si el archivo o su versión no existen,
+   *   o si no es una imagen de sensibilidad normal — el mismo 404 que «no
+   *   existe», para no decirle a quien prueba ids al azar cuáles sí son
+   *   sensibles.
+   * @throws PreconditionFailedException si está borrado o su escaneo no dio
+   *   limpio todavía (pendiente cuenta igual que infectado: acá no hay margen
+   *   para servir algo que no se terminó de revisar).
+   */
+  async downloadPublicMedia(fileId: string): Promise<FileContentDto> {
+    const forked = this.em.fork();
+
+    const file = await this.filesRepo.findById(forked, fileId);
+    if (
+      !file ||
+      file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE ||
+      file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_NORMAL
+    ) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+    }
+    if (
+      file.deletedAt ||
+      file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
+    ) {
+      throw new PreconditionFailedException('El archivo está borrado', {
+        fileId,
+      });
+    }
+    if (!file.currentVersionId) {
+      throw new PreconditionFailedException(
+        'El archivo no tiene una versión vigente',
+        { fileId },
+      );
+    }
+
+    const version = await this.fileVersionsRepo.findById(
+      forked,
+      file.currentVersionId,
+    );
+    if (!version) {
+      throw new ResourceNotFoundException('Versión vigente no encontrada', {
+        fileId,
+      });
+    }
+    if (version.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN) {
+      throw new PreconditionFailedException(
+        'La versión vigente todavía no está lista para servirse públicamente',
+        { fileId },
+      );
+    }
+
+    const buffer = await this.storage.retrieve(version.storageUri);
+    return {
+      buffer,
+      mimeType: version.mimeType,
+      originalName: file.originalName,
+    };
+  }
 }

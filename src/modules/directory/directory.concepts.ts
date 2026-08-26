@@ -70,6 +70,20 @@ export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
     ROLE_OWNER: { code: 'DIR_ROLE_OWNER', display: 'Tenant owner' },
     ROLE_ADMIN: { code: 'DIR_ROLE_ADMIN', display: 'Tenant admin' },
     ROLE_STAFF: { code: 'DIR_ROLE_STAFF', display: 'Tenant staff' },
+    /**
+     * Profesional cuyo vínculo con la organización fue aprobado. Existe para que
+     * la aprobación pueda darle acceso al tenant sin convertirlo en personal
+     * administrativo: opera su propia agenda ahí, y nada más.
+     *
+     * A propósito NO figura en `TENANT_ROLE_CONCEPT_BY_CODE`: el rol lo escribe
+     * únicamente el aprobador de vínculos, no un DTO de invitación. Quien
+     * administra no puede repartirlo a mano, así que la fila es evidencia de un
+     * trámite aprobado y no de una decisión suelta.
+     */
+    ROLE_PRACTITIONER: {
+      code: 'DIR_ROLE_PRACTITIONER',
+      display: 'Tenant practitioner',
+    },
 
     // --- Scopes de acceso (tenant_memberships.access_scope_concept_id) ---
     SCOPE_ALL_TENANT: {

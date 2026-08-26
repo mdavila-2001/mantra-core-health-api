@@ -118,6 +118,63 @@ export class DirectoryMembershipsService {
     });
   }
 
+  /**
+   * Garantiza que el profesional tenga membresía activa en la organización que
+   * acaba de aprobar su vínculo (MAC-VINCULO).
+   *
+   * Existe porque el aislamiento multi-tenant se resuelve por membresía: el
+   * claim `tenants` del token sale de esta tabla, y sin una fila acá el
+   * interceptor rechaza al médico antes de que ninguna regla de agenda llegue a
+   * mirar el vínculo. Aprobar y no escribir esto deja la aprobación sin efecto.
+   *
+   * Se distingue de `invite` en tres cosas, y por eso no lo reusa: no abre
+   * transacción propia (corre dentro de la decisión, que ya validó permisos),
+   * no exige `assertCanAdminister` de nuevo, y **no falla si ya hay membresía**
+   * — aprobar un vínculo sólo puede sumar acceso, nunca degradar a quien ya era
+   * ADMIN de la organización a un rol asistencial.
+   *
+   * @param tx - Transacción activa del llamador; el flush corre con ella.
+   * @param params - Usuario que encarna al profesional, organización y actor que aprueba.
+   * @returns La membresía vigente y si hubo que crearla.
+   */
+  async ensureMembresiaAsistencial(
+    tx: EntityManager,
+    params: {
+      readonly userId: string;
+      readonly tenantId: string;
+      readonly actorUserId: string;
+    },
+  ): Promise<{ membership: TenantMemberships; creada: boolean }> {
+    const existing = await this.membershipsRepo.findActiveByUserTenant(
+      tx,
+      params.userId,
+      params.tenantId,
+      DIR.MEMBERSHIP_ACTIVE,
+    );
+    if (existing) {
+      return { membership: existing, creada: false };
+    }
+
+    const membership = this.membershipsRepo.create(tx, {
+      userId: params.userId,
+      tenantId: params.tenantId,
+      // El rol acotado: alcanza para que el interceptor deje pasar, y queda
+      // fuera de ADMIN_TENANT_ROLES, así que no abre nada administrativo.
+      tenantRoleConceptId: DIR.ROLE_PRACTITIONER,
+      statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+      // La sede ya la fija el vínculo; acotar por branch exigiría un mapeo
+      // practice_site ↔ branch que el modelo no declara.
+      accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
+      // El acceso empieza cuando la organización aprueba, no cuando el vínculo
+      // dice que empezó la relación laboral.
+      startDate: new Date(),
+      invitedByUserId: params.actorUserId,
+      actorUserId: params.actorUserId,
+    });
+
+    return { membership, creada: true };
+  }
+
   /** UC-04-06: asigna la membresía a una branch del mismo tenant. */
   async assignBranch(
     tenantId: string,

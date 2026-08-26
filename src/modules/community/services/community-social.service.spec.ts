@@ -330,6 +330,170 @@ describe('CommunitySocialService', () => {
       expect(existente.displayName).toBe('Nombre nuevo');
     });
 
+    /* --- El avatar de la vitrina (viaja en el mismo PUT que el resto) ---- */
+
+    it('crea la vitrina con el avatar cuando llega en el alta', async () => {
+      const d = build();
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'f1',
+        createdByUserId: 'u-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        mimeType: 'image/png',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
+      });
+      d.profilesRepo.findByTarget
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: 'pp-1',
+          tenantId: 't-1',
+          targetId: 'u-1',
+          slug: 'nuevo-slug',
+          displayName: 'Nombre',
+          avatarFileId: 'f1',
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+        });
+
+      await d.service.upsertOwnProfile(
+        {
+          tenantId: 't-1',
+          slug: 'nuevo-slug',
+          displayName: 'Nombre',
+          avatarFileId: 'f1',
+        },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(d.profilesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ avatarFileId: 'f1' }),
+      );
+    });
+
+    it('fijar el avatar en una vitrina existente exige que sea una imagen viva', async () => {
+      const d = build();
+      const existente = {
+        id: 'pp-1',
+        tenantId: 't-1',
+        targetId: 'u-1',
+        slug: 'dra-salas',
+        displayName: 'Dra. Salas',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        // Todavía sin avatar: es lo que la prueba hace fijar más abajo. Va
+        // declarado —y no ausente— porque el tipo del literal es el que se
+        // lee al final, y sin la propiedad no habría nada que comprobar.
+        avatarFileId: undefined as string | undefined,
+      };
+      d.profilesRepo.findByTarget.mockResolvedValue(existente);
+      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'f1',
+        createdByUserId: 'u-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        mimeType: 'image/png',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
+      });
+
+      await d.service.upsertOwnProfile(
+        {
+          tenantId: 't-1',
+          slug: 'dra-salas',
+          displayName: 'Dra. Salas',
+          avatarFileId: 'f1',
+        },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(existente.avatarFileId).toBe('f1');
+    });
+
+    it('rechaza un archivo que no es imagen para el avatar', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget.mockResolvedValue({
+        id: 'pp-1',
+        targetId: 'u-1',
+        slug: 'dra-salas',
+        displayName: 'Dra. Salas',
+      });
+      d.profilesRepo.findBySlug.mockResolvedValue({
+        id: 'pp-1',
+        targetId: 'u-1',
+      });
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'f1',
+        createdByUserId: 'u-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      // Por defecto la versión no declara `mimeType`: cae fuera del allowlist.
+
+      await expect(
+        d.service.upsertOwnProfile(
+          {
+            tenantId: 't-1',
+            slug: 'dra-salas',
+            displayName: 'Dra. Salas',
+            avatarFileId: 'f1',
+          },
+          { id: 'u-1', roles: [] } as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('omitir el avatar conserva el que ya tenía', async () => {
+      const d = build();
+      const existente = {
+        id: 'pp-1',
+        targetId: 'u-1',
+        slug: 'dra-salas',
+        displayName: 'Dra. Salas',
+        avatarFileId: 'f-viejo',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      };
+      d.profilesRepo.findByTarget.mockResolvedValue(existente);
+      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+
+      await d.service.upsertOwnProfile(
+        { tenantId: 't-1', slug: 'dra-salas', displayName: 'Dra. Salas nueva' },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(existente.avatarFileId).toBe('f-viejo');
+    });
+
+    it('un avatar en null lo quita', async () => {
+      const d = build();
+      const existente = {
+        id: 'pp-1',
+        targetId: 'u-1',
+        slug: 'dra-salas',
+        displayName: 'Dra. Salas',
+        avatarFileId: 'f-viejo',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      };
+      d.profilesRepo.findByTarget.mockResolvedValue(existente);
+      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+
+      await d.service.upsertOwnProfile(
+        {
+          tenantId: 't-1',
+          slug: 'dra-salas',
+          displayName: 'Dra. Salas',
+          avatarFileId: null,
+        },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(existente.avatarFileId).toBeUndefined();
+    });
+
     /**
      * Dos vitrinas con el mismo slug serían dos enlaces que llevan a personas
      * distintas según cuál resuelva primero.

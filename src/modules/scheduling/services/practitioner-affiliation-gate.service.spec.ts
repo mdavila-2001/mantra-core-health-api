@@ -43,9 +43,26 @@ function conVinculos(
   );
 }
 
-/** Hace que las sedes consultadas pertenezcan a este tenant. */
+/** Hace que todas las sedes consultadas pertenezcan a este tenant. */
 function sedesDe(d: ReturnType<typeof build>, tenantId: string): void {
-  d.em.execute.mockResolvedValue([{ tenant_id: tenantId }] as never);
+  d.em.execute.mockImplementation(async (_sql: string, params: any[]) =>
+    (params[0] as string[]).map((sede) => ({
+      site_id: sede,
+      tenant_id: tenantId,
+    })),
+  );
+}
+
+/** Reparte las sedes entre organizaciones, sede por sede. */
+function sedesRepartidas(
+  d: ReturnType<typeof build>,
+  porSede: Record<string, string>,
+): void {
+  d.em.execute.mockImplementation(async (_sql: string, params: any[]) =>
+    (params[0] as string[])
+      .filter((sede) => porSede[sede] !== undefined)
+      .map((sede) => ({ site_id: sede, tenant_id: porSede[sede] })),
+  );
 }
 
 describe('PractitionerAffiliationGateService', () => {
@@ -111,9 +128,20 @@ describe('PractitionerAffiliationGateService', () => {
     expect(await d.service.evaluar(TENANT, profesional)).toBe('pendiente');
   });
 
-  it('con vinculos solo en otras organizaciones, ausente', async () => {
-    // El caso real del médico multi-sede: tener aprobación en el hospital donde
-    // está de turno no lo habilita en la clínica de al lado.
+  /**
+   * Antes esto daba `ausente`, y era el defecto: el veredicto miraba si el
+   * profesional tenía vínculos **en general**, no si tenía uno con ESTA
+   * organización. En cuanto una institución le aprobaba el suyo, su propio
+   * consultorio —donde no hay vínculo que pedir— pasaba a leerse como una
+   * organización más de la que faltaba el vínculo, y el médico dejaba de poder
+   * publicar ahí. Tener una aprobación en otro lado lo dejaba peor que no tener
+   * ninguna.
+   *
+   * Lo que la regla protege sigue protegido: para bloquear una organización
+   * hace falta un vínculo suyo sin aprobar, y eso lo cubren los dos casos de
+   * abajo.
+   */
+  it('un vinculo en otra organizacion no dice nada de esta', async () => {
     const d = build();
     conVinculos(d, [
       {
@@ -123,7 +151,50 @@ describe('PractitionerAffiliationGateService', () => {
     ]);
     sedesDe(d, OTRO_TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('sin-vinculos');
+  });
+
+  /**
+   * El caso multi-sede completo, que es el que motivó todo esto: aprobado en la
+   * institución y, con el mismo perfil, dueño de su consultorio. Las dos
+   * respuestas tienen que dejarlo trabajar.
+   */
+  it('aprobado en la institucion y libre en su propio consultorio', async () => {
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-caja',
+        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+      },
+    ]);
+    sedesRepartidas(d, { 'sede-caja': OTRO_TENANT });
+
+    expect(await d.service.evaluar(OTRO_TENANT, profesional)).toBe('aprobado');
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('sin-vinculos');
+  });
+
+  /**
+   * Y el reverso: un vínculo pendiente en la institución no se diluye porque el
+   * profesional tenga otros aprobados en otras partes.
+   */
+  it('el pendiente de esta organizacion no lo tapan los aprobados de otras', async () => {
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-otra',
+        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+      },
+      {
+        practiceSiteId: 'sede-esta',
+        statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
+      },
+    ]);
+    sedesRepartidas(d, {
+      'sede-otra': OTRO_TENANT,
+      'sede-esta': TENANT,
+    });
+
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('pendiente');
   });
 
   it('el vinculo aprobado gana sobre el pendiente de la misma organizacion', async () => {
@@ -243,11 +314,17 @@ describe('PractitionerAffiliationGateService', () => {
     expect(await d.service.evaluar(TENANT, profesional)).toBe('no-vigente');
   });
 
-  it('sin vinculo con ESTA organizacion el veredicto es ausente, no negativa', async () => {
+  it('sin vinculo con ESTA organizacion el veredicto no es una negativa', async () => {
     // Es la distinción que cuesta caro confundir: «nadie dijo nada sobre esta
     // organización» no es lo mismo que «esta organización dijo que no». Tratar
     // lo primero como negativa dejaba a un médico sin publicar en su propio
     // consultorio por haber declarado que trabaja en un hospital.
+    //
+    // El veredicto es `sin-vinculos` —el mismo que el de quien no tiene
+    // ninguno— y no `ausente`: `ausente` quedó para cuando SÍ hay un vínculo
+    // con esta organización pero su estado no es ninguno de los conocidos.
+    // Los dos consumidores dejan pasar `sin-vinculos`; `ausente` lo bloquea
+    // en `bookings`, que es exactamente lo que no debe pasarle a este médico.
     const d = build();
     conVinculos(d, [
       {
@@ -257,6 +334,50 @@ describe('PractitionerAffiliationGateService', () => {
     ]);
     sedesDe(d, OTRO_TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('sin-vinculos');
+  });
+
+  /**
+   * Quién administra una sede lo dice `managing_tenant_id`, que es la columna
+   * que mira la aprobación del vínculo. Si acá se preguntara sólo por el tenant
+   * de la práctica, una sede administrada por otra organización daría un
+   * veredicto distinto del que dio la aprobación: aprobada allá, ausente acá.
+   */
+  it('la sede la manda quien la administra, no la práctica que la contiene', async () => {
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+      },
+    ]);
+    sedesDe(d, TENANT);
+
+    const veredicto = await d.service.evaluar(TENANT, profesional);
+
+    expect(veredicto).toBe('aprobado');
+    const [sql] = d.em.execute.mock.calls[0];
+    expect(sql).toContain('COALESCE(s.managing_tenant_id, p.tenant_id)');
+  });
+
+  /**
+   * El puente devuelve el par completo: sin el id de la sede no se puede saber
+   * de cuál organización es cada vínculo, que es justamente lo que la regla
+   * pregunta.
+   */
+  it('el puente dice a que organizacion pertenece cada sede', async () => {
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+      },
+    ]);
+    sedesDe(d, TENANT);
+
+    await d.service.evaluar(TENANT, profesional);
+
+    const [sql] = d.em.execute.mock.calls[0];
+    expect(sql).toContain('s.id AS site_id');
   });
 });

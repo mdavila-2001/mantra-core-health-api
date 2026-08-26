@@ -69,6 +69,8 @@ function build(opciones?: {
     badgesByProfiles: mockFn().mockResolvedValue(new Map()),
     agendaByPractitioner: mockFn().mockResolvedValue(new Map()),
     locationsByOwner: mockFn().mockResolvedValue(new Map()),
+    specialtiesByPractitioner: mockFn().mockResolvedValue(new Map()),
+    affiliationsByPractitioner: mockFn().mockResolvedValue(new Map()),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // Por omisión el índice falla: así estas pruebas ejercen el camino SQL —el
@@ -126,6 +128,56 @@ describe('CommunityPublicService', () => {
       const res = await d.service.getBySlug('dra-quispe');
 
       expect(Object.keys(res).sort()).toEqual([...PUBLIC_PROFILE_KEYS].sort());
+    });
+
+    it('un profesional sirve su trayectoria laboral', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.affiliationsByPractitioner.mockResolvedValue(
+        new Map([
+          [
+            'sujeto-interno',
+            [
+              {
+                organizationName: 'Hospital Obrero N.º 1',
+                roleTitle: 'Cardióloga de planta',
+                departmentText: 'Cardiología',
+                startDate: '2018-03-01',
+                endDate: null,
+              },
+            ],
+          ],
+        ]),
+      );
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(res.trajectory).toEqual([
+        {
+          organizationName: 'Hospital Obrero N.º 1',
+          roleTitle: 'Cardióloga de planta',
+          departmentText: 'Cardiología',
+          startDate: '2018-03-01',
+          endDate: null,
+        },
+      ]);
+      expect(d.repo.affiliationsByPractitioner).toHaveBeenCalledWith(
+        expect.anything(),
+        ['sujeto-interno'],
+      );
+    });
+
+    it('quien no es profesional no pide ni sirve trayectoria', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue({
+        ...perfilCompleto,
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+      });
+
+      const res = await d.service.getBySlug('clinica-del-sur');
+
+      expect(res.trajectory).toEqual([]);
+      expect(d.repo.affiliationsByPractitioner).not.toHaveBeenCalled();
     });
 
     // Enumerados uno por uno y no con un `not.toContain` genérico: si mañana se
