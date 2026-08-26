@@ -53,20 +53,22 @@ import { definitionPropertyCode } from '../../modules/terminology/terminology.co
  *
  * ## Cobertura, dicha en voz alta
  *
- * Cubre los **155 conceptos que componen los 53 conjuntos de valores** de
+ * Cubre los **162 conceptos que componen los 63 conjuntos de valores** de
  * `DYNAMIC_ENUM_CATALOG` — es decir, todo lo que el glosario puede llegar a
  * mostrar hoy navegando por etiquetas. El catálogo interno completo es mayor
  * (estados de auditoría, tipos de evento, cosas que ningún conjunto de valores
  * ofrece y que nadie ve en pantalla): esos quedan sin designación `ES` a
  * propósito, y la lectura los devuelve con su rótulo original marcados como no
  * traducidos, nunca en blanco. `terminology-designations.es.spec.ts` fija que la
- * cobertura de los 155 sea completa, de modo que añadir un concepto a un
+ * cobertura sea completa, de modo que añadir un concepto a un
  * conjunto de valores sin traducirlo rompe la prueba en vez de aparecer en
  * inglés en producción.
  *
  * El número sube cuando sube: los cinco del curso clínico y los seis del estado
  * clínico de la condición entraron con el conjunto que los ofrece, y llegaron
- * acá porque esa prueba se puso roja — que es exactamente para lo que está.
+ * acá porque esa prueba se puso roja — que es exactamente para lo que está. Los
+ * siete de v4.1.9 (los cinco estados del vínculo profesional–institución y los
+ * dos peldaños intermedios de la escalera de verificación) entraron igual.
  */
 
 /** El nombre y la explicación de un concepto en castellano. */
@@ -486,6 +488,48 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
 
+  // --- Profesionales: vínculo con la institución --------------------------
+  [
+    PROF.AFFILIATION_PENDING,
+    {
+      display: 'Vínculo pendiente de aprobación',
+      definition:
+        'El profesional declaró que atiende ahí y alguien de la organización todavía tiene que confirmarlo.',
+    },
+  ],
+  [
+    PROF.AFFILIATION_DECLARED,
+    {
+      display: 'Vínculo declarado por el profesional',
+      definition:
+        'Lo declaró el profesional y no hay nadie en la organización que pueda confirmarlo. Se muestra siempre con esa aclaración: no lleva el sello de la institución.',
+    },
+  ],
+  [
+    PROF.AFFILIATION_APPROVED,
+    {
+      display: 'Vínculo aprobado',
+      definition:
+        'Alguien que administra la organización confirmó que el profesional atiende ahí.',
+    },
+  ],
+  [
+    PROF.AFFILIATION_REJECTED,
+    {
+      display: 'Vínculo rechazado',
+      definition:
+        'La organización no confirmó el vínculo. Si escribió el motivo, el profesional lo lee.',
+    },
+  ],
+  [
+    PROF.AFFILIATION_REVOKED,
+    {
+      display: 'Vínculo revocado',
+      definition:
+        'El vínculo estuvo aprobado y la organización lo retiró después. Deja de valer para atender ahí; las citas ya confirmadas no se cancelan solas.',
+    },
+  ],
+
   // --- Organizaciones: qué tipo de institución es -------------------------
   [
     CONCEPTS.TENANT_TYPE_PROVIDER,
@@ -596,6 +640,22 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Organización sin verificar',
       definition:
         'No se comprobó la existencia legal de la organización ni quién la representa.',
+    },
+  ],
+  [
+    DIR.TENANT_REGISTRY_LISTED,
+    {
+      display: 'Organización del padrón oficial',
+      definition:
+        'Figura en el padrón oficial de establecimientos de salud, así que existe de hecho, pero todavía nadie la administra en la plataforma.',
+    },
+  ],
+  [
+    DIR.TENANT_CLAIMED,
+    {
+      display: 'Organización reclamada',
+      definition:
+        'Alguien real la administra y está reuniendo la documentación para que se la verifique.',
     },
   ],
   [
