@@ -10,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { SchedulingCatalogRepository } from '../repositories';
+import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
 import type { SchedulableResources } from '../entities';
 import {
   CreateResourceDto,
@@ -31,11 +32,6 @@ import {
 } from '../dto';
 import { diasLocalesQueCoinciden, horaLocalAUtc } from '../scheduling-time';
 import type { DiaLocal } from '../scheduling-time';
-import { PractitionerAffiliations } from '../../profiles/entities';
-// El único sitio donde se decide qué concepto significa «aprobado» es TP-2. Se
-// importa en vez de repetir la comparación: cuando el value set de estados
-// exista, ese objeto cambia y esto lo sigue sin tocarse.
-import { ESTADO_DEL_VINCULO } from '../../profiles/services/profiles-affiliations.service';
 
 /**
  * Roles que administran el catálogo de agendas de terceros por oficio.
@@ -103,6 +99,7 @@ export class SchedulingCatalogService {
     private readonly em: EntityManager,
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly logger: PinoLogger,
+    private readonly vinculos: PractitionerAffiliationGateService,
   ) {
     this.logger.setContext(SchedulingCatalogService.name);
   }
@@ -762,74 +759,18 @@ export class SchedulingCatalogService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     if (this.esAdministradorDeCatalogo(actor)) return;
-    if (actor.practitionerProfileId === undefined) return;
 
-    const vinculos = await this.em.find(
-      PractitionerAffiliations,
-      { practitionerProfileId: actor.practitionerProfileId },
-      { fields: ['practiceSiteId', 'statusConceptId', 'organizationName'] },
-    );
-
-    // Sólo un vínculo que apunta a una sede dice algo sobre un tenant. Hoy el
-    // médico pide la afiliación escribiendo el nombre de la institución a mano
-    // —`organization_name` es obligatorio y `practice_site_id` opcional, y en la
-    // base viva es nulo en todas—, así que la mayoría de los vínculos no
-    // identifica ninguna organización de la plataforma. Tomar uno de ésos como
-    // negativa sería castigar al médico por haber declarado dónde trabaja: lo
-    // dejaría sin publicar ni siquiera en su propio consultorio.
-    const conSede = vinculos.filter(
-      (v): v is (typeof vinculos)[number] & { practiceSiteId: string } =>
-        v.practiceSiteId !== undefined && v.practiceSiteId !== null,
-    );
-
-    // Sin vínculos con sede no se bloquea: es el consultorio propio, que nunca
-    // pidió permiso a nadie, y el médico recién llegado que todavía no pertenece
-    // a ninguna institución. La regla aprieta cuando hay un vínculo que nombra
-    // una organización de la plataforma, no antes.
-    if (conSede.length === 0) return;
-
-    const tenantsAprobados = await this.tenantsDeSedes(
-      conSede
-        .filter((v) => v.statusConceptId === ESTADO_DEL_VINCULO.APROBADO)
-        .map((v) => v.practiceSiteId),
-    );
-    if (tenantsAprobados.has(tenantId)) return;
-
-    const pendientes = await this.tenantsDeSedes(
-      conSede
-        .filter((v) => v.statusConceptId === ESTADO_DEL_VINCULO.PENDIENTE)
-        .map((v) => v.practiceSiteId),
-    );
+    const veredicto = await this.vinculos.evaluar(tenantId, actor);
+    if (veredicto === 'sin-vinculos' || veredicto === 'aprobado') return;
 
     throw new PreconditionFailedException(
-      pendientes.has(tenantId)
+      veredicto === 'pendiente'
         ? 'Tu vínculo con esta organización todavía está pendiente de ' +
             'aprobación. Cuando la acepten vas a poder publicar tu agenda acá.'
         : 'Para publicar tu agenda en esta organización primero necesitás que ' +
             'te acepte como profesional suyo. Pedí el vínculo desde tu perfil.',
-      { tenantId, vinculo: pendientes.has(tenantId) ? 'pendiente' : 'ausente' },
+      { tenantId, vinculo: veredicto },
     );
-  }
-
-  /**
-   * Resuelve a qué organizaciones pertenecen unas sedes.
-   *
-   * Una consulta con `IN` en vez de una por sede: un médico con agenda en cinco
-   * hospitales haría cinco viajes a la base en cada publicación.
-   *
-   * @param sedes - Identificadores de sede; vacío devuelve conjunto vacío.
-   * @returns Los tenants dueños de esas sedes, sin repetir.
-   */
-  private async tenantsDeSedes(sedes: string[]): Promise<Set<string>> {
-    if (sedes.length === 0) return new Set();
-    const filas = await this.em.execute<{ tenant_id: string }[]>(
-      `SELECT DISTINCT p.tenant_id
-         FROM practice.practice_sites s
-         JOIN practice.practices p ON p.id = s.practice_id
-        WHERE s.id IN (?)`,
-      [sedes],
-    );
-    return new Set(filas.map((f) => f.tenant_id));
   }
 
   /**

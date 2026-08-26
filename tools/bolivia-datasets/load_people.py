@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 import re
 import sys
 import unicodedata
@@ -130,6 +131,9 @@ class Api:
     def __init__(self, base: str) -> None:
         self.base = base.rstrip("/")
         self.token: str | None = None
+        # 10 altas por minuto → una cada ~7 s deja margen; el reintento espera la ventana entera.
+        self.pausa_entre_altas = 7.0
+        self.pausa_por_429 = 62.0
 
     def _peticion(self, metodo: str, ruta: str, cuerpo: dict | None) -> tuple[int, dict]:
         datos = json.dumps(cuerpo).encode("utf-8") if cuerpo is not None else None
@@ -159,7 +163,15 @@ class Api:
         self.token = cuerpo["accessToken"]
 
     def post(self, ruta: str, cuerpo: dict) -> tuple[int, dict]:
-        return self._peticion("POST", ruta, cuerpo)
+        # El alta está limitada a 10/min por IP (protección anti-abuso). En vez de
+        # apagar esa protección para todo el servidor, el cargador se autolimita:
+        # espera entre altas y, si aun así choca con un 429, respeta la ventana y
+        # reintenta una vez. Es más lento pero no deja la puerta abierta.
+        estado, cuerpo_resp = self._peticion("POST", ruta, cuerpo)
+        if estado == 429:
+            time.sleep(self.pausa_por_429)
+            estado, cuerpo_resp = self._peticion("POST", ruta, cuerpo)
+        return estado, cuerpo_resp
 
     def get(self, ruta: str) -> tuple[int, dict]:
         return self._peticion("GET", ruta, None)
@@ -247,6 +259,7 @@ def alta_de_pacientes(
             # «dejar uno al final libre para … la ocupación que no encontró».
             cuerpo["occupationFreeText"] = ocupacion[:120]
 
+        time.sleep(api.pausa_entre_altas)
         estado, respuesta = api.post("/iam/auth/register-patient", cuerpo)
         if estado in (200, 201):
             creados += 1
@@ -282,13 +295,20 @@ def alta_de_medicos(
         )
         sedes = opcional(columna(cabecera, fila, "SEDES GOBERNACION SANTA CRUZ"))
         colegio = opcional(columna(cabecera, fila, "REGISTRO COLEGIO ODONTOLOGOS"))
-        credencial = sedes or colegio
+        # La matrícula del Ministerio ES la credencial que habilita a ejercer, así
+        # que sirve para las dos cosas que el alta pide (`licenseNumber` y
+        # `credentialNumber`). El SEDES y el registro del colegio son secundarios
+        # —muchos médicos del padrón traen sólo uno o ninguno—: se usan como
+        # `credentialNumber` cuando están, y si no, la propia matrícula. Exigir
+        # los tres a la vez, como hacía la primera versión, rechazaba médicos con
+        # matrícula válida sólo porque les faltaba un registro accesorio.
+        credencial = sedes or colegio or matricula
 
         if not correo:
             problemas.append(f"CI {ci}: sin correo, y el alta de médico lo exige")
             continue
-        if not matricula or not credencial:
-            problemas.append(f"CI {ci}: sin matrícula o sin registro profesional")
+        if not matricula:
+            problemas.append(f"CI {ci}: sin matrícula del Ministerio")
             continue
         if not aplicar:
             creados += 1
@@ -304,6 +324,7 @@ def alta_de_medicos(
         if titulo:
             cuerpo["professionalTitle"] = titulo[:120]
 
+        time.sleep(api.pausa_entre_altas)
         estado, respuesta = api.post("/iam/auth/register-practitioner", cuerpo)
         if estado in (200, 201):
             creados += 1

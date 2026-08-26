@@ -17,3 +17,4 @@ export * from './set-practitioner-photo.dto';
 export * from './list-practitioners.dto';
 export * from './practitioner-onboarding.dto';
 export * from './affiliation-request.dto';
+export * from './linkable-organization.dto';

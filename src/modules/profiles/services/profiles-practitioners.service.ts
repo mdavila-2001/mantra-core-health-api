@@ -29,6 +29,7 @@ import {
 import { ClinicalNoteHeaders, DocumentRecords } from '../../chart/entities';
 import { Encounters, MedicationRequests } from '../../clinical/entities';
 import { PROF } from '../profiles.concepts';
+import { ESTADO_DEL_VINCULO } from './profiles-affiliations.service';
 import type { OnboardingStepDto, PractitionerOnboardingDto } from '../dto';
 import {
   PersonsRepository,
@@ -1513,6 +1514,25 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
     endDate: row.endDate ?? null,
     current: row.endDate === undefined || row.endDate === null,
     status: row.statusConceptId,
+    statusKind: estadoLegible(row.statusConceptId),
     createdAt: row.createdAt,
   };
+}
+
+/**
+ * Traduce el concepto de estado a algo que una pantalla pueda usar.
+ *
+ * Un solo lugar: cuando exista el value set de estados de vínculo, esto es lo
+ * único que cambia.
+ *
+ * @param conceptId - El estado tal como está guardado.
+ * @returns El caso conocido, o `desconocido` si no es ninguno.
+ */
+function estadoLegible(
+  conceptId: string,
+): 'pendiente' | 'aprobado' | 'rechazado' | 'desconocido' {
+  if (conceptId === ESTADO_DEL_VINCULO.PENDIENTE) return 'pendiente';
+  if (conceptId === ESTADO_DEL_VINCULO.APROBADO) return 'aprobado';
+  if (conceptId === ESTADO_DEL_VINCULO.RECHAZADO) return 'rechazado';
+  return 'desconocido';
 }
