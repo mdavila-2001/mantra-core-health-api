@@ -194,6 +194,16 @@ export class AffiliationResponseDto {
     | 'desconocido';
 
   /**
+   * Por qué la organización rechazó o dio de baja el vínculo.
+   *
+   * **Lo lee el profesional**, no es una nota interna. Un rechazo sin motivo es
+   * mudo para quien lo recibe, y quien lo escribe tiene que saber que se lee.
+   * `null` en cualquier otro estado.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  decisionReasonText!: string | null;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @ApiProperty({ type: String, format: 'date-time' })

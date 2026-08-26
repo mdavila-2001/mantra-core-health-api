@@ -1515,6 +1515,7 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
     current: row.endDate === undefined || row.endDate === null,
     status: row.statusConceptId,
     statusKind: estadoLegible(row.statusConceptId),
+    decisionReasonText: row.decisionReasonText ?? null,
     createdAt: row.createdAt,
   };
 }

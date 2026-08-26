@@ -46,6 +46,9 @@ function build() {
     transactional: mockFn((cb: any) => cb(tx)),
     find: mockFn().mockResolvedValue([]),
     findOne: mockFn().mockResolvedValue(null),
+    // La cuenta del profesional, para saber a quién avisarle. Por defecto la
+    // tiene: un profesional sin cuenta es la excepción, no la regla.
+    execute: mockFn().mockResolvedValue([{ user_id: 'user-med' }]),
   };
   em.fork = mockFn(() => em);
   tx.find = em.find;
@@ -65,14 +68,17 @@ function build() {
     hasAdministrators: mockFn().mockResolvedValue(true),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // El emisor de avisos: interesa CON QUÉ se lo llama, no que entregue.
+  const avisos = { emit: mockFn().mockResolvedValue({ delivered: true }) };
 
   const service = new ProfilesAffiliationsService(
     em,
     affiliationsRepo as any,
     tenantAdmin as any,
     logger as any,
+    avisos as any,
   );
-  return { service, em, tx, affiliationsRepo, tenantAdmin };
+  return { service, em, tx, affiliationsRepo, tenantAdmin, avisos };
 }
 
 describe('ProfilesAffiliationsService (TP-2)', () => {
@@ -216,6 +222,134 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: TENANT });
       return solicitud;
     }
+
+    it('el motivo del rechazo SE GUARDA, no sólo se registra', async () => {
+      // La columna existe desde v4.1.9 y nadie la escribía: el motivo viajaba
+      // sólo al log, así que un rechazo era mudo para quien lo recibe.
+      const d = build();
+      const solicitud = conSolicitud(d);
+
+      await d.service.rechazar(
+        TENANT,
+        'af-1',
+        { reason: '  No figurás en nuestro plantel  ' } as never,
+        orgAdmin,
+      );
+
+      expect(solicitud.decisionReasonText).toBe(
+        'No figurás en nuestro plantel',
+      );
+    });
+
+    it('un motivo en blanco no ensucia la columna', async () => {
+      const d = build();
+      const solicitud = conSolicitud(d);
+
+      await d.service.rechazar(
+        TENANT,
+        'af-1',
+        { reason: '   ' } as never,
+        orgAdmin,
+      );
+
+      expect(solicitud.decisionReasonText).toBeUndefined();
+    });
+
+    it('revocar da de baja un vínculo YA APROBADO', async () => {
+      // El concepto existía desde v4.1.9 y nada lo escribía: aprobar era
+      // irreversible por omisión, no por decisión.
+      const d = build();
+      const solicitud = conSolicitud(d);
+      solicitud.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
+
+      await d.service.revocar(
+        TENANT,
+        'af-1',
+        { reason: 'Terminó su contrato' } as never,
+        orgAdmin,
+      );
+
+      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.REVOCADO);
+      expect(solicitud.decisionReasonText).toBe('Terminó su contrato');
+    });
+
+    it('no se puede revocar lo que todavía está pendiente', async () => {
+      const d = build();
+      conSolicitud(d);
+
+      await expect(
+        d.service.revocar(TENANT, 'af-1', {} as never, orgAdmin),
+      ).rejects.toThrow(/aprobado/);
+    });
+
+    it('aprobar le avisa al médico, y le dice qué cambia para él', async () => {
+      // Enterarse de que lo aprobaron sin saber que ya puede publicar agenda
+      // deja el aviso a mitad de camino.
+      const d = build();
+      conSolicitud(d);
+
+      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+
+      const [aviso] = d.avisos.emit.mock.calls[0];
+      expect(aviso.kind).toBe('AFFILIATION_APPROVED');
+      expect(aviso.recipientUserId).toBe('user-med');
+      expect(aviso.bodyText).toMatch(/publicar tu agenda/);
+    });
+
+    it('el aviso del rechazo LLEVA el motivo', async () => {
+      const d = build();
+      conSolicitud(d);
+
+      await d.service.rechazar(
+        TENANT,
+        'af-1',
+        { reason: 'No figurás en nuestro plantel' } as never,
+        orgAdmin,
+      );
+
+      const [aviso] = d.avisos.emit.mock.calls[0];
+      expect(aviso.kind).toBe('AFFILIATION_REJECTED');
+      expect(aviso.bodyText).toContain('No figurás en nuestro plantel');
+    });
+
+    it('el aviso de la revocación aclara que las citas siguen', async () => {
+      const d = build();
+      const solicitud = conSolicitud(d);
+      solicitud.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
+
+      await d.service.revocar(TENANT, 'af-1', {} as never, orgAdmin);
+
+      const [aviso] = d.avisos.emit.mock.calls[0];
+      expect(aviso.bodyText).toMatch(/ya confirmaste siguen en pie/);
+    });
+
+    it('un profesional sin cuenta no rompe la decisión', async () => {
+      // Existe —lo cargó una organización— y no hay a dónde mandarle el aviso.
+      // No es un error: la decisión se toma igual.
+      const d = build();
+      const solicitud = conSolicitud(d);
+      d.em.execute.mockResolvedValue([]);
+
+      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+
+      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(d.avisos.emit).not.toHaveBeenCalled();
+    });
+
+    it('si el aviso falla, la decisión YA está tomada', async () => {
+      // Emitir va después de la transacción a propósito: un fallo de mensajería
+      // no puede revertir una aprobación que la organización ya decidió.
+      const d = build();
+      const solicitud = conSolicitud(d);
+      d.avisos.emit.mockResolvedValue({
+        delivered: false,
+        skippedReason: 'canal caído',
+      });
+
+      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+
+      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+    });
 
     it('aprobar deja el vínculo activo', async () => {
       const d = build();

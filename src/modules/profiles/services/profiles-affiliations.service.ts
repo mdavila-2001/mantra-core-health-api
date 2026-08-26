@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -17,6 +17,11 @@ import { PracticeSites } from '../../practice/entities';
 import { JurisdictionAuthorizations, Persons } from '../entities';
 import { TenantAdministrationService } from '../../directory/services';
 import { PROF } from '../profiles.concepts';
+import {
+  AFFILIATION_NOTICE_PORT,
+  type AffiliationNoticeKind,
+  type AffiliationNoticePort,
+} from '../ports/affiliation-notice.port';
 import { PractitionerAffiliationsRepository } from '../repositories';
 import type { PractitionerAffiliations } from '../entities';
 import type { AffiliationRequestListDto, RejectAffiliationDto } from '../dto';
@@ -155,6 +160,8 @@ export class ProfilesAffiliationsService {
     private readonly affiliationsRepo: PractitionerAffiliationsRepository,
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly logger: PinoLogger,
+    @Inject(AFFILIATION_NOTICE_PORT)
+    private readonly avisos: AffiliationNoticePort,
   ) {
     this.logger.setContext(ProfilesAffiliationsService.name);
   }
@@ -351,19 +358,18 @@ export class ProfilesAffiliationsService {
     await this.decidir(tenantId, affiliationId, actor, {
       destino: ESTADO_DEL_VINCULO.APROBADO,
       operacion: 'profiles.affiliation.approve',
+      desde: 'PENDIENTE',
+      siNoEsta: 'Esa solicitud ya fue resuelta',
     });
   }
 
   /**
-   * La organización rechaza el vínculo.
+   * La organización rechaza el vínculo, y el motivo se guarda.
    *
-   * ## El motivo no se guarda todavía, y conviene saberlo
-   *
-   * `practitioner_affiliations` no tiene columna donde escribirlo, y agregarla
-   * es un cambio de esquema —de Marcelo—. Se acepta en el cuerpo y viaja al
-   * registro estructurado, que es donde hoy queda rastro de por qué se rechazó;
-   * lo que falta es devolvérselo al profesional en su pantalla. Anotado como
-   * bloqueador: sin esa columna, un rechazo es mudo para quien lo recibe.
+   * `decision_reason_text` existe desde v4.1.9 y hasta ahora nadie la escribía:
+   * el motivo viajaba sólo al registro estructurado, así que un rechazo era
+   * mudo para quien lo recibe. Ahora se persiste y el profesional lo lee en su
+   * historial.
    */
   async rechazar(
     tenantId: string,
@@ -375,6 +381,45 @@ export class ProfilesAffiliationsService {
       destino: ESTADO_DEL_VINCULO.RECHAZADO,
       operacion: 'profiles.affiliation.reject',
       motivo: dto.reason,
+      desde: 'PENDIENTE',
+      siNoEsta: 'Esa solicitud ya fue resuelta',
+    });
+  }
+
+  /**
+   * La organización da de baja un vínculo que ya había aprobado.
+   *
+   * ## Por qué faltaba, y por qué importa
+   *
+   * `AFFILIATION_REVOKED` existe desde v4.1.9 y **nada lo escribía**: aprobar
+   * era irreversible por omisión, no por decisión. Y el gating de agenda ya
+   * defendía ese estado —un vínculo revocado no deja aceptar turnos—, así que
+   * defendía algo que sólo se alcanzaba escribiendo en la base a mano.
+   *
+   * ## Lo que NO hace
+   *
+   * No cancela las citas ya confirmadas. Dejarlas caer en bloque plantaría a
+   * pacientes que tenían un turno prometido, por un trámite entre el médico y la
+   * organización del que no fueron parte. Lo que sí ocurre desde la revocación:
+   * no puede aceptar turnos nuevos ni publicar más agenda ahí.
+   *
+   * @param tenantId - La organización que revoca.
+   * @param affiliationId - El vínculo.
+   * @param dto - Motivo, que el profesional va a leer.
+   * @param actor - Quien revoca; tiene que poder administrar la organización.
+   */
+  async revocar(
+    tenantId: string,
+    affiliationId: string,
+    dto: RejectAffiliationDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.decidir(tenantId, affiliationId, actor, {
+      destino: ESTADO_DEL_VINCULO.REVOCADO,
+      operacion: 'profiles.affiliation.revoke',
+      motivo: dto.reason,
+      desde: 'APROBADO',
+      siNoEsta: 'Sólo se puede revocar un vínculo aprobado',
     });
   }
 
@@ -394,9 +439,19 @@ export class ProfilesAffiliationsService {
       readonly destino: string;
       readonly operacion: string;
       readonly motivo?: string;
+      /**
+       * Desde qué estado se admite la transición.
+       *
+       * Aprobar y rechazar sólo tienen sentido sobre un pedido pendiente;
+       * revocar, sólo sobre uno ya aprobado. Declararlo acá evita que cada
+       * operación repita la comprobación y que una se olvide.
+       */
+      readonly desde: keyof typeof ESTADO_DEL_VINCULO;
+      /** Qué decir cuando el vínculo no está en ese estado. */
+      readonly siNoEsta: string;
     },
   ): Promise<void> {
-    await this.em.transactional(async (tx) => {
+    const perfil = await this.em.transactional(async (tx) => {
       await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
 
       const solicitud = await this.affiliationsRepo.findById(tx, affiliationId);
@@ -424,14 +479,20 @@ export class ProfilesAffiliationsService {
         });
       }
 
-      if (solicitud.statusConceptId !== ESTADO_DEL_VINCULO.PENDIENTE) {
-        throw new PreconditionFailedException('Esa solicitud ya fue resuelta', {
+      if (!esEstado(solicitud.statusConceptId, decision.desde)) {
+        throw new PreconditionFailedException(decision.siNoEsta, {
           affiliationId,
           statusConceptId: solicitud.statusConceptId,
         });
       }
 
       solicitud.statusConceptId = decision.destino;
+      // El motivo se guarda, no sólo se registra: un rechazo que sólo vive en
+      // el log es mudo para quien lo recibe. La columna existe desde v4.1.9 y
+      // nadie la escribía.
+      if (decision.motivo !== undefined && decision.motivo.trim() !== '') {
+        solicitud.decisionReasonText = decision.motivo.trim();
+      }
       // Quién y cuándo: `touch` escribe `updated_by_user_id` y `updated_at`,
       // que es el rastro que el prompt pide y el que la tabla ya sabe guardar.
       touch(solicitud, actor.id);
@@ -446,7 +507,81 @@ export class ProfilesAffiliationsService {
         },
         'Practitioner affiliation decided',
       );
+
+      return solicitud.practitionerProfileId;
     });
+
+    // El aviso va DESPUÉS de la transacción, y a propósito: la decisión ya está
+    // escrita y confirmada. Emitir dentro dejaría la escritura esperando a un
+    // canal de mensajería, y un fallo suyo revertiría una aprobación que la
+    // organización ya tomó.
+    await this.avisar(perfil, tenantId, affiliationId, decision);
+  }
+
+  /**
+   * Le cuenta al profesional qué decidió la organización.
+   *
+   * ## Por qué nunca lanza
+   *
+   * Que no salga un aviso es un problema del aviso. La decisión ya ocurrió, ya
+   * está escrita, y volver a intentarla porque falló mensajería sería peor.
+   *
+   * @param practitionerProfileId - De quién es el vínculo.
+   * @param tenantId - La organización que decidió.
+   * @param affiliationId - El vínculo.
+   * @param decision - Qué se decidió y con qué motivo.
+   */
+  private async avisar(
+    practitionerProfileId: string,
+    tenantId: string,
+    affiliationId: string,
+    decision: { readonly destino: string; readonly motivo?: string },
+  ): Promise<void> {
+    const kind = AVISO_POR_DESTINO[decision.destino];
+    if (kind === undefined) return;
+
+    const cuenta = await this.cuentaDelProfesional(practitionerProfileId);
+    if (cuenta === null) {
+      this.logger.info(
+        { operation: 'profiles.affiliation.notice', affiliationId },
+        'El profesional no tiene cuenta: no hay a quién avisarle',
+      );
+      return;
+    }
+
+    const motivo =
+      decision.motivo !== undefined && decision.motivo.trim() !== ''
+        ? ` Motivo: ${decision.motivo.trim()}`
+        : '';
+
+    await this.avisos.emit({
+      kind,
+      recipientUserId: cuenta,
+      tenantId,
+      subject: ASUNTO[kind],
+      bodyText: `${CUERPO[kind]}${motivo}`,
+      affiliationId,
+    });
+  }
+
+  /**
+   * La cuenta que encarna a un profesional, o `null` si no tiene.
+   *
+   * Un profesional sin cuenta de portal existe —lo cargó una organización— y
+   * simplemente no hay a dónde mandarle el aviso. No es un error.
+   *
+   * @param practitionerProfileId - El perfil profesional.
+   * @returns El id de usuario, o `null`.
+   */
+  private async cuentaDelProfesional(
+    practitionerProfileId: string,
+  ): Promise<string | null> {
+    const filas = await this.em.execute<{ user_id: string }[]>(
+      `SELECT user_id FROM profiles.person_account_links
+        WHERE person_id = ? LIMIT 1`,
+      [practitionerProfileId],
+    );
+    return filas[0]?.user_id ?? null;
   }
 }
 
@@ -469,3 +604,38 @@ function nombreVisible(persona: Persons): string | null {
     .filter((parte) => parte !== '');
   return partes.length === 0 ? null : partes.join(' ');
 }
+
+/**
+ * Qué aviso corresponde a cada estado al que se puede llegar decidiendo.
+ *
+ * Un estado que no está acá no avisa nada, y está bien: `DECLARADO` y
+ * `PENDIENTE` no son decisiones de la organización, son cómo nace el vínculo.
+ */
+const AVISO_POR_DESTINO: Readonly<Record<string, AffiliationNoticeKind>> = {
+  [ESTADO_DEL_VINCULO.APROBADO]: 'AFFILIATION_APPROVED',
+  [ESTADO_DEL_VINCULO.RECHAZADO]: 'AFFILIATION_REJECTED',
+  [ESTADO_DEL_VINCULO.REVOCADO]: 'AFFILIATION_REVOKED',
+};
+
+/** Lo que se lee en la campana sin abrir nada. */
+const ASUNTO: Readonly<Record<AffiliationNoticeKind, string>> = {
+  AFFILIATION_APPROVED: 'Te aceptaron como profesional',
+  AFFILIATION_REJECTED: 'No aceptaron tu vínculo',
+  AFFILIATION_REVOKED: 'Dieron de baja tu vínculo',
+};
+
+/**
+ * El cuerpo del aviso.
+ *
+ * Cada uno dice **qué cambia para el médico**, no sólo qué pasó: enterarse de
+ * que lo aprobaron sin saber que ya puede publicar agenda deja el aviso a mitad
+ * de camino.
+ */
+const CUERPO: Readonly<Record<AffiliationNoticeKind, string>> = {
+  AFFILIATION_APPROVED:
+    'La organización te aceptó como profesional suyo. Ya podés publicar tu agenda ahí.',
+  AFFILIATION_REJECTED:
+    'La organización no aceptó el vínculo que pediste. Si creés que es un error, hablá con ellos.',
+  AFFILIATION_REVOKED:
+    'La organización dio de baja tu vínculo. Las citas que ya confirmaste siguen en pie, pero no vas a poder aceptar turnos nuevos ni publicar más agenda ahí.',
+};
