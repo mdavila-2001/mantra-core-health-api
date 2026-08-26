@@ -579,6 +579,64 @@ export class ProfilesAffiliationsService {
   }
 
   /**
+   * Le avisa a la organización que un profesional pidió vincularse.
+   *
+   * ## Por qué hace falta
+   *
+   * La bandeja de solicitudes existe y funciona, pero **nadie entra a mirarla
+   * por las dudas**. Sin este aviso, un pedido puede quedar semanas sin
+   * respuesta mientras el médico espera del otro lado sin saber por qué.
+   *
+   * ## A quién
+   *
+   * A los OWNER y ADMIN de la organización, que son exactamente quienes pueden
+   * decidir. Mandárselo a todo el personal sería avisarle a gente que sólo
+   * puede mirar.
+   *
+   * Nunca lanza: el vínculo ya se creó, y que no salga un aviso no puede
+   * deshacerlo.
+   *
+   * @param tenantId - La organización a la que le piden entrar.
+   * @param affiliationId - El vínculo recién pedido.
+   * @param practitionerProfileId - Quién pide; el nombre se resuelve acá.
+   */
+  async avisarDelPedido(
+    tenantId: string,
+    affiliationId: string,
+    practitionerProfileId: string,
+  ): Promise<void> {
+    const admins = await this.em.execute<{ user_id: string }[]>(
+      `SELECT m.user_id
+         FROM directory.tenant_memberships m
+         JOIN terminology.catalog_concepts r ON r.id = m.tenant_role_concept_id
+         JOIN terminology.catalog_concepts s ON s.id = m.status_concept_id
+        WHERE m.tenant_id = ?
+          AND r.code IN ('directory:ROLE_OWNER', 'directory:ROLE_ADMIN')
+          AND s.code = 'directory:MEMBERSHIP_ACTIVE'`,
+      [tenantId],
+    );
+    if (admins.length === 0) return;
+
+    // El mismo resolutor que usa la bandeja: quien decide tiene que saber sobre
+    // quién decide, tanto en el aviso como en la lista.
+    const identidades = await this.identidadDe(this.em, [
+      practitionerProfileId,
+    ]);
+    const quien =
+      identidades.get(practitionerProfileId)?.nombre ?? 'Un profesional';
+    for (const admin of admins) {
+      await this.avisos.emit({
+        kind: 'AFFILIATION_REQUESTED',
+        recipientUserId: admin.user_id,
+        tenantId,
+        subject: ASUNTO.AFFILIATION_REQUESTED,
+        bodyText: `${quien} pidió vincularse a tu organización. Podés aceptarlo o rechazarlo desde la bandeja de solicitudes.`,
+        affiliationId,
+      });
+    }
+  }
+
+  /**
    * La cuenta que encarna a un profesional, o `null` si no tiene.
    *
    * Un profesional sin cuenta de portal existe —lo cargó una organización— y
@@ -715,6 +773,7 @@ const ASUNTO: Readonly<Record<AffiliationNoticeKind, string>> = {
   AFFILIATION_APPROVED: 'Te aceptaron como profesional',
   AFFILIATION_REJECTED: 'No aceptaron tu vínculo',
   AFFILIATION_REVOKED: 'Dieron de baja tu vínculo',
+  AFFILIATION_REQUESTED: 'Un profesional quiere vincularse',
 };
 
 /**
@@ -731,4 +790,6 @@ const CUERPO: Readonly<Record<AffiliationNoticeKind, string>> = {
     'La organización no aceptó el vínculo que pediste. Si creés que es un error, hablá con ellos.',
   AFFILIATION_REVOKED:
     'La organización dio de baja tu vínculo. Las citas que ya confirmaste siguen en pie, pero no vas a poder aceptar turnos nuevos ni publicar más agenda ahí.',
+  AFFILIATION_REQUESTED:
+    'Un profesional pidió vincularse a tu organización. Podés aceptarlo o rechazarlo desde la bandeja de solicitudes.',
 };

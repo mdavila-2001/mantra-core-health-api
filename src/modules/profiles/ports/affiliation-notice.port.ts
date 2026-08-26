@@ -15,7 +15,14 @@ export type AffiliationNoticeKind =
   /** La organización lo rechazó, con su motivo. */
   | 'AFFILIATION_REJECTED'
   /** La organización dio de baja uno que ya había aprobado. */
-  | 'AFFILIATION_REVOKED';
+  | 'AFFILIATION_REVOKED'
+  /**
+   * Un profesional pidió vincularse, y va **a la organización**.
+   *
+   * Es el único que no viaja al médico. Sin él, la bandeja de solicitudes
+   * depende de que alguien entre a mirarla por las dudas — y nadie lo hace.
+   */
+  | 'AFFILIATION_REQUESTED';
 
 /** Un aviso del vínculo, listo para emitirse. */
 export interface AffiliationNotice {

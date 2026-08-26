@@ -193,6 +193,10 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       code: 'AFFILIATION_NOTICE_REVOKED',
       display: 'Affiliation notice: revoked',
     },
+    NOTICE_AFFILIATION_REQUESTED: {
+      code: 'AFFILIATION_NOTICE_REQUESTED',
+      display: 'Affiliation notice: requested',
+    },
 
     AFFILIATION_TYPE_EMPLOYMENT: {
       code: 'AFFILIATION_TYPE_EMPLOYMENT',

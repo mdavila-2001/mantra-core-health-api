@@ -563,4 +563,60 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       expect(params.tenantId).toBe(TENANT);
     });
   });
+
+  describe('avisarDelPedido · la bandeja deja de depender de que alguien mire', () => {
+    /** Deja al tenant con los administradores indicados. */
+    function conAdmins(d: ReturnType<typeof build>, cuantos: number): void {
+      d.em.execute.mockImplementation(async (sql: string) =>
+        sql.includes('tenant_memberships')
+          ? Array.from({ length: cuantos }, (_, i) => ({
+              user_id: `admin-${i}`,
+            }))
+          : [{ user_id: 'user-med' }],
+      );
+    }
+
+    it('le avisa a CADA administrador de la organización', async () => {
+      // Son exactamente quienes pueden decidir. Mandárselo a todo el personal
+      // sería avisarle a gente que sólo puede mirar.
+      const d = build();
+      conAdmins(d, 3);
+
+      await d.service.avisarDelPedido(TENANT, 'af-1', 'pp-1');
+
+      expect(d.avisos.emit).toHaveBeenCalledTimes(3);
+      const [aviso] = d.avisos.emit.mock.calls[0];
+      expect(aviso.kind).toBe('AFFILIATION_REQUESTED');
+      expect(aviso.tenantId).toBe(TENANT);
+    });
+
+    it('sin administradores no avisa a nadie, y no falla', async () => {
+      // Es el hospital público del padrón: no hay quién decida, y por eso el
+      // vínculo nace declarado en vez de pendiente.
+      const d = build();
+      conAdmins(d, 0);
+
+      await d.service.avisarDelPedido(TENANT, 'af-1', 'pp-1');
+
+      expect(d.avisos.emit).not.toHaveBeenCalled();
+    });
+
+    it('el aviso dice QUIÉN pide, no «un profesional» a secas', async () => {
+      const d = build();
+      d.em.execute.mockImplementation(async (sql: string) =>
+        sql.includes('tenant_memberships') ? [{ user_id: 'admin-0' }] : [],
+      );
+      d.em.find.mockImplementation(async (entidad: any) => {
+        const nombre = entidad?.name ?? String(entidad);
+        return nombre.includes('Persons')
+          ? [{ id: 'pp-1', displayName: 'Ana Rossell' }]
+          : [];
+      });
+
+      await d.service.avisarDelPedido(TENANT, 'af-1', 'pp-1');
+
+      const [aviso] = d.avisos.emit.mock.calls[0];
+      expect(aviso.bodyText).toContain('Ana Rossell');
+    });
+  });
 });
