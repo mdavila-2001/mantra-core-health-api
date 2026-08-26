@@ -16,6 +16,16 @@ export interface OrganizationPublicProfileProjection {
   displayName: string;
   /** Usuario responsable de la proyección. */
   actorUserId: string;
+  /**
+   * Qué clase de vitrina es. Omitirlo la proyecta como organización, que es lo
+   * que hacían todas antes de que esto existiera.
+   *
+   * Importa porque **el buscador público filtra por este campo**: una farmacia
+   * proyectada como organización aparece en `/public/search/organizations` y
+   * deja `/public/search/pharmacies` en cero para siempre. Se vio sembrando
+   * siete organizaciones y encontrando cero farmacias.
+   */
+  targetTypeConceptId?: string;
 }
 
 /**
@@ -51,7 +61,8 @@ export class PublicProfileProjectionService {
 
     const profile = this.profilesRepo.create(em, {
       tenantId: data.tenantId,
-      targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+      targetTypeConceptId:
+        data.targetTypeConceptId ?? COMM.PROFILE_TARGET_ORGANIZATION,
       targetId: data.targetId,
       slug: data.slug,
       displayName: data.displayName,

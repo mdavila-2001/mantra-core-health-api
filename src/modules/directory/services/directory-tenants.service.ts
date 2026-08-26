@@ -33,6 +33,7 @@ import {
 } from '../dto';
 import { TenantAdministrationService } from './tenant-administration.service';
 import { PublicProfileProjectionService } from '../../community/services';
+import { COMM } from '../../community/community.concepts';
 
 /**
  * Resuelve el tipo de organización a su concept id.
@@ -222,6 +223,11 @@ export class DirectoryTenantsService {
         slug: `organization-${tenant.id}`,
         displayName: tenant.tradeName ?? tenant.legalName,
         actorUserId: actor.id,
+        // Una farmacia verificada tiene que aparecer en la vertical de
+        // farmacias, no en la de organizaciones. Proyectarlas todas como
+        // organización dejaba `/public/search/pharmacies` en cero para siempre,
+        // y el buscador público con una vertical muerta.
+        targetTypeConceptId: vitrinaSegunTipo(tenant.tenantTypeConceptId),
       });
 
       this.logger.info(
@@ -473,4 +479,26 @@ export class DirectoryTenantsService {
       createdAt: tenant.createdAt,
     };
   }
+}
+
+/**
+ * Qué clase de vitrina pública le corresponde a un tenant según su tipo.
+ *
+ * Sólo se mapea lo **inequívoco**: una farmacia es una farmacia y una pagadora
+ * es una aseguradora. El resto —hospital, consultorio, universidad, negocio de
+ * salud— cae en organización, que es lo que eran todas hasta ahora.
+ *
+ * Los laboratorios **no** están acá a propósito: no son un tipo de tenant, son
+ * el agregado de `diagnostic_units`, que ya proyecta su propia vitrina en su
+ * `verify-and-publish`. Mapear `HEALTH_OTHER` a laboratorio metería en esa
+ * vertical a cualquier negocio de salud que no sea ninguna de las otras cosas.
+ */
+function vitrinaSegunTipo(tenantTypeConceptId: string | undefined): string {
+  if (tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY) {
+    return COMM.PROFILE_TARGET_PHARMACY;
+  }
+  if (tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PAYER) {
+    return COMM.PROFILE_TARGET_INSURER;
+  }
+  return COMM.PROFILE_TARGET_ORGANIZATION;
 }
