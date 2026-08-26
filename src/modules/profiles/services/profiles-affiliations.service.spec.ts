@@ -60,6 +60,9 @@ function build() {
   // deja pasar salvo cuando la prueba habla justamente del permiso.
   const tenantAdmin = {
     assertCanAdminister: mockFn().mockResolvedValue(undefined),
+    // Por defecto la organización SÍ tiene quién decida: es el caso
+    // corriente y deja que cada prueba declare lo contrario si le importa.
+    hasAdministrators: mockFn().mockResolvedValue(true),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
@@ -79,20 +82,37 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
    * su trayectoria y en su perfil, sin que nadie de esa clínica se enterara.
    */
   describe('estadoInicial · con qué nace el vínculo', () => {
-    it('sin sede nace aprobado: es historial laboral y no hay a quién pedirle permiso', async () => {
+    it('sin sede nace DECLARADO, porque nadie lo aprobó', async () => {
+      // Antes nacía «aprobado», y era escribir un hecho que no ocurrió: sin sede
+      // el vínculo no nombra ninguna organización de la plataforma, así que no
+      // hubo aprobación de nadie. `DECLARADO` lo dice sin mentir, y habilita igual.
       const d = build();
 
       await expect(
         d.service.estadoInicial(d.em, undefined, medico),
-      ).resolves.toBe(ESTADO_DEL_VINCULO.APROBADO);
+      ).resolves.toBe(ESTADO_DEL_VINCULO.DECLARADO);
     });
 
-    it('con una sede de otra organización nace pendiente', async () => {
+    it('con una sede de una organización QUE TIENE dueño nace pendiente', async () => {
       const d = build();
       d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: TENANT });
+      d.tenantAdmin.hasAdministrators.mockResolvedValue(true);
 
       await expect(d.service.estadoInicial(d.em, SEDE, medico)).resolves.toBe(
         ESTADO_DEL_VINCULO.PENDIENTE,
+      );
+    });
+
+    it('con una sede de una organización SIN dueño nace declarado', async () => {
+      // Los hospitales públicos y las cajas del padrón nunca van a registrarse,
+      // así que no tienen a quién apruebe. Dejar el pedido pendiente condenaría
+      // a sus médicos a esperar para siempre.
+      const d = build();
+      d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: TENANT });
+      d.tenantAdmin.hasAdministrators.mockResolvedValue(false);
+
+      await expect(d.service.estadoInicial(d.em, SEDE, medico)).resolves.toBe(
+        ESTADO_DEL_VINCULO.DECLARADO,
       );
     });
 
@@ -109,12 +129,12 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       );
     });
 
-    it('una sede sin organización a cargo no tiene a quién pedirle permiso', async () => {
+    it('una sede sin organización a cargo nace declarado', async () => {
       const d = build();
       d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: undefined });
 
       await expect(d.service.estadoInicial(d.em, SEDE, medico)).resolves.toBe(
-        ESTADO_DEL_VINCULO.APROBADO,
+        ESTADO_DEL_VINCULO.DECLARADO,
       );
     });
 

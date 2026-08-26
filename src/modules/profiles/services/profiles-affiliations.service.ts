@@ -49,12 +49,66 @@ import type { AffiliationRequestListDto, RejectAffiliationDto } from '../dto';
  */
 export const ESTADO_DEL_VINCULO = {
   /** Pedido y esperando que la organización decida. */
-  PENDIENTE: CONCEPTS.STATE_PENDING,
+  PENDIENTE: PROF.AFFILIATION_PENDING,
+  /**
+   * Declarado por el profesional, sin aprobación de nadie.
+   *
+   * No es un pendiente disfrazado. Los hospitales públicos y las cajas del
+   * padrón nunca van a registrarse en la plataforma, así que no tienen a quién
+   * apruebe: esperar esa aprobación bloquearía a sus médicos para siempre.
+   * **Publica igual**; lo que no tiene es sello de la institución, y eso se dice
+   * en pantalla.
+   */
+  DECLARADO: PROF.AFFILIATION_DECLARED,
   /** La organización lo aceptó. */
-  APROBADO: PROF.AFFILIATION_ACTIVE,
-  /** La organización lo rechazó, o el profesional lo retiró. */
-  RECHAZADO: PROF.AFFILIATION_RETRACTED,
+  APROBADO: PROF.AFFILIATION_APPROVED,
+  /** La organización lo rechazó. */
+  RECHAZADO: PROF.AFFILIATION_REJECTED,
+  /** Estaba aprobado y la organización lo dio de baja. */
+  REVOCADO: PROF.AFFILIATION_REVOKED,
 } as const;
+
+/**
+ * Los ids que un estado puede tener escritos en la base, hoy.
+ *
+ * ## Por qué hay dos ids por estado y no uno
+ *
+ * v4.1.9 reemplazó los conceptos del vínculo, pero **el backfill todavía no
+ * corrió**: las filas vivas siguen con los ids viejos escritos. Si la lectura
+ * mirara sólo los nuevos, cada vínculo ya aprobado pasaría a no reconocerse —y
+ * un médico que hoy publica dejaría de poder—.
+ *
+ * Así que se **escribe** con los nuevos y se **lee** aceptando los dos. Cuando
+ * el patch v4.1.9 corra en todas las bases, los viejos desaparecen solos y este
+ * mapa se poda sin tocar nada más; hasta entonces, borrarlo rompe datos reales.
+ */
+const IDS_ACEPTADOS: Readonly<Record<string, readonly string[]>> = {
+  PENDIENTE: [PROF.AFFILIATION_PENDING, CONCEPTS.STATE_PENDING],
+  DECLARADO: [PROF.AFFILIATION_DECLARED],
+  APROBADO: [PROF.AFFILIATION_APPROVED, PROF.AFFILIATION_ACTIVE],
+  RECHAZADO: [PROF.AFFILIATION_REJECTED, PROF.AFFILIATION_RETRACTED],
+  REVOCADO: [PROF.AFFILIATION_REVOKED],
+};
+
+/**
+ * Si un concepto guardado corresponde a ese estado.
+ *
+ * Se compara con esto y no con `===` contra `ESTADO_DEL_VINCULO` mientras el
+ * backfill no haya corrido.
+ *
+ * @param conceptId - El estado tal como está en la fila.
+ * @param estado - El estado buscado.
+ * @returns `true` si coinciden, con id viejo o nuevo.
+ */
+export function esEstado(
+  conceptId: string,
+  estado: keyof typeof ESTADO_DEL_VINCULO,
+): boolean {
+  return IDS_ACEPTADOS[estado].includes(conceptId);
+}
+
+/** Todos los ids que significan «la organización todavía no decidió». */
+export const IDS_PENDIENTES: readonly string[] = IDS_ACEPTADOS.PENDIENTE;
 
 /**
  * El vínculo médico–organización, con aprobación (TP-2).
@@ -149,7 +203,10 @@ export class ProfilesAffiliationsService {
     practiceSiteId: string | undefined,
     actor: AuthenticatedUser,
   ): Promise<string> {
-    if (!practiceSiteId) return ESTADO_DEL_VINCULO.APROBADO;
+    // Sin sede el vínculo no nombra ninguna organización de la plataforma: es
+    // una línea de currículum. Nadie lo aprobó, así que decir «aprobado» sería
+    // escribir un hecho que no ocurrió.
+    if (!practiceSiteId) return ESTADO_DEL_VINCULO.DECLARADO;
 
     const site = await em.findOne(PracticeSites, { id: practiceSiteId });
     if (!site) {
@@ -160,10 +217,24 @@ export class ProfilesAffiliationsService {
 
     const tenantId = site.managingTenantId;
     // Una sede sin organización a cargo no tiene a quién pedirle permiso.
-    if (!tenantId) return ESTADO_DEL_VINCULO.APROBADO;
+    if (!tenantId) return ESTADO_DEL_VINCULO.DECLARADO;
 
-    const esSuya = actor.tenantIds?.includes(tenantId) === true;
-    return esSuya ? ESTADO_DEL_VINCULO.APROBADO : ESTADO_DEL_VINCULO.PENDIENTE;
+    // La propia organización dando de alta a su gente: ahí sí aprobó alguien, y
+    // ese alguien es quien está creando el vínculo.
+    if (actor.tenantIds?.includes(tenantId) === true) {
+      return ESTADO_DEL_VINCULO.APROBADO;
+    }
+
+    // Y si la organización no tiene a nadie que pueda decidir —los hospitales
+    // públicos y las cajas del padrón, que nunca van a registrarse—, dejar el
+    // pedido pendiente lo condenaría a esperar para siempre.
+    const hayQuienDecida = await this.tenantAdmin.hasAdministrators(
+      em,
+      tenantId,
+    );
+    return hayQuienDecida
+      ? ESTADO_DEL_VINCULO.PENDIENTE
+      : ESTADO_DEL_VINCULO.DECLARADO;
   }
 
   /**

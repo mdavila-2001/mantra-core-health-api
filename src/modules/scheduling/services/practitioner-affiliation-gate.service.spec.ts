@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
 import { ESTADO_DEL_VINCULO } from '../../profiles/services/profiles-affiliations.service';
+import { PROF } from '../../profiles/profiles.concepts';
 
 const TENANT = '11111111-1111-1111-1111-111111111111';
 const OTRO_TENANT = '22222222-2222-2222-2222-222222222222';
@@ -183,5 +184,62 @@ describe('PractitionerAffiliationGateService', () => {
     expect(d.em.execute.mock.calls[0][1]).toEqual([
       ['sede-1', 'sede-2', 'sede-3'],
     ]);
+  });
+
+  it('un vinculo DECLARADO habilita igual que uno aprobado', async () => {
+    // Es el médico del hospital público: no hay nadie que pueda aprobarlo, así
+    // que exigirle aprobación lo bloquearía para siempre. Lo que le falta es el
+    // sello de la institución, y eso se dice en pantalla, no bloqueando.
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: ESTADO_DEL_VINCULO.DECLARADO,
+      },
+    ]);
+    sedesDe(d, TENANT);
+
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
+  });
+
+  it('reconoce el id VIEJO de aprobado mientras el backfill no corrio', async () => {
+    // v4.1.9 cambió los conceptos y las filas vivas siguen con los ids
+    // anteriores escritos. Si la lectura mirara sólo los nuevos, cada vínculo ya
+    // aprobado dejaría de reconocerse y su médico dejaría de poder publicar.
+    const d = build();
+    conVinculos(d, [
+      { practiceSiteId: 'sede-1', statusConceptId: PROF.AFFILIATION_ACTIVE },
+    ]);
+    sedesDe(d, TENANT);
+
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
+  });
+
+  it('reconoce el id VIEJO de pendiente', async () => {
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: 'state-pending-viejo',
+      },
+    ]);
+    sedesDe(d, TENANT);
+
+    // El id viejo de pendiente es `CONCEPTS.STATE_PENDING`; con cualquier otro
+    // valor el veredicto es «ausente», que es lo correcto: no se inventa.
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
+  });
+
+  it('un vinculo REVOCADO no habilita', async () => {
+    const d = build();
+    conVinculos(d, [
+      {
+        practiceSiteId: 'sede-1',
+        statusConceptId: ESTADO_DEL_VINCULO.REVOCADO,
+      },
+    ]);
+    sedesDe(d, TENANT);
+
+    expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
   });
 });

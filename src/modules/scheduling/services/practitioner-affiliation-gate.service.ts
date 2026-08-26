@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../common';
 import { PractitionerAffiliations } from '../../profiles/entities';
-import { ESTADO_DEL_VINCULO } from '../../profiles/services/profiles-affiliations.service';
+import { esEstado } from '../../profiles/services/profiles-affiliations.service';
 
 /**
  * En qué situación está el profesional respecto de una organización.
@@ -74,14 +74,21 @@ export class PractitionerAffiliationGateService {
 
     const aprobados = await this.tenantsDeSedes(
       conSede
-        .filter((v) => v.statusConceptId === ESTADO_DEL_VINCULO.APROBADO)
+        // `DECLARADO` habilita igual que `APROBADO`: es el médico del hospital
+        // público, donde no hay nadie que pueda aprobar. Lo que le falta es el
+        // sello de la institución, y eso se dice en pantalla, no bloqueando.
+        .filter(
+          (v) =>
+            esEstado(v.statusConceptId, 'APROBADO') ||
+            esEstado(v.statusConceptId, 'DECLARADO'),
+        )
         .map((v) => v.practiceSiteId),
     );
     if (aprobados.has(tenantId)) return 'aprobado';
 
     const pendientes = await this.tenantsDeSedes(
       conSede
-        .filter((v) => v.statusConceptId === ESTADO_DEL_VINCULO.PENDIENTE)
+        .filter((v) => esEstado(v.statusConceptId, 'PENDIENTE'))
         .map((v) => v.practiceSiteId),
     );
     return pendientes.has(tenantId) ? 'pendiente' : 'ausente';

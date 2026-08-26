@@ -175,8 +175,23 @@ export class AffiliationResponseDto {
    * `declarado`— las pantallas que ya distinguen los casos conocidos no van a
    * mentir sobre el nuevo, van a decir que no lo reconocen.
    */
-  @ApiProperty({ enum: ['pendiente', 'aprobado', 'rechazado', 'desconocido'] })
-  statusKind!: 'pendiente' | 'aprobado' | 'rechazado' | 'desconocido';
+  @ApiProperty({
+    enum: [
+      'pendiente',
+      'declarado',
+      'aprobado',
+      'rechazado',
+      'revocado',
+      'desconocido',
+    ],
+  })
+  statusKind!:
+    | 'pendiente'
+    | 'declarado'
+    | 'aprobado'
+    | 'rechazado'
+    | 'revocado'
+    | 'desconocido';
 
   /**
    * Fecha y hora en que se creó el registro.
