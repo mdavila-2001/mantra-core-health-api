@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -68,6 +69,7 @@ import {
   SetPractitionerPhotoDto,
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
+import { ContactPointsRepository } from '../../common/repositories';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
 
@@ -126,6 +128,7 @@ export class ProfilesPractitionersService {
     // tercero se deciden en un solo lugar.
     private readonly affiliations: ProfilesAffiliationsService,
     private readonly attachableFiles: AttachableFileService,
+    private readonly contactPointsRepo: ContactPointsRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly verificationBypass: VerificationBypassService,
@@ -180,7 +183,9 @@ export class ProfilesPractitionersService {
       );
     }
 
-    return this.buildSummary(em, link.personId, actor.id);
+    // `true`: es la única lectura donde el correo y el teléfono salen. La
+    // ficha que abre la guía usa el mismo DTO y NO los lleva.
+    return this.buildSummary(em, link.personId, actor.id, true);
   }
 
   /**
@@ -480,15 +485,25 @@ export class ProfilesPractitionersService {
    * Compartido entre la lectura propia y la ajena: el contrato es el mismo y
    * lo único que cambia es cómo se resolvió `personId` (sesión o parámetro).
    *
+   * ## El contacto no viaja en la ficha ajena
+   *
+   * `incluyeContacto` es el único punto donde las dos lecturas dejan de ser la
+   * misma. El correo y el teléfono viven en `common.contact_points`, son datos
+   * de la persona y no de los que una guía médica publica; se leen sólo cuando
+   * quien pregunta es el titular. La ficha ajena ni siquiera los consulta —no
+   * se envían y después se ocultan, que es la forma de que un día se escapen.
+   *
    * @param em - Contexto de persistencia.
    * @param personId - El titular del perfil (= profileId del profesional).
    * @param subjectUserId - La cuenta cuya actividad se cuenta, si hay.
+   * @param incluyeContacto - Si se leen correo y teléfono. Sólo la propia.
    * @returns El perfil completo.
    */
   private async buildSummary(
     em: EntityManager,
     personId: string,
     subjectUserId: string | undefined,
+    incluyeContacto = false,
   ): Promise<PractitionerProfileSummaryDto> {
     const person = await this.personsRepo.findById(em, personId);
     const practitioner = await this.practitionersRepo.findById(em, personId);
@@ -517,6 +532,7 @@ export class ProfilesPractitionersService {
       languages,
       affiliations,
       activity,
+      contactos,
     ] = await Promise.all([
       this.sinTumbarLaFicha(
         () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
@@ -563,7 +579,22 @@ export class ProfilesPractitionersService {
             SIN_ACTIVIDAD,
             { profileId, pieza: 'actividad' },
           ),
+      // El contacto: sólo en la lectura propia, y envuelto como las demás. Un
+      // fallo leyendo `common.contact_points` deja el perfil sin correo, no
+      // sin perfil.
+      incluyeContacto
+        ? this.sinTumbarLaFicha(
+            () => this.contactPointsRepo.findVigentesByOwner(em, person.id),
+            [],
+            { profileId, pieza: 'contacto' },
+          )
+        : Promise.resolve([]),
     ]);
+
+    // El primero de cada sistema gana: el repositorio ya los devuelve por
+    // `rank`, que es la columna que dice cuál es el preferido.
+    const contacto = (sistema: string): string | undefined =>
+      contactos.find((punto) => punto.systemConceptId === sistema)?.value;
 
     return {
       profileId,
@@ -573,6 +604,8 @@ export class ProfilesPractitionersService {
       professionalTitle: practitioner.professionalTitle,
       professionalBio: practitioner.professionalBio,
       photoFileId: practitioner.photoFileId,
+      email: contacto(CONCEPTS.CONTACT_EMAIL),
+      phone: contacto(CONCEPTS.CONTACT_PHONE),
       practitionerCategoryConceptId: practitioner.practitionerCategoryConceptId,
       verificationStatusConceptId: practitioner.verificationStatusConceptId,
       practiceStatusConceptId: practitioner.practiceStatusConceptId,
