@@ -36,9 +36,11 @@ además, activos. Lo ajeno o no publicado responde el mismo `404`. Los
 sede llega en texto con sus coordenadas (`pharmacy_site → practice_site →
 common.addresses`). El precio vigente respeta **tres ventanas a la vez**: lista
 `ACTIVE` dentro de `valid_from`/`valid_to` **y pública**, y versión de precio
-`ACTIVE` dentro de `effective_from`/`effective_to`. `conceptId` de la búsqueda
-es el `medication_concept_id` del vademécum (`terminology`, códigos ATC): el
-mismo con que la receta identifica el fármaco.
+`ACTIVE` dentro de `effective_from`/`effective_to`. Una lista ligada a una
+aseguradora (`insurer_tenant_id`) nunca sale por esta cara aunque esté marcada
+visible: es un acuerdo entre partes, no precio de mostrador. `conceptId` de la
+búsqueda es el `medication_concept_id` del vademécum (`terminology`, códigos
+ATC): el mismo con que la receta identifica el fármaco.
 
 ## Entidades
 

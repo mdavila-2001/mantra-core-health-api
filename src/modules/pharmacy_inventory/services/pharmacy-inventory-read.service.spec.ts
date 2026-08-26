@@ -135,7 +135,8 @@ describe('PharmacyInventoryReadService', () => {
       const item = result.items[0];
       expect(item.onHandQuantity).toBe(18);
       expect(item.reservedQuantity).toBe(2);
-      expect(item.quarantineQuantity).toBe(1);
+      // La cuarentena es estado interno del ledger: no sale al directorio.
+      expect(item).not.toHaveProperty('quarantineQuantity');
       // Lo vendible es la columna `available` del ledger, agregada.
       expect(item.availableQuantity).toBe(15);
       expect(item.locationCount).toBe(2);
@@ -289,7 +290,7 @@ describe('PharmacyInventoryReadService', () => {
       ).toBe(true);
     });
 
-    it('prefers the site-specific price list and totals only fully priced sites', async () => {
+    it('prefers the site-specific list, excludes insurer lists and totals only fully priced sites', async () => {
       const d = build();
       conDosSedes(d);
       d.pharmacyRepo.findCurrentPublicPriceLists.mockResolvedValue([
@@ -306,6 +307,15 @@ describe('PharmacyInventoryReadService', () => {
           code: 'SEDE-LEJOS',
           currencyConceptId: CURRENCY.id,
         },
+        // Ligada a aseguradora y más barata: aun así no puede ganar, porque
+        // ni siquiera entra al directorio.
+        {
+          id: 'list-aseg',
+          pharmacyId: 'ph-1',
+          code: 'ASEGURADORA',
+          insurerTenantId: 'tenant-aseguradora',
+          currencyConceptId: CURRENCY.id,
+        },
       ]);
       d.pharmacyRepo.findCurrentPrices.mockResolvedValue([
         {
@@ -319,12 +329,21 @@ describe('PharmacyInventoryReadService', () => {
           unitAmount: '18.00',
           patientAmount: '17.00',
         },
+        {
+          pharmacyPriceListId: 'list-aseg',
+          pharmacyProductId: 'prod-1',
+          unitAmount: '1.00',
+        },
         // prod-2 sin precio publicado.
       ]);
 
       const result = await runWithTenant('tenant-a', () =>
         d.service.availability(['prod-1', 'prod-2'], undefined),
       );
+
+      // La lista de aseguradora ni se consulta.
+      const listIds = d.pharmacyRepo.findCurrentPrices.mock.calls[0][1];
+      expect(listIds).toEqual(['list-pharm', 'list-sede']);
 
       const lejos = result.items.find((item) => item.siteId === 'site-lejos')!;
       const cerca = result.items.find((item) => item.siteId === 'site-cerca')!;
@@ -343,6 +362,44 @@ describe('PharmacyInventoryReadService', () => {
         code: CURRENCY.code,
         display: CURRENCY.display,
       });
+    });
+
+    it('sums money exactly instead of drifting in floating point', async () => {
+      const d = build();
+      conDosSedes(d);
+      d.pharmacyRepo.findCurrentPublicPriceLists.mockResolvedValue([
+        {
+          id: 'list-pharm',
+          pharmacyId: 'ph-1',
+          code: 'PUBLICA',
+          currencyConceptId: CURRENCY.id,
+        },
+      ]);
+      // Importes con tres decimales: en binario 1.005 + 2.010 "suma"
+      // 3.0149999…, que un toFixed(2) serviría como 3.01.
+      d.pharmacyRepo.findCurrentPrices.mockResolvedValue([
+        {
+          pharmacyPriceListId: 'list-pharm',
+          pharmacyProductId: 'prod-1',
+          unitAmount: '1.005',
+        },
+        {
+          pharmacyPriceListId: 'list-pharm',
+          pharmacyProductId: 'prod-2',
+          unitAmount: '2.010',
+        },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.availability(['prod-1', 'prod-2'], undefined),
+      );
+
+      const lejos = result.items.find((item) => item.siteId === 'site-lejos')!;
+      const cerca = result.items.find((item) => item.siteId === 'site-cerca')!;
+      // Suma exacta en decimal, redondeada half-up a los 2 decimales del
+      // contrato: 3.015 → 3.02, no el 3.01 del punto flotante.
+      expect(lejos.totalAmount).toBe('3.02');
+      expect(cerca.totalAmount).toBe('1.01');
     });
   });
 

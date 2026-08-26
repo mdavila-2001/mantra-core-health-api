@@ -117,6 +117,7 @@ export class CommunityMessagingReadService {
           this.conversationsRepo.countUnread(
             em,
             conversation.id,
+            profileId,
             lastReadByConversation.get(conversation.id),
           ),
         ]);

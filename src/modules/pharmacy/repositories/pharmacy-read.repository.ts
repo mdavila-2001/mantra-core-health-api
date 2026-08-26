@@ -154,8 +154,8 @@ export class PharmacyReadRepository {
   /**
    * Listas de precios **públicas** vigentes que aplican a una sede: las de la
    * farmacia entera (`pharmacy_site_id` null) y las propias de la sede. Las
-   * listas por aseguradora no salen por acá: son un acuerdo entre partes, no
-   * un precio de mostrador.
+   * listas ligadas a una aseguradora no salen por acá aunque alguien las
+   * marque visibles: son un acuerdo entre partes, no un precio de mostrador.
    */
   findCurrentPublicPriceLists(
     em: EntityManager,
@@ -167,6 +167,7 @@ export class PharmacyReadRepository {
       pharmacyId: { $in: [...pharmacyIds] },
       statusConceptId: PHARM.PRICE_LIST_ACTIVE,
       publicVisibility: true,
+      insurerTenantId: null,
       $and: [
         { $or: [{ validFrom: null }, { validFrom: { $lte: now } }] },
         { $or: [{ validTo: null }, { validTo: { $gte: now } }] },

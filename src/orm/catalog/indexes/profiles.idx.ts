@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `profiles`.
- * 129 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 131 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const profilesIndexes: readonly IndexTuple[] = [
@@ -95,11 +95,13 @@ export const profilesIndexes: readonly IndexTuple[] = [
   ['person_profiles', 'uq_person_profiles_person_type', ['person_id', 'profile_type_concept_id'], true, 'btree'],
   ['practitioner_affiliations', 'ix_practitioner_affiliations_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
   ['practitioner_affiliations', 'ix_practitioner_affiliations_practice_site_id', ['practice_site_id'], false, 'btree'],
+  ['practitioner_affiliations', 'ix_practitioner_affiliations_health_facility_concept_id', ['health_facility_concept_id'], false, 'btree'],
   ['practitioner_affiliations', 'ix_practitioner_affiliations_affiliation_type_concept_id', ['affiliation_type_concept_id'], false, 'btree'],
   ['practitioner_affiliations', 'ix_practitioner_affiliations_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['practitioner_affiliations', 'ix_practitioner_affiliations_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['practitioner_affiliations', 'ix_practitioner_affiliations_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['practitioner_affiliations', 'uq_practitioner_affiliation_same', ['practitioner_profile_id', 'organization_name', 'role_title', 'start_date'], true, 'btree'],
+  ['practitioner_affiliations', 'ux_practitioner_affiliations_same_health_facility', ['practitioner_profile_id', 'health_facility_concept_id', 'role_title', 'start_date'], true, 'btree', 'health_facility_concept_id IS NOT NULL'],
+  ['practitioner_affiliations', 'ux_practitioner_affiliations_same_organization_name', ['practitioner_profile_id', 'organization_name', 'role_title', 'start_date'], true, 'btree', 'health_facility_concept_id IS NULL'],
   ['practitioner_languages', 'ix_practitioner_languages_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
   ['practitioner_languages', 'ix_practitioner_languages_language_concept_id', ['language_concept_id'], false, 'btree'],
   ['practitioner_languages', 'ix_practitioner_languages_proficiency_concept_id', ['proficiency_concept_id'], false, 'btree'],

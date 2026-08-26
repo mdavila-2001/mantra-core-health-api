@@ -10,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { SchedulingCatalogRepository } from '../repositories';
+import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
 import type { SchedulableResources } from '../entities';
 import {
   CreateResourceDto,
@@ -98,6 +99,7 @@ export class SchedulingCatalogService {
     private readonly em: EntityManager,
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly logger: PinoLogger,
+    private readonly vinculos: PractitionerAffiliationGateService,
   ) {
     this.logger.setContext(SchedulingCatalogService.name);
   }
@@ -108,6 +110,7 @@ export class SchedulingCatalogService {
     actor: AuthenticatedUser,
   ): Promise<ResourceResponseDto> {
     this.assertPuedeCrearRecurso(dto, actor);
+    await this.assertVinculoConLaOrganizacion(dto.tenantId, actor);
     this.logger.info(
       { operation: 'scheduling.resource.create', tenantId: dto.tenantId },
       'Creating schedulable resource',
@@ -713,6 +716,61 @@ export class SchedulingCatalogService {
       );
     }
     this.assertTenantDelActor(dto.tenantId, actor);
+  }
+
+  /**
+   * Exige vínculo aprobado con la organización antes de publicar en ella.
+   *
+   * ## Qué regla implementa
+   *
+   * El registro de procesos describe al médico atendiendo en varios sitios —«los
+   * hospitales públicos que está de turno» (MEDICO 3.1) y «las diferentes
+   * clínicas privadas o centros que atiende» (3.2)—, y esto es lo que decide en
+   * cuáles puede hacerlo: **pertenecer a la organización**, aprobado por ella.
+   *
+   * `assertPuedeCrearRecurso` ya comprueba dos cosas distintas de ésta: que la
+   * agenda sea del propio perfil, y que el tenant esté entre los del token. Lo
+   * segundo dice «tenés acceso a esa organización»; esto dice «esa organización
+   * te aceptó como profesional suyo», que no es lo mismo: una secretaria
+   * pertenece al tenant y no publica agenda médica en él.
+   *
+   * ## Por qué el vínculo a UNA sede habilita toda la organización
+   *
+   * La afiliación apunta a una sede (`practice_site_id`) y el recurso a un
+   * tenant, así que hay que resolver `sede → práctica → tenant`. Un médico
+   * vinculado a la sede Miraflores de un hospital queda habilitado para publicar
+   * en ese hospital, no sólo en esa sede. Es lo que el modelo permite hoy sin
+   * columnas nuevas, y es la lectura conservadora: la organización que aprobó al
+   * profesional lo aprobó como suyo. Acotar por sede es una decisión posterior y
+   * necesita que la aprobación diga a qué sede aplica.
+   *
+   * ## Por qué 422 y no 403
+   *
+   * Un 403 dice «no podés» y deja al médico sin saber qué hacer. Acá el camino
+   * existe y es corto —pedir el vínculo—, así que el error lo nombra. Es la
+   * misma decisión que el resto del módulo: `PreconditionFailedException` en
+   * este proyecto responde **422**, no 412.
+   *
+   * @param tenantId - La organización donde se quiere publicar.
+   * @param actor - Quien publica.
+   */
+  private async assertVinculoConLaOrganizacion(
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (this.esAdministradorDeCatalogo(actor)) return;
+
+    const veredicto = await this.vinculos.evaluar(tenantId, actor);
+    if (veredicto === 'sin-vinculos' || veredicto === 'aprobado') return;
+
+    throw new PreconditionFailedException(
+      veredicto === 'pendiente'
+        ? 'Tu vínculo con esta organización todavía está pendiente de ' +
+            'aprobación. Cuando la acepten vas a poder publicar tu agenda acá.'
+        : 'Para publicar tu agenda en esta organización primero necesitás que ' +
+            'te acepte como profesional suyo. Pedí el vínculo desde tu perfil.',
+      { tenantId, vinculo: veredicto },
+    );
   }
 
   /**

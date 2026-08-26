@@ -32,6 +32,22 @@ export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
       display: 'Tenant unverified',
     },
 
+    // --- Peldaños intermedios de la escalera de verificación (v4.1.9) ---
+    // Entre «sin verificar» y «verificada» faltaban los dos escalones que el
+    // producto sí distingue: la institución que existe porque el padrón oficial
+    // del SEDES la lista —y que nadie administra todavía— y la que alguien real
+    // ya reclamó y está documentando. Sin ellos la escalera era un booleano, y
+    // un hospital público, que jamás va a presentar expediente, quedaba para
+    // siempre indistinguible de una organización que se inventó a sí misma.
+    TENANT_REGISTRY_LISTED: {
+      code: 'DIR_TENANT_REGISTRY_LISTED',
+      display: 'Tenant listed in official registry',
+    },
+    TENANT_CLAIMED: {
+      code: 'DIR_TENANT_CLAIMED',
+      display: 'Tenant claimed',
+    },
+
     // --- Estados de tenant_memberships.status_concept_id ---
     MEMBERSHIP_INVITED: {
       code: 'DIR_MEMBERSHIP_INVITED',

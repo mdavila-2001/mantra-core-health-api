@@ -382,6 +382,10 @@ describe('CommunitySocialService', () => {
         slug: 'dra-salas',
         displayName: 'Dra. Salas',
         statusConceptId: CONCEPTS.STATE_ACTIVE,
+        // Todavía sin avatar: es lo que la prueba hace fijar más abajo. Va
+        // declarado —y no ausente— porque el tipo del literal es el que se
+        // lee al final, y sin la propiedad no habría nada que comprobar.
+        avatarFileId: undefined as string | undefined,
       };
       d.profilesRepo.findByTarget.mockResolvedValue(existente);
       d.profilesRepo.findBySlug.mockResolvedValue(existente);

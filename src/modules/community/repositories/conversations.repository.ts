@@ -374,28 +374,39 @@ export class ConversationsRepository {
   /**
    * Cuenta los mensajes posteriores al último leído por el participante.
    *
+   * **Los propios no cuentan.** Contaba todos los de la conversación, así que
+   * quien escribía se sumaba a sí mismo un mensaje sin leer: con dos mensajes
+   * —uno de cada lado— los dos participantes veían «2», y el que acababa de
+   * escribir volvía a la bandeja con un globo azul avisándole de su propio
+   * mensaje. Un mensaje sin leer es uno que te mandaron, por definición.
+   *
    * @param em - Contexto de persistencia o transacción activa.
    * @param conversationId - Conversación a contar.
+   * @param readerProfileId - Quién lee: sus propios mensajes quedan fuera.
    * @param lastReadMessageId - Último mensaje que el participante marcó leído.
    * @returns Cantidad de mensajes sin leer.
    */
   async countUnread(
     em: EntityManager,
     conversationId: string,
+    readerProfileId: string,
     lastReadMessageId: string | undefined,
   ): Promise<number> {
-    if (!lastReadMessageId)
-      return em.count(DirectMessages, { conversationId, deletedAt: null });
+    const deOtros = {
+      conversationId,
+      deletedAt: null,
+      senderProfileId: { $ne: readerProfileId },
+    } as const;
+
+    if (!lastReadMessageId) return em.count(DirectMessages, deOtros);
 
     const lastRead = await em.findOne(DirectMessages, {
       id: lastReadMessageId,
     });
-    if (!lastRead?.sentAt)
-      return em.count(DirectMessages, { conversationId, deletedAt: null });
+    if (!lastRead?.sentAt) return em.count(DirectMessages, deOtros);
 
     return em.count(DirectMessages, {
-      conversationId,
-      deletedAt: null,
+      ...deOtros,
       sentAt: { $gt: lastRead.sentAt },
     });
   }

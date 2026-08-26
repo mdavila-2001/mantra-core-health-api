@@ -87,8 +87,95 @@ def filas_de_tabla(lineas: Iterable[str]) -> Iterator[tuple[list[str], list[str]
         anterior = fila
 
 
+def buscar(fuente: Path, *nombres: str) -> Path | None:
+    """Encuentra un archivo del stakeholder aunque le hayan cambiado el nombre.
+
+    Cada entrega renombra: la primera trajo
+    `LISTADO_DE_ASEGURADORAS_1.md` y la de `RealDataSeeds/` el mismo listado como
+    `LISTADO DE ASEGURADORAS.md` — guiones bajos por espacios, sin el sufijo. En
+    vez de mantener dos listas de nombres literales, se compara **normalizado**:
+    sin extensión, sin signos y sin el numeral final.
+    """
+    objetivos = {re.sub(r"\s*\d+$", "", normalizar(n)) for n in nombres}
+    for candidato in sorted(fuente.glob("*.md")):
+        clave = re.sub(r"\s*\d+$", "", normalizar(candidato.stem))
+        if clave in objetivos:
+            return candidato
+    return None
+
+
+def buscar_en_entregas(fuente: Path, *nombres: str) -> Path | None:
+    """Busca un archivo en la carpeta de origen y en las entregas hermanas.
+
+    El stakeholder no manda todo junto: los nueve primeros llegaron en
+    `markdown_convertidos/` y la lista de farmacias/laboratorios apareció después
+    en `RealDataSeeds/`. En vez de obligar a consolidar las carpetas a mano —lo
+    que invita a mezclar versiones—, se mira primero en el origen indicado y
+    después en las hermanas.
+    """
+    hallado = buscar(fuente, *nombres)
+    if hallado is not None:
+        return hallado
+    for hermana in sorted(fuente.parent.iterdir()):
+        if hermana.is_dir() and hermana != fuente:
+            hallado = buscar(hermana, *nombres)
+            if hallado is not None:
+                return hallado
+    return None
+
+
+def exigir(fuente: Path, *nombres: str) -> Path:
+    """Como `buscar`, pero falla con un mensaje útil si el archivo no está."""
+    hallado = buscar(fuente, *nombres)
+    if hallado is None:
+        raise SystemExit(
+            f"No se encontró «{nombres[0]}» en {fuente}. "
+            f"Nombres probados: {', '.join(nombres)}"
+        )
+    return hallado
+
+
 def leer(ruta: Path) -> list[str]:
-    return ruta.read_text(encoding="utf-8").splitlines()
+    """Lee un markdown del stakeholder, venga como venga.
+
+    Los primeros diez archivos llegaron en UTF-8 limpio. La entrega de
+    `RealDataSeeds/` llegó exportada desde Excel con pandas y trae **dos capas de
+    problema** encima:
+
+    1. **UTF-16 con BOM**, que `read_text('utf-8')` ni siquiera abre.
+    2. **Acentos rotos por partida doble**: el texto pasó por una consola de
+       Windows y quedó guardado como si CP850 fuera Latin-1. Así,
+       «Farmacia Chávez» se lee «Farmacia Chßvez» y «CRUCEÑO» sale «CRUCEÐO».
+
+    Lo segundo se revierte re-codificando a CP850 y releyendo como Latin-1: el
+    byte 0xE1 que CP850 muestra como «ß» es la «á» de Latin-1. Se aplica **sólo
+    si el resultado mejora** —si el texto ya estaba bien, esa vuelta lo
+    rompería—, y el criterio es contar caracteres imposibles en castellano.
+    """
+    crudo = ruta.read_bytes()
+    if crudo[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        texto = crudo.decode("utf-16")
+    else:
+        texto = crudo.decode("utf-8")
+
+    if _sospechoso_de_mojibake(texto):
+        try:
+            texto = texto.encode("cp850").decode("latin-1")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            # Si no convierte limpio no era este daño: mejor el texto original
+            # que uno a medio arreglar.
+            pass
+    return texto.splitlines()
+
+
+# Caracteres que CP850 usa para dibujar cajas y que no aparecen en un nombre de
+# empresa boliviana: si están, el texto pasó por la consola.
+_RASTRO_DE_CONSOLA = "ßÐ═░▒▄█┌┐└┘├┤┬┴┼"
+
+
+def _sospechoso_de_mojibake(texto: str) -> bool:
+    """Verdadero cuando el texto parece haber pasado por una consola DOS."""
+    return sum(texto.count(c) for c in _RASTRO_DE_CONSOLA) > 3
 
 
 def columna(cabecera: list[str], fila: list[str], *nombres: str) -> str:
@@ -154,7 +241,7 @@ def extraer_aseguradoras(fuente: Path) -> list[dict]:
     lista completa es la que existe en el mercado y sirve para el alta de
     organizaciones.
     """
-    lineas = leer(fuente / "LISTADO_DE_ASEGURADORAS_1.md")
+    lineas = leer(exigir(fuente, "LISTADO_DE_ASEGURADORAS_1", "LISTADO DE ASEGURADORAS"))
     ramo = "PERSONAS"
     salida: list[dict] = []
     usados: set[str] = set()
@@ -203,7 +290,7 @@ def extraer_establecimientos(fuente: Path) -> list[dict]:
     usados: set[str] = set()
 
     # -- clínicas privadas --------------------------------------------------
-    for cabecera, fila in filas_de_tabla(leer(fuente / "LISTA_DE_CLINICAS_PRIVADAS_1.md")):
+    for cabecera, fila in filas_de_tabla(leer(exigir(fuente, "LISTA_DE_CLINICAS_PRIVADAS_1", "LISTA DE CLINICAS PRIVADAS"))):
         nombre = columna(cabecera, fila, "ESTABLECIMIENTO")
         if not nombre or normalizar(nombre) == "establecimiento":
             continue
@@ -224,7 +311,7 @@ def extraer_establecimientos(fuente: Path) -> list[dict]:
         )
 
     # -- hospitales de 3.º y 2.º nivel, y cajas -----------------------------
-    lineas = leer(fuente / "LISTA_DE_HOSPITAL_DE_TERCER_SEGUNDO_NIVEL_Y_CAJAS_1.md")
+    lineas = leer(exigir(fuente, "LISTA_DE_HOSPITAL_DE_TERCER_SEGUNDO_NIVEL_Y_CAJAS_1", "LISTA DE HOSPITAL DE TERCER, SEGUNDO NIVEL Y CAJAS"))
     seccion = ""
     for linea in lineas:
         if linea.startswith("#"):
@@ -280,7 +367,7 @@ def extraer_establecimientos(fuente: Path) -> list[dict]:
 
     # -- centros de salud de primer nivel -----------------------------------
     for cabecera, fila in filas_de_tabla(
-        leer(fuente / "LISTA_DE_HOSPITAL_DE_PRIMER_NIVEL_SANTA_CRUZ_1.md")
+        leer(exigir(fuente, "LISTA_DE_HOSPITAL_DE_PRIMER_NIVEL_SANTA_CRUZ_1", "LISTA DE HOSPITAL DE PRIMER NIVEL SANTA CRUZ"))
     ):
         nombre = columna(cabecera, fila, "ESTABLECIMIENTO")
         if not nombre or normalizar(nombre) == "establecimiento":
@@ -301,7 +388,77 @@ def extraer_establecimientos(fuente: Path) -> list[dict]:
                 "naturaleza": "PUBLICA",
             }
         )
+
+    # -- farmacias, laboratorios y centros de imagen -------------------------
+    #
+    # Entran al MISMO catálogo que clínicas y hospitales, y no a uno propio,
+    # porque el registro de procesos los trata igual: los módulos FARMACIA,
+    # LABORATORIO DE SANGRE y ANÁLISIS MEDICOS abren con el mismo capítulo
+    # —«Registro en la App Datos Legales de la empresa»— y los mismos 18 puntos
+    # que cualquier otra institución. Lo que los distingue es el `tipo`, que es
+    # justamente por donde se filtra.
+    #
+    # El archivo llegó en la entrega de `RealDataSeeds/`, así que puede no estar
+    # en una copia vieja del origen: se omite en silencio si falta, en vez de
+    # romper la extracción de los otros nueve.
+    archivo_empresas = buscar_en_entregas(
+        fuente, "LISTA DE FARMACIAS, LABORATORIOS Y ANALISIS MEDICOS"
+    )
+    if archivo_empresas is not None:
+        seccion = ""
+        for linea in leer(archivo_empresas):
+            if linea.startswith("#"):
+                seccion = normalizar(linea)
+                continue
+            fila = celdas(linea)
+            if not fila or es_separador(fila):
+                continue
+            nombre = limpiar_nan(fila[0])
+            # El export de pandas repite el título de la hoja y la cabecera como
+            # filas normales; ninguna de las dos es una empresa.
+            if not nombre or normalizar(nombre) in (
+                "nombre comercial",
+                "lista de farmacias",
+                "lista de laboratorios de sangre",
+                "lista de analisis clinicos",
+            ):
+                continue
+            if "farmacia" in seccion:
+                tipo = "FARMACIA"
+            elif "laboratorio" in seccion:
+                tipo = "LABORATORIO"
+            elif "analisis" in seccion:
+                tipo = "IMAGEN"
+            else:
+                continue
+            salida.append(
+                {
+                    "code": codigo("BO_EST", nombre, usados),
+                    "nombre": nombre,
+                    "razonSocial": limpiar_nan(fila[1] if len(fila) > 1 else ""),
+                    "nit": limpiar_nan(fila[2] if len(fila) > 2 else ""),
+                    "direccion": limpiar_nan(fila[4] if len(fila) > 4 else ""),
+                    "telefonos": telefonos(fila[3] if len(fila) > 3 else ""),
+                    "departamento": "SC",
+                    "municipio": "SANTA CRUZ DE LA SIERRA",
+                    "tipo": tipo,
+                    "nivel": None,
+                    "naturaleza": "PRIVADA",
+                }
+            )
+
     return salida
+
+
+def limpiar_nan(valor: str) -> str | None:
+    """Vacía las celdas que pandas escribió como `NaN`.
+
+    El export de Excel pone el literal `NaN` donde la planilla tenía un hueco.
+    Cargarlo tal cual dejaría farmacias con la dirección «NaN», que es peor que
+    no tener dirección: parece un dato.
+    """
+    v = valor.strip()
+    return None if not v or v.lower() in ("nan", "none") else v
 
 
 # --------------------------------------------------------------------------- #
@@ -331,7 +488,7 @@ def extraer_redes(fuente: Path) -> dict:
     for carrier, etiqueta, archivo, c_medico, c_ciudad, c_plan, c_dir, c_tel in fuentes:
         profesionales: dict[str, dict] = {}
         planes: set[str] = set()
-        for cabecera, fila in filas_de_tabla(leer(fuente / archivo)):
+        for cabecera, fila in filas_de_tabla(leer(exigir(fuente, archivo.replace(".md","")))):
             nombre = columna(cabecera, fila, *c_medico)
             if not nombre or normalizar(nombre) in {"medico", "nombre del medico"}:
                 continue
@@ -389,7 +546,7 @@ def extraer_aranceles(fuente: Path) -> dict:
     especialidad_previa = ""
 
     for cabecera, fila in filas_de_tabla(
-        leer(fuente / "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md")
+        leer(exigir(fuente, "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas"))
     ):
         especialidad = columna(cabecera, fila, "Especialidad")
         concepto = columna(cabecera, fila, "Procedimiento / concepto")
@@ -435,7 +592,7 @@ def extraer_aranceles(fuente: Path) -> dict:
     seccion = ""
     cabecera: list[str] = []
     anterior: list[str] = []
-    for linea in leer(fuente / "LISTADO_ARANCEL_ODONTOLOGICO_2026_1.md"):
+    for linea in leer(exigir(fuente, "LISTADO_ARANCEL_ODONTOLOGICO_2026_1", "LISTADO ARANCEL ODONTOLOGICO 2026")):
         if linea.startswith("##"):
             seccion = linea.lstrip("# ").strip()
             cabecera = []
@@ -491,7 +648,7 @@ def extraer_especialidades(fuente: Path) -> list[dict]:
         ("Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md", "Especialidad", "arancel"),
     ]
     for archivo, titulo, origen in archivos:
-        for cabecera, fila in filas_de_tabla(leer(fuente / archivo)):
+        for cabecera, fila in filas_de_tabla(leer(exigir(fuente, archivo.replace(".md","")))):
             valor = columna(cabecera, fila, titulo)
             if not valor or len(valor) < 4:
                 continue

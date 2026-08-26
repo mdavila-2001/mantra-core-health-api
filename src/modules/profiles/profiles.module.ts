@@ -39,6 +39,7 @@ import {
   PatientPortalProxiesRepository,
 } from './repositories';
 import { ProfileOwnershipService } from './services';
+import { LinkableOrganizationsService } from './services/linkable-organizations.service';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -69,6 +70,7 @@ import { ProfileOwnershipService } from './services';
     ProfileOwnershipService,
     MedicalSpecialtyCatalogService,
     ProfilesAffiliationsService,
+    LinkableOrganizationsService,
     // Repositorios
     PersonsRepository,
     PersonProfilesRepository,
