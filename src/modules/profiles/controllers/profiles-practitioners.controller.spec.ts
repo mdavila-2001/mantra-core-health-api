@@ -26,10 +26,14 @@ function build() {
     removePractitionerPhoto: mockFn(),
     getOwnOnboarding: mockFn(),
   };
+  // El buscador del padrón: el controller sólo le pasa los tres parámetros de
+  // la query, así que alcanza con poder observar con qué lo llamó.
+  const linkableOrganizations = { buscar: mockFn() };
   const controller = new ProfilesPractitionersController(
     practitionersService as any,
+    linkableOrganizations as any,
   );
-  return { controller, practitionersService };
+  return { controller, practitionersService, linkableOrganizations };
 }
 
 describe('ProfilesPractitionersController', () => {

@@ -25,6 +25,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ProfilesPractitionersService } from '../services';
+import { LinkableOrganizationsService } from '../services/linkable-organizations.service';
 import {
   CreatePractitionerDto,
   PractitionerResponseDto,
@@ -42,6 +43,7 @@ import {
   ListPractitionersResponseDto,
   SetPractitionerPhotoDto,
   PractitionerOnboardingDto,
+  ListLinkableOrganizationsResponseDto,
 } from '../dto';
 
 /**
@@ -56,9 +58,11 @@ export class ProfilesPractitionersController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param practitionersService - Valor de practitioners service requerido por la operación.
+   * @param linkableOrganizations - Buscador del padrón de establecimientos.
    */
   constructor(
     private readonly practitionersService: ProfilesPractitionersService,
+    private readonly linkableOrganizations: LinkableOrganizationsService,
   ) {}
 
   /**
@@ -283,6 +287,51 @@ export class ProfilesPractitionersController {
       dto,
       actor,
     );
+  }
+
+  /**
+   * El buscador de instituciones para declarar dónde se trabaja.
+   *
+   * ## Por qué vive en el perfil y no en un módulo propio
+   *
+   * Es el paso previo de `POST practitioners/me/affiliations`, y el profesional
+   * declara dónde trabaja desde su perfil, no entrando por cada organización.
+   * Dejarlo acá mantiene el circuito entero en una sola superficie.
+   *
+   * ## Sin `@Roles`, igual que el resto del historial laboral
+   *
+   * Devuelve el padrón oficial de establecimientos: un catálogo público, sin
+   * `tenant_id` y sin PHI. Exigir un rol lo cerraría para el profesional que
+   * todavía no lo tiene, que es justo quien está completando su perfil.
+   *
+   * @param q - Texto a buscar en el nombre del establecimiento.
+   * @param municipality - Municipio exacto; separa los homónimos del padrón.
+   * @param limit - Tope de resultados (por defecto 20).
+   * @returns Los establecimientos que coinciden.
+   */
+  @Get('practitioners/me/linkable-organizations')
+  @ApiOperation({
+    summary: 'Buscar instituciones del padrón para declarar una afiliación',
+    description:
+      'El padrón cubre sólo Santa Cruz: fuera de ahí, el alta admite el nombre escrito a mano.',
+  })
+  @ApiQuery({ name: 'q', required: false, description: 'Texto del nombre' })
+  @ApiQuery({
+    name: 'municipality',
+    required: false,
+    description: 'Municipio exacto; distingue establecimientos homónimos',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tope de resultados (por defecto 20)',
+  })
+  searchLinkableOrganizations(
+    @Query('q') q?: string,
+    @Query('municipality') municipality?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListLinkableOrganizationsResponseDto> {
+    return this.linkableOrganizations.buscar({ query: q, municipality, limit });
   }
 
   /**

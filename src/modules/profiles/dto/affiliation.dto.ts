@@ -163,6 +163,22 @@ export class AffiliationResponseDto {
   status!: string;
 
   /**
+   * El mismo estado, en algo sobre lo que una pantalla pueda ramificar.
+   *
+   * El concept id sigue viajando en `status` y es la verdad; esto es una
+   * derivación de conveniencia. Existe porque la alternativa era que el
+   * frontend comparara uuids escritos a mano, que es exactamente lo que el
+   * proyecto prohíbe: los conceptos se resuelven en el servidor.
+   *
+   * `desconocido` cuando el estado no es ninguno de los tres esperados. Es
+   * preferible a suponer: cuando exista el value set de estados —donde entra
+   * `declarado`— las pantallas que ya distinguen los casos conocidos no van a
+   * mentir sobre el nuevo, van a decir que no lo reconocen.
+   */
+  @ApiProperty({ enum: ['pendiente', 'aprobado', 'rechazado', 'desconocido'] })
+  statusKind!: 'pendiente' | 'aprobado' | 'rechazado' | 'desconocido';
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @ApiProperty({ type: String, format: 'date-time' })

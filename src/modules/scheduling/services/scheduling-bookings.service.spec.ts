@@ -106,6 +106,10 @@ function build() {
     emitMany: mockFn().mockResolvedValue([]),
   };
 
+  // La regla de pertenencia vive en su propio servicio y tiene specs propios;
+  // por defecto no hay vínculos que mirar, que es el caso del consultorio
+  // propio y el de la gran mayoría de las reservas de estas pruebas.
+  const vinculos = { evaluar: mockFn(async () => 'sin-vinculos') };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -115,10 +119,12 @@ function build() {
     noticeRepo as any,
     notices as any,
     logger as any,
+    vinculos as any,
   );
   return {
     service,
     tx,
+    vinculos,
     bookingsRepo,
     catalogRepo,
     historyRepo,
@@ -1057,6 +1063,94 @@ describe('SchedulingBookingsService', () => {
         resourceName: 'Consultorio del Dr. Paz',
       };
     }
+
+    describe('vinculo vigente con la organizacion — MAC-VINCULO', () => {
+      // El `actor` de este archivo es un SCHEDULING_AGENT, que opera agendas
+      // ajenas por su rol y por eso saltea la regla. Acá hace falta el médico:
+      // es a él a quien la organización le revoca el vínculo.
+      const medico = {
+        id: 'user-med',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-1',
+      } as never;
+
+      /** Deja la reserva lista para aceptar y fija el veredicto del vínculo. */
+      function conVeredicto(d: ReturnType<typeof build>, veredicto: string) {
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+          solicitudPendiente(),
+        );
+        d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        // `cargarParaOperar` exige que la agenda sea suya antes de mirar nada
+        // más: el recurso apunta a su propio perfil profesional.
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.vinculos.evaluar.mockResolvedValue(veredicto as never);
+        return d;
+      }
+
+      it('con el vinculo revocado no acepta, y el error lo explica', async () => {
+        // Publicar y aceptar ocurren en momentos distintos: el médico publicó
+        // con el vínculo aprobado y la organización se lo revocó después. La
+        // agenda sigue publicada y los pedidos siguen entrando.
+        const d = conVeredicto(build(), 'ausente');
+
+        await expect(d.service.accept('booking-1', {}, medico)).rejects.toThrow(
+          /ya no está vigente/,
+        );
+      });
+
+      it('el aviso aclara que las citas ya confirmadas siguen en pie', async () => {
+        // Es la regla de borde: revocar un vínculo no cancela en bloque turnos
+        // que ya se le prometieron a un paciente.
+        const d = conVeredicto(build(), 'ausente');
+
+        await expect(d.service.accept('booking-1', {}, medico)).rejects.toThrow(
+          /ya confirmaste siguen/,
+        );
+      });
+
+      it('el error de vinculo al aceptar es 422, no 403', async () => {
+        const d = conVeredicto(build(), 'ausente');
+
+        await expect(
+          d.service.accept('booking-1', {}, medico),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('con el vinculo aprobado acepta con normalidad', async () => {
+        const d = conVeredicto(build(), 'aprobado');
+
+        await d.service.accept('booking-1', {}, medico);
+
+        expect(d.bookingsRepo.findBookingByIdForUpdate).toHaveBeenCalled();
+      });
+
+      it('sin vinculos que mirar acepta: es el consultorio propio', async () => {
+        const d = conVeredicto(build(), 'sin-vinculos');
+
+        await d.service.accept('booking-1', {}, medico);
+
+        expect(d.bookingsRepo.findBookingByIdForUpdate).toHaveBeenCalled();
+      });
+
+      it('un administrador de agenda no necesita vinculo propio', async () => {
+        // Opera agendas ajenas por su rol; exigirle vínculo le quitaría lo que
+        // ese rol ya le concede.
+        const d = conVeredicto(build(), 'ausente');
+
+        await d.service.accept('booking-1', {}, {
+          id: 'user-root',
+          roles: ['SCHEDULING_ADMIN', 'SECURITY_ADMIN'],
+        } as never);
+
+        expect(d.vinculos.evaluar).not.toHaveBeenCalled();
+      });
+    });
 
     it('REGLA 2 · aceptar una cancela las pendientes que chocan', async () => {
       // El caso que motiva la regla: el paciente pidió a tres médicos la misma

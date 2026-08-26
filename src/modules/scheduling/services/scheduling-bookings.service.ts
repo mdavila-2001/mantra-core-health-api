@@ -14,6 +14,7 @@ import {
   SchedulingBookingsRepository,
   SchedulingCatalogRepository,
 } from '../repositories';
+import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
 import {
   HistoryRepository,
   type HistoryRevision,
@@ -224,6 +225,7 @@ export class SchedulingBookingsService {
     @Inject(AGENDA_NOTICE_PORT)
     private readonly notices: AgendaNoticePort,
     private readonly logger: PinoLogger,
+    private readonly vinculos: PractitionerAffiliationGateService,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
   }
@@ -993,6 +995,7 @@ export class SchedulingBookingsService {
 
     const resultado = await this.em.transactional(async (tx) => {
       const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      await this.assertVinculoVigente(booking.tenantId, actor);
       const fromState = booking.statusConceptId;
       this.assertTransition(fromState, CONCEPTS.BOOKING_CONFIRMED);
 
@@ -1669,6 +1672,54 @@ export class SchedulingBookingsService {
   }
 
   /** Si el actor administra agendas ajenas por oficio. */
+  /**
+   * Exige que el vínculo con la organización siga vigente para comprometer un
+   * turno suyo.
+   *
+   * ## Por qué hace falta si publicar ya estaba bloqueado
+   *
+   * Publicar y aceptar ocurren en momentos distintos. Un médico publica su
+   * agenda con el vínculo aprobado y meses después la organización se lo
+   * revoca: la agenda ya está publicada y los pedidos siguen entrando. Sin esta
+   * comprobación seguiría comprometiendo turnos en nombre de una institución
+   * que ya no lo reconoce.
+   *
+   * ## Las citas ya confirmadas no se caen solas
+   *
+   * Esto bloquea aceptar de acá en adelante; **no toca** las que ya estaban
+   * confirmadas. Cancelarlas en bloque al revocar un vínculo dejaría plantados a
+   * pacientes que tenían un turno prometido, por un trámite entre el médico y la
+   * organización del que no fueron parte. Avisarles es responsabilidad de la
+   * organización y del médico.
+   *
+   * Por lo mismo **no se instrumentan `start` ni `check-in`**: llegado ese
+   * momento el paciente ya está en la puerta, y negarle la atención por un
+   * vínculo administrativo lo castiga a él, no a quien corresponde.
+   *
+   * @param tenantId - La organización dueña de la reserva.
+   * @param actor - Quien acepta.
+   * @throws PreconditionFailedException si el vínculo no está vigente.
+   */
+  private async assertVinculoVigente(
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (this.operaCualquierAgenda(actor)) return;
+
+    const veredicto = await this.vinculos.evaluar(tenantId, actor);
+    if (veredicto === 'sin-vinculos' || veredicto === 'aprobado') return;
+
+    throw new PreconditionFailedException(
+      veredicto === 'pendiente'
+        ? 'Tu vínculo con esta organización todavía está pendiente de ' +
+            'aprobación, así que todavía no podés comprometer turnos suyos.'
+        : 'Tu vínculo con esta organización ya no está vigente, así que no ' +
+            'podés aceptar turnos suyos. Las citas que ya confirmaste siguen ' +
+            'en pie: hablá con la organización para reactivarlo.',
+      { tenantId, vinculo: veredicto },
+    );
+  }
+
   private operaCualquierAgenda(actor: AuthenticatedUser): boolean {
     return actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol));
   }
