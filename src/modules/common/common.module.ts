@@ -10,6 +10,7 @@ import {
 } from './controllers';
 import {
   AddressesService,
+  AttachableFileService,
   ContactPointsService,
   FileUploadService,
   FilesService,
@@ -45,6 +46,7 @@ import {
     AddressesService,
     FilesService,
     FileUploadService,
+    AttachableFileService,
     IdentifiersRepository,
     ContactPointsRepository,
     AddressesRepository,
@@ -55,6 +57,19 @@ import {
   ],
   // Documento de identidad y correo del auto-registro de pacientes los escribe
   // IAM dentro de su propia transacción, así que necesita estos repositorios.
-  exports: [IdentifiersRepository, ContactPointsRepository],
+  // `AttachableFileService` sale por la misma razón: quien adjunta un archivo
+  // —el muro social a una publicación, `profiles` a la foto del profesional—
+  // tiene que poder comprobar dentro de su propia transacción que ese archivo
+  // existe y es de quien lo adjunta.
+  exports: [
+    IdentifiersRepository,
+    ContactPointsRepository,
+    // El alta pública escribe el domicilio del municipio elegido, y vive en
+    // `iam`: sin exportarlo, ese módulo no puede inyectarlo.
+    AddressesRepository,
+    FilesRepository,
+    FileVersionsRepository,
+    AttachableFileService,
+  ],
 })
 export class CommonModule {}

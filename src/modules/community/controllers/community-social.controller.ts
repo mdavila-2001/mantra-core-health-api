@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -44,6 +45,11 @@ import {
   BlockPageDto,
   UpsertOwnPublicProfileDto,
   OwnPublicProfileDto,
+  ProfileStatsDto,
+  UnfollowQueryDto,
+  UnbookmarkQueryDto,
+  UnblockQueryDto,
+  SocialRemovalResponseDto,
 } from '../dto';
 
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
@@ -111,6 +117,30 @@ export class CommunitySocialController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<OwnPublicProfileDto> {
     return this.service.upsertOwnProfile(dto, actor);
+  }
+
+  /**
+   * «Tu perfil esta semana» (`ORG-PUB-005`).
+   *
+   * Va declarado **antes** que `profiles/:profileId`, igual que
+   * `profiles/me`: Nest resuelve por orden de declaración y un parámetro
+   * capturaría `me`.
+   *
+   * Sin `@Roles`: el sujeto lo resuelve el servidor desde la sesión, así que
+   * no hay forma de pedir las estadísticas de otro. Es la misma regla que
+   * `GET profiles/me`.
+   */
+  @Get('profiles/me/stats')
+  @ApiOperation({
+    summary: 'Estadísticas de la vitrina pública propia',
+    description:
+      'Visitas y apariciones en búsquedas de los últimos 7 días. Son visitas, ' +
+      'no visitantes únicos: no se guarda ningún rastro del visitante.',
+  })
+  ownProfileStats(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ProfileStatsDto> {
+    return this.service.getOwnProfileStats(actor);
   }
 
   /** UC-19-01. */
@@ -182,11 +212,69 @@ export class CommunitySocialController {
     return this.service.block(dto, actor);
   }
 
+  // --- Caras inversas (UC-19-04/05/14) ---
+  //
+  // Van por query y no por el id de la fila porque la pantalla que las ofrece
+  // sabe *a quién* dejó de seguir o *qué* dejó de guardar, no el uuid del
+  // vínculo: pedirle ese uuid la obligaría a una lectura extra sólo para poder
+  // deshacer lo que acaba de hacer.
+
+  /** UC-19-05, cara inversa. */
+  @Delete('follows')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Dejar de seguir un objeto social' })
+  unfollow(
+    @Query() query: UnfollowQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    return this.service.unfollow(query, actor);
+  }
+
+  /** UC-19-04, cara inversa. */
+  @Delete('bookmarks')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Quitar un marcador' })
+  unbookmark(
+    @Query() query: UnbookmarkQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    return this.service.unbookmark(query, actor);
+  }
+
+  /** UC-19-14, cara inversa. */
+  @Delete('blocks')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Levantar un bloqueo' })
+  unblock(
+    @Query() query: UnblockQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    return this.service.unblock(query, actor);
+  }
+
   // --- Lecturas (UC-19-01..07, cara de lectura) ---
   //
   // Sin `@Roles`: alcanza con una sesión. Las que exponen contenido privado
   // —marcadores y bloqueos— comprueban la propiedad del perfil en el servicio,
   // que es donde hay base para comprobarla.
+
+  /**
+   * La misma ficha, por el slug del directorio público (carril P2).
+   *
+   * **Va declarada antes que `profiles/:profileId`**, y no es un detalle de
+   * estilo: el router prueba en orden, y aunque el parámetro lleva
+   * `ParseUUIDPipe` —que rechazaría `by-slug`— dejar que la ruta específica
+   * quede después de la genérica es la forma de que un cambio futuro del pipe
+   * la apague sin que nadie se entere.
+   */
+  @Get('profiles/by-slug/:slug')
+  @ApiOperation({ summary: 'Ficha de un perfil público por su slug' })
+  getProfileBySlug(
+    @Param('slug') slug: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PublicProfileDetailDto> {
+    return this.readService.getProfileBySlug(slug, actor);
+  }
 
   /** Ficha del perfil, con sellos de verificación y prestigio. */
   @Get('profiles/:profileId')

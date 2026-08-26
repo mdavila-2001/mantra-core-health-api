@@ -6,6 +6,7 @@ import {
   IsUUID,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 /**
@@ -14,16 +15,72 @@ import {
  * Un clínico/organización crea la cuenta de un paciente que no puede hacerlo por
  * sí mismo. NO se envía ninguna contraseña: el titular la fijará al activar. El
  * `email` actúa como identificador verificado para evitar duplicados.
+ *
+ * El nombre se declara en partes, como en el resto de las altas. Ojo: esta vía
+ * crea la cuenta y nada más —no hay fila en `profiles.persons`—, así que las
+ * partes sólo sobreviven compuestas en `iam.users.display_name`; la persona se
+ * registra después, cuando el titular completa su perfil.
  */
 export class AssistedRegistrationDto {
   /**
-   * Valor de display name mantenido por la instancia.
+   * Nombre de pila del paciente.
+   *
+   * Obligatorio salvo que se envíe `displayName`, que es la forma anterior de
+   * declarar el nombre y se sigue aceptando para no romper a quien ya la usa.
    */
-  @ApiProperty({ description: 'Nombre visible del paciente', maxLength: 200 })
+  @ApiPropertyOptional({ maxLength: 100, example: 'Lucía' })
+  @ValidateIf((dto: AssistedRegistrationDto) => dto.displayName === undefined)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  name?: string;
+
+  /**
+   * Segundo nombre. Opcional: mucha gente no tiene.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Andrea' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  middleName?: string;
+
+  /**
+   * Apellido paterno. Mismo criterio que `name`.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Mamani' })
+  @ValidateIf((dto: AssistedRegistrationDto) => dto.displayName === undefined)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  lastName?: string;
+
+  /**
+   * Apellido materno. Opcional: no todas las jurisdicciones lo emiten.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Quispe' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  motherLastName?: string;
+
+  /**
+   * Nombre ya compuesto, para mostrar.
+   *
+   * Dejó de ser la forma de declarar el nombre —ahora se envían sus partes— pero
+   * sigue siendo opcional en vez de prohibido: quitarlo de golpe rompería a todo
+   * cliente que ya integró contra este endpoint. Si viene, manda tal cual; si no,
+   * se compone con las partes.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Forma anterior de declarar el nombre. Preferí name/lastName.',
+    deprecated: true,
+  })
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(200)
-  displayName!: string;
+  displayName?: string;
 
   /**
    * Valor de email mantenido por la instancia.

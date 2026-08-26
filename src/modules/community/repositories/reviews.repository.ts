@@ -60,6 +60,56 @@ export interface CreateReviewData {
 /** Acceso a datos de reviews de servicio y sus puntuaciones por dimensión. */
 @Injectable()
 export class ReviewsRepository {
+  /** Una review por su id. */
+  findById(em: EntityManager, id: string): Promise<ServiceReviews | null> {
+    return em.findOne(ServiceReviews, { id });
+  }
+
+  /** La respuesta que un perfil ya publicó a una review, si publicó alguna. */
+  findResponseByResponder(
+    em: EntityManager,
+    reviewId: string,
+    responderPublicProfileId: string,
+  ): Promise<ReviewResponses | null> {
+    return em.findOne(ReviewResponses, { reviewId, responderPublicProfileId });
+  }
+
+  /**
+   * Crea la respuesta de un perfil a una review.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Review, perfil que responde y texto.
+   * @returns La respuesta creada.
+   */
+  createResponse(
+    em: EntityManager,
+    data: {
+      /** Review contestada. */
+      reviewId: string;
+      /** Vitrina que contesta. */
+      responderPublicProfileId: string;
+      /** Texto de la respuesta. */
+      responseText: string;
+      /** Estado de moderación inicial. */
+      moderationStatusConceptId: string;
+      /** Usuario que ejecuta. */
+      actorUserId?: string;
+    },
+  ): ReviewResponses {
+    return em.create(
+      ReviewResponses,
+      {
+        reviewId: data.reviewId,
+        responderPublicProfileId: data.responderPublicProfileId,
+        responseText: data.responseText,
+        moderationStatusConceptId: data.moderationStatusConceptId,
+        publishedAt: new Date(),
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
+  }
+
   /** Review verificada previa del mismo paciente para el mismo encuentro. */
   findByReviewerEncounter(
     em: EntityManager,

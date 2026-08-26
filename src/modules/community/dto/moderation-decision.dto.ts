@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /community/moderation/queue/{queueId}/decision` (UC-19-09). */
 export class ModerationDecisionDto {
@@ -14,16 +21,22 @@ export class ModerationDecisionDto {
   decision!: 'REMOVED' | 'RESTRICTED' | 'WARNED' | 'DISMISSED';
 
   /**
-   * Valor de rationale text mantenido por la instancia.
+   * Motivo de la decisión. **Obligatorio.**
+   *
+   * Era opcional, y el carril lo pide obligatorio por una razón concreta: una
+   * decisión sin motivo escrito deja al sancionado sin nada que leer cuando
+   * apela, y al equipo sin nada que auditar cuando alguien pregunta por qué se
+   * bajó un contenido. La columna admite nulo —hay filas viejas sin motivo— pero
+   * el contrato de entrada ya no.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Motivación de la decisión',
     maxLength: 2000,
   })
-  @IsOptional()
   @IsString()
+  @MinLength(1)
   @MaxLength(2000)
-  rationaleText?: string;
+  rationaleText!: string;
 
   /**
    * Identificador asociado a subject profile.

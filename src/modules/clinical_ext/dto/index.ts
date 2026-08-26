@@ -6,3 +6,4 @@ export * from './order-set.dto';
 export * from './referral.dto';
 export * from './care-gap.dto';
 export * from './virtual-encounter.dto';
+export * from './prescription-favorite.dto';

@@ -46,3 +46,32 @@ export function composePersonDisplayName(
 
   return compuesto === '' ? undefined : compuesto;
 }
+
+/**
+ * El nombre tal como lo declara el cuerpo de un alta: sus partes y, para quien
+ * todavía use la forma anterior, el compuesto ya armado.
+ */
+export interface DeclaredPersonName extends PersonNameParts {
+  /** Forma anterior de declarar el nombre. Si viene, manda tal cual. */
+  readonly displayName?: string;
+}
+
+/**
+ * El nombre para mostrar de la CUENTA (`iam.users.display_name`).
+ *
+ * `profiles.persons` lo deriva solo —lo hace `PersonsRepository.create`, que es
+ * el único punto de inserción—, pero la cuenta es otra tabla en otro esquema y
+ * necesita el mismo valor calculado por quien da el alta para que las dos no
+ * puedan divergir.
+ *
+ * `displayName` explícito gana: es la forma anterior de declarar el nombre y
+ * sigue aceptándose, así que quien la use tiene que ver exactamente lo que
+ * mandó. Devuelve vacío sólo si el cuerpo no traía nombre alguno, cosa que los
+ * DTO impiden exigiendo `name` y `lastName` cuando no viene `displayName`.
+ *
+ * @param nombre - El nombre declarado en el cuerpo del alta.
+ * @returns El nombre para mostrar de la cuenta.
+ */
+export function composeAccountDisplayName(nombre: DeclaredPersonName): string {
+  return nombre.displayName ?? composePersonDisplayName(nombre) ?? '';
+}

@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { DiagnosticOrdersRepository } from '../repositories';
-import { DIAG } from '../diagnostics.concepts';
-import { CLIN } from '../../clinical/clinical.concepts';
+import { CATEGORIAS_DIAGNOSTICAS } from '../diagnostics.concepts';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
 
 /**
@@ -23,18 +22,6 @@ import type { PatientDiagnosticOrdersResponseDto } from '../dto';
  */
 @Injectable()
 export class DiagnosticsOrdersService {
-  /**
-   * Las categorías que hacen que una orden de servicio sea diagnóstica.
-   *
-   * Laboratorio la declara `clinical` (es suya desde antes); imagenología la
-   * declara este módulo. Son las dos únicas: si mañana aparece otra, se agrega
-   * acá y la pantalla la muestra sin cambiar nada más.
-   */
-  private static readonly CATEGORIAS_DIAGNOSTICAS: readonly string[] = [
-    CLIN.SERVICE_REQUEST_CATEGORY_LAB,
-    DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
-  ];
-
   /**
    * Inicializa la instancia y sus dependencias.
    *
@@ -78,7 +65,7 @@ export class DiagnosticsOrdersService {
         em,
         custodianTenantId,
         patientProfileId,
-        DiagnosticsOrdersService.CATEGORIAS_DIAGNOSTICAS,
+        CATEGORIAS_DIAGNOSTICAS,
         over,
       ),
       this.ordersRepo.findReportsByPatient(

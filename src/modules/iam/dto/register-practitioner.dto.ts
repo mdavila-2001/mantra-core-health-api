@@ -12,6 +12,7 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 import {
   ADMIN_GENDER_CODES,
@@ -56,13 +57,64 @@ export class RegisterPractitionerDto {
   password!: string;
 
   /**
-   * Nombre visible de la cuenta y de la persona.
+   * Nombre de pila.
+   *
+   * Obligatorio salvo que se envíe `displayName`, que es la forma anterior de
+   * declarar el nombre y se sigue aceptando para no romper a quien ya la usa.
    */
-  @ApiProperty({ maxLength: 200 })
+  @ApiPropertyOptional({ maxLength: 100, example: 'Ana' })
+  @ValidateIf((dto: RegisterPractitionerDto) => dto.displayName === undefined)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  name?: string;
+
+  /**
+   * Segundo nombre. Opcional: mucha gente no tiene.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Lucía' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  middleName?: string;
+
+  /**
+   * Apellido paterno. Mismo criterio que `name`.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Rojas' })
+  @ValidateIf((dto: RegisterPractitionerDto) => dto.displayName === undefined)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  lastName?: string;
+
+  /**
+   * Apellido materno. Opcional: no todas las jurisdicciones lo emiten.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Paz' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  motherLastName?: string;
+
+  /**
+   * Nombre ya compuesto, para mostrar.
+   *
+   * Dejó de ser la forma de declarar el nombre —ahora se envían sus partes— pero
+   * sigue siendo opcional en vez de prohibido: quitarlo de golpe rompería a todo
+   * cliente que ya integró contra este endpoint. Si viene, manda tal cual; si no,
+   * se compone con las partes.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Forma anterior de declarar el nombre. Preferí name/lastName.',
+    deprecated: true,
+  })
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(200)
-  displayName!: string;
+  displayName?: string;
 
   /**
    * Número de matrícula/licencia profesional.
@@ -101,6 +153,19 @@ export class RegisterPractitionerDto {
   regulatoryAuthority?: string;
 
   /**
+   * Fecha de inscripción de la matrícula (ISO `YYYY-MM-DD`). Es el `valid_from`
+   * de la autorización jurisdiccional: sin esto la única forma de declararla era
+   * agregar una segunda autorización después del alta.
+   */
+  @ApiPropertyOptional({
+    description: 'Fecha de inscripción de la matrícula (ISO)',
+    format: 'date',
+  })
+  @IsOptional()
+  @IsISO8601()
+  licenseIssueDate?: string;
+
+  /**
    * Título profesional visible (p. ej. "Dra.", "Lic.").
    */
   @ApiPropertyOptional({ maxLength: 100 })
@@ -125,6 +190,49 @@ export class RegisterPractitionerDto {
     message: 'El documento sólo admite letras, dígitos, punto y guion',
   })
   nationalId?: string;
+
+  /**
+   * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`).
+   *
+   * Mismo campo, mismo catálogo y mismo destino que en `RegisterPatientDto`: la
+   * terminación LP/CB/SC… que distingue cédulas homónimas de departamentos
+   * distintos (backlog T-01). Faltaba sólo acá, y el formulario de alta de
+   * profesional **ya lo mandaba**: con `forbidNonWhitelisted` la petición volvía
+   * `400 property issuerAdministrativeAreaConceptId should not exist`, así que
+   * elegir el departamento rompía el alta entera en vez de enriquecerla.
+   *
+   * Se ignora sin `nationalId`: sin documento no hay identificador al que
+   * atarle un departamento de emisión.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)',
+  })
+  @IsOptional()
+  @IsUUID()
+  issuerAdministrativeAreaConceptId?: string;
+
+  /**
+   * Municipio de residencia (miembro de `VS_BO_MUNICIPALITY`).
+   *
+   * **Sólo el municipio, sin el departamento.** El código del INE de un
+   * municipio lleva adentro el de su departamento, así que el departamento se
+   * deriva acá y no se recibe: un par (departamento, municipio) enviado por el
+   * cliente puede llegar incoherente —el municipio de un departamento con el
+   * departamento de otro— y no habría forma de saber cuál de los dos es el que
+   * la persona quiso decir.
+   *
+   * Es opcional, como el resto del domicilio: nadie queda fuera del alta por no
+   * decir dónde vive.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Municipio de residencia (catálogo VS_BO_MUNICIPALITY)',
+  })
+  @IsOptional()
+  @IsUUID()
+  residenceMunicipalityConceptId?: string;
 
   /**
    * Teléfono de contacto profesional.

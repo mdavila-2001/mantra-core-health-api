@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -8,6 +9,7 @@ import {
   Patch,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -23,6 +25,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ProfilesPractitionersService } from '../services';
+import { LinkableOrganizationsService } from '../services/linkable-organizations.service';
 import {
   CreatePractitionerDto,
   PractitionerResponseDto,
@@ -38,6 +41,9 @@ import {
   PractitionerProfileSummaryDto,
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
+  SetPractitionerPhotoDto,
+  PractitionerOnboardingDto,
+  ListLinkableOrganizationsResponseDto,
 } from '../dto';
 
 /**
@@ -52,9 +58,11 @@ export class ProfilesPractitionersController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param practitionersService - Valor de practitioners service requerido por la operación.
+   * @param linkableOrganizations - Buscador del padrón de establecimientos.
    */
   constructor(
     private readonly practitionersService: ProfilesPractitionersService,
+    private readonly linkableOrganizations: LinkableOrganizationsService,
   ) {}
 
   /**
@@ -83,6 +91,33 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerProfileSummaryDto> {
     return this.practitionersService.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * En qué punto del alta está el profesional de la sesión.
+   *
+   * Va **antes** de cualquier `practitioners/:profileId` por lo mismo que
+   * `me/summary`: Nest resuelve por orden de declaración y un parámetro
+   * capturaría `me`.
+   *
+   * Sin `@Roles`: el filtro real es tener perfil profesional, que es un dato de
+   * la cuenta y no un rol. Si no lo tiene, el servicio lo dice con un 422.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Las cinco etapas del alta y la primera incompleta.
+   */
+  @Get('practitioners/me/onboarding')
+  @ApiOperation({
+    summary: 'Qué le falta al profesional para completar su alta',
+    description:
+      'El paso se DERIVA de los datos que ya existen (matrícula, especialidad, ' +
+      'foto, afiliación o agenda propia): no hay columna de progreso, así que ' +
+      'retomar sale gratis y los perfiles anteriores aparecen completos sin migrar.',
+  })
+  getOwnOnboarding(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerOnboardingDto> {
+    return this.practitionersService.getOwnOnboarding(actor);
   }
 
   /**
@@ -170,6 +205,58 @@ export class ProfilesPractitionersController {
     return this.practitionersService.updateOwnPractitionerProfile(dto, actor);
   }
 
+  /**
+   * Fijar la foto del perfil profesional.
+   *
+   * Va con `:profileId` y no con `me` a propósito: la misma ruta sirve al
+   * titular y a la plataforma, y quién puede lo decide
+   * `ProfileOwnershipService` —titular o rol de plataforma— en vez de
+   * duplicarse en dos superficies que después divergen. Con `me` la intención
+   * de un administrador que arregla la ficha de otro no quedaría escrita en
+   * ningún lado.
+   *
+   * `PUT` porque el resultado no depende de cuántas veces se pida: el perfil
+   * queda con esa foto.
+   *
+   * @param profileId - El perfil cuya foto se fija.
+   * @param dto - El archivo ya subido que pasa a ser la foto.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya con su foto.
+   */
+  @Put('practitioners/:profileId/photo')
+  @ApiOperation({ summary: 'Fijar la foto del perfil profesional' })
+  setPractitionerPhoto(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: SetPractitionerPhotoDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    return this.practitionersService.setPractitionerPhoto(
+      profileId,
+      dto,
+      actor,
+    );
+  }
+
+  /**
+   * Quitar la foto del perfil profesional.
+   *
+   * Quita la referencia; el archivo no se toca. Quien quiera borrar el archivo
+   * del almacenamiento tiene el camino de `common/files`, que lleva su propio
+   * borrado lógico.
+   *
+   * @param profileId - El perfil cuya foto se quita.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya sin foto.
+   */
+  @Delete('practitioners/:profileId/photo')
+  @ApiOperation({ summary: 'Quitar la foto del perfil profesional' })
+  removePractitionerPhoto(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    return this.practitionersService.removePractitionerPhoto(profileId, actor);
+  }
+
   /** UC-05-03. */
   @Post('practitioners')
   @Roles('SECURITY_ADMIN')
@@ -200,6 +287,51 @@ export class ProfilesPractitionersController {
       dto,
       actor,
     );
+  }
+
+  /**
+   * El buscador de instituciones para declarar dónde se trabaja.
+   *
+   * ## Por qué vive en el perfil y no en un módulo propio
+   *
+   * Es el paso previo de `POST practitioners/me/affiliations`, y el profesional
+   * declara dónde trabaja desde su perfil, no entrando por cada organización.
+   * Dejarlo acá mantiene el circuito entero en una sola superficie.
+   *
+   * ## Sin `@Roles`, igual que el resto del historial laboral
+   *
+   * Devuelve el padrón oficial de establecimientos: un catálogo público, sin
+   * `tenant_id` y sin PHI. Exigir un rol lo cerraría para el profesional que
+   * todavía no lo tiene, que es justo quien está completando su perfil.
+   *
+   * @param q - Texto a buscar en el nombre del establecimiento.
+   * @param municipality - Municipio exacto; separa los homónimos del padrón.
+   * @param limit - Tope de resultados (por defecto 20).
+   * @returns Los establecimientos que coinciden.
+   */
+  @Get('practitioners/me/linkable-organizations')
+  @ApiOperation({
+    summary: 'Buscar instituciones del padrón para declarar una afiliación',
+    description:
+      'El padrón cubre sólo Santa Cruz: fuera de ahí, el alta admite el nombre escrito a mano.',
+  })
+  @ApiQuery({ name: 'q', required: false, description: 'Texto del nombre' })
+  @ApiQuery({
+    name: 'municipality',
+    required: false,
+    description: 'Municipio exacto; distingue establecimientos homónimos',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tope de resultados (por defecto 20)',
+  })
+  searchLinkableOrganizations(
+    @Query('q') q?: string,
+    @Query('municipality') municipality?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListLinkableOrganizationsResponseDto> {
+    return this.linkableOrganizations.buscar({ query: q, municipality, limit });
   }
 
   /**

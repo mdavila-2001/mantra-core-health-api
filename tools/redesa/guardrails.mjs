@@ -361,6 +361,50 @@ const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
   'src/modules/tracking/repositories/tracking.repository.ts#findOpenSubjectsForScan',
   'src/modules/vector_rag/repositories/vector-catalog.repository.ts#findQueuedJobs',
   'src/modules/workflow/repositories/workflow-runtime.repository.ts#findDueInstancesForUpdate',
+  // Directorio público (P10, 2026-08-18): `community.public_profiles` es la
+  // vitrina que se sirve **sin sesión y a través de todos los tenants** —nadie
+  // busca «un cardiólogo dentro de la clínica X» sin saber que X existe—, así
+  // que acotar por tenant devolvería un directorio vacío. La barrera acá no es
+  // el tenant sino el par `visibility = PUBLIC AND status = ACTIVE`, que las
+  // dos consultas aplican y el propio repositorio documenta arriba de todo.
+  // `countIndexable` es el denominador de «indexados N de N» del reindexado,
+  // que corre como SYSTEM desde `internal/community/search/reindex`.
+  'src/modules/community/repositories/public-search.repository.ts#countIndexable',
+]);
+
+/**
+ * Lecturas de **directorio público**: cruzan tenants a propósito porque la
+ * superficie que sirven es anónima y transversal — nadie busca «un cardiólogo
+ * dentro de la clínica X» sin saber que X existe, y acotar por tenant
+ * devolvería un directorio vacío.
+ *
+ * Es una lista aparte de la de barridos del worker y no un apéndice suyo: la
+ * justificación es distinta y hay que poder revisarlas por separado. En un
+ * barrido SYSTEM, el motivo es que no se sabe de antemano qué tenants tienen
+ * algo pendiente. Acá el motivo es que **la barrera no es el tenant**: es el
+ * par publicación/estado que cada consulta aplica por su cuenta
+ * (`visibility = PUBLIC AND status = ACTIVE` en community; `ACTIVE` +
+ * `VERIFIED` en unidades diagnósticas).
+ *
+ * Antes de agregar una entrada acá, comprobá las dos cosas: que la lectura la
+ * sirva un endpoint declarado `@Public()` o `@TenantAgnostic()` —o sea, que la
+ * superficie ya renuncie al tenant a la vista de todos—, y que su `where`
+ * traiga ese par por igualdad, no como «distinto de privado». Si falta
+ * cualquiera de las dos, lo que hay es una fuga, no una excepción.
+ */
+const PUBLIC_DIRECTORY_ALLOWLIST = new Set([
+  // Buscador público del directorio de la red social (P4/P10). El repositorio
+  // documenta el par de condiciones arriba de todo, y la proyección enumera
+  // campos a mano para que no se escape ningún identificador interno.
+  'src/modules/community/repositories/public-search.repository.ts#searchProfiles',
+  // Denominador de «indexados N de N» del reindexado del mismo directorio, que
+  // corre como SYSTEM desde `internal/community/search/reindex`.
+  'src/modules/community/repositories/public-search.repository.ts#countIndexable',
+  // Buscador público de unidades diagnósticas: `searchWhere` exige
+  // `UNIT_ACTIVE` + `VERIFICATION_VERIFIED` y acepta `tenantId` como filtro
+  // opcional, no como límite de acceso.
+  'src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts#searchVisible',
+  'src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts#countVisible',
 ]);
 
 /** Nombre del método de clase que contiene la línea `atLine` (busca hacia atrás). */
@@ -419,20 +463,24 @@ for (const file of repoFiles) {
       continue;
 
     const method = enclosingMethodName(lines, i);
+    const qualified = method ? `${rel(file)}#${method}` : null;
     if (
-      method &&
-      TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST.has(`${rel(file)}#${method}`)
+      qualified &&
+      (TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST.has(qualified) ||
+        PUBLIC_DIRECTORY_ALLOWLIST.has(qualified))
     )
       continue;
 
-    // Ventana generosa alrededor de la llamada: firma del método suele caber
-    // en ±20 líneas (mismo margen crudo que el resto del archivo usa para
-    // "near"). Si `tenantId` aparece ahí (parámetro o spread condicional), la
-    // llamada ya está acotada.
-    const windowStart = Math.max(0, i - 20);
-    const windowEnd = Math.min(lines.length, i + 10);
-    const window = lines.slice(windowStart, windowEnd).join(' ');
-    if (/\btenantId\b/.test(window)) continue;
+    // Se busca `tenantId` en el MÉTODO ENTERO, no en una ventana de líneas
+    // alrededor de la llamada. La ventana de ±20 era una aproximación al
+    // método, y fallaba justo donde el método es largo: `listQueuePage` de
+    // `moderation.repository.ts` arma `const where = { tenantId }` veinti**una**
+    // líneas antes del `em.find`, así que la consulta —que sí está acotada—
+    // se reportaba como bloqueante por una línea de diferencia. Un límite
+    // arbitrario que depende de cuántos filtros opcionales tenga el método no
+    // distingue una fuga de tenant de una firma con JSDoc largo.
+    const methodBody = enclosingMethodBody(lines, i);
+    if (/\btenantId\b/.test(methodBody)) continue;
 
     // El criterio ya acota por un id de principal/recurso puntual (patrón PDP:
     // userId, patientProfileId, consentId, resourceId, ...) — no es un listado

@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { AuditModule } from '../audit/audit.module';
+import { PracticeModule } from '../practice/practice.module';
+import { BillingModule } from '../billing/billing.module';
+import { MessagingModule } from '../messaging/messaging.module';
 import {
   AccountingLedgerController,
   AccountingFiscalController,
@@ -10,6 +13,7 @@ import {
   AccountingAssetController,
   AccountingLiabilityController,
   AccountingExchangeRateController,
+  AccountingPractitionerController,
 } from './controllers';
 import {
   LedgerReadService,
@@ -21,6 +25,7 @@ import {
   LiabilityService,
   ExchangeRateService,
   PostingHelper,
+  PractitionerAccountingService,
 } from './services';
 import {
   JournalRepository,
@@ -41,7 +46,17 @@ import {
  * entidades del esquema `accounting`.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuditModule],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    AuditModule,
+    // Carril 18 — puertos que necesita el auto-servicio contable del doctor:
+    // `PracticeModule` resuelve a qué prácticas pertenece (para no dejarlo
+    // escribir en una ajena), `BillingModule` expone el anclaje idempotente
+    // factura→asiento, `MessagingModule` expone las notificaciones contables.
+    PracticeModule,
+    BillingModule,
+    MessagingModule,
+  ],
   controllers: [
     AccountingLedgerController,
     AccountingFiscalController,
@@ -50,6 +65,7 @@ import {
     AccountingAssetController,
     AccountingLiabilityController,
     AccountingExchangeRateController,
+    AccountingPractitionerController,
   ],
   providers: [
     // Repositorios
@@ -72,6 +88,7 @@ import {
     AssetService,
     LiabilityService,
     ExchangeRateService,
+    PractitionerAccountingService,
   ],
 })
 export class AccountingModule {}

@@ -59,22 +59,30 @@ async function call(actor, method, path, { body, token, note, expect } = {}) {
 }
 
 import { randomUUID } from 'node:crypto';
+// Correos reales: ver `correos-reales.mjs`.
+import { CORREOS, correoDe } from './correos-reales.mjs';
+
+/** Cuántas cuentas lleva creadas la corrida: reparte entre los cinco buzones. */
+let PERSONAS_CREADAS = 0;
 
 const claims = (t) => JSON.parse(Buffer.from(t.split('.')[1], 'base64').toString());
 
 const admin = await call('admin', 'POST', '/iam/auth/login', {
-  body: { email: 'admin@redesa.test', password: 'S3cret-passw0rd' },
+  body: { email: CORREOS.admin, password: 'S3cret-passw0rd' },
 });
 const A = admin.accessToken;
 const TENANT = claims(A).tenants[0];
 
 async function persona(label, roles) {
-  const email = `${label.toLowerCase()}.${U}@redesa.test`;
+  // Correo real y único: la etiqueta `+` da unicidad sin dejar de llegar.
+  const email = correoDe(label, U, PERSONAS_CREADAS++);
   const alta = await call('admin', 'POST', '/iam/users/assisted-practitioner-registration', {
     token: A,
     body: {
       email,
-      displayName: `Dr. ${label}`,
+      // Sin honorífico: el registro real no lo escribe, y un seed que lo mete
+      // deja el directorio con tratamientos mezclados.
+      displayName: label,
       licenseNumber: `LIC-${label}-${U}`,
       credentialNumber: `CRED-${label}-${U}`,
       professionalTitle: label,
@@ -131,7 +139,7 @@ console.log('\n=== FLUJO DEL CLÍNICO ===');
 const paciente = await call('CLINICIAN', 'POST', '/iam/users/assisted-registration', {
   token: clinico.token,
   body: {
-    email: `paciente.${U}@redesa.test`,
+    email: correoDe('paciente', U, PERSONAS_CREADAS++),
     displayName: 'Paciente de Prueba',
     reason: 'Alta asistida en consulta',
   },

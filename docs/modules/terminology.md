@@ -35,7 +35,7 @@ referenciadas por FK (`*_concept_id`), resueltas desde `CONCEPTS` (`src/common`)
 | 03-06 | `POST /terminology/concepts/:conceptId/relationships` | SECURITY_ADMIN | 201 | Crea una relación dirigida entre dos conceptos. Devuelve la relación creada |
 | 03-07 | `POST /terminology/value-sets` | SECURITY_ADMIN | 201 | Crea un conjunto de valores con versión inicial `1.0.0` y reglas. Devuelve `{id, versionId, rulesCount}` |
 | 03-08 | `POST /terminology/ValueSet/:id/$expand` | SECURITY_ADMIN | 200 | Materializa los miembros evaluando las reglas. Devuelve `{rulesEvaluated, includedMembers, replacedMembers, stateConceptId}` |
-| 03-08 | `GET /terminology/value-sets/:id/$expand` | autenticado | 200 | Lee la expansión ya materializada, paginada por cursor. Devuelve `{items[], count, limit, nextCursor, version}` |
+| 03-08 | `GET /terminology/value-sets/:id/$expand` | público (60/min por IP) | 200 | Lee la expansión ya materializada, paginada por cursor. Devuelve `{items[], count, limit, nextCursor, version}` |
 | 03-09 | `POST /terminology/ConceptMap/$translate` | autenticado | 200 | Cura (con `targetConceptId`) o consulta un mapeo entre conceptos. Devuelve `{matched, matches[], curated}` |
 | 03-10 | `POST /terminology/concepts/:conceptId/$deprecate` | SECURITY_ADMIN | 200 | Retira el concepto (soft-retire) y lo excluye de las expansiones. Devuelve `{stateConceptId, replacedByConceptId, excludedMembers, alreadyRetired}` |
 | 03-11 | `GET /terminology/CodeSystem/$lookup?system=&code=` | autenticado | 200 | Resuelve un concepto con sus designaciones y propiedades. Sólo lectura |

@@ -25,6 +25,7 @@ import {
   BIRTH_SEX_CONCEPT_BY_CODE,
   PROF,
 } from '../../profiles/profiles.concepts';
+import { composeAccountDisplayName } from '../../profiles/person-name';
 import {
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
@@ -35,6 +36,7 @@ import {
   ProfessionalCredentialsRepository,
 } from '../../profiles/repositories';
 import {
+  AddressesRepository,
   ContactPointsRepository,
   IdentifiersRepository,
 } from '../../common/repositories';
@@ -55,6 +57,7 @@ import {
   RegisterPractitionerDto,
   RegisterPractitionerResponseDto,
 } from '../dto';
+import { createResidenceAddress } from './residence-address';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
@@ -134,6 +137,7 @@ export class IamPractitionerSelfRegistrationService {
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly addressesRepo: AddressesRepository,
     private readonly tenantMembershipsRepo: TenantMembershipsRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly notificationsService: NotificationsService,
@@ -266,12 +270,17 @@ export class IamPractitionerSelfRegistrationService {
         });
       }
 
+      // El nombre para mostrar sale de las partes; si el cliente mandó la forma
+      // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
+      // -la cuenta y la persona- para que no puedan divergir.
+      const displayName = composeAccountDisplayName(dto);
+
       // 1) La cuenta. En el autorregistro nace ACTIVA porque el titular está
       // presente y fija su propia contraseña. En el alta administrativa nace
       // PENDIENTE: quien la crea no puede elegir la clave de otro, así que se
       // emite un token de activación y el titular la fija al entrar.
       const user = this.usersRepo.create(tx, {
-        displayName: dto.displayName,
+        displayName,
         statusConceptId: asistido
           ? CONCEPTS.STATE_PENDING
           : CONCEPTS.USER_ACTIVE,
@@ -325,7 +334,11 @@ export class IamPractitionerSelfRegistrationService {
       const person = this.personsRepo.create(tx, {
         personStatusConceptId: PROF.PERSON_ACTIVE,
         vitalStatusConceptId: PROF.VITAL_ALIVE,
-        displayName: dto.displayName,
+        name: dto.name,
+        middleName: dto.middleName,
+        lastName: dto.lastName,
+        motherLastName: dto.motherLastName,
+        displayName,
         birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
         administrativeGenderConceptId: dto.gender
           ? ADMIN_GENDER_CONCEPT_BY_CODE[dto.gender]
@@ -368,6 +381,13 @@ export class IamPractitionerSelfRegistrationService {
           dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
         licenseNumber: dto.licenseNumber,
         regulatoryAuthority: dto.regulatoryAuthority,
+        // Desde cuándo vale la habilitación. Que la matrícula nazca PENDIENTE
+        // de verificación no contradice la fecha: una cosa es desde cuándo la
+        // declara el profesional y otra desde cuándo la plataforma la dio por
+        // buena, que es lo que resuelve `stateConceptId`.
+        validFrom: dto.licenseIssueDate
+          ? new Date(dto.licenseIssueDate)
+          : undefined,
         stateConceptId: PROF.AUTH_PENDING,
         actorUserId: user.id,
       });
@@ -407,9 +427,21 @@ export class IamPractitionerSelfRegistrationService {
           value: dto.nationalId,
           useConceptId: CONCEPTS.USE_OFFICIAL,
           stateConceptId: CONCEPTS.STATE_ACTIVE,
+          // Sólo tiene sentido dentro de este `if`: es el departamento que
+          // emitió ESTE documento, no un dato suelto de la persona.
+          issuerAdministrativeAreaConceptId:
+            dto.issuerAdministrativeAreaConceptId,
           actorUserId: user.id,
         });
       }
+
+      // Domicilio: el municipio elegido en el alta. El departamento lo deriva
+      // el ayudante del código del INE, no viene del cliente.
+      createResidenceAddress(this.addressesRepo, tx, {
+        personId: person.id,
+        municipalityConceptId: dto.residenceMunicipalityConceptId,
+        actorUserId: user.id,
+      });
 
       // 6) Contacto: el correo siempre, el teléfono si lo aportó.
       this.contactPointsRepo.create(tx, {

@@ -24,6 +24,7 @@ import {
   TenantsRepository,
 } from '../../directory/repositories';
 import { TenantTypeProfileService } from '../../directory/services';
+import { composeAccountDisplayName } from '../../profiles/person-name';
 import {
   CredentialsRepository,
   EmailVerificationsRepository,
@@ -182,8 +183,10 @@ export class IamOrganizationSelfRegistrationService {
 
       // 1) Cuenta del owner, ACTIVA y con su contraseña definitiva: el titular
       // está presente, así que no hay token de activación ni cambio forzado.
+      // El nombre sale de las partes; si el cliente mandó la forma anterior,
+      // manda esa.
       const user = this.usersRepo.create(tx, {
-        displayName: dto.owner.displayName,
+        displayName: composeAccountDisplayName(dto.owner),
         statusConceptId: CONCEPTS.USER_ACTIVE,
         mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
         timeZone: dto.owner.timeZone ?? dto.organization.timeZone,

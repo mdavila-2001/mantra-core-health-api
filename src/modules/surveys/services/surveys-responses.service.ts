@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -69,10 +69,7 @@ export class SurveysResponsesService {
     actor: AuthenticatedUser,
   ): Promise<PatientInvitationDto[]> {
     const patientProfileId = this.requirePatientProfile(actor);
-    const invitations = await this.invitationsRepo.listByPatient(
-      this.em,
-      patientProfileId,
-    );
+    const invitations = await this.listInvitationsOf(patientProfileId);
 
     const now = new Date();
     const result: PatientInvitationDto[] = [];
@@ -250,13 +247,40 @@ export class SurveysResponsesService {
    * las de otro.
    */
   private requirePatientProfile(actor: AuthenticatedUser): string {
+    // 403 y no 422: no es una precondición que el cliente pueda cumplir
+    // mandando otra cosa — es que esta sesión no es la de un paciente. Mismo
+    // criterio que `community-reviews.service.ts` para calificar.
     if (!actor.patientProfileId) {
-      throw new PreconditionFailedException(
-        'La sesión no tiene perfil de paciente asociado',
-        { userId: actor.id },
+      throw new ForbiddenException(
+        'Solo un paciente puede ver sus cuestionarios',
       );
     }
     return actor.patientProfileId;
+  }
+
+  /**
+   * Las invitaciones del paciente.
+   *
+   * Tuvo un `catch` de `TableNotFoundException` que respondía «no hay
+   * cuestionarios» cuando el esquema no existía: el módulo había nacido con las
+   * entidades y sin DDL, y esta lectura reventaba con 500 en la primera
+   * pantalla que abría un paciente recién registrado (F-14). Ese parche se
+   * retira acá porque **el esquema ya está en el modelo**: el módulo 65 se
+   * promovió por el camino canónico y sus 7 tablas se materializan en toda base
+   * que el pipeline construya.
+   *
+   * Se retira y no se deja «por las dudas» a propósito: mientras estuviera, una
+   * tabla que falte —un patch sin aplicar, un despliegue a medias— seguiría
+   * pareciendo un paciente sin cuestionarios en vez de lo que es, y ese es
+   * justamente el error que costó descubrir la primera vez.
+   *
+   * @param patientProfileId - Paciente de la sesión.
+   * @returns Sus invitaciones.
+   */
+  private async listInvitationsOf(
+    patientProfileId: string,
+  ): Promise<SurveyInvitations[]> {
+    return this.invitationsRepo.listByPatient(this.em, patientProfileId);
   }
 
   /** Carga la invitación comprobando que sea del paciente de la sesión. */

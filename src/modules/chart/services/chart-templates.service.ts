@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ResourceNotFoundException,
+  getCurrentTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -180,6 +181,8 @@ export class ChartTemplatesService {
           valueSetId: field.valueSetId,
           required: assignment.required,
           ordinal: assignment.ordinal,
+          // Recién creada por un administrador: propia si nació con tenant.
+          own: assignment.tenantId != null,
         });
       }
 
@@ -213,10 +216,22 @@ export class ChartTemplatesService {
     );
   }
 
-  /** El esquema completo de una plantilla, por id. */
-  async getTemplate(id: string): Promise<ChartTemplateResponseDto> {
+  /**
+   * El esquema completo de una plantilla, por id.
+   *
+   * Mismo aislamiento que el listado: se sirven las globales (sin tenant) y
+   * las del tenant del actor. La de otra organización responde **404 y no
+   * 403**: confirmar que ese uuid existe ya filtra información.
+   *
+   * @param id - Identificador de la plantilla.
+   * @param tenantId - Tenant del actor, si el contexto lo fijó.
+   */
+  async getTemplate(
+    id: string,
+    tenantId?: string,
+  ): Promise<ChartTemplateResponseDto> {
     const template = await this.templatesRepo.findTemplateById(this.em, id);
-    if (!template) {
+    if (!template || (template.tenantId && template.tenantId !== tenantId)) {
       throw new ResourceNotFoundException('Plantilla no encontrada', { id });
     }
     const schema = await this.resolveSchema(template.sectionId);
@@ -240,6 +255,7 @@ export class ChartTemplatesService {
     const assignments = await this.templatesRepo.findFieldAssignmentsBySection(
       this.em,
       sectionId,
+      getCurrentTenantId(),
     );
     if (assignments.length === 0) return { fields: [] };
 
@@ -272,6 +288,9 @@ export class ChartTemplatesService {
         valueSetId: field.valueSetId,
         required: assignment.required,
         ordinal: assignment.ordinal,
+        // Los del estándar son globales; los que agregó la organización llevan
+        // su tenant. La consulta ya trajo sólo esos dos grupos.
+        own: assignment.tenantId != null,
       });
     }
 
@@ -293,6 +312,7 @@ export class ChartTemplatesService {
       name: string;
       version: number;
       statusConceptId: string;
+      sectionId?: string;
     },
     schema: ResolvedSchema,
   ): ChartTemplateResponseDto {
@@ -304,6 +324,8 @@ export class ChartTemplatesService {
       name: template.name,
       version: template.version,
       statusConceptId: template.statusConceptId,
+      sectionId: template.sectionId,
+      fieldTargetConceptId: CHART.TEMPLATE_FIELD_TARGET,
       fields: schema.fields,
       provenance: schema.provenance,
     };

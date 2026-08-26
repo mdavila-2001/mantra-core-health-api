@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical_ext`.
- * 93 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 101 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalExtIndexes: readonly IndexTuple[] = [
@@ -75,6 +75,14 @@ export const clinicalExtIndexes: readonly IndexTuple[] = [
   ['order_set_items', 'ix_order_set_items_default_route_concept_id', ['default_route_concept_id'], false, 'btree'],
   ['order_set_items', 'ix_order_set_items_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['order_set_items', 'ix_order_set_items_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['prescription_favorites', 'ix_prescription_favorites_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
+  ['prescription_favorites', 'ix_prescription_favorites_medication_concept_id', ['medication_concept_id'], false, 'btree'],
+  ['prescription_favorites', 'ix_prescription_favorites_substance_atc_concept_id', ['substance_atc_concept_id'], false, 'btree'],
+  ['prescription_favorites', 'ix_prescription_favorites_route_concept_id', ['route_concept_id'], false, 'btree'],
+  ['prescription_favorites', 'ix_prescription_favorites_unit_concept_id', ['unit_concept_id'], false, 'btree'],
+  ['prescription_favorites', 'ix_prescription_favorites_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['prescription_favorites', 'ix_prescription_favorites_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['prescription_favorites', 'uq_prescription_favorites_practitioner_name', ['practitioner_profile_id', 'name'], true, 'btree'],
   ['reference_ranges', 'ix_reference_ranges_code_concept_id', ['code_concept_id'], false, 'btree'],
   ['reference_ranges', 'ix_reference_ranges_unit_concept_id', ['unit_concept_id'], false, 'btree'],
   ['reference_ranges', 'ix_reference_ranges_sex_concept_id', ['sex_concept_id'], false, 'btree'],

@@ -4,6 +4,7 @@ import { bootstrapTestApp, bearer, type TestContext } from './harness';
 import { CONCEPTS } from '../../src/common';
 import { IDA } from '../../src/modules/identity_assurance/identity_assurance.concepts';
 import { IDENTITY_CARD_VERTICAL } from '../../src/modules/identity_assurance/identity_assurance.seed';
+import { IdentityAssertions } from '../../src/modules/identity_assurance/entities';
 
 /**
  * El ciclo de verificación de identidad de punta a punta, contra la API real.
@@ -172,7 +173,7 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
     expect(await idsEnCola()).toContain(caseId);
   });
 
-  it('aprobar la revisión deja el caso verificado y lo saca de la cola', async () => {
+  it('aprobar la revisión deja el caso asertado y lo saca de la cola', async () => {
     const decision = await http()
       .post(`/identity/manual-review/${reviewId}/decision`)
       .set(bearer(ctx.adminToken))
@@ -180,10 +181,35 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
       // (`@HttpCode(HttpStatus.OK)` en el controller).
       .send({ decision: 'APPROVED', decisionReason: 'Documento legible' })
       .expect(200);
-    expect(decision.body.caseStatus).toBe(IDA.CASE_VERIFIED);
+    // ASSERTED y no VERIFIED: aprobar emite la aserción en la misma
+    // transacción, y `VERIFIED` es un estado de paso dentro de ella. Esperar
+    // `VERIFIED` acá era el rojo preexistente de este spec.
+    expect(decision.body.caseStatus).toBe(IDA.CASE_ASSERTED);
 
     // Es lo que hace de esto una cola y no un listado: el trabajo hecho se va.
     expect(await idsEnCola()).not.toContain(caseId);
+  });
+
+  // H-01: lo que el titular gana al aprobarse su caso. El estado del caso es
+  // contabilidad interna; la aserción es lo que consulta `VerifiedIdentityGuard`
+  // en cada petición, y su ausencia era el 403 permanente.
+  //
+  // Se comprueba contra la tabla y no por HTTP porque no hay endpoint de lectura
+  // de aserciones: `/identity/assertions` sólo expone la revocación (UC-27-11).
+  it('la aprobación emite una aserción vigente para el sujeto', async () => {
+    const em = ctx.orm.em.fork();
+    const assertions = await em.find(IdentityAssertions, {
+      subjectEntityId,
+      revokedAt: null,
+    });
+
+    expect(assertions).toHaveLength(1);
+    expect(assertions[0]).toMatchObject({
+      subjectTypeConceptId: IDA.SUBJECT_PATIENT_IDENTITY,
+      identityVerificationCaseId: caseId,
+    });
+    // Sin vigencia, el guard la descartaría en la siguiente petición.
+    expect(assertions[0].expiresAt?.getTime()).toBeGreaterThan(Date.now());
   });
 
   it('la cola exige autenticación', async () => {

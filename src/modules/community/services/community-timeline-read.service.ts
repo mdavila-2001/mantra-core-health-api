@@ -12,6 +12,7 @@ import {
   PostsRepository,
 } from '../repositories';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityEngagementService } from './community-engagement.service';
 import type { FeedPageDto, NotificationPageDto } from '../dto';
 
 /**
@@ -33,6 +34,7 @@ export class CommunityTimelineReadService {
    * @param notificationsRepo - Acceso a `community.social_notifications`.
    * @param postsRepo - Acceso a `community.social_posts`, para hidratar.
    * @param visibility - Reglas transversales de visibilidad y propiedad.
+   * @param engagement - Recuento de reacciones y comentarios de la página.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -41,6 +43,7 @@ export class CommunityTimelineReadService {
     private readonly notificationsRepo: NotificationsRepository,
     private readonly postsRepo: PostsRepository,
     private readonly visibility: CommunityVisibilityService,
+    private readonly engagement: CommunityEngagementService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityTimelineReadService.name);
@@ -101,6 +104,14 @@ export class CommunityTimelineReadService {
     );
     const byId = new Map(visiblePosts.map((post) => [post.id, post]));
 
+    // Sobre lo visible, no sobre lo repartido: el fan-out pudo dejar en este
+    // timeline una publicación que el autor restringió después.
+    const engagement = await this.engagement.ofPosts(
+      em,
+      visiblePosts.map((post) => post.id),
+      profileId,
+    );
+
     const last = page.at(-1);
     return {
       items: page.map((item) => {
@@ -124,6 +135,12 @@ export class CommunityTimelineReadService {
                 commentsEnabled: post.commentsEnabled ?? null,
                 publishedAt: post.publishedAt ?? null,
                 editedAt: post.editedAt ?? null,
+                reactions: (
+                  engagement.get(post.id) ?? CommunityEngagementService.vacio()
+                ).reactions,
+                commentCount: (
+                  engagement.get(post.id) ?? CommunityEngagementService.vacio()
+                ).commentCount,
               }
             : null,
         };

@@ -9,6 +9,11 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ConversationsRepository, BlocksRepository } from '../repositories';
+import { CommunityMessageNotificationsService } from './community-message-notifications.service';
+// Import directo del archivo (no del barrel `../gateways`): rompe el ciclo
+// barrel↔barrel con `CommunityMessagingGateway`, que a su vez necesita
+// `CommunityVisibilityService` de este mismo paquete `services/`.
+import { CommunityMessagingGateway } from '../gateways/community-messaging.gateway';
 import { COMM } from '../community.concepts';
 import {
   CreateConversationDto,
@@ -32,23 +37,61 @@ export class CommunityMessagingService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param conversationsRepo - Valor de conversations repo requerido por la operación.
    * @param blocksRepo - Valor de blocks repo requerido por la operación.
+   * @param messageNotifications - Aviso in-app del carril P1.
+   * @param gateway - Empuje en tiempo real por WebSocket.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly conversationsRepo: ConversationsRepository,
     private readonly blocksRepo: BlocksRepository,
+    private readonly messageNotifications: CommunityMessageNotificationsService,
+    private readonly gateway: CommunityMessagingGateway,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityMessagingService.name);
   }
 
-  /** Bootstrap: crea una conversación y da de alta a sus participantes. */
+  /**
+   * Abre la conversación con esas personas: la que ya existe, o una nueva.
+   *
+   * ## Por qué dejó de crear siempre (carril P2)
+   *
+   * Era un *bootstrap* y creaba una conversación nueva en cada llamada. Con un
+   * botón «Escribir al doctor» en la pantalla de la cita eso significa que la
+   * tercera vez que alguien lo pulsa tiene tres hilos con la misma persona y
+   * sus mensajes repartidos entre los tres. No es un caso borde: pasa la
+   * segunda vez.
+   *
+   * La reutilización aplica **sólo a las directas de dos participantes**. Un
+   * grupo con los mismos integrantes puede existir varias veces a propósito —
+   * dos foros del mismo equipo son dos foros—, así que ahí se sigue creando.
+   *
+   * Es aditivo para quien ya la usaba: devuelve un id de conversación en la
+   * que los participantes pedidos participan, que es lo que el contrato
+   * prometía.
+   */
   async createConversation(
     dto: CreateConversationDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
-    return this.em.transactional(async (tx) => {
+    const resultado = await this.em.transactional(async (tx) => {
+      const esDirectaDeDos =
+        dto.conversationType !== 'GROUP' &&
+        dto.participantProfileIds.length === 2;
+
+      if (esDirectaDeDos) {
+        const [perfilA, perfilB] = dto.participantProfileIds;
+        const existente = await this.conversationsRepo.findDirectBetween(
+          tx,
+          perfilA,
+          perfilB,
+          COMM.CONVERSATION_DIRECT,
+          CONCEPTS.STATE_ACTIVE,
+        );
+        if (existente) return { id: existente.id, creada: false };
+      }
+
       const conversation = this.conversationsRepo.createConversation(tx, {
         conversationTypeConceptId:
           dto.conversationType === 'GROUP'
@@ -70,8 +113,17 @@ export class CommunityMessagingService {
         });
       }
       await tx.flush();
-      return { id: conversation.id };
+      return { id: conversation.id, creada: true };
     });
+
+    // Fuera de la transacción y sólo si de verdad nació una conversación: la
+    // reutilizada no es una novedad para nadie, avisarla sería un badge de
+    // «conversación nueva» sobre un hilo que ya conocían.
+    if (resultado.creada) {
+      this.gateway.emitNewConversation(resultado.id, dto.participantProfileIds);
+    }
+
+    return { id: resultado.id };
   }
 
   /** UC-19-06: envía un mensaje directo; actualiza contadores de la conversación. */
@@ -84,7 +136,7 @@ export class CommunityMessagingService {
       { operation: 'community.message.send', conversationId },
       'Sending direct message',
     );
-    return this.em.transactional(async (tx) => {
+    const enviado = await this.em.transactional(async (tx) => {
       const conversation = await this.conversationsRepo.findConversationById(
         tx,
         conversationId,
@@ -165,8 +217,60 @@ export class CommunityMessagingService {
         });
       }
 
-      return { id: message.id, conversationId, sentAt: now };
+      return {
+        id: message.id,
+        conversationId,
+        senderProfileId: message.senderProfileId,
+        replyToMessageId: message.replyToMessageId ?? null,
+        contentTypeConceptId: message.contentTypeConceptId,
+        bodyText: message.bodyText ?? null,
+        attachmentFileId: message.attachmentFileId ?? null,
+        isEdited: false,
+        sentAt: now,
+        // Los destinatarios viajan fuera del DTO para no tener que releerlos
+        // después del commit: ya se recorrieron acá para los recibos.
+        destinatarios: participants
+          .map((p) => p.participantProfileId)
+          .filter((profileId) => profileId !== dto.senderProfileId),
+      };
     });
+
+    // Carril P2 → P1 · «tenés un mensaje nuevo».
+    //
+    // Después del commit y no dentro: el mensaje ya está guardado cuando esto
+    // corre, así que ningún problema de la campana puede hacerlo desaparecer.
+    // `mensajeNuevo` no lanza.
+    await this.messageNotifications.mensajeNuevo(
+      conversationId,
+      dto.senderProfileId,
+      enviado.destinatarios,
+      actor.id,
+    );
+
+    // Empuje en vivo por WS — mismo criterio que la notificación: después del
+    // commit, y `emitMessage` no lanza. Se arma el payload explícito (sin
+    // `destinatarios`, que es un detalle interno de este método) para no
+    // filtrar por WS un campo que el contrato REST tampoco expone.
+    this.gateway.emitMessage(
+      {
+        id: enviado.id,
+        conversationId: enviado.conversationId,
+        senderProfileId: enviado.senderProfileId,
+        replyToMessageId: enviado.replyToMessageId,
+        contentTypeConceptId: enviado.contentTypeConceptId,
+        bodyText: enviado.bodyText,
+        attachmentFileId: enviado.attachmentFileId,
+        isEdited: enviado.isEdited,
+        sentAt: enviado.sentAt,
+      },
+      enviado.destinatarios,
+    );
+
+    return {
+      id: enviado.id,
+      conversationId: enviado.conversationId,
+      sentAt: enviado.sentAt,
+    };
   }
 
   /** UC-19-07: marca la conversación como leída para un participante. */
@@ -175,7 +279,7 @@ export class CommunityMessagingService {
     dto: MarkReadDto,
     actor: AuthenticatedUser,
   ): Promise<ReadReceiptResponseDto> {
-    return this.em.transactional(async (tx) => {
+    const resultado = await this.em.transactional(async (tx) => {
       const conversation = await this.conversationsRepo.findConversationById(
         tx,
         conversationId,
@@ -225,5 +329,15 @@ export class CommunityMessagingService {
 
       return { receiptsRecorded: 1, lastReadMessageId: messageId };
     });
+
+    if (resultado.lastReadMessageId) {
+      this.gateway.emitRead({
+        conversationId,
+        profileId: dto.recipientProfileId,
+        lastReadMessageId: resultado.lastReadMessageId,
+      });
+    }
+
+    return resultado;
   }
 }

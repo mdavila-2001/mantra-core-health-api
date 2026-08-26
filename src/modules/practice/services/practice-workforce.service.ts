@@ -18,7 +18,28 @@ import {
   CreateSupportAssignmentDto,
   RoleAssignmentResponseDto,
   SupportAssignmentResponseDto,
+  SelfRequestRoleAssignmentDto,
+  RoleAssignmentTransitionDto,
+  MyRoleAssignmentResponseDto,
 } from '../dto';
+
+/** Transiciones válidas del ciclo de vida de una vinculación (Carril 18). */
+const ASSIGNMENT_TRANSITIONS: Record<string, readonly string[]> = {
+  [PRAC.ROLE_ASSIGNMENT_PENDING]: [
+    PRAC.ROLE_ASSIGNMENT_ACTIVE,
+    PRAC.ROLE_ASSIGNMENT_REJECTED,
+  ],
+  [PRAC.ROLE_ASSIGNMENT_ACTIVE]: [
+    PRAC.ROLE_ASSIGNMENT_SUSPENDED,
+    PRAC.ROLE_ASSIGNMENT_ENDED,
+  ],
+  [PRAC.ROLE_ASSIGNMENT_SUSPENDED]: [
+    PRAC.ROLE_ASSIGNMENT_ACTIVE,
+    PRAC.ROLE_ASSIGNMENT_ENDED,
+  ],
+  [PRAC.ROLE_ASSIGNMENT_REJECTED]: [],
+  [PRAC.ROLE_ASSIGNMENT_ENDED]: [],
+};
 
 /**
  * Personal de práctica: asignación de rol de profesional a sitio/unidad/servicio
@@ -150,6 +171,241 @@ export class PracticeWorkforceService {
         practitionerRoleAssignmentId: support.practitionerRoleAssignmentId,
         status: support.statusConceptId,
         createdAt: support.createdAt,
+      };
+    });
+  }
+
+  /**
+   * Carril 18 (spec líneas 1619-1654) — un profesional pide vincularse a una
+   * organización por su cuenta. A diferencia de {@link assignRole} (alta
+   * administrativa inmediata, `SECURITY_ADMIN`), esto queda `PENDING`: la
+   * organización tiene que aprobarla, rechazarla, suspenderla o finalizarla
+   * (spec línea 1655) — el profesional nunca se auto-activa.
+   *
+   * Deliberadamente NO toca `authz.care_relationships` ni ningún otro
+   * mecanismo de acceso a pacientes: pertenecer a una organización no debe
+   * conceder acceso automático a sus pacientes (spec línea 1659); ese acceso
+   * depende de una relación asistencial concreta (línea 1663), que este
+   * método no crea.
+   */
+  async selfRequestAffiliation(
+    practiceId: string,
+    dto: SelfRequestRoleAssignmentDto,
+    actor: AuthenticatedUser,
+  ): Promise<RoleAssignmentResponseDto> {
+    const practitionerProfileId = actor.practitionerProfileId;
+    if (!practitionerProfileId) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene un perfil profesional asociado',
+        { actorId: actor.id },
+      );
+    }
+    this.logger.info(
+      { operation: 'practice.role.self-request', practiceId },
+      'Practitioner self-requesting organization affiliation',
+    );
+    return this.em.transactional(async (tx) => {
+      const practice = await this.practicesRepo.findById(tx, practiceId);
+      if (!practice)
+        throw new ResourceNotFoundException('Práctica no encontrada', {
+          practiceId,
+        });
+      if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
+        throw new PreconditionFailedException('La práctica no está activa', {
+          practiceId,
+        });
+      }
+      if (dto.practiceSiteId) {
+        const site = await this.sitesRepo.findById(tx, dto.practiceSiteId);
+        if (!site || site.practiceId !== practiceId) {
+          throw new PreconditionFailedException(
+            'El sitio no pertenece a la práctica',
+            { practiceId, siteId: dto.practiceSiteId },
+          );
+        }
+      }
+
+      const role = this.rolesRepo.create(tx, {
+        practitionerProfileId,
+        practiceId,
+        practiceSiteId: dto.practiceSiteId,
+        roleConceptId: dto.roleConceptId ?? PRAC.ROLE_ATTENDING,
+        specialtyConceptId: dto.specialtyConceptId,
+        validFrom: dto.validFrom ? new Date(dto.validFrom) : new Date(),
+        statusConceptId: PRAC.ROLE_ASSIGNMENT_PENDING,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+      return {
+        id: role.id,
+        practiceId: role.practiceId,
+        practitionerProfileId: role.practitionerProfileId,
+        status: role.statusConceptId,
+        createdAt: role.createdAt,
+      };
+    });
+  }
+
+  /**
+   * Carril 18 — todas las vinculaciones del profesional autenticado, en
+   * cualquier organización, incluidas las pendientes y las históricas.
+   */
+  async listMyAssignments(
+    actor: AuthenticatedUser,
+  ): Promise<MyRoleAssignmentResponseDto[]> {
+    if (!actor.practitionerProfileId) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene un perfil profesional asociado',
+        { actorId: actor.id },
+      );
+    }
+    const em = this.em.fork();
+    const assignments = await this.rolesRepo.findByPractitioner(
+      em,
+      actor.practitionerProfileId,
+    );
+    const practiceIds = [...new Set(assignments.map((a) => a.practiceId))];
+    const practices = new Map(
+      (
+        await Promise.all(
+          practiceIds.map((id) => this.practicesRepo.findById(em, id)),
+        )
+      )
+        .filter((p): p is NonNullable<typeof p> => p !== null)
+        .map((p) => [p.id, p] as const),
+    );
+
+    return assignments.map((a) => {
+      const practice = practices.get(a.practiceId);
+      return {
+        id: a.id,
+        practiceId: a.practiceId,
+        practiceName: practice?.name ?? '(organización no encontrada)',
+        practiceType: practice?.typeConceptId ?? null,
+        practiceSiteId: a.practiceSiteId ?? null,
+        roleConceptId: a.roleConceptId,
+        specialtyConceptId: a.specialtyConceptId ?? null,
+        status: a.statusConceptId,
+        isPrimary: a.isPrimary ?? false,
+        validFrom: a.validFrom ?? null,
+        validTo: a.validTo ?? null,
+        createdAt: a.createdAt,
+      };
+    });
+  }
+
+  /**
+   * Carril 18 (spec línea 1655) — la organización aprueba una vinculación
+   * pendiente: `PENDING → ACTIVE`. Rol `SECURITY_ADMIN` (administra la
+   * organización); el gate autoritativo vive en el controlador.
+   */
+  approveAssignment(
+    roleId: string,
+    dto: RoleAssignmentTransitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<RoleAssignmentResponseDto> {
+    return this.transitionAssignment(
+      roleId,
+      PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      dto,
+      actor,
+    );
+  }
+
+  /** `PENDING → REJECTED`. */
+  rejectAssignment(
+    roleId: string,
+    dto: RoleAssignmentTransitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<RoleAssignmentResponseDto> {
+    return this.transitionAssignment(
+      roleId,
+      PRAC.ROLE_ASSIGNMENT_REJECTED,
+      dto,
+      actor,
+    );
+  }
+
+  /** `ACTIVE → SUSPENDED`. */
+  suspendAssignment(
+    roleId: string,
+    dto: RoleAssignmentTransitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<RoleAssignmentResponseDto> {
+    return this.transitionAssignment(
+      roleId,
+      PRAC.ROLE_ASSIGNMENT_SUSPENDED,
+      dto,
+      actor,
+    );
+  }
+
+  /** `ACTIVE|SUSPENDED → ENDED`. Sella `validTo` porque deja de estar vigente. */
+  endAssignment(
+    roleId: string,
+    dto: RoleAssignmentTransitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<RoleAssignmentResponseDto> {
+    return this.transitionAssignment(
+      roleId,
+      PRAC.ROLE_ASSIGNMENT_ENDED,
+      dto,
+      actor,
+    );
+  }
+
+  /**
+   * Motor común de transición: valida que el paso sea uno de los declarados
+   * en {@link ASSIGNMENT_TRANSITIONS} (rechaza cualquier otro con 422) y sella
+   * `validTo` cuando el destino es un estado terminal (rechazada/finalizada).
+   */
+  private async transitionAssignment(
+    roleId: string,
+    toStatus: string,
+    dto: RoleAssignmentTransitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<RoleAssignmentResponseDto> {
+    return this.em.transactional(async (tx) => {
+      const role = await this.rolesRepo.findById(tx, roleId);
+      if (!role)
+        throw new ResourceNotFoundException(
+          'Vinculación profesional-organización no encontrada',
+          { roleId },
+        );
+
+      const allowed = ASSIGNMENT_TRANSITIONS[role.statusConceptId] ?? [];
+      if (!allowed.includes(toStatus)) {
+        throw new PreconditionFailedException(
+          'La vinculación no admite esa transición desde su estado actual',
+          { roleId, from: role.statusConceptId, to: toStatus },
+        );
+      }
+
+      role.statusConceptId = toStatus;
+      role.updatedByUserId = actor.id;
+      role.updatedAt = new Date();
+      if (
+        toStatus === PRAC.ROLE_ASSIGNMENT_REJECTED ||
+        toStatus === PRAC.ROLE_ASSIGNMENT_ENDED
+      ) {
+        role.validTo = new Date();
+      }
+      this.logger.info(
+        {
+          operation: 'practice.role.transition',
+          roleId,
+          to: toStatus,
+          reason: dto.reason,
+        },
+        'Role assignment transitioned',
+      );
+      await tx.flush();
+      return {
+        id: role.id,
+        practiceId: role.practiceId,
+        practitionerProfileId: role.practitionerProfileId,
+        status: role.statusConceptId,
+        createdAt: role.createdAt,
       };
     });
   }

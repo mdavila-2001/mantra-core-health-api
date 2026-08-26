@@ -1884,7 +1884,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "required": true,
         "ordinal": 1
       }
-    ]
+    ],
+    "provenance": {
+      "sourceTitle": "valor-ejemplo",
+      "organization": "valor-ejemplo",
+      "url": "valor-ejemplo",
+      "license": "valor-ejemplo",
+      "sourceVersion": "valor-ejemplo",
+      "retrievedAt": "valor-ejemplo",
+      "note": "valor-ejemplo"
+    }
   }
 ]
 ```
@@ -2052,7 +2061,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "required": true,
       "ordinal": 1
     }
-  ]
+  ],
+  "provenance": {
+    "sourceTitle": "valor-ejemplo",
+    "organization": "valor-ejemplo",
+    "url": "valor-ejemplo",
+    "license": "valor-ejemplo",
+    "sourceVersion": "valor-ejemplo",
+    "retrievedAt": "valor-ejemplo",
+    "note": "valor-ejemplo"
+  }
 }
 ```
 
@@ -2076,6 +2094,14 @@ Campos de la respuesta:
 | `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos, si el campo es de selección. | `00000000-0000-4000-8000-000000000001` |
 | `fields[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo es obligatorio al completar la plantilla. | `true` |
 | `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación del campo dentro de la plantilla. | `1` |
+| `provenance` | No | `ChartTemplateProvenanceDto` | Sin restricción adicional declarada | De dónde salió la plantilla, si vino del catálogo de formularios estándar. | `{"sourceTitle":"valor-ejemplo","organization":"valor-ejemplo","url":"valor-ejemplo","license":"valor-ejemplo","sourceVersion":"valor-ejemplo","retrievedAt":"valor-ejemplo","note":"valor-ejemplo"}` |
+| `provenance.sourceTitle` | No | `string` | Sin restricción adicional declarada | Título del documento tal como lo publica el organismo. | `valor-ejemplo` |
+| `provenance.organization` | No | `string` | Sin restricción adicional declarada | Organismo que lo publica. | `valor-ejemplo` |
+| `provenance.url` | No | `string` | Sin restricción adicional declarada | URL de la que se descargó. | `valor-ejemplo` |
+| `provenance.license` | No | `string` | Sin restricción adicional declarada | Licencia bajo la que se puede usar. | `valor-ejemplo` |
+| `provenance.sourceVersion` | No | `string` | Sin restricción adicional declarada | Versión o edición del documento de origen. | `valor-ejemplo` |
+| `provenance.retrievedAt` | No | `string` | Sin restricción adicional declarada | Fecha de descarga, en ISO `YYYY-MM-DD`. | `valor-ejemplo` |
+| `provenance.note` | No | `string` | Sin restricción adicional declarada | Qué se transcribió y qué quedó afuera, cuando no es obvio. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2193,7 +2219,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "required": true,
       "ordinal": 1
     }
-  ]
+  ],
+  "provenance": {
+    "sourceTitle": "valor-ejemplo",
+    "organization": "valor-ejemplo",
+    "url": "valor-ejemplo",
+    "license": "valor-ejemplo",
+    "sourceVersion": "valor-ejemplo",
+    "retrievedAt": "valor-ejemplo",
+    "note": "valor-ejemplo"
+  }
 }
 ```
 
@@ -2217,6 +2252,14 @@ Campos de la respuesta:
 | `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos, si el campo es de selección. | `00000000-0000-4000-8000-000000000001` |
 | `fields[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo es obligatorio al completar la plantilla. | `true` |
 | `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación del campo dentro de la plantilla. | `1` |
+| `provenance` | No | `ChartTemplateProvenanceDto` | Sin restricción adicional declarada | De dónde salió la plantilla, si vino del catálogo de formularios estándar. | `{"sourceTitle":"valor-ejemplo","organization":"valor-ejemplo","url":"valor-ejemplo","license":"valor-ejemplo","sourceVersion":"valor-ejemplo","retrievedAt":"valor-ejemplo","note":"valor-ejemplo"}` |
+| `provenance.sourceTitle` | No | `string` | Sin restricción adicional declarada | Título del documento tal como lo publica el organismo. | `valor-ejemplo` |
+| `provenance.organization` | No | `string` | Sin restricción adicional declarada | Organismo que lo publica. | `valor-ejemplo` |
+| `provenance.url` | No | `string` | Sin restricción adicional declarada | URL de la que se descargó. | `valor-ejemplo` |
+| `provenance.license` | No | `string` | Sin restricción adicional declarada | Licencia bajo la que se puede usar. | `valor-ejemplo` |
+| `provenance.sourceVersion` | No | `string` | Sin restricción adicional declarada | Versión o edición del documento de origen. | `valor-ejemplo` |
+| `provenance.retrievedAt` | No | `string` | Sin restricción adicional declarada | Fecha de descarga, en ISO `YYYY-MM-DD`. | `valor-ejemplo` |
+| `provenance.note` | No | `string` | Sin restricción adicional declarada | Qué se transcribió y qué quedó afuera, cuando no es obvio. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

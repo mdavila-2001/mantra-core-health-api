@@ -352,6 +352,10 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   ID_TYPE_MRN: def('common:id-type:mrn', 'MRN', 'Medical record number'),
   ID_TYPE_PASSPORT: def('common:id-type:passport', 'PASSPORT', 'Passport'),
+  // Registro tributario de una organización (el NIT boliviano). Lo referencia el
+  // paquete de seeds para el NIT de las aseguradoras (v4.1.4); acá debe existir
+  // con la misma clave o el id determinista no coincidiría entre ambos lados.
+  ID_TYPE_TAX: def('common:id-type:tax', 'TAX_ID', 'Tax identification number'),
   USE_OFFICIAL: def('common:use:official', 'OFFICIAL', 'Official'),
   USE_SECONDARY: def('common:use:secondary', 'SECONDARY', 'Secondary'),
 
@@ -361,6 +365,10 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ADDR_USE_HOME: def('common:addr-use:home', 'ADDR_HOME', 'Home address'),
   ADDR_TYPE_POSTAL: def('common:addr-type:postal', 'POSTAL', 'Postal'),
   COUNTRY_PE: def('common:country:pe', 'PE', 'Peru'),
+  // ALoVida es una plataforma boliviana (SEGIP, catálogo de municipios del
+  // INE): `addresses.service.ts` usaba PE como único país sembrado, lo que
+  // dejaba cada dirección creada apuntando al país equivocado.
+  COUNTRY_BO: def('common:country:bo', 'BO', 'Bolivia'),
 
   // --- Common: archivos ---
   FILE_CATEGORY_DOCUMENT: def(
@@ -510,6 +518,57 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'COMPANY',
     'Company',
   ),
+  /* Las formas societarias que reconoce el derecho comercial boliviano. El
+     registro de procesos las pide, con esta misma lista, en los cinco módulos
+     que dan de alta una organización —médico, farmacia, laboratorio, imagen y
+     aseguradora—: «Aquí nuestra APP tiene que tener este detalle en la base de
+     datos para que puedan SOLO SELECCIONAR AL REGISTRAR, UNIPERSONAL, SRL,
+     LTDA, S.A., SOCIEDAD COLECTIVA, SOCIEDAD EN COMANDITA SIMPLE, SOCIEDAD EN
+     COMANDITA POR ACCIONES, SUCURSAL DE SOCIEDAD EXTRANJERA».
+
+     El motivo que da es de negocio y no de forma: «Esto con la finalidad de
+     poder tener DATA de cuantos proveedores tenemos con SRL, UNIPERSONAL y
+     S.A.». Escrito a mano, ese dato no se puede contar.
+
+     `LEGAL_ENTITY_COMPANY` se conserva: es lo que llevan las filas que ya
+     existen, y retirarlo obligaría a decidir por ellas qué forma societaria
+     tienen. */
+  LEGAL_ENTITY_SOLE_PROPRIETORSHIP: def(
+    'directory:legal-entity:sole-proprietorship',
+    'UNIPERSONAL',
+    'Sole proprietorship',
+  ),
+  LEGAL_ENTITY_SRL: def(
+    'directory:legal-entity:srl',
+    'SRL',
+    'Limited liability company (S.R.L.)',
+  ),
+  LEGAL_ENTITY_LTDA: def(
+    'directory:legal-entity:ltda',
+    'LTDA',
+    'Limited company (Ltda.)',
+  ),
+  LEGAL_ENTITY_SA: def('directory:legal-entity:sa', 'SA', 'Corporation (S.A.)'),
+  LEGAL_ENTITY_GENERAL_PARTNERSHIP: def(
+    'directory:legal-entity:general-partnership',
+    'SOCIEDAD_COLECTIVA',
+    'General partnership',
+  ),
+  LEGAL_ENTITY_LIMITED_PARTNERSHIP: def(
+    'directory:legal-entity:limited-partnership',
+    'COMANDITA_SIMPLE',
+    'Limited partnership',
+  ),
+  LEGAL_ENTITY_PARTNERSHIP_BY_SHARES: def(
+    'directory:legal-entity:partnership-by-shares',
+    'COMANDITA_ACCIONES',
+    'Partnership limited by shares',
+  ),
+  LEGAL_ENTITY_FOREIGN_BRANCH: def(
+    'directory:legal-entity:foreign-branch',
+    'SUCURSAL_EXTRANJERA',
+    'Branch of a foreign company',
+  ),
   TENANT_ACTIVE: def(
     'directory:tenant-status:active',
     'TENANT_ACTIVE',
@@ -556,6 +615,57 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   REL_IS_A: def('terminology:relationship:is-a', 'IS_A', 'Is a'),
   REL_PART_OF: def('terminology:relationship:part-of', 'PART_OF', 'Part of'),
+  // --- Terminology: relaciones tipadas del glosario médico (Carril 03) ------
+  // Aditivas a `REL_IS_A`/`REL_PART_OF`: la jerarquía genérica del catálogo no
+  // alcanza para expresar «este síntoma se asocia a esta enfermedad» o «este
+  // término se diagnostica con esta prueba». Semántica de cada una (documentada
+  // también en el encabezado del seed del glosario):
+  //  - RELATED_TERM: «ver también» genérico, sin direccionalidad implícita.
+  //  - DISEASE: el origen se asocia clínicamente a / es manifestación de / está
+  //    indicado para la enfermedad destino.
+  //  - PROCEDURE: el origen se asocia al procedimiento clínico destino.
+  //  - TREATMENT: el origen se trata mediante / involucra el tratamiento destino.
+  //  - ANATOMY: el origen se relaciona con la estructura anatómica destino.
+  //  - DIAGNOSTIC_TEST: el origen se diagnostica/monitorea mediante la prueba
+  //    diagnóstica destino.
+  REL_RELATED_TERM: def(
+    'terminology:relationship:related-term',
+    'RELATED_TERM',
+    'Related term',
+  ),
+  REL_DISEASE: def(
+    'terminology:relationship:disease',
+    'REL_DISEASE',
+    'Associated disease',
+  ),
+  // El código NO es `REL_PROCEDURE` aunque el símbolo sí: ese código ya lo ocupa
+  // `RELATEDNESS_PROCEDURE` (`periop:relatedness:procedure`), y
+  // `catalog_concepts` tiene UNIQUE(code_system_version_id, code). Los dos son
+  // conceptos distintos —acá «el término se asocia a un procedimiento», allá «el
+  // evento adverso se relaciona con el procedimiento»— así que no se unifican.
+  // Se movió éste y no el de periop porque el de periop ya está materializado en
+  // las bases existentes: cambiarlo dejaría el código de la fila viva divergido
+  // para siempre del catálogo, ya que el seed inserta pero nunca actualiza.
+  REL_PROCEDURE: def(
+    'terminology:relationship:procedure',
+    'REL_ASSOC_PROCEDURE',
+    'Associated procedure',
+  ),
+  REL_TREATMENT: def(
+    'terminology:relationship:treatment',
+    'REL_TREATMENT',
+    'Associated treatment',
+  ),
+  REL_ANATOMY: def(
+    'terminology:relationship:anatomy',
+    'REL_ANATOMY',
+    'Associated anatomy',
+  ),
+  REL_DIAGNOSTIC_TEST: def(
+    'terminology:relationship:diagnostic-test',
+    'REL_DIAGNOSTIC_TEST',
+    'Associated diagnostic test',
+  ),
   VS_OP_IN: def('terminology:vs-operator:in', 'IN', 'In'),
   VS_OP_IS_A: def(
     'terminology:vs-operator:is-a',
@@ -5609,6 +5719,70 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'messaging:provider-type:email',
     'MSG_PROV_EMAIL',
     'Email messaging provider',
+  ),
+  /**
+   * Tipo de proveedor del canal in-app. No hay nadie externo del otro lado: la
+   * «entrega» es escribir en `in_app_notifications`. Existe porque
+   * `provider_channel_configs` exige un proveedor y fingir que el in-app lo
+   * entrega el proveedor de correo mezclaría dos entregabilidades distintas en
+   * la misma métrica.
+   */
+  MSG_PROVIDER_TYPE_IN_APP: def(
+    'messaging:provider-type:in-app',
+    'MSG_PROV_IN_APP',
+    'In-app messaging provider',
+  ),
+
+  /* --- Categorías de notificación (carril P1) -----------------------------
+     La categoría es la unidad de preferencia: `recipient_preferences` guarda
+     un opt-in por (usuario, canal, categoría), así que silenciar es silenciar
+     una de estas cuatro. Son cuatro y no una por disparador porque quien
+     configura razona en estos términos —«no me avises de lo social»— y una
+     categoría por evento produciría una pantalla de preferencias que nadie
+     termina de leer. Ver `messaging/notifications.contract.ts`. */
+  /** Receta emitida, encuentro cerrado, resultado disponible. */
+  NOTIF_CATEGORY_CLINICAL: def(
+    'messaging:notification-category:clinical',
+    'NOTIF_CAT_CLINICAL',
+    'Clinical notifications',
+  ),
+  /** Cupo liberado, demora del profesional, recordatorio, cambio de cita. */
+  NOTIF_CATEGORY_SCHEDULING: def(
+    'messaging:notification-category:scheduling',
+    'NOTIF_CAT_SCHEDULING',
+    'Appointment notifications',
+  ),
+  /** Mensajería directa entre personas. */
+  NOTIF_CATEGORY_MESSAGES: def(
+    'messaging:notification-category:messages',
+    'NOTIF_CAT_MESSAGES',
+    'Direct message notifications',
+  ),
+  /** Muro, reacciones, comentarios, grupos. */
+  NOTIF_CATEGORY_SOCIAL: def(
+    'messaging:notification-category:social',
+    'NOTIF_CAT_SOCIAL',
+    'Social notifications',
+  ),
+
+  /**
+   * Categorías de notificación de comunidad que consume la misma campana (P7).
+   *
+   * Se suman al mismo `category_concept_id` que las clínicas, y no a un canal
+   * aparte, porque el destinatario tiene una sola bandeja: separar el aviso de
+   * un grupo del de una receta obligaría a mirar dos lugares. Lo que sí las
+   * separa es la categoría, que es justamente lo que `recipient_preferences`
+   * necesita para que alguien silencie los grupos sin silenciar su receta.
+   */
+  NOTIF_CAT_GROUP_JOIN_APPROVED: def(
+    'messaging:notification-category:group-join-approved',
+    'NOTIF_CAT_GRP_JOINED',
+    'Group membership approved',
+  ),
+  NOTIF_CAT_GROUP_NEW_POST: def(
+    'messaging:notification-category:group-new-post',
+    'NOTIF_CAT_GRP_POST',
+    'New post in a group',
   ),
 
   // ==========================================================================

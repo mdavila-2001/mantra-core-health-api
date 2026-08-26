@@ -24,11 +24,15 @@ import {
 } from '../../../common';
 import {
   SchedulingBookingsService,
+  SchedulingDelayService,
   SchedulingWaitlistService,
 } from '../services';
 import {
   AcceptBookingDto,
   RejectBookingDto,
+  RequestBookingInfoDto,
+  ProposeScheduleDto,
+  ProposeScheduleResponseDto,
   BookingDecisionResponseDto,
   RescheduleBookingDto,
   RescheduleResponseDto,
@@ -39,7 +43,8 @@ import {
   ScheduleRemindersResponseDto,
   BookingItemDto,
   SearchBookingsResponseDto,
-  BookingDecisionsResponseDto,
+  DelayBookingDto,
+  DelayNoticeResponseDto,
 } from '../dto';
 
 /** Operaciones sobre una cita ya confirmada. */
@@ -56,6 +61,7 @@ export class SchedulingBookingsController {
   constructor(
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
+    private readonly delayService: SchedulingDelayService,
   ) {}
 
   /**
@@ -95,6 +101,7 @@ export class SchedulingBookingsController {
     @Query('to', new ParseOptionalDatePipe()) to?: Date,
     @Query('includeCancelled') includeCancelled?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @CurrentUser() actor?: AuthenticatedUser,
   ): Promise<SearchBookingsResponseDto> {
     return this.bookingsService.searchBookings(
       {
@@ -105,6 +112,7 @@ export class SchedulingBookingsController {
         includeCancelled: includeCancelled === 'true',
       },
       limit ?? 100,
+      actor,
     );
   }
 
@@ -117,25 +125,13 @@ export class SchedulingBookingsController {
   @Get(':id')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({ summary: 'UC-41-15: consulta una cita' })
-  getBooking(@Param('id', ParseUUIDPipe) id: string): Promise<BookingItemDto> {
-    return this.bookingsService.getBookingById(id);
-  }
-
-  /**
-   * El historial de decisiones de una cita (carril 11).
-   *
-   * Complementa a `accept` y `reject`, que dicen **qué pasó ahora**: esto dice
-   * qué se fue decidiendo y qué escribió el prestador en cada paso. La alcanza
-   * `PATIENT` porque es justamente lo que necesita leer — el motivo de un
-   * rechazo vive acá.
-   */
-  @Get(':id/decisions')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
-  @ApiOperation({ summary: 'Historial de decisiones de la solicitud' })
-  listDecisions(
+  getBooking(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<BookingDecisionsResponseDto> {
-    return this.bookingsService.listDecisions(id);
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingItemDto> {
+    // El actor viaja para decidir si el motivo de consulta se incluye: sólo el
+    // titular y su médico lo ven (TJ-2).
+    return this.bookingsService.getBookingById(id, actor);
   }
 
   /**
@@ -156,6 +152,48 @@ export class SchedulingBookingsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<BookingDecisionResponseDto> {
     return this.bookingsService.accept(id, dto, actor);
+  }
+
+  /**
+   * UC-41-18: el centro pide documentación, una orden médica o avisa cómo
+   * prepararse, antes de aceptar — CARRIL 11.
+   *
+   * No la alcanza `PATIENT`: es el prestador el que pide. La persona lee lo que
+   * le pidieron en el motivo de su propia cita.
+   */
+  @Post(':id/request-info')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Pedir documentación u orden médica antes de aceptar',
+    description:
+      'No libera el cupo: pedir un papel no le quita el horario a nadie.',
+  })
+  requestInfo(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RequestBookingInfoDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    return this.bookingsService.requestInfo(id, dto, actor);
+  }
+
+  /**
+   * UC-41-19: el centro propone otro horario para la solicitud — CARRIL 11.
+   *
+   * Distinto de `reschedule`: aquélla mueve una cita **vigente** a pedido de
+   * quien la tiene; ésta contrapropone sobre lo que todavía no se aceptó, y la
+   * solicitud sigue pendiente de que la persona lo mire.
+   */
+  @Post(':id/propose-schedule')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Proponer otro horario para la solicitud' })
+  proposeSchedule(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ProposeScheduleDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ProposeScheduleResponseDto> {
+    return this.bookingsService.proposeSchedule(id, dto, actor);
   }
 
   /**
@@ -261,6 +299,29 @@ export class SchedulingBookingsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CheckInResponseDto> {
     return this.bookingsService.checkIn(id, actor);
+  }
+
+  /**
+   * P8: el profesional avisa que se demora sobre **esta** cita.
+   *
+   * No cambia el estado de la cita ni toca su cupo: es comunicación. La demora
+   * queda en el historial del turno —así el paciente la ve aunque no abra la
+   * campana— y sale como aviso in-app.
+   */
+  @Post(':id/delay')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Informar una demora sobre una cita',
+    description:
+      'Sólo la informa quien atiende esa agenda. No mueve el turno: avisa que empieza más tarde.',
+  })
+  delay(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DelayBookingDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DelayNoticeResponseDto> {
+    return this.delayService.delayBooking(id, dto, actor);
   }
 
   /** UC-41-13. */

@@ -1,0 +1,35 @@
+{
+  "code": "EMERG_ATENCION_BASE",
+  "name": "Atención en emergencia",
+  "specialty": { "code": "MEDICINA_EMERGENCIA", "display": "Medicina de Emergencia" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, registro de la atención de urgencias y emergencias",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma se transcribe la estructura común del registro: motivo, tiempo de evolución, antecedentes, alergias, medicación, signos vitales, diagnóstico y conducta. Son agregados propios de la especialidad la hora de llegada, la forma de llegada, la evaluación inicial y el nivel de prioridad asignado, que se registra como texto libre tal como lo escriba el profesional."
+  },
+  "fields": [
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "hora_de_llegada", "name": "Hora de llegada", "dataType": "string", "required": true },
+    { "code": "forma_de_llegada", "name": "Forma de llegada", "dataType": "string", "required": false },
+    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": false },
+    { "code": "nivel_de_prioridad_asignado", "name": "Nivel de prioridad asignado", "dataType": "string", "required": false },
+    { "code": "evaluacion_inicial", "name": "Evaluación inicial", "dataType": "text", "required": true },
+    { "code": "estado_de_conciencia", "name": "Estado de conciencia", "dataType": "string", "required": false },
+    { "code": "presion_arterial", "name": "Presión arterial", "dataType": "string", "required": false },
+    { "code": "frecuencia_cardiaca", "name": "Frecuencia cardíaca", "dataType": "integer", "required": false },
+    { "code": "frecuencia_respiratoria", "name": "Frecuencia respiratoria", "dataType": "integer", "required": false },
+    { "code": "saturacion_de_oxigeno", "name": "Saturación de oxígeno (%)", "dataType": "integer", "required": false },
+    { "code": "temperatura", "name": "Temperatura (°C)", "dataType": "decimal", "required": false },
+    { "code": "dolor_presente", "name": "Dolor presente", "dataType": "boolean", "required": false },
+    { "code": "antecedentes_relevantes", "name": "Antecedentes relevantes", "dataType": "text", "required": false },
+    { "code": "alergias", "name": "Alergias", "dataType": "text", "required": false },
+    { "code": "medicacion_actual", "name": "Medicación actual", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
+    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+  ]
+}

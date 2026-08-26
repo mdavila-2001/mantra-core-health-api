@@ -10,6 +10,7 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import {
@@ -122,7 +123,13 @@ export class RegisterOrganizationDetailsDto {
   timeZone?: string;
 }
 
-/** Datos de la persona que queda como owner de la organización. */
+/**
+ * Datos de la persona que queda como owner de la organización.
+ *
+ * El nombre se declara en partes, como en el resto de las altas. Ojo: esta vía
+ * crea la cuenta del owner y nada más —no hay fila en `profiles.persons`—, así
+ * que las partes sólo sobreviven compuestas en `iam.users.display_name`.
+ */
 export class RegisterOrganizationOwnerDto {
   /**
    * Correo con el que el owner iniciará sesión.
@@ -146,13 +153,68 @@ export class RegisterOrganizationOwnerDto {
   password!: string;
 
   /**
-   * Nombre para mostrar del owner.
+   * Nombre de pila del owner.
+   *
+   * Obligatorio salvo que se envíe `displayName`, que es la forma anterior de
+   * declarar el nombre y se sigue aceptando para no romper a quien ya la usa.
    */
-  @ApiProperty({ maxLength: 200 })
+  @ApiPropertyOptional({ maxLength: 100, example: 'Ana' })
+  @ValidateIf(
+    (dto: RegisterOrganizationOwnerDto) => dto.displayName === undefined,
+  )
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  name?: string;
+
+  /**
+   * Segundo nombre. Opcional: mucha gente no tiene.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Lucía' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  middleName?: string;
+
+  /**
+   * Apellido paterno. Mismo criterio que `name`.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Rojas' })
+  @ValidateIf(
+    (dto: RegisterOrganizationOwnerDto) => dto.displayName === undefined,
+  )
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  lastName?: string;
+
+  /**
+   * Apellido materno. Opcional: no todas las jurisdicciones lo emiten.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Paz' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  motherLastName?: string;
+
+  /**
+   * Nombre ya compuesto, para mostrar.
+   *
+   * Dejó de ser la forma de declarar el nombre —ahora se envían sus partes— pero
+   * sigue siendo opcional en vez de prohibido: quitarlo de golpe rompería a todo
+   * cliente que ya integró contra este endpoint. Si viene, manda tal cual; si no,
+   * se compone con las partes.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Forma anterior de declarar el nombre. Preferí name/lastName.',
+    deprecated: true,
+  })
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(200)
-  displayName!: string;
+  displayName?: string;
 
   /**
    * Zona horaria del owner; por defecto la de la organización.

@@ -8,7 +8,10 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import {
+  ClinicalFormsSeedService,
+  CODIGO_TRANSVERSAL,
+} from './clinical-forms-seed.service';
 import { STANDARD_FORMS } from './data/clinical-forms/catalog';
 import { CHART_TEMPLATE_PROVENANCE_FIELD_CODE } from '../../modules/chart/dto';
 import { deterministicId } from '../constants/concepts';
@@ -19,15 +22,34 @@ import { deterministicId } from '../constants/concepts';
  * @param existing - Identificadores que la base ya tiene.
  * @returns Servicio y las filas que intentó crear, por entidad.
  */
-function build(existing: Set<string> = new Set()) {
+function build(
+  existing: Set<string> = new Set(),
+  /**
+   * Las especialidades que el value set del modelo publica, por código. Vacío
+   * simula la base pelada: sin `VS_MEDICAL_SPECIALTY`, el seed acuña los suyos.
+   */
+  delModelo: ReadonlyMap<string, string> = new Map(),
+) {
   const created: { entity: string; data: any }[] = [];
+  const actualizados: { where: any; data: any }[] = [];
 
   const em = {
     find: mockFn((_entity: any, where: any) => {
       const ids: string[] = where?.id?.$in ?? [];
-      return Promise.resolve(
-        ids.filter((id) => existing.has(id)).map((id) => ({ id })),
+      // Los conceptos del value set se devuelven con su código: es por código
+      // —no por uuid— que el seed arma el mapa de especialidades del modelo.
+      const porId = new Map(
+        [...delModelo].map(([code, id]) => [id, code] as const),
       );
+      return Promise.resolve(
+        ids
+          .filter((id) => existing.has(id) || porId.has(id))
+          .map((id) => ({ id, code: porId.get(id) })),
+      );
+    }),
+    nativeUpdate: mockFn((_entity: any, where: any, data: any) => {
+      actualizados.push({ where, data });
+      return Promise.resolve(1);
     }),
     findOne: mockFn((_entity: any, where: any) =>
       Promise.resolve(existing.has(where?.id) ? { id: where.id } : null),
@@ -46,19 +68,47 @@ function build(existing: Set<string> = new Set()) {
   const orm = { em: { fork: mockFn(() => em) } };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
+  // El value set existe sólo si el caso declaró especialidades del modelo.
+  const valueSets = {
+    findByInternalCode: mockFn(() =>
+      Promise.resolve(delModelo.size > 0 ? { id: 'vs-especialidades' } : null),
+    ),
+    findIncludedConceptIdsByValueSet: mockFn(() =>
+      Promise.resolve([...delModelo.values()]),
+    ),
+  };
+
   return {
-    service: new ClinicalFormsSeedService(orm as any, logger as any),
+    service: new ClinicalFormsSeedService(
+      orm as any,
+      logger as any,
+      valueSets as any,
+    ),
     /** Filas creadas para una entidad concreta. */
     rowsOf: (entity: string) =>
       created.filter((row) => row.entity === entity).map((row) => row.data),
     /** La bitácora completa de `create`/`flush`, en orden. */
     bitacora: () => created.map((row) => row.entity),
+    /** Los `nativeUpdate` que corrió, en orden. */
+    actualizaciones: () => actualizados,
   };
 }
 
 /** Las especialidades distintas que declara el catálogo. */
 const ESPECIALIDADES = new Set(
   STANDARD_FORMS.map((form) => form.specialty.code),
+);
+
+/**
+ * Lo que publicaría `VS_MEDICAL_SPECIALTY`: todas las del catálogo menos
+ * `TRANSVERSAL`, que no es una especialidad médica y no está en el value set.
+ * Los uuid son de mentira a propósito — lo que importa es que NO coincidan con
+ * los acuñados, que es exactamente el caso que la unificación resuelve.
+ */
+const ESPECIALIDADES_DEL_MODELO = new Map(
+  [...ESPECIALIDADES]
+    .filter((codigo) => codigo !== CODIGO_TRANSVERSAL)
+    .map((codigo) => [codigo, `vs-${codigo.toLowerCase()}`] as const),
 );
 
 describe('ClinicalFormsSeedService', () => {
@@ -244,7 +294,7 @@ describe('catálogo de formularios estándar', () => {
   });
 
   it('cubre los cuatro transversales y las especialidades del reclamo', () => {
-    expect(ESPECIALIDADES).toContain('TRANSVERSAL');
+    expect(ESPECIALIDADES).toContain(CODIGO_TRANSVERSAL);
     for (const especialidad of [
       'CARDIOLOGIA',
       'PEDIATRIA',
@@ -265,5 +315,96 @@ describe('catálogo de formularios estándar', () => {
       const codigos = form.fields.map((field) => field.code);
       expect(codigos).not.toContain(CHART_TEMPLATE_PROVENANCE_FIELD_CODE);
     }
+  });
+
+  /* ---- el vocabulario de especialidades ----------------------------------- */
+
+  it('cuelga las plantillas de los conceptos del modelo cuando el value set está', async () => {
+    const { service, rowsOf } = build(new Set(), ESPECIALIDADES_DEL_MODELO);
+
+    await service.run();
+
+    const odonto = rowsOf('SpecialtyChartTemplates').find(
+      (fila: any) => fila.code === 'ODONTO_ODONTOGRAMA_OMS',
+    );
+    expect(odonto.specialtyConceptId).toBe(
+      ESPECIALIDADES_DEL_MODELO.get('ODONTOLOGIA'),
+    );
+    // Y no acuña las que el modelo ya declara.
+    const acunados = rowsOf('CatalogConcepts').map((fila: any) => fila.code);
+    expect(acunados).not.toContain('clinical-forms:specialty:ODONTOLOGIA');
+  });
+
+  it('sin value set del modelo, sigue acuñando sus propios conceptos', async () => {
+    const { service, rowsOf } = build();
+
+    await service.run();
+
+    const odonto = rowsOf('SpecialtyChartTemplates').find(
+      (fila: any) => fila.code === 'ODONTO_ODONTOGRAMA_OMS',
+    );
+    expect(odonto.specialtyConceptId).toBe(
+      deterministicId('clinical-forms:specialty:ODONTOLOGIA'),
+    );
+    const acunados = rowsOf('CatalogConcepts').map((fila: any) => fila.code);
+    expect(acunados).toContain('clinical-forms:specialty:ODONTOLOGIA');
+  });
+
+  it('TRANSVERSAL se acuña siempre: no es una especialidad médica', async () => {
+    const { service, rowsOf } = build(new Set(), ESPECIALIDADES_DEL_MODELO);
+
+    await service.run();
+
+    const acunados = rowsOf('CatalogConcepts').map((fila: any) => fila.code);
+    expect(acunados).toContain('clinical-forms:specialty:TRANSVERSAL');
+  });
+
+  it('re-apunta al modelo las plantillas colgadas de un concepto acuñado', async () => {
+    const { service, actualizaciones } = build(
+      new Set(),
+      ESPECIALIDADES_DEL_MODELO,
+    );
+
+    await service.run();
+
+    const reparacion = actualizaciones().find(
+      (fila) =>
+        fila.where?.specialtyConceptId ===
+        deterministicId('clinical-forms:specialty:ODONTOLOGIA'),
+    );
+    expect(reparacion).toBeDefined();
+    expect(reparacion!.data.specialtyConceptId).toBe(
+      ESPECIALIDADES_DEL_MODELO.get('ODONTOLOGIA'),
+    );
+  });
+
+  it('sin value set no intenta reparar nada', async () => {
+    const { service, actualizaciones } = build();
+
+    await service.run();
+
+    const reparaciones = actualizaciones().filter(
+      (fila) => fila.data?.specialtyConceptId !== undefined,
+    );
+    expect(reparaciones).toHaveLength(0);
+  });
+
+  /* ---- el odontograma del formulario OMS ----------------------------------- */
+
+  it('el formulario OMS declara el odontograma como json y ya no exige la prosa', () => {
+    const oms = STANDARD_FORMS.find(
+      (form) => form.code === 'ODONTO_ODONTOGRAMA_OMS',
+    )!;
+    expect(oms.version).toBeGreaterThanOrEqual(2);
+
+    const odontograma = oms.fields.find(
+      (field) => field.code === 'odontograma_fdi',
+    )!;
+    expect(odontograma.dataType).toBe('json');
+
+    const prosa = oms.fields.find(
+      (field) => field.code === 'estado_por_pieza',
+    )!;
+    expect(prosa.required).toBe(false);
   });
 });

@@ -31,6 +31,14 @@ function build() {
     findByIssueIdempotencyKey: mockFn().mockResolvedValue(null),
   };
   const recordsRepo = { create: mockFn() };
+  // v4.1.6: la indicación diagnóstica se valida contra el paciente de la receta.
+  // Por defecto la condición existe y es del mismo paciente del dto de prueba.
+  const conditionsRepo = {
+    findById: mockFn().mockResolvedValue({
+      id: 'condition-1',
+      patientProfileId: 'patient-1',
+    }),
+  };
   // Por defecto FAIL-SAFE: sin política, la firma no se exige.
   const signaturePolicies = {
     isSignatureRequired: mockFn().mockResolvedValue(false),
@@ -38,22 +46,31 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
+  // Carril P1: el aviso «tu receta está lista». Doblado para que emitir no
+  // participe de lo que estas pruebas afirman sobre el sellado de la receta.
+  const clinicalNotifications = {
+    prescriptionIssued: mockFn().mockResolvedValue({ suppressed: false }),
+  };
   const service = new MedicationsService(
     em as any,
     requestsRepo,
     recordsRepo as any,
+    conditionsRepo as any,
     signaturePolicies as any,
     auditTrail as any,
     historyRepo as any,
+    clinicalNotifications as any,
     logger as any,
   );
   return {
+    clinicalNotifications,
     service,
     requestsRepo,
     recordsRepo,
     signaturePolicies,
     auditTrail,
     historyRepo,
+    conditionsRepo,
   };
 }
 
@@ -79,6 +96,70 @@ describe('MedicationsService', () => {
       expect(d.requestsRepo.create.mock.calls[0][1].statusConceptId).toBe(
         CLIN.MEDICATION_REQUEST_DRAFT,
       );
+    });
+
+    // v4.1.6 — la indicación diagnóstica: para qué es la receta.
+    it('persists the indication when the condition belongs to the patient', async () => {
+      const d = build();
+      d.conditionsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        patientProfileId: 'p1',
+      });
+      d.requestsRepo.create.mockReturnValue({
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        createdAt: new Date(),
+      });
+      await d.service.prescribe(
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          medicationConceptId: 'm1',
+          indicationConditionId: 'c1',
+        },
+        actor,
+      );
+      expect(d.requestsRepo.create.mock.calls[0][1].indicationConditionId).toBe(
+        'c1',
+      );
+    });
+
+    it('rejects an indication that belongs to another patient (422)', async () => {
+      const d = build();
+      d.conditionsRepo.findById.mockResolvedValue({
+        id: 'c9',
+        patientProfileId: 'OTRO-PACIENTE',
+      });
+      await expect(
+        d.service.prescribe(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            medicationConceptId: 'm1',
+            indicationConditionId: 'c9',
+          },
+          actor,
+        ),
+      ).rejects.toThrow(PreconditionFailedException);
+      expect(d.requestsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects an indication that does not exist (422)', async () => {
+      const d = build();
+      d.conditionsRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.prescribe(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            medicationConceptId: 'm1',
+            indicationConditionId: 'no-existe',
+          },
+          actor,
+        ),
+      ).rejects.toThrow(PreconditionFailedException);
+      expect(d.requestsRepo.create).not.toHaveBeenCalled();
     });
   });
 

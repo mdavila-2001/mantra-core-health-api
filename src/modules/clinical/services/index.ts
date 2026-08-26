@@ -10,3 +10,6 @@ export * from './prescription-signature-policies.service';
 export * from './procedures.service';
 export * from './immunizations.service';
 export * from './clinical-read.service';
+// Carril P1: los disparadores in-app de receta y encuentro. Va al final porque
+// es el único servicio de `clinical` que no registra nada clínico — sólo avisa.
+export { ClinicalNotificationsService } from './clinical-notifications.service';

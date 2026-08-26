@@ -11,7 +11,9 @@ import { FormsDefinitionSetsController } from './forms-definition-sets.controlle
 import { FormsFieldsController } from './forms-fields.controller';
 import { FormsAssignmentsController } from './forms-assignments.controller';
 import { FormsInstancesController } from './forms-instances.controller';
+import { FormsMeController } from './forms-me.controller';
 import { FormsValuesController } from './forms-values.controller';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -26,11 +28,37 @@ describe('FormsDefinitionSetsController', () => {
       publishVersion: mockFn(),
       runMigration: mockFn(),
     };
+    const readService = {
+      listDefinitionSets: mockFn(),
+      getDefinitionSet: mockFn(),
+    };
     return {
-      controller: new FormsDefinitionSetsController(schemaService as any),
+      controller: new FormsDefinitionSetsController(
+        schemaService as any,
+        readService as any,
+      ),
       schemaService,
+      readService,
     };
   }
+
+  it('delegates listDefinitionSets with the default limit', async () => {
+    const d = build();
+    await d.controller.listDefinitionSets(undefined);
+    expect(d.readService.listDefinitionSets).toHaveBeenCalledWith(
+      undefined,
+      50,
+    );
+  });
+
+  it('delegates getDefinitionSet', async () => {
+    const d = build();
+    await d.controller.getDefinitionSet('set1');
+    expect(d.readService.getDefinitionSet).toHaveBeenCalledWith(
+      'set1',
+      undefined,
+    );
+  });
 
   it('delegates createDefinitionSet (UC-09-01)', async () => {
     const d = build();
@@ -127,16 +155,73 @@ describe('FormsFieldsController', () => {
 });
 
 describe('FormsAssignmentsController', () => {
-  it('delegates createAssignment (UC-09-06)', async () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
+  function build() {
     const assignmentsService = { createAssignment: mockFn() };
-    const controller = new FormsAssignmentsController(
-      assignmentsService as any,
-    );
+    const readService = {
+      listAssignments: mockFn(),
+      getExtensionBudget: mockFn(),
+    };
+    return {
+      controller: new FormsAssignmentsController(
+        assignmentsService as any,
+        readService as any,
+      ),
+      assignmentsService,
+      readService,
+    };
+  }
+
+  it('delegates createAssignment (UC-09-06)', async () => {
+    const d = build();
     const dto = { fieldId: 'f1', targetResourceConceptId: 'rt' };
-    await controller.createAssignment(dto, actor);
-    expect(assignmentsService.createAssignment).toHaveBeenCalledWith(
+    await d.controller.createAssignment(dto, actor);
+    expect(d.assignmentsService.createAssignment).toHaveBeenCalledWith(
       dto,
       actor,
+    );
+  });
+
+  it('delegates listAssignments with its filters and the default limit', async () => {
+    const d = build();
+    await d.controller.listAssignments('rt', 'f1', undefined, undefined);
+    expect(d.readService.listAssignments).toHaveBeenCalledWith(
+      { targetResourceConceptId: 'rt', fieldId: 'f1', sectionId: undefined },
+      undefined,
+      50,
+    );
+  });
+
+  it('delegates getBudget with the tenant of the context', async () => {
+    const d = build();
+    await d.controller.getBudget('rt');
+    expect(d.readService.getExtensionBudget).toHaveBeenCalledWith(
+      'rt',
+      undefined,
+    );
+  });
+
+  it('deja asignar a quien atiende, no sólo a quien administra', () => {
+    // El generador de formularios vive de esto: un doctor podía declarar un
+    // campo y no colgarlo de ningún sitio. Los límites de tenant y política los
+    // aplica el servicio; acá se comprueba que la puerta del rol esté abierta,
+    // que es lo que se cerró sin querer si alguien recorta este decorador.
+    const rolesDe = (handler: string): string[] =>
+      Reflect.getMetadata(
+        ROLES_KEY,
+        Object.getOwnPropertyDescriptor(
+          FormsAssignmentsController.prototype,
+          handler,
+        )!.value,
+      ) as string[];
+    expect(rolesDe('createAssignment')).toEqual(
+      expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
+    );
+    expect(rolesDe('getBudget')).toEqual(
+      expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
     );
   });
 });
@@ -152,15 +237,36 @@ describe('FormsInstancesController', () => {
       closeInstance: mockFn(),
     };
     const valuesService = { captureValues: mockFn() };
+    const readService = {
+      listInstancesByEncounter: mockFn(),
+      getInstance: mockFn(),
+    };
     return {
       controller: new FormsInstancesController(
         instancesService as any,
         valuesService as any,
+        readService as any,
       ),
       instancesService,
       valuesService,
+      readService,
     };
   }
+
+  it('delegates listInstances by encounter with the default limit', async () => {
+    const d = build();
+    await d.controller.listInstances('enc-1', undefined);
+    expect(d.readService.listInstancesByEncounter).toHaveBeenCalledWith(
+      'enc-1',
+      50,
+    );
+  });
+
+  it('delegates getInstance', async () => {
+    const d = build();
+    await d.controller.getInstance('i1');
+    expect(d.readService.getInstance).toHaveBeenCalledWith('i1');
+  });
 
   it('delegates openInstance (UC-09-07)', async () => {
     const d = build();
@@ -184,6 +290,51 @@ describe('FormsInstancesController', () => {
     const d = build();
     await d.controller.closeInstance('i1', actor);
     expect(d.instancesService.closeInstance).toHaveBeenCalledWith('i1', actor);
+  });
+});
+
+describe('FormsMeController', () => {
+  const paciente = { id: 'u-1', patientProfileId: 'pp-1' } as any;
+
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
+  function build() {
+    const readService = {
+      listMyInstances: mockFn(),
+      getMyInstance: mockFn(),
+    };
+    return {
+      controller: new FormsMeController(readService as any),
+      readService,
+    };
+  }
+
+  it('delegates listMyInstances with the actor and the default limit', async () => {
+    const d = build();
+    await d.controller.listMyInstances(paciente, undefined);
+    expect(d.readService.listMyInstances).toHaveBeenCalledWith(paciente, 50);
+  });
+
+  it('delegates getMyInstance with the actor of the session', async () => {
+    const d = build();
+    await d.controller.getMyInstance('i1', paciente);
+    expect(d.readService.getMyInstance).toHaveBeenCalledWith('i1', paciente);
+  });
+
+  it('declares no role requirement: the filter is the patient claim', () => {
+    // Igual que surveys/me: sin @Roles ni en la clase ni en los handlers — el
+    // guard de roles deja pasar y el servicio exige el perfil de paciente.
+    const rolesDe = (handler: string): unknown =>
+      Reflect.getMetadata(
+        ROLES_KEY,
+        Object.getOwnPropertyDescriptor(FormsMeController.prototype, handler)!
+          .value,
+      );
+    expect(Reflect.getMetadata(ROLES_KEY, FormsMeController)).toBeUndefined();
+    expect(rolesDe('listMyInstances')).toBeUndefined();
+    expect(rolesDe('getMyInstance')).toBeUndefined();
   });
 });
 

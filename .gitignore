@@ -42,6 +42,17 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+# Los respaldos que se hacen antes de tocar el entorno —`.env.bak-20260819-023207`
+# y compañía—. Tienen exactamente el mismo contenido que `.env`, así que
+# ignorarlo a él y no a su copia deja la puerta abierta por el costado; apareció
+# uno suelto en `git status` el 24/08/2026.
+.env.bak*
+# El entorno del seed E2E lleva contraseñas de cuentas reales de la máquina que
+# lo corre: se versiona el ejemplo (`.env.e2e.example`), nunca el archivo.
+.env.e2e
+# El manifiesto lo **genera** `seed-e2e.mjs` y trae los uuid de las cuentas de
+# esa base. Versionarlo prometería actores que en otra máquina no existen.
+tools/e2e/seed-manifest.json
 
 # temp directory
 .temp
@@ -106,3 +117,19 @@ dist-docs/
 # versionado en `openapi/`. El contrato bueno lo produce `yarn docs:openapi:generate`.
 docs/endpoints/
 .yarn/install-state.gz
+
+# Documentos de coordinación de carriles: material de proceso de cada sesión de
+# trabajo, no del producto. Reparten el trabajo entre quienes tocan el árbol a la
+# vez y dejan de significar algo cuando el carril cierra. Versionarlos ensucia la
+# raíz del repositorio y provoca conflictos en cada merge, siempre en el mismo
+# archivo y siempre sin nada que decidir.
+/CARRIL-*.md
+/CARRILES-*.md
+/CARRIL_*.md
+/COORDINACION-AGENTES.md
+
+# Entorno E2E aislado (carril P4). Contiene credenciales locales: nunca se versiona.
+.env.e2e
+
+# Salida del sembrador E2E: es del entorno de cada máquina, no del repo.
+seed-manifest.json

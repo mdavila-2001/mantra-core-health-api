@@ -10,6 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ForbiddenException } from '@nestjs/common';
 import { DirectoryReadService } from './directory-read.service';
+import { DIR, TENANT_TYPE_CONCEPT_BY_CODE } from '../directory.concepts';
 import { ResourceNotFoundException } from '../../../common';
 
 const actor = { id: 'u1', roles: ['STAFF'] } as any;
@@ -29,12 +30,19 @@ function build() {
   const membershipsRepo = {
     findPageByTenant: mockFn(() => Promise.resolve([])),
     findByIdInTenant: mockFn(() => Promise.resolve({ id: 'm1' })),
+    // TP-1: por defecto el actor no pertenece a ninguna organización, que es el
+    // estado de un paciente o de un médico con consultorio propio.
+    findActiveByUser: mockFn(() => Promise.resolve([])),
   };
   const branchesRepo = { findByTenant: mockFn(() => Promise.resolve([])) };
   const branchMembershipsRepo = {
     findByMembership: mockFn(() => Promise.resolve([])),
   };
   const tenantAdmin = { assertCanRead: mockFn(() => Promise.resolve()) };
+  // Por defecto no hay carrier que leer; los tests PAYER lo sobrescriben.
+  const catalogRepo = {
+    findCarrierByTenantId: mockFn(() => Promise.resolve(null)),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DirectoryReadService(
@@ -44,6 +52,7 @@ function build() {
     branchesRepo as any,
     branchMembershipsRepo as any,
     tenantAdmin as any,
+    catalogRepo as any,
     logger as any,
   );
   return {
@@ -53,6 +62,7 @@ function build() {
     branchesRepo,
     branchMembershipsRepo,
     tenantAdmin,
+    catalogRepo,
   };
 }
 
@@ -252,5 +262,171 @@ describe('DirectoryReadService.listMemberships', () => {
     expect(result.items[0].startDate).toBeNull();
     expect(result.items[0].endDate).toBeNull();
     expect(result.items[0].primaryBranchId).toBeNull();
+  });
+
+  /**
+   * TP-1: la organización como actor.
+   *
+   * Todas las lecturas del directorio empiezan por un `tenantId` que hay que
+   * traer de algún lado, y para quien administra su propia organización eso era
+   * un callejón: la pantalla necesitaba el id para pedir la ficha y el único
+   * lugar de donde sacarlo era la ficha.
+   */
+  describe('listMyTenants (TP-1)', () => {
+    const actor = { id: 'user-1', roles: ['USER'] } as any;
+
+    it('quien no pertenece a ninguna organización recibe una lista vacía, no un 403', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([]);
+
+      await expect(d.service.listMyTenants(actor)).resolves.toEqual({
+        items: [],
+      });
+    });
+
+    it('devuelve cada organización con el rol del actor en ella', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        {
+          tenantId: 'ten-1',
+          tenantRoleConceptId: DIR.ROLE_ADMIN,
+        },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-1',
+        code: 'CLIN-1',
+        legalName: 'Clínica del Centro SRL',
+        tradeName: 'Clínica del Centro',
+        tenantTypeConceptId: 'tt-1',
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      });
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items).toHaveLength(1);
+      expect(salida.items[0].id).toBe('ten-1');
+      expect(salida.items[0].myRoleConceptId).toBe(DIR.ROLE_ADMIN);
+      expect(salida.items[0].canAdminister).toBe(true);
+    });
+
+    /**
+     * El `staff` ve su organización y no la administra: es la distinción que
+     * decide si la pantalla dibuja los botones de editar e invitar.
+     */
+    it('el staff ve la organización pero no la administra', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-1', tenantRoleConceptId: DIR.ROLE_STAFF },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-1',
+        code: 'CLIN-1',
+        legalName: 'Clínica del Centro SRL',
+        tenantTypeConceptId: 'tt-1',
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items[0].canAdminister).toBe(false);
+    });
+
+    /**
+     * TP-1 + sigla/dirección: el panel propio de la aseguradora necesita ver
+     * sus datos mínimos (código, NIT, sigla, dirección) sin pedirle el id del
+     * carrier al actor.
+     */
+    it('para un tenant PAYER, incluye los datos de su aseguradora', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-payer', tenantRoleConceptId: DIR.ROLE_OWNER },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-payer',
+        code: 'ASE-1',
+        legalName: 'Aseguradora X',
+        tenantTypeConceptId: TENANT_TYPE_CONCEPT_BY_CODE.PAYER,
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      d.catalogRepo.findCarrierByTenantId.mockResolvedValue({
+        carrierCode: 'CAR-1',
+        regulatorIdentifier: 'APS-4821',
+        sigla: 'ASX',
+        address: 'Av. Siempre Viva 742',
+      });
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items[0].payer).toEqual({
+        carrierCode: 'CAR-1',
+        regulatorIdentifier: 'APS-4821',
+        sigla: 'ASX',
+        address: 'Av. Siempre Viva 742',
+      });
+    });
+
+    it('para un tenant que no es PAYER, no incluye el bloque `payer`', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-1', tenantRoleConceptId: DIR.ROLE_OWNER },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-1',
+        code: 'CLIN-1',
+        legalName: 'Clínica del Centro SRL',
+        tenantTypeConceptId: 'tt-provider',
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items[0]).not.toHaveProperty('payer');
+      expect(d.catalogRepo.findCarrierByTenantId).not.toHaveBeenCalled();
+    });
+
+    it('sólo pide las membresías ACTIVAS del actor', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([]);
+
+      await d.service.listMyTenants(actor);
+
+      expect(d.membershipsRepo.findActiveByUser).toHaveBeenCalledWith(
+        expect.anything(),
+        'user-1',
+        DIR.MEMBERSHIP_ACTIVE,
+      );
+    });
+
+    /**
+     * Una membresía viva contra una organización que ya no está no es culpa de
+     * quien pregunta: se omite en vez de romperle el panel.
+     */
+    it('una organización que ya no existe se omite en vez de fallar', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-fantasma', tenantRoleConceptId: DIR.ROLE_ADMIN },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue(null);
+
+      await expect(d.service.listMyTenants(actor)).resolves.toEqual({
+        items: [],
+      });
+    });
   });
 });

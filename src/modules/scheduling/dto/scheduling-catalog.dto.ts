@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -302,7 +302,18 @@ export class ScheduleRuleDto {
   capacityPerSlot?: number;
 }
 
-/** Cuerpo de `POST /scheduling/resources/{id}/templates` (UC-41-02). */
+/**
+ * Cuerpo de `POST /scheduling/resources/{id}/templates` (UC-41-02).
+ *
+ * El nombre de esquema va explícito porque `surveys` declara otra clase
+ * `CreateTemplateDto`: sin desambiguar, ambas colapsan en un único
+ * `#/components/schemas/CreateTemplateDto` y el contrato publicaba la forma de
+ * los cuestionarios (`title`, `ownerPractitionerId`…) para la publicación de
+ * agenda de un profesional. Cualquier cliente generado desde el contrato —la
+ * colección de Postman incluida— mandaba un cuerpo que este endpoint rechaza.
+ * Mismo remedio que `PharmacyCreateSiteDto` y compañía.
+ */
+@ApiSchema({ name: 'SchedulingCreateTemplateDto' })
 export class CreateTemplateDto {
   /**
    * Valor de name mantenido por la instancia.
@@ -360,6 +371,132 @@ export class CreateTemplateDto {
   @IsOptional()
   @IsISO8601()
   validTo?: string;
+}
+
+/**
+ * Una franja de una plantilla, como la lee la pantalla del médico.
+ *
+ * Va la hora de pared tal como se declaró —`09:00:00`—, no un instante: la
+ * regla dice «los lunes de nueve a una», y convertirla a UTC acá obligaría a
+ * elegir un lunes concreto para poder hacerlo.
+ */
+export class TemplateRuleDto {
+  /** Día de la semana, 0 = domingo. */
+  @ApiProperty({ minimum: 0, maximum: 6 })
+  dayOfWeek!: number;
+
+  /** Hora de inicio, de pared. */
+  @ApiProperty({ example: '09:00:00' })
+  startTime!: string;
+
+  /** Hora de fin, de pared. */
+  @ApiProperty({ example: '13:00:00' })
+  endTime!: string;
+
+  /** Duración de cada turno, si la franja la declara. */
+  @ApiProperty({ required: false })
+  slotMinutes?: number;
+
+  /** Pacientes por turno, si la franja lo declara. */
+  @ApiProperty({ required: false })
+  capacityPerSlot?: number;
+}
+
+/**
+ * Una plantilla publicada, con sus franjas.
+ *
+ * Es la lectura que faltaba: hasta ahora `scheduling` sólo tenía los dos POST
+ * de plantilla, así que quien publicaba un horario no podía volver a verlo
+ * nunca más —y el «nombre de la plantilla» que el alta pedía era una etiqueta
+ * a ciegas—.
+ */
+export class TemplateDetailDto {
+  /** Identificador único de la instancia. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Nombre con el que se publicó. */
+  @ApiProperty()
+  name!: string;
+
+  /** Las franjas, ordenadas por día y hora. */
+  @ApiProperty({ type: [TemplateRuleDto] })
+  rules!: TemplateRuleDto[];
+
+  /** Duración por defecto de la plantilla, si la declara. */
+  @ApiProperty({ required: false })
+  slotMinutes?: number;
+
+  /** Desde cuándo rige. */
+  @ApiProperty({ required: false, format: 'date-time' })
+  validFrom?: string;
+
+  /** Hasta cuándo rige; ausente es «hasta nuevo aviso». */
+  @ApiProperty({ required: false, format: 'date-time' })
+  validTo?: string;
+
+  /** La política de reserva que referencia, si tiene. */
+  @ApiProperty({ required: false, format: 'uuid' })
+  bookingPolicyId?: string;
+
+  /** Estado de la plantilla. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+}
+
+/** Las plantillas de un recurso. */
+export class TemplateListDto {
+  /** Las plantillas publicadas, de la más reciente a la más vieja. */
+  @ApiProperty({ type: [TemplateDetailDto] })
+  items!: TemplateDetailDto[];
+
+  /** Cuántas son. */
+  @ApiProperty()
+  count!: number;
+}
+
+/**
+ * Una excepción de disponibilidad, como la lee el calendario del médico.
+ *
+ * Existe para que un día bloqueado **no se vea igual que un día sin agenda**:
+ * los dos aparecen sin cupos, pero uno es «no atiendo los miércoles» y el otro
+ * «ese miércoles no atiendo, y por esto». El motivo es la diferencia.
+ */
+export class AvailabilityExceptionDto {
+  /** Identificador único de la instancia. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Tipo de excepción, como concepto. */
+  @ApiProperty({ format: 'uuid' })
+  exceptionTypeConceptId!: string;
+
+  /** Comienzo del bloqueo. */
+  @ApiProperty({ format: 'date-time' })
+  startAt!: string;
+
+  /** Fin del bloqueo. */
+  @ApiProperty({ format: 'date-time' })
+  endAt!: string;
+
+  /** Por qué, si se declaró. Lo lee el profesional, no el paciente. */
+  @ApiProperty({ required: false })
+  reason?: string;
+
+  /** `true` cuando la excepción ABRE disponibilidad en vez de cerrarla. */
+  @ApiProperty({ required: false })
+  isAvailable?: boolean;
+}
+
+/** Las excepciones de un recurso en una ventana. */
+export class AvailabilityExceptionListDto {
+  /** Las excepciones, de la más próxima a la más lejana. */
+  @ApiProperty({ type: [AvailabilityExceptionDto] })
+  items!: AvailabilityExceptionDto[];
+
+  /** Cuántas son. */
+  @ApiProperty()
+  count!: number;
 }
 
 /**

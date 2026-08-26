@@ -90,6 +90,22 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['get', '/r/{code}'],
   ['get', '/public/directory'],
   ['get', '/public/{slug}'],
+  // Buscador público V65 (`CommunityPublicController`): las trece llevan
+  // `@Public()` en el controlador, líneas 58-231. Entraron sin sumarse acá y
+  // por eso `docs` venía fallando en `dev` con trece `security-defined`.
+  ['get', '/public/search'],
+  ['get', '/public/search/practitioners'],
+  ['get', '/public/search/organizations'],
+  ['get', '/public/search/diagnostic-units'],
+  ['get', '/public/search/insurers'],
+  ['get', '/public/search/pharmacies'],
+  ['get', '/public/search/medications'],
+  ['get', '/public/nearby'],
+  ['get', '/p/{slug}'],
+  ['get', '/o/{slug}'],
+  ['get', '/f/{slug}'],
+  ['get', '/l/{slug}'],
+  ['get', '/s/{slug}'],
 ];
 
 function markPublicOperations(document) {

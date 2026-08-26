@@ -15,9 +15,11 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import {
   CurrentUser,
   ParseOptionalLimitPipe,
+  Public,
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
@@ -36,9 +38,24 @@ const DEFAULT_EXPANSION_PAGE_SIZE = 50;
 const DEFAULT_VALUE_SET_PAGE_SIZE = 50;
 
 /**
+ * Tope de lecturas por minuto e IP de las dos rutas anónimas del catálogo.
+ *
+ * Más holgado que el de las rutas públicas de escritura (10/min): un formulario
+ * de alta resuelve el conjunto y después lee su expansión, y una pantalla con
+ * varios desplegables encadena una pareja de peticiones por cada uno. Sigue
+ * siendo un tope: el catálogo es de sólo lectura, pero es una consulta a la base
+ * y no se deja sin límite frente a un cliente sin identificar.
+ */
+const PUBLIC_CATALOG_READ_THROTTLE = { default: { limit: 60, ttl: 60_000 } };
+
+/**
  * Alta de conjuntos de valores (UC-03-07), reservada a `SECURITY_ADMIN`, y
- * lectura de su expansión vigente (UC-03-08), abierta a cualquier cliente
- * autenticado.
+ * lectura del catálogo —listado y expansión vigente (UC-03-08)—, abierta a
+ * cualquier cliente, con o sin sesión.
+ *
+ * `@ApiBearerAuth()` sigue a nivel de clase por el `POST`: mismo criterio que
+ * `payments-operations.controller.ts`, donde el `@Public()` convive con la
+ * declaración de clase sin repetir seguridad por ruta.
  */
 @ApiTags('terminology')
 @ApiBearerAuth()
@@ -81,6 +98,16 @@ export class TerminologyValueSetsController {
    * formulario necesita resolver su conjunto de valores, y exigir rol de
    * administración para eso deja el catálogo inutilizable desde el cliente.
    *
+   * Y no pide **sesión**, que es un paso más allá: el registro público es un
+   * formulario sin sesión y su desplegable de departamentos (`VS_BO_DEPARTMENT`)
+   * empieza justamente acá. Con la ruta autenticada, esa pantalla recibía 401
+   * antes de pintar el primer campo.
+   *
+   * Es seguro porque lo que devuelve no es de nadie: `terminology.value_sets` y
+   * las tablas de su expansión no tienen `tenant_id` —son el catálogo global,
+   * fuera del alcance de las políticas RLS por tenant— y ninguna fila contiene
+   * datos de un paciente. Lo que sale de acá son códigos y nombres de catálogo.
+   *
    * @param code - Código interno exacto, como `administrative-gender`.
    * @param query - Texto libre sobre el código interno y el nombre.
    * @param cursor - Cursor opaco devuelto por la página anterior.
@@ -88,6 +115,8 @@ export class TerminologyValueSetsController {
    * @returns Página de conjuntos con su versión vigente.
    */
   @Get()
+  @Public()
+  @Throttle(PUBLIC_CATALOG_READ_THROTTLE)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar conjuntos de valores por código interno o texto',
@@ -137,6 +166,11 @@ export class TerminologyValueSetsController {
    * necesita la lista de opciones válidas, y exigir rol de seguridad para leerla
    * dejaría el catálogo inutilizable desde el cliente.
    *
+   * Tampoco pide sesión, y va en el mismo lote que el listado de arriba a
+   * propósito: resolver el conjunto y leer sus miembros son los dos pasos de una
+   * misma lectura, y abrir sólo el primero deja el formulario público con el
+   * identificador del catálogo y sin sus opciones.
+   *
    * Pagina por cursor y no por página numerada: la expansión se reemplaza entera
    * cada vez que se re-expande, y con `offset` una re-expansión a mitad de
    * recorrido saltaría o repetiría miembros sin que el cliente se entere.
@@ -148,6 +182,8 @@ export class TerminologyValueSetsController {
    * @returns Página de miembros con su concepto resuelto.
    */
   @Get(':id/$expand')
+  @Public()
+  @Throttle(PUBLIC_CATALOG_READ_THROTTLE)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'UC-03-08: lee la expansión vigente de un conjunto de valores',

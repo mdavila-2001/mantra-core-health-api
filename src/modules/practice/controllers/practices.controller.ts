@@ -44,6 +44,7 @@ import {
   RoleAssignmentResponseDto,
   InventoryItemResponseDto,
   StatusResultDto,
+  SelfRequestRoleAssignmentDto,
   MedicalOrganizationConsoleDto,
 } from '../dto';
 
@@ -254,6 +255,27 @@ export class PracticesController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<RoleAssignmentResponseDto> {
     return this.workforceService.assignRole(practiceId, dto, actor);
+  }
+
+  /**
+   * Carril 18 — el profesional pide vincularse a la organización por su
+   * cuenta; queda `PENDING` hasta que la organización la apruebe (ver
+   * `/role-assignments/:roleId/approve` en `RoleAssignmentsController`).
+   */
+  @Post(':practiceId/role-assignments/self-request')
+  @Roles('PRACTITIONER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Solicitar la propia vinculación a una organización',
+    description:
+      'Autoservicio del profesional: queda PENDING hasta que la organización la apruebe, rechace, suspenda o finalice. No concede acceso a pacientes de la organización.',
+  })
+  selfRequestRoleAssignment(
+    @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @Body() dto: SelfRequestRoleAssignmentDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<RoleAssignmentResponseDto> {
+    return this.workforceService.selfRequestAffiliation(practiceId, dto, actor);
   }
 
   /** UC-14-10. */

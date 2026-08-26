@@ -1,0 +1,19 @@
+# Una pasada del auto-despliegue de la API. La dispara el temporizador hermano.
+#
+# `oneshot` y no un demonio: una construcción colgada deja un bucle colgado hasta que alguien
+# mira, mientras que aquí lo peor que puede pasar es que una pasada falle y la siguiente salga
+# limpia. El `flock` del script impide que dos se solapen.
+[Unit]
+Description=Auto-despliegue de la API de ALOVIDA ante commits nuevos en dev
+Documentation=file:///home/pablo/Documents/GitHub/ALOVIDA/mantra-core-health-api/tools/autodeploy/README.md
+After=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/pablo/Documents/GitHub/ALOVIDA/mantra-core-health-api
+ExecStart=/home/pablo/Documents/GitHub/ALOVIDA/mantra-core-health-api/tools/autodeploy/autodeploy.sh una-vez
+# La imagen pesa 660 MB y una construcción sin caché pasa largo de los diez minutos.
+TimeoutStartSec=45min
+StandardOutput=journal
+StandardError=journal

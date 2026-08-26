@@ -31,16 +31,40 @@ function build() {
     createMessage: mockFn(),
     findLastMessage: mockFn(),
     createReceipt: mockFn(),
+    // Carril P2: por defecto no hay conversación directa previa, que es el
+    // caso de la primera vez. Las pruebas que prueban la reutilización la
+    // devuelven explícitamente.
+    findDirectBetween: mockFn().mockResolvedValue(null),
   };
   const blocksRepo = { existsBetween: mockFn().mockResolvedValue(null) };
+  // El aviso in-app del carril P1, doblado: enviar un mensaje se prueba acá,
+  // avisarlo se prueba en su propio servicio.
+  const messageNotifications = {
+    mensajeNuevo: mockFn().mockResolvedValue(undefined),
+  };
+  // El gateway WS, doblado: se prueba que se llame, no lo que hace socket.io.
+  const gateway = {
+    emitMessage: mockFn(),
+    emitRead: mockFn(),
+    emitNewConversation: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityMessagingService(
     em as any,
     conversationsRepo as any,
     blocksRepo as any,
+    messageNotifications as any,
+    gateway as any,
     logger as any,
   );
-  return { service, tx, conversationsRepo, blocksRepo };
+  return {
+    service,
+    tx,
+    conversationsRepo,
+    blocksRepo,
+    messageNotifications,
+    gateway,
+  };
 }
 
 describe('CommunityMessagingService', () => {
@@ -53,6 +77,61 @@ describe('CommunityMessagingService', () => {
     );
     expect(res).toEqual({ id: 'conv1' });
     expect(d.conversationsRepo.createParticipant).toHaveBeenCalledTimes(2);
+    expect(d.gateway.emitNewConversation).toHaveBeenCalledWith('conv1', [
+      'p1',
+      'p2',
+    ]);
+  });
+
+  /* --- Carril P2 · la conversación directa deja de duplicarse ------------- */
+
+  it('devuelve la conversación directa que ya existe en vez de crear otra', async () => {
+    const d = build();
+    d.conversationsRepo.findDirectBetween.mockResolvedValue({
+      id: 'conv-vieja',
+    });
+
+    const res = await d.service.createConversation(
+      { participantProfileIds: ['p1', 'p2'] },
+      actor,
+    );
+
+    // Sin esto, la tercera vez que alguien pulsa «Escribir al doctor» tiene
+    // tres hilos con la misma persona y los mensajes repartidos entre los tres.
+    expect(res).toEqual({ id: 'conv-vieja' });
+    expect(d.conversationsRepo.createConversation).not.toHaveBeenCalled();
+    expect(d.conversationsRepo.createParticipant).not.toHaveBeenCalled();
+    // Reutilizada no es una novedad para nadie: nada que avisar por WS.
+    expect(d.gateway.emitNewConversation).not.toHaveBeenCalled();
+  });
+
+  it('no reutiliza nada cuando es un grupo: dos foros del mismo equipo son dos foros', async () => {
+    const d = build();
+    d.conversationsRepo.createConversation.mockReturnValue({
+      id: 'conv-nueva',
+    });
+
+    await d.service.createConversation(
+      { participantProfileIds: ['p1', 'p2'], conversationType: 'GROUP' },
+      actor,
+    );
+
+    expect(d.conversationsRepo.findDirectBetween).not.toHaveBeenCalled();
+    expect(d.conversationsRepo.createConversation).toHaveBeenCalled();
+  });
+
+  it('tampoco reutiliza con más de dos participantes', async () => {
+    const d = build();
+    d.conversationsRepo.createConversation.mockReturnValue({
+      id: 'conv-nueva',
+    });
+
+    await d.service.createConversation(
+      { participantProfileIds: ['p1', 'p2', 'p3'] },
+      actor,
+    );
+
+    expect(d.conversationsRepo.findDirectBetween).not.toHaveBeenCalled();
   });
 
   describe('sendMessage (UC-19-06)', () => {
@@ -129,6 +208,11 @@ describe('CommunityMessagingService', () => {
       expect(res.id).toBe('msg1');
       expect(conversation.messageCount).toBe(5);
       expect(d.conversationsRepo.createReceipt).toHaveBeenCalled();
+      // El empuje WS es aditivo a la notificación in-app, no un sustituto.
+      expect(d.gateway.emitMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'msg1', conversationId: 'conv1' }),
+        ['p2'],
+      );
     });
   });
 
@@ -152,6 +236,11 @@ describe('CommunityMessagingService', () => {
       );
       expect(res).toEqual({ receiptsRecorded: 1, lastReadMessageId: 'msg9' });
       expect(participant.lastReadMessageId).toBe('msg9');
+      expect(d.gateway.emitRead).toHaveBeenCalledWith({
+        conversationId: 'conv1',
+        profileId: 'p1',
+        lastReadMessageId: 'msg9',
+      });
     });
   });
 });

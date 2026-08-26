@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityModerationService } from './community-moderation.service';
+import { ForbiddenException } from '@nestjs/common';
 import { ConflictException, ResourceNotFoundException } from '../../../common';
 import { COMM } from '../community.concepts';
 
@@ -31,14 +32,22 @@ function build() {
     createStrike: mockFn(),
     createAppeal: mockFn(),
     findOpenAppealForDecision: mockFn(),
+    findAppealById: mockFn(),
+  };
+  // Por defecto la propiedad se concede; los casos de perfil ajeno hacen que el
+  // doble rechace. La regla en sí vive en `CommunityVisibilityService`, que
+  // tiene su propia prueba con la implementación real.
+  const visibility = {
+    assertActsAsProfile: mockFn(() => Promise.resolve(undefined)),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityModerationService(
     em as any,
-    moderationRepo,
+    moderationRepo as any,
+    visibility as any,
     logger as any,
   );
-  return { service, tx, moderationRepo };
+  return { service, tx, moderationRepo, visibility };
 }
 
 describe('CommunityModerationService', () => {
@@ -170,6 +179,175 @@ describe('CommunityModerationService', () => {
       );
       expect(res).toEqual({ id: 'ap1' });
       expect(d.moderationRepo.createQueue).toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * El apelante no lo elige el cliente. Sin la comprobación, cualquiera podía
+   * abrir una apelación en nombre de otro — y como una decisión sólo admite una
+   * apelación abierta a la vez, además le quemaba la suya al sancionado.
+   *
+   * La regla es la misma que gobierna toda escritura del grafo social, así que
+   * se usa la compartida: acá se prueba que se pida con el perfil correcto y que
+   * su negativa corte la operación.
+   */
+  describe('propiedad del apelante', () => {
+    it('exige la titularidad del perfil que apela', async () => {
+      const d = build();
+      d.moderationRepo.findDecisionById.mockResolvedValue(null);
+
+      await expect(
+        d.service.appeal(
+          'dec1',
+          { appellantProfileId: 'pp-1', reasonText: 'apelo' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+      // Llegó hasta buscar la decisión, o sea que la propiedad no lo frenó, y se
+      // pidió con el perfil declarado y no con otro.
+      expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+        expect.anything(),
+        'pp-1',
+        actor,
+      );
+    });
+
+    it('no crea la apelación si el perfil no es del actor', async () => {
+      const d = build();
+      d.visibility.assertActsAsProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+
+      await expect(
+        d.service.appeal(
+          'dec1',
+          { appellantProfileId: 'pp-ajeno', reasonText: 'no fui yo' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.moderationRepo.createAppeal).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * Se podía apelar y no había forma de cerrar la apelación: toda apelación
+   * quedaba abierta para siempre, y como apelar re-encola el contenido con
+   * prioridad alta, esa entrada tampoco tenía salida.
+   */
+  describe('resolveAppeal (UC-19-10, cierre)', () => {
+    it('throws cuando la apelación no existe', async () => {
+      const d = build();
+      d.moderationRepo.findAppealById.mockResolvedValue(null);
+
+      await expect(
+        d.service.resolveAppeal('ap-x', { resolution: 'UPHELD' } as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('rechaza resolver una apelación ya resuelta', async () => {
+      const d = build();
+      d.moderationRepo.findAppealById.mockResolvedValue({
+        id: 'ap-1',
+        statusConceptId: COMM.APPEAL_UPHELD,
+      });
+
+      await expect(
+        d.service.resolveAppeal('ap-1', { resolution: 'UPHELD' } as any, actor),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('marca la resolución, quién y cuándo', async () => {
+      const d = build();
+      const apelacion: any = {
+        id: 'ap-1',
+        moderationDecisionId: 'dec1',
+        statusConceptId: COMM.APPEAL_OPEN,
+        updatedAt: new Date(),
+      };
+      d.moderationRepo.findAppealById.mockResolvedValue(apelacion);
+      d.moderationRepo.findDecisionById.mockResolvedValue(null);
+
+      const res = await d.service.resolveAppeal(
+        'ap-1',
+        { resolution: 'OVERTURNED' } as any,
+        actor,
+      );
+
+      expect(res).toEqual({ id: 'ap-1' });
+      expect(apelacion.statusConceptId).toBe(COMM.APPEAL_OVERTURNED);
+      expect(apelacion.resolutionConceptId).toBe(COMM.APPEAL_OVERTURNED);
+      expect(apelacion.reviewedByUserId).toBe('mod-1');
+      expect(apelacion.resolvedAt).toBeInstanceOf(Date);
+    });
+
+    /**
+     * Si la entrada re-encolada no se cierra con la apelación, queda pidiendo
+     * para siempre una revisión que ya se hizo.
+     */
+    it('cierra la entrada de cola que la apelación había abierto', async () => {
+      const d = build();
+      d.moderationRepo.findAppealById.mockResolvedValue({
+        id: 'ap-1',
+        moderationDecisionId: 'dec1',
+        statusConceptId: COMM.APPEAL_OPEN,
+        updatedAt: new Date(),
+      });
+      d.moderationRepo.findDecisionById.mockResolvedValue({
+        id: 'dec1',
+        moderationQueueId: 'q-original',
+      });
+      d.moderationRepo.findQueueById.mockResolvedValue({
+        id: 'q-original',
+        contentRefId: 'post-1',
+      });
+      const reencolada: any = {
+        id: 'q-apelacion',
+        statusConceptId: COMM.QUEUE_QUEUED,
+        updatedAt: new Date(),
+      };
+      d.moderationRepo.findOpenQueueForContent.mockResolvedValue(reencolada);
+
+      await d.service.resolveAppeal(
+        'ap-1',
+        { resolution: 'UPHELD' } as any,
+        actor,
+      );
+
+      expect(reencolada.statusConceptId).toBe(COMM.QUEUE_RESOLVED);
+    });
+
+    /**
+     * `OVERTURNED` deja constancia de que la apelación prosperó, pero deshacer
+     * la sanción es una política que producto no definió: ejecutarla acá sería
+     * inventarla.
+     */
+    it('no revierte la decisión original ni anula el strike', async () => {
+      const d = build();
+      d.moderationRepo.findAppealById.mockResolvedValue({
+        id: 'ap-1',
+        moderationDecisionId: 'dec1',
+        statusConceptId: COMM.APPEAL_OPEN,
+        updatedAt: new Date(),
+      });
+      d.moderationRepo.findDecisionById.mockResolvedValue({
+        id: 'dec1',
+        moderationQueueId: 'q-original',
+      });
+      d.moderationRepo.findQueueById.mockResolvedValue({
+        id: 'q-original',
+        contentRefId: 'post-1',
+      });
+      d.moderationRepo.findOpenQueueForContent.mockResolvedValue(null);
+
+      await d.service.resolveAppeal(
+        'ap-1',
+        { resolution: 'OVERTURNED' } as any,
+        actor,
+      );
+
+      expect(d.moderationRepo.createDecision).not.toHaveBeenCalled();
+      expect(d.moderationRepo.createStrike).not.toHaveBeenCalled();
     });
   });
 });

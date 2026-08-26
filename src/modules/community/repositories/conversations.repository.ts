@@ -209,6 +209,89 @@ export class ConversationsRepository {
   }
 
   /**
+   * La conversación directa que ya existe entre dos perfiles, si existe.
+   *
+   * ## El hueco que cierra
+   *
+   * `POST /community/conversations` era un *bootstrap*: creaba una conversación
+   * nueva cada vez. Con un botón «Escribir al doctor» en la pantalla de la
+   * cita, eso significa que la tercera vez que alguien lo pulsa tiene tres
+   * hilos con la misma persona y sus mensajes repartidos entre los tres. No es
+   * un caso borde: es lo que pasa la segunda vez.
+   *
+   * ## Por qué se resuelve con dos consultas y no con un `JOIN`
+   *
+   * Porque el modelo no tiene forma de preguntar «la conversación cuyos
+   * participantes son exactamente estos dos»: los participantes viven en una
+   * tabla aparte sin clave compuesta ni firma del conjunto. Se traen las
+   * participaciones activas de cada uno y se intersecan — dos consultas
+   * acotadas por perfil, no un recorrido de la tabla.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param perfilA - Uno de los dos perfiles.
+   * @param perfilB - El otro.
+   * @param directTypeConceptId - Concepto que marca una conversación directa.
+   * @param activeStatusConceptId - Estado que cuenta como vivo.
+   * @returns La conversación directa compartida, o `null`.
+   */
+  async findDirectBetween(
+    em: EntityManager,
+    perfilA: string,
+    perfilB: string,
+    directTypeConceptId: string,
+    activeStatusConceptId: string,
+  ): Promise<Conversations | null> {
+    const [deA, deB] = await Promise.all([
+      em.find(ConversationParticipants, {
+        participantProfileId: perfilA,
+        statusConceptId: activeStatusConceptId,
+      }),
+      em.find(ConversationParticipants, {
+        participantProfileId: perfilB,
+        statusConceptId: activeStatusConceptId,
+      }),
+    ]);
+
+    const deBPorConversacion = new Set(
+      deB.map((participacion) => participacion.conversationId),
+    );
+    const compartidas = deA
+      .map((participacion) => participacion.conversationId)
+      .filter((conversationId) => deBPorConversacion.has(conversationId));
+    if (compartidas.length === 0) return null;
+
+    // Sólo las directas: los dos pueden compartir además un grupo, y un grupo
+    // no es el hilo al que lleva «Escribir al doctor».
+    const candidatas = await em.find(
+      Conversations,
+      {
+        id: { $in: compartidas },
+        conversationTypeConceptId: directTypeConceptId,
+        statusConceptId: activeStatusConceptId,
+      },
+      { orderBy: { lastMessageAt: 'DESC', id: 'DESC' } },
+    );
+
+    // Si hubiera más de una —creadas antes de que esto existiera—, gana la más
+    // activa: es donde está la conversación que la gente reconoce.
+    for (const conversacion of candidatas) {
+      const participantes = await em.find(ConversationParticipants, {
+        conversationId: conversacion.id,
+      });
+      // Exactamente los dos: una directa con un tercero adentro no es la
+      // conversación privada que se está buscando.
+      const perfiles = new Set(
+        participantes.map(
+          (participacion) => participacion.participantProfileId,
+        ),
+      );
+      if (perfiles.size === 2 && perfiles.has(perfilA) && perfiles.has(perfilB))
+        return conversacion;
+    }
+    return null;
+  }
+
+  /**
    * Participaciones activas de un perfil, del último mensaje al primero.
    *
    * Es la primera mitad de la bandeja: da las conversaciones y, de paso, el
@@ -291,28 +374,39 @@ export class ConversationsRepository {
   /**
    * Cuenta los mensajes posteriores al último leído por el participante.
    *
+   * **Los propios no cuentan.** Contaba todos los de la conversación, así que
+   * quien escribía se sumaba a sí mismo un mensaje sin leer: con dos mensajes
+   * —uno de cada lado— los dos participantes veían «2», y el que acababa de
+   * escribir volvía a la bandeja con un globo azul avisándole de su propio
+   * mensaje. Un mensaje sin leer es uno que te mandaron, por definición.
+   *
    * @param em - Contexto de persistencia o transacción activa.
    * @param conversationId - Conversación a contar.
+   * @param readerProfileId - Quién lee: sus propios mensajes quedan fuera.
    * @param lastReadMessageId - Último mensaje que el participante marcó leído.
    * @returns Cantidad de mensajes sin leer.
    */
   async countUnread(
     em: EntityManager,
     conversationId: string,
+    readerProfileId: string,
     lastReadMessageId: string | undefined,
   ): Promise<number> {
-    if (!lastReadMessageId)
-      return em.count(DirectMessages, { conversationId, deletedAt: null });
+    const deOtros = {
+      conversationId,
+      deletedAt: null,
+      senderProfileId: { $ne: readerProfileId },
+    } as const;
+
+    if (!lastReadMessageId) return em.count(DirectMessages, deOtros);
 
     const lastRead = await em.findOne(DirectMessages, {
       id: lastReadMessageId,
     });
-    if (!lastRead?.sentAt)
-      return em.count(DirectMessages, { conversationId, deletedAt: null });
+    if (!lastRead?.sentAt) return em.count(DirectMessages, deOtros);
 
     return em.count(DirectMessages, {
-      conversationId,
-      deletedAt: null,
+      ...deOtros,
       sentAt: { $gt: lastRead.sentAt },
     });
   }
@@ -359,6 +453,19 @@ export class ConversationsRepository {
       { conversationId },
       { orderBy: { sentAt: 'desc' } },
     );
+  }
+
+  /**
+   * Un mensaje por id, para resolver hasta cuándo leyó el peer (doble check ✓✓).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del mensaje.
+   */
+  findMessageById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DirectMessages | null> {
+    return em.findOne(DirectMessages, { id });
   }
 
   /**

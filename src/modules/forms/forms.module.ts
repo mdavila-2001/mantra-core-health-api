@@ -6,6 +6,7 @@ import {
   FormsFieldsController,
   FormsAssignmentsController,
   FormsInstancesController,
+  FormsMeController,
   FormsValuesController,
 } from './controllers';
 import {
@@ -14,6 +15,7 @@ import {
   FormsAssignmentsService,
   FormsInstancesService,
   FormsValuesService,
+  FormsReadService,
 } from './services';
 import {
   DefinitionSetsRepository,
@@ -37,6 +39,7 @@ import {
     FormsFieldsController,
     FormsAssignmentsController,
     FormsInstancesController,
+    FormsMeController,
     FormsValuesController,
   ],
   providers: [
@@ -53,6 +56,7 @@ import {
     FormsAssignmentsService,
     FormsInstancesService,
     FormsValuesService,
+    FormsReadService,
   ],
 })
 export class FormsModule {}

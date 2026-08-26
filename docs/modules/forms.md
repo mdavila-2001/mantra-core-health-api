@@ -9,7 +9,7 @@
 # Módulo `forms`
 
 **Fuente:** [`src/modules/forms/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/forms/README.md)
-· 5 controllers · 5 services · 6 repositories · 16 entidades · 13 DTO
+· 5 controllers · 6 services · 6 repositories · 16 entidades · 14 DTO
 
 ---
 
@@ -29,7 +29,7 @@ gobernadas por política, instancias de formulario, captura/curación de valores
 | UC-09-03 | `POST /forms/definition-sets/:id/versions/:ver/publish` | `SECURITY_ADMIN` | Compone miembros y publica la versión |
 | UC-09-04 | `POST /forms/fields/:id/dependencies` | autenticado | Define dependencia condicional entre campos |
 | UC-09-05 | `PUT /forms/fields/:id/localizations/:lang` | autenticado | Upsert de localización i18n (`es`/`en`) |
-| UC-09-06 | `POST /forms/assignments` | `SECURITY_ADMIN` | Asigna campo a target con enforcement de política |
+| UC-09-06 | `POST /forms/assignments` | clínico o `SECURITY_ADMIN` | Asigna campo a target con enforcement de política. Quien atiende, sólo en su tenant y con política que lo permita |
 | UC-09-07 | `POST /forms/instances` | autenticado | Abre instancia de formulario para un recurso |
 | UC-09-08 | `POST /forms/instances/:id/values` | autenticado | Captura valores (value[x] exclusivo) |
 | UC-09-09 | `PATCH /forms/values/:id` | autenticado | Corrige valor con supersede y snapshot inmutable |
@@ -37,6 +37,12 @@ gobernadas por política, instancias de formulario, captura/curación de valores
 | UC-09-11 | `POST /forms/instances/:id/close` | autenticado | Cierra formulario y finaliza valores preliminares |
 | UC-09-12 | `POST /forms/fields/:id/access-rules` | `SECURITY_ADMIN` | Define regla de acceso / enmascarado por campo |
 | UC-09-13 | `POST /forms/definition-sets/:id/migrations/:migrationId/run` | `SECURITY_ADMIN` | Ejecuta migración entre versiones |
+| Lectura | `GET /forms/definition-sets` | clínico o `SECURITY_ADMIN` | Lista sets visibles (globales y del tenant) |
+| Lectura | `GET /forms/definition-sets/:id` | clínico o `SECURITY_ADMIN` | Set con versiones, campos (reglas, dependencias, i18n) y secciones |
+| Lectura | `GET /forms/instances?encounter=` | `CLINICIAN`/`PRACTITIONER` | Instancias del encuentro (anclado a su tenant) |
+| Lectura | `GET /forms/instances/:id` | `CLINICIAN`/`PRACTITIONER` | Instancia con valores vigentes, `value[x]` resuelto por tipo |
+| Lectura | `GET /forms/assignments` | clínico o `SECURITY_ADMIN` | Asignaciones activas visibles con secciones resueltas |
+| Lectura | `GET /forms/assignments/budget?targetResourceConceptId=` | clínico o `SECURITY_ADMIN` | Tope, consumo y resto del presupuesto de extensión del tenant |
 
 ## Entidades (schema `forms`)
 
@@ -76,6 +82,17 @@ gobernadas por política, instancias de formulario, captura/curación de valores
 
 Guard JWT global. Endpoints de gobernanza/administración de extensibilidad exigen
 `SECURITY_ADMIN`; los clínicos/steward/ETL requieren solo autenticación.
+
+## Lecturas (Fase 1 del carril de consulta)
+
+`FormsReadService` sigue el patrón de `ChartReadService`: sólo lectura sobre un
+`fork` del `EntityManager`, lotes `$in` sin N+1, `limit+1` con recorte declarado.
+Aislamiento de instancias: la propiedad se ancla en el `clinical.encounter` que
+la instancia referencia (`resourceId`), exigiendo el tenant del contexto; lo
+ajeno o lo no anclable responde 404. Enmascarado deny-by-default: un campo con
+`field_value_access_rules` activa responde `masked: true` sin valor, porque la
+semántica de roles de la regla no es evaluable todavía (no existe puente
+rol→value-set en el sistema).
 
 ## Tests
 

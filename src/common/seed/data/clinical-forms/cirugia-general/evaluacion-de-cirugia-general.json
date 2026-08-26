@@ -1,0 +1,122 @@
+{
+  "code": "CIRGEN_EVALUACION_BASE",
+  "name": "Evaluación de cirugía general",
+  "specialty": {
+    "code": "CIRUGIA_GENERAL",
+    "display": "Cirugía General"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen por aparatos del abdomen",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad los ítems quirúrgicos: características del dolor abdominal, tránsito intestinal, hernias, cirugías previas, riesgo quirúrgico descrito en prosa e indicación quirúrgica propuesta."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "dolor_abdominal",
+      "name": "Dolor abdominal",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "caracteristicas_del_dolor",
+      "name": "Características del dolor (localización, irradiación, atenuantes)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "nauseas_o_vomitos",
+      "name": "Náuseas o vómitos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "transito_intestinal",
+      "name": "Tránsito intestinal",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "cirugias_previas",
+      "name": "Cirugías previas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "antecedentes_patologicos",
+      "name": "Antecedentes patológicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "alergias",
+      "name": "Alergias",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_del_abdomen",
+      "name": "Examen del abdomen (inspección, palpación, percusión, auscultación)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "hernias",
+      "name": "Hernias de la pared abdominal (ubicación y hallazgos)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examenes_complementarios",
+      "name": "Exámenes complementarios disponibles",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "riesgo_quirurgico",
+      "name": "Riesgo quirúrgico descrito",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "indicacion_quirurgica_propuesta",
+      "name": "Indicación quirúrgica propuesta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import {
   ArrayMaxSize,
   IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -31,7 +32,11 @@ export class PostMediaInputDto {
     enum: ['IMAGE', 'VIDEO', 'DOCUMENT'],
   })
   @IsOptional()
-  @IsString()
+  // Mismo defecto que en `visibility`, y el campo es de P5: el enum estaba
+  // documentado y no validado, y `MEDIA_ROLE_BY_CODE[...]` de un rol inventado
+  // da `undefined` contra una columna NOT NULL. Se cierra acá porque es la misma
+  // clase y la misma línea; el carril de medios no queda con un 500 esperándolo.
+  @IsIn(['IMAGE', 'VIDEO', 'DOCUMENT'])
   mediaRole?: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
 
   /**
@@ -100,7 +105,7 @@ export class CreatePostDto {
    */
   @ApiPropertyOptional({ description: 'Tipo de post', enum: ['TEXT', 'POLL'] })
   @IsOptional()
-  @IsString()
+  @IsIn(['TEXT', 'POLL'])
   postType?: 'TEXT' | 'POLL';
 
   /**
@@ -112,7 +117,11 @@ export class CreatePostDto {
     enum: ['PUBLIC', 'FOLLOWERS', 'PRIVATE'],
   })
   @IsOptional()
-  @IsString()
+  // `@IsIn` y no `@IsString`: el enum estaba documentado pero no validado, y el
+  // servicio resuelve el concepto con `POST_VISIBILITY_CONCEPT_BY_CODE[...]`.
+  // Una visibilidad inventada no daba 400 — daba `undefined` contra una columna
+  // NOT NULL, o sea un 500 por un dato que el cliente eligió mal.
+  @IsIn(['PUBLIC', 'FOLLOWERS', 'PRIVATE'])
   visibility?: 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
 
   /**

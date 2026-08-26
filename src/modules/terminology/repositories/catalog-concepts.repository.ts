@@ -189,7 +189,19 @@ export class CatalogConceptsRepository {
    */
   search(
     em: EntityManager,
-    filters: { query?: string; codeSystemVersionId?: string; ids?: string[] },
+    filters: {
+      query?: string;
+      codeSystemVersionId?: string;
+      ids?: string[];
+      /**
+       * Acota a conceptos con este `state_concept_id` exacto.
+       *
+       * Lo usa el glosario público para excluir borradores (`TERM_DRAFT`):
+       * ver `ConceptsService.searchConcepts`. Ausente para cualquier otro
+       * llamador, que sigue viendo el catálogo completo como siempre.
+       */
+      stateConceptId?: string;
+    },
     limit: number,
   ): Promise<CatalogConcepts[]> {
     const where: Record<string, unknown> = {};
@@ -198,6 +210,9 @@ export class CatalogConceptsRepository {
     }
     if (filters.codeSystemVersionId) {
       where.codeSystemVersionId = filters.codeSystemVersionId;
+    }
+    if (filters.stateConceptId) {
+      where.stateConceptId = filters.stateConceptId;
     }
     if (filters.query) {
       // `$ilike` cubre los dos formatos de código que conviven en el catálogo:

@@ -77,6 +77,96 @@ export class PractitionerAffiliationsRepository {
   }
 
   /**
+   * Las afiliaciones del profesional en un estado concreto.
+   *
+   * Es la lectura que sostiene la regla de visibilidad de TP-2: un vínculo
+   * declarado y todavía no aprobado no puede presentarse como si la
+   * organización lo hubiera aceptado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - Profesional consultado.
+   * @param statusConceptIds - Estados aceptados.
+   * @returns Sus afiliaciones en esos estados.
+   */
+  findByPractitionerInStatus(
+    em: EntityManager,
+    practitionerProfileId: string,
+    statusConceptIds: readonly string[],
+  ): Promise<PractitionerAffiliations[]> {
+    return em.find(PractitionerAffiliations, {
+      practitionerProfileId,
+      statusConceptId: { $in: [...statusConceptIds] },
+    });
+  }
+
+  /**
+   * Las afiliaciones que apuntan a alguna de las sedes indicadas.
+   *
+   * Es la bandeja de la organización: quiénes pidieron atender en sus sedes.
+   *
+   * Recibe las sedes ya resueltas —y no el tenant— porque el vínculo entre una
+   * afiliación y una organización pasa por la sede (`practice_site_id` →
+   * `practice_sites.managing_tenant_id`), y ese salto vive en `practice`. Con
+   * la lista de sedes acotada al tenant del actor, **el filtro por organización
+   * ya está en la consulta**: no hay forma de que devuelva la solicitud de otra.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceSiteIds - Sedes de la organización.
+   * @param statusConceptIds - Estados a los que acotar; vacío = todos.
+   * @returns Las afiliaciones de esas sedes, de la más reciente a la más antigua.
+   */
+  findBySites(
+    em: EntityManager,
+    practiceSiteIds: readonly string[],
+    statusConceptIds: readonly string[] = [],
+  ): Promise<PractitionerAffiliations[]> {
+    if (practiceSiteIds.length === 0) return Promise.resolve([]);
+
+    const where: Record<string, unknown> = {
+      practiceSiteId: { $in: [...practiceSiteIds] },
+    };
+    if (statusConceptIds.length > 0) {
+      where.statusConceptId = { $in: [...statusConceptIds] };
+    }
+
+    return em.find(PractitionerAffiliations, where, {
+      orderBy: { createdAt: 'DESC', id: 'ASC' },
+    });
+  }
+
+  /**
+   * La afiliación del profesional a una sede concreta, si existe.
+   *
+   * `findSame` compara institución, cargo y fecha —sirve para no cargar dos
+   * veces la misma línea del currículum—, pero no sirve para el pedido de
+   * vínculo: pedir dos veces atender en la misma sede es lo mismo aunque se
+   * escriba el cargo distinto.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - Profesional consultado.
+   * @param practiceSiteId - Sede pedida.
+   * @returns La fila existente, o `null`.
+   */
+  findByPractitionerAndSite(
+    em: EntityManager,
+    practitionerProfileId: string,
+    practiceSiteId: string,
+  ): Promise<PractitionerAffiliations | null> {
+    return em.findOne(PractitionerAffiliations, {
+      practitionerProfileId,
+      practiceSiteId,
+    });
+  }
+
+  /** Una afiliación por su identificador. */
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PractitionerAffiliations | null> {
+    return em.findOne(PractitionerAffiliations, { id });
+  }
+
+  /**
    * Afiliación duplicada: misma institución, mismo cargo y mismo inicio.
    *
    * Es lo que distingue «trabajé dos veces ahí» —que es cierto y se registra—

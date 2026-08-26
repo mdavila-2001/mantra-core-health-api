@@ -12,10 +12,20 @@ import type { RegisterPractitionerDto } from '../dto';
 const dto: RegisterPractitionerDto = {
   email: 'dra.rojas@sanrafael.bo',
   password: 'password123',
-  displayName: 'Dra. Ana Rojas',
+  name: 'Ana',
+  middleName: 'Lucía',
+  lastName: 'Rojas',
+  motherLastName: 'Paz',
   licenseNumber: 'MP-45821',
   credentialNumber: 'TIT-99310',
 };
+
+/**
+ * Un concepto de `VS_BO_DEPARTMENT`, el que siembra `BoGeographySeedService`
+ * para Santa Cruz. Va literal y no importado del seeder: la prueba comprueba
+ * que el servicio pasa el uuid tal cual llega, no que sepa derivarlo.
+ */
+const DEPARTAMENTO_SANTA_CRUZ = '51fcbf8e-b4ea-5ba9-8aec-0df7be617c69';
 
 describe('IamPractitionerSelfRegistrationService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
@@ -60,6 +70,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const accountLinksRepo = { create: fn() };
     const identifiersRepo = { create: fn() };
     const contactPointsRepo = { create: fn() };
+    const addressesRepo = { create: fn() };
     const tenantMembershipsRepo = { create: fn() };
     const notificationsService = {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
@@ -90,6 +101,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       accountLinksRepo as never,
       identifiersRepo as never,
       contactPointsRepo as never,
+      addressesRepo as never,
       tenantMembershipsRepo as never,
       effectiveRoles as never,
       notificationsService as never,
@@ -280,6 +292,56 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
+  it('persists the name in parts and composes the display name once', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    // La persona guarda las piezas; el compuesto se deriva de ellas.
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        name: 'Ana',
+        middleName: 'Lucía',
+        lastName: 'Rojas',
+        motherLastName: 'Paz',
+        displayName: 'Ana Lucía Rojas Paz',
+      }),
+    );
+    // La cuenta vive en otro esquema: si no recibiera el mismo valor, las dos
+    // filas podrían divergir.
+    expect(d.usersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ displayName: 'Ana Lucía Rojas Paz' }),
+    );
+  });
+
+  it('keeps honouring displayName for clients that still send it', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      email: dto.email,
+      password: dto.password,
+      licenseNumber: dto.licenseNumber,
+      credentialNumber: dto.credentialNumber,
+      displayName: 'Dra. Ana Rojas',
+    });
+
+    // Quien mandó la forma anterior tiene que ver exactamente lo que mandó.
+    expect(d.usersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ displayName: 'Dra. Ana Rojas' }),
+    );
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        displayName: 'Dra. Ana Rojas',
+        name: undefined,
+        lastName: undefined,
+      }),
+    );
+  });
+
   it('translates the gender and birth-sex codes into terminology concepts', async () => {
     const d = build();
 
@@ -321,6 +383,42 @@ describe('IamPractitionerSelfRegistrationService', () => {
       expect.objectContaining({
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
         value: '4821993',
+      }),
+    );
+  });
+
+  it('ata el departamento emisor al identificador, no a la persona', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      nationalId: '4821993',
+      issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+    });
+
+    expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        value: '4821993',
+        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+      }),
+    );
+  });
+
+  it('guarda la fecha de inscripción como validez de la matrícula', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      licenseIssueDate: '2019-03-14',
+    });
+
+    expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        validFrom: new Date('2019-03-14'),
+        // La fecha no adelanta la verificación: sigue PENDIENTE.
+        stateConceptId: PROF.AUTH_PENDING,
       }),
     );
   });

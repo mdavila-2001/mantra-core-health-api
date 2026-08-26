@@ -1,23 +1,38 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { CommunityModerationService } from '../services';
+import {
+  CommunityModerationService,
+  CommunityModerationReadService,
+} from '../services';
 import {
   CreateReportDto,
   ModerationDecisionDto,
   CreateAppealDto,
+  ResolveAppealDto,
   ReportResponseDto,
   ModerationDecisionResponseDto,
   IdResponseDto,
+  ModerationQueueQueryDto,
+  ModerationQueuePageDto,
+  ModerationDecisionsQueryDto,
+  ModerationDecisionPageDto,
+  ModerationAppealsQueryDto,
+  ModerationAppealPageDto,
 } from '../dto';
+
+/** Tope por defecto de filas por página, igual que en el resto de la API. */
+const DEFAULT_PAGE_LIMIT = 50;
 
 /** Endpoints de confianza y seguridad: reportes, decisiones y apelaciones. */
 @ApiTags('community-moderation')
@@ -27,9 +42,13 @@ export class CommunityModerationController {
   /**
    * Inicializa la instancia y sus dependencias.
    *
-   * @param service - Valor de service requerido por la operación.
+   * @param service - Escrituras de confianza y seguridad.
+   * @param readService - Lecturas de la cola de trabajo.
    */
-  constructor(private readonly service: CommunityModerationService) {}
+  constructor(
+    private readonly service: CommunityModerationService,
+    private readonly readService: CommunityModerationReadService,
+  ) {}
 
   /** UC-19-08 (cualquier miembro puede reportar). */
   @Post('reports')
@@ -65,5 +84,60 @@ export class CommunityModerationController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.service.appeal(decisionId, dto, actor);
+  }
+
+  /** UC-19-10, cierre: resuelve una apelación abierta. */
+  @Post('moderation/appeals/:appealId/resolve')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resolver una apelación de moderación' })
+  resolveAppeal(
+    @Param('appealId', ParseUUIDPipe) appealId: string,
+    @Body() dto: ResolveAppealDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
+    return this.service.resolveAppeal(appealId, dto, actor);
+  }
+
+  // --- Lecturas de la cola de trabajo (UC-19-09/10, cara de lectura) ---
+  //
+  // Las tres exigen `SECURITY_ADMIN`: exponen contenido reportado, el texto que
+  // escribió quien reportó y quién decidió qué. Un paciente o un profesional
+  // común no las abre — y el guard lo comprueba en el servidor, no el menú.
+
+  /** Cola de moderación con filtros de trabajo. */
+  @Get('moderation/queue')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Cola de moderación con filtros y cursor' })
+  listQueue(
+    @Query() query: ModerationQueueQueryDto,
+  ): Promise<ModerationQueuePageDto> {
+    return this.readService.listQueue(query, query.limit ?? DEFAULT_PAGE_LIMIT);
+  }
+
+  /** Decisiones tomadas, de la más reciente hacia atrás. */
+  @Get('moderation/decisions')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Decisiones de moderación tomadas' })
+  listDecisions(
+    @Query() query: ModerationDecisionsQueryDto,
+  ): Promise<ModerationDecisionPageDto> {
+    return this.readService.listDecisions(
+      query,
+      query.limit ?? DEFAULT_PAGE_LIMIT,
+    );
+  }
+
+  /** Apelaciones, con la decisión que cada una impugna. */
+  @Get('moderation/appeals')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Apelaciones presentadas, con su decisión' })
+  listAppeals(
+    @Query() query: ModerationAppealsQueryDto,
+  ): Promise<ModerationAppealPageDto> {
+    return this.readService.listAppeals(
+      query,
+      query.limit ?? DEFAULT_PAGE_LIMIT,
+    );
   }
 }

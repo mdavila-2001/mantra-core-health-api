@@ -8,7 +8,10 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
 import { CommunitySocialService } from './community-social.service';
+import { AttachableFileService } from '../../common/services';
+import { COMM } from '../community.concepts';
 import {
   CONCEPTS,
   ConflictException,
@@ -23,7 +26,10 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    remove: mockFn(),
+  };
   // `fork` devuelve el mismo doble: `getOwnProfile` lee con un contexto propio
   // y `upsertOwnProfile` escribe en una transacción, pero para la prueba es el
   // mismo objeto.
@@ -53,8 +59,52 @@ function build() {
     create: mockFn(),
   };
   const blocksRepo = { findByPair: mockFn(), create: mockFn() };
+  // La propiedad del perfil con el que se firma se concede por defecto: *que* se
+  // exija se prueba caso por caso más abajo, y *cómo* se decide es asunto de
+  // `CommunityVisibilityService`, que tiene su propia prueba con la regla real.
+  const visibility = {
+    assertActsAsProfile: mockFn(() => Promise.resolve(undefined)),
+  };
+  // Por defecto el archivo adjunto existe, es del actor y su versión está limpia:
+  // así las pruebas que no hablan de media no tienen que montarlo.
+  const filesRepo = {
+    findById: mockFn(() =>
+      Promise.resolve({
+        id: 'f1',
+        createdByUserId: actor.id,
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      }),
+    ),
+  };
+  const fileVersionsRepo = {
+    findById: mockFn(() =>
+      Promise.resolve({
+        id: 'v1',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
+      }),
+    ),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // El servicio compartido va **de verdad**, no doblado: la regla que interesa
+  // acá es la que corre en producción, y sus casos siguen escribiéndose contra
+  // los repositorios como antes de extraerla.
+  const attachableFiles = new AttachableFileService(
+    filesRepo as any,
+    fileVersionsRepo as any,
+    logger as any,
+  );
 
+  const stats = {
+    recordView: mockFn(),
+    recordImpressions: mockFn(),
+    read: mockFn().mockResolvedValue({
+      windowDays: 7,
+      views: 0,
+      searchAppearances: 0,
+      daily: [],
+    }),
+  };
   const service = new CommunitySocialService(
     em as any,
     profilesRepo as any,
@@ -64,6 +114,9 @@ function build() {
     bookmarksRepo as any,
     followsRepo as any,
     blocksRepo as any,
+    visibility as any,
+    attachableFiles,
+    stats as any,
     logger as any,
   );
   return {
@@ -77,6 +130,9 @@ function build() {
     bookmarksRepo,
     followsRepo,
     blocksRepo,
+    visibility,
+    filesRepo,
+    fileVersionsRepo,
   };
 }
 
@@ -148,9 +204,81 @@ describe('CommunitySocialService', () => {
 
       expect(d.profilesRepo.findByTarget).toHaveBeenCalledWith(d.em, 'u-1');
     });
+
+    /**
+     * El desajuste que se comprobó en vivo: la escritura acepta como titular el
+     * perfil profesional **o** la cuenta, y la lectura miraba sólo el primero.
+     * Una profesional con vitrina a nombre de su cuenta publicaba con ella y
+     * recibía `null` al pedir la suya.
+     */
+    it('encuentra la vitrina creada a nombre de la cuenta de un profesional', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget.mockImplementation(
+        (_em: any, targetId: string) =>
+          Promise.resolve(
+            targetId === 'u-1'
+              ? {
+                  id: 'pp-1',
+                  tenantId: 't-1',
+                  targetId: 'u-1',
+                  slug: 'dra-salas',
+                  displayName: 'Dra. Salas',
+                  statusConceptId: CONCEPTS.STATE_ACTIVE,
+                }
+              : null,
+          ),
+      );
+
+      const perfil = await d.service.getOwnProfile({
+        id: 'u-1',
+        roles: [],
+        practitionerProfileId: 'hp-1',
+      } as any);
+
+      expect(perfil?.id).toBe('pp-1');
+      // Primero el perfil profesional, que es el sujeto canónico; la cuenta es
+      // el camino alternativo, no el preferido.
+      expect(d.profilesRepo.findByTarget).toHaveBeenNthCalledWith(
+        1,
+        d.em,
+        'hp-1',
+      );
+      expect(d.profilesRepo.findByTarget).toHaveBeenNthCalledWith(
+        2,
+        d.em,
+        'u-1',
+      );
+    });
   });
 
   describe('upsertOwnProfile', () => {
+    it('editar la vitrina propia con su mismo slug no da conflicto', async () => {
+      // El slug ocupado es el suyo: si la comprobación mirase sólo el sujeto
+      // preferido, editar su propia vitrina le respondería «ese enlace ya está
+      // en uso».
+      const d = build();
+      const propia = {
+        id: 'pp-1',
+        tenantId: 't-1',
+        targetId: 'u-1',
+        slug: 'dra-salas',
+        displayName: 'Dra. Salas',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      };
+      d.profilesRepo.findBySlug.mockResolvedValue(propia);
+      d.profilesRepo.findByTarget.mockImplementation(
+        (_em: any, targetId: string) =>
+          Promise.resolve(targetId === 'u-1' ? propia : null),
+      );
+
+      await expect(
+        d.service.upsertOwnProfile(
+          { tenantId: 't-1', slug: 'dra-salas', displayName: 'Dra. Salas' },
+          { id: 'u-1', roles: [], practitionerProfileId: 'hp-1' } as any,
+        ),
+      ).resolves.toBeDefined();
+    });
+
     /** Sin vitrina previa: crea. */
     it('crea la vitrina cuando el sujeto no tenía ninguna', async () => {
       const d = build();
@@ -221,6 +349,133 @@ describe('CommunitySocialService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.profilesRepo.create).not.toHaveBeenCalled();
     });
+
+    /**
+     * El alta no publica a nadie. Es la mitad que faltaba del opt-in: la
+     * columna existía y ninguna ruta la escribía, así que toda vitrina nacía
+     * nula —privada— y el directorio público quedaba vacío por construcción.
+     */
+    it('no publica la vitrina nueva cuando no se declara la visibilidad', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: 'pp-1',
+          tenantId: 't-1',
+          targetId: 'u-1',
+          slug: 'nuevo-slug',
+          displayName: 'Nombre',
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+        });
+
+      const resultado = await d.service.upsertOwnProfile(
+        { tenantId: 't-1', slug: 'nuevo-slug', displayName: 'Nombre' },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(d.profilesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ visibilityConceptId: undefined }),
+      );
+      expect(resultado.visibility).toBe('PRIVATE');
+    });
+
+    /** Declararla `PUBLIC` es lo que la lista en el directorio anónimo. */
+    it('publica la vitrina nueva cuando el titular lo declara', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: 'pp-1',
+          tenantId: 't-1',
+          targetId: 'u-1',
+          slug: 'doctor-uno-e2e',
+          displayName: 'Doctora Uno',
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+          visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+        });
+
+      const resultado = await d.service.upsertOwnProfile(
+        {
+          tenantId: 't-1',
+          slug: 'doctor-uno-e2e',
+          displayName: 'Doctora Uno',
+          visibility: 'PUBLIC',
+        },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(d.profilesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+        }),
+      );
+      expect(resultado.visibility).toBe('PUBLIC');
+    });
+
+    /**
+     * Omitir el campo al editar **conserva** lo que había. Si el `PUT` lo
+     * borrara, cualquier pantalla que edite el titular sin tocar el
+     * interruptor despublicaría la vitrina sin decirlo.
+     */
+    it('conserva la visibilidad existente cuando el PUT no la menciona', async () => {
+      const d = build();
+      const existente = {
+        id: 'pp-1',
+        tenantId: 't-1',
+        targetId: 'u-1',
+        slug: 'doctor-uno-e2e',
+        displayName: 'Nombre viejo',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+      };
+      d.profilesRepo.findByTarget.mockResolvedValue(existente);
+      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+
+      await d.service.upsertOwnProfile(
+        {
+          tenantId: 't-1',
+          slug: 'doctor-uno-e2e',
+          displayName: 'Nombre nuevo',
+        },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(existente.visibilityConceptId).toBe(
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+      );
+    });
+
+    /** Y declararla `PRIVATE` la saca del directorio. */
+    it('despublica la vitrina cuando el titular declara PRIVATE', async () => {
+      const d = build();
+      const existente = {
+        id: 'pp-1',
+        tenantId: 't-1',
+        targetId: 'u-1',
+        slug: 'doctor-uno-e2e',
+        displayName: 'Doctora Uno',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+      };
+      d.profilesRepo.findByTarget.mockResolvedValue(existente);
+      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+
+      await d.service.upsertOwnProfile(
+        {
+          tenantId: 't-1',
+          slug: 'doctor-uno-e2e',
+          displayName: 'Doctora Uno',
+          visibility: 'PRIVATE',
+        },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(existente.visibilityConceptId).toBe(
+        COMM.PROFILE_VISIBILITY_PRIVATE,
+      );
+    });
   });
 
   describe('publishPost (UC-19-01)', () => {
@@ -266,6 +521,120 @@ describe('CommunitySocialService', () => {
         actor.id,
       );
       expect(d.postsRepo.createMention).toHaveBeenCalled();
+    });
+
+    /** Autor válido con un post listo para publicar; sólo cambia la media. */
+    function withAuthor(d: ReturnType<typeof build>) {
+      d.profilesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        commentsDefaultEnabled: true,
+      });
+      d.postsRepo.create.mockReturnValue({
+        id: 'post1',
+        authorPublicProfileId: 'p1',
+        publicationStatusConceptId: 'pub',
+        publishedAt: new Date(),
+      });
+    }
+
+    it('refuses to attach a file uploaded by someone else', async () => {
+      const d = build();
+      withAuthor(d);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'f1',
+        createdByUserId: 'otro-usuario',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        d.service.publishPost(
+          'p1',
+          { bodyText: 'hi', media: [{ fileId: 'f1' }] } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.postsRepo.createMedia).not.toHaveBeenCalled();
+    });
+
+    it('refuses a media file that does not exist', async () => {
+      const d = build();
+      withAuthor(d);
+      d.filesRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.publishPost(
+          'p1',
+          { bodyText: 'hi', media: [{ fileId: 'fantasma' }] } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.postsRepo.createMedia).not.toHaveBeenCalled();
+    });
+
+    it('refuses a media file whose current version is infected', async () => {
+      const d = build();
+      withAuthor(d);
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_INFECTED,
+      });
+
+      await expect(
+        d.service.publishPost(
+          'p1',
+          { bodyText: 'hi', media: [{ fileId: 'f1' }] } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.postsRepo.createMedia).not.toHaveBeenCalled();
+    });
+
+    it('refuses a soft-deleted media file', async () => {
+      const d = build();
+      withAuthor(d);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'f1',
+        createdByUserId: actor.id,
+        currentVersionId: 'v1',
+        deletedAt: new Date('2026-01-01'),
+        lifecycleStatusConceptId: CONCEPTS.FILE_DELETED,
+      });
+
+      await expect(
+        d.service.publishPost(
+          'p1',
+          { bodyText: 'hi', media: [{ fileId: 'f1' }] } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.postsRepo.createMedia).not.toHaveBeenCalled();
+    });
+
+    it('attaches media in a stable order when the file is the author own', async () => {
+      const d = build();
+      withAuthor(d);
+
+      await d.service.publishPost(
+        'p1',
+        {
+          bodyText: 'hi',
+          media: [{ fileId: 'f1' }, { fileId: 'f2' }],
+        } as any,
+        actor,
+      );
+
+      expect(d.postsRepo.createMedia).toHaveBeenCalledTimes(2);
+      expect(d.postsRepo.createMedia).toHaveBeenNthCalledWith(
+        1,
+        d.tx,
+        expect.objectContaining({ fileId: 'f1', ordinal: 0 }),
+      );
+      expect(d.postsRepo.createMedia).toHaveBeenNthCalledWith(
+        2,
+        d.tx,
+        expect.objectContaining({ fileId: 'f2', ordinal: 1 }),
+      );
     });
   });
 
@@ -434,6 +803,317 @@ describe('CommunitySocialService', () => {
       );
       expect(res).toEqual({ id: 'blk1' });
       expect(follow.statusConceptId).not.toBe(CONCEPTS.STATE_ACTIVE);
+    });
+
+    /**
+     * Un bloqueo levantado deja la fila en `STATE_REVOKED`. Si el 409 de
+     * duplicado no distinguía el estado, «bloqueé, desbloqueé, quiero volver a
+     * bloquear» quedaba bloqueado para siempre.
+     */
+    it('vuelve a bloquear reactivando la fila revocada, sin 409', async () => {
+      const d = build();
+      const previo = {
+        id: 'blk1',
+        statusConceptId: CONCEPTS.STATE_REVOKED,
+        updatedAt: new Date(),
+      };
+      d.blocksRepo.findByPair.mockResolvedValue(previo);
+      const res = await d.service.block(
+        { blockerProfileId: 'p1', blockedProfileId: 'p2' } as any,
+        actor,
+      );
+      expect(res).toEqual({ id: 'blk1' });
+      expect(previo.statusConceptId).toBe(CONCEPTS.STATE_ACTIVE);
+      expect(d.blocksRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * El perfil con el que se firma una escritura no lo elige el cliente.
+   *
+   * Cada una de estas llamadas recibía el perfil autor en el cuerpo o en la ruta
+   * y ninguna comprobaba que fuera del actor. Con el uuid de un perfil ajeno
+   * —que las lecturas del muro publican— se podía publicar, comentar, reaccionar,
+   * guardar, seguir y bloquear en nombre de otro.
+   *
+   * Se prueba que la comprobación se pide **con el perfil correcto** y que su
+   * negativa corta la operación. La regla en sí vive en
+   * `CommunityVisibilityService`.
+   */
+  describe('propiedad del perfil que firma', () => {
+    const casos: readonly {
+      nombre: string;
+      perfil: string;
+      ejecutar: (d: ReturnType<typeof build>) => Promise<unknown>;
+    }[] = [
+      {
+        nombre: 'publishPost',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.profilesRepo.findById.mockResolvedValue({ id: 'p1' });
+          d.postsRepo.create.mockReturnValue({ id: 'post1' });
+          return d.service.publishPost('p1', { bodyText: 'x' } as any, actor);
+        },
+      },
+      {
+        nombre: 'createComment',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.profilesRepo.findById.mockResolvedValue({ id: 'p1' });
+          d.commentsRepo.create.mockReturnValue({ id: 'c1' });
+          return d.service.createComment(
+            {
+              authorProfileId: 'p1',
+              commentableType: 'POST',
+              commentableRefId: 'post1',
+              bodyText: 'x',
+            } as any,
+            actor,
+          );
+        },
+      },
+      {
+        nombre: 'react',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.reactionsRepo.findByActorTarget.mockResolvedValue(null);
+          d.reactionsRepo.create.mockReturnValue({ id: 'r1' });
+          return d.service.react(
+            {
+              actorProfileId: 'p1',
+              reactableType: 'POST',
+              reactableRefId: 'post1',
+              reactionType: 'LIKE',
+            } as any,
+            actor,
+          );
+        },
+      },
+      {
+        nombre: 'bookmark',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.bookmarksRepo.findByProfileTarget.mockResolvedValue(null);
+          d.bookmarksRepo.create.mockReturnValue({ id: 'b1' });
+          return d.service.bookmark(
+            {
+              profileId: 'p1',
+              bookmarkableType: 'POST',
+              bookmarkableRefId: 'post1',
+            } as any,
+            actor,
+          );
+        },
+      },
+      {
+        nombre: 'follow',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.followsRepo.findByFollowerTarget.mockResolvedValue(null);
+          d.followsRepo.create.mockReturnValue({ id: 'f1' });
+          return d.service.follow(
+            {
+              followerProfileId: 'p1',
+              followableType: 'PROFILE',
+              followableRefId: 'p2',
+            } as any,
+            actor,
+          );
+        },
+      },
+      {
+        nombre: 'block',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.blocksRepo.findByPair.mockResolvedValue(null);
+          d.blocksRepo.create.mockReturnValue({ id: 'blk1' });
+          return d.service.block(
+            { blockerProfileId: 'p1', blockedProfileId: 'p2' } as any,
+            actor,
+          );
+        },
+      },
+      {
+        nombre: 'unfollow',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.followsRepo.findByFollowerTarget.mockResolvedValue(null);
+          return d.service.unfollow(
+            {
+              followerProfileId: 'p1',
+              followableType: 'PROFILE',
+              followableRefId: 'p2',
+            } as any,
+            actor,
+          );
+        },
+      },
+      {
+        nombre: 'unbookmark',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.bookmarksRepo.findByProfileTarget.mockResolvedValue(null);
+          return d.service.unbookmark(
+            {
+              profileId: 'p1',
+              bookmarkableType: 'POST',
+              bookmarkableRefId: 'post1',
+            } as any,
+            actor,
+          );
+        },
+      },
+      {
+        nombre: 'unblock',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.blocksRepo.findByPair.mockResolvedValue(null);
+          return d.service.unblock(
+            { blockerProfileId: 'p1', blockedProfileId: 'p2' } as any,
+            actor,
+          );
+        },
+      },
+    ];
+
+    for (const caso of casos) {
+      it(`${caso.nombre} exige que el perfil sea del actor`, async () => {
+        const d = build();
+        await caso.ejecutar(d);
+        expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+          expect.anything(),
+          caso.perfil,
+          actor,
+        );
+      });
+
+      it(`${caso.nombre} no escribe si el perfil no es del actor`, async () => {
+        const d = build();
+        d.visibility.assertActsAsProfile.mockRejectedValue(
+          new Error('perfil ajeno'),
+        );
+        await expect(caso.ejecutar(d)).rejects.toThrow('perfil ajeno');
+        expect(d.tx.flush).not.toHaveBeenCalled();
+      });
+    }
+  });
+
+  describe('unfollow (UC-19-05, cara inversa)', () => {
+    it('pasa el follow activo a FOLLOW_REMOVED sin borrar la fila', async () => {
+      const d = build();
+      const follow = {
+        id: 'f1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        updatedAt: new Date(),
+      };
+      d.followsRepo.findByFollowerTarget.mockResolvedValue(follow);
+      const res = await d.service.unfollow(
+        {
+          followerProfileId: 'p1',
+          followableType: 'PROFILE',
+          followableRefId: 'p2',
+        } as any,
+        actor,
+      );
+      expect(res).toEqual({ removed: true });
+      expect(follow.statusConceptId).not.toBe(CONCEPTS.STATE_ACTIVE);
+    });
+
+    /**
+     * Es un conmutador: si el follow ya no está, el estado final es el que se
+     * pedía. Un error obligaría a la pantalla a tratarlo como fallo.
+     */
+    it('devuelve removed=false cuando ya no seguía, sin error', async () => {
+      const d = build();
+      d.followsRepo.findByFollowerTarget.mockResolvedValue({
+        id: 'f1',
+        statusConceptId: 'otro-estado',
+      });
+      await expect(
+        d.service.unfollow(
+          {
+            followerProfileId: 'p1',
+            followableType: 'PROFILE',
+            followableRefId: 'p2',
+          } as any,
+          actor,
+        ),
+      ).resolves.toEqual({ removed: false });
+    });
+  });
+
+  describe('unbookmark (UC-19-04, cara inversa)', () => {
+    it('quita el marcador', async () => {
+      const d = build();
+      d.bookmarksRepo.findByProfileTarget.mockResolvedValue({
+        id: 'b1',
+        collectionName: undefined,
+      });
+      const res = await d.service.unbookmark(
+        {
+          profileId: 'p1',
+          bookmarkableType: 'POST',
+          bookmarkableRefId: 'post1',
+        } as any,
+        actor,
+      );
+      expect(res).toEqual({ removed: true });
+      expect(d.tx.remove).toHaveBeenCalled();
+    });
+
+    it('no quita un marcador de otra colección cuando se acotó a una', async () => {
+      const d = build();
+      d.bookmarksRepo.findByProfileTarget.mockResolvedValue({
+        id: 'b1',
+        collectionName: 'lecturas',
+      });
+      const res = await d.service.unbookmark(
+        {
+          profileId: 'p1',
+          bookmarkableType: 'POST',
+          bookmarkableRefId: 'post1',
+          collectionName: 'guardados',
+        } as any,
+        actor,
+      );
+      expect(res).toEqual({ removed: false });
+      expect(d.tx.remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('unblock (UC-19-14, cara inversa)', () => {
+    it('revoca el bloqueo activo', async () => {
+      const d = build();
+      const block = {
+        id: 'blk1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        updatedAt: new Date(),
+      };
+      d.blocksRepo.findByPair.mockResolvedValue(block);
+      const res = await d.service.unblock(
+        { blockerProfileId: 'p1', blockedProfileId: 'p2' } as any,
+        actor,
+      );
+      expect(res).toEqual({ removed: true });
+      expect(block.statusConceptId).toBe(CONCEPTS.STATE_REVOKED);
+    });
+
+    /**
+     * Bloquear cortó dos relaciones que existían; desbloquear devuelve el
+     * permiso de volver a seguir, no la decisión de seguir.
+     */
+    it('no reactiva los follows que la poda del bloqueo removió', async () => {
+      const d = build();
+      d.blocksRepo.findByPair.mockResolvedValue({
+        id: 'blk1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        updatedAt: new Date(),
+      });
+      await d.service.unblock(
+        { blockerProfileId: 'p1', blockedProfileId: 'p2' } as any,
+        actor,
+      );
+      expect(d.followsRepo.findMutualBetween).not.toHaveBeenCalled();
     });
   });
 });

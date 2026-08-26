@@ -79,6 +79,20 @@ export class Conditions {
   lateralityConceptId?: string;
 
   /**
+   * Identificador asociado a clinical course concept.
+   *
+   * Curso clínico (agudo/crónico/subagudo/recurrente/desconocido). Eje distinto
+   * del estado clínico: gobierna qué transiciones de `clinicalStatusConceptId`
+   * son válidas (Patch v4.0.8) — una condición crónica no pasa a `RESOLVED`.
+   */
+  @Property({
+    fieldName: 'clinical_course_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  clinicalCourseConceptId?: string;
+
+  /**
    * Valor de onset at mantenido por la instancia.
    */
   @Property({
@@ -87,6 +101,20 @@ export class Conditions {
     nullable: true,
   })
   onsetAt?: Date;
+
+  /**
+   * Fecha esperada de resolución o de próxima revisión.
+   *
+   * Sólo tiene sentido clínico para un curso agudo/subagudo; una condición
+   * crónica la deja sin definir. Informativa: no dispara ninguna transición de
+   * estado por sí sola (Patch v4.0.8).
+   */
+  @Property({
+    fieldName: 'expected_resolution_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  expectedResolutionAt?: Date;
 
   /**
    * Valor de resolved at mantenido por la instancia.
@@ -103,6 +131,12 @@ export class Conditions {
    */
   @Property({ fieldName: 'recorded_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   recordedByUserId?: string;
+
+  /**
+   * Valor de note text mantenido por la instancia.
+   */
+  @Property({ fieldName: 'note_text', columnType: 'text', nullable: true })
+  noteText?: string;
 
   /**
    * Fecha y hora en que se creó el registro.

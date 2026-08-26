@@ -1,0 +1,128 @@
+{
+  "code": "ORL_EVALUACION_BASE",
+  "name": "Evaluación otorrinolaringológica",
+  "specialty": {
+    "code": "OTORRINOLARINGOLOGIA",
+    "display": "Otorrinolaringología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen de cabeza y cuello",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen dirigido, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis otológica (hipoacusia, lado afectado, otalgia, otorrea, acúfenos, vértigo), la nasal y faringolaríngea (obstrucción nasal, epistaxis, odinofagia, disfonía) y la otoscopia y la rinoscopia anterior descritas en prosa."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "hipoacusia",
+      "name": "Hipoacusia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "lado_afectado",
+      "name": "Lado afectado",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "otalgia",
+      "name": "Otalgia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "otorrea",
+      "name": "Otorrea",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "acufenos",
+      "name": "Acúfenos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "vertigo",
+      "name": "Vértigo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "obstruccion_nasal",
+      "name": "Obstrucción nasal",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "epistaxis",
+      "name": "Epistaxis",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "odinofagia",
+      "name": "Odinofagia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "disfonia",
+      "name": "Disfonía",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "antecedentes_otorrinolaringologicos",
+      "name": "Antecedentes otorrinolaringológicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "otoscopia",
+      "name": "Otoscopia (hallazgos descritos)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "rinoscopia_anterior",
+      "name": "Rinoscopia anterior (hallazgos descritos)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_de_cuello",
+      "name": "Examen de cuello",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

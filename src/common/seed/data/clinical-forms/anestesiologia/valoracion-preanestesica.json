@@ -1,0 +1,128 @@
+{
+  "code": "ANEST_VALORACION_PREANESTESICA",
+  "name": "Valoración preanestésica",
+  "specialty": {
+    "code": "ANESTESIOLOGIA",
+    "display": "Anestesiología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen físico preoperatorio",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma sale la estructura común de la consulta: motivo, antecedentes patológicos, alergias, medicación habitual, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad el procedimiento previsto, el ayuno en horas, la evaluación de la vía aérea (Mallampati, apertura bucal, movilidad cervical), las piezas dentarias en riesgo, las experiencias anestésicas previas y sus complicaciones, la clasificación ASA registrada como texto libre y el plan anestésico propuesto."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "procedimiento_previsto",
+      "name": "Procedimiento previsto",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "antecedentes_patologicos",
+      "name": "Antecedentes patológicos",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "alergias",
+      "name": "Alergias",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "medicacion_habitual",
+      "name": "Medicación habitual",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "habitos_toxicos",
+      "name": "Hábitos tóxicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "experiencias_anestesicas_previas",
+      "name": "Experiencias anestésicas previas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "complicaciones_anestesicas_previas",
+      "name": "Complicaciones anestésicas previas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "ayuno_en_horas",
+      "name": "Ayuno en horas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "via_aerea_mallampati",
+      "name": "Vía aérea — Mallampati",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "apertura_bucal",
+      "name": "Apertura bucal",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "movilidad_cervical",
+      "name": "Movilidad cervical",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "piezas_dentarias_en_riesgo",
+      "name": "Piezas dentarias en riesgo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_cardiorrespiratorio",
+      "name": "Examen cardiorrespiratorio",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "laboratorio_relevante",
+      "name": "Laboratorio relevante",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "clasificacion_asa",
+      "name": "Clasificación ASA",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "plan_de_tratamiento",
+      "name": "Plan anestésico propuesto",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

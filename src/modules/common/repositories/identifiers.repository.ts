@@ -34,6 +34,11 @@ export interface CreateIdentifierData {
    */
   stateConceptId: string;
   /**
+   * Departamento emisor (miembro de `VS_BO_DEPARTMENT`). Sólo aplica a
+   * documentos bolivianos; el resto de tipos de identificador lo dejan vacío.
+   */
+  issuerAdministrativeAreaConceptId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -87,6 +92,8 @@ export class IdentifiersRepository {
         value: data.value,
         useConceptId: data.useConceptId,
         stateConceptId: data.stateConceptId,
+        issuerAdministrativeAreaConceptId:
+          data.issuerAdministrativeAreaConceptId,
         ...createdBy(data.actorUserId),
         // `partial: true` relaja el tipado estricto de `em.create`: la columna
         // `row_version` (version: true) tiene DEFAULT en BD y MikroORM la gestiona,

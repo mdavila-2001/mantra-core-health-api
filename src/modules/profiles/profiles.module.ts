@@ -3,12 +3,22 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 // Verificar una matrícula concede el rol asistencial: la autoridad sobre los
 // roles es de `authz`, que no importa `profiles` (no cierra ciclo).
 import { AuthzModule } from '../authz/authz.module';
+// La foto del perfil profesional es un archivo de `common`: fijarla exige
+// comprobar contra `common.files` que sea del titular y siga siendo utilizable.
+import { CommonModule } from '../common/common.module';
+import { TerminologyModule } from '../terminology/terminology.module';
+// TP-2: quién administra cada organización lo decide `directory`, y de ahí sale
+// el permiso para aprobar o rechazar un vínculo médico–organización.
+import { DirectoryModule } from '../directory/directory.module';
 import * as entities from './entities';
+import { MedicalSpecialtyCatalogService } from './services/medical-specialty-catalog.service';
 import {
   ProfilesPatientsController,
   ProfilesPractitionersController,
+  TenantPractitionerRequestsController,
 } from './controllers';
 import {
+  ProfilesAffiliationsService,
   ProfilesPatientsService,
   ProfilesPractitionersService,
 } from './services';
@@ -29,6 +39,7 @@ import {
   PatientPortalProxiesRepository,
 } from './repositories';
 import { ProfileOwnershipService } from './services';
+import { LinkableOrganizationsService } from './services/linkable-organizations.service';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -38,10 +49,28 @@ import { ProfileOwnershipService } from './services';
  * relacionadas, proxies de portal y defunción/anonimización.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuthzModule],
-  controllers: [ProfilesPatientsController, ProfilesPractitionersController],
+  // DirectoryModule: TP-2 necesita saber quién administra cada organización
+  // para decidir quién aprueba un vínculo, y ese criterio ya vive allá. No hay
+  // ciclo: `directory` no depende de `profiles`.
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    AuthzModule,
+    CommonModule,
+    // Sólo para leer el catálogo de especialidades: la regla de qué uuid es
+    // una especialidad válida vive en terminología, no en una lista de acá.
+    TerminologyModule,
+    DirectoryModule,
+  ],
+  controllers: [
+    ProfilesPatientsController,
+    ProfilesPractitionersController,
+    TenantPractitionerRequestsController,
+  ],
   providers: [
     ProfileOwnershipService,
+    MedicalSpecialtyCatalogService,
+    ProfilesAffiliationsService,
+    LinkableOrganizationsService,
     // Repositorios
     PersonsRepository,
     PersonProfilesRepository,

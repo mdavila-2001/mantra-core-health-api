@@ -28,8 +28,9 @@ import {
   PersonProfilesRepository,
   PersonsRepository,
 } from '../../profiles/repositories';
-import { composePersonDisplayName } from '../../profiles/person-name';
+import { composeAccountDisplayName } from '../../profiles/person-name';
 import {
+  AddressesRepository,
   ContactPointsRepository,
   IdentifiersRepository,
 } from '../../common/repositories';
@@ -49,6 +50,7 @@ import {
   VerifyEmailDto,
   VerifyEmailResponseDto,
 } from '../dto';
+import { createResidenceAddress } from './residence-address';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
@@ -109,6 +111,7 @@ export class IamPatientSelfRegistrationService {
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly addressesRepo: AddressesRepository,
     private readonly notificationsService: NotificationsService,
     private readonly tenantMembershipsRepo: TenantMembershipsRepository,
     private readonly logger: PinoLogger,
@@ -186,7 +189,7 @@ export class IamPatientSelfRegistrationService {
       // El nombre para mostrar sale de las partes; si el cliente mandó la forma
       // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
       // -la cuenta y la persona- para que no puedan divergir.
-      const displayName = composeDisplayName(dto);
+      const displayName = composeAccountDisplayName(dto);
 
       const user = this.usersRepo.create(tx, {
         displayName,
@@ -238,6 +241,13 @@ export class IamPatientSelfRegistrationService {
           (dto.sexAtBirth
             ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
             : undefined),
+        // El catálogo gana sobre el texto libre: si ambos vienen, el texto
+        // libre sólo tenía sentido para cuando el paciente no encontró la
+        // suya en el catálogo (T-02).
+        occupationConceptId: dto.occupationConceptId,
+        occupationFreeText: dto.occupationConceptId
+          ? undefined
+          : dto.occupationFreeText,
         actorUserId: user.id,
       });
       await tx.flush();
@@ -282,6 +292,8 @@ export class IamPatientSelfRegistrationService {
         value: dto.nationalId,
         useConceptId: CONCEPTS.USE_OFFICIAL,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
+        issuerAdministrativeAreaConceptId:
+          dto.issuerAdministrativeAreaConceptId,
         actorUserId: user.id,
       });
 
@@ -307,6 +319,14 @@ export class IamPatientSelfRegistrationService {
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
+        actorUserId: user.id,
+      });
+
+      // Domicilio: el municipio elegido en el alta. El departamento lo deriva
+      // el ayudante del código del INE, no viene del cliente.
+      createResidenceAddress(this.addressesRepo, tx, {
+        personId: person.id,
+        municipalityConceptId: dto.residenceMunicipalityConceptId,
         actorUserId: user.id,
       });
 
@@ -494,23 +514,4 @@ export class IamPatientSelfRegistrationService {
       return false;
     }
   }
-}
-
-/**
- * El nombre para mostrar de la CUENTA (`iam.users.display_name`).
- *
- * `profiles.persons` lo deriva solo —lo hace `PersonsRepository.create`, que es
- * el único punto de inserción—, pero la cuenta es otra tabla en otro esquema y
- * necesita el mismo valor calculado acá para que las dos no puedan divergir.
- *
- * `displayName` explícito gana: es la forma anterior de declarar el nombre y
- * sigue aceptándose, así que quien la use tiene que ver exactamente lo que
- * mandó. Nunca devuelve vacío: el DTO exige `name` y `lastName` cuando no viene
- * `displayName`.
- *
- * @param dto - Cuerpo del alta.
- * @returns El nombre para mostrar de la cuenta.
- */
-function composeDisplayName(dto: RegisterPatientDto): string {
-  return dto.displayName ?? composePersonDisplayName(dto) ?? '';
 }

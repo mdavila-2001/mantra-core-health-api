@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `profiles`.
- * 117 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 124 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
@@ -70,6 +70,7 @@ export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
   ['persons', 'gender_identity_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['persons', 'merge_survivor_person_id', 'profiles', 'persons', 'id'],
   ['persons', 'nationality_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['persons', 'occupation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['persons', 'person_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['persons', 'photo_file_id', 'common', 'files', 'id'],
   ['persons', 'preferred_language_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -88,6 +89,12 @@ export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
   ['person_profiles', 'profile_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['person_profiles', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['person_profiles', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_affiliations', 'affiliation_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_affiliations', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_affiliations', 'practice_site_id', 'practice', 'practice_sites', 'id'],
+  ['practitioner_affiliations', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['practitioner_affiliations', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_affiliations', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_languages', 'created_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_languages', 'language_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_languages', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],

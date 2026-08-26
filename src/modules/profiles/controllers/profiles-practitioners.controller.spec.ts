@@ -22,11 +22,18 @@ function build() {
     addJurisdictionAuthorization: mockFn(),
     addSpecialty: mockFn(),
     verifyCredential: mockFn(),
+    setPractitionerPhoto: mockFn(),
+    removePractitionerPhoto: mockFn(),
+    getOwnOnboarding: mockFn(),
   };
+  // El buscador del padrón: el controller sólo le pasa los tres parámetros de
+  // la query, así que alcanza con poder observar con qué lo llamó.
+  const linkableOrganizations = { buscar: mockFn() };
   const controller = new ProfilesPractitionersController(
     practitionersService as any,
+    linkableOrganizations as any,
   );
-  return { controller, practitionersService };
+  return { controller, practitionersService, linkableOrganizations };
 }
 
 describe('ProfilesPractitionersController', () => {
@@ -78,5 +85,55 @@ describe('ProfilesPractitionersController', () => {
       dto,
       actor,
     );
+  });
+
+  it('delegates setPractitionerPhoto with the profile from the route', async () => {
+    // El perfil sale del parámetro y el actor de la sesión: el controlador no
+    // resuelve permisos, y que el sujeto no venga del cuerpo es lo que impide
+    // pedir la foto de otro con una petición bien formada.
+    const d = build();
+    const dto = { fileId: 'file-1' };
+    d.practitionersService.setPractitionerPhoto.mockResolvedValue({
+      profileId: 'pp1',
+      photoFileId: 'file-1',
+    });
+
+    await expect(
+      d.controller.setPractitionerPhoto('pp1', dto as any, actor),
+    ).resolves.toEqual({ profileId: 'pp1', photoFileId: 'file-1' });
+    expect(d.practitionersService.setPractitionerPhoto).toHaveBeenCalledWith(
+      'pp1',
+      dto,
+      actor,
+    );
+  });
+
+  it('delegates removePractitionerPhoto', async () => {
+    const d = build();
+    await d.controller.removePractitionerPhoto('pp1', actor);
+    expect(d.practitionersService.removePractitionerPhoto).toHaveBeenCalledWith(
+      'pp1',
+      actor,
+    );
+  });
+
+  /**
+   * TJ-1: el sujeto sale de la sesión y no hay parámetro que apunte a otro, así
+   * que lo único que este endpoint puede devolver es el avance de quien pregunta.
+   */
+  it('delegates getOwnOnboarding con el actor de la sesión (TJ-1)', async () => {
+    const d = build();
+    d.practitionersService.getOwnOnboarding.mockResolvedValue({
+      practitionerProfileId: 'pp1',
+      steps: [],
+      firstIncomplete: 'done',
+    });
+
+    await expect(d.controller.getOwnOnboarding(actor)).resolves.toEqual({
+      practitionerProfileId: 'pp1',
+      steps: [],
+      firstIncomplete: 'done',
+    });
+    expect(d.practitionersService.getOwnOnboarding).toHaveBeenCalledWith(actor);
   });
 });

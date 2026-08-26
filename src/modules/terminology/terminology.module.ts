@@ -16,6 +16,8 @@ import {
   ValueSetsService,
   ConceptMapsService,
   TenantCatalogService,
+  ConceptFileImportService,
+  CodeSystemsReadService,
 } from './services';
 import {
   TerminologySourcesRepository,
@@ -54,6 +56,8 @@ import {
     ValueSetsService,
     ConceptMapsService,
     TenantCatalogService,
+    ConceptFileImportService,
+    CodeSystemsReadService,
     TerminologySourcesRepository,
     CodeSystemsRepository,
     CodeSystemVersionsRepository,
@@ -67,6 +71,14 @@ import {
   // `CatalogConceptsRepository` lo necesita directory para comprobar que los
   // `*ConceptId` de un alta existen antes de escribirlos: son FK contra
   // `catalog_concepts` y descubrirlas en el INSERT devuelve un 500 opaco.
-  exports: [CatalogConceptsRepository],
+  // `ValueSetsRepository` sale para que `profiles` pueda preguntar si un uuid
+  // es una especialidad médica: la pregunta es de terminología y la respuesta
+  // tiene que salir de acá, no de una lista repetida en el otro módulo.
+  exports: [
+    CatalogConceptsRepository,
+    ValueSetsRepository,
+    // El buscador de instituciones del perfil lee `facility:*` en lote.
+    ConceptDesignationsRepository,
+  ],
 })
 export class TerminologyModule {}
