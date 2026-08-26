@@ -406,4 +406,106 @@ describe('DirectoryMembershipsService', () => {
       expect(d.membershipsRepo.countActiveByTenantRole).not.toHaveBeenCalled();
     });
   });
+
+  /**
+   * La membresía que concede aprobar un vínculo médico–organización
+   * (MAC-VINCULO). No es una invitación: la organización ya decidió, así que no
+   * vuelve a preguntar quién administra ni falla si la persona ya estaba dentro.
+   */
+  describe('ensureMembresiaAsistencial', () => {
+    const params = {
+      userId: 'user-med',
+      tenantId: 't1',
+      actorUserId: 'admin-1',
+    };
+
+    it('crea la membresía con el rol acotado cuando no había ninguna', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+      d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
+
+      const res = await d.service.ensureMembresiaAsistencial(
+        d.tx as any,
+        params,
+      );
+
+      expect(res).toEqual({ membership: { id: 'm-nueva' }, creada: true });
+      const [, data] = d.membershipsRepo.create.mock.calls.at(-1);
+      expect(data).toMatchObject({
+        userId: 'user-med',
+        tenantId: 't1',
+        tenantRoleConceptId: DIR.ROLE_PRACTITIONER,
+        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+        accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
+        invitedByUserId: 'admin-1',
+      });
+    });
+
+    /**
+     * El rol asistencial es el piso, no el techo: si la persona ya administra
+     * la organización, aprobarle un vínculo no puede quitarle atribuciones.
+     * Aprobar sólo suma acceso.
+     */
+    it('no degrada a quien ya era ADMIN de la organización', async () => {
+      const d = build();
+      const existente = {
+        id: 'm-vieja',
+        tenantRoleConceptId: DIR.ROLE_ADMIN,
+      };
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(existente);
+
+      const res = await d.service.ensureMembresiaAsistencial(
+        d.tx as any,
+        params,
+      );
+
+      expect(res).toEqual({ membership: existente, creada: false });
+      expect(d.membershipsRepo.create).not.toHaveBeenCalled();
+      expect(existente.tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
+    });
+
+    /**
+     * No hay unique (user, tenant) en la base: la guarda contra la fila
+     * duplicada es ésta y sólo ésta.
+     */
+    it('busca la membresía activa antes de escribir', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+      d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
+
+      await d.service.ensureMembresiaAsistencial(d.tx as any, params);
+
+      expect(d.membershipsRepo.findActiveByUserTenant).toHaveBeenCalledWith(
+        d.tx,
+        'user-med',
+        't1',
+        DIR.MEMBERSHIP_ACTIVE,
+      );
+    });
+
+    /**
+     * Corre dentro de la transacción de la decisión: abrir una propia o
+     * flushear por su cuenta partiría en dos lo que debe pasar junto.
+     */
+    it('no abre transacción propia ni flushea', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+      d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
+
+      await d.service.ensureMembresiaAsistencial(d.tx as any, params);
+
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    /** La organización ya decidió: volver a preguntar sería preguntar de más. */
+    it('no vuelve a exigir permisos de administración', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+      d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
+
+      await d.service.ensureMembresiaAsistencial(d.tx as any, params);
+
+      expect(d.tenantAdmin.assertCanAdminister).not.toHaveBeenCalled();
+    });
+  });
 });

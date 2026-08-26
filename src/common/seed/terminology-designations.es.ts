@@ -723,6 +723,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    DIR.ROLE_PRACTITIONER,
+    {
+      display: 'Profesional vinculado',
+      definition:
+        'Profesional de salud cuyo vínculo fue aprobado por la organización. Atiende y publica su agenda en ella; no administra personas, sucursales ni configuración.',
+    },
+  ],
+  [
     DIR.SCOPE_ALL_TENANT,
     {
       display: 'Alcance: toda la organización',

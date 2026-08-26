@@ -466,7 +466,12 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     name: 'Rol en la organización',
     description:
       'Rol de negocio con el que la persona actúa en la organización. No es un rol global de plataforma.',
-    concepts: [DIR.ROLE_OWNER, DIR.ROLE_ADMIN, DIR.ROLE_STAFF],
+    concepts: [
+      DIR.ROLE_OWNER,
+      DIR.ROLE_ADMIN,
+      DIR.ROLE_STAFF,
+      DIR.ROLE_PRACTITIONER,
+    ],
     defaultConceptId: DIR.ROLE_STAFF,
     targets: ['directory.tenant_memberships.tenant_role_concept_id'],
   },
