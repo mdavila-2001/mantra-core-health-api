@@ -123,10 +123,20 @@ export class TransferResponseDto {
 /** Respuesta del worker de expiración de reservas (UC-25-05). */
 export class ExpireReservationsResponseDto {
   /**
-   * Valor de expired count mantenido por la instancia.
+   * Todo lo expirado en la corrida: reservas de mostrador más pedidos de
+   * paciente (FAR-E1). El desglose de pedidos viaja aparte.
    */
-  @ApiProperty({ description: 'Reservas expiradas en esta corrida' })
+  @ApiProperty({ description: 'Reservas y pedidos expirados en esta corrida' })
   expiredCount!: number;
+
+  /**
+   * Cuántos de los expirados eran pedidos de paciente (FAR-E1).
+   */
+  @ApiProperty({
+    required: false,
+    description: 'Pedidos de paciente vencidos en esta corrida',
+  })
+  expiredOrderCount?: number;
 }
 
 /** Respuesta de la reconciliación de sincronización (UC-25-12). */

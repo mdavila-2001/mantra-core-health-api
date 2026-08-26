@@ -131,6 +131,61 @@ export const { seeds: PHARMACY_INVENTORY_CONCEPT_SEEDS, ids: PINV } =
       code: 'PINV_RES_LINE_RELEASED',
       display: 'Reservation line released',
     },
+    // Línea de pedido de paciente sin stock al crear: se registra con
+    // reserved_quantity = 0 y NO tumba el pedido (FAR-E1, reserva parcial).
+    RES_LINE_OUT_OF_STOCK: {
+      code: 'PINV_RES_LINE_OUT_OF_STOCK',
+      display: 'Reservation line out of stock',
+    },
+
+    // --- Pedidos de paciente (FAR-E1) ---
+    // El pedido se materializa sobre `inventory_reservations`; lo que lo
+    // distingue de una reserva de mostrador es su `reservation_status_concept_id`:
+    // una fila con estado `PINV_ORDER_*` ES un pedido de paciente. El value set
+    // completo son los 10 estados acordados con FAR-I2; el carril E1 solo
+    // ejecuta creación (`ENVIADO`), cancelación (`CANCELADO`) y vencimiento
+    // (`VENCIDO`) — los demás los transicionan E2/E3, pero se acuñan todos
+    // para que la máquina de estados sea un dato completo desde el día uno.
+    ORDER_ENVIADO: {
+      code: 'PINV_ORDER_ENVIADO',
+      display: 'Order submitted',
+    },
+    ORDER_EN_REVISION: {
+      code: 'PINV_ORDER_EN_REVISION',
+      display: 'Order under review',
+    },
+    ORDER_CONFIRMADO: {
+      code: 'PINV_ORDER_CONFIRMADO',
+      display: 'Order confirmed',
+    },
+    ORDER_ACEPTACION_PENDIENTE: {
+      code: 'PINV_ORDER_ACEPTACION_PENDIENTE',
+      display: 'Order awaiting patient acceptance',
+    },
+    ORDER_ACEPTADO: {
+      code: 'PINV_ORDER_ACEPTADO',
+      display: 'Order accepted by patient',
+    },
+    ORDER_LISTO_PARA_RETIRO: {
+      code: 'PINV_ORDER_LISTO_PARA_RETIRO',
+      display: 'Order ready for pickup',
+    },
+    ORDER_RETIRADO: {
+      code: 'PINV_ORDER_RETIRADO',
+      display: 'Order picked up',
+    },
+    ORDER_RECHAZADO: {
+      code: 'PINV_ORDER_RECHAZADO',
+      display: 'Order rejected',
+    },
+    ORDER_VENCIDO: {
+      code: 'PINV_ORDER_VENCIDO',
+      display: 'Order expired',
+    },
+    ORDER_CANCELADO: {
+      code: 'PINV_ORDER_CANCELADO',
+      display: 'Order cancelled',
+    },
 
     // --- Dispensación (medication_dispensations.dispensation_status_concept_id) ---
     DISPENSE_DISPENSED: {
