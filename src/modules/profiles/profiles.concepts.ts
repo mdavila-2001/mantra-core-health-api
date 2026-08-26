@@ -129,10 +129,46 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       display: 'Specialty verified',
     },
 
-    // Historial laboral: afiliaciones institucionales del profesional.
-    // El estado es del registro, no de la relación laboral: si el vínculo sigue
-    // vigente lo dice `end_date`, y mezclarlo acá obligaría a mirar dos campos
-    // para responder una sola pregunta.
+    // Vínculo del profesional con la institución. Desde v4.1.9 el estado es el
+    // de la APROBACIÓN del vínculo, no el del registro: aprobado sólo si alguien
+    // de la organización aprobó; pendiente si hay a quién preguntarle (la
+    // organización tiene OWNER/ADMIN); declarado si no hay nadie. Que el vínculo
+    // siga vigente lo sigue diciendo `end_date`, no el estado.
+    //
+    // `AFFILIATION_DECLARED` no es un pendiente disfrazado: existe porque
+    // esperar la aprobación de una organización sin dueño —los hospitales
+    // públicos y las cajas, que nunca van a registrarse— bloquearía a sus
+    // médicos para siempre. Publica igual; lo que no tiene es sello de la
+    // institución, y eso se dice en pantalla.
+    AFFILIATION_PENDING: {
+      code: 'AFFILIATION_PENDING',
+      display: 'Practitioner affiliation pending approval',
+    },
+    AFFILIATION_DECLARED: {
+      code: 'AFFILIATION_DECLARED',
+      display: 'Practitioner affiliation declared',
+    },
+    AFFILIATION_APPROVED: {
+      code: 'AFFILIATION_APPROVED',
+      display: 'Practitioner affiliation approved',
+    },
+    AFFILIATION_REJECTED: {
+      code: 'AFFILIATION_REJECTED',
+      display: 'Practitioner affiliation rejected',
+    },
+    AFFILIATION_REVOKED: {
+      code: 'AFFILIATION_REVOKED',
+      display: 'Practitioner affiliation revoked',
+    },
+
+    // DEPRECADOS en v4.1.9. Eran el estado del *registro* (activo/retractado) y
+    // los cinco de arriba los reemplazan. Se conservan hasta que se cumplan las
+    // dos condiciones: (a) `ESTADO_DEL_VINCULO` y sus pruebas apunten a los
+    // nuevos —carril MAC-VINCULO— y (b) el backfill del patch v4.1.9 haya
+    // corrido en todas las bases vivas, porque hasta entonces son los ids que
+    // las filas existentes tienen escritos. Recién ahí se borran, en un PR
+    // propio. No les agregues designación en castellano: no pertenecen a ningún
+    // conjunto de valores y `terminology-designations.es.spec.ts` lo prohíbe.
     AFFILIATION_ACTIVE: {
       code: 'AFFILIATION_ACTIVE',
       display: 'Practitioner affiliation active',
