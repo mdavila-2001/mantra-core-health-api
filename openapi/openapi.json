@@ -3051,6 +3051,109 @@
         "description": "Consultar el resumen propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/profiles/patients/me": {
+      "get": {
+        "operationId": "ProfilesPatientsController_getOwnProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lo que el paciente declaró al registrarse. Los campos que no declaró llegan ausentes, no `null`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnPatientProfileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar los propios datos de filiación",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Consultar los propios datos de filiación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "patch": {
+        "operationId": "ProfilesPatientsController_updateOwnProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOwnPatientProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "El perfil releído. Un cuerpo vacío es válido y devuelve el perfil sin cambios.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnPatientProfileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar los propios datos de filiación",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Editar los propios datos de filiación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/profiles/patients": {
       "get": {
         "operationId": "ProfilesPatientsController_searchPatients",
@@ -73032,7 +73135,7 @@
           },
           "phone": {
             "type": "string",
-            "description": "Teléfono de contacto en formato E.164 o nacional",
+            "description": "Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres",
             "maxLength": 40
           },
           "occupationConceptId": {
@@ -73560,6 +73663,134 @@
           "refreshToken": {
             "type": "string",
             "description": "Refresh token en crudo emitido previamente. Obligatorio salvo que la API entregue el token como cookie httpOnly (AUTH_REFRESH_COOKIE_ENABLED), en cuyo caso se ignora y se lee de la cookie"
+          }
+        }
+      },
+      "OwnPatientProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "personId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre de pila"
+          },
+          "middleName": {
+            "type": "string",
+            "description": "Segundo nombre"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Apellido paterno"
+          },
+          "motherLastName": {
+            "type": "string",
+            "description": "Apellido materno"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Nombre compuesto por el servidor a partir de las partes. No se edita directamente."
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha sin hora: serializarla como instante la desplazaría un día"
+          },
+          "sexAtBirth": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "INTERSEX",
+              "UNKNOWN"
+            ],
+            "description": "Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología."
+          },
+          "occupationFreeText": {
+            "type": "string",
+            "description": "Ocupación declarada en texto libre"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Teléfono de contacto vigente (`common.contact_points`)"
+          },
+          "residenceMunicipalityConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor."
+          },
+          "identityVerified": {
+            "type": "boolean",
+            "description": "Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`."
+          },
+          "patientCode": {
+            "type": "string",
+            "description": "Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`."
+          }
+        },
+        "required": [
+          "personId",
+          "patientProfileId",
+          "identityVerified"
+        ]
+      },
+      "UpdateOwnPatientProfileDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Lucía"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Andrea"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Mamani"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Quispe"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "sexAtBirth": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "INTERSEX",
+              "UNKNOWN"
+            ],
+            "description": "Sexo asignado al nacer"
+          },
+          "occupationFreeText": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres. Cadena vacía para quedarse sin teléfono.",
+            "maxLength": 40
+          },
+          "residenceMunicipalityConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Municipio de residencia (catálogo VS_BO_MUNICIPALITY)"
           }
         }
       },

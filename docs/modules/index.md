@@ -35,7 +35,7 @@
 | [`messaging`](messaging.md) | 3 | 3 | 4 | 22 | 2 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
-| [`profiles`](profiles.md) | 3 | 6 | 14 | 19 | 20 |
+| [`profiles`](profiles.md) | 3 | 6 | 14 | 19 | 21 |
 | [`read_models`](read_models.md) | 3 | 3 | 8 | 13 | 5 |
 | [`surveys`](surveys.md) | 3 | 3 | 4 | 7 | 7 |
 | [`telemetry`](telemetry.md) | 3 | 4 | 14 | 14 | 12 |
@@ -70,4 +70,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **232** | **339** | **387** | **1238** | **445** |
+| **Total** | **232** | **339** | **387** | **1238** | **446** |
