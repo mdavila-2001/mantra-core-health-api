@@ -55,6 +55,8 @@ import {
   ListWaitlistResponseDto,
   DelayResourceDto,
   DelayNoticeResponseDto,
+  CreateDirectAppointmentDto,
+  DirectAppointmentResponseDto,
 } from '../dto';
 
 /**
@@ -310,6 +312,31 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
     return this.catalogService.removeException(id, actor);
+  }
+
+  /**
+   * AG-2 · La cita puntual: el doctor asigna, el paciente se entera.
+   *
+   * «Volvé el jueves a las 10» — lo que los consultorios hacen todos los días y
+   * el sistema no permitía: toda cita nacía de un cupo publicado que el
+   * paciente tomaba. Ésta nace CONFIRMADA (ya se acordó en persona), con
+   * campana al paciente y la salida de «pedir cambio».
+   */
+  @Post('appointments/direct')
+  // El profesional sólo en SU agenda (el servicio lo verifica); quien
+  // administra agendas, en cualquiera.
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Asignar una cita puntual a un paciente (nace confirmada)',
+    description:
+      'Cupo único + reserva en una transacción. Retira los horarios libres que pise y lo informa; la regla madre rechaza si el profesional ya está comprometido.',
+  })
+  createDirectAppointment(
+    @Body() dto: CreateDirectAppointmentDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DirectAppointmentResponseDto> {
+    return this.bookingsService.createDirectAppointment(dto, actor);
   }
 
   /** UC-41-05. */

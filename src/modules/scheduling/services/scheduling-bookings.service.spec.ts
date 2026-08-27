@@ -72,6 +72,8 @@ function build() {
     findTemplateById: mockFn(),
     findPolicyById: mockFn(),
     findResourceById: mockFn(),
+    findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
+    createSlot: mockFn().mockReturnValue({ id: 'slot-directo' }),
   };
   // C-10: la historia de transición se versiona vía el HistoryRepository de audit.
   // `latestBySource` es la lectura del motivo (corrección #14): por defecto no
@@ -1071,6 +1073,157 @@ describe('SchedulingBookingsService', () => {
         resourceName: 'Consultorio del Dr. Paz',
       };
     }
+
+    describe('la cita puntual — AG-2', () => {
+      const medico = {
+        id: 'user-med',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-1',
+      } as never;
+
+      const dto = {
+        patientProfileId: 'pp-ana',
+        resourceId: 'res-1',
+        startAt: '2026-09-10T14:00:00Z',
+        durationMinutes: 180,
+        reasonText: 'Cirugía de implante',
+      };
+
+      /** Deja la agenda del médico lista para asignar. */
+      function listoParaAsignar(d: ReturnType<typeof build>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          tenantId: 'ten-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+          timeZone: 'America/La_Paz',
+        });
+        d.bookingsRepo.findPatientNames.mockResolvedValue(
+          new Map([['pp-ana', 'Ana Quispe']]),
+        );
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.bookingsRepo.createBooking.mockReturnValue({ id: 'bk-directa' });
+        return d;
+      }
+
+      it('crea cupo único + reserva CONFIRMADA en una transacción', async () => {
+        const d = listoParaAsignar(build());
+
+        const res = await d.service.createDirectAppointment(
+          dto as never,
+          medico,
+        );
+
+        expect(res.bookingId).toBe('bk-directa');
+        expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+        // el cupo nace ya tomado y sin plantilla: nunca estuvo ofrecido.
+        const slotArgs = d.catalogRepo.createSlot.mock.calls[0][1];
+        expect(slotArgs.capacity).toBe(1);
+        expect(slotArgs.remainingCapacity).toBe(0);
+        expect(slotArgs.scheduleTemplateId).toBeUndefined();
+      });
+
+      it('la duración es libre: la cirugía de 3 horas es el caso entero', async () => {
+        const d = listoParaAsignar(build());
+
+        await d.service.createDirectAppointment(dto as never, medico);
+
+        const slotArgs = d.catalogRepo.createSlot.mock.calls[0][1];
+        const durMs = slotArgs.endAt.getTime() - slotArgs.startAt.getTime();
+        expect(durMs).toBe(180 * 60_000);
+      });
+
+      it('la regla madre corre ANTES de crear nada', async () => {
+        const d = listoParaAsignar(build());
+        d.tiempoProfesional.assertRangoLibre.mockRejectedValue(
+          new PreconditionFailedException('El profesional ya tiene a Beto…'),
+        );
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/ya tiene a Beto/);
+        expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+        expect(d.bookingsRepo.createBooking).not.toHaveBeenCalled();
+      });
+
+      it('el tiempo del PACIENTE también se protege', async () => {
+        // La regla 1 vale igual cuando quien agenda es el doctor: el paciente
+        // tampoco puede estar en dos lugares.
+        const d = listoParaAsignar(build());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([
+          {
+            id: 'bk-otra',
+            resourceName: 'Otro consultorio',
+            startAt: new Date(),
+          },
+        ]);
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/paciente ya tiene un turno/);
+      });
+
+      it('retira los cupos libres que pisa y lo INFORMA', async () => {
+        // Decisión 8: informar, no pedir permiso.
+        const d = listoParaAsignar(build());
+        const libre1 = {
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          capacity: 1,
+          remainingCapacity: 1,
+        };
+        const libre2 = {
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          capacity: 1,
+          remainingCapacity: 1,
+        };
+        d.catalogRepo.findOpenSlotsOfProfessionalInWindow.mockResolvedValue([
+          libre1,
+          libre2,
+        ]);
+
+        const res = await d.service.createDirectAppointment(
+          dto as never,
+          medico,
+        );
+
+        expect(res.retractedSlots).toBe(2);
+        expect(libre1.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+        expect(libre2.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      });
+
+      it('un profesional NO asigna en la agenda de otro', async () => {
+        const d = listoParaAsignar(build());
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          tenantId: 'ten-1',
+          resourceRefId: 'hp-OTRO',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/su propia agenda/);
+      });
+
+      it('un paciente que no existe rebota con 404, no crea nada', async () => {
+        const d = listoParaAsignar(build());
+        d.bookingsRepo.findPatientNames.mockResolvedValue(new Map());
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/Paciente no encontrado/);
+        expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+      });
+
+      it('hereda el gating del vínculo: revocado no asigna', async () => {
+        const d = listoParaAsignar(build());
+        d.vinculos.evaluar.mockResolvedValue('no-vigente' as never);
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/no está vigente/);
+      });
+    });
 
     describe('la regla madre — AG-1', () => {
       it('aceptar consulta el tiempo del profesional EXCLUYENDO la propia cita', async () => {
