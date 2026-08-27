@@ -1434,4 +1434,52 @@ describe('SchedulingCatalogService', () => {
       });
     });
   });
+
+  /**
+   * Lo que se ofrece como disponible tiene que poder pedirse.
+   *
+   * Destapado por el journey de AG-6 midiendo la misma ventana por las dos
+   * rutas: `GET /scheduling/resources/:id/slots` devolvía **10** horarios y la
+   * hermana del portal **2**. Los ocho de diferencia eran la reunión del médico
+   * y las tres horas de una cirugía — cupos `SLOT_BLOCKED` que conservan su
+   * `remaining_capacity`, así que el filtro de capacidad no los veía.
+   *
+   * No afectaba a la web (usa la otra ruta), pero ésta declara
+   * `@Roles(…'PATIENT')` y se documenta como «la consulta que hace posible
+   * reservar desde una pantalla»: quien la siguiera ofrecía horarios muertos.
+   */
+  describe('getResourceAgenda · lo disponible tiene que poder pedirse', () => {
+    const VENTANA = {
+      from: new Date('2026-09-03T00:00:00.000Z'),
+      to: new Date('2026-09-04T00:00:00.000Z'),
+      limit: 50,
+    };
+
+    it('con onlyAvailable pide SÓLO los cupos abiertos, no sólo los que tienen lugar', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
+
+      await d.service.getResourceAgenda(RESOURCE, { ...VENTANA, onlyAvailable: true });
+
+      const [, , , , opciones] = d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
+      expect(opciones.onlyAvailable).toBe(true);
+      // La capacidad no alcanza: un cupo bloqueado la conserva.
+      expect(opciones.openStatusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
+    it('sin onlyAvailable no impone estado: el dueño de la agenda ve su día entero', async () => {
+      // La vista del profesional necesita ver lo bloqueado —es su reunión, su
+      // cirugía—. Filtrar siempre por SLOT_OPEN le escondería su propio día.
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
+
+      await d.service.getResourceAgenda(RESOURCE, { ...VENTANA, onlyAvailable: false });
+
+      const [, , , , opciones] = d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
+      expect(opciones.onlyAvailable).toBe(false);
+    });
+  });
+
 });

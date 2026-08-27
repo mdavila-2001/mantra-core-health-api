@@ -586,6 +586,12 @@ export class SchedulingCatalogService {
         onlyAvailable: options.onlyAvailable,
         ahora: new Date(),
         limit: options.limit + 1,
+        // Lo que se ofrece tiene que poder pedirse: un cupo bloqueado por una
+        // excepción (AG-3) o retirado por una cita puntual (AG-2) conserva su
+        // capacidad, así que el filtro de capacidad no lo ve y se colaba entre
+        // los disponibles. El concepto lo aporta el servicio, como en la ruta
+        // hermana del portal.
+        openStatusConceptId: CONCEPTS.SLOT_OPEN,
       },
     );
     const truncated = rows.length > options.limit;
