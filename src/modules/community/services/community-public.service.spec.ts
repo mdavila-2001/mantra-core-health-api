@@ -64,6 +64,8 @@ function build(opciones?: {
     findPublicBySlug: mockFn().mockResolvedValue(null),
     ratingsByProfile: mockFn().mockResolvedValue(new Map()),
     listPublicPosts: mockFn().mockResolvedValue([]),
+    engagementByPost: mockFn().mockResolvedValue(new Map()),
+    isPublicPostMedia: mockFn().mockResolvedValue(false),
     countPublishedReviews: mockFn().mockResolvedValue(0),
     nearbyProfiles: mockFn().mockResolvedValue([]),
     badgesByProfiles: mockFn().mockResolvedValue(new Map()),
@@ -97,15 +99,26 @@ function build(opciones?: {
     recordView: mockFn(),
     recordImpressions: mockFn(),
   };
+  const profiles = {
+    isPublicMedia: mockFn().mockResolvedValue(false),
+  };
+  const files = {
+    downloadPublicMedia: mockFn().mockResolvedValue({
+      buffer: Buffer.alloc(0),
+      mimeType: 'image/jpeg',
+    }),
+  };
   const service = new CommunityPublicService(
     em as any,
     repo as any,
+    profiles as any,
+    files as any,
     searchIndex as any,
     verification,
     stats as any,
     logger as any,
   );
-  return { service, repo, searchIndex, logger, verification, stats };
+  return { service, repo, profiles, files, searchIndex, logger, verification, stats };
 }
 
 describe('CommunityPublicService', () => {
