@@ -31,11 +31,14 @@ import {
 } from '../repositories';
 import { PharmacyReadRepository } from '../../pharmacy/repositories';
 import { InventoryReservationsService } from './inventory-reservations.service';
+import { PharmacyOrderNotificationsService } from './pharmacy-order-notifications.service';
 import type {
+  ConfirmPharmacyOrderDto,
   CreatePharmacyOrderDto,
   PharmacyOrderDto,
   PharmacyOrderLineDto,
   PharmacyOrderListResponseDto,
+  RejectPharmacyOrderDto,
   InventoryConceptDto,
 } from '../dto';
 import {
@@ -81,6 +84,52 @@ export const ORDER_NON_TERMINAL_STATUS_IDS: readonly string[] =
   ORDER_STATUS_IDS.filter((id) => !ORDER_TERMINAL_STATUS_IDS.includes(id));
 
 /**
+ * Las transiciones del mostrador (FAR-E2), como dato.
+ *
+ * Espejo exacto de los helpers del front (`puedeConfirmarse`,
+ * `puedeRechazarsePorFarmacia`, `puedePrepararse`): recepcionar lo enviado,
+ * confirmar lo no revisado o en revisión, rechazar todo lo vivo salvo lo que
+ * ya espera en el mostrador, y dejar listo lo confirmado o aceptado.
+ * `ACEPTACION_PENDIENTE`/`ACEPTADO` figuran por completitud — hoy son
+ * inalcanzables (las sustituciones están bloqueadas por modelo) pero la
+ * máquina no debe reescribirse cuando lleguen.
+ *
+ * Fuera de esta tabla viven las dos transiciones que E1 ya posee: la
+ * cancelación del titular (no-terminal → CANCELADO, con su 409 sobre
+ * terminales, contrato ya publicado) y el vencimiento por reloj
+ * (no-terminal → VENCIDO). Una transición que no figura acá responde 422.
+ */
+export const ORDER_STAFF_TRANSITIONS: ReadonlyMap<
+  string,
+  ReadonlySet<string>
+> = new Map([
+  [
+    PINV.ORDER_ENVIADO,
+    new Set([
+      PINV.ORDER_EN_REVISION,
+      PINV.ORDER_CONFIRMADO,
+      PINV.ORDER_RECHAZADO,
+    ]),
+  ],
+  [
+    PINV.ORDER_EN_REVISION,
+    new Set([PINV.ORDER_CONFIRMADO, PINV.ORDER_RECHAZADO]),
+  ],
+  [
+    PINV.ORDER_CONFIRMADO,
+    new Set([PINV.ORDER_LISTO_PARA_RETIRO, PINV.ORDER_RECHAZADO]),
+  ],
+  [PINV.ORDER_ACEPTACION_PENDIENTE, new Set([PINV.ORDER_RECHAZADO])],
+  [
+    PINV.ORDER_ACEPTADO,
+    new Set([PINV.ORDER_LISTO_PARA_RETIRO, PINV.ORDER_RECHAZADO]),
+  ],
+]);
+
+/** Tope de la bandeja cuando la consulta no acota. */
+const DEFAULT_INBOX_LIMIT = 100;
+
+/**
  * Roles de staff que pueden leer un pedido ajeno (la bandeja del carril E2).
  * Cuando E2 defina su rol de farmacia, se añade acá — la titularidad del
  * paciente no cambia.
@@ -98,6 +147,11 @@ const PINV_CONCEPT_BY_ID: ReadonlyMap<string, InventoryConceptDto> = new Map(
     deterministicId(seed.key),
     { code: seed.code, display: seed.display },
   ]),
+);
+
+/** Del código servido en el DTO (`PINV_ORDER_*`) al concepto: el filtro de la bandeja. */
+const ORDER_STATUS_ID_BY_CODE: ReadonlyMap<string, string> = new Map(
+  ORDER_STATUS_IDS.map((id) => [PINV_CONCEPT_BY_ID.get(id)?.code ?? id, id]),
 );
 
 /** Una cantidad `numeric` (string de BD) como número; lo ilegible cuenta 0. */
@@ -166,6 +220,7 @@ export class PharmacyOrdersService {
    * @param pharmacyRepo - Visibilidad del directorio de farmacias (módulo 24).
    * @param reservationsService - Primitiva compartida de liberación (UC-25-05).
    * @param outbox - Publicación transaccional de eventos de dominio.
+   * @param orderNotifications - La campana del paciente, post-commit (FAR-E2).
    * @param logger - Logger estructurado (ids y conteos; nunca datos clínicos).
    */
   constructor(
@@ -178,6 +233,7 @@ export class PharmacyOrdersService {
     private readonly pharmacyRepo: PharmacyReadRepository,
     private readonly reservationsService: InventoryReservationsService,
     private readonly outbox: OutboxService,
+    private readonly orderNotifications: PharmacyOrderNotificationsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PharmacyOrdersService.name);
@@ -453,6 +509,323 @@ export class PharmacyOrdersService {
   }
 
   /**
+   * FAR-E2: la bandeja del mostrador — los pedidos de las farmacias del
+   * tenant activo, más nuevos primero.
+   *
+   * El recorte por organización va en el WHERE de las dos consultas (farmacias
+   * por `tenant_id`, pedidos por esas farmacias), nunca como filtro posterior.
+   * Los filtros disponibles son los que el modelo declara: estado
+   * (`PINV_ORDER_*`), sede y ventana de creación. Antes de responder corre la
+   * expiración perezosa sobre los vencidos, para que la bandeja nunca muestre
+   * como vivo un pedido cuyo reloj ya pasó.
+   */
+  async listForPharmacyTenant(
+    filters: {
+      /** Código de estado (`PINV_ORDER_*`) para acotar la bandeja. */
+      statusCode?: string;
+      /** Sede puntual. */
+      siteId?: string;
+      /** Creados desde este instante. */
+      from?: Date;
+      /** Creados hasta este instante. */
+      to?: Date;
+      /** Tope de filas (por defecto 100). */
+      limit?: number;
+    },
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderListResponseDto> {
+    const tenantId = requireTenantId();
+    const statusIds = this.resolveStatusFilter(filters.statusCode);
+    const query = {
+      siteId: filters.siteId,
+      from: filters.from,
+      to: filters.to,
+      limit: filters.limit ?? DEFAULT_INBOX_LIMIT,
+    };
+
+    let em = this.em.fork();
+    const pharmacies = await this.ordersRepo.findPharmaciesByTenant(
+      em,
+      tenantId,
+    );
+    if (pharmacies.length === 0) return { items: [], count: 0 };
+    const pharmacyIds = pharmacies.map((pharmacy) => pharmacy.id);
+
+    let orders = await this.ordersRepo.findOrdersForPharmacies(
+      em,
+      pharmacyIds,
+      statusIds,
+      query,
+    );
+    const dueIds = orders
+      .filter((order) => this.isDue(order))
+      .map((order) => order.id);
+    if (dueIds.length > 0) {
+      await this.expireDue(actor, dueIds);
+      em = this.em.fork();
+      orders = await this.ordersRepo.findOrdersForPharmacies(
+        em,
+        pharmacyIds,
+        statusIds,
+        query,
+      );
+    }
+
+    const items = await this.composeOrders(em, tenantId, orders);
+    return { items, count: items.length };
+  }
+
+  /**
+   * FAR-E2: recepcionar el pedido — `ENVIADO → EN_REVISION`.
+   *
+   * Es el «visto» del mostrador: el paciente ve que la farmacia lo está
+   * mirando. Transición pura de estado, con lock, evento en la transacción y
+   * campana después del commit.
+   */
+  async openReview(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    const tenantId = requireTenantId();
+
+    const { patientProfileId } = await this.em.transactional(async (tx) => {
+      const order = await this.loadTenantOrderForUpdate(tx, id, tenantId);
+      this.assertStaffTransition(order, PINV.ORDER_EN_REVISION);
+
+      order.reservationStatusConceptId = PINV.ORDER_EN_REVISION;
+      touch(order, actor.id);
+
+      await this.publishStaffEvent(tx, tenantId, order, {
+        eventType: 'PharmacyOrderUnderReview',
+        statusCode: 'PINV_ORDER_EN_REVISION',
+        actor,
+      });
+      await tx.flush();
+
+      this.logger.info(
+        { operation: 'pharmacy_inventory.order.review', orderId: order.id },
+        'Pharmacy order under review',
+      );
+      return { patientProfileId: order.patientProfileId };
+    });
+
+    if (patientProfileId) {
+      await this.orderNotifications.orderUnderReview(
+        id,
+        patientProfileId,
+        actor.id,
+      );
+    }
+    return this.readOrderForTenant(id, tenantId);
+  }
+
+  /**
+   * FAR-E2: confirmar el pedido **sin sustituciones** —
+   * `ENVIADO|EN_REVISION → CONFIRMADO`, sellando el `confirmed_at` que el
+   * modelo ya declara (la creación de E1 lo deja nulo a propósito).
+   *
+   * Un ajuste `NO_DISPONIBLE` devuelve el stock de ESE renglón con la
+   * primitiva compartida (`onlyLineIds`) y deja la línea como
+   * `RES_LINE_OUT_OF_STOCK` con reservado 0 — la misma forma que tiene una
+   * línea que nació sin stock; una línea ya sin stock no se libera dos veces.
+   *
+   * Un ajuste `PROPONER_GENERICO` responde 422 tipificado SIN tocar nada:
+   * la propuesta de sustitución exige persistencia por línea que el modelo
+   * v4.0.10 no declara (bloqueador FAR-E1/E2), y `ACEPTACION_PENDIENTE` es
+   * inalcanzable hasta ese patch. No se recalculan ni fingen precios: el
+   * pedido no tiene precios persistidos.
+   */
+  async confirm(
+    id: string,
+    dto: ConfirmPharmacyOrderDto,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    const tenantId = requireTenantId();
+    const adjustments = dto.adjustments ?? [];
+
+    const { patientProfileId } = await this.em.transactional(async (tx) => {
+      const order = await this.loadTenantOrderForUpdate(tx, id, tenantId);
+      // Antes que nada y antes de mutar: la capacidad bloqueada corta entera.
+      const proposed = adjustments.filter(
+        (adjustment) => adjustment.decision === 'PROPONER_GENERICO',
+      );
+      if (proposed.length > 0) {
+        throw new PreconditionFailedException(
+          'La propuesta de sustitución está bloqueada por modelo: no existe persistencia de propuestas por línea. El pedido no se modificó.',
+          {
+            orderId: id,
+            blockedByModel: 'substitutions',
+            productIds: proposed.map((adjustment) => adjustment.productId),
+          },
+        );
+      }
+      this.assertStaffTransition(order, PINV.ORDER_CONFIRMADO);
+
+      let adjusted = 0;
+      if (adjustments.length > 0) {
+        const lines = await this.ordersRepo.findLinesByReservationIds(tx, [
+          order.id,
+        ]);
+        const linesByProduct = new Map<string, InventoryReservationLines[]>();
+        for (const line of lines) {
+          const list = linesByProduct.get(line.pharmacyProductId) ?? [];
+          list.push(line);
+          linesByProduct.set(line.pharmacyProductId, list);
+        }
+
+        for (const adjustment of adjustments) {
+          const portions = linesByProduct.get(adjustment.productId);
+          if (!portions) {
+            throw new PreconditionFailedException(
+              'El ajuste refiere un producto que no está en el pedido',
+              { orderId: id, productId: adjustment.productId },
+            );
+          }
+          // Solo lo CONFIRMED tiene stock que devolver; una línea que nació
+          // SIN_STOCK ya está en la forma final y no genera asientos.
+          const confirmed = portions.filter(
+            (portion) => portion.statusConceptId === PINV.RES_LINE_CONFIRMED,
+          );
+          if (confirmed.length > 0) {
+            await this.reservationsService.releaseConfirmedLines(
+              tx,
+              order,
+              actor,
+              { onlyLineIds: confirmed.map((portion) => portion.id) },
+            );
+            for (const portion of confirmed) {
+              portion.statusConceptId = PINV.RES_LINE_OUT_OF_STOCK;
+              portion.reservedQuantity = '0';
+              touch(portion, actor.id);
+            }
+            adjusted += 1;
+          }
+        }
+      }
+
+      order.reservationStatusConceptId = PINV.ORDER_CONFIRMADO;
+      order.confirmedAt = new Date();
+      touch(order, actor.id);
+
+      await this.publishStaffEvent(tx, tenantId, order, {
+        eventType: 'PharmacyOrderConfirmed',
+        statusCode: 'PINV_ORDER_CONFIRMADO',
+        actor,
+        extra: { unavailableLineCount: adjusted },
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'pharmacy_inventory.order.confirm',
+          orderId: order.id,
+          unavailableLines: adjusted,
+        },
+        'Pharmacy order confirmed',
+      );
+      return { patientProfileId: order.patientProfileId };
+    });
+
+    if (patientProfileId) {
+      await this.orderNotifications.orderConfirmed(
+        id,
+        patientProfileId,
+        actor.id,
+      );
+    }
+    return this.readOrderForTenant(id, tenantId);
+  }
+
+  /**
+   * FAR-E2: rechazar el pedido — estados rechazables → `RECHAZADO`, liberando
+   * el stock reservado con la primitiva compartida (sin doble liberación: la
+   * guarda por línea y el lock de cabecera lo garantizan; un reintento ve el
+   * pedido ya terminal y recibe 422 sin tocar el ledger).
+   *
+   * **El motivo NO se persiste** (bloqueador de modelo): viaja en el evento de
+   * dominio y en la campana inmediata al paciente, y el `GET` del pedido no
+   * puede devolverlo. Cuando el modelo declare la columna, este método la
+   * sella y la limitación desaparece del contrato.
+   */
+  async reject(
+    id: string,
+    dto: RejectPharmacyOrderDto,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    const tenantId = requireTenantId();
+    const reason = dto.reason.trim();
+    if (reason === '') {
+      throw new PreconditionFailedException(
+        'El rechazo exige un motivo en palabras',
+        { orderId: id },
+      );
+    }
+
+    const { patientProfileId } = await this.em.transactional(async (tx) => {
+      const order = await this.loadTenantOrderForUpdate(tx, id, tenantId);
+      this.assertStaffTransition(order, PINV.ORDER_RECHAZADO);
+
+      order.reservationStatusConceptId = PINV.ORDER_RECHAZADO;
+      order.releasedAt = new Date();
+      touch(order, actor.id);
+      await this.reservationsService.releaseConfirmedLines(tx, order, actor);
+
+      await this.publishStaffEvent(tx, tenantId, order, {
+        eventType: 'PharmacyOrderRejected',
+        statusCode: 'PINV_ORDER_RECHAZADO',
+        actor,
+        extra: { reason },
+      });
+      await tx.flush();
+
+      this.logger.info(
+        { operation: 'pharmacy_inventory.order.reject', orderId: order.id },
+        'Pharmacy order rejected',
+      );
+      return { patientProfileId: order.patientProfileId };
+    });
+
+    if (patientProfileId) {
+      await this.orderNotifications.orderRejected(
+        id,
+        patientProfileId,
+        reason,
+        actor.id,
+      );
+    }
+    return this.readOrderForTenant(id, tenantId);
+  }
+
+  /**
+   * FAR-E2: dejar el pedido listo en el mostrador — **BLOQUEADO POR MODELO**.
+   *
+   * `LISTO_PARA_RETIRO` afirma que hay un pedido esperando a una persona en un
+   * mostrador — y eso solo es verdad si el pedido es de RETIRO. La modalidad
+   * (`RETIRO|DOMICILIO|TRABAJO`) no se persiste todavía, así que no existe
+   * evidencia fiable para distinguirlo: permitir la transición genéricamente
+   * podría convertir un pedido de entrega en uno de retiro. Hasta que el patch
+   * de modelo declare la modalidad (y con ella el código de retiro, que
+   * tampoco existe), la ruta queda por compatibilidad y responde **422
+   * tipificado** sin ningún efecto: cero transición, cero cambio de
+   * `expires_at`, cero evento, cero campana, cero ledger.
+   *
+   * Al habilitarse, la semántica ya está fijada por el contrato FAR-E1/I2:
+   * `CONFIRMADO|ACEPTADO → LISTO_PARA_RETIRO` (la tabla de transiciones ya la
+   * declara), renovación de `expires_at` +48 h y sello del código de retiro —
+   * solo cuando el pedido pueda demostrarse RETIRO.
+   */
+  async ready(id: string, actor: AuthenticatedUser): Promise<PharmacyOrderDto> {
+    // El mismo 422 para todo actor y todo pedido: la capacidad entera está
+    // bloqueada, así que no hay nada que leer ni que revelar. `actor` queda en
+    // la firma para que habilitarla no cambie el contrato del controller.
+    void actor;
+    throw new PreconditionFailedException(
+      'Marcar listo para retiro está bloqueado por modelo: la modalidad del pedido no se persiste y no puede demostrarse que sea un retiro. El pedido no se modificó.',
+      { orderId: id, blockedByModel: 'deliveryMode' },
+    );
+  }
+
+  /**
    * FAR-E1: vencer pedidos vivos cuyo `expires_at` ya pasó.
    *
    * La llaman el worker de UC-25-05 (sin `ids`: toda la cola) y la expiración
@@ -517,6 +890,114 @@ export class PharmacyOrdersService {
   }
 
   // --- Apoyo ---
+
+  /** El filtro de estado de la bandeja: un código conocido, o el set entero. */
+  private resolveStatusFilter(statusCode?: string): readonly string[] {
+    if (statusCode === undefined) return ORDER_STATUS_IDS;
+    const id = ORDER_STATUS_ID_BY_CODE.get(statusCode);
+    if (id === undefined) {
+      throw new PreconditionFailedException('Estado de pedido desconocido', {
+        status: statusCode,
+        allowed: [...ORDER_STATUS_ID_BY_CODE.keys()],
+      });
+    }
+    return [id];
+  }
+
+  /**
+   * El pedido bajo lock de escritura, ya verificado contra el tenant activo.
+   * Inexistente, de otro tenant o una reserva de mostrador: el mismo 404 —
+   * una farmacia ajena no distingue «no existe» de «no es tuyo».
+   */
+  private async loadTenantOrderForUpdate(
+    tx: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<InventoryReservations> {
+    const order = await this.ordersRepo.findOrderByIdForUpdate(
+      tx,
+      id,
+      ORDER_STATUS_IDS,
+    );
+    if (!order) throw orderNotFound(id);
+    const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
+      tx,
+      tenantId,
+      [order.pharmacyId],
+    );
+    if (!pharmacy) throw orderNotFound(id);
+    return order;
+  }
+
+  /**
+   * La máquina de estados del mostrador, aplicada: una transición que la
+   * tabla no declara responde 422 con ambos estados en palabras. Se evalúa
+   * con el lock ya tomado, así que el perdedor de una carrera ve el estado
+   * ganador y recibe su 422 sin haber tocado ledger ni outbox.
+   */
+  private assertStaffTransition(
+    order: InventoryReservations,
+    toStatusId: string,
+  ): void {
+    const allowed = ORDER_STAFF_TRANSITIONS.get(
+      order.reservationStatusConceptId,
+    );
+    if (!allowed?.has(toStatusId)) {
+      throw new PreconditionFailedException(
+        'La transición no es legal para el estado actual del pedido',
+        {
+          orderId: order.id,
+          from: moduleConcept(order.reservationStatusConceptId).code,
+          to: moduleConcept(toStatusId).code,
+        },
+      );
+    }
+  }
+
+  /** El hecho del mostrador, publicado en la MISMA transacción del cambio. */
+  private async publishStaffEvent(
+    tx: EntityManager,
+    tenantId: string,
+    order: InventoryReservations,
+    event: {
+      /** Nombre del hecho. */
+      eventType: string;
+      /** Código del estado resultante. */
+      statusCode: string;
+      /** Quien opera el mostrador. */
+      actor: AuthenticatedUser;
+      /** Datos extra del hecho (p. ej. el motivo efímero del rechazo). */
+      extra?: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    await this.outbox.publishDomainEvent(tx, {
+      tenantId,
+      eventType: event.eventType,
+      aggregateType: 'pharmacy_inventory.inventory_reservations',
+      aggregateId: order.id,
+      payloadJson: {
+        orderId: order.id,
+        pharmacyId: order.pharmacyId,
+        pharmacySiteId: order.pharmacySiteId,
+        statusCode: event.statusCode,
+        ...(event.extra ?? {}),
+      },
+      actorUserId: event.actor.id,
+    });
+  }
+
+  /** La lectura del pedido para el mostrador, tras una transición. */
+  private async readOrderForTenant(
+    id: string,
+    tenantId: string,
+  ): Promise<PharmacyOrderDto> {
+    const em = this.em.fork();
+    const order = await this.ordersRepo.findOrderById(em, id, ORDER_STATUS_IDS);
+    if (!order) throw orderNotFound(id);
+    const [dto] = await this.composeOrders(em, tenantId, [order]);
+    if (!dto) throw orderNotFound(id);
+    return dto;
+  }
 
   /** El claim `pid` es la titularidad; una cuenta sin perfil no puede pedir. */
   private requirePatientProfile(actor: AuthenticatedUser): string {
@@ -708,7 +1189,7 @@ export class PharmacyOrdersService {
   ): Promise<PharmacyOrderDto[]> {
     if (orders.length === 0) return [];
 
-    const [lines, sites, pharmacies] = await Promise.all([
+    const [lines, sites, pharmacies, patientNames] = await Promise.all([
       this.ordersRepo.findLinesByReservationIds(
         em,
         orders.map((order) => order.id),
@@ -718,6 +1199,15 @@ export class PharmacyOrdersService {
       ]),
       this.ordersRepo.findPharmaciesByIdsInTenant(em, tenantId, [
         ...new Set(orders.map((order) => order.pharmacyId)),
+      ]),
+      // El nombre del paciente, en lote: la bandeja FAR-E2 lo pinta y un
+      // uuid no se pinta.
+      this.ordersRepo.findPersonNamesByProfileIds(em, [
+        ...new Set(
+          orders
+            .map((order) => order.patientProfileId)
+            .filter((id): id is string => Boolean(id)),
+        ),
       ]),
     ]);
     const products = await this.ordersRepo.findProductsByIds(em, [
@@ -761,6 +1251,9 @@ export class PharmacyOrdersService {
           linesByOrder.get(order.id) ?? [],
           productById,
           conceptById,
+          order.patientProfileId
+            ? (patientNames.get(order.patientProfileId) ?? null)
+            : null,
         ),
       );
     }
@@ -808,6 +1301,7 @@ function toOrderDto(
   lines: readonly InventoryReservationLines[],
   productById: ReadonlyMap<string, PharmacyProducts>,
   conceptById: ReadonlyMap<string, CatalogConcepts>,
+  patientName: string | null,
 ): PharmacyOrderDto {
   const grouped = new Map<string, InventoryReservationLines[]>();
   for (const line of lines) {
@@ -854,6 +1348,7 @@ function toOrderDto(
     pharmacyId: pharmacy.id,
     pharmacyName: pharmacyName(pharmacy),
     medicationRequestId: order.medicationRequestId ?? null,
+    patientName,
     lines: lineDtos,
   };
 }

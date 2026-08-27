@@ -89,7 +89,13 @@ export type NotificationDestinationType =
   /** Una publicación del muro. */
   | 'POST'
   /** Un resultado de diagnóstico. */
-  | 'DIAGNOSTIC_REPORT';
+  | 'DIAGNOSTIC_REPORT'
+  /**
+   * Un pedido de farmacia del paciente (FAR-E1/E2). Aditivo: en el backend el
+   * union es puramente de tipos (se guarda en `related_resource_type`,
+   * varchar); el `switch` exhaustivo del front debe sumar su ruta al conectar.
+   */
+  | 'PHARMACY_ORDER';
 
 /**
  * A dónde lleva la notificación al abrirla.
