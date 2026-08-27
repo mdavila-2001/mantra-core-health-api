@@ -72,6 +72,8 @@ function build() {
     findTemplateById: mockFn(),
     findPolicyById: mockFn(),
     findResourceById: mockFn(),
+    findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
+    createSlot: mockFn().mockReturnValue({ id: 'slot-directo' }),
   };
   // C-10: la historia de transición se versiona vía el HistoryRepository de audit.
   // `latestBySource` es la lectura del motivo (corrección #14): por defecto no
@@ -110,6 +112,12 @@ function build() {
   // por defecto no hay vínculos que mirar, que es el caso del consultorio
   // propio y el de la gran mayoría de las reservas de estas pruebas.
   const vinculos = { evaluar: mockFn(async () => 'sin-vinculos') };
+  // La regla madre tiene specs propios; acá interesa QUÉ hace cada flujo con su
+  // veredicto. Por defecto el rango está libre.
+  const tiempoProfesional = {
+    assertRangoLibre: mockFn(async () => undefined),
+    compromisos: mockFn(async () => []),
+  };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -120,11 +128,13 @@ function build() {
     notices as any,
     logger as any,
     vinculos as any,
+    tiempoProfesional as any,
   );
   return {
     service,
     tx,
     vinculos,
+    tiempoProfesional,
     bookingsRepo,
     catalogRepo,
     historyRepo,
@@ -1063,6 +1073,234 @@ describe('SchedulingBookingsService', () => {
         resourceName: 'Consultorio del Dr. Paz',
       };
     }
+
+    describe('la cita puntual — AG-2', () => {
+      const medico = {
+        id: 'user-med',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-1',
+      } as never;
+
+      const dto = {
+        patientProfileId: 'pp-ana',
+        resourceId: 'res-1',
+        startAt: '2026-09-10T14:00:00Z',
+        durationMinutes: 180,
+        reasonText: 'Cirugía de implante',
+      };
+
+      /** Deja la agenda del médico lista para asignar. */
+      function listoParaAsignar(d: ReturnType<typeof build>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          tenantId: 'ten-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+          timeZone: 'America/La_Paz',
+        });
+        d.bookingsRepo.findPatientNames.mockResolvedValue(
+          new Map([['pp-ana', 'Ana Quispe']]),
+        );
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.bookingsRepo.createBooking.mockReturnValue({ id: 'bk-directa' });
+        return d;
+      }
+
+      it('crea cupo único + reserva CONFIRMADA en una transacción', async () => {
+        const d = listoParaAsignar(build());
+
+        const res = await d.service.createDirectAppointment(
+          dto as never,
+          medico,
+        );
+
+        expect(res.bookingId).toBe('bk-directa');
+        expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+        // el cupo nace ya tomado y sin plantilla: nunca estuvo ofrecido.
+        const slotArgs = d.catalogRepo.createSlot.mock.calls[0][1];
+        expect(slotArgs.capacity).toBe(1);
+        expect(slotArgs.remainingCapacity).toBe(0);
+        expect(slotArgs.scheduleTemplateId).toBeUndefined();
+      });
+
+      it('la duración es libre: la cirugía de 3 horas es el caso entero', async () => {
+        const d = listoParaAsignar(build());
+
+        await d.service.createDirectAppointment(dto as never, medico);
+
+        const slotArgs = d.catalogRepo.createSlot.mock.calls[0][1];
+        const durMs = slotArgs.endAt.getTime() - slotArgs.startAt.getTime();
+        expect(durMs).toBe(180 * 60_000);
+      });
+
+      it('la regla madre corre ANTES de crear nada', async () => {
+        const d = listoParaAsignar(build());
+        d.tiempoProfesional.assertRangoLibre.mockRejectedValue(
+          new PreconditionFailedException('El profesional ya tiene a Beto…'),
+        );
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/ya tiene a Beto/);
+        expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+        expect(d.bookingsRepo.createBooking).not.toHaveBeenCalled();
+      });
+
+      it('el tiempo del PACIENTE también se protege', async () => {
+        // La regla 1 vale igual cuando quien agenda es el doctor: el paciente
+        // tampoco puede estar en dos lugares.
+        const d = listoParaAsignar(build());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([
+          {
+            id: 'bk-otra',
+            resourceName: 'Otro consultorio',
+            startAt: new Date(),
+          },
+        ]);
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/paciente ya tiene un turno/);
+      });
+
+      it('retira los cupos libres que pisa y lo INFORMA', async () => {
+        // Decisión 8: informar, no pedir permiso.
+        const d = listoParaAsignar(build());
+        const libre1 = {
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          capacity: 1,
+          remainingCapacity: 1,
+        };
+        const libre2 = {
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          capacity: 1,
+          remainingCapacity: 1,
+        };
+        d.catalogRepo.findOpenSlotsOfProfessionalInWindow.mockResolvedValue([
+          libre1,
+          libre2,
+        ]);
+
+        const res = await d.service.createDirectAppointment(
+          dto as never,
+          medico,
+        );
+
+        expect(res.retractedSlots).toBe(2);
+        expect(libre1.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+        expect(libre2.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      });
+
+      it('un profesional NO asigna en la agenda de otro', async () => {
+        const d = listoParaAsignar(build());
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          tenantId: 'ten-1',
+          resourceRefId: 'hp-OTRO',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/su propia agenda/);
+      });
+
+      it('un paciente que no existe rebota con 404, no crea nada', async () => {
+        const d = listoParaAsignar(build());
+        d.bookingsRepo.findPatientNames.mockResolvedValue(new Map());
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/Paciente no encontrado/);
+        expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+      });
+
+      it('hereda el gating del vínculo: revocado no asigna', async () => {
+        const d = listoParaAsignar(build());
+        d.vinculos.evaluar.mockResolvedValue('no-vigente' as never);
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/no está vigente/);
+      });
+    });
+
+    describe('la regla madre — AG-1', () => {
+      it('aceptar consulta el tiempo del profesional EXCLUYENDO la propia cita', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-1',
+          appointmentId: 'appt-1',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+        d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await d.service.accept('booking-1', {}, actor);
+
+        const llamada = d.tiempoProfesional.assertRangoLibre.mock.calls[0];
+        expect(llamada[1]).toBe('hp-1');
+        // el último argumento es la propia reserva: aceptarse no es chocar
+        // consigo misma.
+        expect(llamada[4]).toBe('booking-1');
+      });
+
+      it('si el profesional ya está comprometido en OTRA sede, aceptar rebota', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-1',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.tiempoProfesional.assertRangoLibre.mockRejectedValue(
+          new PreconditionFailedException('El profesional ya tiene a Ana…'),
+        );
+
+        await expect(d.service.accept('booking-1', {}, actor)).rejects.toThrow(
+          /ya tiene a Ana/,
+        );
+      });
+
+      it('una sala o un equipo no pasan por la regla del profesional', async () => {
+        // La regla protege a la persona; una sala puede tener dos agendas sin
+        // ser un problema humano.
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-sala',
+          appointmentId: 'appt-1',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+        d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-sala',
+          resourceRefId: 'sala-1',
+          resourceRefType: 'rooms',
+        });
+
+        await d.service.accept('booking-1', {}, actor);
+
+        expect(d.tiempoProfesional.assertRangoLibre).not.toHaveBeenCalled();
+      });
+    });
 
     describe('vinculo vigente con la organizacion — MAC-VINCULO', () => {
       // El `actor` de este archivo es un SCHEDULING_AGENT, que opera agendas

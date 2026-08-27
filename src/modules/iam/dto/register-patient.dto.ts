@@ -230,11 +230,18 @@ export class RegisterPatientDto {
   phone?: string;
 
   /**
-   * Ocupación, miembro de `VS_SEGIP_OCCUPATION` (backlog T-02).
+   * Ocupación, miembro de `VS_BO_OCCUPATION`.
+   *
+   * **El código es `VS_BO_OCCUPATION`, no `VS_SEGIP_OCCUPATION`.** Acá decía lo
+   * segundo desde el 21/08; la nota de entidad de `profiles.persons` del modelo
+   * (v4.1.8, 22/08) lo fijó como el primero, y es la que manda: un catálogo
+   * tiene un solo dueño, y sembrar los dos habría dejado dos conjuntos con las
+   * mismas ocupaciones sin forma de saber cuál mira cada pantalla. Lo siembra
+   * `BoOccupationsSeedService`, en esta API.
    */
   @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Ocupación del catálogo (VS_SEGIP_OCCUPATION)',
+    description: 'Ocupación del catálogo (VS_BO_OCCUPATION)',
   })
   @IsOptional()
   @IsUUID()

@@ -1,4 +1,13 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Header,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  Res,
+} from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Public, ResourceNotFoundException } from '../../../common';
@@ -8,6 +17,7 @@ import {
 } from '../services';
 import type {
   PublicDirectoryProfileDto,
+  PublicFeedPageDto,
   PublicNearbyPageDto,
   PublicSearchPageDto,
 } from '../dto';
@@ -53,6 +63,25 @@ export class CommunityPublicController {
    * @param service - Buscador público.
    */
   constructor(private readonly service: CommunityPublicService) {}
+
+  /**
+   * El feed de la portada: lo último de todas las vitrinas, mezclado.
+   *
+   * Va declarado **antes** que `public/search` por la misma razón que todo este
+   * controlador va antes que `read_models`: Nest resuelve por orden, y una ruta
+   * hermana con parámetro capturaría este segmento.
+   */
+  @Public()
+  @Get('public/posts')
+  @ApiOperation({
+    summary: 'Últimas publicaciones de todos los profesionales',
+  })
+  feedPublico(
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicFeedPageDto> {
+    return this.service.feedPublico({ cursor, limit: this.toInt(limit) });
+  }
 
   /** Búsqueda unificada sobre todos los verticales. */
   @Public()
@@ -229,6 +258,32 @@ export class CommunityPublicController {
       throw new ResourceNotFoundException('No encontrado', { slug });
 
     return this.service.getBySlug(slug, concepto);
+  }
+
+  /**
+   * Imagen de la superficie pública: el avatar o la portada de una vitrina, o
+   * una foto de una de sus publicaciones.
+   *
+   * La ficha y el buscador devuelven la URL `/public/media/:id` en vez del id
+   * de archivo pelado —un uuid interno regalado a un anónimo no se vuelve a
+   * esconder—, así que esta ruta es la contraparte que sirve esos bytes. Lo
+   * que autoriza es qué es el archivo, no quién lo pide: sin esto, cada foto
+   * del directorio es un enlace roto.
+   *
+   * `ParseUUIDPipe` rechaza con 400 lo que no es un uuid antes de tocar la
+   * base; el resto de los «no» son un 404 indistinguible del «no existe».
+   */
+  @Public()
+  @Get('public/media/:id')
+  @Header('Cache-Control', 'public, max-age=3600')
+  @ApiOperation({ summary: 'Servir una imagen pública (avatar, portada o post)' })
+  async getPublicMedia(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const contenido = await this.service.getPublicMedia(id);
+    res.setHeader('Content-Type', contenido.mimeType);
+    res.send(contenido.buffer);
   }
 
   /** Ficha pública de un profesional. */

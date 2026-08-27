@@ -60,6 +60,8 @@ export interface CreatePublicProfileData {
   actorUserId?: string;
   /** Archivo del avatar, ya subido. */
   avatarFileId?: string;
+  /** Archivo de la portada, ya subido. */
+  coverFileId?: string;
 }
 
 /**
@@ -242,6 +244,7 @@ export class PublicProfilesRepository {
         acceptsReviews: data.acceptsReviews ?? true,
         commentsDefaultEnabled: data.commentsDefaultEnabled ?? true,
         avatarFileId: data.avatarFileId,
+        coverFileId: data.coverFileId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

@@ -572,6 +572,19 @@ export class GenerateSlotsResponseDto {
    */
   @ApiProperty({ description: 'Slots que ya existían y se conservaron' })
   skipped!: number;
+
+  /**
+   * Cupos que NO se generaron porque pisaban un compromiso del profesional.
+   *
+   * La regla madre (AG-1): la cirugía del jueves hace que ese rato no se
+   * ofrezca, en ninguna de sus sedes. Se informa para que quien publica sepa
+   * que el hueco no es un error del generador.
+   */
+  @ApiProperty({
+    description:
+      'Cupos omitidos por chocar con compromisos del profesional (citas confirmadas en cualquiera de sus sedes)',
+  })
+  omittedByCommitments!: number;
 }
 
 /** Tipo de excepción de disponibilidad. */

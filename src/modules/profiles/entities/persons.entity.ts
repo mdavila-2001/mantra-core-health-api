@@ -142,7 +142,7 @@ export class Persons {
   preferredLanguageConceptId?: string;
 
   /**
-   * Ocupación (miembro de `VS_SEGIP_OCCUPATION`), buscable con lupa
+   * Ocupación (miembro de `VS_BO_OCCUPATION`), buscable con lupa
    * (SALUD/Arquitectura/alovida-backlog-procesos.md, T-02).
    */
   @Property({

@@ -48,7 +48,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['payments', 42, 'payments', 53],
   ['pharma_lab', null, 'pharma_lab', 31],
   ['pharmacy', 24, 'pharmacy', 9],
-  ['pharmacy_inventory', 25, 'pharmacy_inventory', 20],
+  ['pharmacy_inventory', 25, 'pharmacy_inventory', 21],
   ['platform_ops', 46, 'platform_ops', 38],
   ['polyglot_storage', 54, 'polyglot_storage', 20],
   ['practice', 14, 'practice', 11],

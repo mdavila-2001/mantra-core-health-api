@@ -3,7 +3,9 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import type { PublicProfiles, VerifiedBadges } from '../entities';
-import { PublicSearchRepository } from '../repositories';
+import { PublicProfilesRepository, PublicSearchRepository } from '../repositories';
+import { FileUploadService } from '../../common/services';
+import type { FileContentDto } from '../../common/dto';
 import type {
   ProfileAffiliation,
   ProfileLocation,
@@ -24,6 +26,7 @@ import {
 import { CommunityProfileStatsService } from './community-profile-stats.service';
 import type {
   PublicDirectoryProfileDto,
+  PublicFeedPageDto,
   PublicNearbyPageDto,
   PublicResultKind,
   PublicSearchPageDto,
@@ -85,6 +88,14 @@ export const PUBLIC_RESULT_KEYS = [
   'verifiedBadge',
   'hasPublishedAgenda',
   'nextAvailableDate',
+  // La tarjeta del directorio se mira antes de leerse: sin portada, sin calle
+  // y sin punto, cuarenta centros de salud se ven exactamente iguales y la
+  // única forma de elegir es abrirlos de a uno. Los tres salen de datos que la
+  // página ya cargaba —`coverFileId` del perfil, `lines` y las coordenadas de
+  // `locationsByOwner`— y no cuestan una consulta más.
+  'coverUrl',
+  'address',
+  'location',
 ] as const;
 
 /** Las claves que la ficha pública puede tener. Nada más. */
@@ -162,12 +173,133 @@ export class CommunityPublicService {
   constructor(
     private readonly em: EntityManager,
     private readonly repo: PublicSearchRepository,
+    private readonly profiles: PublicProfilesRepository,
+    private readonly files: FileUploadService,
     private readonly searchIndex: SearchIndexService,
     private readonly verification: CommunityVerificationService,
     private readonly stats: CommunityProfileStatsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityPublicService.name);
+  }
+
+  /**
+   * El feed de la portada: lo último que publicaron **todos** los
+   * profesionales, mezclado y ordenado por fecha.
+   *
+   * Es la vista por defecto de la superficie pública. Quien entra sin sesión no
+   * tiene todavía un médico en la cabeza al que buscar, así que una portada que
+   * exige elegir uno primero no le sirve de nada; un compilado de lo último
+   * escrito sí, y de ahí se llega a la ficha de quien lo escribió.
+   *
+   * @param params - Cuántas traer y desde dónde seguir.
+   * @returns Página de publicaciones con su autor.
+   */
+  async feedPublico(params: {
+    /** Tope pedido. */
+    limit?: number;
+    /** Cursor opaco de continuación. */
+    cursor?: string;
+  }): Promise<PublicFeedPageDto> {
+    const em = this.em.fork();
+    const limit = this.clampLimit(params.limit);
+
+    // Una de más para saber si hay página siguiente sin un `COUNT` aparte.
+    const filas = await this.repo.listFeedPublico(
+      em,
+      limit + 1,
+      this.decodeFeedCursor(params.cursor),
+    );
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+
+    const engagement = await this.repo.engagementByPost(
+      em,
+      pagina.map((fila) => fila.id),
+    );
+
+    const ultima = pagina.at(-1);
+    return {
+      items: pagina.map((fila) => {
+        const extra = engagement.get(fila.id);
+        return {
+          id: fila.id,
+          bodyText: fila.bodyText,
+          publishedAt: fila.publishedAt.toISOString(),
+          mediaUrls: (extra?.imageFileIds ?? [])
+            .map((fileId) => this.fileUrl(fileId))
+            .filter((url): url is string => url !== null),
+          reactionCount: extra?.reactionCount ?? 0,
+          commentCount: extra?.commentCount ?? 0,
+          authorSlug: fila.authorSlug,
+          authorDisplayName: fila.authorDisplayName,
+          authorHeadline: fila.authorHeadline,
+          authorAvatarUrl: this.fileUrl(fila.authorAvatarFileId ?? undefined),
+          authorKind:
+            KIND_BY_TARGET_CONCEPT[fila.authorKindConceptId] ?? 'PRACTITIONER',
+        };
+      }),
+      nextCursor:
+        hayMas && ultima
+          ? Buffer.from(
+              JSON.stringify({ p: ultima.publishedAt.toISOString(), i: ultima.id }),
+            ).toString('base64url')
+          : null,
+      totalHint: null,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  /** Descompone el cursor del feed; uno corrupto se ignora, no rompe la página. */
+  private decodeFeedCursor(
+    cursor?: string,
+  ): { publishedAt: Date; id: string } | undefined {
+    if (!cursor) return undefined;
+    try {
+      const crudo: unknown = JSON.parse(
+        Buffer.from(cursor, 'base64url').toString(),
+      );
+      if (
+        typeof crudo === 'object' &&
+        crudo !== null &&
+        typeof (crudo as { p?: unknown }).p === 'string' &&
+        typeof (crudo as { i?: unknown }).i === 'string'
+      ) {
+        const fecha = new Date((crudo as { p: string }).p);
+        if (!Number.isNaN(fecha.getTime())) {
+          return { publishedAt: fecha, id: (crudo as { i: string }).i };
+        }
+      }
+    } catch {
+      // Un cursor ilegible se trata como ausente: la primera página es una
+      // respuesta razonable, un 400 por un dato que el cliente no escribió a
+      // mano no lo es.
+    }
+    return undefined;
+  }
+
+  /**
+   * Sirve una imagen de la superficie pública: el avatar o la portada de una
+   * vitrina publicada, o una foto adjunta a una de sus publicaciones.
+   *
+   * No hay actor que demuestre nada —es una lectura anónima—, así que lo que
+   * autoriza es qué **es** el archivo. Un id que no pasa ninguna de las dos
+   * puertas devuelve el mismo 404 que uno inexistente: a quien prueba ids al
+   * azar no se le confirma cuáles corresponden a algo real.
+   *
+   * @param fileId - Identificador del archivo pedido.
+   * @returns Bytes y tipo MIME para servir por HTTP.
+   * @throws ResourceNotFoundException si el archivo no está colgado de nada público.
+   */
+  async getPublicMedia(fileId: string): Promise<FileContentDto> {
+    const em = this.em.fork();
+    const permitido =
+      (await this.profiles.isPublicMedia(em, fileId)) ||
+      (await this.repo.isPublicPostMedia(em, fileId));
+    if (!permitido) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+    }
+    return this.files.downloadPublicMedia(fileId);
   }
 
   /**
@@ -300,6 +432,13 @@ export class CommunityPublicService {
         ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
         : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
     ]);
+    // La interacción de cada publicación: sus imágenes, y cuántas reacciones y
+    // comentarios lleva. Un solo viaje para todo el lote.
+    const engagement = await this.repo.engagementByPost(
+      em,
+      posts.map((post) => post.id),
+    );
+
     const rating = señales.ratings.get(profile.id);
     const badge = this.verification.readBadge(
       profile,
@@ -335,14 +474,19 @@ export class CommunityPublicService {
       verifiedBadge: badge,
       hasPublishedAgenda: agenda?.hasAgenda ?? false,
       nextAvailableDate: agenda?.nextAvailableDate ?? null,
-      posts: posts.map((post) => ({
-        id: post.id,
-        bodyText: post.bodyText,
-        publishedAt: (post.publishedAt ?? post.createdAt).toISOString(),
-        mediaUrls: [],
-        reactionCount: 0,
-        commentCount: 0,
-      })),
+      posts: posts.map((post) => {
+        const extra = engagement.get(post.id);
+        return {
+          id: post.id,
+          bodyText: post.bodyText,
+          publishedAt: (post.publishedAt ?? post.createdAt).toISOString(),
+          mediaUrls: (extra?.imageFileIds ?? [])
+            .map((fileId) => this.fileUrl(fileId))
+            .filter((url): url is string => url !== null),
+          reactionCount: extra?.reactionCount ?? 0,
+          commentCount: extra?.commentCount ?? 0,
+        };
+      }),
       updatedAt: profile.updatedAt.toISOString(),
     };
   }
@@ -625,6 +769,23 @@ export class CommunityPublicService {
       validUntil: texto('validUntil'),
     };
 
+    // El punto viaja al índice como `geo_point` —`{lat, lon}`, con la `lon` que
+    // exige OpenSearch— y sale al cliente como `{lat, lng}`, que es lo que
+    // declara el contrato público. La traducción va acá, en el mismo lugar que
+    // recompone el sello, para que la fila servida desde el índice sea idéntica
+    // a la servida desde SQL.
+    const punto = source.location;
+    const location =
+      typeof punto === 'object' &&
+      punto !== null &&
+      typeof (punto as { lat?: unknown }).lat === 'number' &&
+      typeof (punto as { lon?: unknown }).lon === 'number'
+        ? {
+            lat: (punto as { lat: number }).lat,
+            lng: (punto as { lon: number }).lon,
+          }
+        : null;
+
     return {
       kind: (texto('kind') ?? 'PRACTITIONER') as PublicResultKind,
       slug: texto('slug') ?? '',
@@ -638,6 +799,9 @@ export class CommunityPublicService {
       verifiedBadge,
       hasPublishedAgenda: source.hasPublishedAgenda === true,
       nextAvailableDate: texto('nextAvailableDate'),
+      coverUrl: texto('coverUrl'),
+      address: texto('address'),
+      location,
     };
   }
 
@@ -700,13 +864,22 @@ export class CommunityPublicService {
       señales.badges.get(profile.id) ?? [],
     );
     const agenda = señales.agenda.get(profile.targetId);
+    const ubicacion = señales.locations.get(profile.targetId);
     return {
       kind: this.kindOf(profile),
       slug: profile.slug,
       displayName: profile.displayName,
       headline: profile.headline ?? null,
-      city: señales.locations.get(profile.targetId)?.city ?? null,
+      city: ubicacion?.city ?? null,
       avatarUrl: this.fileUrl(profile.avatarFileId),
+      coverUrl: this.fileUrl(profile.coverFileId),
+      address: ubicacion?.address ?? null,
+      // El punto sólo cuando está completo: media coordenada no ubica nada y
+      // `geo_point` la rechaza igual. Ver `locationsByOwner`.
+      location:
+        ubicacion && ubicacion.lat !== null && ubicacion.lng !== null
+          ? { lat: ubicacion.lat, lng: ubicacion.lng }
+          : null,
       // El booleano deriva del sello, no de la columna resumen: si las dos se
       // desincronizaran, manda el que tiene la evidencia detrás.
       verified: badge.status === 'VERIFIED',

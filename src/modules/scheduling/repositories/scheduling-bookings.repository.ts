@@ -690,6 +690,165 @@ export class SchedulingBookingsRepository {
     );
   }
 
+  /**
+   * Los compromisos del PROFESIONAL que pisan una franja, cruzando TODAS sus
+   * agendas.
+   *
+   * Es la consulta de la regla madre (AG-1): el médico es el recurso escaso, no
+   * la sede. Un doctor con consultorio propio y hospital tiene DOS recursos, y
+   * hasta esta consulta nada miraba los dos juntos: se comprobó reservándole a
+   * dos pacientes 14:00–14:30 y 14:15–14:45 en sus dos agendas — ambas quedaron
+   * confirmadas, y el médico citado en dos lugares a la vez.
+   *
+   * Se busca por `resource_ref_id` —el vínculo del recurso con el perfil— y no
+   * por tenant, con el mismo argumento que la validación de plantillas: el que
+   * no puede estar en dos lugares es él, publique donde publique.
+   *
+   * Tocarse en el borde no cuenta (`<` y `>` estrictos): terminar 10:30 acá y
+   * empezar 10:30 allá es apretado pero posible — mismo criterio que la
+   * validación del paciente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - El profesional cuyos compromisos se miran.
+   * @param desde - Inicio de la franja que se quiere ocupar.
+   * @param hasta - Fin de la franja.
+   * @param estados - Estados que cuentan como compromiso.
+   * @param excepto - Reserva que no se compara consigo misma, si aplica.
+   * @returns Los compromisos que se cruzan, del más próximo al más lejano.
+   */
+  async findProfessionalCommitmentsOverlapping(
+    em: EntityManager,
+    practitionerProfileId: string,
+    desde: Date,
+    hasta: Date,
+    estados: readonly string[],
+    excepto?: string,
+  ): Promise<
+    {
+      id: string;
+      startAt: Date;
+      endAt: Date;
+      statusConceptId: string;
+      resourceName: string | null;
+      timeZone: string | null;
+      patientProfileId: string;
+    }[]
+  > {
+    if (estados.length === 0) return [];
+
+    const filas: {
+      id: string;
+      startAt: Date | string;
+      endAt: Date | string;
+      statusConceptId: string;
+      resourceName: string | null;
+      timeZone: string | null;
+      patientProfileId: string;
+    }[] = await em.getConnection().execute(
+      `SELECT b.id,
+              s.start_at          AS "startAt",
+              s.end_at            AS "endAt",
+              b.status_concept_id AS "statusConceptId",
+              r.name              AS "resourceName",
+              r.time_zone         AS "timeZone",
+              b.patient_profile_id AS "patientProfileId"
+         FROM scheduling.appointment_bookings b
+         JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
+         JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
+        WHERE r.resource_ref_id = ?
+          AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
+          AND b.status_concept_id IN (?)
+          AND s.start_at < ?
+          AND s.end_at   > ?
+          AND (? IS NULL OR b.id <> ?)
+        ORDER BY s.start_at ASC`,
+      [
+        practitionerProfileId,
+        [...estados],
+        hasta,
+        desde,
+        excepto ?? null,
+        excepto ?? null,
+      ],
+    );
+
+    // El driver devuelve los timestamptz del SQL crudo como texto, no como
+    // `Date`; quien formatee la hora con eso revienta con «Invalid time value».
+    // Se normaliza acá, que es la frontera con la base — apareció ejecutando el
+    // experimento de la regla madre, no leyendo.
+    return filas.map((fila) => ({
+      ...fila,
+      startAt: new Date(fila.startAt),
+      endAt: new Date(fila.endAt),
+    }));
+  }
+
+  /**
+   * El tiempo ocupado del profesional que pisa una franja, cruzando sus sedes.
+   *
+   * Son las excepciones de NO disponibilidad con rango horario — la reunión de
+   * 13:15, la guardia del martes— de cualquiera de sus recursos (AG-3). El
+   * paciente nunca las ve; para la regla madre cuentan igual que una cita:
+   * nada se reserva ni se genera encima.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - El profesional.
+   * @param desde - Inicio de la franja.
+   * @param hasta - Fin de la franja.
+   * @param excepto - Excepción que no se compara consigo misma, si aplica.
+   * @returns Los ratos ocupados que se cruzan, del más próximo al más lejano.
+   */
+  async findProfessionalBusyExceptionsOverlapping(
+    em: EntityManager,
+    practitionerProfileId: string,
+    desde: Date,
+    hasta: Date,
+    excepto?: string,
+  ): Promise<
+    {
+      id: string;
+      startAt: Date;
+      endAt: Date;
+      reason: string | null;
+      resourceName: string | null;
+      timeZone: string | null;
+    }[]
+  > {
+    const filas: {
+      id: string;
+      startAt: Date | string;
+      endAt: Date | string;
+      reason: string | null;
+      resourceName: string | null;
+      timeZone: string | null;
+    }[] = await em.getConnection().execute(
+      `SELECT e.id,
+              e.start_at  AS "startAt",
+              e.end_at    AS "endAt",
+              e.reason    AS "reason",
+              r.name      AS "resourceName",
+              r.time_zone AS "timeZone"
+         FROM scheduling.availability_exceptions e
+         JOIN scheduling.schedulable_resources r ON r.id = e.resource_id
+        WHERE r.resource_ref_id = ?
+          AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
+          AND e.is_available = false
+          AND e.start_at < ?
+          AND e.end_at   > ?
+          AND (? IS NULL OR e.id <> ?)
+        ORDER BY e.start_at ASC`,
+      [practitionerProfileId, hasta, desde, excepto ?? null, excepto ?? null],
+    );
+
+    // Misma frontera que los compromisos: el SQL crudo trae timestamptz como
+    // texto y quien formatee la hora con eso revienta.
+    return filas.map((fila) => ({
+      ...fila,
+      startAt: new Date(fila.startAt),
+      endAt: new Date(fila.endAt),
+    }));
+  }
+
   async findPatientNames(
     em: EntityManager,
     patientProfileIds: readonly string[],

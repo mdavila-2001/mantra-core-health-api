@@ -252,6 +252,7 @@ export class CommunitySocialService {
           : 'PRIVATE',
       verificationStatusConceptId: profile.verificationStatusConceptId ?? null,
       avatarFileId: profile.avatarFileId ?? null,
+      coverFileId: profile.coverFileId ?? null,
       statusConceptId: profile.statusConceptId,
     };
   }
@@ -320,6 +321,23 @@ export class CommunitySocialService {
           },
         );
       }
+      // Misma regla que el avatar, mismo servicio: la portada es un segundo
+      // archivo, no una variante del primero.
+      if (dto.coverFileId) {
+        await this.attachableFiles.assertUsableBy(
+          tx,
+          dto.coverFileId,
+          actor,
+          {
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+            operation: 'community.profile.upsertOwn',
+          },
+          {
+            subject: 'El archivo de la portada',
+            notFound: 'El archivo de la portada no existe',
+          },
+        );
+      }
 
       // Misma resolución que la lectura: si la vitrina existe a nombre de la
       // cuenta, editarla es editar la suya, no crear una segunda.
@@ -342,6 +360,9 @@ export class CommunitySocialService {
         if (dto.avatarFileId !== undefined) {
           existente.avatarFileId = dto.avatarFileId ?? undefined;
         }
+        if (dto.coverFileId !== undefined) {
+          existente.coverFileId = dto.coverFileId ?? undefined;
+        }
         touch(existente, actor.id);
       } else {
         this.profilesRepo.create(tx, {
@@ -361,6 +382,7 @@ export class CommunitySocialService {
               : PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility],
           acceptsReviews: dto.acceptsReviews,
           avatarFileId: dto.avatarFileId ?? undefined,
+          coverFileId: dto.coverFileId ?? undefined,
           actorUserId: actor.id,
         });
       }

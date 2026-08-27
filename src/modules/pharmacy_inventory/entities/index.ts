@@ -14,6 +14,7 @@ export * from './pharmacy_goods_receipt_lines.entity';
 export * from './pharmacy_goods_receipts.entity';
 export * from './pharmacy_inventory_sync_batches.entity';
 export * from './pharmacy_inventory_sync_items.entity';
+export * from './pharmacy_order_substitutions.entity';
 export * from './pharmacy_purchase_order_lines.entity';
 export * from './pharmacy_purchase_orders.entity';
 export * from './pharmacy_suppliers.entity';

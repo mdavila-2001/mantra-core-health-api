@@ -209,6 +209,120 @@ function slugificar(texto) {
     .replace(/^-+|-+$/g, '');
 }
 
+/* ── Las imágenes ──────────────────────────────────────────────────────────
+ *
+ * Un perfil sin foto se lee como una cuenta a medio hacer, y una sección de
+ * publicaciones sin una sola imagen no deja juzgar cómo se ve la tarjeta cuando
+ * la lleva. Las fotos salen de bancos de imágenes libres —retratos de
+ * `pravatar.cc`, fotos temáticas de `loremflickr.com`—, se bajan una vez y se
+ * suben a `common.files` con `POST /common/files/upload`. Son marcadores
+ * visuales, no personas reales: `--sin-imagenes` las apaga si no hay red.        */
+
+const SIN_IMAGENES = flag('sin-imagenes');
+const cacheImagenes = new Map();
+
+async function bajarImagen(url) {
+  if (cacheImagenes.has(url)) return cacheImagenes.get(url);
+  try {
+    const res = await fetch(url, { redirect: 'follow' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 512) throw new Error('respuesta demasiado corta');
+    cacheImagenes.set(url, buf);
+    return buf;
+  } catch (error) {
+    cacheImagenes.set(url, null);
+    log.push({
+      section: 'imagenes',
+      title: `bajar ${url}`,
+      method: 'GET',
+      path: url,
+      status: 0,
+      expected: null,
+      ok: false,
+      durationMs: 0,
+      detail: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Sube unos bytes de imagen y devuelve el id del archivo, o `null`.
+ *
+ * `category: IMAGE` y `sensitivity: NORMAL` son lo que exige el cuerpo del
+ * endpoint; `NORMAL` además es la condición para que `GET /public/media/:id`
+ * pueda servirla a un anónimo.
+ */
+async function subirImagen(bearer, buffer, nombre) {
+  if (!buffer) return null;
+  const form = new FormData();
+  form.append('file', new Blob([buffer], { type: 'image/jpeg' }), nombre);
+  form.append('category', 'IMAGE');
+  form.append('sensitivity', 'NORMAL');
+  const started = Date.now();
+  try {
+    const res = await fetch(`${BASE}/common/files/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${bearer}` },
+      body: form,
+    });
+    const text = await res.text();
+    const body = text ? JSON.parse(text) : null;
+    const ok = res.status >= 200 && res.status < 300;
+    log.push({
+      section: 'imagenes',
+      title: `subir ${nombre}`,
+      method: 'POST',
+      path: '/common/files/upload',
+      status: res.status,
+      expected: [201],
+      ok,
+      durationMs: Date.now() - started,
+      detail: ok ? undefined : resumir(body),
+    });
+    return ok ? (body?.id ?? null) : null;
+  } catch (error) {
+    log.push({
+      section: 'imagenes',
+      title: `subir ${nombre}`,
+      method: 'POST',
+      path: '/common/files/upload',
+      status: 0,
+      expected: [201],
+      ok: false,
+      durationMs: Date.now() - started,
+      detail: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Baja una foto y la sube; devuelve el id del archivo o `null`.
+ *
+ * `picsum.photos` y no un banco por etiqueta (`loremflickr`): éste devuelve un
+ * marcador rojo de «no encontré fotos» cuando la etiqueta —o la combinación de
+ * etiquetas— no tiene suficientes, y ese marcador terminaba publicado como si
+ * fuera la imagen del artículo. `picsum` siempre devuelve una foto real, y con
+ * `seed` la misma consulta cae siempre en la misma imagen: la corrida es
+ * reproducible. No son fotos médicas —son marcadores— y con eso alcanza para
+ * ver cómo se comporta la tarjeta cuando lleva imagen.
+ */
+async function imagenTematica(bearer, consulta, nombre, ancho = 1200, alto = 675) {
+  if (SIN_IMAGENES || !consulta) return null;
+  const semilla = slugificar(consulta) || 'alovida';
+  const url = `https://picsum.photos/seed/${encodeURIComponent(semilla)}/${ancho}/${alto}`;
+  return subirImagen(bearer, await bajarImagen(url), nombre);
+}
+
+/** El retrato del médico, de `pravatar.cc`. Determinístico por índice. */
+async function retrato(bearer, indice, nombre) {
+  if (SIN_IMAGENES) return null;
+  const url = `https://i.pravatar.cc/512?img=${(indice % 70) + 1}`;
+  return subirImagen(bearer, await bajarImagen(url), nombre);
+}
+
 /* ── El elenco ──────────────────────────────────────────────────────────── */
 
 /**
@@ -313,13 +427,149 @@ const MEDICOS = [
 ];
 
 /** Lo que publica un médico. Corto, concreto y en su voz. */
-const PUBLICACIONES = [
-  'Tres señales que sí ameritan consulta el mismo día: dolor de pecho con esfuerzo, falta de aire que aparece acostado, y desmayo sin aviso. El resto casi siempre puede esperar a un turno normal.',
-  'La presión se mide sentado, con el brazo apoyado a la altura del corazón y después de cinco minutos quieto. Medida de otra forma, el número no sirve para decidir nada.',
-  'Si te indicaron un antibiótico, terminá el esquema aunque te sientas bien al segundo día. Cortarlo antes es lo que fabrica bacterias resistentes.',
-  'Traer los estudios previos a la consulta cambia el resultado. No es burocracia: sin el laboratorio anterior no se puede saber si un valor subió, bajó o siempre fue así.',
-  'El control anual no es un trámite. La mitad de lo que encontramos temprano no daba ningún síntoma cuando lo encontramos.',
+/**
+ * Lo que publica un médico: un repositorio de divulgación, no un muro de frases
+ * sueltas. Cada entrada tiene un cuerpo largo —de varios párrafos, como un
+ * artículo corto—, sus etiquetas, y una pista de qué foto la acompaña. La
+ * sección «Publicaciones» sólo se puede juzgar —tipografía, ancho de lectura,
+ * recorte de la tarjeta, imagen a lo ancho— cuando el contenido tiene el peso
+ * que va a tener en producción.
+ *
+ * `imagen` es una consulta para un banco de fotos libres (`loremflickr`): el
+ * seeder la baja, la sube a `common.files` y la adjunta al post. `null` deja el
+ * post sólo de texto, que también hay que poder ver.
+ */
+const GENERALES = [
+  {
+    texto:
+      'Traer los estudios previos a la consulta cambia el resultado.\n\nNo es burocracia. Sin el laboratorio anterior no se puede saber si un valor subió, bajó o siempre fue así, y esa diferencia decide si hoy pedimos algo nuevo o esperamos. Un mismo colesterol de 210 es una buena noticia en quien venía de 260 y una señal de alarma en quien venía de 170.\n\nSi los tenés en papel, una foto legible alcanza. Si están en otra institución, casi siempre te los dan pidiéndolos en admisión con tu documento.',
+    hashtags: ['prevención', 'consultaMédica', 'saludBolivia'],
+    imagen: 'medical,records,paperwork',
+  },
+  {
+    texto:
+      'El control anual no es un trámite.\n\nLa mitad de lo que encontramos a tiempo no daba ningún síntoma cuando lo encontramos: presión alta, azúcar en el límite, una tiroides que empieza a fallar. Ninguna de esas cosas duele hasta que ya hizo daño.\n\nUn control razonable para un adulto sano es una consulta clínica al año, con presión, peso, y análisis de sangre y orina. Si hay antecedentes en la familia, el médico ajusta desde ahí.',
+    hashtags: ['chequeoAnual', 'prevención', 'medicinaPreventiva'],
+    imagen: 'doctor,checkup,stethoscope',
+  },
+  {
+    texto:
+      'Si te indicaron un antibiótico, terminá el esquema completo.\n\nAunque te sientas bien al segundo día. Cortarlo antes deja vivas a las bacterias más resistentes justamente las que costó más matar y esas son las que vuelven, ahora sin miedo a ese antibiótico.\n\nY al revés: el antibiótico no sirve para la gripe, ni para la mayoría de los dolores de garganta, ni para el resfrío. Tomarlo «por las dudas» no acorta nada y sí gasta una herramienta que es de todos.',
+    hashtags: ['usoResponsableDeAntibióticos', 'resistenciaAntimicrobiana'],
+    imagen: 'pills,medicine,pharmacy',
+  },
+  {
+    texto:
+      'Cómo saber si una fiebre es de las que pueden esperar al día siguiente.\n\nEn un adulto, una fiebre sola, que baja con paracetamol y deja hacer vida más o menos normal, casi siempre puede verse en un turno normal. Lo que cambia el plan es la compañía: falta de aire, dolor de pecho, confusión, una mancha en la piel que no desaparece al apretarla, o fiebre que ya lleva más de tres días sin ceder.\n\nEn bebés menores de tres meses, cualquier fiebre es consulta el mismo día. Ahí no se espera.',
+    hashtags: ['fiebre', 'cuándoConsultar', 'urgencias'],
+    imagen: 'thermometer,fever,sick',
+  },
 ];
+
+const POR_ESPECIALIDAD = {
+  cardiologia: [
+    {
+      texto:
+        'La presión se mide sentado, con la espalda apoyada, los pies en el piso y el brazo a la altura del corazón, después de cinco minutos quieto y sin haber tomado café ni fumado en la media hora previa.\n\nMedida de cualquier otra forma parado, apurado, con la vejiga llena el número sale alto y no sirve para decidir nada. Un tratamiento que se ajusta con mediciones mal tomadas es un tratamiento mal ajustado.\n\nLo mejor para el control es un registro en casa: dos tomas a la mañana y dos a la noche, durante una semana, anotadas. Eso vale más que una sola medición en el consultorio.',
+      hashtags: ['hipertensión', 'presiónArterial', 'cardiología'],
+      imagen: 'blood,pressure,measurement',
+    },
+    {
+      texto:
+        'Tres señales que sí ameritan ir a una emergencia, no esperar un turno:\n\n1. Dolor o presión en el pecho que aparece con el esfuerzo y cede con el reposo.\n2. Falta de aire que aparece al acostarse y obliga a dormir con más almohadas.\n3. Desmayo sin aviso, sobre todo si fue haciendo un esfuerzo.\n\nEl resto de las molestias del pecho pinchazos que duran un segundo, dolor que cambia al respirar o al apretar casi siempre no son del corazón, pero si hay dudas, se consulta.',
+      hashtags: ['infarto', 'señalesDeAlarma', 'cardiología'],
+      imagen: 'heart,cardiology,ecg',
+    },
+  ],
+  pediatria: [
+    {
+      texto:
+        'La libreta de vacunas es el documento de salud más importante que tiene tu hijo. Traela a cada consulta, aunque la visita sea por otra cosa.\n\nEn cada control revisamos qué toca y qué quedó pendiente. Una vacuna atrasada no se pierde: se retoma desde donde quedó, no se empieza de cero. Lo que no se recupera es el tiempo en que el chico estuvo sin protección.\n\nSi la perdiste, en el centro de salud donde lo vacunaron tienen el registro y te la reconstruyen.',
+      hashtags: ['vacunas', 'pediatría', 'controlDelNiñoSano'],
+      imagen: 'child,vaccination,pediatric',
+    },
+    {
+      texto:
+        'Bronquiolitis: qué es y cuándo preocuparse.\n\nEs una infección viral de las vías respiratorias chicas, común en menores de dos años, sobre todo en invierno. Empieza como un resfrío y al segundo o tercer día aparece la tos y la respiración silbante.\n\nLo que se vigila en casa: que respire rápido o con el pecho hundido, que le cueste comer o dormir por la falta de aire, que se ponga pálido o azulado alrededor de la boca. Cualquiera de esas cosas es consulta inmediata. El resto se maneja con paciencia, líquidos y lavados nasales.',
+      hashtags: ['bronquiolitis', 'pediatría', 'saludRespiratoria'],
+      imagen: 'baby,nebulizer,respiratory',
+    },
+  ],
+  'medicina-interna': [
+    {
+      texto:
+        'Tener varias enfermedades crónicas a la vez diabetes, presión, tiroides, colesterol no es tener varios problemas separados. Es un solo sistema que hay que mantener en equilibrio.\n\nEl error frecuente es que cada especialista ajusta lo suyo sin mirar el resto, y el paciente termina con doce pastillas que compiten entre sí. La medicina interna existe para ordenar eso: una sola mirada, una lista de medicación revisada entera, y controles que se agrupan en vez de multiplicarse.\n\nSi tomás más de cinco medicamentos, pedí una revisión completa de la lista al menos una vez al año.',
+      hashtags: ['enfermedadesCrónicas', 'polifarmacia', 'medicinaInterna'],
+      imagen: 'medication,organizer,pills',
+    },
+  ],
+  'medicina-general': [
+    {
+      texto:
+        'Qué esperar de una consulta con el médico general.\n\nNo soy el final del camino: muchas veces soy la primera puerta. Escucho el motivo entero, examino, y pido lo que hace falta para entender qué está pasando. Si el problema se resuelve ahí, lo resolvemos. Si necesitás un especialista, te lo digo el mismo día y con una indicación clara de a quién y por qué, en vez de mandarte a dar vueltas.\n\nUna buena derivación ahorra meses. Una consulta general bien hecha evita la mitad de las derivaciones.',
+      hashtags: ['atenciónPrimaria', 'medicinaGeneral', 'saludBolivia'],
+      imagen: 'general,practitioner,clinic',
+    },
+  ],
+  'ginecologia-obstetricia': [
+    {
+      texto:
+        'El Papanicolaou detecta cambios en el cuello del útero años antes de que se conviertan en un problema serio. Ese margen de años es lo que lo hace tan efectivo: da tiempo de sobra para actuar.\n\nLa recomendación general es empezar a los 25 y repetir cada tres años si los resultados son normales, o según lo que indique tu ginecóloga si hubo algún hallazgo. Sumado a la vacuna contra el VPH, es la prevención de cáncer más eficaz que tenemos hoy.\n\nNo duele, dura dos minutos, y no necesitás derivación para pedirlo.',
+      hashtags: ['papanicolaou', 'prevención', 'saludDeLaMujer', 'VPH'],
+      imagen: 'gynecology,women,health',
+    },
+  ],
+  traumatologia: [
+    {
+      texto:
+        'Torcedura de tobillo: los primeros dos días deciden cómo sigue.\n\nLo básico sigue siendo lo de siempre: frío 20 minutos cada 2 o 3 horas, el pie en alto por encima del corazón, y una venda elástica que comprima sin cortar la circulación.\n\nCuándo hace falta radiografía: si no podés apoyar el pie ni dar cuatro pasos, si el dolor está justo sobre el hueso y no sobre el ligamento, o si a las 48 horas la hinchazón no bajó nada. Si podés caminar aunque duela, casi siempre es ligamento y se maneja sin placa.',
+      hashtags: ['esguince', 'traumatología', 'lesionesDeportivas', 'RICE'],
+      imagen: 'ankle,injury,bandage',
+    },
+  ],
+  dermatologia: [
+    {
+      texto:
+        'La regla del ABCDE para mirar un lunar:\n\nA de Asimetría una mitad distinta de la otra.\nB de Bordes irregulares o mal definidos.\nC de Color más de un tono, o muy oscuro.\nD de Diámetro mayor a 6 milímetros.\nE de Evolución cualquier cambio de tamaño, forma, color o síntomas en los últimos meses.\n\nLa E es la más importante. Un lunar que cambia se revisa, tenga el aspecto que tenga. Una vez al año, alguien que te mire la piel entera con dermatoscopio: es rápido y cambia pronósticos.',
+      hashtags: ['lunares', 'cáncerDePiel', 'dermatología', 'ABCDE'],
+      imagen: 'skin,dermatology,examination',
+    },
+  ],
+  psiquiatria: [
+    {
+      texto:
+        'Sobre empezar una medicación para la ansiedad o la depresión.\n\nLo que suele no contarse bien: los antidepresivos no hacen efecto el primer día. Tardan entre dos y cuatro semanas en mostrar el beneficio real, y las primeras dos semanas pueden traer molestias que después se van. Saber eso de entrada evita abandonarlos justo antes de que empiecen a funcionar.\n\nNo generan dependencia como se cree, pero no se cortan de golpe: se bajan de a poco y con acompañamiento. Y no reemplazan a la psicoterapia trabajan mejor juntas.',
+      hashtags: ['saludMental', 'depresión', 'ansiedad', 'psiquiatría'],
+      imagen: 'mental,health,therapy',
+    },
+  ],
+  endocrinologia: [
+    {
+      texto:
+        'La hemoglobina glicosilada (HbA1c) es un promedio de tu azúcar en sangre de los últimos tres meses. Por eso vale más que un pinchazo aislado: no la podés «preparar» con dos días de dieta antes del análisis.\n\nEn una persona con diabetes, la meta habitual es mantenerla por debajo de 7%, pero eso se individualiza edad, años de enfermedad, riesgo de hipoglucemia. Bajarla de 9 a 8 ya reduce complicaciones de forma medible. No hace falta llegar a un número perfecto para que el esfuerzo valga la pena.',
+      hashtags: ['diabetes', 'HbA1c', 'endocrinología'],
+      imagen: 'diabetes,glucose,test',
+    },
+  ],
+  oftalmologia: [
+    {
+      texto:
+        'Si tenés diabetes, necesitás un control de fondo de ojo una vez al año aunque veas perfecto.\n\nLa retinopatía diabética el daño que el azúcar alto le hace a los vasos de la retina no da ningún síntoma en sus etapas tempranas, que son justo las que se pueden tratar. Cuando aparece la visión borrosa o las manchas, el daño ya avanzó.\n\nEl estudio es simple: unas gotas para dilatar la pupila y una foto de la retina. Media hora, una vez al año, y se detecta a tiempo lo que de otro modo se ve cuando ya es tarde.',
+      hashtags: ['retinopatíaDiabética', 'diabetes', 'oftalmología', 'fondoDeOjo'],
+      imagen: 'eye,exam,ophthalmology',
+    },
+  ],
+};
+
+/**
+ * La cola de publicaciones de un médico: primero lo específico de su
+ * especialidad, después lo general, sin repetir hasta agotar. Así un
+ * cardiólogo abre con algo de cardiología y no con un consejo genérico.
+ */
+function publicacionesPara(codigoEspecialidad) {
+  const propias = POR_ESPECIALIDAD[codigoEspecialidad] ?? [];
+  return [...propias, ...GENERALES];
+}
 
 /**
  * País y jurisdicción de Bolivia, con sus uuid derivados del catálogo
@@ -542,6 +792,40 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
   if (!vitrina.ok) return null;
   const profileId = vitrina.body.id;
 
+  // El retrato y la portada. Se suben con el token del propio médico —
+  // `AttachableFileService` exige que el archivo sea suyo— y se fijan con un
+  // segundo PUT: `avatarFileId`/`coverFileId` sólo aceptan un id ya subido.
+  // Sin foto la ficha cae a iniciales, que es digno pero se lee como perfil
+  // sin terminar; sin portada cae al degradado de marca, que también lo es,
+  // pero no deja ver cómo queda la ficha con las dos cosas puestas.
+  let avatarPuesto = false;
+  let portadaPuesta = false;
+  const avatarFileId = await retrato(suToken, indice, `retrato-${slug}.jpg`);
+  const coverFileId = await imagenTematica(
+    suToken,
+    `${medico.codigoEspecialidad}-consultorio`,
+    `portada-${slug}.jpg`,
+    1600,
+    500,
+  );
+  if (avatarFileId || coverFileId) {
+    const conFotos = await call('medicos', `fotos de ${medico.nombre}`, 'PUT', '/community/profiles/me', {
+      token: suToken,
+      body: {
+        tenantId,
+        slug,
+        displayName: `${medico.nombre} ${medico.apellido}`,
+        headline: `${medico.titulo} · ${medico.especialidad}`,
+        biography: medico.bio,
+        visibility: 'PUBLIC',
+        ...(avatarFileId ? { avatarFileId } : {}),
+        ...(coverFileId ? { coverFileId } : {}),
+      },
+    });
+    avatarPuesto = conFotos.ok && Boolean(avatarFileId);
+    portadaPuesta = conFotos.ok && Boolean(coverFileId);
+  }
+
   // La especialidad: sin ella el médico cae bajo «Sin especialidad
   // registrada» en la guía, y el chip de su especialidad nunca tiene a nadie
   // debajo. `practitionerProfileId` viene del alta, no de la vitrina —son dos
@@ -597,22 +881,56 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
     if (puesta.ok) trayectoriaSembrada += 1;
   }
 
-  // Publicaciones: es lo que convierte una ficha en un perfil vivo.
+  // Publicaciones: es lo que convierte una ficha en un perfil vivo. Cada médico
+  // abre con lo específico de su especialidad y sigue con lo general. La mayoría
+  // lleva una imagen; una de cada tres lleva **varias**, para poder ver el
+  // carrusel deslizable de la tarjeta; alguna va sólo de texto.
+  const cola = publicacionesPara(medico.codigoEspecialidad);
+  let publicacionesConImagen = 0;
   for (let i = 0; i < POSTS_POR_DOCTOR; i += 1) {
-    const texto = PUBLICACIONES[(indice + i) % PUBLICACIONES.length];
+    const entrada = cola[i % cola.length];
+    const cuantasImagenes = i % 3 === 2 ? 3 : 1;
+    const media = [];
+    for (let n = 0; n < cuantasImagenes; n += 1) {
+      const fileId = await imagenTematica(
+        suToken,
+        `${entrada.imagen}-${i}-${n}`,
+        `post-${slug}-${i + 1}-${n + 1}.jpg`,
+      );
+      if (fileId) {
+        media.push({
+          fileId,
+          mediaRole: 'IMAGE',
+          altText: entrada.hashtags?.[0] ?? 'Imagen de la publicación',
+          ordinal: n,
+        });
+      }
+    }
     const post = await call('publicaciones', `post ${i + 1} de ${medico.nombre}`, 'POST', `/community/profiles/${profileId}/posts`, {
       token: suToken,
-      body: { bodyText: texto, postType: 'TEXT', visibility: 'PUBLIC' },
+      body: {
+        bodyText: entrada.texto,
+        postType: 'TEXT',
+        visibility: 'PUBLIC',
+        ...(entrada.hashtags ? { hashtags: entrada.hashtags } : {}),
+        ...(media.length > 0 ? { media } : {}),
+      },
       expect: [200, 201],
     });
-    if (post.ok) sembrado.publicaciones += 1;
+    if (post.ok) {
+      sembrado.publicaciones += 1;
+      if (media.length > 0) publicacionesConImagen += 1;
+    }
   }
 
   sembrado.medicos.push({
     nombre: `${medico.nombre} ${medico.apellido}`,
     especialidad: medico.especialidad,
     especialidadAsignada,
+    avatarPuesto,
+    portadaPuesta,
     trayectoriaSembrada,
+    publicacionesConImagen,
     ciudad: medico.ciudad,
     email,
     clave: CLAVE,
@@ -746,8 +1064,10 @@ async function main() {
   paso(
     `\n  ${sembrado.medicos.length} médicos ` +
       `(${sembrado.medicos.filter((m) => m.especialidadAsignada).length} con especialidad, ` +
+      `${sembrado.medicos.filter((m) => m.avatarPuesto).length} con foto, ` +
+      `${sembrado.medicos.filter((m) => m.portadaPuesta).length} con portada, ` +
       `${sembrado.medicos.filter((m) => m.trayectoriaSembrada === 2).length} con trayectoria completa) · ` +
-      `${sembrado.publicaciones} publicaciones · ` +
+      `${sembrado.publicaciones} publicaciones (${sembrado.medicos.reduce((n, m) => n + (m.publicacionesConImagen ?? 0), 0)} con imagen) · ` +
       `${sembrado.organizaciones.filter((o) => o.verificada).length}/${sembrado.organizaciones.length} organizaciones verificadas y ubicadas en el mapa`,
   );
   paso(`  Detalle de la corrida: ${OUT}`);

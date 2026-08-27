@@ -62,18 +62,27 @@ function buildCatalog() {
     findSlotsByTemplateInRange: mockFn(),
     findSlotsByResourceInRange: mockFn().mockResolvedValue([]),
     findOpenSlotsInWindow: mockFn(),
+    findExceptionById: mockFn(),
+    removeException: mockFn(),
+    findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // La regla de pertenencia vive en su propio servicio y tiene specs propios;
   // acá sólo importa qué hace el catálogo con cada veredicto.
   const vinculos = { evaluar: mockFn(async () => 'sin-vinculos') };
+  const tiempoProfesional = {
+    assertRangoLibre: mockFn(async () => undefined),
+    compromisos: mockFn(async () => []),
+    citasConfirmadas: mockFn(async () => []),
+  };
   const service = new SchedulingCatalogService(
     em as any,
     catalogRepo,
     logger as any,
     vinculos as any,
+    tiempoProfesional as any,
   );
-  return { service, tx, catalogRepo, em, vinculos };
+  return { service, tx, catalogRepo, em, vinculos, tiempoProfesional };
 }
 
 describe('SchedulingCatalogService', () => {
@@ -978,6 +987,89 @@ describe('SchedulingCatalogService', () => {
         endAt: '2026-06-01T12:00:00Z',
       };
 
+      it('AG-3 · el tiempo ocupado que pisa una cita CONFIRMADA no se crea', async () => {
+        // El tiempo ocupado no desplaza pacientes en silencio: el doctor recibe
+        // el conflicto y decide — reprograma a la persona o elige otro rato.
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.tiempoProfesional.citasConfirmadas = mockFn(async () => [
+          {
+            id: 'bk-1',
+            startAt: new Date('2026-06-01T09:00:00Z'),
+            endAt: new Date('2026-06-01T09:30:00Z'),
+            resourceName: 'Consultorio Centro',
+            kind: 'cita',
+          },
+        ]);
+
+        await expect(
+          d.service.createException(RESOURCE, dto, actor),
+        ).rejects.toThrow(/cita confirmada.*Consultorio Centro/);
+        expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+      });
+
+      it('AG-3 · una reunión que pisa OTRA reunión es inofensiva y pasa', async () => {
+        // Dos rótulos del mismo doctor no son un conflicto humano. Sólo las
+        // citas con paciente frenan la creación.
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.tiempoProfesional.citasConfirmadas = mockFn(async () => []);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+
+        const res = await d.service.createException(RESOURCE, dto, actor);
+
+        expect(res.id).toBe('exc-1');
+      });
+
+      it('AG-3 · una sala no pasa por la regla del profesional', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefId: 'sala-1',
+          resourceRefType: 'rooms',
+        });
+        d.tiempoProfesional.citasConfirmadas = mockFn(async () => []);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+
+        await d.service.createException(RESOURCE, dto, actor);
+
+        expect(d.tiempoProfesional.citasConfirmadas).not.toHaveBeenCalled();
+      });
+
+      it('AG-3 · borrar la excepción exige que el recurso sea del actor', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findExceptionById.mockResolvedValue({
+          id: 'exc-1',
+          resourceId: RESOURCE,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          tenantId: TENANT,
+          resourceRefId: 'hp-ajeno',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await expect(
+          d.service.removeException('exc-1', {
+            id: 'user-pract',
+            roles: ['PRACTITIONER'],
+            practitionerProfileId: 'hp-propio',
+            tenantIds: [TENANT],
+          } as never),
+        ).rejects.toThrow();
+        expect(d.catalogRepo.removeException).not.toHaveBeenCalled();
+      });
+
       it('blocks the untouched free slots that overlap the absence', async () => {
         const d = buildCatalog();
         d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
@@ -1342,4 +1434,52 @@ describe('SchedulingCatalogService', () => {
       });
     });
   });
+
+  /**
+   * Lo que se ofrece como disponible tiene que poder pedirse.
+   *
+   * Destapado por el journey de AG-6 midiendo la misma ventana por las dos
+   * rutas: `GET /scheduling/resources/:id/slots` devolvía **10** horarios y la
+   * hermana del portal **2**. Los ocho de diferencia eran la reunión del médico
+   * y las tres horas de una cirugía — cupos `SLOT_BLOCKED` que conservan su
+   * `remaining_capacity`, así que el filtro de capacidad no los veía.
+   *
+   * No afectaba a la web (usa la otra ruta), pero ésta declara
+   * `@Roles(…'PATIENT')` y se documenta como «la consulta que hace posible
+   * reservar desde una pantalla»: quien la siguiera ofrecía horarios muertos.
+   */
+  describe('getResourceAgenda · lo disponible tiene que poder pedirse', () => {
+    const VENTANA = {
+      from: new Date('2026-09-03T00:00:00.000Z'),
+      to: new Date('2026-09-04T00:00:00.000Z'),
+      limit: 50,
+    };
+
+    it('con onlyAvailable pide SÓLO los cupos abiertos, no sólo los que tienen lugar', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
+
+      await d.service.getResourceAgenda(RESOURCE, { ...VENTANA, onlyAvailable: true });
+
+      const [, , , , opciones] = d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
+      expect(opciones.onlyAvailable).toBe(true);
+      // La capacidad no alcanza: un cupo bloqueado la conserva.
+      expect(opciones.openStatusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
+    it('sin onlyAvailable no impone estado: el dueño de la agenda ve su día entero', async () => {
+      // La vista del profesional necesita ver lo bloqueado —es su reunión, su
+      // cirugía—. Filtrar siempre por SLOT_OPEN le escondería su propio día.
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
+
+      await d.service.getResourceAgenda(RESOURCE, { ...VENTANA, onlyAvailable: false });
+
+      const [, , , , opciones] = d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
+      expect(opciones.onlyAvailable).toBe(false);
+    });
+  });
+
 });

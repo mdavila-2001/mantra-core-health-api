@@ -11,6 +11,7 @@ import {
 } from '../../../common';
 import { SchedulingCatalogRepository } from '../repositories';
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
+import { SchedulingProfessionalTimeService } from './scheduling-professional-time.service';
 import type { SchedulableResources } from '../entities';
 import {
   CreateResourceDto,
@@ -100,6 +101,7 @@ export class SchedulingCatalogService {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly logger: PinoLogger,
     private readonly vinculos: PractitionerAffiliationGateService,
+    private readonly tiempoProfesional: SchedulingProfessionalTimeService,
   ) {
     this.logger.setContext(SchedulingCatalogService.name);
   }
@@ -322,6 +324,20 @@ export class SchedulingCatalogService {
       const zona = resource?.timeZone ?? 'UTC';
       if (resource) this.assertRecursoDelActor(resource, actor);
 
+      // REGLA MADRE (AG-1): los cupos que caerían sobre un compromiso del
+      // profesional no se generan. Se cargan UNA vez para toda la ventana —
+      // consultar por cupo sería un viaje a la base por cada media hora—.
+      const compromisos =
+        resource &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
+          ? await this.tiempoProfesional.compromisos(
+              tx,
+              resource.resourceRefId,
+              from,
+              to,
+            )
+          : [];
+
       const rules = await this.catalogRepo.findRulesByTemplate(tx, templateId);
       const existing = await this.catalogRepo.findSlotsByTemplateInRange(
         tx,
@@ -335,6 +351,7 @@ export class SchedulingCatalogService {
 
       let created = 0;
       let skipped = 0;
+      let omittedByCommitments = 0;
 
       for (const rule of rules) {
         const slotMinutes =
@@ -368,12 +385,23 @@ export class SchedulingCatalogService {
               skipped += 1;
               continue;
             }
+            // El cupo que pisa un compromiso se SALTEA, no aborta la corrida:
+            // la cirugía del jueves no puede impedir generar el resto del mes.
+            if (
+              compromisos.some(
+                (compromiso: { startAt: Date; endAt: Date }) =>
+                  compromiso.startAt < end && compromiso.endAt > cursor,
+              )
+            ) {
+              omittedByCommitments += 1;
+              continue;
+            }
             if (created >= MAX_SLOTS_PER_RUN) {
               this.logger.warn(
                 { operation: 'scheduling.slots.generate', templateId, created },
                 'Slot generation hit the per-run cap; narrow the window and re-run',
               );
-              return { templateId, created, skipped };
+              return { templateId, created, skipped, omittedByCommitments };
             }
 
             this.catalogRepo.createSlot(tx, {
@@ -392,7 +420,7 @@ export class SchedulingCatalogService {
         }
       }
 
-      return { templateId, created, skipped };
+      return { templateId, created, skipped, omittedByCommitments };
     });
   }
 
@@ -437,6 +465,39 @@ export class SchedulingCatalogService {
       }
 
       const isAvailable = dto.isAvailable ?? false;
+
+      // AG-3: el tiempo ocupado no desplaza pacientes en silencio. Si el rango
+      // pisa una cita CONFIRMADA del profesional —en esta sede o en otra—, el
+      // doctor recibe el conflicto y decide: reprograma a la persona o elige
+      // otro rato. Lo pendiente no bloquea la creación: nunca va a poder
+      // aceptarse encima (la regla madre lo rechaza), que es la misma
+      // protección sin congelar el calendario por preguntas sin responder.
+      // Una reunión que pisa OTRA reunión es inofensiva y no se valida.
+      if (
+        !isAvailable &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
+      ) {
+        const confirmadas = await this.tiempoProfesional.citasConfirmadas(
+          tx,
+          resource.resourceRefId,
+          startAt,
+          endAt,
+        );
+        if (confirmadas.length > 0) {
+          const primera = confirmadas[0];
+          throw new PreconditionFailedException(
+            `Tenés una cita confirmada en ese rato${
+              primera.resourceName ? ` en «${primera.resourceName}»` : ''
+            }. Reprogramala primero o elegí otro horario.`,
+            {
+              bookingId: primera.id,
+              startAt: primera.startAt,
+              endAt: primera.endAt,
+            },
+          );
+        }
+      }
+
       const exception = this.catalogRepo.createException(tx, {
         resourceId,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
@@ -525,6 +586,12 @@ export class SchedulingCatalogService {
         onlyAvailable: options.onlyAvailable,
         ahora: new Date(),
         limit: options.limit + 1,
+        // Lo que se ofrece tiene que poder pedirse: un cupo bloqueado por una
+        // excepción (AG-3) o retirado por una cita puntual (AG-2) conserva su
+        // capacidad, así que el filtro de capacidad no lo ve y se colaba entre
+        // los disponibles. El concepto lo aporta el servicio, como en la ruta
+        // hermana del portal.
+        openStatusConceptId: CONCEPTS.SLOT_OPEN,
       },
     );
     const truncated = rows.length > options.limit;
@@ -754,6 +821,48 @@ export class SchedulingCatalogService {
    * @param tenantId - La organización donde se quiere publicar.
    * @param actor - Quien publica.
    */
+
+  /**
+   * Elimina un tiempo ocupado (o cualquier excepción) del calendario.
+   *
+   * ## Borrar NO resucita los cupos retirados
+   *
+   * Es la semántica menos sorprendente, y queda declarada: los cupos que la
+   * excepción bloqueó siguen bloqueados, y se regeneran con la plantilla si
+   * corresponde. Resucitarlos automáticamente ofrecería horarios que el doctor
+   * quizá bloqueó por otro motivo mientras tanto.
+   *
+   * @param exceptionId - La excepción a eliminar.
+   * @param actor - Quien la elimina; tiene que poder operar el recurso.
+   */
+  async removeException(
+    exceptionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const exception = await this.catalogRepo.findExceptionById(
+        tx,
+        exceptionId,
+      );
+      if (!exception) {
+        throw new ResourceNotFoundException('Excepción no encontrada', {
+          exceptionId,
+        });
+      }
+      const resource = await this.catalogRepo.findResourceById(
+        tx,
+        exception.resourceId,
+      );
+      if (resource) this.assertRecursoDelActor(resource, actor);
+
+      this.logger.info(
+        { operation: 'scheduling.exception.remove', exceptionId },
+        'Removing availability exception',
+      );
+      this.catalogRepo.removeException(tx, exception);
+    });
+  }
+
   private async assertVinculoConLaOrganizacion(
     tenantId: string,
     actor: AuthenticatedUser,
