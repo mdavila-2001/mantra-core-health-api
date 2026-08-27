@@ -44,12 +44,30 @@
  *    corrimiento chico y determinístico (`dispersar()`) para que no queden
  *    todas apiladas en el mismo punto.
  *
+ * 7. **Trayectoria profesional, para todos.** Dos etapas por médico —una
+ *    cerrada y una en curso— por `POST /profiles/practitioners/me/affiliations`.
+ *    Antes de esto, de los ~78 médicos que dejaban los tres seeders **uno solo**
+ *    tenía historial: ese endpoint es self-service puro, sin atajo de
+ *    plataforma, y ningún seeder con sesión propia lo llamaba. La pestaña
+ *    «Trayectoria» del perfil sólo se podía ver vacía.
+ * 8. **Teléfono, y la matrícula completa.** El teléfono viaja en el alta y se
+ *    escribe en `common.contact_points` junto al correo: es lo primero que un
+ *    médico busca en su propio perfil y ningún seeder lo sembraba. La matrícula
+ *    va con autoridad emisora y fecha, que sin ellas era un número pelado.
+ *
  * **Lo que sigue faltando, y por qué esta corrida no lo resuelve:** los
  * médicos no tienen consultorio propio en `common.addresses` — el tipo de
  * dueño (`OwnerType`) sólo contempla `USER`, `PATIENT` y `TENANT`, no un
  * perfil de profesional, así que hoy no hay ningún `ownerId` correcto para
  * escribir esa fila. Es un hueco del contrato, no del seeder: agregarlo a mano
  * con el `ownerId` equivocado dejaría datos que no se pueden leer de vuelta.
+ *
+ * Y tampoco hay **formación académica** (universidad, carrera, año de egreso):
+ * el modelo no la tiene. Lo más parecido es `professional_credentials`, que es
+ * un documento con número —no una formación—, y el auto-registro no acepta ni
+ * la institución ni la fecha del título; sólo el alta administrativa lo hace.
+ * Un profesional ya dado de alta **no puede agregar un título**: no existe el
+ * endpoint. Sembrarlo pediría modelo nuevo, no un seeder más largo.
  *
  * No es un mock: escribe por la API real, con sus guards y validaciones. Si el
  * contrato cambia, la corrida termina en rojo en vez de dejar datos a medias.
@@ -352,6 +370,50 @@ function dispersar(ciudad, indice) {
   };
 }
 
+/**
+ * La trayectoria de cada médico, por ciudad.
+ *
+ * ## Por qué hacía falta
+ *
+ * Sin esto la pestaña «Trayectoria» del perfil decía «No hay actividad actual
+ * registrada» y «No hay experiencia histórica registrada» para **todos** los
+ * médicos sembrados: de los ~78 que dejaban los tres seeders, uno solo tenía
+ * afiliaciones. Una pantalla que sólo se puede ver vacía no se puede juzgar —
+ * ni el orden de la línea de tiempo, ni cómo se lee un cargo largo, ni qué
+ * pasa cuando hay tres etapas encimadas.
+ *
+ * Son dos etapas por médico: una **en curso** (sin `hasta`, que es lo que la
+ * pantalla marca como actividad actual) y una **cerrada** (la residencia o el
+ * puesto anterior). Los hospitales son reales de cada ciudad, porque un
+ * seeder con «Hospital 1» y «Hospital 2» tampoco deja juzgar el recorte.
+ */
+const TRAYECTORIA_POR_CIUDAD = {
+  'La Paz': [
+    { organizacion: 'Hospital Obrero N.º 1', cargo: 'Médico residente' },
+    { organizacion: 'Clínica del Sur', cargo: 'Médico de planta' },
+  ],
+  'El Alto': [
+    { organizacion: 'Hospital Municipal Boliviano Holandés', cargo: 'Médico residente' },
+    { organizacion: 'Centro de Salud Villa Adela', cargo: 'Médico de planta' },
+  ],
+  Cochabamba: [
+    { organizacion: 'Hospital Viedma', cargo: 'Médico residente' },
+    { organizacion: 'Clínica Los Olivos', cargo: 'Jefe de servicio' },
+  ],
+  'Santa Cruz de la Sierra': [
+    { organizacion: 'Hospital San Juan de Dios', cargo: 'Médico residente' },
+    { organizacion: 'Clínica Foianini', cargo: 'Médico de planta' },
+  ],
+  Sucre: [
+    { organizacion: 'Hospital Santa Bárbara', cargo: 'Médico residente' },
+    { organizacion: 'Clínica Cristo de las Américas', cargo: 'Médico de planta' },
+  ],
+  Tarija: [
+    { organizacion: 'Hospital San Juan de Dios de Tarija', cargo: 'Médico residente' },
+    { organizacion: 'Clínica Los Chacos', cargo: 'Médico de planta' },
+  ],
+};
+
 /** Organizaciones con cara pública: clínicas, laboratorios y farmacias. */
 const ORGANIZACIONES = [
   {
@@ -439,6 +501,15 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
       licenseNumber: `MP-${sufijo}`,
       credentialNumber: `TIT-${sufijo}`,
       professionalTitle: medico.titulo,
+      // El teléfono: se escribe en `common.contact_points` junto al correo, y
+      // es lo primero que un médico busca en su propio perfil. Ningún seeder
+      // lo sembraba, así que el bloque de contacto se veía siempre vacío.
+      // Determinístico a partir del índice para que la corrida sea repetible.
+      phone: `+591 7${String(10_000_000 + indice * 137).slice(0, 7)}`,
+      // La matrícula, completa: sin autoridad ni fecha, la pestaña de
+      // credenciales mostraba un número pelado que no dice quién lo emitió.
+      regulatoryAuthority: 'Colegio Médico de Bolivia',
+      licenseIssueDate: `${2006 + (indice % 12)}-03-15`,
     },
     expect: 201,
   });
@@ -492,6 +563,40 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
     especialidadAsignada = especialidad.ok;
   }
 
+  // La trayectoria: dos etapas, una cerrada y una en curso. Va con el token
+  // del propio médico porque `me/affiliations` es self-service puro — no hay
+  // atajo de plataforma, y es la razón por la que hasta ahora sólo un médico
+  // de todos los sembrados tenía historial.
+  const etapas = TRAYECTORIA_POR_CIUDAD[medico.ciudad] ?? TRAYECTORIA_POR_CIUDAD['La Paz'];
+  const egreso = 2006 + (indice % 12);
+  let trayectoriaSembrada = 0;
+  const afiliaciones = [
+    {
+      organizationName: etapas[0].organizacion,
+      roleTitle: etapas[0].cargo,
+      departmentText: medico.especialidad,
+      startDate: `${egreso}-06-01`,
+      endDate: `${egreso + 4}-05-31`,
+    },
+    {
+      organizationName: etapas[1].organizacion,
+      roleTitle: etapas[1].cargo,
+      departmentText: medico.especialidad,
+      // Sin `endDate`: es lo que la pantalla lee como «actividad actual».
+      startDate: `${egreso + 4}-07-01`,
+    },
+  ];
+  for (const afiliacion of afiliaciones) {
+    const puesta = await call(
+      'trayectoria',
+      `${afiliacion.organizationName} de ${medico.nombre}`,
+      'POST',
+      '/profiles/practitioners/me/affiliations',
+      { token: suToken, body: afiliacion, expect: 201 },
+    );
+    if (puesta.ok) trayectoriaSembrada += 1;
+  }
+
   // Publicaciones: es lo que convierte una ficha en un perfil vivo.
   for (let i = 0; i < POSTS_POR_DOCTOR; i += 1) {
     const texto = PUBLICACIONES[(indice + i) % PUBLICACIONES.length];
@@ -507,6 +612,7 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
     nombre: `${medico.nombre} ${medico.apellido}`,
     especialidad: medico.especialidad,
     especialidadAsignada,
+    trayectoriaSembrada,
     ciudad: medico.ciudad,
     email,
     clave: CLAVE,
@@ -639,7 +745,8 @@ async function main() {
   paso(`\n  Contraseña de todas: ${CLAVE}`);
   paso(
     `\n  ${sembrado.medicos.length} médicos ` +
-      `(${sembrado.medicos.filter((m) => m.especialidadAsignada).length} con especialidad asignada) · ` +
+      `(${sembrado.medicos.filter((m) => m.especialidadAsignada).length} con especialidad, ` +
+      `${sembrado.medicos.filter((m) => m.trayectoriaSembrada === 2).length} con trayectoria completa) · ` +
       `${sembrado.publicaciones} publicaciones · ` +
       `${sembrado.organizaciones.filter((o) => o.verificada).length}/${sembrado.organizaciones.length} organizaciones verificadas y ubicadas en el mapa`,
   );

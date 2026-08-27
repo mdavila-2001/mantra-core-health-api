@@ -147,6 +147,11 @@ function build() {
     assertIsMedicalSpecialty: mockFn(() => Promise.resolve()),
   };
 
+  // El contacto del profesional (`common.contact_points`). Vacío por defecto.
+  const contactPointsRepo = {
+    findVigentesByOwner: mockFn(() => Promise.resolve([])),
+  };
+
   const service = new ProfilesPractitionersService(
     em as any,
     personsRepo,
@@ -163,6 +168,9 @@ function build() {
     // pruebas que no hablan del vínculo no tengan que montarlo.
     afiliaciones as never,
     attachableFiles,
+    // Sin contactos por defecto: es el caso de casi todo perfil sembrado, y
+    // las pruebas que hablan del correo lo declaran ellas.
+    contactPointsRepo as any,
     accountLinksRepo as any,
     effectiveRoles as any,
     verificationBypass as any,
@@ -172,6 +180,7 @@ function build() {
   return {
     service,
     specialtyCatalog,
+    contactPointsRepo,
     em,
     accountLinksRepo,
     effectiveRoles,
@@ -701,6 +710,112 @@ describe('ProfilesPractitionersService', () => {
   });
 
   /* ---- el perfil profesional propio ------------------------------------- */
+
+  /**
+   * El contacto del profesional: correo y teléfono.
+   *
+   * Es lo primero que un médico busca en su propio perfil y no estaba en
+   * ningún lado —los datos existían en `common.contact_points` desde el
+   * registro, pero ninguna lectura los devolvía—. Lo delicado es que el DTO lo
+   * comparten la lectura propia y la ficha que abre la guía de profesionales:
+   * el mismo campo que le sirve al dueño sería una filtración en la ficha.
+   */
+  describe('el contacto propio, y sólo el propio', () => {
+    /** Deja el perfil mínimo en pie para que la lectura llegue al final. */
+    const conPerfil = (d: ReturnType<typeof build>): void => {
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue(null);
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Lucía Salas',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      });
+    };
+
+    const CONTACTOS = [
+      {
+        systemConceptId: CONCEPTS.CONTACT_EMAIL,
+        value: 'lucia.salas@alovida.test',
+      },
+      { systemConceptId: CONCEPTS.CONTACT_PHONE, value: '+591 700 12345' },
+    ];
+
+    it('la lectura propia trae correo y teléfono', async () => {
+      const d = build();
+      conPerfil(d);
+      d.contactPointsRepo.findVigentesByOwner.mockResolvedValue(CONTACTOS);
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.email).toBe('lucia.salas@alovida.test');
+      expect(perfil.phone).toBe('+591 700 12345');
+      // Se pregunta por la PERSONA, que es el dueño con el que el registro
+      // escribió la fila — no por el perfil ni por la cuenta.
+      expect(d.contactPointsRepo.findVigentesByOwner).toHaveBeenCalledWith(
+        expect.anything(),
+        'per-1',
+      );
+    });
+
+    it('la ficha ajena NO los trae, y ni siquiera los consulta', async () => {
+      // Lo segundo importa tanto como lo primero: si la ficha los leyera y
+      // después los quitara, bastaría con que alguien devolviera el objeto
+      // entero para filtrarlos. No leerlos es lo que lo hace imposible.
+      const d = build();
+      conPerfil(d);
+      d.contactPointsRepo.findVigentesByOwner.mockResolvedValue(CONTACTOS);
+
+      const ficha = await d.service.getPractitionerSummary('per-1');
+
+      expect(ficha.email).toBeUndefined();
+      expect(ficha.phone).toBeUndefined();
+      expect(d.contactPointsRepo.findVigentesByOwner).not.toHaveBeenCalled();
+    });
+
+    it('sin contactos cargados el perfil sale igual, sin correo', async () => {
+      const d = build();
+      conPerfil(d);
+      d.contactPointsRepo.findVigentesByOwner.mockResolvedValue([]);
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.email).toBeUndefined();
+      expect(perfil.practitionerCode).toBe('MED-7');
+    });
+
+    it('si la lectura del contacto falla, el perfil no se cae', async () => {
+      // Misma regla que las otras seis piezas (F-18): un perfil incompleto se
+      // muestra incompleto, no con un 500 en la cara.
+      const d = build();
+      conPerfil(d);
+      d.contactPointsRepo.findVigentesByOwner.mockRejectedValue(
+        new Error('la tabla no responde'),
+      );
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.email).toBeUndefined();
+      expect(perfil.practitionerCode).toBe('MED-7');
+    });
+  });
 
   describe('getOwnPractitionerProfile', () => {
     /**
