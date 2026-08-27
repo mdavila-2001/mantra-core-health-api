@@ -7,14 +7,28 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  ParseOptionalDatePipe,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PharmacyOrdersService } from '../services';
 import {
+  ConfirmPharmacyOrderDto,
   CreatePharmacyOrderDto,
   PharmacyOrderDto,
   PharmacyOrderListResponseDto,
+  RejectPharmacyOrderDto,
 } from '../dto';
 
 /**
@@ -32,6 +46,43 @@ export class PharmacyOrdersController {
    * @param orders - Casos de uso del pedido de farmacia.
    */
   constructor(private readonly orders: PharmacyOrdersService) {}
+
+  /**
+   * FAR-E2: la bandeja del mostrador — los pedidos del tenant de la farmacia.
+   *
+   * `SECURITY_ADMIN` es **provisional**: no existe todavía un rol runtime de
+   * farmacia; cuando FAR-E2 lo defina, se reemplaza acá. La protección real es
+   * el tenant en el WHERE: una organización nunca ve pedidos de otra.
+   */
+  @Get()
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Bandeja de pedidos de las farmacias del tenant (FAR-E2)',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Código de estado (PINV_ORDER_*)',
+  })
+  @ApiQuery({ name: 'siteId', required: false, format: 'uuid' })
+  @ApiQuery({ name: 'from', required: false, description: 'Instante ISO 8601' })
+  @ApiQuery({ name: 'to', required: false, description: 'Instante ISO 8601' })
+  @ApiQuery({ name: 'limit', required: false })
+  listForTenant(
+    @Query('status') status?: string,
+    @Query('siteId', new ParseUUIDPipe({ optional: true })) siteId?: string,
+    @Query('from', new ParseOptionalDatePipe()) from?: Date,
+    @Query('to', new ParseOptionalDatePipe()) to?: Date,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @CurrentUser() actor?: AuthenticatedUser,
+  ): Promise<PharmacyOrderListResponseDto> {
+    return this.orders.listForPharmacyTenant(
+      { statusCode: status, siteId, from, to, limit },
+      // El guard de roles garantiza el actor; el `?` es solo por la firma de
+      // los parámetros opcionales de Nest.
+      actor!,
+    );
+  }
 
   /** FAR-E1: crear el pedido (nace `ENVIADO`, vence a las 48 h). */
   @Post()
@@ -94,5 +145,80 @@ export class PharmacyOrdersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
     return this.orders.cancel(id, actor);
+  }
+
+  /* ── El mostrador (FAR-E2) — rol provisional SECURITY_ADMIN hasta que
+     exista el rol runtime de farmacia; el tenant en el WHERE es la
+     protección real en los cuatro. ─────────────────────────────────── */
+
+  /** FAR-E2: recepcionar — `ENVIADO → EN_REVISION` (el «visto»). */
+  @Post(':id/review')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Abrir revisión del pedido (FAR-E2)',
+    description:
+      'El paciente ve que la farmacia está mirando su pedido. Transición ilegal: 422.',
+  })
+  openReview(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.openReview(id, actor);
+  }
+
+  /** FAR-E2: confirmar sin sustituciones (proponer genérico: 422, bloqueado). */
+  @Post(':id/confirm')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Confirmar el pedido (FAR-E2)',
+    description:
+      'Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea; PROPONER_GENERICO responde 422 porque la sustitución está bloqueada por modelo.',
+  })
+  confirm(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ConfirmPharmacyOrderDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.confirm(id, dto, actor);
+  }
+
+  /** FAR-E2: rechazar con motivo (el motivo aún no se persiste: viaja en el aviso). */
+  @Post(':id/reject')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Rechazar el pedido (FAR-E2)',
+    description:
+      'Libera el stock reservado. El motivo es obligatorio y viaja en el evento y la campana; no se persiste todavía (bloqueador de modelo).',
+  })
+  reject(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RejectPharmacyOrderDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.reject(id, dto, actor);
+  }
+
+  /**
+   * FAR-E2: dejar listo en mostrador — **bloqueado por modelo**. La ruta queda
+   * por compatibilidad y responde 422 tipificado: sin modalidad persistida no
+   * puede demostrarse que el pedido sea un retiro, y «listo para retiro» sobre
+   * un pedido de entrega sería mentirle al mostrador y al paciente.
+   */
+  @Post(':id/ready')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Marcar el pedido listo para retiro (FAR-E2 — bloqueado)',
+    description:
+      'Responde 422 (blockedByModel: deliveryMode) sin ningún efecto: la modalidad del pedido no se persiste y no puede demostrarse que sea un retiro. Se habilita con el patch de modelo.',
+  })
+  ready(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.ready(id, actor);
   }
 }
