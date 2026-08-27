@@ -67,16 +67,24 @@ export class PharmacyOrderNotificationsService {
     });
   }
 
-  /** «Tu pedido está listo»: la reserva corre de nuevo por 48 horas. */
+  /**
+   * «Tu pedido está listo»: la reserva corre de nuevo por 48 horas.
+   *
+   * El código de retiro viaja acá y en la vista del pedido de su dueño — y en
+   * ningún otro lado (contrato v4.2.1): no es un secreto criptográfico, es la
+   * prueba de posesión con la que se retira en el mostrador.
+   */
   async orderReady(
     orderId: string,
     patientProfileId: string,
     actorUserId: string,
+    pickupCode?: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
       subject: 'Tu pedido está listo para retirar',
-      bodyText:
-        'Podés pasar a retirarlo por la sede. La reserva se renovó por 48 horas.',
+      bodyText: pickupCode
+        ? `Podés pasar a retirarlo por la sede con el código ${pickupCode}. La reserva se renovó por 48 horas.`
+        : 'Podés pasar a retirarlo por la sede. La reserva se renovó por 48 horas.',
       orderId,
       statusCode: 'PINV_ORDER_LISTO_PARA_RETIRO',
       actorUserId,

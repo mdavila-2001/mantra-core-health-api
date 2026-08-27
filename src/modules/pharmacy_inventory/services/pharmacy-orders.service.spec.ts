@@ -118,6 +118,11 @@ function build() {
     ]),
     findStockPositions: mockFn(async () => []),
   };
+  const dispensationsRepo = {
+    findByIdempotencyKey: mockFn(async () => null),
+    create: mockFn(() => ({ id: 'disp-1' })),
+    createLine: mockFn(() => ({ id: 'dline-1' })),
+  };
   const pharmacyRepo = {
     findActiveSiteById: mockFn(async () => SEDE),
     findVisibleById: mockFn(async () => FARMACIA),
@@ -139,6 +144,7 @@ function build() {
     stockRepo as any,
     ledgerRepo as any,
     inventoryReadRepo as any,
+    dispensationsRepo as any,
     pharmacyRepo as any,
     reservationsService as any,
     outbox as any,
@@ -155,6 +161,7 @@ function build() {
     stockRepo,
     ledgerRepo,
     inventoryReadRepo,
+    dispensationsRepo,
     pharmacyRepo,
     reservationsService,
     outbox,
@@ -345,6 +352,56 @@ describe('PharmacyOrdersService', () => {
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('create · modalidad de entrega (v4.2.1)', () => {
+    it('persists the RETIRO concept when the order declares pickup', async () => {
+      const d = build();
+      conLectura(d, pedido(), []);
+
+      await runWithTenant('tenant-a', () =>
+        d.service.create(
+          {
+            siteId: 'site-1',
+            deliveryMode: 'RETIRO',
+            lines: [{ productId: 'prod-1', quantity: 3 }],
+          },
+          paciente,
+        ),
+      );
+
+      expect(d.reservationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          deliveryModeConceptId: PINV.DELIVERY_RETIRO,
+        }),
+      );
+    });
+
+    it('shipping modes answer a typed 422 before touching anything (FAR-E4 lane)', async () => {
+      const d = build();
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service
+          .create(
+            {
+              siteId: 'site-1',
+              deliveryMode: 'DOMICILIO',
+              lines: [{ productId: 'prod-1', quantity: 3 }],
+            },
+            paciente,
+          )
+          .catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as any).details).toMatchObject({
+        deliveryMode: 'DOMICILIO',
+      });
+      // Ni transacción ni cabecera: el 422 corta antes de escribir.
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.reservationsRepo.create).not.toHaveBeenCalled();
     });
   });
 

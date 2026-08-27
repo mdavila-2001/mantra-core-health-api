@@ -1,4 +1,6 @@
+import { randomInt } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -28,6 +30,7 @@ import {
   StockPositionsRepository,
   LedgerRepository,
   InventoryReadRepository,
+  DispensationsRepository,
 } from '../repositories';
 import { PharmacyReadRepository } from '../../pharmacy/repositories';
 import { InventoryReservationsService } from './inventory-reservations.service';
@@ -35,6 +38,7 @@ import { PharmacyOrderNotificationsService } from './pharmacy-order-notification
 import type {
   ConfirmPharmacyOrderDto,
   CreatePharmacyOrderDto,
+  DispensePharmacyOrderDto,
   PharmacyOrderDto,
   PharmacyOrderLineDto,
   PharmacyOrderListResponseDto,
@@ -48,6 +52,34 @@ import {
 
 /** Vida del pedido: 48 h desde la creación (el carril E2 la renueva al LISTO). */
 export const ORDER_TTL_HOURS = 48;
+
+/**
+ * Alfabeto del código de retiro: **sin ambiguos** (`0`/`O`, `1`/`I`/`L`
+ * excluidos a propósito). El código se dicta en voz alta en un mostrador y se
+ * copia a mano de la pantalla de un teléfono; `IL01` es una discusión
+ * garantizada. 30⁶ ≈ 7,3 × 10⁸ combinaciones. Contrato v4.2.1
+ * (`DISENO-CODIGO-RETIRO.md`).
+ */
+export const PICKUP_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+/** Largo del código de retiro. */
+export const PICKUP_CODE_LENGTH = 6;
+
+/**
+ * Intentos ante colisión de código (violación del único parcial). La unicidad
+ * la garantiza el índice, no una consulta previa: se genera, se inserta y se
+ * reintenta la transacción entera si el índice lo rechaza — consultar antes de
+ * escribir es una carrera. Con 7 × 10⁸ de espacio, dos colisiones seguidas son
+ * casi imposibles; tres intentos están de sobra.
+ */
+const PICKUP_CODE_MAX_ATTEMPTS = 3;
+
+/** Del código de modalidad del contrato (`RETIRO`…) al concepto persistible. */
+const DELIVERY_MODE_ID_BY_CODE: ReadonlyMap<string, string> = new Map([
+  ['RETIRO', PINV.DELIVERY_RETIRO],
+  ['DOMICILIO', PINV.DELIVERY_DOMICILIO],
+  ['TRABAJO', PINV.DELIVERY_TRABAJO],
+]);
 
 /**
  * La máquina de estados del pedido como dato, no como `if`s.
@@ -91,8 +123,8 @@ export const ORDER_NON_TERMINAL_STATUS_IDS: readonly string[] =
  * confirmar lo no revisado o en revisión, rechazar todo lo vivo salvo lo que
  * ya espera en el mostrador, y dejar listo lo confirmado o aceptado.
  * `ACEPTACION_PENDIENTE`/`ACEPTADO` figuran por completitud — hoy son
- * inalcanzables (las sustituciones están bloqueadas por modelo) pero la
- * máquina no debe reescribirse cuando lleguen.
+ * inalcanzables (la persistencia de propuestas de sustitución va en su propia
+ * rama) pero la máquina no debe reescribirse cuando lleguen.
  *
  * Fuera de esta tabla viven las dos transiciones que E1 ya posee: la
  * cancelación del titular (no-terminal → CANCELADO, con su 409 sobre
@@ -179,6 +211,13 @@ const orderNotFound = (id: string): ResourceNotFoundException =>
   new ResourceNotFoundException('Pedido no encontrado', { id });
 
 /**
+ * Quién lee el pedido. El código de retiro es la prueba de posesión del
+ * titular: solo la vista `owner` lo sirve; el staff valida enviándolo en la
+ * dispensa, no mirándolo en la bandeja.
+ */
+type OrderViewer = 'owner' | 'staff';
+
+/**
  * Pedido de farmacia del paciente (FAR-E1): creación con reserva parcial,
  * lectura del titular, cancelación con liberación de stock y vencimiento a las
  * 48 h.
@@ -193,10 +232,13 @@ const orderNotFound = (id: string): ResourceNotFoundException =>
  * `releaseConfirmedLines` (la de UC-25-05) al devolverlo — acá no hay una
  * segunda contabilidad.
  *
- * Los campos comerciales del contrato FAR-I2 que el modelo v4.0.10 no declara
- * (modalidad y dirección de entrega, precios congelados, código de retiro,
- * motivo de rechazo, sustituciones) **no se persisten ni se fingen**: llegan
- * en la segunda vuelta, tras el patch de modelo.
+ * Desde el modelo v4.2.1 el pedido persiste su **modalidad de entrega** y su
+ * **código de retiro**, y con ellos este servicio ejecuta el flujo completo de
+ * retiro: `ready` (FAR-E2, sella el código) y `dispense` (FAR-E3, entrega
+ * parcial acumulativa contra el código). Lo que el carril todavía no
+ * implementa (dirección de envío, precios congelados, motivo de rechazo
+ * persistido, sustituciones) **no se persiste ni se finge**: va en su propia
+ * rama para mantener el diff revisable.
  *
  * ## Reserva parcial
  *
@@ -217,6 +259,7 @@ export class PharmacyOrdersService {
    * @param stockRepo - Posiciones de stock (lock pesimista).
    * @param ledgerRepo - Ledger append-only del inventario.
    * @param inventoryReadRepo - Ubicaciones y posiciones, en lote.
+   * @param dispensationsRepo - Alta de dispensaciones (la entrega de FAR-E3).
    * @param pharmacyRepo - Visibilidad del directorio de farmacias (módulo 24).
    * @param reservationsService - Primitiva compartida de liberación (UC-25-05).
    * @param outbox - Publicación transaccional de eventos de dominio.
@@ -230,6 +273,7 @@ export class PharmacyOrdersService {
     private readonly stockRepo: StockPositionsRepository,
     private readonly ledgerRepo: LedgerRepository,
     private readonly inventoryReadRepo: InventoryReadRepository,
+    private readonly dispensationsRepo: DispensationsRepository,
     private readonly pharmacyRepo: PharmacyReadRepository,
     private readonly reservationsService: InventoryReservationsService,
     private readonly outbox: OutboxService,
@@ -255,6 +299,7 @@ export class PharmacyOrdersService {
     const tenantId = requireTenantId();
     const patientProfileId = this.requirePatientProfile(actor);
     this.assertNoDuplicateProducts(dto);
+    const deliveryModeConceptId = this.resolveDeliveryMode(dto.deliveryMode);
 
     const orderId = await this.em.transactional(async (tx) => {
       if (dto.idempotencyKey) {
@@ -316,6 +361,7 @@ export class PharmacyOrdersService {
         patientProfileId,
         medicationRequestId: dto.medicationRequestId,
         reservationStatusConceptId: PINV.ORDER_ENVIADO,
+        deliveryModeConceptId,
         expiresAt: new Date(Date.now() + ORDER_TTL_HOURS * 3_600_000),
         idempotencyKey: dto.idempotencyKey,
         actorUserId: actor.id,
@@ -396,7 +442,7 @@ export class PharmacyOrdersService {
       );
     }
 
-    const items = await this.composeOrders(em, tenantId, orders);
+    const items = await this.composeOrders(em, tenantId, orders, 'owner');
     return { items, count: items.length };
   }
 
@@ -433,7 +479,12 @@ export class PharmacyOrdersService {
 
     // El tenant va en la consulta: una farmacia de otro tenant no resuelve y
     // el pedido cae en el mismo 404 que uno inexistente.
-    const [dto] = await this.composeOrders(em, tenantId, [order]);
+    const [dto] = await this.composeOrders(
+      em,
+      tenantId,
+      [order],
+      isOwner ? 'owner' : 'staff',
+    );
     if (!dto) throw orderNotFound(id);
     return dto;
   }
@@ -797,32 +848,374 @@ export class PharmacyOrdersService {
   }
 
   /**
-   * FAR-E2: dejar el pedido listo en el mostrador — **BLOQUEADO POR MODELO**.
+   * FAR-E2/E3: dejar el pedido listo en el mostrador —
+   * `CONFIRMADO|ACEPTADO → LISTO_PARA_RETIRO` (habilitado por el modelo
+   * v4.2.1, que persiste la modalidad y el código de retiro).
    *
-   * `LISTO_PARA_RETIRO` afirma que hay un pedido esperando a una persona en un
-   * mostrador — y eso solo es verdad si el pedido es de RETIRO. La modalidad
-   * (`RETIRO|DOMICILIO|TRABAJO`) no se persiste todavía, así que no existe
-   * evidencia fiable para distinguirlo: permitir la transición genéricamente
-   * podría convertir un pedido de entrega en uno de retiro. Hasta que el patch
-   * de modelo declare la modalidad (y con ella el código de retiro, que
-   * tampoco existe), la ruta queda por compatibilidad y responde **422
-   * tipificado** sin ningún efecto: cero transición, cero cambio de
-   * `expires_at`, cero evento, cero campana, cero ledger.
+   * `LISTO_PARA_RETIRO` afirma que hay un pedido esperando a una persona en
+   * un mostrador, así que exige demostrarlo: el pedido debe declarar
+   * modalidad `PINV_DELIVERY_RETIRO` (uno de envío cierra por el carril de
+   * envío, FAR-E4) y la sede debe ofrecer retiro en mostrador
+   * (`pharmacy_sites.pickup_available`) — el esquema no puede exigir ninguna
+   * de las dos porque la tabla la comparten las reservas de mostrador; son
+   * reglas de este servicio.
    *
-   * Al habilitarse, la semántica ya está fijada por el contrato FAR-E1/I2:
-   * `CONFIRMADO|ACEPTADO → LISTO_PARA_RETIRO` (la tabla de transiciones ya la
-   * declara), renovación de `expires_at` +48 h y sello del código de retiro —
-   * solo cuando el pedido pueda demostrarse RETIRO.
+   * En la MISMA transacción se sella el código de retiro (solo si no lo tenía:
+   * un reintento no rota el código de alguien ya avisado) y se renueva
+   * `expires_at` +48 h — el código caduca con el pedido, sin ventana propia.
+   * La unicidad del código la garantiza el índice parcial
+   * `ux_inventory_reservations_pickup_code`: ante la colisión (rarísima) se
+   * reintenta la transacción entera con un código nuevo, hasta 3 veces.
    */
   async ready(id: string, actor: AuthenticatedUser): Promise<PharmacyOrderDto> {
-    // El mismo 422 para todo actor y todo pedido: la capacidad entera está
-    // bloqueada, así que no hay nada que leer ni que revelar. `actor` queda en
-    // la firma para que habilitarla no cambie el contrato del controller.
-    void actor;
-    throw new PreconditionFailedException(
-      'Marcar listo para retiro está bloqueado por modelo: la modalidad del pedido no se persiste y no puede demostrarse que sea un retiro. El pedido no se modificó.',
-      { orderId: id, blockedByModel: 'deliveryMode' },
+    const tenantId = requireTenantId();
+
+    let lastCollision: unknown;
+    for (let attempt = 1; attempt <= PICKUP_CODE_MAX_ATTEMPTS; attempt += 1) {
+      try {
+        const { patientProfileId, pickupCode } = await this.em.transactional(
+          async (tx) => {
+            const order = await this.loadTenantOrderForUpdate(tx, id, tenantId);
+            this.assertStaffTransition(order, PINV.ORDER_LISTO_PARA_RETIRO);
+            await this.assertPickupOrder(tx, order);
+
+            // Un reintento (o una transición previa fallida después del
+            // sello) conserva el código: rotarlo obligaría a re-avisar a
+            // alguien que quizá ya está en camino.
+            order.pickupCode ??= generatePickupCode();
+            order.reservationStatusConceptId = PINV.ORDER_LISTO_PARA_RETIRO;
+            order.expiresAt = new Date(
+              Date.now() + ORDER_TTL_HOURS * 3_600_000,
+            );
+            touch(order, actor.id);
+
+            await this.publishStaffEvent(tx, tenantId, order, {
+              eventType: 'PharmacyOrderReady',
+              statusCode: 'PINV_ORDER_LISTO_PARA_RETIRO',
+              actor,
+            });
+            await tx.flush();
+
+            this.logger.info(
+              {
+                operation: 'pharmacy_inventory.order.ready',
+                orderId: order.id,
+              },
+              'Pharmacy order ready for pickup',
+            );
+            return {
+              patientProfileId: order.patientProfileId,
+              pickupCode: order.pickupCode,
+            };
+          },
+        );
+
+        if (patientProfileId) {
+          await this.orderNotifications.orderReady(
+            id,
+            patientProfileId,
+            actor.id,
+            pickupCode,
+          );
+        }
+        return this.readOrderForTenant(id, tenantId);
+      } catch (error) {
+        if (!isPickupCodeCollision(error)) throw error;
+        lastCollision = error;
+        this.logger.info(
+          { operation: 'pharmacy_inventory.order.ready', orderId: id, attempt },
+          'Pickup code collision; retrying with a fresh code',
+        );
+      }
+    }
+    // Tres colisiones seguidas sobre 7 × 10⁸ de espacio no son mala suerte:
+    // algo está mal (¿el generador?, ¿el índice?) y se dice como conflicto.
+    throw new ConflictException(
+      'No se pudo sellar un código de retiro único; reintente la operación',
+      {
+        orderId: id,
+        attempts: PICKUP_CODE_MAX_ATTEMPTS,
+        cause: String(lastCollision),
+      },
     );
+  }
+
+  /**
+   * FAR-E3: la entrega en el mostrador —
+   * `LISTO_PARA_RETIRO → (LISTO_PARA_RETIRO | RETIRADO)`.
+   *
+   * ## El código primero, los efectos después
+   *
+   * El pedido se carga con `FOR UPDATE` (dos mostradores concurrentes se
+   * serializan) y el código se valida **antes de cualquier escritura**,
+   * insensible a mayúsculas. Un código que no coincide responde 422 tipificado
+   * con cero efectos: nada de stock, nada de ledger, nada de estado — el
+   * front ya espera esa forma (`codigoValido: false`).
+   *
+   * ## Parcial acumulativa
+   *
+   * La entrega puede acotarse a productos (`productIds`); cada línea entregada
+   * acumula en `fulfilled_quantity` (la fuente de verdad del saldo: restante =
+   * `reserved − fulfilled`) y el desglose por entrega queda en las
+   * `medication_dispensation_lines`. Mientras quede saldo en pie el pedido
+   * sigue `LISTO_PARA_RETIRO` con el MISMO código; cuando la última línea se
+   * cubre pasa a `PINV_ORDER_RETIRADO`. La contabilidad es la de UC-25-03:
+   * `MV_DISPENSE` por línea, `on_hand` y `reserved` bajan juntos (el stock
+   * estaba reservado por este pedido) y la posición se recalcula.
+   *
+   * ## Cero doble dispensación
+   *
+   * Una línea sin saldo no puede volver a entregarse (422 sin efectos), y
+   * repetir la `idempotencyKey` devuelve el pedido tal como quedó sin repetir
+   * stock ni ledger — la misma clave que ya usa UC-25-03.
+   */
+  async dispense(
+    id: string,
+    dto: DispensePharmacyOrderDto,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    const tenantId = requireTenantId();
+
+    await this.em.transactional(async (tx) => {
+      const order = await this.loadTenantOrderForUpdate(tx, id, tenantId);
+
+      // Idempotencia ANTES que el estado: el reintento de la entrega que dejó
+      // el pedido RETIRADO tiene que devolverlo tal como quedó, no un 422.
+      if (dto.idempotencyKey) {
+        const existing = await this.dispensationsRepo.findByIdempotencyKey(
+          tx,
+          order.pharmacyId,
+          dto.idempotencyKey,
+        );
+        if (existing?.inventoryReservationId === order.id) return;
+        if (existing) {
+          throw new ConflictException(
+            'La clave de idempotencia ya se usó para otra entrega',
+            { orderId: id },
+          );
+        }
+      }
+
+      if (order.reservationStatusConceptId !== PINV.ORDER_LISTO_PARA_RETIRO) {
+        throw new PreconditionFailedException(
+          'Solo un pedido listo para retiro puede dispensarse',
+          {
+            orderId: id,
+            from: moduleConcept(order.reservationStatusConceptId).code,
+          },
+        );
+      }
+
+      // La prueba de posesión, antes de tocar nada. Sin código sellado no hay
+      // retiro posible — no debería ocurrir en un LISTO, pero si ocurre es un
+      // 422 honesto, no un pase libre.
+      const presented = dto.pickupCode.trim().toUpperCase();
+      if (!order.pickupCode || presented !== order.pickupCode) {
+        throw new PreconditionFailedException(
+          'El código de retiro no coincide. El pedido no se modificó.',
+          { orderId: id, reason: 'PICKUP_CODE_MISMATCH' },
+        );
+      }
+
+      const lines = await this.ordersRepo.findLinesByReservationIds(tx, [
+        order.id,
+      ]);
+      const pending = lines.filter(
+        (line) =>
+          line.statusConceptId === PINV.RES_LINE_CONFIRMED &&
+          remainingOf(line) > 0,
+      );
+
+      let targets = pending;
+      if (dto.productIds !== undefined) {
+        const requested = new Set(dto.productIds);
+        const pendingProducts = new Set(
+          pending.map((line) => line.pharmacyProductId),
+        );
+        const notPending = [...requested].filter(
+          (productId) => !pendingProducts.has(productId),
+        );
+        if (notPending.length > 0) {
+          // Producto ajeno al pedido, ya entregado o sin stock en pie: no hay
+          // nada que darle, y decirlo evita una entrega fantasma.
+          throw new PreconditionFailedException(
+            'La entrega refiere productos sin saldo en pie en este pedido',
+            { orderId: id, productIds: notPending },
+          );
+        }
+        targets = pending.filter((line) =>
+          requested.has(line.pharmacyProductId),
+        );
+      }
+      if (targets.length === 0) {
+        throw new PreconditionFailedException(
+          'El pedido no tiene saldo en pie que entregar',
+          { orderId: id },
+        );
+      }
+
+      const dispensation = this.dispensationsRepo.create(tx, {
+        pharmacyId: order.pharmacyId,
+        pharmacySiteId: order.pharmacySiteId,
+        // Un pedido siempre nace con titular (claim `pid`); el fallback es
+        // solo por el tipo opcional de la entidad compartida.
+        patientProfileId: order.patientProfileId ?? '',
+        medicationRequestId: order.medicationRequestId,
+        inventoryReservationId: order.id,
+        dispensationStatusConceptId: PINV.DISPENSE_DISPENSED,
+        dispensedAt: new Date(),
+        idempotencyKey: dto.idempotencyKey,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      for (const line of targets) {
+        const take = remainingOf(line);
+        this.dispensationsRepo.createLine(tx, {
+          medicationDispensationId: dispensation.id,
+          pharmacyProductId: line.pharmacyProductId,
+          inventoryLotId: line.inventoryLotId,
+          dispensedQuantity: String(take),
+          actorUserId: actor.id,
+        });
+
+        // El stock estaba reservado por ESTE pedido: `on_hand` y `reserved`
+        // bajan juntos y el disponible no cambia para el resto del mundo.
+        if (line.inventoryLocationId) {
+          const sequence = await this.ledgerRepo.nextSequence(
+            tx,
+            order.pharmacyId,
+          );
+          this.ledgerRepo.append(tx, {
+            pharmacyId: order.pharmacyId,
+            pharmacySiteId: order.pharmacySiteId,
+            inventoryLocationId: line.inventoryLocationId,
+            pharmacyProductId: line.pharmacyProductId,
+            inventoryLotId: line.inventoryLotId,
+            ledgerSequence: sequence,
+            movementTypeConceptId: PINV.MV_DISPENSE,
+            quantityDelta: String(-take),
+            reservationDelta: String(-take),
+            sourceId: dispensation.id,
+            recordedByUserId: actor.id,
+          });
+          const position = await this.stockRepo.findByKeyForUpdate(tx, {
+            inventoryLocationId: line.inventoryLocationId,
+            pharmacyProductId: line.pharmacyProductId,
+            inventoryLotId: line.inventoryLotId,
+          });
+          if (position) {
+            position.onHandQuantity = String(
+              num(position.onHandQuantity) - take,
+            );
+            position.reservedQuantity = String(
+              Math.max(0, num(position.reservedQuantity) - take),
+            );
+            position.availableQuantity = recompute(
+              position.onHandQuantity,
+              position.reservedQuantity,
+              position.quarantineQuantity,
+            );
+            position.lastLedgerSequence = sequence;
+            position.updatedAt = new Date();
+          }
+        }
+
+        line.fulfilledQuantity = String(num(line.fulfilledQuantity) + take);
+        line.statusConceptId = PINV.RES_LINE_FULFILLED;
+        touch(line, actor.id);
+      }
+
+      const remainingLines = pending.filter(
+        (line) => !targets.includes(line),
+      ).length;
+      const complete = remainingLines === 0;
+      if (complete) {
+        order.reservationStatusConceptId = PINV.ORDER_RETIRADO;
+      }
+      touch(order, actor.id);
+
+      await this.publishStaffEvent(tx, tenantId, order, {
+        eventType: 'PharmacyOrderDispensed',
+        statusCode: complete
+          ? 'PINV_ORDER_RETIRADO'
+          : 'PINV_ORDER_LISTO_PARA_RETIRO',
+        actor,
+        extra: {
+          dispensationId: dispensation.id,
+          deliveredLineCount: targets.length,
+          remainingLineCount: remainingLines,
+          complete,
+        },
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'pharmacy_inventory.order.dispense',
+          orderId: order.id,
+          dispensationId: dispensation.id,
+          deliveredLines: targets.length,
+          remainingLines,
+          complete,
+        },
+        'Pharmacy order dispensed at the counter',
+      );
+    });
+
+    return this.readOrderForTenant(id, tenantId);
+  }
+
+  /**
+   * Las dos pruebas de que «listo para RETIRO» es verdad: la modalidad
+   * declarada es retiro, y la sede puede atenderlo en mostrador. El esquema no
+   * puede exigirlas (columnas nullable compartidas con el mostrador): son
+   * reglas de servicio, y su ausencia responde 422 tipificado sin efectos.
+   */
+  private async assertPickupOrder(
+    tx: EntityManager,
+    order: InventoryReservations,
+  ): Promise<void> {
+    if (!order.deliveryModeConceptId) {
+      throw new PreconditionFailedException(
+        'El pedido no declara modalidad de entrega: no puede demostrarse que sea un retiro',
+        { orderId: order.id, deliveryMode: null },
+      );
+    }
+    if (order.deliveryModeConceptId !== PINV.DELIVERY_RETIRO) {
+      throw new PreconditionFailedException(
+        'El pedido es de envío: se cierra por el carril de envío, no por el mostrador',
+        {
+          orderId: order.id,
+          deliveryMode: moduleConcept(order.deliveryModeConceptId).code,
+        },
+      );
+    }
+    const [site] = await this.ordersRepo.findSitesByIds(tx, [
+      order.pharmacySiteId,
+    ]);
+    // Solo `true` habilita: una sede que no declaró la capacidad no puede
+    // prometer un mostrador que quizá no tiene.
+    if (site?.pickupAvailable !== true) {
+      throw new PreconditionFailedException(
+        'La sede no ofrece retiro en mostrador',
+        { orderId: order.id, siteId: order.pharmacySiteId },
+      );
+    }
+  }
+
+  /** El código de modalidad del contrato, resuelto a concepto persistible. */
+  private resolveDeliveryMode(
+    deliveryMode: CreatePharmacyOrderDto['deliveryMode'],
+  ): string | undefined {
+    if (deliveryMode === undefined) return undefined;
+    if (deliveryMode !== 'RETIRO') {
+      throw new PreconditionFailedException(
+        'El envío a domicilio o al trabajo llega con el carril de envío (FAR-E4); hoy solo RETIRO',
+        { deliveryMode },
+      );
+    }
+    return DELIVERY_MODE_ID_BY_CODE.get(deliveryMode);
   }
 
   /**
@@ -1171,7 +1564,7 @@ export class PharmacyOrdersService {
     if (!order || order.patientProfileId !== patientProfileId) {
       throw orderNotFound(id);
     }
-    const [dto] = await this.composeOrders(em, tenantId, [order]);
+    const [dto] = await this.composeOrders(em, tenantId, [order], 'owner');
     if (!dto) throw orderNotFound(id);
     return dto;
   }
@@ -1186,6 +1579,7 @@ export class PharmacyOrdersService {
     em: EntityManager,
     tenantId: string,
     orders: readonly InventoryReservations[],
+    viewer: OrderViewer = 'staff',
   ): Promise<PharmacyOrderDto[]> {
     if (orders.length === 0) return [];
 
@@ -1254,11 +1648,64 @@ export class PharmacyOrdersService {
           order.patientProfileId
             ? (patientNames.get(order.patientProfileId) ?? null)
             : null,
+          viewer,
         ),
       );
     }
     return items;
   }
+}
+
+/** Saldo por retirar de una línea: lo reservado menos lo ya entregado. */
+function remainingOf(line: InventoryReservationLines): number {
+  return num(line.reservedQuantity) - num(line.fulfilledQuantity);
+}
+
+/**
+ * Un código de retiro nuevo: 6 símbolos del alfabeto sin ambiguos, con
+ * aleatoriedad criptográfica. Ya sale normalizado (mayúsculas): lo que se
+ * guarda y lo que se compara comparten forma.
+ */
+function generatePickupCode(): string {
+  let code = '';
+  for (let i = 0; i < PICKUP_CODE_LENGTH; i += 1) {
+    code += PICKUP_CODE_ALPHABET[randomInt(PICKUP_CODE_ALPHABET.length)];
+  }
+  return code;
+}
+
+/**
+ * ¿El flush murió por el único parcial del código de retiro? Solo esa
+ * violación se reintenta con un código nuevo; cualquier otra unicidad
+ * (idempotencia, por ejemplo) es un error real y sube tal cual. El nombre de
+ * la constraint se busca en la cadena de causas, como hace el filtro global.
+ */
+function isPickupCodeCollision(error: unknown): boolean {
+  if (!(error instanceof UniqueConstraintViolationException)) return false;
+  let current: unknown = error;
+  for (let depth = 0; depth < 5 && current; depth += 1) {
+    const candidate = current as {
+      /** Nombre de la constraint, si el driver lo trae. */
+      constraint?: unknown;
+      /** Mensaje del eslabón. */
+      message?: unknown;
+      /** Causa envuelta (Error.cause). */
+      cause?: unknown;
+      /** Causa envuelta (convención del driver). */
+      previous?: unknown;
+    };
+    if (candidate.constraint === 'ux_inventory_reservations_pickup_code') {
+      return true;
+    }
+    if (
+      typeof candidate.message === 'string' &&
+      candidate.message.includes('ux_inventory_reservations_pickup_code')
+    ) {
+      return true;
+    }
+    current = candidate.cause ?? candidate.previous;
+  }
+  return false;
 }
 
 /** Orden estable de posiciones: mayor disponible, luego ubicación y lote. */
@@ -1302,6 +1749,7 @@ function toOrderDto(
   productById: ReadonlyMap<string, PharmacyProducts>,
   conceptById: ReadonlyMap<string, CatalogConcepts>,
   patientName: string | null,
+  viewer: OrderViewer,
 ): PharmacyOrderDto {
   const grouped = new Map<string, InventoryReservationLines[]>();
   for (const line of lines) {
@@ -1329,6 +1777,10 @@ function toOrderDto(
           (sum, portion) => sum + Number(portion.reservedQuantity),
           0,
         ),
+        fulfilledQuantity: portions.reduce(
+          (sum, portion) => sum + num(portion.fulfilledQuantity),
+          0,
+        ),
         status: moduleConcept(portions[0].statusConceptId),
       };
     })
@@ -1349,6 +1801,11 @@ function toOrderDto(
     pharmacyName: pharmacyName(pharmacy),
     medicationRequestId: order.medicationRequestId ?? null,
     patientName,
+    deliveryMode: order.deliveryModeConceptId
+      ? moduleConcept(order.deliveryModeConceptId)
+      : null,
+    // La prueba de posesión es del titular: el staff la sirve null siempre.
+    pickupCode: viewer === 'owner' ? (order.pickupCode ?? null) : null,
     lines: lineDtos,
   };
 }

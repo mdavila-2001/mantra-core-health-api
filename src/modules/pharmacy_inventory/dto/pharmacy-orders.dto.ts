@@ -20,12 +20,21 @@ import { InventoryConceptDto } from './read-responses.dto';
  *
  * El pedido se sirve **en palabras**: conceptos resueltos a `{code, display}`,
  * nombres de sede/farmacia/producto junto a cada id, y sin ningún UUID que la
- * interfaz tenga que pintar como texto. Los campos comerciales del contrato
- * FAR-I2 que dependen del cambio de modelo (modalidad de entrega, dirección,
- * precios congelados, código de retiro, motivo de rechazo, sustituciones) NO
- * se exponen todavía: llegan en una segunda vuelta cuando el modelo los
- * declare — omitirlos es honesto; servirlos vacíos fingiría que existen.
+ * interfaz tenga que pintar como texto. Con el modelo v4.2.1 el pedido ya
+ * persiste su modalidad de entrega y su código de retiro, y este contrato los
+ * sirve; lo que sigue sin modelo o sin carril (dirección de envío, precios
+ * congelados, motivo de rechazo persistido, sustituciones) NO se expone
+ * todavía — omitirlo es honesto; servirlo vacío fingiría que existe.
  */
+
+/**
+ * Modalidades de entrega del contrato FAR-I2, como las escribe el cliente.
+ *
+ * Las tres se aceptan en la validación para poder responder un 422
+ * **tipificado y explicable** sobre las dos de envío — el carril de envío es
+ * FAR-E4 y todavía no existe; rechazarlas en el pipe sería un 400 mudo.
+ */
+export const DELIVERY_MODES = ['RETIRO', 'DOMICILIO', 'TRABAJO'] as const;
 
 /** Una línea del pedido: producto y cantidad. */
 export class PharmacyOrderLineInputDto {
@@ -64,6 +73,17 @@ export class CreatePharmacyOrderDto {
   @IsOptional()
   @IsUUID()
   medicationRequestId?: string;
+
+  /**
+   * Cómo llega el pedido a la persona. Hoy solo `RETIRO` se persiste; las dos
+   * modalidades de envío responden 422 tipificado hasta que exista el carril
+   * de envío (FAR-E4). Opcional por compatibilidad: un pedido sin modalidad
+   * se crea, pero nunca va a poder marcarse listo para retiro.
+   */
+  @ApiPropertyOptional({ enum: DELIVERY_MODES })
+  @IsOptional()
+  @IsIn([...DELIVERY_MODES])
+  deliveryMode?: (typeof DELIVERY_MODES)[number];
 
   /**
    * Clave de idempotencia del cliente: reintentar la misma clave devuelve el
@@ -146,6 +166,13 @@ export class PharmacyOrderLineDto {
   reservedQuantity!: number;
 
   /**
+   * Cantidad ya entregada en el mostrador, acumulada entre entregas parciales
+   * (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`.
+   */
+  @ApiProperty()
+  fulfilledQuantity!: number;
+
+  /**
    * Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada,
    * `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada).
    */
@@ -219,6 +246,24 @@ export class PharmacyOrderDto {
   patientName!: string | null;
 
   /**
+   * Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos
+   * anteriores al modelo v4.2.1, que no la declararon.
+   */
+  @ApiPropertyOptional({ type: InventoryConceptDto, nullable: true })
+  deliveryMode!: InventoryConceptDto | null;
+
+  /**
+   * Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`.
+   *
+   * **Solo en la lectura del titular**: es la prueba de posesión con que la
+   * persona retira, así que la bandeja y las lecturas de staff lo sirven
+   * `null` — el mostrador no valida mirándolo, valida enviándolo en
+   * `POST /pharmacy/orders/:id/dispense`.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  pickupCode!: string | null;
+
+  /**
    * Líneas del pedido.
    */
   @ApiProperty({ type: [PharmacyOrderLineDto] })
@@ -282,6 +327,48 @@ export class RejectPharmacyOrderDto {
   @IsNotEmpty()
   @MaxLength(500)
   reason!: string;
+}
+
+/** Cuerpo de `POST /pharmacy/orders/:id/dispense` (FAR-E3). */
+export class DispensePharmacyOrderDto {
+  /**
+   * El código que trae la persona al mostrador. Se compara sin distinguir
+   * mayúsculas; un código que no coincide responde 422 tipificado sin ningún
+   * efecto — el front lo muestra como `codigoValido: false`, no como error.
+   */
+  @ApiProperty({ description: 'Código de retiro que presenta la persona' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(20)
+  pickupCode!: string;
+
+  /**
+   * Productos que se lleva en ESTA entrega (parcial). Sin declarar, se
+   * entrega todo el saldo en pie del pedido.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description: 'Productos de esta entrega; omitido = todo el saldo en pie',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsUUID('all', { each: true })
+  productIds?: string[];
+
+  /**
+   * Clave de idempotencia del mostrador: reintentar la misma clave devuelve
+   * el pedido tal como quedó, sin repetir stock ni ledger.
+   */
+  @ApiPropertyOptional({
+    description: 'Clave de idempotencia; repetirla no duplica la entrega',
+    maxLength: 120,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  idempotencyKey?: string;
 }
 
 /** Respuesta de `GET /pharmacy/orders/me`. */

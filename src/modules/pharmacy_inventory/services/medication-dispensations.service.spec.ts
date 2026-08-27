@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { MedicationDispensationsService } from './medication-dispensations.service';
+import { PINV } from '../pharmacy_inventory.concepts';
 import { PreconditionFailedException } from '../../../common';
 
 const actor = { id: 'pharm-1', roles: ['PHARMACIST'] } as any;
@@ -89,6 +90,38 @@ describe('MedicationDispensationsService', () => {
       inventoryLotId: 'lot1',
     });
     expect(d.stockRepo.findByKey).not.toHaveBeenCalled();
+  });
+
+  it('dispense: a patient ORDER cannot be closed through the generic route', async () => {
+    const d = build();
+    // La reserva referida es un pedido de paciente (estado PINV_ORDER_*):
+    // su entrega exige el codigo de retiro y acumula por linea (FAR-E3).
+    d.reservationsRepo.findById.mockResolvedValue({
+      id: 'res-order',
+      reservationStatusConceptId: PINV.ORDER_LISTO_PARA_RETIRO,
+    });
+
+    await expect(
+      d.service.dispense(
+        'ph1',
+        {
+          pharmacySiteId: 's1',
+          patientProfileId: 'pat1',
+          inventoryReservationId: 'res-order',
+          lines: [
+            {
+              inventoryLocationId: 'loc1',
+              pharmacyProductId: 'p1',
+              dispensedQuantity: 1,
+            },
+          ],
+        } as any,
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    // Cero efectos: ni dispensacion, ni ledger, ni stock.
+    expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
+    expect(d.ledgerRepo.append).not.toHaveBeenCalled();
   });
 
   it('dispense: insufficient on-hand throws 422', async () => {
