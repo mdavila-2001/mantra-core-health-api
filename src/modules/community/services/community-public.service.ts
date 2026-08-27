@@ -315,6 +315,8 @@ export class CommunityPublicService {
     kind?: PublicResultKind;
     /** Sólo prestadores verificados. */
     verified?: boolean;
+    /** Ciudad a la que acotar. */
+    city?: string;
     /** Cursor opaco. */
     cursor?: string;
     /** Tope pedido. */
@@ -354,10 +356,13 @@ export class CommunityPublicService {
     // El índice primero; el SQL queda como red. Si OpenSearch no responde el
     // buscador **encuentra menos y peor**, que es un defecto; devolver 500
     // sería una caída de la portada pública.
+    const city = filtros.city?.trim().slice(0, MAX_QUERY_LENGTH) || undefined;
+
     const desdeIndice = await this.searchFromIndex({
       q,
       kind: filtros.kind,
       verified: filtros.verified,
+      city,
       cursor: filtros.cursor,
       limit,
     });
@@ -369,6 +374,7 @@ export class CommunityPublicService {
         q,
         targetTypeConceptId,
         verified: filtros.verified,
+        city,
         after: this.decodeSqlCursor(filtros.cursor),
       },
       limit + 1,
@@ -674,6 +680,8 @@ export class CommunityPublicService {
     kind?: PublicResultKind;
     /** Sólo verificados. */
     verified?: boolean;
+    /** Ciudad a la que acotar. */
+    city?: string;
     /** Cursor opaco. */
     cursor?: string;
     /** Tope ya acotado. */
@@ -686,6 +694,13 @@ export class CommunityPublicService {
       }
       if (filtros.verified) {
         filtrosIndice.push({ field: 'verified', values: ['true'] });
+      }
+      // `city` está mapeada como `keyword` con el normalizador español, así
+      // que compara sin tildes ni mayúsculas — igual que el camino SQL. Que
+      // los dos acoten igual no es un detalle: si el índice se cae, la lista
+      // tiene que seguir diciendo lo mismo.
+      if (filtros.city) {
+        filtrosIndice.push({ field: 'city', values: [filtros.city] });
       }
 
       const result = await this.searchIndex.search(

@@ -8,7 +8,7 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Public, ResourceNotFoundException } from '../../../common';
 import {
@@ -114,18 +114,34 @@ export class CommunityPublicController {
     });
   }
 
-  /** Organizaciones de salud: hospitales, clínicas, centros. */
+  /**
+   * Organizaciones de salud: hospitales, clínicas, centros.
+   *
+   * `city` acota por la ciudad de la dirección vigente, sin distinguir tildes
+   * ni mayúsculas. Es el filtro que un directorio de **lugares** necesita antes
+   * que ningún otro —a nadie le sirve una clínica excelente en otra ciudad—, y
+   * está implementado en los dos caminos, el del índice y el de SQL: uno que
+   * sólo funcionara con OpenSearch arriba dejaría de acotar sin avisar el día
+   * que se cayera.
+   */
   @Public()
   @Get('public/search/organizations')
   @ApiOperation({ summary: 'Organizaciones en el directorio público' })
+  @ApiQuery({
+    name: 'city',
+    required: false,
+    description: 'Ciudad a la que acotar; sin tildes ni mayúsculas que valgan',
+  })
   searchOrganizations(
     @Query('q') q?: string,
+    @Query('city') city?: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
   ): Promise<PublicSearchPageDto> {
     return this.service.search({
       q,
       kind: 'ORGANIZATION',
+      city,
       cursor,
       limit: this.toInt(limit),
     });
@@ -275,6 +291,19 @@ export class CommunityPublicController {
    */
   @Public()
   @Get('public/media/:id')
+  // El límite de la superficie pública son 60 peticiones por minuto, y se
+  // dimensionó cuando la tarjeta del directorio no tenía foto: «una pantalla de
+  // resultados con sus avatares no llega a diez». Con la grilla de centros de
+  // salud una sola página son veinticinco portadas y veinticinco logos, así que
+  // el navegador chocaba contra el tope **dentro de la primera pantalla** y las
+  // fotos salían rotas —no en desarrollo, donde se abre una ficha por vez, sino
+  // apenas se abre el directorio.
+  //
+  // Subirlo acá y no en todo `/public` es la diferencia que importa: esta ruta
+  // devuelve bytes de una imagen ya cacheable una hora, no un resultado de
+  // búsqueda. Raspar el directorio sigue costando 60 búsquedas por minuto; lo
+  // que deja de costar es mirarlo.
+  @Throttle({ default: { limit: 600, ttl: 60_000 } })
   @Header('Cache-Control', 'public, max-age=3600')
   @ApiOperation({ summary: 'Servir una imagen pública (avatar, portada o post)' })
   async getPublicMedia(
