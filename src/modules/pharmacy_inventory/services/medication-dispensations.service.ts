@@ -20,6 +20,7 @@ import {
   StatusResultDto,
 } from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
+import { ORDER_STATUS_IDS } from './pharmacy-orders.service';
 
 /**
  * Ejecuta la operación num.
@@ -116,6 +117,16 @@ export class MedicationDispensationsService {
           throw new ResourceNotFoundException('Reserva no encontrada', {
             reservationId: dto.inventoryReservationId,
           });
+        }
+        // Un pedido de paciente NO se dispensa por acá: su entrega exige el
+        // código de retiro y acumula por línea (FAR-E3). Esta ruta cierra la
+        // reserva entera de un golpe, y sobre un pedido eso sería saltarse la
+        // prueba de posesión y pisar la máquina de estados del mostrador.
+        if (ORDER_STATUS_IDS.includes(reservation.reservationStatusConceptId)) {
+          throw new PreconditionFailedException(
+            'La reserva es un pedido de paciente: se dispensa con su código de retiro por POST /pharmacy/orders/:id/dispense',
+            { reservationId: dto.inventoryReservationId },
+          );
         }
       }
 

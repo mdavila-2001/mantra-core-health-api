@@ -30,6 +30,11 @@ export interface CreateReservationData {
    */
   reservationStatusConceptId: string;
   /**
+   * Modalidad de entrega del pedido de paciente (`PINV_DELIVERY_*`, v4.2.1).
+   * Las reservas de mostrador no la llevan: queda sin sellar.
+   */
+  deliveryModeConceptId?: string;
+  /**
    * Valor de expires at mantenido por la instancia.
    */
   expiresAt: Date;
@@ -148,6 +153,7 @@ export class ReservationsRepository {
         medicationRequestId: data.medicationRequestId,
         quotationId: data.quotationId,
         reservationStatusConceptId: data.reservationStatusConceptId,
+        deliveryModeConceptId: data.deliveryModeConceptId,
         expiresAt: data.expiresAt,
         confirmedAt: data.confirmedAt,
         idempotencyKey: data.idempotencyKey,

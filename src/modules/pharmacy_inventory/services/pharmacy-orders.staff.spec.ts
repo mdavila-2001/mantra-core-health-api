@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import {
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
   runWithTenant,
@@ -23,7 +25,12 @@ const FARMACIA = {
   legalName: 'Farmacia Andina S.R.L.',
   tradeName: 'Farmacia Andina',
 } as any;
-const SEDE = { id: 'site-1', pharmacyId: 'ph-1', name: 'Sede Centro' } as any;
+const SEDE = {
+  id: 'site-1',
+  pharmacyId: 'ph-1',
+  name: 'Sede Centro',
+  pickupAvailable: true,
+} as any;
 const PRODUCTO = {
   id: 'prod-1',
   pharmacyId: 'ph-1',
@@ -101,6 +108,11 @@ function build() {
     findActiveLocationsBySites: mockFn(async () => []),
     findStockPositions: mockFn(async () => []),
   };
+  const dispensationsRepo = {
+    findByIdempotencyKey: mockFn(async () => null),
+    create: mockFn(() => ({ id: 'disp-1' })),
+    createLine: mockFn(() => ({ id: 'dline-1' })),
+  };
   const pharmacyRepo = {
     findActiveSiteById: mockFn(async () => SEDE),
     findVisibleById: mockFn(async () => FARMACIA),
@@ -122,6 +134,7 @@ function build() {
     stockRepo as any,
     ledgerRepo as any,
     inventoryReadRepo as any,
+    dispensationsRepo as any,
     pharmacyRepo as any,
     reservationsService as any,
     outbox as any,
@@ -134,6 +147,9 @@ function build() {
     fork,
     em,
     ordersRepo,
+    stockRepo,
+    ledgerRepo,
+    dispensationsRepo,
     reservationsService,
     outbox,
     orderNotifications,
@@ -559,14 +575,91 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
   });
 
   describe('ready', () => {
-    // «Listo para retiro» exige demostrar que el pedido ES un retiro, y la
-    // modalidad no se persiste (bloqueador de modelo): la capacidad entera
-    // responde 422 tipificado sin efectos. Estos specs fijan el bloqueo a
-    // propósito — si alguien lo «arregla» adivinando la modalidad, delatan.
-    it('answers a typed 422: blocked by model while modality is not persisted', async () => {
+    /** Un pedido confirmado de RETIRO, con la sede de mostrador por defecto. */
+    function retiroConfirmado(extra: Record<string, unknown> = {}) {
+      return pedido({
+        reservationStatusConceptId: PINV.ORDER_CONFIRMADO,
+        deliveryModeConceptId: PINV.DELIVERY_RETIRO,
+        ...extra,
+      });
+    }
+
+    it('a confirmed pickup order transitions, seals a code and renews the clock', async () => {
+      const d = build();
+      const confirmado = retiroConfirmado();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(confirmado);
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.ready('order-1', staff),
+      );
+
+      expect(confirmado.reservationStatusConceptId).toBe(
+        PINV.ORDER_LISTO_PARA_RETIRO,
+      );
+      // El código: 6 símbolos del alfabeto sin ambiguos, ya normalizado.
+      expect(confirmado.pickupCode).toMatch(
+        /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/,
+      );
+      // La reserva corre de nuevo ~48 h desde ahora.
+      const horas = (confirmado.expiresAt.getTime() - Date.now()) / 3_600_000;
+      expect(horas).toBeGreaterThan(47.9);
+      expect(horas).toBeLessThanOrEqual(48);
+      // El hecho en la transacción; la campana después, CON el código.
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ eventType: 'PharmacyOrderReady' }),
+      );
+      expect(d.orderNotifications.orderReady).toHaveBeenCalledWith(
+        'order-1',
+        'pat-1',
+        'user-mostrador',
+        confirmado.pickupCode,
+      );
+      // La lectura de staff NO revela el código: es la prueba del titular.
+      expect(res.pickupCode).toBeNull();
+    });
+
+    it('a re-ready keeps the already sealed code: nobody re-notifies a new one', async () => {
+      const d = build();
+      const confirmado = retiroConfirmado({ pickupCode: 'ZZZZ99' });
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(confirmado);
+
+      await runWithTenant('tenant-a', () => d.service.ready('order-1', staff));
+
+      expect(confirmado.pickupCode).toBe('ZZZZ99');
+      expect(d.orderNotifications.orderReady).toHaveBeenCalledWith(
+        'order-1',
+        'pat-1',
+        'user-mostrador',
+        'ZZZZ99',
+      );
+    });
+
+    it('an order without modality answers a typed 422 with zero effects', async () => {
       const d = build();
       const confirmado = pedido({
         reservationStatusConceptId: PINV.ORDER_CONFIRMADO,
+      });
+      const venceEl = confirmado.expiresAt;
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(confirmado);
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service.ready('order-1', staff).catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as any).details).toMatchObject({ deliveryMode: null });
+      expect(confirmado.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
+      expect(confirmado.pickupCode).toBeUndefined();
+      expect(confirmado.expiresAt).toBe(venceEl);
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.orderNotifications.orderReady).not.toHaveBeenCalled();
+    });
+
+    it('a shipping order closes through the shipping lane, not the counter', async () => {
+      const d = build();
+      const confirmado = retiroConfirmado({
+        deliveryModeConceptId: PINV.DELIVERY_DOMICILIO,
       });
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(confirmado);
 
@@ -576,33 +669,365 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
       expect(error).toBeInstanceOf(PreconditionFailedException);
       expect((error as any).details).toMatchObject({
-        blockedByModel: 'deliveryMode',
+        deliveryMode: 'PINV_DELIVERY_DOMICILIO',
       });
+      expect(confirmado.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
     });
 
-    it('zero effects: state, expiry, ledger, outbox and bell all untouched', async () => {
+    it('a site without a counter cannot promise a pickup: typed 422', async () => {
       const d = build();
-      const venceEl = new Date(Date.now() + 60_000);
-      const confirmado = pedido({
-        reservationStatusConceptId: PINV.ORDER_CONFIRMADO,
-        expiresAt: venceEl,
-      });
+      const confirmado = retiroConfirmado();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(confirmado);
+      d.ordersRepo.findSitesByIds.mockResolvedValue([
+        { ...SEDE, pickupAvailable: false },
+      ]);
 
-      await runWithTenant('tenant-a', () =>
-        d.service.ready('order-1', staff).catch(() => undefined),
+      const error = await runWithTenant('tenant-a', () =>
+        d.service.ready('order-1', staff).catch((e: unknown) => e),
       );
 
-      // El pedido sigue CONFIRMADO con su ventana original de 48 h intacta.
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as any).details).toMatchObject({ siteId: 'site-1' });
       expect(confirmado.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
-      expect(confirmado.expiresAt).toBe(venceEl);
-      // Y no hubo ni contabilidad, ni evento, ni campana — ni siquiera lock.
-      expect(
-        d.reservationsService.releaseConfirmedLines,
-      ).not.toHaveBeenCalled();
       expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
-      expect(d.orderNotifications.orderReady).not.toHaveBeenCalled();
-      expect(d.ordersRepo.findOrderByIdForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('a pickup-code collision retries the whole transaction with a fresh code', async () => {
+      const d = build();
+      const confirmado = retiroConfirmado();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(confirmado);
+      const original = d.em.transactional.getMockImplementation();
+      let llamadas = 0;
+      d.em.transactional.mockImplementation(async (cb: any) => {
+        llamadas += 1;
+        if (llamadas === 1) {
+          throw new UniqueConstraintViolationException(
+            new Error(
+              'duplicate key value violates unique constraint "ux_inventory_reservations_pickup_code"',
+            ),
+          );
+        }
+        return original!(cb);
+      });
+
+      await runWithTenant('tenant-a', () => d.service.ready('order-1', staff));
+
+      expect(llamadas).toBe(2);
+      expect(confirmado.reservationStatusConceptId).toBe(
+        PINV.ORDER_LISTO_PARA_RETIRO,
+      );
+    });
+
+    it('three collisions in a row stop as a conflict, not an infinite loop', async () => {
+      const d = build();
+      d.em.transactional.mockImplementation(async () => {
+        throw new UniqueConstraintViolationException(
+          new Error(
+            'duplicate key value violates unique constraint "ux_inventory_reservations_pickup_code"',
+          ),
+        );
+      });
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service.ready('order-1', staff).catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect(d.em.transactional).toHaveBeenCalledTimes(3);
+    });
+
+    it('any other unique violation is a real error and does NOT retry', async () => {
+      const d = build();
+      d.em.transactional.mockImplementation(async () => {
+        throw new UniqueConstraintViolationException(
+          new Error(
+            'duplicate key value violates unique constraint "uq_inventory_reservations_idempotency"',
+          ),
+        );
+      });
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service.ready('order-1', staff).catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(UniqueConstraintViolationException);
+      expect(d.em.transactional).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('dispense (FAR-E3)', () => {
+    /** Un pedido listo, con su código sellado. */
+    function listo(extra: Record<string, unknown> = {}) {
+      return pedido({
+        reservationStatusConceptId: PINV.ORDER_LISTO_PARA_RETIRO,
+        deliveryModeConceptId: PINV.DELIVERY_RETIRO,
+        pickupCode: 'ABC234',
+        ...extra,
+      });
+    }
+
+    /** Una línea reservada y aún sin entregar, con ubicación y lote. */
+    function lineaViva(extra: Record<string, unknown> = {}) {
+      return linea({
+        inventoryLocationId: 'loc-1',
+        inventoryLotId: 'lot-1',
+        ...extra,
+      });
+    }
+
+    /** La posición de stock que respalda la línea viva. */
+    function posicion() {
+      return {
+        inventoryLocationId: 'loc-1',
+        pharmacyProductId: 'prod-1',
+        inventoryLotId: 'lot-1',
+        onHandQuantity: '5',
+        reservedQuantity: '3',
+        quarantineQuantity: '0',
+        availableQuantity: '2',
+      } as any;
+    }
+
+    it('the right code delivers the full balance and the order becomes RETIRADO', async () => {
+      const d = build();
+      const orden = listo();
+      const lin = lineaViva();
+      const pos = posicion();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([lin]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(pos);
+
+      // Minúsculas y espacios: la comparación es insensible a la forma.
+      await runWithTenant('tenant-a', () =>
+        d.service.dispense('order-1', { pickupCode: ' abc234 ' }, staff),
+      );
+
+      // La entrega quedó asentada: dispensación, línea y ledger.
+      expect(d.dispensationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          inventoryReservationId: 'order-1',
+          dispensationStatusConceptId: PINV.DISPENSE_DISPENSED,
+        }),
+      );
+      expect(d.dispensationsRepo.createLine).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ dispensedQuantity: '3' }),
+      );
+      expect(d.ledgerRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          movementTypeConceptId: PINV.MV_DISPENSE,
+          quantityDelta: '-3',
+          reservationDelta: '-3',
+        }),
+      );
+      // El stock estaba reservado por ESTE pedido: bajan on_hand y reserved.
+      expect(pos.onHandQuantity).toBe('2');
+      expect(pos.reservedQuantity).toBe('0');
+      expect(pos.availableQuantity).toBe('2');
+      // La línea acumula y el pedido cierra.
+      expect(lin.fulfilledQuantity).toBe('3');
+      expect(lin.statusConceptId).toBe(PINV.RES_LINE_FULFILLED);
+      expect(orden.reservationStatusConceptId).toBe(PINV.ORDER_RETIRADO);
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          eventType: 'PharmacyOrderDispensed',
+          payloadJson: expect.objectContaining({
+            statusCode: 'PINV_ORDER_RETIRADO',
+            complete: true,
+          }),
+        }),
+      );
+    });
+
+    it('a code mismatch is a typed 422 with ZERO writes', async () => {
+      const d = build();
+      const orden = listo();
+      const lin = lineaViva();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([lin]);
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service
+          .dispense('order-1', { pickupCode: 'XXXXXX' }, staff)
+          .catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as any).details).toMatchObject({
+        reason: 'PICKUP_CODE_MISMATCH',
+      });
+      // Cero efectos: ni dispensación, ni ledger, ni estado, ni evento.
+      expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
+      expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(orden.reservationStatusConceptId).toBe(
+        PINV.ORDER_LISTO_PARA_RETIRO,
+      );
+      expect(lin.fulfilledQuantity).toBeUndefined();
+    });
+
+    it('a partial delivery keeps LISTO with the SAME code; the second one closes', async () => {
+      const d = build();
+      const orden = listo();
+      const linea1 = lineaViva();
+      const linea2 = lineaViva({
+        id: 'line-2',
+        pharmacyProductId: 'prod-2',
+        inventoryLocationId: 'loc-2',
+        inventoryLotId: undefined,
+      });
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
+        linea1,
+        linea2,
+      ]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(posicion());
+
+      // Primera entrega: solo prod-1. El pedido sigue LISTO, mismo código.
+      await runWithTenant('tenant-a', () =>
+        d.service.dispense(
+          'order-1',
+          { pickupCode: 'ABC234', productIds: ['prod-1'] },
+          staff,
+        ),
+      );
+      expect(linea1.fulfilledQuantity).toBe('3');
+      expect(linea2.fulfilledQuantity).toBeUndefined();
+      expect(orden.reservationStatusConceptId).toBe(
+        PINV.ORDER_LISTO_PARA_RETIRO,
+      );
+      expect(orden.pickupCode).toBe('ABC234');
+      expect(d.outbox.publishDomainEvent).toHaveBeenLastCalledWith(
+        d.tx,
+        expect.objectContaining({
+          payloadJson: expect.objectContaining({
+            complete: false,
+            remainingLineCount: 1,
+          }),
+        }),
+      );
+
+      // Segunda entrega, mismo código: cubre el saldo y cierra RETIRADO.
+      await runWithTenant('tenant-a', () =>
+        d.service.dispense(
+          'order-1',
+          { pickupCode: 'ABC234', productIds: ['prod-2'] },
+          staff,
+        ),
+      );
+      expect(linea2.fulfilledQuantity).toBe('3');
+      expect(orden.reservationStatusConceptId).toBe(PINV.ORDER_RETIRADO);
+    });
+
+    it('a product without standing balance answers 422 without a ghost delivery', async () => {
+      const d = build();
+      const orden = listo();
+      const entregada = lineaViva({
+        statusConceptId: PINV.RES_LINE_FULFILLED,
+        fulfilledQuantity: '3',
+      });
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([entregada]);
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service
+          .dispense(
+            'order-1',
+            { pickupCode: 'ABC234', productIds: ['prod-1'] },
+            staff,
+          )
+          .catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as any).details).toMatchObject({
+        productIds: ['prod-1'],
+      });
+      expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
+      expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+    });
+
+    it('replaying the idempotency key returns the order without re-dispensing', async () => {
+      const d = build();
+      const orden = listo({ reservationStatusConceptId: PINV.ORDER_RETIRADO });
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(orden);
+      d.dispensationsRepo.findByIdempotencyKey.mockResolvedValue({
+        id: 'disp-0',
+        inventoryReservationId: 'order-1',
+      });
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.dispense(
+          'order-1',
+          { pickupCode: 'ABC234', idempotencyKey: 'clave-1' },
+          staff,
+        ),
+      );
+
+      expect(res.id).toBe('order-1');
+      expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
+      expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('an idempotency key from another delivery is a conflict, not a silent no-op', async () => {
+      const d = build();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(listo());
+      d.dispensationsRepo.findByIdempotencyKey.mockResolvedValue({
+        id: 'disp-9',
+        inventoryReservationId: 'otro-pedido',
+      });
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service
+          .dispense(
+            'order-1',
+            { pickupCode: 'ABC234', idempotencyKey: 'clave-ajena' },
+            staff,
+          )
+          .catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('an order that is not ready answers 422 with the current state in words', async () => {
+      const d = build();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(
+        pedido({ reservationStatusConceptId: PINV.ORDER_CONFIRMADO }),
+      );
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service
+          .dispense('order-1', { pickupCode: 'ABC234' }, staff)
+          .catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as any).details).toMatchObject({
+        from: 'PINV_ORDER_CONFIRMADO',
+      });
+      expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('another tenant gets the same 404 as a nonexistent order', async () => {
+      const d = build();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(listo());
+      d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([]);
+
+      const error = await runWithTenant('tenant-b', () =>
+        d.service
+          .dispense('order-1', { pickupCode: 'ABC234' }, staff)
+          .catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
     });
   });
 });

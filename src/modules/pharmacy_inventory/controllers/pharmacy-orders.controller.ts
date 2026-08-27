@@ -26,6 +26,7 @@ import { PharmacyOrdersService } from '../services';
 import {
   ConfirmPharmacyOrderDto,
   CreatePharmacyOrderDto,
+  DispensePharmacyOrderDto,
   PharmacyOrderDto,
   PharmacyOrderListResponseDto,
   RejectPharmacyOrderDto,
@@ -202,23 +203,43 @@ export class PharmacyOrdersController {
   }
 
   /**
-   * FAR-E2: dejar listo en mostrador — **bloqueado por modelo**. La ruta queda
-   * por compatibilidad y responde 422 tipificado: sin modalidad persistida no
-   * puede demostrarse que el pedido sea un retiro, y «listo para retiro» sobre
-   * un pedido de entrega sería mentirle al mostrador y al paciente.
+   * FAR-E2/E3: dejar listo en mostrador (habilitado por el modelo v4.2.1).
+   * Exige que el pedido sea demostrablemente un RETIRO y que la sede ofrezca
+   * mostrador; sella el código de retiro y renueva la reserva 48 h.
    */
   @Post(':id/ready')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Marcar el pedido listo para retiro (FAR-E2 — bloqueado)',
+    summary: 'Marcar el pedido listo para retiro (FAR-E2/E3)',
     description:
-      'Responde 422 (blockedByModel: deliveryMode) sin ningún efecto: la modalidad del pedido no se persiste y no puede demostrarse que sea un retiro. Se habilita con el patch de modelo.',
+      'CONFIRMADO|ACEPTADO → LISTO_PARA_RETIRO. Solo pedidos con modalidad RETIRO y sede con mostrador; sella el código de retiro (una sola vez) y renueva expires_at +48 h. Un pedido de envío o sin modalidad responde 422 tipificado sin efectos.',
   })
   ready(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
     return this.orders.ready(id, actor);
+  }
+
+  /**
+   * FAR-E3: la entrega en el mostrador, contra el código de retiro. Parcial
+   * acumulativa: mientras quede saldo el pedido sigue LISTO_PARA_RETIRO con el
+   * mismo código, y pasa a RETIRADO cuando la última línea se cubre.
+   */
+  @Post(':id/dispense')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Dispensar el pedido en el mostrador (FAR-E3)',
+    description:
+      'Valida el código de retiro (insensible a mayúsculas; mismatch: 422 sin efectos) y entrega el saldo en pie — todo, o solo productIds. Acumula fulfilled_quantity por línea; con saldo cero el pedido pasa a RETIRADO. Repetir la idempotencyKey no duplica stock ni ledger.',
+  })
+  dispense(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DispensePharmacyOrderDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.dispense(id, dto, actor);
   }
 }
