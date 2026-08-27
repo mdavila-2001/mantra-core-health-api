@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `pharmacy_inventory`.
- * 129 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 141 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const pharmacyInventoryForeignKeys: readonly ForeignKeyTuple[] = [
@@ -54,6 +54,9 @@ export const pharmacyInventoryForeignKeys: readonly ForeignKeyTuple[] = [
   ['inventory_recall_holds', 'source_authority_tenant_id', 'directory', 'tenants', 'id'],
   ['inventory_recall_holds', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['inventory_reservations', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['inventory_reservations', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['inventory_reservations', 'delivery_address_id', 'common', 'addresses', 'id'],
+  ['inventory_reservations', 'delivery_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['inventory_reservations', 'medication_request_id', 'clinical', 'medication_requests', 'id'],
   ['inventory_reservations', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['inventory_reservations', 'pharmacy_id', 'pharmacy', 'pharmacies', 'id'],
@@ -61,6 +64,7 @@ export const pharmacyInventoryForeignKeys: readonly ForeignKeyTuple[] = [
   ['inventory_reservations', 'reservation_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['inventory_reservations', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['inventory_reservation_lines', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['inventory_reservation_lines', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['inventory_reservation_lines', 'inventory_location_id', 'pharmacy_inventory', 'inventory_locations', 'id'],
   ['inventory_reservation_lines', 'inventory_lot_id', 'pharmacy_inventory', 'inventory_lots', 'id'],
   ['inventory_reservation_lines', 'inventory_reservation_id', 'pharmacy_inventory', 'inventory_reservations', 'id'],
@@ -115,6 +119,14 @@ export const pharmacyInventoryForeignKeys: readonly ForeignKeyTuple[] = [
   ['pharmacy_inventory_sync_items', 'pharmacy_inventory_sync_batch_id', 'pharmacy_inventory', 'pharmacy_inventory_sync_batches', 'id'],
   ['pharmacy_inventory_sync_items', 'pharmacy_product_id', 'pharmacy', 'pharmacy_products', 'id'],
   ['pharmacy_inventory_sync_items', 'reconciliation_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['pharmacy_order_substitutions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['pharmacy_order_substitutions', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['pharmacy_order_substitutions', 'inventory_reservation_id', 'pharmacy_inventory', 'inventory_reservations', 'id'],
+  ['pharmacy_order_substitutions', 'inventory_reservation_line_id', 'pharmacy_inventory', 'inventory_reservation_lines', 'id'],
+  ['pharmacy_order_substitutions', 'original_pharmacy_product_id', 'pharmacy', 'pharmacy_products', 'id'],
+  ['pharmacy_order_substitutions', 'proposed_pharmacy_product_id', 'pharmacy', 'pharmacy_products', 'id'],
+  ['pharmacy_order_substitutions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['pharmacy_order_substitutions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_purchase_orders', 'created_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_purchase_orders', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_purchase_orders', 'erp_purchase_order_id', 'erp', 'purchase_orders', 'id'],
