@@ -12,6 +12,7 @@ import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
   InventoryReservationsService,
   InventorySyncService,
+  PharmacyOrdersService,
 } from '../services';
 import {
   CreateSyncBatchDto,
@@ -33,22 +34,33 @@ export class PharmacyInventoryInternalController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param reservations - Valor de reservations requerido por la operación.
+   * @param orders - Pedidos de paciente (FAR-E1), para vencerlos en la misma corrida.
    * @param sync - Valor de sync requerido por la operación.
    */
   constructor(
     private readonly reservations: InventoryReservationsService,
+    private readonly orders: PharmacyOrdersService,
     private readonly sync: InventorySyncService,
   ) {}
 
-  /** UC-25-05: liberar reservas expiradas. */
+  /**
+   * UC-25-05: liberar reservas expiradas. La misma corrida vence también los
+   * pedidos de paciente (FAR-E1) cuyo reloj de 48 h ya pasó — un solo worker,
+   * las dos colas.
+   */
   @Post('reservations/expire')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Liberar reservas vencidas (UC-25-05)' })
-  expireReservations(
+  @ApiOperation({ summary: 'Liberar reservas y pedidos vencidos (UC-25-05)' })
+  async expireReservations(
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ExpireReservationsResponseDto> {
-    return this.reservations.expire(actor);
+    const reservations = await this.reservations.expire(actor);
+    const orders = await this.orders.expireDue(actor);
+    return {
+      expiredCount: reservations.expiredCount + orders.expiredCount,
+      expiredOrderCount: orders.expiredCount,
+    };
   }
 
   /** Bootstrap: ingresar un lote de sincronización ERP. */

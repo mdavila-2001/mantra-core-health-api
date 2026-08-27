@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PharmacyModule } from '../pharmacy/pharmacy.module';
+import { MessagingModule } from '../messaging/messaging.module';
 import * as entities from './entities';
 import {
   PharmacyProcurementController,
   PharmacyInventoryController,
+  PharmacyOrdersController,
   PharmacyDispensingController,
   PharmacyInventoryInternalController,
   PharmacyInventoryReadController,
@@ -13,6 +15,7 @@ import {
   InventoryLocationsService,
   PharmacyProcurementService,
   InventoryReservationsService,
+  PharmacyOrdersService,
   MedicationDispensationsService,
   InventoryCountService,
   InventoryRecallService,
@@ -29,6 +32,7 @@ import {
   PurchaseOrdersRepository,
   GoodsReceiptsRepository,
   ReservationsRepository,
+  PharmacyOrdersRepository,
   DispensationsRepository,
   CountSessionsRepository,
   RecallHoldsRepository,
@@ -52,10 +56,14 @@ import {
     // disponibilidad reutiliza sus filtros de publicación y precios en vez de
     // duplicarlos.
     PharmacyModule,
+    // `OutboxService`: el pedido del paciente (FAR-E1) publica sus hechos
+    // (enviado, cancelado, vencido) en la misma transacción del cambio.
+    MessagingModule,
   ],
   controllers: [
     PharmacyProcurementController,
     PharmacyInventoryController,
+    PharmacyOrdersController,
     PharmacyDispensingController,
     PharmacyInventoryInternalController,
     PharmacyInventoryReadController,
@@ -70,6 +78,7 @@ import {
     PurchaseOrdersRepository,
     GoodsReceiptsRepository,
     ReservationsRepository,
+    PharmacyOrdersRepository,
     DispensationsRepository,
     CountSessionsRepository,
     RecallHoldsRepository,
@@ -80,6 +89,7 @@ import {
     InventoryLocationsService,
     PharmacyProcurementService,
     InventoryReservationsService,
+    PharmacyOrdersService,
     MedicationDispensationsService,
     InventoryCountService,
     InventoryRecallService,

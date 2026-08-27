@@ -30,6 +30,7 @@ import {
 import { ClinicalNoteHeaders, DocumentRecords } from '../../chart/entities';
 import { Encounters, MedicationRequests } from '../../clinical/entities';
 import { PROF } from '../profiles.concepts';
+import { PracticeSites } from '../../practice/entities';
 import { esEstado } from './profiles-affiliations.service';
 import type { OnboardingStepDto, PractitionerOnboardingDto } from '../dto';
 import {
@@ -1446,7 +1447,7 @@ export class ProfilesPractitionersService {
       { operation: 'profiles.affiliation.add', actorId: actor.id },
       'Adding practitioner affiliation',
     );
-    return this.em.transactional(async (tx) => {
+    const creado = await this.em.transactional(async (tx) => {
       const profileId = await this.ownership.requireOwnPractitionerProfileId(
         tx,
         actor,
@@ -1524,6 +1525,40 @@ export class ProfilesPractitionersService {
       );
       return toAffiliation(affiliation);
     });
+
+    // El aviso a la organización va DESPUÉS de la transacción y sólo si el
+    // vínculo quedó pendiente: un declarado no tiene a quién avisarle y un
+    // aprobado ya está resuelto. Nunca lanza — el vínculo ya se creó, y que no
+    // salga un aviso no puede deshacerlo.
+    if (creado.statusKind === 'pendiente' && dto.practiceSiteId !== undefined) {
+      await this.avisarDelPedido(dto.practiceSiteId, creado);
+    }
+    return creado;
+  }
+
+  /**
+   * Le cuenta a la organización que alguien pidió vincularse.
+   *
+   * La bandeja de solicitudes existe y nadie entra a mirarla por las dudas: sin
+   * este aviso un pedido puede quedar semanas sin respuesta mientras el médico
+   * espera del otro lado sin saber por qué.
+   *
+   * @param practiceSiteId - La sede a la que apunta el pedido.
+   * @param afiliacion - El vínculo recién creado.
+   */
+  private async avisarDelPedido(
+    practiceSiteId: string,
+    afiliacion: AffiliationResponseDto,
+  ): Promise<void> {
+    const sede = await this.em.findOne(PracticeSites, { id: practiceSiteId });
+    const tenantId = sede?.managingTenantId;
+    if (tenantId === undefined || tenantId === null) return;
+
+    await this.affiliations.avisarDelPedido(
+      tenantId,
+      afiliacion.id,
+      afiliacion.practitionerProfileId,
+    );
   }
 }
 

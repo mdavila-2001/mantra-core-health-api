@@ -16,6 +16,7 @@ const CATEGORIA: Readonly<Record<AffiliationNoticeKind, string>> = {
   AFFILIATION_APPROVED: PROF.NOTICE_AFFILIATION_APPROVED,
   AFFILIATION_REJECTED: PROF.NOTICE_AFFILIATION_REJECTED,
   AFFILIATION_REVOKED: PROF.NOTICE_AFFILIATION_REVOKED,
+  AFFILIATION_REQUESTED: PROF.NOTICE_AFFILIATION_REQUESTED,
 };
 
 /**
@@ -30,6 +31,9 @@ const PRIORIDAD: Readonly<Record<AffiliationNoticeKind, number>> = {
   AFFILIATION_REVOKED: 2,
   AFFILIATION_APPROVED: 4,
   AFFILIATION_REJECTED: 4,
+  // El pedido no urge a quien lo recibe —nadie está esperándolo—, pero mientras
+  // no se mire, hay un médico esperando del otro lado.
+  AFFILIATION_REQUESTED: 5,
 };
 
 /**
