@@ -678,6 +678,133 @@ export class PublicSearchRepository {
     );
   }
 
+  /**
+   * Media, reacciones y comentarios de un lote de publicaciones, para la ficha.
+   *
+   * Una consulta por concepto en vez de tres viajes: `post_media` trae los
+   * archivos de imagen en orden, y dos `COUNT` agrupados traen la interacción.
+   * Las imágenes son las únicas que se publican —vídeo y documento se guardan
+   * pero no se sirven al anónimo todavía—, y el orden es `ordinal` y después
+   * `created_at`, el mismo con el que se subieron.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param postIds - Publicaciones del lote.
+   * @returns Mapa `postId → { imageFileIds, reactionCount, commentCount }`.
+   */
+  async engagementByPost(
+    em: EntityManager,
+    postIds: string[],
+  ): Promise<
+    Map<
+      string,
+      {
+        imageFileIds: string[];
+        reactionCount: number;
+        commentCount: number;
+      }
+    >
+  > {
+    const salida = new Map<
+      string,
+      { imageFileIds: string[]; reactionCount: number; commentCount: number }
+    >();
+    if (postIds.length === 0) return salida;
+
+    const asegurar = (id: string) => {
+      let fila = salida.get(id);
+      if (!fila) {
+        fila = { imageFileIds: [], reactionCount: 0, commentCount: 0 };
+        salida.set(id, fila);
+      }
+      return fila;
+    };
+
+    const conn = em.getConnection();
+
+    const medios = await conn.execute<
+      { post_id: string; file_id: string }[]
+    >(
+      `SELECT post_id, file_id
+         FROM community.post_media
+        WHERE post_id IN (?)
+          AND media_role_concept_id = ?
+        ORDER BY COALESCE(ordinal, 0) ASC, created_at ASC`,
+      [postIds, COMM.MEDIA_ROLE_IMAGE],
+      'all',
+    );
+    for (const fila of medios) asegurar(fila.post_id).imageFileIds.push(fila.file_id);
+
+    const reacciones = await conn.execute<
+      { reactable_ref_id: string; total: string }[]
+    >(
+      `SELECT reactable_ref_id, COUNT(*) AS total
+         FROM community.reactions
+        WHERE reactable_ref_id IN (?)
+          AND reactable_type_concept_id = ?
+        GROUP BY reactable_ref_id`,
+      [postIds, COMM.CONTENT_TYPE_POST],
+      'all',
+    );
+    for (const fila of reacciones) {
+      asegurar(fila.reactable_ref_id).reactionCount = Number(fila.total);
+    }
+
+    const comentarios = await conn.execute<
+      { commentable_ref_id: string; total: string }[]
+    >(
+      `SELECT commentable_ref_id, COUNT(*) AS total
+         FROM community.comments
+        WHERE commentable_ref_id IN (?)
+          AND commentable_type_concept_id = ?
+          AND status_concept_id <> ?
+        GROUP BY commentable_ref_id`,
+      [postIds, COMM.CONTENT_TYPE_POST, COMM.MODERATION_REMOVED],
+      'all',
+    );
+    for (const fila of comentarios) {
+      asegurar(fila.commentable_ref_id).commentCount = Number(fila.total);
+    }
+
+    return salida;
+  }
+
+  /**
+   * Si un archivo es una imagen adjunta a una publicación pública de una
+   * vitrina publicada. Es la otra mitad de `PublicProfilesRepository.isPublicMedia`:
+   * la primera cubre el avatar y la portada del perfil; ésta, las fotos que van
+   * dentro de las publicaciones que ese perfil dejó a la vista de todos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fileId - El archivo a comprobar.
+   */
+  async isPublicPostMedia(em: EntityManager, fileId: string): Promise<boolean> {
+    const filas = await em.getConnection().execute<{ uno: number }[]>(
+      `SELECT 1 AS uno
+         FROM community.post_media pm
+         JOIN community.social_posts sp ON sp.id = pm.post_id
+         JOIN community.public_profiles pp ON pp.id = sp.author_public_profile_id
+        WHERE pm.file_id = ?
+          AND pm.media_role_concept_id = ?
+          AND sp.visibility_concept_id = ?
+          AND sp.publication_status_concept_id = ?
+          AND sp.moderation_status_concept_id <> ?
+          AND pp.visibility_concept_id = ?
+          AND pp.status_concept_id = ?
+        LIMIT 1`,
+      [
+        fileId,
+        COMM.MEDIA_ROLE_IMAGE,
+        COMM.POST_VISIBILITY_PUBLIC,
+        COMM.PUBLICATION_PUBLISHED,
+        COMM.MODERATION_REMOVED,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ],
+      'all',
+    );
+    return filas.length > 0;
+  }
+
   /** Cuántas reseñas publicadas tiene un perfil (para la ficha). */
   async countPublishedReviews(
     em: EntityManager,
