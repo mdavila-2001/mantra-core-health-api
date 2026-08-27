@@ -3,7 +3,9 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import type { PublicProfiles, VerifiedBadges } from '../entities';
-import { PublicSearchRepository } from '../repositories';
+import { PublicProfilesRepository, PublicSearchRepository } from '../repositories';
+import { FileUploadService } from '../../common/services';
+import type { FileContentDto } from '../../common/dto';
 import type {
   ProfileAffiliation,
   ProfileLocation,
@@ -162,12 +164,38 @@ export class CommunityPublicService {
   constructor(
     private readonly em: EntityManager,
     private readonly repo: PublicSearchRepository,
+    private readonly profiles: PublicProfilesRepository,
+    private readonly files: FileUploadService,
     private readonly searchIndex: SearchIndexService,
     private readonly verification: CommunityVerificationService,
     private readonly stats: CommunityProfileStatsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityPublicService.name);
+  }
+
+  /**
+   * Sirve una imagen de la superficie pública: el avatar o la portada de una
+   * vitrina publicada, o una foto adjunta a una de sus publicaciones.
+   *
+   * No hay actor que demuestre nada —es una lectura anónima—, así que lo que
+   * autoriza es qué **es** el archivo. Un id que no pasa ninguna de las dos
+   * puertas devuelve el mismo 404 que uno inexistente: a quien prueba ids al
+   * azar no se le confirma cuáles corresponden a algo real.
+   *
+   * @param fileId - Identificador del archivo pedido.
+   * @returns Bytes y tipo MIME para servir por HTTP.
+   * @throws ResourceNotFoundException si el archivo no está colgado de nada público.
+   */
+  async getPublicMedia(fileId: string): Promise<FileContentDto> {
+    const em = this.em.fork();
+    const permitido =
+      (await this.profiles.isPublicMedia(em, fileId)) ||
+      (await this.repo.isPublicPostMedia(em, fileId));
+    if (!permitido) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+    }
+    return this.files.downloadPublicMedia(fileId);
   }
 
   /**
@@ -300,6 +328,13 @@ export class CommunityPublicService {
         ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
         : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
     ]);
+    // La interacción de cada publicación: sus imágenes, y cuántas reacciones y
+    // comentarios lleva. Un solo viaje para todo el lote.
+    const engagement = await this.repo.engagementByPost(
+      em,
+      posts.map((post) => post.id),
+    );
+
     const rating = señales.ratings.get(profile.id);
     const badge = this.verification.readBadge(
       profile,
@@ -335,14 +370,19 @@ export class CommunityPublicService {
       verifiedBadge: badge,
       hasPublishedAgenda: agenda?.hasAgenda ?? false,
       nextAvailableDate: agenda?.nextAvailableDate ?? null,
-      posts: posts.map((post) => ({
-        id: post.id,
-        bodyText: post.bodyText,
-        publishedAt: (post.publishedAt ?? post.createdAt).toISOString(),
-        mediaUrls: [],
-        reactionCount: 0,
-        commentCount: 0,
-      })),
+      posts: posts.map((post) => {
+        const extra = engagement.get(post.id);
+        return {
+          id: post.id,
+          bodyText: post.bodyText,
+          publishedAt: (post.publishedAt ?? post.createdAt).toISOString(),
+          mediaUrls: (extra?.imageFileIds ?? [])
+            .map((fileId) => this.fileUrl(fileId))
+            .filter((url): url is string => url !== null),
+          reactionCount: extra?.reactionCount ?? 0,
+          commentCount: extra?.commentCount ?? 0,
+        };
+      }),
       updatedAt: profile.updatedAt.toISOString(),
     };
   }

@@ -70,6 +70,11 @@ import {
     FilesRepository,
     FileVersionsRepository,
     AttachableFileService,
+    // La superficie pública de `community` sirve el avatar de una vitrina y las
+    // imágenes de sus publicaciones por `GET /public/media/:id`, y para eso
+    // necesita `downloadPublicMedia` —que autoriza por lo que el archivo es, no
+    // por quién lo pide—.
+    FileUploadService,
   ],
 })
 export class CommonModule {}
