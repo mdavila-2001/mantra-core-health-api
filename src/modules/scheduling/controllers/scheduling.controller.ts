@@ -1,4 +1,5 @@
 import {
+  Delete,
   Body,
   Controller,
   Get,
@@ -285,6 +286,30 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ExceptionResponseDto> {
     return this.catalogService.createException(id, dto, actor);
+  }
+
+  /**
+   * Elimina una excepción de disponibilidad (el tiempo ocupado de AG-3).
+   *
+   * Borrar NO resucita los cupos que la excepción bloqueó: se regeneran con la
+   * plantilla si corresponde. Es la semántica menos sorprendente y está
+   * documentada en el servicio.
+   */
+  @Delete('exceptions/:id')
+  // Mismo alcance que el POST hermano: el servicio verifica que el recurso de
+  // la excepción sea del actor (`assertRecursoDelActor`).
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Eliminar una excepción de disponibilidad',
+    description:
+      'Los cupos que la excepción bloqueó siguen bloqueados; se regeneran con la plantilla.',
+  })
+  removeException(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.catalogService.removeException(id, actor);
   }
 
   /** UC-41-05. */
