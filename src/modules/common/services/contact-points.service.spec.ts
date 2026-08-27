@@ -27,7 +27,13 @@ describe('ContactPointsService', () => {
    */
   function build() {
     const { em, tx } = createEmMock();
-    const repo = { findById: fn(), create: fn(), findVigentesByOwner: fn() };
+    const repo = {
+      findById: fn(),
+      create: fn(),
+      findVigentesByOwner: fn(),
+      findVigenteByOwnerAndSystem: fn(),
+      closeVigente: fn(),
+    };
     const service = new ContactPointsService(
       em as never,
       repo,

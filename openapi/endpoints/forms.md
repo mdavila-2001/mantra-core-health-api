@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `forms`
 
-Referencia exhaustiva de 18 operación(es) del módulo `forms`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 21 operación(es) del módulo `forms`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `forms-assignments`, `forms-definition-sets`, `forms-fields`, `forms-instances`, `forms-values`
-- **Controladores:** `FormsAssignmentsController`, `FormsDefinitionSetsController`, `FormsFieldsController`, `FormsInstancesController`, `FormsValuesController`
+- **Etiquetas OpenAPI:** `forms-assignments`, `forms-definition-sets`, `forms-fields`, `forms-instances`, `forms-me`, `forms-values`
+- **Controladores:** `FormsAssignmentsController`, `FormsDefinitionSetsController`, `FormsFieldsController`, `FormsInstancesController`, `FormsMeController`, `FormsValuesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -13,22 +13,25 @@ Referencia exhaustiva de 18 operación(es) del módulo `forms`, derivada del con
 
 1. [GET /forms/assignments](#1-get-forms-assignments) — Listar asignaciones de campo (globales y del tenant)
 2. [POST /forms/assignments](#2-post-forms-assignments) — Asignar campos a un target con política de extensión
-3. [GET /forms/definition-sets](#3-get-forms-definition-sets) — Listar los sets de definiciones visibles
-4. [POST /forms/definition-sets](#4-post-forms-definition-sets) — Definir un set de campos dinámicos y su versión inicial
-5. [GET /forms/definition-sets/{id}](#5-get-forms-definition-sets-id) — Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones
-6. [POST /forms/definition-sets/{id}/migrations/{migrationId}/run](#6-post-forms-definition-sets-id-migrations-migrationid-run) — Migrar valores entre versiones de schema
-7. [POST /forms/definition-sets/{id}/versions/{ver}/publish](#7-post-forms-definition-sets-id-versions-ver-publish) — Componer miembros del set y publicar la versión
-8. [POST /forms/field-definitions](#8-post-forms-field-definitions) — Declarar una definición de campo con reglas de validación
-9. [POST /forms/fields/{id}/access-rules](#9-post-forms-fields-id-access-rules) — Definir reglas de acceso y enmascarado por campo
-10. [POST /forms/fields/{id}/dependencies](#10-post-forms-fields-id-dependencies) — Definir dependencias condicionales entre campos
-11. [PUT /forms/fields/{id}/localizations/{lang}](#11-put-forms-fields-id-localizations-lang) — Localizar (i18n) una definición de campo
-12. [GET /forms/instances](#12-get-forms-instances) — Listar las instancias de formulario de un encuentro
-13. [POST /forms/instances](#13-post-forms-instances) — Abrir una instancia de formulario para un recurso
-14. [GET /forms/instances/{id}](#14-get-forms-instances-id) — Leer una instancia con sus valores vigentes, por tipo resuelto
-15. [POST /forms/instances/{id}/close](#15-post-forms-instances-id-close) — Cerrar formulario y proyectar vista de recurso
-16. [POST /forms/instances/{id}/values](#16-post-forms-instances-id-values) — Capturar valores de formulario (value[x] exclusivo)
-17. [PATCH /forms/values/{id}](#17-patch-forms-values-id) — Corregir valor con supersede y snapshot inmutable
-18. [POST /forms/values/import](#18-post-forms-values-import) — Registrar procedencia de valores importados (batch ETL)
+3. [GET /forms/assignments/budget](#3-get-forms-assignments-budget) — Presupuesto de extensión del target para el tenant actual
+4. [GET /forms/definition-sets](#4-get-forms-definition-sets) — Listar los sets de definiciones visibles
+5. [POST /forms/definition-sets](#5-post-forms-definition-sets) — Definir un set de campos dinámicos y su versión inicial
+6. [GET /forms/definition-sets/{id}](#6-get-forms-definition-sets-id) — Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones
+7. [POST /forms/definition-sets/{id}/migrations/{migrationId}/run](#7-post-forms-definition-sets-id-migrations-migrationid-run) — Migrar valores entre versiones de schema
+8. [POST /forms/definition-sets/{id}/versions/{ver}/publish](#8-post-forms-definition-sets-id-versions-ver-publish) — Componer miembros del set y publicar la versión
+9. [POST /forms/field-definitions](#9-post-forms-field-definitions) — Declarar una definición de campo con reglas de validación
+10. [POST /forms/fields/{id}/access-rules](#10-post-forms-fields-id-access-rules) — Definir reglas de acceso y enmascarado por campo
+11. [POST /forms/fields/{id}/dependencies](#11-post-forms-fields-id-dependencies) — Definir dependencias condicionales entre campos
+12. [PUT /forms/fields/{id}/localizations/{lang}](#12-put-forms-fields-id-localizations-lang) — Localizar (i18n) una definición de campo
+13. [GET /forms/instances](#13-get-forms-instances) — Listar las instancias de formulario de un encuentro
+14. [POST /forms/instances](#14-post-forms-instances) — Abrir una instancia de formulario para un recurso
+15. [GET /forms/instances/{id}](#15-get-forms-instances-id) — Leer una instancia con sus valores vigentes, por tipo resuelto
+16. [POST /forms/instances/{id}/close](#16-post-forms-instances-id-close) — Cerrar formulario y proyectar vista de recurso
+17. [POST /forms/instances/{id}/values](#17-post-forms-instances-id-values) — Capturar valores de formulario (value[x] exclusivo)
+18. [GET /forms/me/instances](#18-get-forms-me-instances) — Ver mis formularios clínicos
+19. [GET /forms/me/instances/{id}](#19-get-forms-me-instances-id) — Leer un formulario propio con sus respuestas
+20. [PATCH /forms/values/{id}](#20-patch-forms-values-id) — Corregir valor con supersede y snapshot inmutable
+21. [POST /forms/values/import](#21-post-forms-values-import) — Registrar procedencia de valores importados (batch ETL)
 
 ---
 
@@ -232,7 +235,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -296,7 +299,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo se pueden asignar campos dentro de la propia organización | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 403 | `FORBIDDEN` | Este formulario no admite campos propios: no tiene política de extensión activa | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 403 | `FORBIDDEN` | La política de este formulario no permite campos del tenant | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
 | 404 | `NOT_FOUND` | Campo no encontrado | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Se excedió el presupuesto de campos del target | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
@@ -317,7 +323,120 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /forms/definition-sets
+## 3. GET /forms/assignments/budget
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-assignments`
+- **Nombre:** Presupuesto de extensión del target para el tenant actual
+- **Operation ID:** `FormsAssignmentsController_getBudget`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsAssignmentsController.getBudget](../../src/modules/forms/controllers/forms-assignments.controller.ts)
+
+### Descripción de negocio
+
+Presupuesto de extensión del target para el tenant actual. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cuánto puede extender el tenant este target, antes de escribir nada. Va acá y no en un controlador propio porque es la misma regla que aplica el `POST` de al lado; separarlas es lo que hace que una diga que sí y la otra que no.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /forms/assignments/budget` en `FormsAssignmentsController_getBudget`. El controlador delega en `FormsReadService.getExtensionBudget`. No recibe body. El tipo de retorno estático es `Promise<ExtensionBudgetResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `targetResourceConceptId` | query | Sí | `string` | Sin restricción adicional declarada | Target cuyo presupuesto se consulta | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /forms/assignments/budget?targetResourceConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /forms/assignments/budget?targetResourceConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ExtensionBudgetResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExtensionBudgetResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "targetResourceConceptId": "00000000-0000-4000-8000-000000000001",
+  "allowTenantFields": true,
+  "maximumFields": 1,
+  "used": 1,
+  "remaining": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `targetResourceConceptId` | Sí | `string` | formato `uuid` | Target sobre el que se consultó el presupuesto. | `00000000-0000-4000-8000-000000000001` |
+| `allowTenantFields` | Sí | `boolean` | Sin restricción adicional declarada | ¿La política deja que la organización cuelgue campos propios? Sin política activa es false | `true` |
+| `maximumFields` | No | `number` | Sin restricción adicional declarada | Tope de la política; ausente significa sin tope declarado | `1` |
+| `used` | Sí | `number` | Sin restricción adicional declarada | Campos activos que el tenant ya colgó | `1` |
+| `remaining` | No | `number` | Sin restricción adicional declarada | Campos que quedan; ausente cuando no hay tope declarado | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/assignments/budget"
+}
+```
+
+---
+
+## 4. GET /forms/definition-sets
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -445,7 +564,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /forms/definition-sets
+## 5. POST /forms/definition-sets
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -581,7 +700,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /forms/definition-sets/{id}
+## 6. GET /forms/definition-sets/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -830,7 +949,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /forms/definition-sets/{id}/migrations/{migrationId}/run
+## 7. POST /forms/definition-sets/{id}/migrations/{migrationId}/run
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -973,7 +1092,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /forms/definition-sets/{id}/versions/{ver}/publish
+## 8. POST /forms/definition-sets/{id}/versions/{ver}/publish
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -1115,7 +1234,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /forms/field-definitions
+## 9. POST /forms/field-definitions
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1269,7 +1388,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /forms/fields/{id}/access-rules
+## 10. POST /forms/fields/{id}/access-rules
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1405,7 +1524,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /forms/fields/{id}/dependencies
+## 11. POST /forms/fields/{id}/dependencies
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1543,7 +1662,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PUT /forms/fields/{id}/localizations/{lang}
+## 12. PUT /forms/fields/{id}/localizations/{lang}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1672,7 +1791,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /forms/instances
+## 13. GET /forms/instances
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -1802,7 +1921,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /forms/instances
+## 14. POST /forms/instances
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -1934,7 +2053,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /forms/instances/{id}
+## 15. GET /forms/instances/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2010,6 +2129,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "id": "00000000-0000-4000-8000-000000000001",
       "fieldId": "00000000-0000-4000-8000-000000000001",
       "dataType": "valor-ejemplo",
+      "fieldName": "Nombre de ejemplo",
       "value": {
         "clave": "valor"
       },
@@ -2028,10 +2148,11 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `values` | Sí | `array<FieldValueItemDto>` | Sin restricción adicional declarada | Valor de values mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","dataType":"valor-ejemplo","value":{"clave":"valor"},"unitConceptId":"00000000-0000-4000-8000-000000000001","valueStatusConceptId":"00000000-0000-4000-8000-000000000001","valueVersion":1,"ordinal":1,"effectiveFrom":"2026-07-31T12:00:00.000Z","masked":true}]` |
+| `values` | Sí | `array<FieldValueItemDto>` | Sin restricción adicional declarada | Valor de values mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","dataType":"valor-ejemplo","fieldName":"Nombre de ejemplo","value":{"clave":"valor"},"unitConceptId":"00000000-0000-4000-8000-000000000001","valueStatusConceptId":"00000000-0000-4000-8000-000000000001","valueVersion":1,"ordinal":1,"effectiveFrom":"2026-07-31T12:00:00.000Z","masked":true}]` |
 | `values[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `values[].fieldId` | Sí | `string` | formato `uuid` | Identificador asociado a field. | `00000000-0000-4000-8000-000000000001` |
 | `values[].dataType` | No | `string` | Sin restricción adicional declarada | Tipo técnico del campo, si su definición sigue existiendo. Decide cómo re-dibujar el valor | `valor-ejemplo` |
+| `values[].fieldName` | No | `string` | Sin restricción adicional declarada | Nombre del campo, si su definición sigue existiendo. Es la etiqueta con que una pantalla sin acceso a las plantillas puede re-pintar el valor | `Nombre de ejemplo` |
 | `values[].value` | No | `object` | Sin restricción adicional declarada | El valor único, resuelto de la columna value[x] que su tipo determina. null cuando el campo está enmascarado | `{"clave":"valor"}` |
 | `values[].unitConceptId` | No | `string` | formato `uuid` | Identificador asociado a unit concept. | `00000000-0000-4000-8000-000000000001` |
 | `values[].valueStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a value status concept. | `00000000-0000-4000-8000-000000000001` |
@@ -2068,7 +2189,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /forms/instances/{id}/close
+## 16. POST /forms/instances/{id}/close
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2178,7 +2299,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /forms/instances/{id}/values
+## 17. POST /forms/instances/{id}/values
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2326,7 +2447,268 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. PATCH /forms/values/{id}
+## 18. GET /forms/me/instances
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-me`
+- **Nombre:** Ver mis formularios clínicos
+- **Operation ID:** `FormsMeController_listMyInstances`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsMeController.listMyInstances](../../src/modules/forms/controllers/forms-me.controller.ts)
+
+### Descripción de negocio
+
+Ver mis formularios clínicos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Los formularios respondidos del paciente de la sesión.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /forms/me/instances` en `FormsMeController_listMyInstances`. El controlador delega en `FormsReadService.listMyInstances`. No recibe body. El tipo de retorno estático es `Promise<MyFormInstanceListResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope del listado (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /forms/me/instances HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /forms/me/instances?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyFormInstanceListResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyFormInstanceListResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "resourceId": "00000000-0000-4000-8000-000000000001",
+      "resourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "schemaVersion": 1,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "closedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "limit": 1,
+  "truncated": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<FormInstanceItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","resourceTypeConceptId":"00000000-0000-4000-8000-000000000001","schemaVersion":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","closedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].resourceId` | Sí | `string` | formato `uuid` | Identificador asociado a resource. | `00000000-0000-4000-8000-000000000001` |
+| `items[].resourceTypeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a resource type concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].schemaVersion` | Sí | `number` | Sin restricción adicional declarada | Valor de schema version mantenido por la instancia. | `1` |
+| `items[].stateConceptId` | No | `string` | formato `uuid` | Identificador asociado a state concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].closedAt` | No | `string` | formato `date-time` | Valor de closed at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado al listado | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | true si quedaron instancias fuera del tope. Se declara, no se calla | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil de paciente asociado | Excepción explícita en src/modules/forms/services/forms-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/me/instances"
+}
+```
+
+---
+
+## 19. GET /forms/me/instances/{id}
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-me`
+- **Nombre:** Leer un formulario propio con sus respuestas
+- **Operation ID:** `FormsMeController_getMyInstance`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsMeController.getMyInstance](../../src/modules/forms/controllers/forms-me.controller.ts)
+
+### Descripción de negocio
+
+Leer un formulario propio con sus respuestas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Un formulario propio, con sus valores vigentes.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /forms/me/instances/{id}` en `FormsMeController_getMyInstance`. El controlador delega en `FormsReadService.getMyInstance`. No recibe body. El tipo de retorno estático es `Promise<FormInstanceDetailResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /forms/me/instances/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /forms/me/instances/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<FormInstanceDetailResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FormInstanceDetailResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "values": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fieldId": "00000000-0000-4000-8000-000000000001",
+      "dataType": "valor-ejemplo",
+      "fieldName": "Nombre de ejemplo",
+      "value": {
+        "clave": "valor"
+      },
+      "unitConceptId": "00000000-0000-4000-8000-000000000001",
+      "valueStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "valueVersion": 1,
+      "ordinal": 1,
+      "effectiveFrom": "2026-07-31T12:00:00.000Z",
+      "masked": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `values` | Sí | `array<FieldValueItemDto>` | Sin restricción adicional declarada | Valor de values mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","dataType":"valor-ejemplo","fieldName":"Nombre de ejemplo","value":{"clave":"valor"},"unitConceptId":"00000000-0000-4000-8000-000000000001","valueStatusConceptId":"00000000-0000-4000-8000-000000000001","valueVersion":1,"ordinal":1,"effectiveFrom":"2026-07-31T12:00:00.000Z","masked":true}]` |
+| `values[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `values[].fieldId` | Sí | `string` | formato `uuid` | Identificador asociado a field. | `00000000-0000-4000-8000-000000000001` |
+| `values[].dataType` | No | `string` | Sin restricción adicional declarada | Tipo técnico del campo, si su definición sigue existiendo. Decide cómo re-dibujar el valor | `valor-ejemplo` |
+| `values[].fieldName` | No | `string` | Sin restricción adicional declarada | Nombre del campo, si su definición sigue existiendo. Es la etiqueta con que una pantalla sin acceso a las plantillas puede re-pintar el valor | `Nombre de ejemplo` |
+| `values[].value` | No | `object` | Sin restricción adicional declarada | El valor único, resuelto de la columna value[x] que su tipo determina. null cuando el campo está enmascarado | `{"clave":"valor"}` |
+| `values[].unitConceptId` | No | `string` | formato `uuid` | Identificador asociado a unit concept. | `00000000-0000-4000-8000-000000000001` |
+| `values[].valueStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a value status concept. | `00000000-0000-4000-8000-000000000001` |
+| `values[].valueVersion` | No | `number` | Sin restricción adicional declarada | Valor de value version mantenido por la instancia. | `1` |
+| `values[].ordinal` | Sí | `number` | Sin restricción adicional declarada | Valor de ordinal mantenido por la instancia. | `1` |
+| `values[].effectiveFrom` | No | `string` | formato `date-time` | Valor de effective from mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `values[].masked` | Sí | `boolean` | Sin restricción adicional declarada | true si el campo tiene una regla de acceso activa que hoy no puede evaluarse: el valor no se expone (deny-by-default) | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Instancia no encontrada | Excepción explícita en src/modules/forms/services/forms-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil de paciente asociado | Excepción explícita en src/modules/forms/services/forms-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/me/instances/{id}"
+}
+```
+
+---
+
+## 20. PATCH /forms/values/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-values`
@@ -2456,7 +2838,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /forms/values/import
+## 21. POST /forms/values/import
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-values`

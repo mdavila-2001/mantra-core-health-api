@@ -52,9 +52,16 @@ asignación de especialistas; más la reproyección del perfil público.
 
 ## Reglas de negocio
 
-- **Unicidad**: `(tenant_id, code)` por unidad; `(diagnostic_unit_id, study_code)`
-  por oferta; `(diagnostic_unit_id, code)` por cronograma; `(site, serial_number)`
-  por equipo. Duplicado → `409 Conflict`.
+- **Unicidad**: el modelo declara para la unidad **dos restricciones separadas** —
+  `tenant_id` a solas (una unidad de diagnóstico por organización) y `code` a solas
+  (código único en toda la plataforma)—, no una compuesta `(tenant_id, code)`. Las
+  demás las hace valer el servicio: `(diagnostic_unit_id, study_code)` por oferta;
+  `(diagnostic_unit_id, code)` por cronograma; `(site, serial_number)` por equipo.
+  Duplicado → `409 Conflict`.
+  > El chequeo de alta busca el código **dentro del tenant**, que es más permisivo
+  > que lo que declara el modelo: la segunda unidad de una organización, o un código
+  > repetido entre organizaciones, lo rechaza Postgres y no el servicio. Anotado el
+  > 2026-08-19; alinear es cambio de comportamiento y va por su propia tarjeta.
 - **Verify-and-publish** exige ≥1 sitio ACTIVO; si no, `422 Precondition Failed`.
   Verifica especialidades y acreditaciones vigentes y asigna `public_profile_id`.
 - **Precios append-only**: nunca se reescribe un importe publicado. Una versión

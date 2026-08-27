@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `diagnostics`
 
-Referencia exhaustiva de 26 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 27 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reports`, `diagnostics-specimens`
 - **Controladores:** `DiagnosticsImagingController`, `DiagnosticsLabController`, `DiagnosticsOrdersController`, `DiagnosticsPatientResultsController`, `DiagnosticsReportsController`, `DiagnosticsSpecimensController`
@@ -16,27 +16,28 @@ Referencia exhaustiva de 26 operación(es) del módulo `diagnostics`, derivada d
 3. [GET /diagnostic-results/me/{reportId}/shares](#3-get-diagnostic-results-me-reportid-shares) — Con quién está compartido un resultado
 4. [POST /diagnostic-results/me/{reportId}/shares](#4-post-diagnostic-results-me-reportid-shares) — Compartir temporalmente un resultado con un profesional
 5. [POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke](#5-post-diagnostic-results-me-reportid-shares-shareid-revoke) — Dejar de compartir un resultado
-6. [POST /diagnostics/accessions](#6-post-diagnostics-accessions) — Acesionar especímenes recibidos en laboratorio
-7. [POST /diagnostics/analyzer-runs](#7-post-diagnostics-analyzer-runs) — Abrir una corrida de analizador (soporte para ingesta)
-8. [POST /diagnostics/analyzer-runs/{id}/messages](#8-post-diagnostics-analyzer-runs-id-messages) — Ingerir mensaje de resultado de analizador (LIS/HL7/ASTM)
-9. [POST /diagnostics/clinical-media](#9-post-diagnostics-clinical-media) — Adjuntar media clínica / imagen al chart
-10. [POST /diagnostics/containers/{id}/custody-events](#10-post-diagnostics-containers-id-custody-events) — Registrar cadena de custodia / traslado de contenedor
-11. [POST /diagnostics/critical-results](#11-post-diagnostics-critical-results) — Detectar y notificar un resultado crítico
-12. [POST /diagnostics/critical-results/{id}/acknowledge](#12-post-diagnostics-critical-results-id-acknowledge) — Acusar recibo / escalar notificación crítica
-13. [POST /diagnostics/data-quality-events](#13-post-diagnostics-data-quality-events) — Registrar evento de calidad de datos + enlazar provenance
-14. [POST /diagnostics/imaging-endpoints](#14-post-diagnostics-imaging-endpoints) — Registrar un endpoint DICOM (soporte para STOW-RS)
-15. [POST /diagnostics/imaging-studies/{id}/dose-events](#15-post-diagnostics-imaging-studies-id-dose-events) — Registrar evento de dosis de radiación
-16. [GET /diagnostics/patients/{patientProfileId}/imaging-studies](#16-get-diagnostics-patients-patientprofileid-imaging-studies) — Listar los estudios de imagen del paciente
-17. [GET /diagnostics/patients/{patientProfileId}/orders](#17-get-diagnostics-patients-patientprofileid-orders) — Órdenes de laboratorio e imagenología del paciente, con sus informes
-18. [POST /diagnostics/reports/{reportId}/versions](#18-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
-19. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#19-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
-20. [POST /diagnostics/results/{observationId}/verifications](#20-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
-21. [POST /diagnostics/specimens](#21-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
-22. [POST /diagnostics/specimens/{id}/containers](#22-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
-23. [POST /diagnostics/specimens/{id}/rejection](#23-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
-24. [GET /diagnostics/work-orders](#24-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
-25. [POST /diagnostics/work-orders](#25-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
-26. [POST /dicomweb/studies](#26-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
+6. [GET /diagnostic-results/me/orders](#6-get-diagnostic-results-me-orders) — Órdenes de laboratorio e imagen del titular
+7. [POST /diagnostics/accessions](#7-post-diagnostics-accessions) — Acesionar especímenes recibidos en laboratorio
+8. [POST /diagnostics/analyzer-runs](#8-post-diagnostics-analyzer-runs) — Abrir una corrida de analizador (soporte para ingesta)
+9. [POST /diagnostics/analyzer-runs/{id}/messages](#9-post-diagnostics-analyzer-runs-id-messages) — Ingerir mensaje de resultado de analizador (LIS/HL7/ASTM)
+10. [POST /diagnostics/clinical-media](#10-post-diagnostics-clinical-media) — Adjuntar media clínica / imagen al chart
+11. [POST /diagnostics/containers/{id}/custody-events](#11-post-diagnostics-containers-id-custody-events) — Registrar cadena de custodia / traslado de contenedor
+12. [POST /diagnostics/critical-results](#12-post-diagnostics-critical-results) — Detectar y notificar un resultado crítico
+13. [POST /diagnostics/critical-results/{id}/acknowledge](#13-post-diagnostics-critical-results-id-acknowledge) — Acusar recibo / escalar notificación crítica
+14. [POST /diagnostics/data-quality-events](#14-post-diagnostics-data-quality-events) — Registrar evento de calidad de datos + enlazar provenance
+15. [POST /diagnostics/imaging-endpoints](#15-post-diagnostics-imaging-endpoints) — Registrar un endpoint DICOM (soporte para STOW-RS)
+16. [POST /diagnostics/imaging-studies/{id}/dose-events](#16-post-diagnostics-imaging-studies-id-dose-events) — Registrar evento de dosis de radiación
+17. [GET /diagnostics/patients/{patientProfileId}/imaging-studies](#17-get-diagnostics-patients-patientprofileid-imaging-studies) — Listar los estudios de imagen del paciente
+18. [GET /diagnostics/patients/{patientProfileId}/orders](#18-get-diagnostics-patients-patientprofileid-orders) — Órdenes de laboratorio e imagenología del paciente, con sus informes
+19. [POST /diagnostics/reports/{reportId}/versions](#19-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
+20. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#20-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
+21. [POST /diagnostics/results/{observationId}/verifications](#21-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
+22. [POST /diagnostics/specimens](#22-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
+23. [POST /diagnostics/specimens/{id}/containers](#23-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
+24. [POST /diagnostics/specimens/{id}/rejection](#24-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
+25. [GET /diagnostics/work-orders](#25-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
+26. [POST /diagnostics/work-orders](#26-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
+27. [POST /dicomweb/studies](#27-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
 
 ---
 
@@ -748,7 +749,143 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /diagnostics/accessions
+## 6. GET /diagnostic-results/me/orders
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-patient-results`
+- **Nombre:** Órdenes de laboratorio e imagen del titular
+- **Operation ID:** `DiagnosticsPatientResultsController_listOwnOrders`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsPatientResultsController.listOwnOrders](../../src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts)
+
+### Descripción de negocio
+
+El pedido del médico visto por quien tiene que cumplirlo: qué le pidieron, cómo prepararse y si ya hay resultado para abrir.
+
+Contexto declarado en el controlador: Las órdenes diagnósticas del titular. ## Va antes de `me/:reportId` a propósito Nest resuelve por orden de declaración. Debajo de la ruta con parámetro, `orders` entraría como `:reportId` y moriría en el `ParseUUIDPipe` con un 400 que además parece un error del cliente. No es estilo: moverla rompe el endpoint.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-results/me/orders` en `DiagnosticsPatientResultsController_listOwnOrders`. El controlador delega en `DiagnosticsPatientResultsService.listOwnOrders`. No recibe body. El tipo de retorno estático es `Promise<PatientOwnOrdersResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de órdenes (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-results/me/orders HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-results/me/orders?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientOwnOrdersResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "preparationInstructions": "valor-ejemplo",
+      "hasReleasedResult": true,
+      "reportId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "limit": 1,
+  "truncated": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente leído. | `00000000-0000-4000-8000-000000000001` |
+| `items` | Sí | `array<PatientOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","preparationInstructions":"valor-ejemplo","hasReleasedResult":true,"reportId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la orden. | `00000000-0000-4000-8000-000000000001` |
+| `items[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se pidió, si se pidió durante uno. | `00000000-0000-4000-8000-000000000001` |
+| `items[].codeConceptId` | Sí | `string` | formato `uuid` | Qué se pidió (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].categoryConceptId` | No | `string` | formato `uuid` | Laboratorio o imagenología (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la orden (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].priorityConceptId` | No | `string` | formato `uuid` | Prioridad (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se pidió. | `2026-07-31T12:00:00.000Z` |
+| `items[].preparationInstructions` | No | `string` | Sin restricción adicional declarada | Cómo prepararse: ayunas, horarios, qué llevar. Sale del catálogo de estudios (`diagnostic_study_offerings`), emparejado por concepto. Ausente cuando ningún centro publicó preparación para ese estudio — que es distinto de «no hay que prepararse», y por eso la pantalla no debe inventar un texto tranquilizador cuando falta. | `valor-ejemplo` |
+| `items[].hasReleasedResult` | Sí | `boolean` | Sin restricción adicional declarada | Ya hay un resultado liberado y visible para esta orden. | `true` |
+| `items[].reportId` | No | `string` | formato `uuid` | El informe a abrir, cuando es verdadero. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado. | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | La lista quedó recortada por el tope. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-results/me/orders"
+}
+```
+
+---
+
+## 7. POST /diagnostics/accessions
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -890,7 +1027,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /diagnostics/analyzer-runs
+## 8. POST /diagnostics/analyzer-runs
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -1022,7 +1159,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /diagnostics/analyzer-runs/{id}/messages
+## 9. POST /diagnostics/analyzer-runs/{id}/messages
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -1159,7 +1296,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /diagnostics/clinical-media
+## 10. POST /diagnostics/clinical-media
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -1316,7 +1453,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /diagnostics/containers/{id}/custody-events
+## 11. POST /diagnostics/containers/{id}/custody-events
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -1458,7 +1595,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /diagnostics/critical-results
+## 12. POST /diagnostics/critical-results
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -1594,7 +1731,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /diagnostics/critical-results/{id}/acknowledge
+## 13. POST /diagnostics/critical-results/{id}/acknowledge
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -1723,7 +1860,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /diagnostics/data-quality-events
+## 14. POST /diagnostics/data-quality-events
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -1862,7 +1999,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /diagnostics/imaging-endpoints
+## 15. POST /diagnostics/imaging-endpoints
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -1990,7 +2127,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /diagnostics/imaging-studies/{id}/dose-events
+## 16. POST /diagnostics/imaging-studies/{id}/dose-events
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -2128,7 +2265,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /diagnostics/patients/{patientProfileId}/imaging-studies
+## 17. GET /diagnostics/patients/{patientProfileId}/imaging-studies
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -2241,7 +2378,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /diagnostics/patients/{patientProfileId}/orders
+## 18. GET /diagnostics/patients/{patientProfileId}/orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-orders`
@@ -2405,7 +2542,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /diagnostics/reports/{reportId}/versions
+## 19. POST /diagnostics/reports/{reportId}/versions
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -2562,7 +2699,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
+## 20. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -2693,7 +2830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /diagnostics/results/{observationId}/verifications
+## 21. POST /diagnostics/results/{observationId}/verifications
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -2830,7 +2967,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /diagnostics/specimens
+## 22. POST /diagnostics/specimens
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -2968,7 +3105,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /diagnostics/specimens/{id}/containers
+## 23. POST /diagnostics/specimens/{id}/containers
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -3102,7 +3239,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /diagnostics/specimens/{id}/rejection
+## 24. POST /diagnostics/specimens/{id}/rejection
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -3237,7 +3374,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /diagnostics/work-orders
+## 25. GET /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -3353,7 +3490,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /diagnostics/work-orders
+## 26. POST /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -3508,7 +3645,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /dicomweb/studies
+## 27. POST /dicomweb/studies
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`

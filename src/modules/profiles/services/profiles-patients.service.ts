@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -10,7 +11,19 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { PROF } from '../profiles.concepts';
+import { findCurrentIdentityAssertionForPerson } from '../../identity_assurance/repositories/identity-assertions.repository';
+import {
+  AddressesRepository,
+  ContactPointsRepository,
+} from '../../common/repositories';
+import { createResidenceAddress } from '../../common/services/residence-address';
+import {
+  BIRTH_SEX_CODE_BY_CONCEPT,
+  BIRTH_SEX_CONCEPT_BY_CODE,
+  PROF,
+} from '../profiles.concepts';
+import { composePersonDisplayName } from '../person-name';
+import type { Persons, PatientProfiles } from '../entities';
 import {
   PersonsRepository,
   PersonProfilesRepository,
@@ -43,8 +56,165 @@ import {
   PatientSummaryResponseDto,
   SearchPatientsResponseDto,
   PatientDetailResponseDto,
+  OwnPatientProfileResponseDto,
+  UpdateOwnPatientProfileDto,
 } from '../dto';
 import { ProfileOwnershipService } from './profile-ownership.service';
+
+/**
+ * Deja fuera de la respuesta los campos sin valor.
+ *
+ * El contrato de las lecturas propias dice que lo opcional viaja **ausente, no
+ * `null`**, y hace falta traducir: el ORM hidrata una columna `NULL` como `null`,
+ * así que devolver la entidad tal cual pondría un `null` donde el contrato
+ * promete que no hay nada. La distinción importa: `null` se lee como «este dato
+ * está vacío» y la ausencia como «esta persona no lo declaró», y un formulario
+ * que los confunde pinta un campo borrado donde nunca hubo uno.
+ *
+ * @param respuesta - La respuesta armada, con sus huecos.
+ * @returns La misma respuesta sin las claves nulas ni indefinidas.
+ */
+function sinCamposAusentes<T extends object>(respuesta: T): T {
+  return Object.fromEntries(
+    Object.entries(respuesta).filter(
+      ([, valor]) => valor !== null && valor !== undefined,
+    ),
+  ) as T;
+}
+
+/**
+ * Normaliza un texto opcional que el titular puede querer dejar en blanco.
+ *
+ * `''` —y un texto de sólo espacios— significa «esto no lo tengo», no «tengo un
+ * dato vacío». La columna es nullable, así que la forma de decirlo es `NULL`:
+ * guardar la cadena vacía dejaría un valor que la lectura devolvería como `""`,
+ * indistinguible de un dato real y contrario a la convención del contrato —lo
+ * que no se declaró viaja ausente—. Además metería un espacio de más al
+ * recomponer el nombre visible.
+ *
+ * @param valor - Lo que llegó en el cuerpo.
+ * @returns El texto, o `undefined` para que la columna quede en `NULL`.
+ */
+function textoOpcional(valor: string): string | undefined {
+  return valor.trim() === '' ? undefined : valor;
+}
+
+/**
+ * Escribe la ocupación, que se declara de dos formas que no pueden convivir.
+ *
+ * La persona tiene una sola ocupación, y el modelo la guarda en dos columnas: el
+ * concepto del catálogo (`VS_BO_OCCUPATION`) para lo que está en la lista y el
+ * texto libre para lo que no. Dejar las dos con valor diría que tiene dos, y la
+ * lectura tendría que elegir una por su cuenta.
+ *
+ * La regla es la misma del alta: **el catálogo gana**. Declarar un concepto borra
+ * el texto libre —aunque venga en el mismo cuerpo—, y declarar un texto borra el
+ * concepto, porque escribir la ocupación a mano es decir que no está en la lista.
+ * Vaciar uno de los dos no toca al otro: es quitar lo que se declaró, no
+ * redeclararlo.
+ *
+ * @param person - La persona bajo edición, que se muta.
+ * @param dto - Los campos que llegaron en el cuerpo.
+ */
+function aplicarOcupacion(
+  person: Persons,
+  dto: UpdateOwnPatientProfileDto,
+): void {
+  const conceptoDeclarado = dto.occupationConceptId;
+
+  if (dto.occupationFreeText !== undefined) {
+    person.occupationFreeText = textoOpcional(dto.occupationFreeText);
+    // Sólo un texto con contenido desplaza al concepto: vaciarlo es quedarse sin
+    // texto, no negar la ocupación del catálogo. Y si el cuerpo también trae
+    // concepto, decide el bloque de abajo y éste sobra.
+    if (
+      person.occupationFreeText !== undefined &&
+      conceptoDeclarado === undefined
+    ) {
+      person.occupationConceptId = undefined;
+    }
+  }
+
+  if (conceptoDeclarado !== undefined) {
+    person.occupationConceptId = textoOpcional(conceptoDeclarado);
+    if (person.occupationConceptId !== undefined) {
+      person.occupationFreeText = undefined;
+    }
+  }
+}
+
+/** Las cuatro partes del nombre, que son las que recomponen `display_name`. */
+const PARTES_DEL_NOMBRE = [
+  'name',
+  'middleName',
+  'lastName',
+  'motherLastName',
+] as const satisfies readonly (keyof UpdateOwnPatientProfileDto)[];
+
+/**
+ * Los campos del cuerpo que se escriben en `profiles.persons`.
+ *
+ * Las partes del nombre salen de {@link PARTES_DEL_NOMBRE} en vez de repetirse:
+ * dos listas de campos acaban divergiendo, y la que se olvide de una hará que
+ * editar ese campo no marque la fila como modificada —o al revés—.
+ *
+ * El teléfono y el domicilio quedan **fuera** a propósito: no viven en esta
+ * tabla, y sus filas llevan su propia auditoría al crearse o cerrarse.
+ */
+const CAMPOS_DE_LA_PERSONA = [
+  ...PARTES_DEL_NOMBRE,
+  'birthDate',
+  'sexAtBirth',
+  'occupationConceptId',
+  'occupationFreeText',
+] as const satisfies readonly (keyof UpdateOwnPatientProfileDto)[];
+
+/**
+ * Si el cuerpo declara alguno de los campos indicados.
+ *
+ * Se pregunta por la **presencia** del campo y no por si el valor cambió: un
+ * `PATCH` que reenvía el mismo apellido sigue siendo una declaración de cómo se
+ * llama la persona.
+ *
+ * @param dto - Los campos que llegaron en el cuerpo.
+ * @param campos - Los campos por los que se pregunta.
+ * @returns `true` si el cuerpo trae al menos uno.
+ */
+function declaraAlguno(
+  dto: UpdateOwnPatientProfileDto,
+  campos: readonly (keyof UpdateOwnPatientProfileDto)[],
+): boolean {
+  return campos.some((campo) => dto[campo] !== undefined);
+}
+
+/**
+ * Si la edición toca alguna de las cuatro partes del nombre.
+ *
+ * Decide si hay que recomponer el nombre visible.
+ *
+ * @param dto - Los campos que llegaron en el cuerpo.
+ * @returns `true` si el cuerpo declara alguna parte del nombre.
+ */
+function cambiaAlgunaParteDelNombre(dto: UpdateOwnPatientProfileDto): boolean {
+  return declaraAlguno(dto, PARTES_DEL_NOMBRE);
+}
+
+/**
+ * Si la edición escribe algo en `profiles.persons`.
+ *
+ * Decide si la fila de la persona se marca como modificada. Un `PATCH` que no
+ * trae ninguno de estos campos —el cuerpo vacío, o uno que sólo cambia el
+ * teléfono o el domicilio— **no la toca**: mover `updated_at`,
+ * `updated_by_user_id` y `row_version` sin haber cambiado ni una columna
+ * convierte la auditoría en ruido y hace fallar por conflicto de versión a
+ * quien tuviera la fila leída.
+ *
+ * @param dto - Los campos que llegaron en el cuerpo.
+ * @returns `true` si el cuerpo declara algún campo de la persona.
+ */
+function cambiaLaPersona(dto: UpdateOwnPatientProfileDto): boolean {
+  return declaraAlguno(dto, CAMPOS_DE_LA_PERSONA);
+}
 
 /**
  * Casos de uso del ciclo de vida de personas y pacientes: alta (UC-05-01),
@@ -70,6 +240,8 @@ export class ProfilesPatientsService {
    * @param mergeEventsRepo - Valor de merge events repo requerido por la operación.
    * @param relatedPersonsRepo - Valor de related persons repo requerido por la operación.
    * @param portalProxiesRepo - Valor de portal proxies repo requerido por la operación.
+   * @param contactPointsRepo - Teléfono del paciente (`common.contact_points`).
+   * @param addressesRepo - Domicilio del paciente (`common.addresses`).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -82,6 +254,11 @@ export class ProfilesPatientsService {
     private readonly mergeEventsRepo: PatientMergeEventsRepository,
     private readonly relatedPersonsRepo: RelatedPersonsRepository,
     private readonly portalProxiesRepo: PatientPortalProxiesRepository,
+    // El teléfono y el domicilio del paciente no viven en `profiles`: son un
+    // punto de contacto y una dirección de `common`, y el módulo ya los exporta
+    // para que quien da de alta a la persona los escriba en su transacción.
+    private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly addressesRepo: AddressesRepository,
     private readonly ownership: ProfileOwnershipService,
     private readonly logger: PinoLogger,
   ) {
@@ -161,12 +338,16 @@ export class ProfilesPatientsService {
   }
 
   /**
-   * Resumen del propio paciente, tras la verificación de identidad.
+   * Resumen del propio paciente, verificada su identidad o no.
    *
-   * Es el ejemplo mínimo de una función que exige identidad probada (el guard
-   * `@RequiresVerifiedIdentity` la corta antes de llegar aquí): no es la ficha
-   * médica completa, es el patrón que seguirían los endpoints clínicos cuando se
-   * les aplique el mismo guard.
+   * Verificarse es un trámite posterior e independiente del alta, así que el
+   * titular ve desde el primer día lo que él mismo declaró al registrarse. Lo
+   * único que la verificación habilita es el **código de paciente**: mientras no
+   * haya aserción vigente, `patientCode` no viaja —ausente, no `null`— y
+   * `identityVerified` dice por qué. Es el servidor quien decide qué ve cada
+   * sesión; el cliente no oculta campos por su cuenta.
+   *
+   * No es la ficha médica: es filiación, nunca dato clínico.
    *
    * @param actor - Usuario autenticado.
    * @returns Datos básicos del paciente.
@@ -177,7 +358,233 @@ export class ProfilesPatientsService {
     actor: AuthenticatedUser,
   ): Promise<PatientSummaryResponseDto> {
     const em = this.em.fork();
+    const { person, patient } = await this.resolveOwnPatient(em, actor);
 
+    const identityVerified = Boolean(
+      await findCurrentIdentityAssertionForPerson(em, person.id),
+    );
+
+    return {
+      personId: person.id,
+      patientProfileId: patient.profileId,
+      identityVerified,
+      displayName: person.displayName,
+      birthDate: person.birthDate,
+      personStatus: person.personStatusConceptId,
+      // Ausente mientras no esté verificado: quien no puede verlo tampoco tiene
+      // que distinguir «no lo tiene» de «todavía no puede verlo».
+      ...(identityVerified ? { patientCode: patient.patientCode } : {}),
+    };
+  }
+
+  /**
+   * El propio perfil del paciente, con las partes del nombre y el contacto.
+   *
+   * Es la lectura que sostiene la pantalla de «mis datos»: {@link getOwnSummary}
+   * devuelve el nombre ya compuesto, y con eso un formulario no puede corregir un
+   * apellido —no hay forma de saber dónde termina uno y empieza el otro—. Acá
+   * viajan las cuatro partes, la fecha de nacimiento, el sexo al nacer como
+   * código, el teléfono vigente y el municipio del domicilio vigente: exactamente
+   * el conjunto que la persona declaró al registrarse y el mismo que puede
+   * editar con `PATCH`.
+   *
+   * No trae nada clínico ni de terceros: es filiación propia.
+   *
+   * @param actor - Usuario autenticado, que es también el sujeto.
+   * @returns El perfil propio, con los campos no declarados ausentes.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  async getOwnProfile(
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    const em = this.em.fork();
+    const { person, patient } = await this.resolveOwnPatient(em, actor);
+
+    // Las tres lecturas son independientes entre sí y ninguna depende del
+    // resultado de otra: encadenarlas sólo sumaría latencia.
+    const [assertion, telefono, domicilio] = await Promise.all([
+      findCurrentIdentityAssertionForPerson(em, person.id),
+      this.contactPointsRepo.findVigenteByOwnerAndSystem(
+        em,
+        person.id,
+        CONCEPTS.CONTACT_PHONE,
+      ),
+      this.addressesRepo.findVigenteByOwnerAndUse(
+        em,
+        person.id,
+        CONCEPTS.ADDR_USE_HOME,
+      ),
+    ]);
+    const identityVerified = Boolean(assertion);
+
+    return sinCamposAusentes({
+      personId: person.id,
+      patientProfileId: patient.profileId,
+      name: person.name,
+      middleName: person.middleName,
+      lastName: person.lastName,
+      motherLastName: person.motherLastName,
+      displayName: person.displayName,
+      birthDate: person.birthDate,
+      // El camino inverso del alta: la columna guarda el concepto y el
+      // formulario habla en códigos. Un concepto que no esté en el mapa —una
+      // fila anterior a este catálogo— llega ausente en vez de como un uuid
+      // suelto que el cliente no sabría interpretar.
+      sexAtBirth: person.sexAtBirthConceptId
+        ? BIRTH_SEX_CODE_BY_CONCEPT[person.sexAtBirthConceptId]
+        : undefined,
+      // Las dos formas de declarar la ocupación viajan juntas y sólo una tiene
+      // valor: el formulario no puede pintar el desplegable con el texto libre,
+      // y quien eligió del catálogo veía su ocupación vacía mientras acá sólo
+      // salía el texto.
+      occupationConceptId: person.occupationConceptId,
+      occupationFreeText: person.occupationFreeText,
+      phone: telefono?.value,
+      residenceMunicipalityConceptId: domicilio?.municipalityConceptId,
+      identityVerified,
+      // Mismo criterio que el resumen: ausente mientras no esté verificado.
+      ...(identityVerified ? { patientCode: patient.patientCode } : {}),
+    });
+  }
+
+  /**
+   * Edita los datos que el paciente dio al registrarse.
+   *
+   * ## El hueco que cierra
+   *
+   * El auto-registro escribía la filiación una sola vez y nadie podía volver a
+   * tocarla. Un apellido mal tipeado, un teléfono que cambió o una mudanza
+   * quedaban así para siempre, salvo que alguien escribiera en la base. El
+   * titular es quien mejor conoce estos datos y era el único que no podía
+   * corregirlos.
+   *
+   * ## Qué se toca y qué no
+   *
+   * El sujeto sale de la sesión —vía `person_account_links`, nunca de un claim
+   * del token—, así que no hay forma de editar el de otro. Y lo editable es lo
+   * que la persona **declara** sobre sí misma: nombre, nacimiento, sexo al
+   * nacer, ocupación, teléfono y municipio. El documento de identidad, el correo,
+   * la contraseña, el código de paciente y los estados quedan fuera: tienen su
+   * propio circuito, y moverlos por autoservicio convertiría el perfil en una
+   * declaración jurada de uno mismo.
+   *
+   * `PATCH`: lo que no viene no se toca. Un cuerpo vacío es válido y devuelve el
+   * perfil sin cambios.
+   *
+   * ## Por qué el teléfono y el domicilio no se pisan
+   *
+   * Porque son historia. Por el número anterior se llamó a esta persona y en la
+   * dirección anterior vivía: sobrescribir la fila dejaría al sistema afirmando
+   * que nunca existieron. Se les pone fin de vigencia y se crea la nueva, que es
+   * lo que ya hacen el resto de los datos con vigencia del modelo.
+   *
+   * @param dto - Los campos a cambiar.
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo releído, ya actualizado.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  async updateOwnProfile(
+    dto: UpdateOwnPatientProfileDto,
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.updateOwn', actorId: actor.id },
+      'Updating own patient profile',
+    );
+
+    await this.em.transactional(async (tx) => {
+      const { person } = await this.resolveOwnPatient(tx, actor);
+      const ahora = new Date();
+
+      // Campo por campo y con `!== undefined`: un `??` trataría `''` como «no
+      // vino», y el segundo nombre o el apellido materno son justamente los
+      // campos que alguien vacía cuando descubre que no tiene.
+      //
+      // `name` y `lastName` se asignan tal cual: el DTO les exige `@MinLength(1)`,
+      // así que no se pueden vaciar por acá. Los otros dos sí, y por eso pasan
+      // por {@link textoOpcional}, que traduce el blanco a `NULL`.
+      if (dto.name !== undefined) person.name = dto.name;
+      if (dto.middleName !== undefined) {
+        person.middleName = textoOpcional(dto.middleName);
+      }
+      if (dto.lastName !== undefined) person.lastName = dto.lastName;
+      if (dto.motherLastName !== undefined) {
+        person.motherLastName = textoOpcional(dto.motherLastName);
+      }
+      if (cambiaAlgunaParteDelNombre(dto)) {
+        this.recomponerDisplayName(person);
+      }
+
+      if (dto.birthDate !== undefined) {
+        person.birthDate = new Date(dto.birthDate);
+      }
+      if (dto.sexAtBirth !== undefined) {
+        // El mismo mapeo del alta: el formulario manda un código y la columna
+        // guarda el concepto.
+        person.sexAtBirthConceptId = BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth];
+      }
+      // Las dos columnas de la ocupación se deciden juntas: ver
+      // {@link aplicarOcupacion}, porque cuál gana depende de la otra.
+      aplicarOcupacion(person, dto);
+      // Sólo si de verdad se escribió algo en la fila: ver {@link cambiaLaPersona}.
+      if (cambiaLaPersona(dto)) {
+        touch(person, actor.id);
+      }
+
+      if (dto.phone !== undefined) {
+        await this.reemplazarTelefono(
+          tx,
+          person.id,
+          dto.phone,
+          actor.id,
+          ahora,
+        );
+      }
+      if (dto.residenceMunicipalityConceptId !== undefined) {
+        await this.reemplazarDomicilio(
+          tx,
+          person.id,
+          dto.residenceMunicipalityConceptId,
+          actor.id,
+          ahora,
+        );
+      }
+
+      await tx.flush();
+    });
+
+    // Se relee entero en vez de armar la respuesta con lo que se acaba de
+    // escribir: así quien edita ve lo mismo que vería al recargar, incluido el
+    // `displayName` recompuesto y el teléfono que quedó vigente.
+    return this.getOwnProfile(actor);
+  }
+
+  /**
+   * Resuelve a qué paciente corresponde una sesión.
+   *
+   * El sujeto sale **siempre** de `person_account_links` y nunca de un claim del
+   * token: `pid` es un dato de identificación que no participa de ninguna
+   * decisión, y usarlo acá lo convertiría en una credencial. Este es el mismo
+   * camino que recorre el resumen propio, extraído para que las tres lecturas
+   * propias no puedan divergir en a quién consideran el titular.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param actor - Usuario autenticado.
+   * @returns La persona y su perfil de paciente.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  private async resolveOwnPatient(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<{
+    /** La persona titular de la cuenta. */
+    person: Persons;
+    /** Su perfil de paciente. */
+    patient: PatientProfiles;
+  }> {
     const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
     if (!link) {
       throw new PreconditionFailedException(
@@ -193,14 +600,120 @@ export class ProfilesPatientsService {
       });
     }
 
-    return {
-      personId: person.id,
-      patientProfileId: patient.profileId,
-      patientCode: patient.patientCode,
-      displayName: person.displayName,
-      birthDate: person.birthDate,
-      personStatus: person.personStatusConceptId,
-    };
+    return { person, patient };
+  }
+
+  /**
+   * Recompone el nombre para mostrar con la misma regla del alta.
+   *
+   * `displayName` es derivado, no editable: quien corrige su apellido espera
+   * verlo corregido en toda pantalla que lo muestre, y dejarlo intacto haría que
+   * el perfil dijera una cosa y el nombre visible otra.
+   *
+   * Si la persona se quedara sin ninguna parte del nombre, conserva el que
+   * tenía: es el caso de quien se registró con la forma anterior —sólo
+   * `displayName`— y edita otro campo. Vaciarle el nombre visible sería un
+   * efecto colateral que nadie pidió.
+   *
+   * @param person - La persona con las partes ya actualizadas.
+   */
+  private recomponerDisplayName(person: Persons): void {
+    const recompuesto = composePersonDisplayName(person);
+    if (recompuesto !== undefined) {
+      person.displayName = recompuesto;
+    }
+  }
+
+  /**
+   * Deja vigente el teléfono indicado, cerrando el anterior.
+   *
+   * Si el número es el que ya estaba vigente no escribe nada: crear una fila
+   * idéntica ensuciaría el historial con un cambio que no ocurrió.
+   *
+   * En blanco significa **quitar** el teléfono: se cierra el vigente y no nace
+   * ninguno. Quedarse sin teléfono es un dato —ya no hay por dónde llamar a esta
+   * persona—, y escribir una fila con el valor vacío lo contaría como si tuviera
+   * uno.
+   *
+   * @param tx - Transacción de la edición.
+   * @param personId - Dueño del punto de contacto.
+   * @param telefono - El número nuevo, o en blanco para quedarse sin teléfono.
+   * @param actorUserId - Quién edita.
+   * @param ahora - Instante de la edición, fin de vigencia del anterior.
+   */
+  private async reemplazarTelefono(
+    tx: EntityManager,
+    personId: string,
+    telefono: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const nuevo = textoOpcional(telefono);
+    const vigente = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+      tx,
+      personId,
+      CONCEPTS.CONTACT_PHONE,
+    );
+
+    if (nuevo === undefined) {
+      if (vigente) {
+        this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+      }
+      return;
+    }
+    if (vigente?.value === nuevo) return;
+
+    if (vigente) {
+      this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+    }
+    // Mismo dueño, mismo sistema y mismo uso que escribe el alta: el número
+    // cambió, no la clase de contacto que es.
+    this.contactPointsRepo.create(tx, {
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      ownerId: personId,
+      systemConceptId: CONCEPTS.CONTACT_PHONE,
+      value: nuevo,
+      useConceptId: CONCEPTS.CONTACT_USE_HOME,
+      actorUserId,
+    });
+  }
+
+  /**
+   * Deja vigente el domicilio del municipio indicado, cerrando el anterior.
+   *
+   * La dirección nueva la arma el mismo ayudante que usa el alta, que es quien
+   * deriva el departamento del código del INE y valida el municipio contra el
+   * catálogo: duplicar esa regla acá abriría la puerta a que las dos vías
+   * escribieran direcciones distintas para el mismo municipio.
+   *
+   * @param tx - Transacción de la edición.
+   * @param personId - Dueño de la dirección.
+   * @param municipalityConceptId - El municipio nuevo.
+   * @param actorUserId - Quién edita.
+   * @param ahora - Instante de la edición, fin de vigencia de la anterior.
+   */
+  private async reemplazarDomicilio(
+    tx: EntityManager,
+    personId: string,
+    municipalityConceptId: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
+      tx,
+      personId,
+      CONCEPTS.ADDR_USE_HOME,
+    );
+    if (vigente?.municipalityConceptId === municipalityConceptId) return;
+
+    if (vigente) {
+      this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
+    }
+    createResidenceAddress(this.addressesRepo, tx, {
+      personId,
+      municipalityConceptId,
+      actorUserId,
+    });
   }
 
   /**

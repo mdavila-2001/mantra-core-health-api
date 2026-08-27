@@ -84,9 +84,13 @@ Content-Type: application/json
 | `ownerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines` | Sí | `array<string>` | Sin restricción adicional declarada | Líneas de la dirección. | `["valor-ejemplo"]` |
 | `city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `postalCode` | No | `string` | longitud máxima 32 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
-| `country` | No | `string` | longitud máxima 2 | Código de país ISO. Por defecto 'PE'. | `BO` |
+| `country` | No | `string` | longitud máxima 2 | Código de país ISO. Por defecto 'BO'. | `BO` |
 | `use` | No | `string` | valores: `HOME`, `WORK` | Sin descripción específica en el contrato OpenAPI. | `HOME` |
+| `latitude` | No | `number` | mínimo -90; máximo 90 | Latitud geográfica | `1` |
+| `longitude` | No | `number` | mínimo -180; máximo 180 | Longitud geográfica | `1` |
 
 ### Payload completo de ejemplo
 
@@ -105,9 +109,13 @@ Content-Type: application/json
     "valor-ejemplo"
   ],
   "city": "valor-ejemplo",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "postalCode": "CODIGO_EJEMPLO",
   "country": "BO",
-  "use": "HOME"
+  "use": "HOME",
+  "latitude": 1,
+  "longitude": 1
 }
 ```
 
@@ -136,8 +144,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "valor-ejemplo"
   ],
   "city": "valor-ejemplo",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "postalCode": "CODIGO_EJEMPLO",
   "country": "BO",
+  "latitude": 1,
+  "longitude": 1,
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -151,8 +163,12 @@ Campos de la respuesta:
 | `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Valor de owner type mantenido por la instancia. | `USER` |
 | `lines` | Sí | `array<string>` | Sin restricción adicional declarada | Valor de lines mantenido por la instancia. | `["valor-ejemplo"]` |
 | `city` | No | `string` | Sin restricción adicional declarada | Valor de city mantenido por la instancia. | `valor-ejemplo` |
+| `municipalityConceptId` | No | `string` | formato `uuid` | Municipio boliviano, miembro de `VS_BO_MUNICIPALITY`. | `00000000-0000-4000-8000-000000000001` |
+| `administrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento boliviano, miembro de `VS_BO_DEPARTMENT`. | `00000000-0000-4000-8000-000000000001` |
 | `postalCode` | No | `string` | Sin restricción adicional declarada | Valor de postal code mantenido por la instancia. | `CODIGO_EJEMPLO` |
 | `country` | Sí | `string` | Sin restricción adicional declarada | Código de país. | `BO` |
+| `latitude` | No | `number` | Sin restricción adicional declarada | Latitud del punto, si se cargó. | `1` |
+| `longitude` | No | `number` | Sin restricción adicional declarada | Longitud del punto, si se cargó. | `1` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.

@@ -90,15 +90,15 @@ export const PACIENTE_SMOKE: SmokeCase[] = [
   {
     module: 'Paciente',
     endpoint: 'GET /profiles/patients/me/summary',
-    name: 'límite: recién registrado no ve su resumen hasta verificar identidad',
+    name: 'happy: recién registrado ve su resumen sin verificar identidad',
     method: 'get',
     token: asPatient,
-    // No es un fallo del recorrido: es la regla. Quien se auto-registra declara un documento,
-    // no lo prueba, así que el historial clínico queda cerrado hasta que la identidad se
-    // verifique. Se fija aquí para que, si alguien abriera esa puerta, el smoke lo delate.
+    // La regla es que el resumen propio es libre (F-34): quien se auto-registra ve lo que él
+    // mismo declaró, porque verificarse es un trámite posterior. Lo único que espera a la
+    // aserción es el código de paciente, que viaja sólo con `identityVerified: true`. Se fija
+    // aquí para que, si alguien volviera a poner un muro delante, el smoke lo delate.
     path: () => '/profiles/patients/me/summary',
-    expectedStatus: 403,
-    expectedCode: 'IDENTITY_VERIFICATION_REQUIRED',
+    expectedStatus: 200,
   },
   {
     module: 'Paciente',
