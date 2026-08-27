@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `pharmacy_inventory`.
- * 146 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 159 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const pharmacyInventoryIndexes: readonly IndexTuple[] = [
@@ -63,15 +63,20 @@ export const pharmacyInventoryIndexes: readonly IndexTuple[] = [
   ['inventory_reservations', 'ix_inventory_reservations_medication_request_id', ['medication_request_id'], false, 'btree'],
   ['inventory_reservations', 'ix_inventory_reservations_quotation_id', ['quotation_id'], false, 'btree'],
   ['inventory_reservations', 'ix_inventory_reservations_reservation_status_concept_id', ['reservation_status_concept_id'], false, 'btree'],
+  ['inventory_reservations', 'ix_inventory_reservations_delivery_mode_concept_id', ['delivery_mode_concept_id'], false, 'btree'],
+  ['inventory_reservations', 'ix_inventory_reservations_delivery_address_id', ['delivery_address_id'], false, 'btree'],
+  ['inventory_reservations', 'ix_inventory_reservations_currency_concept_id', ['currency_concept_id'], false, 'btree'],
   ['inventory_reservations', 'ix_inventory_reservations_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['inventory_reservations', 'ix_inventory_reservations_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['inventory_reservations', 'ix_inventory_reservations_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],
   ['inventory_reservations', 'uq_inventory_reservations_idempotency', ['idempotency_key'], true, 'btree'],
+  ['inventory_reservations', 'ux_inventory_reservations_pickup_code', ['pickup_code'], true, 'btree', 'pickup_code IS NOT NULL'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_inventory_reservation_id', ['inventory_reservation_id'], false, 'btree'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_pharmacy_product_id', ['pharmacy_product_id'], false, 'btree'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_inventory_lot_id', ['inventory_lot_id'], false, 'btree'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_inventory_location_id', ['inventory_location_id'], false, 'btree'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['inventory_reservation_lines', 'ix_inventory_reservation_lines_currency_concept_id', ['currency_concept_id'], false, 'btree'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['inventory_serials', 'ix_inventory_serials_inventory_lot_id', ['inventory_lot_id'], false, 'btree'],
@@ -126,6 +131,14 @@ export const pharmacyInventoryIndexes: readonly IndexTuple[] = [
   ['pharmacy_inventory_sync_items', 'ix_pharmacy_inventory_sync_items_pharmacy_product_id', ['pharmacy_product_id'], false, 'btree'],
   ['pharmacy_inventory_sync_items', 'ix_pharmacy_inventory_sync_items_reconciliation_status_ef599848', ['reconciliation_status_concept_id'], false, 'btree'],
   ['pharmacy_inventory_sync_items', 'uq_pharmacy_inventory_sync_items_idempotency', ['idempotency_key'], true, 'btree'],
+  ['pharmacy_order_substitutions', 'ix_pharmacy_order_substitutions_inventory_reservation_id', ['inventory_reservation_id'], false, 'btree'],
+  ['pharmacy_order_substitutions', 'ix_pharmacy_order_substitutions_inventory_reservation_line_id', ['inventory_reservation_line_id'], false, 'btree'],
+  ['pharmacy_order_substitutions', 'ix_pharmacy_order_substitutions_original_pharmacy_product_id', ['original_pharmacy_product_id'], false, 'btree'],
+  ['pharmacy_order_substitutions', 'ix_pharmacy_order_substitutions_proposed_pharmacy_product_id', ['proposed_pharmacy_product_id'], false, 'btree'],
+  ['pharmacy_order_substitutions', 'ix_pharmacy_order_substitutions_currency_concept_id', ['currency_concept_id'], false, 'btree'],
+  ['pharmacy_order_substitutions', 'ix_pharmacy_order_substitutions_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['pharmacy_order_substitutions', 'ix_pharmacy_order_substitutions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['pharmacy_order_substitutions', 'ix_pharmacy_order_substitutions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['pharmacy_purchase_orders', 'ix_pharmacy_purchase_orders_pharmacy_id', ['pharmacy_id'], false, 'btree'],
   ['pharmacy_purchase_orders', 'ix_pharmacy_purchase_orders_pharmacy_site_id', ['pharmacy_site_id'], false, 'btree'],
   ['pharmacy_purchase_orders', 'ix_pharmacy_purchase_orders_pharmacy_supplier_id', ['pharmacy_supplier_id'], false, 'btree'],
