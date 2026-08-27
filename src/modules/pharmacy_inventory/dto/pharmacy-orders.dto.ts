@@ -173,6 +173,21 @@ export class PharmacyOrderLineDto {
   fulfilledQuantity!: number;
 
   /**
+   * Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado
+   * al crear el pedido o al aceptar una sustitución. `null` si la sede no
+   * publicaba precio: el GET no recalcula — un precio congelado que se
+   * recalcula contra listas nuevas reescribe un pedido histórico.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  unitPriceAmount!: string | null;
+
+  /**
+   * Moneda del precio congelado, resuelta.
+   */
+  @ApiPropertyOptional({ type: InventoryConceptDto, nullable: true })
+  currency!: InventoryConceptDto | null;
+
+  /**
    * Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada,
    * `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada).
    */
@@ -264,19 +279,113 @@ export class PharmacyOrderDto {
   pickupCode!: string | null;
 
   /**
+   * Total CONGELADO del pedido con su moneda: suma de los precios congelados
+   * por el saldo reservado de cada renglón en pie. `null` si a algún renglón
+   * le falta precio publicado o si las listas mezclan monedas — una suma con
+   * huecos o que mezcla monedas afirma un costo que nadie publicó. Se
+   * re-congela cuando el pedido cambia (línea no disponible, sustitución
+   * aceptada); jamás se recalcula en una lectura.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  totalAmount!: string | null;
+
+  /**
+   * Moneda del total congelado, resuelta.
+   */
+  @ApiPropertyOptional({ type: InventoryConceptDto, nullable: true })
+  currency!: InventoryConceptDto | null;
+
+  /**
+   * Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1
+   * lo persiste). `null` en cualquier otro estado.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  rejectionReasonText!: string | null;
+
+  /**
+   * La historia de propuestas de sustitución del pedido, más nuevas primero.
+   * Las decididas conservan su estado y su `decidedAt`: son bitácora, no un
+   * campo mutable.
+   */
+  @ApiProperty({ type: () => [PharmacyOrderSubstitutionDto] })
+  substitutions!: PharmacyOrderSubstitutionDto[];
+
+  /**
    * Líneas del pedido.
    */
   @ApiProperty({ type: [PharmacyOrderLineDto] })
   lines!: PharmacyOrderLineDto[];
 }
 
+/** Una propuesta de sustitución, en palabras: la oferta y su decisión. */
+export class PharmacyOrderSubstitutionDto {
+  /**
+   * Identificador de la propuesta.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Producto recetado/pedido.
+   */
+  @ApiProperty({ format: 'uuid' })
+  originalProductId!: string;
+
+  /**
+   * Nombre pintable del original.
+   */
+  @ApiProperty()
+  originalName!: string;
+
+  /**
+   * Precio congelado del original al proponer, o `null` sin precio publicado.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  originalUnitPriceAmount!: string | null;
+
+  /**
+   * Producto propuesto (mismo medicamento del vademécum).
+   */
+  @ApiProperty({ format: 'uuid' })
+  proposedProductId!: string;
+
+  /**
+   * Nombre pintable del propuesto.
+   */
+  @ApiProperty()
+  proposedName!: string;
+
+  /**
+   * Precio congelado del propuesto: la oferta que el paciente decidió.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  proposedUnitPriceAmount!: string | null;
+
+  /**
+   * Moneda de la oferta, resuelta.
+   */
+  @ApiPropertyOptional({ type: InventoryConceptDto, nullable: true })
+  currency!: InventoryConceptDto | null;
+
+  /**
+   * Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto.
+   */
+  @ApiProperty({ type: InventoryConceptDto })
+  status!: InventoryConceptDto;
+
+  /**
+   * Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  decidedAt!: string | null;
+}
+
 /**
  * Decisiones por renglón al confirmar (FAR-E2).
  *
- * `PROPONER_GENERICO` se acepta en la validación para poder responder con un
- * 422 **tipificado y explicable** — la propuesta de sustitución está bloqueada
- * por modelo (sin persistencia por línea) y rechazarla en el pipe de
- * validación la volvería un 400 mudo.
+ * `PROPONER_GENERICO` exige además `proposedProductId`: un producto activo de
+ * la misma farmacia y del MISMO medicamento del vademécum. La propuesta se
+ * persiste como bitácora (v4.2.1) y la decide el paciente.
  */
 export const CONFIRM_LINE_DECISIONS = [
   'NO_DISPONIBLE',
@@ -298,6 +407,19 @@ export class ConfirmOrderAdjustmentDto {
   @ApiProperty({ enum: CONFIRM_LINE_DECISIONS })
   @IsIn([...CONFIRM_LINE_DECISIONS])
   decision!: (typeof CONFIRM_LINE_DECISIONS)[number];
+
+  /**
+   * El producto que se propone en lugar del original. Obligatorio con
+   * `PROPONER_GENERICO` (la regla vive en el servicio para responder 422
+   * tipificado); ignorado con `NO_DISPONIBLE`.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Producto propuesto (mismo concepto del vademécum)',
+  })
+  @IsOptional()
+  @IsUUID()
+  proposedProductId?: string;
 }
 
 /** Cuerpo de `POST /pharmacy/orders/:id/confirm` (FAR-E2). */
@@ -318,11 +440,10 @@ export class RejectPharmacyOrderDto {
   /**
    * Motivo del rechazo, obligatorio y en palabras.
    *
-   * **No se persiste en el pedido** (bloqueador de modelo): viaja en el evento
-   * de dominio y en el aviso inmediato al paciente, y el `GET` del pedido no
-   * puede devolverlo hasta que el modelo declare la columna.
+   * Desde v4.2.1 **se persiste** en `rejection_reason_text`: viaja en el
+   * evento, en el aviso al paciente, y el `GET` del pedido lo devuelve.
    */
-  @ApiProperty({ description: 'Motivo del rechazo (no se persiste todavía)' })
+  @ApiProperty({ description: 'Motivo del rechazo (se persiste en el pedido)' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(500)

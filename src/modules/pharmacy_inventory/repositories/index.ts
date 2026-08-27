@@ -8,6 +8,7 @@ export * from './goods-receipts.repository';
 export * from './reservations.repository';
 export * from './pharmacy-orders.repository';
 export * from './dispensations.repository';
+export * from './pharmacy-order-substitutions.repository';
 export * from './count-sessions.repository';
 export * from './recall-holds.repository';
 export * from './serials.repository';

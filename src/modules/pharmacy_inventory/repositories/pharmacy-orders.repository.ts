@@ -264,6 +264,21 @@ export class PharmacyOrdersRepository {
     return em.findOne(MedicationRequests, { id, patientProfileId });
   }
 
+  /**
+   * El prescriptor de una receta, para el aviso de cierre (FAR-E3): la
+   * dispensación notifica a quien recetó. Lectura puntual de `clinical` —
+   * el módulo no se modifica, se consume, igual que en la validación del alta.
+   */
+  async findPrescriberProfileId(
+    em: EntityManager,
+    medicationRequestId: string,
+  ): Promise<string | null> {
+    const request = await em.findOne(MedicationRequests, {
+      id: medicationRequestId,
+    });
+    return request?.prescriberProfileId ?? null;
+  }
+
   /** Conceptos por id, para resolver `{code, display}` en lote. */
   findConceptsByIds(
     em: EntityManager,
