@@ -33,8 +33,10 @@ import {
   PersonProfilesRepository,
   PersonsRepository,
   PractitionerLanguagesRepository,
+  PractitionerSpecialtiesRepository,
   ProfessionalCredentialsRepository,
 } from '../../profiles/repositories';
+import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
 import {
   AddressesRepository,
   ContactPointsRepository,
@@ -131,6 +133,8 @@ export class IamPractitionerSelfRegistrationService {
     private readonly personsRepo: PersonsRepository,
     private readonly personProfilesRepo: PersonProfilesRepository,
     private readonly practitionersRepo: HealthPractitionerProfilesRepository,
+    private readonly specialtiesRepo: PractitionerSpecialtiesRepository,
+    private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
     private readonly authorizationsRepo: JurisdictionAuthorizationsRepository,
     private readonly professionalCredentialsRepo: ProfessionalCredentialsRepository,
     private readonly languagesRepo: PractitionerLanguagesRepository,
@@ -406,6 +410,30 @@ export class IamPractitionerSelfRegistrationService {
         clinicalInterpretationAllowed: true,
         actorUserId: user.id,
       });
+
+      // 4b) Las especialidades, elegidas EN el alta (registro del cliente,
+      // módulo Médico §1.4.2). Misma semántica que el alta administrativa: la
+      // primera es la principal, nacen pendientes de verificación, y cada
+      // concepto se valida contra el value set — la FK acepta cualquier
+      // concepto del catálogo y quién decide cuáles son especialidades es
+      // `VS_MEDICAL_SPECIALTY`, no el formato del uuid. Repetir una no crea
+      // dos filas: quien pega dos veces la misma opción declara una.
+      const especialidades = [...new Set(dto.specialtyConceptIds ?? [])];
+      for (const [orden, specialtyConceptId] of especialidades.entries()) {
+        await this.specialtyCatalog.assertIsMedicalSpecialty(
+          tx,
+          specialtyConceptId,
+        );
+        this.specialtiesRepo.create(tx, {
+          practitionerProfileId: person.id,
+          specialtyConceptId,
+          isPrimary: orden === 0,
+          boardCertified: false,
+          verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+          validFrom: new Date(),
+          actorUserId: user.id,
+        });
+      }
       await tx.flush();
 
       // 5) Vínculo cuenta-persona: el titular es él mismo.
