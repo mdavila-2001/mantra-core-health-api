@@ -8,3 +8,4 @@ export * from './create-connection.dto';
 export * from './create-mapping.dto';
 export * from './responses.dto';
 export * from './read-responses.dto';
+export * from './public-marketplace.dto';
