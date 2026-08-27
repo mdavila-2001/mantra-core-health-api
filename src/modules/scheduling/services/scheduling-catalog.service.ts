@@ -11,6 +11,7 @@ import {
 } from '../../../common';
 import { SchedulingCatalogRepository } from '../repositories';
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
+import { SchedulingProfessionalTimeService } from './scheduling-professional-time.service';
 import type { SchedulableResources } from '../entities';
 import {
   CreateResourceDto,
@@ -100,6 +101,7 @@ export class SchedulingCatalogService {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly logger: PinoLogger,
     private readonly vinculos: PractitionerAffiliationGateService,
+    private readonly tiempoProfesional: SchedulingProfessionalTimeService,
   ) {
     this.logger.setContext(SchedulingCatalogService.name);
   }
@@ -322,6 +324,20 @@ export class SchedulingCatalogService {
       const zona = resource?.timeZone ?? 'UTC';
       if (resource) this.assertRecursoDelActor(resource, actor);
 
+      // REGLA MADRE (AG-1): los cupos que caerían sobre un compromiso del
+      // profesional no se generan. Se cargan UNA vez para toda la ventana —
+      // consultar por cupo sería un viaje a la base por cada media hora—.
+      const compromisos =
+        resource &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
+          ? await this.tiempoProfesional.compromisos(
+              tx,
+              resource.resourceRefId,
+              from,
+              to,
+            )
+          : [];
+
       const rules = await this.catalogRepo.findRulesByTemplate(tx, templateId);
       const existing = await this.catalogRepo.findSlotsByTemplateInRange(
         tx,
@@ -335,6 +351,7 @@ export class SchedulingCatalogService {
 
       let created = 0;
       let skipped = 0;
+      let omittedByCommitments = 0;
 
       for (const rule of rules) {
         const slotMinutes =
@@ -368,12 +385,23 @@ export class SchedulingCatalogService {
               skipped += 1;
               continue;
             }
+            // El cupo que pisa un compromiso se SALTEA, no aborta la corrida:
+            // la cirugía del jueves no puede impedir generar el resto del mes.
+            if (
+              compromisos.some(
+                (compromiso: { startAt: Date; endAt: Date }) =>
+                  compromiso.startAt < end && compromiso.endAt > cursor,
+              )
+            ) {
+              omittedByCommitments += 1;
+              continue;
+            }
             if (created >= MAX_SLOTS_PER_RUN) {
               this.logger.warn(
                 { operation: 'scheduling.slots.generate', templateId, created },
                 'Slot generation hit the per-run cap; narrow the window and re-run',
               );
-              return { templateId, created, skipped };
+              return { templateId, created, skipped, omittedByCommitments };
             }
 
             this.catalogRepo.createSlot(tx, {
@@ -392,7 +420,7 @@ export class SchedulingCatalogService {
         }
       }
 
-      return { templateId, created, skipped };
+      return { templateId, created, skipped, omittedByCommitments };
     });
   }
 

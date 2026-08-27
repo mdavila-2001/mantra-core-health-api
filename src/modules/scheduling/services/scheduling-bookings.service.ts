@@ -15,6 +15,7 @@ import {
   SchedulingCatalogRepository,
 } from '../repositories';
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
+import { SchedulingProfessionalTimeService } from './scheduling-professional-time.service';
 import {
   HistoryRepository,
   type HistoryRevision,
@@ -226,6 +227,7 @@ export class SchedulingBookingsService {
     private readonly notices: AgendaNoticePort,
     private readonly logger: PinoLogger,
     private readonly vinculos: PractitionerAffiliationGateService,
+    private readonly tiempoProfesional: SchedulingProfessionalTimeService,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
   }
@@ -536,6 +538,24 @@ export class SchedulingBookingsService {
       const resource = slot.resourceId
         ? await this.catalogRepo.findResourceById(tx, slot.resourceId)
         : null;
+
+      // REGLA MADRE (AG-1): el médico es el recurso escaso, no la sede. La
+      // REGLA 1 protege el tiempo del paciente; ésta protege el del profesional
+      // CRUZANDO todas sus agendas — un doctor con consultorio y hospital tiene
+      // dos recursos, y confirmar acá sin mirar el otro lo dejaba citado en dos
+      // lugares a la vez (comprobado ejecutando, no leyendo).
+      if (
+        resource &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
+      ) {
+        await this.tiempoProfesional.assertRangoLibre(
+          tx,
+          resource.resourceRefId,
+          slot.startAt,
+          slot.endAt ?? slot.startAt,
+        );
+      }
+
       const cancellationPolicySnapshot: CancellationPolicySnapshot = {
         policyId: policy?.id,
         policyRowVersion: policy?.rowVersion,
@@ -998,6 +1018,32 @@ export class SchedulingBookingsService {
       await this.assertVinculoVigente(booking.tenantId, actor);
       const fromState = booking.statusConceptId;
       this.assertTransition(fromState, CONCEPTS.BOOKING_CONFIRMED);
+
+      // REGLA MADRE (AG-1): decir «sí» acá compromete el tiempo del
+      // profesional, así que hay que mirar TODAS sus agendas antes — no sólo
+      // ésta. La propia reserva se excluye: aceptarse no es chocar consigo
+      // misma.
+      const recursoDeLaCita = booking.resourceId
+        ? await this.catalogRepo.findResourceById(tx, booking.resourceId)
+        : null;
+      if (
+        recursoDeLaCita &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(recursoDeLaCita.resourceRefType)
+      ) {
+        const slotDeLaCita = await this.bookingsRepo.findSlotById(
+          tx,
+          booking.bookableSlotId,
+        );
+        if (slotDeLaCita) {
+          await this.tiempoProfesional.assertRangoLibre(
+            tx,
+            recursoDeLaCita.resourceRefId,
+            slotDeLaCita.startAt,
+            slotDeLaCita.endAt ?? slotDeLaCita.startAt,
+            booking.id,
+          );
+        }
+      }
 
       const confirmedAt = new Date();
       booking.statusConceptId = CONCEPTS.BOOKING_CONFIRMED;
