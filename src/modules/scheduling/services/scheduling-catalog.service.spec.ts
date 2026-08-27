@@ -67,13 +67,18 @@ function buildCatalog() {
   // La regla de pertenencia vive en su propio servicio y tiene specs propios;
   // acá sólo importa qué hace el catálogo con cada veredicto.
   const vinculos = { evaluar: mockFn(async () => 'sin-vinculos') };
+  const tiempoProfesional = {
+    assertRangoLibre: mockFn(async () => undefined),
+    compromisos: mockFn(async () => []),
+  };
   const service = new SchedulingCatalogService(
     em as any,
     catalogRepo,
     logger as any,
     vinculos as any,
+    tiempoProfesional as any,
   );
-  return { service, tx, catalogRepo, em, vinculos };
+  return { service, tx, catalogRepo, em, vinculos, tiempoProfesional };
 }
 
 describe('SchedulingCatalogService', () => {

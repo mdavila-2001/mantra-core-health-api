@@ -110,6 +110,12 @@ function build() {
   // por defecto no hay vínculos que mirar, que es el caso del consultorio
   // propio y el de la gran mayoría de las reservas de estas pruebas.
   const vinculos = { evaluar: mockFn(async () => 'sin-vinculos') };
+  // La regla madre tiene specs propios; acá interesa QUÉ hace cada flujo con su
+  // veredicto. Por defecto el rango está libre.
+  const tiempoProfesional = {
+    assertRangoLibre: mockFn(async () => undefined),
+    compromisos: mockFn(async () => []),
+  };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -120,11 +126,13 @@ function build() {
     notices as any,
     logger as any,
     vinculos as any,
+    tiempoProfesional as any,
   );
   return {
     service,
     tx,
     vinculos,
+    tiempoProfesional,
     bookingsRepo,
     catalogRepo,
     historyRepo,
@@ -1063,6 +1071,83 @@ describe('SchedulingBookingsService', () => {
         resourceName: 'Consultorio del Dr. Paz',
       };
     }
+
+    describe('la regla madre — AG-1', () => {
+      it('aceptar consulta el tiempo del profesional EXCLUYENDO la propia cita', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-1',
+          appointmentId: 'appt-1',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+        d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await d.service.accept('booking-1', {}, actor);
+
+        const llamada = d.tiempoProfesional.assertRangoLibre.mock.calls[0];
+        expect(llamada[1]).toBe('hp-1');
+        // el último argumento es la propia reserva: aceptarse no es chocar
+        // consigo misma.
+        expect(llamada[4]).toBe('booking-1');
+      });
+
+      it('si el profesional ya está comprometido en OTRA sede, aceptar rebota', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-1',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.tiempoProfesional.assertRangoLibre.mockRejectedValue(
+          new PreconditionFailedException('El profesional ya tiene a Ana…'),
+        );
+
+        await expect(d.service.accept('booking-1', {}, actor)).rejects.toThrow(
+          /ya tiene a Ana/,
+        );
+      });
+
+      it('una sala o un equipo no pasan por la regla del profesional', async () => {
+        // La regla protege a la persona; una sala puede tener dos agendas sin
+        // ser un problema humano.
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-sala',
+          appointmentId: 'appt-1',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+        d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-sala',
+          resourceRefId: 'sala-1',
+          resourceRefType: 'rooms',
+        });
+
+        await d.service.accept('booking-1', {}, actor);
+
+        expect(d.tiempoProfesional.assertRangoLibre).not.toHaveBeenCalled();
+      });
+    });
 
     describe('vinculo vigente con la organizacion — MAC-VINCULO', () => {
       // El `actor` de este archivo es un SCHEDULING_AGENT, que opera agendas

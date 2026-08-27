@@ -19,6 +19,7 @@ import {
   SchedulingAgendaNoticesService,
   SchedulingTenantAgendaService,
   PractitionerAffiliationGateService,
+  SchedulingProfessionalTimeService,
 } from './services';
 import {
   SchedulingCatalogRepository,
@@ -83,6 +84,8 @@ import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice
     // La regla de pertenencia del médico a una organización, que consultan
     // el catálogo (al publicar) y las reservas (al aceptar).
     PractitionerAffiliationGateService,
+    // La regla madre (AG-1): el tiempo del profesional, cruzando sus sedes.
+    SchedulingProfessionalTimeService,
     // Piloto de la migración a puertos (§47, Fase 5): sesión del módulo,
     // adaptador PostgreSQL y los dos puertos de la lista de espera. Ver
     // scheduling.persistence.ts y docs/data/read-write-routing.md.
