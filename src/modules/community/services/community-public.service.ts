@@ -26,6 +26,7 @@ import {
 import { CommunityProfileStatsService } from './community-profile-stats.service';
 import type {
   PublicDirectoryProfileDto,
+  PublicFeedPageDto,
   PublicNearbyPageDto,
   PublicResultKind,
   PublicSearchPageDto,
@@ -87,6 +88,14 @@ export const PUBLIC_RESULT_KEYS = [
   'verifiedBadge',
   'hasPublishedAgenda',
   'nextAvailableDate',
+  // La tarjeta del directorio se mira antes de leerse: sin portada, sin calle
+  // y sin punto, cuarenta centros de salud se ven exactamente iguales y la
+  // única forma de elegir es abrirlos de a uno. Los tres salen de datos que la
+  // página ya cargaba —`coverFileId` del perfil, `lines` y las coordenadas de
+  // `locationsByOwner`— y no cuestan una consulta más.
+  'coverUrl',
+  'address',
+  'location',
 ] as const;
 
 /** Las claves que la ficha pública puede tener. Nada más. */
@@ -172,6 +181,101 @@ export class CommunityPublicService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityPublicService.name);
+  }
+
+  /**
+   * El feed de la portada: lo último que publicaron **todos** los
+   * profesionales, mezclado y ordenado por fecha.
+   *
+   * Es la vista por defecto de la superficie pública. Quien entra sin sesión no
+   * tiene todavía un médico en la cabeza al que buscar, así que una portada que
+   * exige elegir uno primero no le sirve de nada; un compilado de lo último
+   * escrito sí, y de ahí se llega a la ficha de quien lo escribió.
+   *
+   * @param params - Cuántas traer y desde dónde seguir.
+   * @returns Página de publicaciones con su autor.
+   */
+  async feedPublico(params: {
+    /** Tope pedido. */
+    limit?: number;
+    /** Cursor opaco de continuación. */
+    cursor?: string;
+  }): Promise<PublicFeedPageDto> {
+    const em = this.em.fork();
+    const limit = this.clampLimit(params.limit);
+
+    // Una de más para saber si hay página siguiente sin un `COUNT` aparte.
+    const filas = await this.repo.listFeedPublico(
+      em,
+      limit + 1,
+      this.decodeFeedCursor(params.cursor),
+    );
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+
+    const engagement = await this.repo.engagementByPost(
+      em,
+      pagina.map((fila) => fila.id),
+    );
+
+    const ultima = pagina.at(-1);
+    return {
+      items: pagina.map((fila) => {
+        const extra = engagement.get(fila.id);
+        return {
+          id: fila.id,
+          bodyText: fila.bodyText,
+          publishedAt: fila.publishedAt.toISOString(),
+          mediaUrls: (extra?.imageFileIds ?? [])
+            .map((fileId) => this.fileUrl(fileId))
+            .filter((url): url is string => url !== null),
+          reactionCount: extra?.reactionCount ?? 0,
+          commentCount: extra?.commentCount ?? 0,
+          authorSlug: fila.authorSlug,
+          authorDisplayName: fila.authorDisplayName,
+          authorHeadline: fila.authorHeadline,
+          authorAvatarUrl: this.fileUrl(fila.authorAvatarFileId ?? undefined),
+          authorKind:
+            KIND_BY_TARGET_CONCEPT[fila.authorKindConceptId] ?? 'PRACTITIONER',
+        };
+      }),
+      nextCursor:
+        hayMas && ultima
+          ? Buffer.from(
+              JSON.stringify({ p: ultima.publishedAt.toISOString(), i: ultima.id }),
+            ).toString('base64url')
+          : null,
+      totalHint: null,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  /** Descompone el cursor del feed; uno corrupto se ignora, no rompe la página. */
+  private decodeFeedCursor(
+    cursor?: string,
+  ): { publishedAt: Date; id: string } | undefined {
+    if (!cursor) return undefined;
+    try {
+      const crudo: unknown = JSON.parse(
+        Buffer.from(cursor, 'base64url').toString(),
+      );
+      if (
+        typeof crudo === 'object' &&
+        crudo !== null &&
+        typeof (crudo as { p?: unknown }).p === 'string' &&
+        typeof (crudo as { i?: unknown }).i === 'string'
+      ) {
+        const fecha = new Date((crudo as { p: string }).p);
+        if (!Number.isNaN(fecha.getTime())) {
+          return { publishedAt: fecha, id: (crudo as { i: string }).i };
+        }
+      }
+    } catch {
+      // Un cursor ilegible se trata como ausente: la primera página es una
+      // respuesta razonable, un 400 por un dato que el cliente no escribió a
+      // mano no lo es.
+    }
+    return undefined;
   }
 
   /**
@@ -665,6 +769,23 @@ export class CommunityPublicService {
       validUntil: texto('validUntil'),
     };
 
+    // El punto viaja al índice como `geo_point` —`{lat, lon}`, con la `lon` que
+    // exige OpenSearch— y sale al cliente como `{lat, lng}`, que es lo que
+    // declara el contrato público. La traducción va acá, en el mismo lugar que
+    // recompone el sello, para que la fila servida desde el índice sea idéntica
+    // a la servida desde SQL.
+    const punto = source.location;
+    const location =
+      typeof punto === 'object' &&
+      punto !== null &&
+      typeof (punto as { lat?: unknown }).lat === 'number' &&
+      typeof (punto as { lon?: unknown }).lon === 'number'
+        ? {
+            lat: (punto as { lat: number }).lat,
+            lng: (punto as { lon: number }).lon,
+          }
+        : null;
+
     return {
       kind: (texto('kind') ?? 'PRACTITIONER') as PublicResultKind,
       slug: texto('slug') ?? '',
@@ -678,6 +799,9 @@ export class CommunityPublicService {
       verifiedBadge,
       hasPublishedAgenda: source.hasPublishedAgenda === true,
       nextAvailableDate: texto('nextAvailableDate'),
+      coverUrl: texto('coverUrl'),
+      address: texto('address'),
+      location,
     };
   }
 
@@ -740,13 +864,22 @@ export class CommunityPublicService {
       señales.badges.get(profile.id) ?? [],
     );
     const agenda = señales.agenda.get(profile.targetId);
+    const ubicacion = señales.locations.get(profile.targetId);
     return {
       kind: this.kindOf(profile),
       slug: profile.slug,
       displayName: profile.displayName,
       headline: profile.headline ?? null,
-      city: señales.locations.get(profile.targetId)?.city ?? null,
+      city: ubicacion?.city ?? null,
       avatarUrl: this.fileUrl(profile.avatarFileId),
+      coverUrl: this.fileUrl(profile.coverFileId),
+      address: ubicacion?.address ?? null,
+      // El punto sólo cuando está completo: media coordenada no ubica nada y
+      // `geo_point` la rechaza igual. Ver `locationsByOwner`.
+      location:
+        ubicacion && ubicacion.lat !== null && ubicacion.lng !== null
+          ? { lat: ubicacion.lat, lng: ubicacion.lng }
+          : null,
       // El booleano deriva del sello, no de la columna resumen: si las dos se
       // desincronizaran, manda el que tiene la evidencia detrás.
       verified: badge.status === 'VERIFIED',

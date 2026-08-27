@@ -17,6 +17,7 @@ import {
 } from '../services';
 import type {
   PublicDirectoryProfileDto,
+  PublicFeedPageDto,
   PublicNearbyPageDto,
   PublicSearchPageDto,
 } from '../dto';
@@ -62,6 +63,25 @@ export class CommunityPublicController {
    * @param service - Buscador público.
    */
   constructor(private readonly service: CommunityPublicService) {}
+
+  /**
+   * El feed de la portada: lo último de todas las vitrinas, mezclado.
+   *
+   * Va declarado **antes** que `public/search` por la misma razón que todo este
+   * controlador va antes que `read_models`: Nest resuelve por orden, y una ruta
+   * hermana con parámetro capturaría este segmento.
+   */
+  @Public()
+  @Get('public/posts')
+  @ApiOperation({
+    summary: 'Últimas publicaciones de todos los profesionales',
+  })
+  feedPublico(
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicFeedPageDto> {
+    return this.service.feedPublico({ cursor, limit: this.toInt(limit) });
+  }
 
   /** Búsqueda unificada sobre todos los verticales. */
   @Public()

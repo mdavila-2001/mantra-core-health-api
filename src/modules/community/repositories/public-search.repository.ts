@@ -697,6 +697,109 @@ export class PublicSearchRepository {
   }
 
   /**
+   * Las últimas publicaciones de **todas** las vitrinas públicas, mezcladas.
+   *
+   * Es el feed de la portada: quien entra sin sesión ve lo último que
+   * escribieron los profesionales, sin tener que elegir a uno primero. Las
+   * mismas condiciones de visibilidad que `listPublicPosts` —`PUBLIC`,
+   * publicado, no moderado, ya publicado— más las dos del directorio sobre la
+   * vitrina del autor: si un perfil se despublica, sus publicaciones salen del
+   * feed con él.
+   *
+   * Va en SQL y no por el ORM porque necesita los datos del autor en la misma
+   * fila: sin eso serían N lecturas de perfil para pintar N tarjetas.
+   *
+   * El cursor es `(published_at, id)` y no un `OFFSET`: con publicaciones
+   * entrando mientras alguien pagina, un offset repite y saltea filas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param limit - Cuántas traer.
+   * @param cursor - Desde dónde seguir, si se está paginando.
+   * @returns Las publicaciones con su autor, de la más reciente a la más antigua.
+   */
+  async listFeedPublico(
+    em: EntityManager,
+    limit: number,
+    cursor?: { publishedAt: Date; id: string },
+  ): Promise<
+    {
+      id: string;
+      bodyText: string;
+      publishedAt: Date;
+      authorSlug: string;
+      authorDisplayName: string;
+      authorHeadline: string | null;
+      authorAvatarFileId: string | null;
+      authorKindConceptId: string;
+    }[]
+  > {
+    const parametros: unknown[] = [
+      COMM.POST_VISIBILITY_PUBLIC,
+      COMM.PUBLICATION_PUBLISHED,
+      COMM.MODERATION_REMOVED,
+      COMM.MODERATION_RESTRICTED,
+      COMM.PROFILE_VISIBILITY_PUBLIC,
+      CONCEPTS.STATE_ACTIVE,
+    ];
+    // `(a, b) < (c, d)` es comparación de tuplas de Postgres: ordena por
+    // `published_at` y desempata por `id` en una sola condición, que es
+    // exactamente el orden del `ORDER BY`.
+    let condicionCursor = '';
+    if (cursor) {
+      condicionCursor = `AND (sp.published_at, sp.id) < (?, ?)`;
+      parametros.push(cursor.publishedAt, cursor.id);
+    }
+    parametros.push(limit);
+
+    const filas = await em.getConnection().execute<
+      {
+        id: string;
+        body_text: string;
+        published_at: Date;
+        author_slug: string;
+        author_display_name: string;
+        author_headline: string | null;
+        author_avatar_file_id: string | null;
+        author_kind_concept_id: string;
+      }[]
+    >(
+      `SELECT sp.id,
+              sp.body_text,
+              COALESCE(sp.published_at, sp.created_at) AS published_at,
+              pp.slug                    AS author_slug,
+              pp.display_name            AS author_display_name,
+              pp.headline                AS author_headline,
+              pp.avatar_file_id          AS author_avatar_file_id,
+              pp.target_type_concept_id  AS author_kind_concept_id
+         FROM community.social_posts sp
+         JOIN community.public_profiles pp
+           ON pp.id = sp.author_public_profile_id
+        WHERE sp.visibility_concept_id = ?
+          AND sp.publication_status_concept_id = ?
+          AND sp.moderation_status_concept_id NOT IN (?, ?)
+          AND sp.published_at <= NOW()
+          AND pp.visibility_concept_id = ?
+          AND pp.status_concept_id = ?
+          ${condicionCursor}
+        ORDER BY sp.published_at DESC, sp.id DESC
+        LIMIT ?`,
+      parametros,
+      'all',
+    );
+
+    return filas.map((fila) => ({
+      id: fila.id,
+      bodyText: fila.body_text,
+      publishedAt: new Date(fila.published_at),
+      authorSlug: fila.author_slug,
+      authorDisplayName: fila.author_display_name,
+      authorHeadline: fila.author_headline,
+      authorAvatarFileId: fila.author_avatar_file_id,
+      authorKindConceptId: fila.author_kind_concept_id,
+    }));
+  }
+
+  /**
    * Media, reacciones y comentarios de un lote de publicaciones, para la ficha.
    *
    * Una consulta por concepto en vez de tres viajes: `post_media` trae los

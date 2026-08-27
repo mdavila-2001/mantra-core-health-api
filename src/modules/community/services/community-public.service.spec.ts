@@ -64,6 +64,7 @@ function build(opciones?: {
     findPublicBySlug: mockFn().mockResolvedValue(null),
     ratingsByProfile: mockFn().mockResolvedValue(new Map()),
     listPublicPosts: mockFn().mockResolvedValue([]),
+    listFeedPublico: mockFn().mockResolvedValue([]),
     engagementByPost: mockFn().mockResolvedValue(new Map()),
     isPublicPostMedia: mockFn().mockResolvedValue(false),
     countPublishedReviews: mockFn().mockResolvedValue(0),
@@ -796,6 +797,146 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
       expect(d.stats.recordImpressions).toHaveBeenCalled();
       expect(d.stats.recordView).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('feed público de la portada', () => {
+    /** Una fila del feed tal como la devuelve el repositorio. */
+    const fila = (id: string, iso: string, slug = 'dra-demo') => ({
+      id,
+      bodyText: `Cuerpo de ${id}`,
+      publishedAt: new Date(iso),
+      authorSlug: slug,
+      authorDisplayName: 'Dra. Demo',
+      authorHeadline: 'Cardióloga',
+      authorAvatarFileId: null,
+      authorKindConceptId: 'concepto-desconocido',
+    });
+
+    it('cada tarjeta trae a su autor: en un feed mezclado es lo que las distingue', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({});
+
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0]).toMatchObject({
+        id: 'post-1',
+        authorSlug: 'dra-demo',
+        authorDisplayName: 'Dra. Demo',
+        authorHeadline: 'Cardióloga',
+        authorAvatarUrl: null,
+      });
+    });
+
+    it('un concepto de vertical que no se reconoce cae a PRACTITIONER y no rompe la página', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({});
+
+      expect(res.items[0].authorKind).toBe('PRACTITIONER');
+    });
+
+    it('pide una de más que el tope, y no la devuelve: es cómo sabe que hay más', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+        fila('post-2', '2026-08-27T09:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({ limit: 1 });
+
+      expect(d.repo.listFeedPublico).toHaveBeenCalledWith(
+        expect.anything(),
+        2,
+        undefined,
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).not.toBeNull();
+    });
+
+    it('sin página siguiente el cursor es null, no una cadena vacía', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({ limit: 5 });
+
+      expect(res.nextCursor).toBeNull();
+    });
+
+    it('el cursor que emite es el que vuelve a entender, en la fila donde cortó', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+        fila('post-2', '2026-08-27T09:00:00.000Z'),
+      ]);
+
+      const primera = await d.service.feedPublico({ limit: 1 });
+      await d.service.feedPublico({ limit: 1, cursor: primera.nextCursor! });
+
+      expect(d.repo.listFeedPublico).toHaveBeenLastCalledWith(
+        expect.anything(),
+        2,
+        { publishedAt: new Date('2026-08-27T10:00:00.000Z'), id: 'post-1' },
+      );
+    });
+
+    it('un cursor corrupto se ignora y sirve la primera página, no un 500', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([]);
+
+      await expect(
+        d.service.feedPublico({ cursor: 'no-es-base64-de-json' }),
+      ).resolves.toMatchObject({ items: [] });
+
+      expect(d.repo.listFeedPublico).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.any(Number),
+        undefined,
+      );
+    });
+
+    it('las imágenes y los contadores salen del mismo lote, sin un viaje por post', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+      d.repo.engagementByPost.mockResolvedValue(
+        new Map([
+          ['post-1', { imageFileIds: ['f1'], reactionCount: 3, commentCount: 2 }],
+        ]),
+      );
+
+      const res = await d.service.feedPublico({});
+
+      expect(d.repo.engagementByPost).toHaveBeenCalledTimes(1);
+      expect(res.items[0]).toMatchObject({
+        mediaUrls: ['/public/media/f1'],
+        reactionCount: 3,
+        commentCount: 2,
+      });
+    });
+
+    it('un post sin interacción no inventa contadores: van en cero y sin imágenes', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({});
+
+      expect(res.items[0]).toMatchObject({
+        mediaUrls: [],
+        reactionCount: 0,
+        commentCount: 0,
+      });
     });
   });
 });
