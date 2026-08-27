@@ -42,12 +42,34 @@ import { COMM } from '../community.concepts';
  */
 /** Ciudad y punto de un sujeto; sin coordenadas, `lat`/`lng` van en nulo. */
 export interface ProfileLocation {
+  /**
+   * La calle, tal como se escribe en un sobre.
+   *
+   * Es `common.addresses.lines`, y va aparte de la ciudad porque la ficha las
+   * muestra juntas pero el mapa sólo entiende el punto: quien no tiene
+   * coordenadas todavía puede leer dónde queda.
+   */
+  readonly address: string | null;
   /** Ciudad legible, tal como se muestra. */
   readonly city: string | null;
   /** Latitud, o `null` si la dirección no la tiene cargada. */
   readonly lat: number | null;
   /** Longitud, o `null` si la dirección no la tiene cargada. */
   readonly lng: number | null;
+}
+
+/** Un vínculo laboral de la trayectoria pública de un profesional. */
+export interface ProfileAffiliation {
+  /** Institución, tal como la declaró el profesional. */
+  readonly organizationName: string;
+  /** Cargo ejercido. */
+  readonly roleTitle: string;
+  /** Servicio o departamento, si lo declaró. */
+  readonly departmentText: string | null;
+  /** Inicio del vínculo, como fecha ISO (`YYYY-MM-DD`). */
+  readonly startDate: string;
+  /** Fin del vínculo, o `null` si sigue vigente. */
+  readonly endDate: string | null;
 }
 
 @Injectable()
@@ -313,12 +335,13 @@ export class PublicSearchRepository {
     const filas = await em.getConnection().execute<
       {
         owner_id: string;
+        lines: string | null;
         city: string | null;
         latitude: string | null;
         longitude: string | null;
       }[]
     >(
-      `SELECT DISTINCT ON (owner_id) owner_id, city, latitude, longitude
+      `SELECT DISTINCT ON (owner_id) owner_id, lines, city, latitude, longitude
            FROM common.addresses
           WHERE owner_id IN (?)
             AND (valid_to IS NULL OR valid_to >= CURRENT_DATE)
@@ -338,12 +361,24 @@ export class PublicSearchRepository {
         Number.isFinite(lat) &&
         Number.isFinite(lng);
       if (!geoValida) {
-        if (fila.city) {
-          salida.set(fila.owner_id, { city: fila.city, lat: null, lng: null });
+        // Sin punto pero con texto la dirección **sigue sirviendo**: la ficha
+        // escribe dónde atiende aunque no pueda dibujar el mapa.
+        if (fila.city || fila.lines) {
+          salida.set(fila.owner_id, {
+            address: fila.lines,
+            city: fila.city,
+            lat: null,
+            lng: null,
+          });
         }
         continue;
       }
-      salida.set(fila.owner_id, { city: fila.city, lat, lng });
+      salida.set(fila.owner_id, {
+        address: fila.lines,
+        city: fila.city,
+        lat,
+        lng,
+      });
     }
     return salida;
   }
@@ -383,6 +418,56 @@ export class PublicSearchRepository {
       if (!fila.display) continue;
       const previas = salida.get(fila.practitioner_profile_id) ?? [];
       if (!previas.includes(fila.display)) previas.push(fila.display);
+      salida.set(fila.practitioner_profile_id, previas);
+    }
+    return salida;
+  }
+
+  /**
+   * Trayectoria laboral pública de un profesional: dónde trabajó, con qué
+   * cargo y en qué período. La misma tabla que `profiles.practitioner_affiliations`
+   * (`GET /profiles/practitioners/me/affiliations`), leída sin sesión.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileIds - Sujetos de los perfiles del lote.
+   * @returns Mapa `practitionerProfileId → afiliaciones`, de la más reciente a la más antigua.
+   */
+  async affiliationsByPractitioner(
+    em: EntityManager,
+    practitionerProfileIds: string[],
+  ): Promise<Map<string, ProfileAffiliation[]>> {
+    const salida = new Map<string, ProfileAffiliation[]>();
+    if (practitionerProfileIds.length === 0) return salida;
+
+    const filas = await em.getConnection().execute<
+      {
+        practitioner_profile_id: string;
+        organization_name: string;
+        role_title: string;
+        department_text: string | null;
+        start_date: string;
+        end_date: string | null;
+      }[]
+    >(
+      `SELECT practitioner_profile_id, organization_name, role_title,
+              department_text, start_date, end_date
+         FROM profiles.practitioner_affiliations
+        WHERE practitioner_profile_id IN (?)
+          AND status_concept_id = ?
+        ORDER BY start_date DESC`,
+      [practitionerProfileIds, CONCEPTS.STATE_ACTIVE],
+      'all',
+    );
+
+    for (const fila of filas) {
+      const previas = salida.get(fila.practitioner_profile_id) ?? [];
+      previas.push({
+        organizationName: fila.organization_name,
+        roleTitle: fila.role_title,
+        departmentText: fila.department_text,
+        startDate: fila.start_date,
+        endDate: fila.end_date,
+      });
       salida.set(fila.practitioner_profile_id, previas);
     }
     return salida;

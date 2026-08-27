@@ -45,7 +45,19 @@ export interface BoliviaFacilitySeed {
   readonly departamento: string;
   /** Municipio donde está. */
   readonly municipio: string;
-  /** `CLINICA_PRIVADA`, `HOSPITAL`, `CAJA_SALUD` o `CENTRO_SALUD`. */
+  /**
+   * Qué clase de institución es.
+   *
+   * Los cuatro primeros son lugares donde se atiende: `CLINICA_PRIVADA`,
+   * `HOSPITAL`, `CAJA_SALUD`, `CENTRO_SALUD`. Los tres últimos son las empresas
+   * proveedoras: `FARMACIA`, `LABORATORIO`, `IMAGEN`.
+   *
+   * **Comparten catálogo a propósito.** El registro de procesos abre los módulos
+   * FARMACIA, LABORATORIO DE SANGRE y ANÁLISIS MEDICOS con el mismo capítulo que
+   * cualquier otra institución —«Registro en la App Datos Legales de la
+   * empresa», con los mismos 18 puntos—: para el sistema son la misma clase de
+   * cosa, y lo que las distingue es este campo, que es por donde se filtra.
+   */
   readonly tipo: string;
   /** Nivel de atención (1, 2 o 3); las cajas y clínicas no lo declaran. */
   readonly nivel: number | null;

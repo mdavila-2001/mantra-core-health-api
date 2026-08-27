@@ -212,6 +212,23 @@ export class PractitionerProfileSummaryDto {
   @ApiPropertyOptional({ format: 'uuid' })
   photoFileId?: string;
 
+  /**
+   * Correo de contacto del profesional. **Sólo en la lectura propia.**
+   *
+   * Este DTO lo comparten `me/summary` y la ficha que abre la guía de
+   * profesionales, y ahí está el cuidado: el correo y el teléfono salen de
+   * `common.contact_points`, son datos de la persona y **no** de los que una
+   * guía médica publica. En la ficha ajena viajan siempre en `undefined`, y no
+   * porque la pantalla los oculte —eso sería ocultar algo que ya se envió—
+   * sino porque el servicio no los lee.
+   */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  email?: string;
+
+  /** Teléfono de contacto. Mismo cuidado que {@link email}: sólo el propio. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  phone?: string;
+
   @ApiProperty({ format: 'uuid' })
   practitionerCategoryConceptId!: string;
 

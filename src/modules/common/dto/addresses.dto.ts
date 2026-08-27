@@ -3,10 +3,13 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
+  Min,
 } from 'class-validator';
 import { ContactUse, OwnerType } from './enums';
 
@@ -86,6 +89,36 @@ export class CreateAddressDto {
   @IsOptional()
   @IsEnum(ContactUse)
   use?: ContactUse;
+
+  /**
+   * Latitud del punto, si se conoce.
+   *
+   * Sin ella la dirección sigue sirviendo por texto (ciudad, calle); con
+   * ella, la ficha pública puede dibujar el punto en un mapa en vez de sólo
+   * nombrarlo.
+   */
+  @ApiPropertyOptional({
+    description: 'Latitud geográfica',
+    minimum: -90,
+    maximum: 90,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
+
+  /** Longitud del punto, si se conoce. Va siempre junto a `latitude`. */
+  @ApiPropertyOptional({
+    description: 'Longitud geográfica',
+    minimum: -180,
+    maximum: 180,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  longitude?: number;
 }
 
 /** Representación segura de una dirección. */
@@ -143,6 +176,14 @@ export class AddressResponseDto {
    */
   @ApiProperty({ description: 'Código de país.' })
   country!: string;
+
+  /** Latitud del punto, si se cargó. */
+  @ApiPropertyOptional()
+  latitude?: number;
+
+  /** Longitud del punto, si se cargó. */
+  @ApiPropertyOptional()
+  longitude?: number;
 
   /**
    * Fecha y hora en que se creó el registro.

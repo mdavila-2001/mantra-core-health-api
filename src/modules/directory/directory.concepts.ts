@@ -32,6 +32,22 @@ export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
       display: 'Tenant unverified',
     },
 
+    // --- Peldaños intermedios de la escalera de verificación (v4.1.9) ---
+    // Entre «sin verificar» y «verificada» faltaban los dos escalones que el
+    // producto sí distingue: la institución que existe porque el padrón oficial
+    // del SEDES la lista —y que nadie administra todavía— y la que alguien real
+    // ya reclamó y está documentando. Sin ellos la escalera era un booleano, y
+    // un hospital público, que jamás va a presentar expediente, quedaba para
+    // siempre indistinguible de una organización que se inventó a sí misma.
+    TENANT_REGISTRY_LISTED: {
+      code: 'DIR_TENANT_REGISTRY_LISTED',
+      display: 'Tenant listed in official registry',
+    },
+    TENANT_CLAIMED: {
+      code: 'DIR_TENANT_CLAIMED',
+      display: 'Tenant claimed',
+    },
+
     // --- Estados de tenant_memberships.status_concept_id ---
     MEMBERSHIP_INVITED: {
       code: 'DIR_MEMBERSHIP_INVITED',
@@ -54,6 +70,20 @@ export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
     ROLE_OWNER: { code: 'DIR_ROLE_OWNER', display: 'Tenant owner' },
     ROLE_ADMIN: { code: 'DIR_ROLE_ADMIN', display: 'Tenant admin' },
     ROLE_STAFF: { code: 'DIR_ROLE_STAFF', display: 'Tenant staff' },
+    /**
+     * Profesional cuyo vínculo con la organización fue aprobado. Existe para que
+     * la aprobación pueda darle acceso al tenant sin convertirlo en personal
+     * administrativo: opera su propia agenda ahí, y nada más.
+     *
+     * A propósito NO figura en `TENANT_ROLE_CONCEPT_BY_CODE`: el rol lo escribe
+     * únicamente el aprobador de vínculos, no un DTO de invitación. Quien
+     * administra no puede repartirlo a mano, así que la fila es evidencia de un
+     * trámite aprobado y no de una decisión suelta.
+     */
+    ROLE_PRACTITIONER: {
+      code: 'DIR_ROLE_PRACTITIONER',
+      display: 'Tenant practitioner',
+    },
 
     // --- Scopes de acceso (tenant_memberships.access_scope_concept_id) ---
     SCOPE_ALL_TENANT: {

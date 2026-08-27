@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PublicProfiles, VerifiedBadges } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
+import { COMM } from '../community.concepts';
 
 /** Datos para dar de alta un perfil público (anchor social del módulo). */
 export interface CreatePublicProfileData {
@@ -57,6 +58,8 @@ export interface CreatePublicProfileData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Archivo del avatar, ya subido. */
+  avatarFileId?: string;
 }
 
 /**
@@ -199,6 +202,29 @@ export class PublicProfilesRepository {
     return em.findOne(PublicProfiles, { slug });
   }
 
+  /**
+   * Si un archivo es el avatar o la portada de alguna vitrina pública.
+   *
+   * Es la puerta de `GET /public/media/:id` (P2): antes de servir un archivo
+   * al internet anónimo hay que saber que es de verdad la foto de **una
+   * vitrina publicada**, y no cualquier imagen de sensibilidad normal que
+   * alguien suba y adivine el id — `FileUploadService.downloadPublicMedia`
+   * conoce el archivo, pero no sabe qué es una vitrina.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fileId - El archivo a comprobar.
+   */
+  async isPublicMedia(em: EntityManager, fileId: string): Promise<boolean> {
+    const fila = await em.findOne(PublicProfiles, {
+      $and: [
+        { $or: [{ avatarFileId: fileId }, { coverFileId: fileId }] },
+        { visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC },
+        { statusConceptId: CONCEPTS.STATE_ACTIVE },
+      ],
+    });
+    return fila !== null;
+  }
+
   create(em: EntityManager, data: CreatePublicProfileData): PublicProfiles {
     return em.create(
       PublicProfiles,
@@ -215,6 +241,7 @@ export class PublicProfilesRepository {
         verificationStatusConceptId: CONCEPTS.STATE_PENDING,
         acceptsReviews: data.acceptsReviews ?? true,
         commentsDefaultEnabled: data.commentsDefaultEnabled ?? true,
+        avatarFileId: data.avatarFileId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

@@ -130,6 +130,39 @@ export class TenantAdministrationService {
     );
   }
 
+  /**
+   * Si la organización tiene a alguien que pueda decidir por ella.
+   *
+   * ## Para qué existe
+   *
+   * El vínculo de un profesional nace `PENDIENTE` cuando hay a quién pedirle
+   * permiso, y `DECLARADO` cuando no lo hay. Los hospitales públicos y las cajas
+   * del padrón **nunca van a registrarse** en la plataforma: dejar a sus médicos
+   * esperando una aprobación que nadie puede dar los bloquearía para siempre.
+   *
+   * Cuenta OWNER y ADMIN por separado y suma, en vez de una consulta con `$in`,
+   * porque el repositorio cuenta por rol concreto — y son dos números chicos.
+   *
+   * @param em - Contexto de persistencia.
+   * @param tenantId - La organización.
+   * @returns `true` si alguien puede aprobar en su nombre.
+   */
+  async hasAdministrators(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<boolean> {
+    for (const rol of ADMIN_TENANT_ROLES) {
+      const cuantos = await this.membershipsRepo.countActiveByTenantRole(
+        em,
+        tenantId,
+        rol,
+        DIR.MEMBERSHIP_ACTIVE,
+      );
+      if (cuantos > 0) return true;
+    }
+    return false;
+  }
+
   /** `true` si el actor tiene un rol global de plataforma. */
   private isPlatform(actor: AuthenticatedUser): boolean {
     const roles = actor.roles ?? [];

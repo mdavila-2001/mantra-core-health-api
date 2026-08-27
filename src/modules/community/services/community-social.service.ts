@@ -6,6 +6,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UPLOAD_MIME_ALLOWLIST,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -301,6 +302,25 @@ export class CommunitySocialService {
         });
       }
 
+      // `null` explícito lo quita; `undefined` (omitido) conserva el que haya.
+      // Sólo se valida cuando hay un archivo nuevo que comprobar — la misma
+      // regla que la foto profesional, y no se duplica.
+      if (dto.avatarFileId) {
+        await this.attachableFiles.assertUsableBy(
+          tx,
+          dto.avatarFileId,
+          actor,
+          {
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+            operation: 'community.profile.upsertOwn',
+          },
+          {
+            subject: 'El archivo del avatar',
+            notFound: 'El archivo del avatar no existe',
+          },
+        );
+      }
+
       // Misma resolución que la lectura: si la vitrina existe a nombre de la
       // cuenta, editarla es editar la suya, no crear una segunda.
       const existente = await this.vitrinaDe(tx, actor);
@@ -318,6 +338,9 @@ export class CommunitySocialService {
         if (dto.visibility !== undefined) {
           existente.visibilityConceptId =
             PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility];
+        }
+        if (dto.avatarFileId !== undefined) {
+          existente.avatarFileId = dto.avatarFileId ?? undefined;
         }
         touch(existente, actor.id);
       } else {
@@ -337,6 +360,7 @@ export class CommunitySocialService {
               ? undefined
               : PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility],
           acceptsReviews: dto.acceptsReviews,
+          avatarFileId: dto.avatarFileId ?? undefined,
           actorUserId: actor.id,
         });
       }

@@ -29,6 +29,45 @@
  *    **verifican**: la vitrina pública de una organización no se crea a mano,
  *    la proyecta `PublicProfileProjectionService` cuando el tenant se verifica.
  *    Sembrar sin verificar deja la organización invisible y sin explicación.
+ * 5. **Especialidad real, no sólo en el titular.** Antes esta corrida sólo
+ *    escribía la especialidad dentro de `headline` («Cardióloga ·
+ *    Cardiología»): la guía de profesionales agrupa y filtra por
+ *    `practitioner_specialties`, así que sin este paso los diez médicos caían
+ *    todos bajo «Sin especialidad registrada» y el chip de cada especialidad
+ *    no tenía a nadie debajo. Ahora se resuelve el concepto real del catálogo
+ *    (`clinical-forms:specialty:*`, los mismos que siembra `seed-dev-data.mjs`)
+ *    y se asigna con `POST /profiles/practitioners/{id}/specialties`.
+ * 6. **Dirección con coordenadas, para cada organización.** La ficha pública
+ *    (`/o/`, `/l/`, `/f/`) tiene un mapa aparte de la descripción escrita; sin
+ *    una fila en `common.addresses` con `latitude`/`longitude` no hay qué
+ *    dibujar ahí. Cada organización cae cerca del centro de su ciudad, con un
+ *    corrimiento chico y determinístico (`dispersar()`) para que no queden
+ *    todas apiladas en el mismo punto.
+ *
+ * 7. **Trayectoria profesional, para todos.** Dos etapas por médico —una
+ *    cerrada y una en curso— por `POST /profiles/practitioners/me/affiliations`.
+ *    Antes de esto, de los ~78 médicos que dejaban los tres seeders **uno solo**
+ *    tenía historial: ese endpoint es self-service puro, sin atajo de
+ *    plataforma, y ningún seeder con sesión propia lo llamaba. La pestaña
+ *    «Trayectoria» del perfil sólo se podía ver vacía.
+ * 8. **Teléfono, y la matrícula completa.** El teléfono viaja en el alta y se
+ *    escribe en `common.contact_points` junto al correo: es lo primero que un
+ *    médico busca en su propio perfil y ningún seeder lo sembraba. La matrícula
+ *    va con autoridad emisora y fecha, que sin ellas era un número pelado.
+ *
+ * **Lo que sigue faltando, y por qué esta corrida no lo resuelve:** los
+ * médicos no tienen consultorio propio en `common.addresses` — el tipo de
+ * dueño (`OwnerType`) sólo contempla `USER`, `PATIENT` y `TENANT`, no un
+ * perfil de profesional, así que hoy no hay ningún `ownerId` correcto para
+ * escribir esa fila. Es un hueco del contrato, no del seeder: agregarlo a mano
+ * con el `ownerId` equivocado dejaría datos que no se pueden leer de vuelta.
+ *
+ * Y tampoco hay **formación académica** (universidad, carrera, año de egreso):
+ * el modelo no la tiene. Lo más parecido es `professional_credentials`, que es
+ * un documento con número —no una formación—, y el auto-registro no acepta ni
+ * la institución ni la fecha del título; sólo el alta administrativa lo hace.
+ * Un profesional ya dado de alta **no puede agregar un título**: no existe el
+ * endpoint. Sembrarlo pediría modelo nuevo, no un seeder más largo.
  *
  * No es un mock: escribe por la API real, con sus guards y validaciones. Si el
  * contrato cambia, la corrida termina en rojo en vez de dejar datos a medias.
@@ -186,6 +225,7 @@ const MEDICOS = [
     apellido: 'Quispe',
     titulo: 'Cardióloga',
     especialidad: 'Cardiología',
+    codigoEspecialidad: 'cardiologia',
     ciudad: 'La Paz',
     bio: 'Cardióloga con 14 años de práctica. Atiendo hipertensión, arritmias y control de riesgo cardiovascular. Trabajo con ergometría y Holter propios, y derivo a electrofisiología cuando el caso lo pide.',
   },
@@ -194,6 +234,7 @@ const MEDICOS = [
     apellido: 'Mamani',
     titulo: 'Pediatra',
     especialidad: 'Pediatría',
+    codigoEspecialidad: 'pediatria',
     ciudad: 'El Alto',
     bio: 'Pediatra de atención primaria. Control del niño sano, vacunas y las consultas que no pueden esperar: fiebre, bronquiolitis, diarreas. Atiendo con la libreta de vacunas a la vista y explico cada indicación.',
   },
@@ -202,6 +243,7 @@ const MEDICOS = [
     apellido: 'Salas',
     titulo: 'Médica internista',
     especialidad: 'Medicina interna',
+    codigoEspecialidad: 'medicina-interna',
     ciudad: 'Cochabamba',
     bio: 'Medicina interna: el paciente adulto con varias cosas a la vez. Diabetes, tiroides, hipertensión y el seguimiento que las mantiene ordenadas en vez de tratarlas por separado.',
   },
@@ -210,6 +252,7 @@ const MEDICOS = [
     apellido: 'Rivas',
     titulo: 'Médico general',
     especialidad: 'Medicina general',
+    codigoEspecialidad: 'medicina-general',
     ciudad: 'Santa Cruz de la Sierra',
     bio: 'Consulta general para adultos. Suelo ser la primera puerta: escucho el motivo, pido lo que hace falta y, si corresponde otro especialista, lo digo el mismo día en vez de mandar a dar vueltas.',
   },
@@ -218,6 +261,7 @@ const MEDICOS = [
     apellido: 'Aliaga',
     titulo: 'Ginecóloga',
     especialidad: 'Ginecología y obstetricia',
+    codigoEspecialidad: 'ginecologia-obstetricia',
     ciudad: 'La Paz',
     bio: 'Control ginecológico, planificación y embarazo de bajo riesgo. Consulta larga a propósito: la mayoría de lo que trae una mujer al consultorio no entra en quince minutos.',
   },
@@ -226,6 +270,7 @@ const MEDICOS = [
     apellido: 'Terceros',
     titulo: 'Traumatólogo',
     especialidad: 'Traumatología',
+    codigoEspecialidad: 'traumatologia',
     ciudad: 'Santa Cruz de la Sierra',
     bio: 'Lesiones de rodilla y hombro, y la traumatología del que hace deporte sin ser profesional. Opero lo que hay que operar y digo con la misma claridad lo que no.',
   },
@@ -234,6 +279,7 @@ const MEDICOS = [
     apellido: 'Vargas',
     titulo: 'Dermatóloga',
     especialidad: 'Dermatología',
+    codigoEspecialidad: 'dermatologia',
     ciudad: 'Cochabamba',
     bio: 'Dermatología clínica: acné, dermatitis, caída de cabello y control de lunares con dermatoscopía. Reviso la piel entera aunque la consulta venga por una sola mancha.',
   },
@@ -242,6 +288,7 @@ const MEDICOS = [
     apellido: 'Colque',
     titulo: 'Psiquiatra',
     especialidad: 'Psiquiatría',
+    codigoEspecialidad: 'psiquiatria',
     ciudad: 'La Paz',
     bio: 'Ansiedad, depresión y trastornos del sueño en adultos. Trabajo con psicoterapia y, cuando hace falta, medicación explicada: qué hace, cuánto tarda y qué esperar los primeros días.',
   },
@@ -250,6 +297,7 @@ const MEDICOS = [
     apellido: 'Rojas',
     titulo: 'Endocrinóloga',
     especialidad: 'Endocrinología',
+    codigoEspecialidad: 'endocrinologia',
     ciudad: 'Sucre',
     bio: 'Diabetes, tiroides y obesidad con enfoque metabólico. Ajusto tratamiento con los datos del paciente, no con un esquema fijo, y eso pide controles más seguidos al principio.',
   },
@@ -258,6 +306,7 @@ const MEDICOS = [
     apellido: 'Peña',
     titulo: 'Oftalmólogo',
     especialidad: 'Oftalmología',
+    codigoEspecialidad: 'oftalmologia',
     ciudad: 'Tarija',
     bio: 'Consulta oftalmológica general, control de glaucoma y cirugía de catarata. Reviso fondo de ojo en todo paciente con diabetes, aunque venga sólo por lentes.',
   },
@@ -286,15 +335,129 @@ const BOLIVIA = {
   jurisdictionConceptId: '790554f9-c1e3-564f-81b3-dc59d2ca0272',
 };
 
+/**
+ * Centro aproximado de cada ciudad sembrada, para el mapa de la ficha.
+ *
+ * No son las coordenadas reales de cada sede —eso lo carga quien administra
+ * la organización—, son el punto de partida de una dispersión chica
+ * (`dispersar`, más abajo) para que las organizaciones de una misma ciudad no
+ * queden todas apiladas en el mismo pixel del mapa.
+ */
+const CENTRO_POR_CIUDAD = {
+  'La Paz': { lat: -16.5, lng: -68.15 },
+  'El Alto': { lat: -16.5047, lng: -68.1633 },
+  Cochabamba: { lat: -17.3895, lng: -66.1568 },
+  'Santa Cruz de la Sierra': { lat: -17.7833, lng: -63.1821 },
+  Sucre: { lat: -19.0333, lng: -65.2627 },
+  Tarija: { lat: -21.5355, lng: -64.7296 },
+};
+
+/**
+ * Un punto cerca del centro de `ciudad`, corrido por `indice`.
+ *
+ * El corrimiento es determinístico —no al azar— para que la corrida sea
+ * reproducible: la misma organización cae siempre cerca del mismo punto, en
+ * vez de saltar de lugar cada vez que se repite el seed.
+ */
+function dispersar(ciudad, indice) {
+  const centro = CENTRO_POR_CIUDAD[ciudad] ?? CENTRO_POR_CIUDAD['La Paz'];
+  const angulo = (indice * 47) % 360;
+  const radio = 0.01 + (indice % 3) * 0.006;
+  const rad = (angulo * Math.PI) / 180;
+  return {
+    lat: Number((centro.lat + radio * Math.cos(rad)).toFixed(6)),
+    lng: Number((centro.lng + radio * Math.sin(rad)).toFixed(6)),
+  };
+}
+
+/**
+ * La trayectoria de cada médico, por ciudad.
+ *
+ * ## Por qué hacía falta
+ *
+ * Sin esto la pestaña «Trayectoria» del perfil decía «No hay actividad actual
+ * registrada» y «No hay experiencia histórica registrada» para **todos** los
+ * médicos sembrados: de los ~78 que dejaban los tres seeders, uno solo tenía
+ * afiliaciones. Una pantalla que sólo se puede ver vacía no se puede juzgar —
+ * ni el orden de la línea de tiempo, ni cómo se lee un cargo largo, ni qué
+ * pasa cuando hay tres etapas encimadas.
+ *
+ * Son dos etapas por médico: una **en curso** (sin `hasta`, que es lo que la
+ * pantalla marca como actividad actual) y una **cerrada** (la residencia o el
+ * puesto anterior). Los hospitales son reales de cada ciudad, porque un
+ * seeder con «Hospital 1» y «Hospital 2» tampoco deja juzgar el recorte.
+ */
+const TRAYECTORIA_POR_CIUDAD = {
+  'La Paz': [
+    { organizacion: 'Hospital Obrero N.º 1', cargo: 'Médico residente' },
+    { organizacion: 'Clínica del Sur', cargo: 'Médico de planta' },
+  ],
+  'El Alto': [
+    { organizacion: 'Hospital Municipal Boliviano Holandés', cargo: 'Médico residente' },
+    { organizacion: 'Centro de Salud Villa Adela', cargo: 'Médico de planta' },
+  ],
+  Cochabamba: [
+    { organizacion: 'Hospital Viedma', cargo: 'Médico residente' },
+    { organizacion: 'Clínica Los Olivos', cargo: 'Jefe de servicio' },
+  ],
+  'Santa Cruz de la Sierra': [
+    { organizacion: 'Hospital San Juan de Dios', cargo: 'Médico residente' },
+    { organizacion: 'Clínica Foianini', cargo: 'Médico de planta' },
+  ],
+  Sucre: [
+    { organizacion: 'Hospital Santa Bárbara', cargo: 'Médico residente' },
+    { organizacion: 'Clínica Cristo de las Américas', cargo: 'Médico de planta' },
+  ],
+  Tarija: [
+    { organizacion: 'Hospital San Juan de Dios de Tarija', cargo: 'Médico residente' },
+    { organizacion: 'Clínica Los Chacos', cargo: 'Médico de planta' },
+  ],
+};
+
 /** Organizaciones con cara pública: clínicas, laboratorios y farmacias. */
 const ORGANIZACIONES = [
-  { tipo: 'HOSPITAL', nombre: 'Clínica del Sur', ciudad: 'La Paz' },
-  { tipo: 'HOSPITAL', nombre: 'Hospital Santa María', ciudad: 'Santa Cruz de la Sierra' },
-  { tipo: 'MEDICAL_OFFICE', nombre: 'Centro Médico Sopocachi', ciudad: 'La Paz' },
-  { tipo: 'HEALTH_OTHER', nombre: 'Laboratorio Bioclínico Andino', ciudad: 'La Paz' },
-  { tipo: 'HEALTH_OTHER', nombre: 'Laboratorio Central Cochabamba', ciudad: 'Cochabamba' },
-  { tipo: 'PHARMACY', nombre: 'Farmacia Chuquiago', ciudad: 'La Paz' },
-  { tipo: 'PHARMACY', nombre: 'Farmacia Vida Plena', ciudad: 'Santa Cruz de la Sierra' },
+  {
+    tipo: 'HOSPITAL',
+    nombre: 'Clínica del Sur',
+    ciudad: 'La Paz',
+    calle: 'Av. Hernando Siles 3120, Obrajes',
+  },
+  {
+    tipo: 'HOSPITAL',
+    nombre: 'Hospital Santa María',
+    ciudad: 'Santa Cruz de la Sierra',
+    calle: 'Av. San Martín 4to Anillo',
+  },
+  {
+    tipo: 'MEDICAL_OFFICE',
+    nombre: 'Centro Médico Sopocachi',
+    ciudad: 'La Paz',
+    calle: 'Calle Rosendo Gutiérrez 574, Sopocachi',
+  },
+  {
+    tipo: 'HEALTH_OTHER',
+    nombre: 'Laboratorio Bioclínico Andino',
+    ciudad: 'La Paz',
+    calle: 'Av. Arce 2081',
+  },
+  {
+    tipo: 'HEALTH_OTHER',
+    nombre: 'Laboratorio Central Cochabamba',
+    ciudad: 'Cochabamba',
+    calle: 'Av. Ayacucho 234',
+  },
+  {
+    tipo: 'PHARMACY',
+    nombre: 'Farmacia Chuquiago',
+    ciudad: 'La Paz',
+    calle: 'Av. 6 de Agosto 2170',
+  },
+  {
+    tipo: 'PHARMACY',
+    nombre: 'Farmacia Vida Plena',
+    ciudad: 'Santa Cruz de la Sierra',
+    calle: 'Av. Cristo Redentor 3er Anillo',
+  },
 ];
 
 /* ── La corrida ─────────────────────────────────────────────────────────── */
@@ -324,7 +487,7 @@ async function entrarComoAdmin() {
   };
 }
 
-async function sembrarMedico(medico, indice, tenantId) {
+async function sembrarMedico(medico, indice, tenantId, especialidades) {
   const sufijo = `${TANDA}${indice}`;
   const email = `${slugificar(medico.nombre)}.${slugificar(medico.apellido)}.${sufijo}@alovida.test`;
 
@@ -338,6 +501,15 @@ async function sembrarMedico(medico, indice, tenantId) {
       licenseNumber: `MP-${sufijo}`,
       credentialNumber: `TIT-${sufijo}`,
       professionalTitle: medico.titulo,
+      // El teléfono: se escribe en `common.contact_points` junto al correo, y
+      // es lo primero que un médico busca en su propio perfil. Ningún seeder
+      // lo sembraba, así que el bloque de contacto se veía siempre vacío.
+      // Determinístico a partir del índice para que la corrida sea repetible.
+      phone: `+591 7${String(10_000_000 + indice * 137).slice(0, 7)}`,
+      // La matrícula, completa: sin autoridad ni fecha, la pestaña de
+      // credenciales mostraba un número pelado que no dice quién lo emitió.
+      regulatoryAuthority: 'Colegio Médico de Bolivia',
+      licenseIssueDate: `${2006 + (indice % 12)}-03-15`,
     },
     expect: 201,
   });
@@ -357,7 +529,11 @@ async function sembrarMedico(medico, indice, tenantId) {
     body: {
       tenantId,
       slug,
-      displayName: `${medico.titulo.startsWith('Médic') ? '' : 'Dr'}${medico.nombre} ${medico.apellido}`.trim(),
+      // El nombre, y nada más. Un prefijo armado a mano daba «DrPatricia
+      // Vargas» —sin espacio y en el género equivocado—, y el tratamiento ya
+      // viaja en el `headline` («Dermatóloga · Dermatología»), que es donde
+      // corresponde y donde no hay que adivinarle el género a nadie.
+      displayName: `${medico.nombre} ${medico.apellido}`,
       headline: `${medico.titulo} · ${medico.especialidad}`,
       biography: medico.bio,
       visibility: 'PUBLIC',
@@ -365,6 +541,61 @@ async function sembrarMedico(medico, indice, tenantId) {
   });
   if (!vitrina.ok) return null;
   const profileId = vitrina.body.id;
+
+  // La especialidad: sin ella el médico cae bajo «Sin especialidad
+  // registrada» en la guía, y el chip de su especialidad nunca tiene a nadie
+  // debajo. `practitionerProfileId` viene del alta, no de la vitrina —son dos
+  // ids distintos (el perfil clínico y el perfil social).
+  const concepto = especialidades.get(medico.codigoEspecialidad);
+  let especialidadAsignada = false;
+  if (concepto) {
+    const especialidad = await call(
+      'medicos',
+      `especialidad de ${medico.nombre}`,
+      'POST',
+      `/profiles/practitioners/${alta.body.practitionerProfileId}/specialties`,
+      {
+        token: suToken,
+        body: { specialtyConceptId: concepto.conceptId, isPrimary: true },
+        expect: 201,
+      },
+    );
+    especialidadAsignada = especialidad.ok;
+  }
+
+  // La trayectoria: dos etapas, una cerrada y una en curso. Va con el token
+  // del propio médico porque `me/affiliations` es self-service puro — no hay
+  // atajo de plataforma, y es la razón por la que hasta ahora sólo un médico
+  // de todos los sembrados tenía historial.
+  const etapas = TRAYECTORIA_POR_CIUDAD[medico.ciudad] ?? TRAYECTORIA_POR_CIUDAD['La Paz'];
+  const egreso = 2006 + (indice % 12);
+  let trayectoriaSembrada = 0;
+  const afiliaciones = [
+    {
+      organizationName: etapas[0].organizacion,
+      roleTitle: etapas[0].cargo,
+      departmentText: medico.especialidad,
+      startDate: `${egreso}-06-01`,
+      endDate: `${egreso + 4}-05-31`,
+    },
+    {
+      organizationName: etapas[1].organizacion,
+      roleTitle: etapas[1].cargo,
+      departmentText: medico.especialidad,
+      // Sin `endDate`: es lo que la pantalla lee como «actividad actual».
+      startDate: `${egreso + 4}-07-01`,
+    },
+  ];
+  for (const afiliacion of afiliaciones) {
+    const puesta = await call(
+      'trayectoria',
+      `${afiliacion.organizationName} de ${medico.nombre}`,
+      'POST',
+      '/profiles/practitioners/me/affiliations',
+      { token: suToken, body: afiliacion, expect: 201 },
+    );
+    if (puesta.ok) trayectoriaSembrada += 1;
+  }
 
   // Publicaciones: es lo que convierte una ficha en un perfil vivo.
   for (let i = 0; i < POSTS_POR_DOCTOR; i += 1) {
@@ -380,6 +611,8 @@ async function sembrarMedico(medico, indice, tenantId) {
   sembrado.medicos.push({
     nombre: `${medico.nombre} ${medico.apellido}`,
     especialidad: medico.especialidad,
+    especialidadAsignada,
+    trayectoriaSembrada,
     ciudad: medico.ciudad,
     email,
     clave: CLAVE,
@@ -414,6 +647,24 @@ async function sembrarOrganizacion(org, indice, adminUserId) {
     expect: [200, 201],
   });
 
+  // La dirección con coordenadas: sin esto la ficha pública tiene «dónde
+  // atiende» en texto pero el mapa no tiene qué dibujar. `ownerType: TENANT`
+  // porque el punto que lee la ficha pública es el de la organización, no el
+  // de una sede suya en particular (`directory.branches` es otro dato, con
+  // otro dueño, que la ficha pública todavía no lee).
+  const punto = dispersar(org.ciudad, indice);
+  await call('organizaciones', `dirección de ${org.nombre}`, 'POST', '/common/addresses', {
+    body: {
+      ownerType: 'TENANT',
+      ownerId: tenantId,
+      lines: [org.calle],
+      city: org.ciudad,
+      latitude: punto.lat,
+      longitude: punto.lng,
+    },
+    expect: 201,
+  });
+
   sembrado.organizaciones.push({
     nombre: org.nombre,
     tipo: org.tipo,
@@ -423,13 +674,53 @@ async function sembrarOrganizacion(org, indice, adminUserId) {
   });
 }
 
+/**
+ * Los conceptos de especialidad del catálogo, por su código corto.
+ *
+ * Los mismos que siembra `seed-dev-data.mjs`: `clinical-forms:specialty:*`, en
+ * castellano. No se inventa ningún concepto acá — si el catálogo no los tiene
+ * todavía (una base recién creada, antes de que corra el otro seeder), la
+ * especialidad de cada médico simplemente no se asigna y queda anotado en el
+ * resumen de la corrida.
+ */
+async function especialidadesDelCatalogo() {
+  const pagina = await call(
+    'especialidades',
+    'Conceptos de especialidad del catálogo',
+    'GET',
+    '/terminology/concepts?q=clinical-forms:specialty:&limit=50',
+  );
+  const mapa = new Map();
+  for (const item of pagina.body?.items ?? []) {
+    // El código real es `CARDIOLOGIA`, `MEDICINA_INTERNA` — mayúsculas y
+    // guión bajo. `codigoEspecialidad` en `MEDICOS` está en minúsculas y con
+    // guión medio (calcado del nombre de carpeta en
+    // `src/common/seed/data/clinical-forms/`), así que se normalizan los dos
+    // al mismo formato en vez de tener que escribirlo dos veces distinto.
+    const sufijo = String(item.code ?? '')
+      .split(':')
+      .pop()
+      .toLowerCase()
+      .replace(/_/g, '-');
+    if (sufijo && sufijo !== 'transversal') mapa.set(sufijo, item);
+  }
+  return mapa;
+}
+
 async function main() {
   paso(`\nSembrando la vitrina pública contra ${BASE}\n`);
   const { tenantId, userId: adminUserId } = await entrarComoAdmin();
+  const especialidades = await especialidadesDelCatalogo();
+  if (especialidades.size === 0) {
+    paso(
+      '· El catálogo no tiene especialidades todavía (¿corriste `yarn seed:dev` primero?); ' +
+        'los médicos quedan sin especialidad asignada.',
+    );
+  }
 
   paso(`· Sembrando ${Math.min(DOCTORES, MEDICOS.length)} médicos con vitrina y publicaciones…`);
   for (let i = 0; i < Math.min(DOCTORES, MEDICOS.length); i += 1) {
-    await sembrarMedico(MEDICOS[i], i, tenantId);
+    await sembrarMedico(MEDICOS[i], i, tenantId, especialidades);
   }
 
   if (adminUserId) {
@@ -453,8 +744,11 @@ async function main() {
   }
   paso(`\n  Contraseña de todas: ${CLAVE}`);
   paso(
-    `\n  ${sembrado.medicos.length} médicos · ${sembrado.publicaciones} publicaciones · ` +
-      `${sembrado.organizaciones.filter((o) => o.verificada).length}/${sembrado.organizaciones.length} organizaciones verificadas`,
+    `\n  ${sembrado.medicos.length} médicos ` +
+      `(${sembrado.medicos.filter((m) => m.especialidadAsignada).length} con especialidad, ` +
+      `${sembrado.medicos.filter((m) => m.trayectoriaSembrada === 2).length} con trayectoria completa) · ` +
+      `${sembrado.publicaciones} publicaciones · ` +
+      `${sembrado.organizaciones.filter((o) => o.verificada).length}/${sembrado.organizaciones.length} organizaciones verificadas y ubicadas en el mapa`,
   );
   paso(`  Detalle de la corrida: ${OUT}`);
 

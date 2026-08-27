@@ -4,7 +4,10 @@ import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import type { PublicProfiles, VerifiedBadges } from '../entities';
 import { PublicSearchRepository } from '../repositories';
-import type { ProfileLocation } from '../repositories/public-search.repository';
+import type {
+  ProfileAffiliation,
+  ProfileLocation,
+} from '../repositories/public-search.repository';
 import {
   COMMUNITY_PUBLIC_PROFILES_INDEX,
   PUBLIC_DIRECTORY_TENANT,
@@ -98,6 +101,7 @@ export const PUBLIC_PROFILE_KEYS = [
   'address',
   'location',
   'specialties',
+  'trajectory',
   'ratingAverage',
   'ratingCount',
   'acceptsReviews',
@@ -283,9 +287,18 @@ export class CommunityPublicService {
     )
       throw new ResourceNotFoundException('No encontrado', { slug });
 
-    const [señales, posts] = await Promise.all([
+    const kind = this.kindOf(profile) as PublicDirectoryProfileDto['kind'];
+    // Sólo un profesional tiene especialidad y trayectoria laboral; pedirlas
+    // para el resto sería un viaje que siempre vuelve vacío.
+    const [señales, posts, especialidades, trayectoria] = await Promise.all([
       this.señalesDe(em, [profile]),
       this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
+      kind === 'PRACTITIONER'
+        ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
+        : Promise.resolve(new Map<string, string[]>()),
+      kind === 'PRACTITIONER'
+        ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
+        : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
     ]);
     const rating = señales.ratings.get(profile.id);
     const badge = this.verification.readBadge(
@@ -300,7 +313,7 @@ export class CommunityPublicService {
     this.stats.recordView(profile.tenantId, profile.id);
 
     return {
-      kind: this.kindOf(profile) as PublicDirectoryProfileDto['kind'],
+      kind,
       slug: profile.slug,
       displayName: profile.displayName,
       headline: profile.headline ?? null,
@@ -309,16 +322,13 @@ export class CommunityPublicService {
       coverUrl: this.fileUrl(profile.coverFileId),
       verified: badge.status === 'VERIFIED',
       city: ubicacion?.city ?? null,
-      // `address` y `specialties` viven en `directory` y `profiles`, y su
-      // vínculo con el perfil público es polimórfico. Se sirven en su forma
-      // final —null y vacío, no ausentes— para que la pantalla ya esté
-      // construida cuando se llenen.
-      address: null,
+      address: ubicacion?.address ?? null,
       location:
         ubicacion?.lat != null && ubicacion?.lng != null
           ? { lat: ubicacion.lat, lng: ubicacion.lng }
           : null,
-      specialties: [],
+      specialties: especialidades.get(profile.targetId) ?? [],
+      trajectory: trayectoria.get(profile.targetId) ?? [],
       ratingAverage: rating?.average ?? null,
       ratingCount: rating?.count ?? 0,
       acceptsReviews: profile.acceptsReviews ?? false,

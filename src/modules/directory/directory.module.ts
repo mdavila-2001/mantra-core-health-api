@@ -66,11 +66,15 @@ import {
   // vínculos de TP-2: quién administra una organización se decide en un solo
   // lugar, y ese lugar es éste. Copiar el criterio allá daría dos definiciones
   // de «admin de la organización» que se separan con el tiempo.
+  // `DirectoryMembershipsService` lo necesita `profiles` para que aprobar un
+  // vínculo conceda la membresía asistencial (MAC-VINCULO): qué campos lleva una
+  // membresía y qué cuenta como duplicada se decide acá, no en cada llamador.
   exports: [
     TenantsRepository,
     TenantMembershipsRepository,
     TenantTypeProfileService,
     TenantAdministrationService,
+    DirectoryMembershipsService,
   ],
 })
 export class DirectoryModule {}

@@ -363,6 +363,23 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       'profiles.practitioner_specialties.verification_status_concept_id',
     ],
   },
+  {
+    code: 'practitioner-affiliation-status',
+    name: 'Estado del vínculo con la institución',
+    description:
+      'Aprobado sólo si alguien de la organización lo aprobó; pendiente si hay a quién preguntarle; declarado si nadie puede confirmarlo.',
+    concepts: [
+      PROF.AFFILIATION_PENDING,
+      PROF.AFFILIATION_DECLARED,
+      PROF.AFFILIATION_APPROVED,
+      PROF.AFFILIATION_REJECTED,
+      PROF.AFFILIATION_REVOKED,
+    ],
+    // Sin preseleccionado a propósito: con qué estado nace un vínculo lo decide
+    // el servicio mirando quién administra la sede, y un valor por omisión acá
+    // sería la misma regla escrita en dos lados —el que se olvida de cambiar—.
+    targets: ['profiles.practitioner_affiliations.status_concept_id'],
+  },
 
   // --- directory: organizaciones, membresías y sucursales ---
   {
@@ -420,8 +437,14 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
   {
     code: 'tenant-verification-status',
     name: 'Verificación de la organización',
-    description: 'Si la documentación de la organización fue comprobada.',
-    concepts: [DIR.TENANT_UNVERIFIED, CONCEPTS.TENANT_VERIFIED],
+    description:
+      'Cuánto se comprobó de la organización: nada, que figura en el padrón oficial, que alguien real la administra, o su documentación completa. Los cuatro valores están en orden: cada uno confía más que el anterior.',
+    concepts: [
+      DIR.TENANT_UNVERIFIED,
+      DIR.TENANT_REGISTRY_LISTED,
+      DIR.TENANT_CLAIMED,
+      CONCEPTS.TENANT_VERIFIED,
+    ],
     defaultConceptId: DIR.TENANT_UNVERIFIED,
     targets: ['directory.tenants.verification_status_concept_id'],
   },
@@ -443,7 +466,12 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     name: 'Rol en la organización',
     description:
       'Rol de negocio con el que la persona actúa en la organización. No es un rol global de plataforma.',
-    concepts: [DIR.ROLE_OWNER, DIR.ROLE_ADMIN, DIR.ROLE_STAFF],
+    concepts: [
+      DIR.ROLE_OWNER,
+      DIR.ROLE_ADMIN,
+      DIR.ROLE_STAFF,
+      DIR.ROLE_PRACTITIONER,
+    ],
     defaultConceptId: DIR.ROLE_STAFF,
     targets: ['directory.tenant_memberships.tenant_role_concept_id'],
   },
