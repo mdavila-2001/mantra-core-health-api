@@ -870,20 +870,30 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
   }
 
   // Publicaciones: es lo que convierte una ficha en un perfil vivo. Cada médico
-  // abre con lo específico de su especialidad y sigue con lo general, con
-  // imagen a lo ancho en la mayoría y alguna sólo de texto.
+  // abre con lo específico de su especialidad y sigue con lo general. La mayoría
+  // lleva una imagen; una de cada tres lleva **varias**, para poder ver el
+  // carrusel deslizable de la tarjeta; alguna va sólo de texto.
   const cola = publicacionesPara(medico.codigoEspecialidad);
   let publicacionesConImagen = 0;
   for (let i = 0; i < POSTS_POR_DOCTOR; i += 1) {
     const entrada = cola[i % cola.length];
-    const fileId = await imagenTematica(
-      suToken,
-      entrada.imagen,
-      `post-${slug}-${i + 1}.jpg`,
-    );
-    const media = fileId
-      ? [{ fileId, mediaRole: 'IMAGE', altText: entrada.hashtags?.[0] ?? 'Imagen de la publicación', ordinal: 0 }]
-      : undefined;
+    const cuantasImagenes = i % 3 === 2 ? 3 : 1;
+    const media = [];
+    for (let n = 0; n < cuantasImagenes; n += 1) {
+      const fileId = await imagenTematica(
+        suToken,
+        `${entrada.imagen}-${i}-${n}`,
+        `post-${slug}-${i + 1}-${n + 1}.jpg`,
+      );
+      if (fileId) {
+        media.push({
+          fileId,
+          mediaRole: 'IMAGE',
+          altText: entrada.hashtags?.[0] ?? 'Imagen de la publicación',
+          ordinal: n,
+        });
+      }
+    }
     const post = await call('publicaciones', `post ${i + 1} de ${medico.nombre}`, 'POST', `/community/profiles/${profileId}/posts`, {
       token: suToken,
       body: {
@@ -891,13 +901,13 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
         postType: 'TEXT',
         visibility: 'PUBLIC',
         ...(entrada.hashtags ? { hashtags: entrada.hashtags } : {}),
-        ...(media ? { media } : {}),
+        ...(media.length > 0 ? { media } : {}),
       },
       expect: [200, 201],
     });
     if (post.ok) {
       sembrado.publicaciones += 1;
-      if (media) publicacionesConImagen += 1;
+      if (media.length > 0) publicacionesConImagen += 1;
     }
   }
 
