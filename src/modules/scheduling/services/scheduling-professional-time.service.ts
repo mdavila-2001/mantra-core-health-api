@@ -22,7 +22,15 @@ export interface CompromisoDelProfesional {
   readonly endAt: Date;
   readonly resourceName: string | null;
   readonly timeZone: string | null;
-  readonly patientProfileId: string;
+  /**
+   * Qué clase de compromiso es: una cita con paciente, o tiempo ocupado del
+   * doctor (reunión, guardia — AG-3). Decide cómo se cuenta en el mensaje.
+   */
+  readonly kind: 'cita' | 'ocupado';
+  /** El paciente, cuando es una cita. */
+  readonly patientProfileId: string | null;
+  /** El rótulo del tiempo ocupado, cuando lo es. */
+  readonly reason: string | null;
 }
 
 /**
@@ -73,14 +81,92 @@ export class SchedulingProfessionalTimeService {
     hasta: Date,
     excepto?: string,
   ): Promise<CompromisoDelProfesional[]> {
-    return this.bookingsRepo.findProfessionalCommitmentsOverlapping(
-      em,
-      practitionerProfileId,
-      desde,
-      hasta,
-      ESTADOS_QUE_COMPROMETEN,
-      excepto,
+    const [citas, ocupados] = await Promise.all([
+      this.citasConfirmadas(em, practitionerProfileId, desde, hasta, excepto),
+      this.tiempoOcupado(em, practitionerProfileId, desde, hasta),
+    ]);
+    return [...citas, ...ocupados].sort(
+      (a, b) => a.startAt.getTime() - b.startAt.getTime(),
     );
+  }
+
+  /**
+   * Sólo las citas confirmadas, sin el tiempo ocupado.
+   *
+   * Lo usa la creación del tiempo ocupado (AG-3): una reunión que pisa OTRA
+   * reunión es inofensiva —dos rótulos del mismo doctor—, pero una que pisa a
+   * un paciente confirmado no se crea en silencio.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - El profesional.
+   * @param desde - Inicio del rango.
+   * @param hasta - Fin del rango.
+   * @param excepto - Reserva que no se compara consigo misma.
+   * @returns Las citas que se cruzan.
+   */
+  async citasConfirmadas(
+    em: EntityManager,
+    practitionerProfileId: string,
+    desde: Date,
+    hasta: Date,
+    excepto?: string,
+  ): Promise<CompromisoDelProfesional[]> {
+    const filas =
+      await this.bookingsRepo.findProfessionalCommitmentsOverlapping(
+        em,
+        practitionerProfileId,
+        desde,
+        hasta,
+        ESTADOS_QUE_COMPROMETEN,
+        excepto,
+      );
+    return filas.map((fila) => ({
+      id: fila.id,
+      startAt: fila.startAt,
+      endAt: fila.endAt,
+      resourceName: fila.resourceName,
+      timeZone: fila.timeZone,
+      kind: 'cita' as const,
+      patientProfileId: fila.patientProfileId,
+      reason: null,
+    }));
+  }
+
+  /**
+   * El tiempo ocupado del profesional: reuniones, guardias, recesos (AG-3).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - El profesional.
+   * @param desde - Inicio del rango.
+   * @param hasta - Fin del rango.
+   * @param excepto - Excepción que no se compara consigo misma.
+   * @returns Los ratos ocupados que se cruzan.
+   */
+  async tiempoOcupado(
+    em: EntityManager,
+    practitionerProfileId: string,
+    desde: Date,
+    hasta: Date,
+    excepto?: string,
+  ): Promise<CompromisoDelProfesional[]> {
+    const filas =
+      await this.bookingsRepo.findProfessionalBusyExceptionsOverlapping(
+        em,
+        practitionerProfileId,
+        desde,
+        hasta,
+        excepto,
+      );
+    return filas.map((fila) => ({
+      id: fila.id,
+      startAt: fila.startAt,
+      endAt: fila.endAt,
+      resourceName: fila.resourceName,
+      timeZone: fila.timeZone,
+      kind: 'ocupado' as const,
+      patientProfileId: null,
+      reason: fila.reason,
+    }));
   }
 
   /**
@@ -114,15 +200,24 @@ export class SchedulingProfessionalTimeService {
     if (ocupado.length === 0) return;
 
     const primero = ocupado[0];
-    const nombres = await this.bookingsRepo.findPatientNames(em, [
-      primero.patientProfileId,
-    ]);
-    const paciente = nombres.get(primero.patientProfileId);
+    let quien = 'una cita';
+    if (primero.kind === 'ocupado') {
+      // El tiempo ocupado se cuenta por su rótulo: «Reunión de equipo» le dice
+      // al doctor exactamente contra qué chocó.
+      quien = primero.reason ? `«${primero.reason}»` : 'un rato ocupado';
+    } else if (primero.patientProfileId) {
+      const nombres = await this.bookingsRepo.findPatientNames(em, [
+        primero.patientProfileId,
+      ]);
+      const paciente = nombres.get(primero.patientProfileId);
+      if (paciente) quien = `a ${paciente}`;
+    }
 
     throw new PreconditionFailedException(
-      `El profesional ya tiene ${
-        paciente ? `a ${paciente}` : 'una cita'
-      } de ${horaLocal(primero.startAt, primero.timeZone)} a ${horaLocal(
+      `El profesional ya tiene ${quien} de ${horaLocal(
+        primero.startAt,
+        primero.timeZone,
+      )} a ${horaLocal(
         primero.endAt,
         primero.timeZone,
       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez.`,

@@ -569,6 +569,30 @@ export class SchedulingCatalogRepository {
   }
 
   /**
+   * Una excepción por su id, o `null` si no existe.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - La excepción buscada.
+   * @returns La fila, o `null`.
+   */
+  findExceptionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<AvailabilityExceptions | null> {
+    return em.findOne(AvailabilityExceptions, { id });
+  }
+
+  /**
+   * Elimina una excepción.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param exception - La fila a eliminar.
+   */
+  removeException(em: EntityManager, exception: AvailabilityExceptions): void {
+    em.remove(exception);
+  }
+
+  /**
    * Crea create exception.
    *
    * @param em - Contexto de persistencia o transacción activa.

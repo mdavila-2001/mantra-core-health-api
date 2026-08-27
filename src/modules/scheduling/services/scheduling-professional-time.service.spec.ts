@@ -35,6 +35,7 @@ function compromiso(over: Record<string, unknown> = {}) {
 function build() {
   const bookingsRepo = {
     findProfessionalCommitmentsOverlapping: mockFn(async () => []),
+    findProfessionalBusyExceptionsOverlapping: mockFn(async () => []),
     findPatientNames: mockFn(async () => new Map([['pp-ana', 'Ana Quispe']])),
   };
   const service = new SchedulingProfessionalTimeService(bookingsRepo as any);
@@ -143,5 +144,59 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
     const estados =
       d.bookingsRepo.findProfessionalCommitmentsOverlapping.mock.calls[0][4];
     expect(estados).toHaveLength(2);
+  });
+
+  it('el tiempo ocupado bloquea igual que una cita, y se cuenta por su rótulo', async () => {
+    // AG-3: la reunión de 13:15 compromete al doctor aunque no tenga paciente.
+    // El mensaje dice contra qué chocó — «Reunión de equipo» — no un genérico.
+    const d = build();
+    d.bookingsRepo.findProfessionalBusyExceptionsOverlapping.mockResolvedValue([
+      {
+        id: 'ex-1',
+        startAt: new Date('2026-09-03T17:15:00Z'),
+        endAt: new Date('2026-09-03T17:45:00Z'),
+        reason: 'Reunión de equipo',
+        resourceName: 'Consultorio Centro',
+        timeZone: 'America/La_Paz',
+      },
+    ]);
+
+    await expect(
+      d.service.assertRangoLibre(
+        {} as any,
+        HP,
+        new Date('2026-09-03T17:00:00Z'),
+        new Date('2026-09-03T18:00:00Z'),
+      ),
+    ).rejects.toThrow(/«Reunión de equipo».*13:15.*13:45/);
+  });
+
+  it('los compromisos mezclan citas y tiempo ocupado, ordenados', async () => {
+    const d = build();
+    d.bookingsRepo.findProfessionalCommitmentsOverlapping.mockResolvedValue([
+      compromiso({
+        startAt: new Date('2026-09-03T16:00:00Z'),
+        endAt: new Date('2026-09-03T16:30:00Z'),
+      }),
+    ]);
+    d.bookingsRepo.findProfessionalBusyExceptionsOverlapping.mockResolvedValue([
+      {
+        id: 'ex-1',
+        startAt: new Date('2026-09-03T15:00:00Z'),
+        endAt: new Date('2026-09-03T15:30:00Z'),
+        reason: 'Guardia',
+        resourceName: null,
+        timeZone: null,
+      },
+    ]);
+
+    const lista = await d.service.compromisos(
+      {} as any,
+      HP,
+      new Date('2026-09-03T14:00:00Z'),
+      new Date('2026-09-03T18:00:00Z'),
+    );
+
+    expect(lista.map((c) => c.kind)).toEqual(['ocupado', 'cita']);
   });
 });
