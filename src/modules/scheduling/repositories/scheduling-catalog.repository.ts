@@ -569,6 +569,44 @@ export class SchedulingCatalogRepository {
   }
 
   /**
+   * Los cupos ABIERTOS y sin tomar del profesional que pisan un rango,
+   * cruzando todas sus sedes.
+   *
+   * Es la retracción de AG-2/AG-3: la cita que el doctor se pone encima de
+   * horarios que él mismo ofreció los retira — con aviso, sin preguntar. Sólo
+   * los intactos: un cupo con una reserva adentro no se toca desde acá (eso lo
+   * gobierna la política de choques).
+   *
+   * Se materializa vía entidades y no SQL crudo porque el llamador los MUTA:
+   * las filas crudas no pasan por la unidad de trabajo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceRefId - El perfil profesional dueño de los recursos.
+   * @param desde - Inicio del rango.
+   * @param hasta - Fin del rango.
+   * @param openStatusConceptId - El concepto de cupo abierto.
+   * @returns Los cupos abiertos e intactos que se cruzan.
+   */
+  async findOpenSlotsOfProfessionalInWindow(
+    em: EntityManager,
+    resourceRefId: string,
+    desde: Date,
+    hasta: Date,
+    openStatusConceptId: string,
+  ): Promise<BookableSlots[]> {
+    const recursos = await em.find(SchedulableResources, { resourceRefId });
+    if (recursos.length === 0) return [];
+
+    const slots = await em.find(BookableSlots, {
+      resourceId: { $in: recursos.map((recurso) => recurso.id) },
+      statusConceptId: openStatusConceptId,
+      startAt: { $lt: hasta },
+      endAt: { $gt: desde },
+    });
+    return slots.filter((slot) => slot.remainingCapacity === slot.capacity);
+  }
+
+  /**
    * Una excepción por su id, o `null` si no existe.
    *
    * @param em - Contexto de persistencia o transacción activa.

@@ -64,6 +64,7 @@ function buildCatalog() {
     findOpenSlotsInWindow: mockFn(),
     findExceptionById: mockFn(),
     removeException: mockFn(),
+    findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // La regla de pertenencia vive en su propio servicio y tiene specs propios;
@@ -72,6 +73,7 @@ function buildCatalog() {
   const tiempoProfesional = {
     assertRangoLibre: mockFn(async () => undefined),
     compromisos: mockFn(async () => []),
+    citasConfirmadas: mockFn(async () => []),
   };
   const service = new SchedulingCatalogService(
     em as any,

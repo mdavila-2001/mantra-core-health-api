@@ -54,6 +54,8 @@ export {
   MIN_DELAY_MINUTES,
   MAX_DELAY_MINUTES,
   MAX_DELAY_MESSAGE_LENGTH,
+  CreateDirectAppointmentDto,
+  DirectAppointmentResponseDto,
 } from './scheduling-bookings.dto';
 export type { BookingInfoRequest } from './scheduling-bookings.dto';
 export type { BookingChannel } from './scheduling-bookings.dto';
