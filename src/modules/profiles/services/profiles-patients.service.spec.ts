@@ -15,8 +15,16 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+
+/**
+ * Un municipio real del catálogo (Sacaba, Cochabamba). El domicilio se valida
+ * contra `VS_BO_MUNICIPALITY`, así que un uuid inventado sería rechazado antes
+ * de llegar a la parte que estas pruebas ejercen.
+ */
+const BO_MUNICIPALITY_CONCEPT_ID = boMunicipalityConceptId('031001');
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -83,6 +91,21 @@ function build() {
     revokeActiveForPatient: mockFn().mockResolvedValue(0),
     reassignPatientProfile: mockFn().mockResolvedValue(0),
   };
+  // El teléfono y el domicilio del paciente viven en `common`: el perfil propio
+  // los lee y los reemplaza, y sin estos dobles no se puede probar ni que cierre
+  // el vigente ni que evite crear una fila idéntica.
+  const contactPointsRepo = {
+    findById: mockFn(),
+    findVigentesByOwner: mockFn().mockResolvedValue([]),
+    findVigenteByOwnerAndSystem: mockFn().mockResolvedValue(null),
+    closeVigente: mockFn(),
+    create: mockFn(),
+  };
+  const addressesRepo = {
+    findVigenteByOwnerAndUse: mockFn().mockResolvedValue(null),
+    closeVigente: mockFn(),
+    create: mockFn(),
+  };
   // La propiedad del perfil se prueba en `profile-ownership.service.spec.ts`; aquí el
   // doble deja pasar para no mezclar el permiso con la lógica del servicio.
   const ownership = {
@@ -100,6 +123,8 @@ function build() {
     mergeEventsRepo,
     relatedPersonsRepo,
     portalProxiesRepo,
+    contactPointsRepo,
+    addressesRepo,
     ownership as never,
     logger as any,
   );
@@ -114,6 +139,8 @@ function build() {
     mergeEventsRepo,
     relatedPersonsRepo,
     portalProxiesRepo,
+    contactPointsRepo,
+    addressesRepo,
   };
 }
 
@@ -539,6 +566,385 @@ describe('ProfilesPatientsService', () => {
         subjectEntityId: 'per-1',
         revokedAt: null,
       });
+    });
+  });
+
+  describe('getOwnProfile', () => {
+    const titular = { id: 'user-1', roles: [] } as any;
+
+    /**
+     * Deja al titular con persona y perfil de paciente resueltos, con las partes
+     * del nombre que el alta escribió.
+     * @returns El sistema bajo prueba con sus dobles.
+     */
+    function conPaciente() {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        name: 'Ada',
+        lastName: 'Lovelace',
+        displayName: 'Ada Lovelace',
+        birthDate: new Date('1990-05-05'),
+        sexAtBirthConceptId: PROF.BIRTH_SEX_FEMALE,
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        patientCode: 'PC-1',
+      });
+      return d;
+    }
+
+    it('devuelve las partes del nombre y el sexo al nacer como código', async () => {
+      const d = conPaciente();
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res).toMatchObject({
+        personId: 'per-1',
+        patientProfileId: 'pp-1',
+        name: 'Ada',
+        lastName: 'Lovelace',
+        displayName: 'Ada Lovelace',
+        // El formulario habla en códigos, no en uuid del catálogo.
+        sexAtBirth: 'FEMALE',
+        identityVerified: false,
+      });
+    });
+
+    it('trae el teléfono vigente y el municipio del domicilio vigente', async () => {
+      const d = conPaciente();
+      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue({
+        value: '+591 700 12345',
+      });
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+        municipalityConceptId: 'mun-1',
+      });
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res).toMatchObject({
+        phone: '+591 700 12345',
+        residenceMunicipalityConceptId: 'mun-1',
+      });
+    });
+
+    it('lo que la persona no declaró llega ausente, no null', async () => {
+      const d = conPaciente();
+      // El ORM hidrata una columna NULL como `null`, y el contrato promete que un
+      // dato no declarado no viaja: `null` se leería como «campo vaciado».
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        name: 'Ada',
+        middleName: null,
+        motherLastName: null,
+        occupationFreeText: null,
+        sexAtBirthConceptId: null,
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+      });
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res).not.toHaveProperty('middleName');
+      expect(res).not.toHaveProperty('motherLastName');
+      expect(res).not.toHaveProperty('occupationFreeText');
+      expect(res).not.toHaveProperty('sexAtBirth');
+      expect(res).not.toHaveProperty('phone');
+      expect(res).not.toHaveProperty('residenceMunicipalityConceptId');
+    });
+
+    it('sin identidad verificada no viaja el código de paciente', async () => {
+      const d = conPaciente();
+      d.tx.findOne.mockResolvedValue(null);
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res.identityVerified).toBe(false);
+      expect(res).not.toHaveProperty('patientCode');
+    });
+
+    it('con identidad verificada suma el código de paciente', async () => {
+      const d = conPaciente();
+      d.tx.findOne.mockResolvedValue({ id: 'assertion-1' });
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res).toMatchObject({
+        identityVerified: true,
+        patientCode: 'PC-1',
+      });
+    });
+
+    it('sin vínculo activo de cuenta falla con el error tipificado', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+      await expect(d.service.getOwnProfile(titular)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+    });
+  });
+
+  describe('updateOwnProfile', () => {
+    const titular = { id: 'user-1', roles: [] } as any;
+
+    /**
+     * Deja al titular resuelto y devuelve además la persona mutable, que es
+     * sobre la que la edición escribe.
+     * @returns El sistema bajo prueba, sus dobles y la persona.
+     */
+    function conPaciente() {
+      const d = build();
+      const person = {
+        id: 'per-1',
+        name: 'Ada',
+        lastName: 'Lovelace',
+        displayName: 'Ada Lovelace',
+        occupationFreeText: 'Matemática',
+        birthDate: new Date('1990-05-05'),
+        sexAtBirthConceptId: PROF.BIRTH_SEX_FEMALE,
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+        updatedAt: new Date('2026-01-01'),
+      } as any;
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue(person);
+      d.patientProfilesRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        patientCode: 'PC-1',
+      });
+      return { ...d, person };
+    }
+
+    it('sólo aplica los campos presentes: lo omitido no se toca', async () => {
+      const d = conPaciente();
+
+      await d.service.updateOwnProfile(
+        { occupationFreeText: 'Programadora' },
+        titular,
+      );
+
+      expect(d.person.occupationFreeText).toBe('Programadora');
+      // Ni el nombre ni el nacimiento venían en el cuerpo.
+      expect(d.person.name).toBe('Ada');
+      expect(d.person.birthDate).toEqual(new Date('1990-05-05'));
+      expect(d.person.updatedByUserId).toBe('user-1');
+    });
+
+    it('un cuerpo vacío no cambia nada y devuelve el perfil', async () => {
+      const d = conPaciente();
+
+      const res = await d.service.updateOwnProfile({}, titular);
+
+      expect(res).toMatchObject({ personId: 'per-1', name: 'Ada' });
+      expect(d.person.displayName).toBe('Ada Lovelace');
+      expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
+      expect(d.addressesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un cuerpo vacío no toca la auditoría de la persona', async () => {
+      const d = conPaciente();
+      const antes = d.person.updatedAt;
+
+      const res = await d.service.updateOwnProfile({}, titular);
+
+      // «Sin cambios» incluye la fila: mover `updated_at`, `updated_by_user_id` y
+      // `row_version` sin haber escrito una sola columna convierte la auditoría
+      // en ruido y hace fallar por conflicto de versión a quien la tuviera leída.
+      expect(d.person.updatedAt).toBe(antes);
+      expect(d.person.updatedByUserId).toBeUndefined();
+      // Y sigue devolviendo el perfil, que es lo que el contrato promete.
+      expect(res).toMatchObject({ personId: 'per-1', name: 'Ada' });
+    });
+
+    it('un PATCH que sólo trae el teléfono no toca la persona', async () => {
+      const d = conPaciente();
+      const antes = d.person.updatedAt;
+
+      await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
+
+      // El teléfono no vive en `profiles.persons`, y su propia fila ya nace con
+      // su auditoría: marcar la persona diría que cambió algo suyo que no cambió.
+      expect(d.person.updatedAt).toBe(antes);
+      expect(d.person.updatedByUserId).toBeUndefined();
+      expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('al cambiar una parte del nombre recompone el nombre visible', async () => {
+      const d = conPaciente();
+
+      await d.service.updateOwnProfile(
+        { lastName: 'Byron', motherLastName: 'King' },
+        titular,
+      );
+
+      // La misma regla del alta: las partes presentes, en el orden en que se
+      // dicen. `displayName` es derivado, no editable.
+      expect(d.person.displayName).toBe('Ada Byron King');
+    });
+
+    it('vaciar el segundo nombre lo guarda en NULL, no como cadena vacía', async () => {
+      const d = conPaciente();
+      d.person.middleName = 'Augusta';
+
+      await d.service.updateOwnProfile({ middleName: '' }, titular);
+
+      // La columna es nullable: `''` sería un dato vacío indistinguible de uno
+      // real, y la lectura lo devolvería como `""` en vez de omitirlo.
+      expect(d.person.middleName).toBeUndefined();
+      // Y el nombre visible se recompone sin el doble espacio que dejaría el hueco.
+      expect(d.person.displayName).toBe('Ada Lovelace');
+    });
+
+    it('vaciar el apellido materno y la ocupación los deja en NULL', async () => {
+      const d = conPaciente();
+      d.person.motherLastName = 'Byron';
+
+      await d.service.updateOwnProfile(
+        // Sólo espacios es lo mismo que vacío: nadie declara un apellido de
+        // espacios, y guardarlo dejaría un dato que no se ve pero ocupa.
+        { motherLastName: '   ', occupationFreeText: '' },
+        titular,
+      );
+
+      expect(d.person.motherLastName).toBeUndefined();
+      expect(d.person.occupationFreeText).toBeUndefined();
+    });
+
+    it('vaciar el teléfono cierra el vigente y no crea ninguno', async () => {
+      const d = conPaciente();
+      const vigente = { id: 'cp-1', value: '+591 700 12345' };
+      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(
+        vigente,
+      );
+
+      await d.service.updateOwnProfile({ phone: '' }, titular);
+
+      // Quedarse sin teléfono es un dato; una fila con el valor vacío lo
+      // contaría como si todavía tuviera uno.
+      expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
+        vigente,
+        expect.any(Date),
+        'user-1',
+      );
+      expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('vaciar el teléfono sin tener ninguno no escribe nada', async () => {
+      const d = conPaciente();
+      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(null);
+
+      await d.service.updateOwnProfile({ phone: '' }, titular);
+
+      expect(d.contactPointsRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('traduce el sexo al nacer al concepto que persiste la columna', async () => {
+      const d = conPaciente();
+
+      await d.service.updateOwnProfile({ sexAtBirth: 'MALE' }, titular);
+
+      expect(d.person.sexAtBirthConceptId).toBe(PROF.BIRTH_SEX_MALE);
+    });
+
+    it('al cambiar el teléfono cierra el vigente y crea el nuevo', async () => {
+      const d = conPaciente();
+      const vigente = { id: 'cp-1', value: '+591 700 00000' };
+      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(
+        vigente,
+      );
+
+      await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
+
+      expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
+        vigente,
+        expect.any(Date),
+        'user-1',
+      );
+      expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ value: '+591 700 12345' }),
+      );
+    });
+
+    it('el mismo teléfono no cierra nada ni crea una fila', async () => {
+      const d = conPaciente();
+      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue({
+        id: 'cp-1',
+        value: '+591 700 12345',
+      });
+
+      await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
+
+      expect(d.contactPointsRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin teléfono vigente crea el primero sin cerrar nada', async () => {
+      const d = conPaciente();
+      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(null);
+
+      await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
+
+      expect(d.contactPointsRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('al cambiar el municipio cierra el domicilio vigente y crea el nuevo', async () => {
+      const d = conPaciente();
+      const vigente = { id: 'ad-1', municipalityConceptId: 'mun-vieja' };
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(vigente);
+
+      await d.service.updateOwnProfile(
+        { residenceMunicipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID },
+        titular,
+      );
+
+      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+        vigente,
+        expect.any(Date),
+        'user-1',
+      );
+      // La dirección la arma el ayudante compartido, que además deriva el
+      // departamento del código del INE: acá se comprueba que se escribió una.
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'per-1',
+          municipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID,
+        }),
+      );
+    });
+
+    it('el mismo municipio no cierra el domicilio ni crea otro', async () => {
+      const d = conPaciente();
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+        id: 'ad-1',
+        municipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID,
+      });
+
+      await d.service.updateOwnProfile(
+        { residenceMunicipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID },
+        titular,
+      );
+
+      expect(d.addressesRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.addressesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin vínculo activo de cuenta falla con el error tipificado', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+      await expect(
+        d.service.updateOwnProfile({ name: 'Ada' }, titular),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.tx.flush).not.toHaveBeenCalled();
     });
   });
 });

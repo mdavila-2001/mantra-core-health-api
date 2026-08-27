@@ -321,6 +321,23 @@ export const BIRTH_SEX_CONCEPT_BY_CODE: Readonly<Record<BirthSexCode, string>> =
     UNKNOWN: PROF.BIRTH_SEX_UNKNOWN,
   };
 
+/**
+ * El camino de vuelta de {@link BIRTH_SEX_CONCEPT_BY_CODE}: del concepto que
+ * persiste la columna al código que entiende un formulario.
+ *
+ * Existe porque el dato ahora se **lee** además de escribirse: quien edita su
+ * propio perfil tiene que recibir el mismo código que envía, y no un uuid que
+ * tendría que resolver contra terminología para pintar un desplegable. Se deriva
+ * del mapa de ida en vez de escribirse a mano para que no puedan discrepar.
+ */
+export const BIRTH_SEX_CODE_BY_CONCEPT: Readonly<Record<string, BirthSexCode>> =
+  Object.fromEntries(
+    Object.entries(BIRTH_SEX_CONCEPT_BY_CODE).map(([code, conceptId]) => [
+      conceptId,
+      code as BirthSexCode,
+    ]),
+  );
+
 /** Códigos admitidos, para los validadores `@IsIn` de los DTO. */
 export const ADMIN_GENDER_CODES = Object.keys(
   ADMIN_GENDER_CONCEPT_BY_CODE,

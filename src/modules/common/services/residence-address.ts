@@ -6,11 +6,11 @@ import {
   boDepartmentConceptId,
   boMunicipalityByConceptId,
 } from '../../../common/seed/bo-geography.catalog';
-import type { AddressesRepository } from '../../common/repositories';
+import type { AddressesRepository } from '../repositories';
 
-/** Lo que hace falta para escribir el domicilio de quien se acaba de registrar. */
+/** Lo que hace falta para escribir el domicilio de residencia de una persona. */
 export interface ResidenceAddressData {
-  /** La persona recién creada, dueña de la dirección. */
+  /** La persona dueña de la dirección. */
   readonly personId: string;
   /** Municipio elegido en el alta; `undefined` si no eligió ninguno. */
   readonly municipalityConceptId?: string;
@@ -19,7 +19,16 @@ export interface ResidenceAddressData {
 }
 
 /**
- * Escribe el domicilio de residencia a partir del municipio elegido en el alta.
+ * Escribe el domicilio de residencia a partir del municipio elegido.
+ *
+ * ## Por qué vive en `common` y no donde nació
+ *
+ * Nació junto al auto-registro, en `iam`, cuando el alta era el único momento en
+ * que alguien declaraba dónde vive. Desde que el paciente puede corregir su
+ * domicilio, el segundo llamador es `profiles`, y `profiles` no depende de `iam`
+ * —es al revés: `iam` compone el alta con las piezas de `profiles`—. Traer la
+ * función desde allá invertiría esa dirección por una regla que no es de ninguno
+ * de los dos: la dirección es de `common`, que es donde está su tabla.
  *
  * ## Por qué el departamento no viaja en el DTO
  *
@@ -40,7 +49,7 @@ export interface ResidenceAddressData {
  * dirección con país y nada más no es un dato, es una fila.
  *
  * @param repo - Repositorio de `common.addresses`.
- * @param tx - Contexto transaccional del alta.
+ * @param tx - Contexto transaccional de quien escribe.
  * @param data - Persona, municipio elegido y actor.
  * @returns `true` si escribió la dirección.
  * @throws BadRequestException si el municipio no pertenece a `VS_BO_MUNICIPALITY`.

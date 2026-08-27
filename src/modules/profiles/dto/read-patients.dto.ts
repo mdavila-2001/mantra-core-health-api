@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BIRTH_SEX_CODES, type BirthSexCode } from '../profiles.concepts';
 
 /**
  * Fila del listado de pacientes (UC-05-13).
@@ -267,4 +268,128 @@ export class PatientDetailResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   updatedAt!: Date;
+}
+
+/**
+ * El propio perfil del paciente: exactamente lo que declaró al registrarse, tal
+ * como lo ve —y lo edita— el titular de la cuenta.
+ *
+ * Es un contrato distinto de {@link PatientSummaryResponseDto}, que es el
+ * resumen mínimo con el que el portal se identifica. Éste trae las **partes** del
+ * nombre y no sólo el compuesto, porque un formulario de edición necesita saber
+ * cuál es el apellido materno para poder cambiarlo, y `displayName` no es
+ * separable. Tampoco trae nada clínico: es filiación.
+ *
+ * Los opcionales viajan **ausentes, no `null`**, igual que el resumen: un campo
+ * que la persona nunca declaró y un campo que declaró vacío no son lo mismo, y
+ * `null` los confunde.
+ */
+export class OwnPatientProfileResponseDto {
+  /**
+   * Identificador asociado a person.
+   */
+  @ApiProperty({ format: 'uuid' })
+  personId!: string;
+
+  /**
+   * Identificador asociado a patient profile.
+   */
+  @ApiProperty({ format: 'uuid' })
+  patientProfileId!: string;
+
+  /**
+   * Nombre de pila.
+   */
+  @ApiPropertyOptional({ description: 'Nombre de pila' })
+  name?: string;
+
+  /**
+   * Segundo nombre.
+   */
+  @ApiPropertyOptional({ description: 'Segundo nombre' })
+  middleName?: string;
+
+  /**
+   * Apellido paterno.
+   */
+  @ApiPropertyOptional({ description: 'Apellido paterno' })
+  lastName?: string;
+
+  /**
+   * Apellido materno.
+   */
+  @ApiPropertyOptional({ description: 'Apellido materno' })
+  motherLastName?: string;
+
+  /**
+   * Valor de display name mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Nombre compuesto por el servidor a partir de las partes. No se edita directamente.',
+  })
+  displayName?: string;
+
+  /**
+   * Valor de birth date mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date',
+    description:
+      'Fecha sin hora: serializarla como instante la desplazaría un día',
+  })
+  birthDate?: Date;
+
+  /**
+   * Sexo asignado al nacer, por código legible.
+   */
+  @ApiPropertyOptional({
+    enum: BIRTH_SEX_CODES,
+    description:
+      'Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología.',
+  })
+  sexAtBirth?: BirthSexCode;
+
+  /**
+   * Ocupación en texto libre.
+   */
+  @ApiPropertyOptional({ description: 'Ocupación declarada en texto libre' })
+  occupationFreeText?: string;
+
+  /**
+   * Teléfono de contacto vigente.
+   */
+  @ApiPropertyOptional({
+    description: 'Teléfono de contacto vigente (`common.contact_points`)',
+  })
+  phone?: string;
+
+  /**
+   * Identificador asociado a residence municipality concept.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor.',
+  })
+  residenceMunicipalityConceptId?: string;
+
+  /**
+   * Si el titular tiene una aserción de identidad vigente.
+   */
+  @ApiProperty({
+    description:
+      'Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`.',
+  })
+  identityVerified!: boolean;
+
+  /**
+   * Valor de patient code mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`.',
+  })
+  patientCode?: string;
 }

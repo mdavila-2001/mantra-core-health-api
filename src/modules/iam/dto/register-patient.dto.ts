@@ -19,6 +19,41 @@ import {
 } from '../../profiles/profiles.concepts';
 
 /**
+ * Reglas de forma de los datos que el paciente declara sobre sí mismo.
+ *
+ * Están extraídas y exportadas porque el alta ya no es el único formulario que
+ * las aplica: `PATCH /profiles/patients/me` edita exactamente los mismos campos
+ * y tiene que aceptar exactamente lo mismo. Repetidos como literales en dos
+ * archivos, el día que uno se ajuste el otro se queda atrás y el paciente puede
+ * registrar un valor que después no puede corregir —o al revés—.
+ */
+
+/**
+ * Tope de cada parte del nombre (`profiles.persons.name` y sus hermanas).
+ */
+export const PERSON_NAME_PART_MAX_LENGTH = 100;
+
+/**
+ * Tope de la ocupación en texto libre
+ * (`profiles.persons.occupation_free_text`).
+ */
+export const OCCUPATION_FREE_TEXT_MAX_LENGTH = 200;
+
+/** Tope del teléfono, tal como lo guarda `common.contact_points.value`. */
+export const PHONE_MAX_LENGTH = 40;
+
+/**
+ * Forma admitida de un teléfono: E.164 o nacional, con los separadores que la
+ * gente escribe. Deliberadamente laxo — no valida que el número exista, sólo
+ * impide que el campo se use para meter texto libre.
+ */
+export const PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;
+
+/** Mensaje de {@link PHONE_PATTERN}, para que los dos formularios digan lo mismo. */
+export const PHONE_PATTERN_MESSAGE =
+  'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion';
+
+/**
  * Cuerpo de `POST /iam/auth/register-patient`.
  *
  * El identificador de la cuenta es el **documento de identidad**, no el correo:
@@ -93,39 +128,51 @@ export class RegisterPatientDto {
    * Obligatorio salvo que se envíe `displayName`, que es la forma anterior de
    * declarar el nombre y se sigue aceptando para no romper a quien ya la usa.
    */
-  @ApiPropertyOptional({ maxLength: 100, example: 'Lucía' })
+  @ApiPropertyOptional({
+    maxLength: PERSON_NAME_PART_MAX_LENGTH,
+    example: 'Lucía',
+  })
   @ValidateIf((dto: RegisterPatientDto) => dto.displayName === undefined)
   @IsString()
   @MinLength(1)
-  @MaxLength(100)
+  @MaxLength(PERSON_NAME_PART_MAX_LENGTH)
   name?: string;
 
   /**
    * Segundo nombre. Opcional: mucha gente no tiene.
    */
-  @ApiPropertyOptional({ maxLength: 100, example: 'Andrea' })
+  @ApiPropertyOptional({
+    maxLength: PERSON_NAME_PART_MAX_LENGTH,
+    example: 'Andrea',
+  })
   @IsOptional()
   @IsString()
-  @MaxLength(100)
+  @MaxLength(PERSON_NAME_PART_MAX_LENGTH)
   middleName?: string;
 
   /**
    * Apellido paterno. Mismo criterio que `name`.
    */
-  @ApiPropertyOptional({ maxLength: 100, example: 'Mamani' })
+  @ApiPropertyOptional({
+    maxLength: PERSON_NAME_PART_MAX_LENGTH,
+    example: 'Mamani',
+  })
   @ValidateIf((dto: RegisterPatientDto) => dto.displayName === undefined)
   @IsString()
   @MinLength(1)
-  @MaxLength(100)
+  @MaxLength(PERSON_NAME_PART_MAX_LENGTH)
   lastName?: string;
 
   /**
    * Apellido materno. Opcional: no todas las jurisdicciones lo emiten.
    */
-  @ApiPropertyOptional({ maxLength: 100, example: 'Quispe' })
+  @ApiPropertyOptional({
+    maxLength: PERSON_NAME_PART_MAX_LENGTH,
+    example: 'Quispe',
+  })
   @IsOptional()
   @IsString()
-  @MaxLength(100)
+  @MaxLength(PERSON_NAME_PART_MAX_LENGTH)
   motherLastName?: string;
 
   /**
@@ -169,15 +216,17 @@ export class RegisterPatientDto {
    * esté verificado o no es independiente (`iam.users.phone_verified`).
    */
   @ApiPropertyOptional({
-    description: 'Teléfono de contacto en formato E.164 o nacional',
-    maxLength: 40,
+    // La forma admitida se repite en la descripción a propósito: el validador la
+    // toma de `PHONE_PATTERN`, y una constante compartida no se puede leer desde
+    // el contrato publicado, que es lo único que tiene delante quien integra.
+    description:
+      'Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres',
+    maxLength: PHONE_MAX_LENGTH,
   })
   @IsOptional()
   @IsString()
-  @MaxLength(40)
-  @Matches(/^[+]?[0-9 ()-]{6,}$/, {
-    message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
-  })
+  @MaxLength(PHONE_MAX_LENGTH)
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
   phone?: string;
 
   /**
@@ -196,12 +245,12 @@ export class RegisterPatientDto {
    * si viene `occupationConceptId`.
    */
   @ApiPropertyOptional({
-    maxLength: 200,
+    maxLength: OCCUPATION_FREE_TEXT_MAX_LENGTH,
     description: 'Ocupación en texto libre, para cuando no está en el catálogo',
   })
   @IsOptional()
   @IsString()
-  @MaxLength(200)
+  @MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)
   occupationFreeText?: string;
 
   /**

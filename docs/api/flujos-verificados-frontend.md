@@ -13,7 +13,8 @@ puede estar roto de nacimiento.
 - **Verificado el:** 2026-08-06, contra el stack de `docker-compose` poblado.
 - **Pruebas que lo fijan:** `test/integration/scheduling-agenda.int-spec.ts`,
   `test/integration/patient-chart-read.int-spec.ts`,
-  `test/integration/refresh-cookie.int-spec.ts`.
+  `test/integration/refresh-cookie.int-spec.ts`,
+  `test/integration/patient-own-profile.int-spec.ts`.
 
 ---
 
@@ -57,7 +58,7 @@ el interior del front va a consumir la cuenta era:
 
 | Módulo | Rutas | Con `GET` |
 | --- | --- | --- |
-| `/profiles` | 13 | 1 — sólo `patients/me/summary` (desde F-34 basta con la sesión; sin identidad verificada llega sin el código de paciente) |
+| `/profiles` | 15 | 2 — `patients/me/summary` y `patients/me` (basta con la sesión; sin identidad verificada llegan sin el código de paciente) |
 | `/scheduling` | 20 | 2 — reglas de confirmación y un endpoint interno de worker |
 | `/charts` | 12 | **0** |
 | `/clinical` | 24 | 1 — políticas de firma |
@@ -247,6 +248,65 @@ Un `profileId` inexistente responde **404**, no una respuesta vacía.
 
 `GET /profiles/patients/me/summary` **sigue funcionando igual**: `me` no es un
 UUID, así que la ruta literal gana sobre `:profileId`. Hay una prueba que lo fija.
+
+### `GET` y `PATCH /profiles/patients/me` — los datos propios del paciente
+
+Lo que la persona declaró al registrarse, leído y editado con **su propia
+sesión**. Sin `@Roles`: el sujeto lo resuelve el servidor desde
+`person_account_links` y no hay parámetro que apunte a otro, así que lo único
+que se puede tocar es lo propio.
+
+```json
+{
+  "personId": "18f74644-a7f1-495b-8b95-be57a518863f",
+  "patientProfileId": "18f74644-a7f1-495b-8b95-be57a518863f",
+  "name": "Ada",
+  "middleName": "Augusta",
+  "lastName": "Lovelace",
+  "motherLastName": "Byron",
+  "displayName": "Ada Augusta Lovelace Byron",
+  "birthDate": "1990-05-05",
+  "sexAtBirth": "FEMALE",
+  "phone": "+591 700 11111",
+  "residenceMunicipalityConceptId": "…",
+  "identityVerified": false
+}
+```
+
+| Paso | Endpoint | Resultado |
+| --- | --- | --- |
+| Leer lo propio | `GET /profiles/patients/me` | `200` con las partes del nombre, no sólo el compuesto |
+| Corregir nombre, teléfono y nacimiento | `PATCH /profiles/patients/me` | `200` con el perfil releído y `displayName` recompuesto |
+| Mudarse | `PATCH` con `residenceMunicipalityConceptId` | `200`; el domicilio anterior queda dado de baja, no borrado |
+| Reenviar el mismo teléfono | idem | `200` sin fila nueva — no hubo cambio que historiar |
+| Vaciar el segundo nombre (`""`) | idem | `200`; la columna queda en `NULL` y la clave deja de viajar |
+| Vaciar el teléfono (`""`) | idem | `200`; se cierra el vigente y no nace ninguno |
+| Cuerpo vacío `{}` | idem | `200` con el perfil sin cambios |
+| Campo ajeno a la pantalla (`patientCode`) | idem | `400` — el `ValidationPipe` corre con `forbidNonWhitelisted` |
+| Sin token | `GET`/`PATCH` | `401` |
+
+Cinco cosas que conviene saber antes de construir el formulario:
+
+- **`displayName` es derivado, no editable.** Se recompone con la misma regla
+  del alta en cuanto cambia alguna parte del nombre. Se editan las partes.
+- **`sexAtBirth` viaja como código** (`MALE`/`FEMALE`/`INTERSEX`/`UNKNOWN`),
+  igual que en el alta: el formulario no tiene que resolver terminología para
+  pintar un desplegable.
+- **Lo que la persona no declaró llega ausente, no `null`.** Un campo vacío y
+  un campo que nunca existió no son lo mismo.
+- **El teléfono y el domicilio no se pisan.** Se les pone fin de vigencia y se
+  crea la fila nueva: por el número anterior se llamó a esta persona.
+- **Omitir un campo y mandarlo en blanco no es lo mismo.** Omitirlo lo deja como
+  estaba; mandarlo en blanco lo borra —la columna queda en `NULL` y la clave
+  deja de viajar—. Vale para `middleName`, `motherLastName`,
+  `occupationFreeText` y `phone`. `name` y `lastName` no se pueden vaciar.
+- **`birthDate` viaja como instante ISO** (`1990-05-05T00:00:00.000Z`) aunque sea
+  una fecha sin hora, igual que en `patients/me/summary`. Hay que quedarse con la
+  parte de fecha; interpretarlo en local puede correrlo un día.
+
+Fuera de esta superficie, y a propósito: documento de identidad y departamento
+emisor, correo, contraseña, `patientCode`, estados y `occupationConceptId`.
+Cada uno tiene su propio circuito.
 
 ---
 
