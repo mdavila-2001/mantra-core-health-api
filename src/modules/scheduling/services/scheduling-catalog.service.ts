@@ -465,6 +465,39 @@ export class SchedulingCatalogService {
       }
 
       const isAvailable = dto.isAvailable ?? false;
+
+      // AG-3: el tiempo ocupado no desplaza pacientes en silencio. Si el rango
+      // pisa una cita CONFIRMADA del profesional —en esta sede o en otra—, el
+      // doctor recibe el conflicto y decide: reprograma a la persona o elige
+      // otro rato. Lo pendiente no bloquea la creación: nunca va a poder
+      // aceptarse encima (la regla madre lo rechaza), que es la misma
+      // protección sin congelar el calendario por preguntas sin responder.
+      // Una reunión que pisa OTRA reunión es inofensiva y no se valida.
+      if (
+        !isAvailable &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
+      ) {
+        const confirmadas = await this.tiempoProfesional.citasConfirmadas(
+          tx,
+          resource.resourceRefId,
+          startAt,
+          endAt,
+        );
+        if (confirmadas.length > 0) {
+          const primera = confirmadas[0];
+          throw new PreconditionFailedException(
+            `Tenés una cita confirmada en ese rato${
+              primera.resourceName ? ` en «${primera.resourceName}»` : ''
+            }. Reprogramala primero o elegí otro horario.`,
+            {
+              bookingId: primera.id,
+              startAt: primera.startAt,
+              endAt: primera.endAt,
+            },
+          );
+        }
+      }
+
       const exception = this.catalogRepo.createException(tx, {
         resourceId,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
@@ -782,6 +815,48 @@ export class SchedulingCatalogService {
    * @param tenantId - La organización donde se quiere publicar.
    * @param actor - Quien publica.
    */
+
+  /**
+   * Elimina un tiempo ocupado (o cualquier excepción) del calendario.
+   *
+   * ## Borrar NO resucita los cupos retirados
+   *
+   * Es la semántica menos sorprendente, y queda declarada: los cupos que la
+   * excepción bloqueó siguen bloqueados, y se regeneran con la plantilla si
+   * corresponde. Resucitarlos automáticamente ofrecería horarios que el doctor
+   * quizá bloqueó por otro motivo mientras tanto.
+   *
+   * @param exceptionId - La excepción a eliminar.
+   * @param actor - Quien la elimina; tiene que poder operar el recurso.
+   */
+  async removeException(
+    exceptionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const exception = await this.catalogRepo.findExceptionById(
+        tx,
+        exceptionId,
+      );
+      if (!exception) {
+        throw new ResourceNotFoundException('Excepción no encontrada', {
+          exceptionId,
+        });
+      }
+      const resource = await this.catalogRepo.findResourceById(
+        tx,
+        exception.resourceId,
+      );
+      if (resource) this.assertRecursoDelActor(resource, actor);
+
+      this.logger.info(
+        { operation: 'scheduling.exception.remove', exceptionId },
+        'Removing availability exception',
+      );
+      this.catalogRepo.removeException(tx, exception);
+    });
+  }
+
   private async assertVinculoConLaOrganizacion(
     tenantId: string,
     actor: AuthenticatedUser,

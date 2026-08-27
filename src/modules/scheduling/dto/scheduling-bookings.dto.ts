@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  Max,
   IsISO8601,
   IsOptional,
   IsString,
@@ -867,4 +868,75 @@ export class WaitlistEntryItemDto {
 export class ListWaitlistResponseDto {
   @ApiProperty({ type: [WaitlistEntryItemDto] })
   items!: WaitlistEntryItemDto[];
+}
+
+/**
+ * Cuerpo de `POST /scheduling/appointments/direct` — la cita puntual (AG-2).
+ *
+ * El doctor asigna: «volvé el jueves a las 10». La cita ya se acordó en el
+ * consultorio, así que nace CONFIRMADA y el paciente SE ENTERA (campana con
+ * salida de «pedir cambio»), no confirma.
+ */
+export class CreateDirectAppointmentDto {
+  /** El paciente al que se le asigna la cita. */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  patientProfileId!: string;
+
+  /**
+   * La agenda del doctor donde ocurre — su consultorio o su sede de
+   * organización. Elegir el recurso ES elegir la sede, y el gating del vínculo
+   * ya gobernó quién puede tener agenda dónde.
+   */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  resourceId!: string;
+
+  /** Cuándo empieza. */
+  @ApiProperty({ format: 'date-time' })
+  @IsISO8601()
+  startAt!: string;
+
+  /**
+   * Cuánto dura, en minutos. Libre a propósito: la cirugía de 3 horas y la
+   * consulta de 45 son el punto entero del caso.
+   */
+  @ApiProperty({ minimum: 5, maximum: 480 })
+  @IsInt()
+  @Min(5)
+  @Max(480)
+  durationMinutes!: number;
+
+  /** El motivo, que el paciente ve en su turno. */
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reasonText?: string;
+}
+
+/** Respuesta de la cita puntual. */
+export class DirectAppointmentResponseDto {
+  /** La reserva creada, ya confirmada. */
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  /** El cupo único que la respalda. */
+  @ApiProperty({ format: 'uuid' })
+  bookableSlotId!: string;
+
+  /** Estado con el que nace: confirmada. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /**
+   * Cupos ofrecidos que esta cita retiró.
+   *
+   * Si el rato pisaba horarios libres que el doctor mismo ofrecía —en
+   * cualquiera de sus sedes—, se retiran en la misma transacción y acá se
+   * informa cuántos: el front lo muestra como AVISO («esto quitó N horarios
+   * disponibles»), no como pregunta.
+   */
+  @ApiProperty()
+  retractedSlots!: number;
 }

@@ -62,6 +62,9 @@ function buildCatalog() {
     findSlotsByTemplateInRange: mockFn(),
     findSlotsByResourceInRange: mockFn().mockResolvedValue([]),
     findOpenSlotsInWindow: mockFn(),
+    findExceptionById: mockFn(),
+    removeException: mockFn(),
+    findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // La regla de pertenencia vive en su propio servicio y tiene specs propios;
@@ -70,6 +73,7 @@ function buildCatalog() {
   const tiempoProfesional = {
     assertRangoLibre: mockFn(async () => undefined),
     compromisos: mockFn(async () => []),
+    citasConfirmadas: mockFn(async () => []),
   };
   const service = new SchedulingCatalogService(
     em as any,
@@ -982,6 +986,89 @@ describe('SchedulingCatalogService', () => {
         startAt: '2026-06-01T08:00:00Z',
         endAt: '2026-06-01T12:00:00Z',
       };
+
+      it('AG-3 · el tiempo ocupado que pisa una cita CONFIRMADA no se crea', async () => {
+        // El tiempo ocupado no desplaza pacientes en silencio: el doctor recibe
+        // el conflicto y decide — reprograma a la persona o elige otro rato.
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.tiempoProfesional.citasConfirmadas = mockFn(async () => [
+          {
+            id: 'bk-1',
+            startAt: new Date('2026-06-01T09:00:00Z'),
+            endAt: new Date('2026-06-01T09:30:00Z'),
+            resourceName: 'Consultorio Centro',
+            kind: 'cita',
+          },
+        ]);
+
+        await expect(
+          d.service.createException(RESOURCE, dto, actor),
+        ).rejects.toThrow(/cita confirmada.*Consultorio Centro/);
+        expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+      });
+
+      it('AG-3 · una reunión que pisa OTRA reunión es inofensiva y pasa', async () => {
+        // Dos rótulos del mismo doctor no son un conflicto humano. Sólo las
+        // citas con paciente frenan la creación.
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.tiempoProfesional.citasConfirmadas = mockFn(async () => []);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+
+        const res = await d.service.createException(RESOURCE, dto, actor);
+
+        expect(res.id).toBe('exc-1');
+      });
+
+      it('AG-3 · una sala no pasa por la regla del profesional', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefId: 'sala-1',
+          resourceRefType: 'rooms',
+        });
+        d.tiempoProfesional.citasConfirmadas = mockFn(async () => []);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+
+        await d.service.createException(RESOURCE, dto, actor);
+
+        expect(d.tiempoProfesional.citasConfirmadas).not.toHaveBeenCalled();
+      });
+
+      it('AG-3 · borrar la excepción exige que el recurso sea del actor', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findExceptionById.mockResolvedValue({
+          id: 'exc-1',
+          resourceId: RESOURCE,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          tenantId: TENANT,
+          resourceRefId: 'hp-ajeno',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await expect(
+          d.service.removeException('exc-1', {
+            id: 'user-pract',
+            roles: ['PRACTITIONER'],
+            practitionerProfileId: 'hp-propio',
+            tenantIds: [TENANT],
+          } as never),
+        ).rejects.toThrow();
+        expect(d.catalogRepo.removeException).not.toHaveBeenCalled();
+      });
 
       it('blocks the untouched free slots that overlap the absence', async () => {
         const d = buildCatalog();

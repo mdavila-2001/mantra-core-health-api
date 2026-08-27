@@ -177,11 +177,14 @@ export function avisoDeRecordatorio(
 
 /** Los cambios de estado que el paciente tiene que enterarse. */
 export type CambioDeCita =
-  'ACCEPTED' | 'REJECTED' | 'RESCHEDULED' | 'CANCELLED';
+  'ACCEPTED' | 'ASSIGNED' | 'REJECTED' | 'RESCHEDULED' | 'CANCELLED';
 
 /** Encabezado de cada cambio, en la voz de quien lo recibe. */
 const TITULO: Readonly<Record<CambioDeCita, string>> = {
   ACCEPTED: 'Tu turno quedó confirmado',
+  // La cita puntual (AG-2): el doctor la asigna y el paciente SE ENTERA — no
+  // confirma, porque ya se acordó en el consultorio.
+  ASSIGNED: 'Te agendaron un turno',
   REJECTED: 'No se pudo tomar tu solicitud de turno',
   RESCHEDULED: 'Tu turno se movió de horario',
   CANCELLED: 'Tu turno se canceló',
@@ -206,6 +209,7 @@ export function avisoDeCambioDeCita(
   const conQuien = `con ${booking.resourceLabel}`;
   const cuerpo: Readonly<Record<CambioDeCita, string>> = {
     ACCEPTED: `Tu turno ${conQuien} del ${cuando(booking.startAt)} quedó confirmado.`,
+    ASSIGNED: `${booking.resourceLabel} te agendó para el ${cuando(booking.startAt)}. Si no podés asistir, pedí el cambio desde tus turnos.`,
     REJECTED: `Tu solicitud de turno ${conQuien} del ${cuando(booking.startAt)} no se pudo tomar.`,
     RESCHEDULED: `Tu turno ${conQuien} pasó al ${cuando(booking.startAt)}.`,
     CANCELLED: `Se canceló tu turno ${conQuien} del ${cuando(booking.startAt)}.`,
