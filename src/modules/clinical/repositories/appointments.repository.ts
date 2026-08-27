@@ -33,6 +33,13 @@ export interface CreateAppointmentData {
    */
   reasonText?: string;
   /**
+   * Por qué medio ocurre la atención: presencial, teleconsulta o domicilio.
+   *
+   * Ausente deja la columna en NULL, que se lee como presencial —lo que fueron
+   * todas las citas hasta que existió este conjunto—.
+   */
+  channelConceptId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -73,6 +80,7 @@ export class AppointmentsRepository {
         startAt: data.startAt,
         endAt: data.endAt,
         reasonText: data.reasonText,
+        channelConceptId: data.channelConceptId,
         createdAt: ahora,
         updatedAt: ahora,
         createdByUserId: data.actorUserId,

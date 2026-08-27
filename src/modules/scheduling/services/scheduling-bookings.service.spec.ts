@@ -1123,6 +1123,65 @@ describe('SchedulingBookingsService', () => {
         expect(slotArgs.scheduleTemplateId).toBeUndefined();
       });
 
+      /**
+       * La modalidad de la atención — teleconsulta.
+       *
+       * `clinical.appointments.channel_concept_id` existía desde el modelo y
+       * estaba sin conjunto y sin usar; por eso la teleconsulta no se podía
+       * declarar aunque el modelo ya la admitiera. Estas pruebas fijan las dos
+       * mitades: que el valor elegido llega a la cita CLÍNICA (no a la
+       * reserva, que es otro eje), y que omitirlo no inventa nada.
+       */
+      describe('el canal de la atención', () => {
+        it('escribe la teleconsulta en la cita clínica, no en la reserva', async () => {
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(
+            { ...dto, channel: 'TELECONSULTA' } as never,
+            medico,
+          );
+
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.channelConceptId).toBe(
+            CLIN.APPOINTMENT_CHANNEL_TELEHEALTH,
+          );
+
+          // El canal de la RESERVA es otro eje y no se contagia: la asignó
+          // alguien desde el mostrador, y eso sigue siendo cierto.
+          const reserva = d.bookingsRepo.createBooking.mock.calls[0][1];
+          expect(reserva.bookingChannelConceptId).toBe(CONCEPTS.CHANNEL_DESK);
+        });
+
+        it('sin canal no escribe ninguno: ausente ≠ presencial explícito', async () => {
+          // «Nadie lo dijo» y «dijeron que es presencial» son cosas distintas.
+          // Sólo la primera puede cambiar de significado si mañana el valor por
+          // defecto cambia, y por eso la columna queda en NULL.
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(dto as never, medico);
+
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.channelConceptId).toBeUndefined();
+        });
+
+        it('la visita a domicilio también es un canal, no un tipo de cita', async () => {
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(
+            { ...dto, channel: 'DOMICILIO' } as never,
+            medico,
+          );
+
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.channelConceptId).toBe(
+            CLIN.APPOINTMENT_CHANNEL_HOME_VISIT,
+          );
+          // `type_concept_id` responde otra pregunta —qué clase de atención
+          // es— y no lo toca nadie acá.
+          expect(cita.typeConceptId).toBeUndefined();
+        });
+      });
+
       it('la duración es libre: la cirugía de 3 horas es el caso entero', async () => {
         const d = listoParaAsignar(build());
 
