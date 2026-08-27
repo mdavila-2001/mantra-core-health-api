@@ -95,6 +95,9 @@ function build() {
     findProductsByIds: mockFn(async () => [PRODUCTO]),
     findConceptsByIds: mockFn(async () => []),
     findOwnMedicationRequest: mockFn(async () => null),
+    findPersonNamesByProfileIds: mockFn(async () => new Map()),
+    findPharmaciesByTenant: mockFn(async () => [FARMACIA]),
+    findOrdersForPharmacies: mockFn(async () => []),
   };
   const reservationsRepo = {
     create: mockFn(() => ({
@@ -122,6 +125,12 @@ function build() {
   };
   const reservationsService = { releaseConfirmedLines: mockFn(async () => 1) };
   const outbox = { publishDomainEvent: mockFn(async () => ({})) };
+  const orderNotifications = {
+    orderUnderReview: mockFn(async () => ({ suppressed: false })),
+    orderConfirmed: mockFn(async () => ({ suppressed: false })),
+    orderReady: mockFn(async () => ({ suppressed: false })),
+    orderRejected: mockFn(async () => ({ suppressed: false })),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new PharmacyOrdersService(
     em as any,
@@ -133,6 +142,7 @@ function build() {
     pharmacyRepo as any,
     reservationsService as any,
     outbox as any,
+    orderNotifications as any,
     logger as any,
   );
   return {
@@ -148,6 +158,7 @@ function build() {
     pharmacyRepo,
     reservationsService,
     outbox,
+    orderNotifications,
   };
 }
 

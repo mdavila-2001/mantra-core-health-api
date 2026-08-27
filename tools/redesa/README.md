@@ -10,7 +10,8 @@ Agrupa los componentes relacionados con **redesa** y mantiene cohesionada esta r
 | --- | --- |
 | `coverage-report.mjs` | Informe estático de cobertura (`yarn redesa:coverage`). |
 | `guardrails.mjs` | Guardrails bloqueantes de CI (`yarn redesa:guardrails`). |
-| `seed-dev-data.mjs` | Puebla un entorno de desarrollo por la API real (`yarn seed:dev`). |
+| `seed-dev-data.mjs` | Puebla un entorno de desarrollo por la API real (`yarn seed:dev`). Acumulativo: cada corrida agrega una tanda nueva a propósito, para ejercitar el dominio. |
+| `faker-worker.mjs` | Tráfico de aplicación realista y a escala — médicos con vitrina pública y publicaciones, pacientes — con disciplina **cache-first** (`yarn faker`): si el target ya tiene la tanda pedida, no genera de nuevo. Variables `FAKER_*` documentadas en `.env.example`. Ver `evidencias/faker-worker/`. |
 | `exercise-front-flows.mjs` | Recorre los flujos del frontend **con el token del administrador** y regenera `docs/frontend/CATALOGO-FLUJOS-VERIFICADOS.md` con cuerpos reales. |
 | `exercise-clinical-personas.mjs` | Recorre el flujo de cada actor clínico **con su propio rol** (`yarn redesa:personas`). Falla si aparece un 5xx o un 4xx sin `code` del catálogo. |
 

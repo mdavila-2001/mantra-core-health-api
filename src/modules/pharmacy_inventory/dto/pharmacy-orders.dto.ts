@@ -3,6 +3,8 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  IsIn,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -209,10 +211,77 @@ export class PharmacyOrderDto {
   medicationRequestId!: string | null;
 
   /**
+   * Nombre pintable del paciente, resuelto en lote por el backend (la bandeja
+   * FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene
+   * nombre cargado.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  patientName!: string | null;
+
+  /**
    * Líneas del pedido.
    */
   @ApiProperty({ type: [PharmacyOrderLineDto] })
   lines!: PharmacyOrderLineDto[];
+}
+
+/**
+ * Decisiones por renglón al confirmar (FAR-E2).
+ *
+ * `PROPONER_GENERICO` se acepta en la validación para poder responder con un
+ * 422 **tipificado y explicable** — la propuesta de sustitución está bloqueada
+ * por modelo (sin persistencia por línea) y rechazarla en el pipe de
+ * validación la volvería un 400 mudo.
+ */
+export const CONFIRM_LINE_DECISIONS = [
+  'NO_DISPONIBLE',
+  'PROPONER_GENERICO',
+] as const;
+
+/** Un ajuste de línea que el mostrador declara al confirmar. */
+export class ConfirmOrderAdjustmentDto {
+  /**
+   * Producto del renglón ajustado.
+   */
+  @ApiProperty({ format: 'uuid', description: 'Producto de la línea ajustada' })
+  @IsUUID()
+  productId!: string;
+
+  /**
+   * Qué decidió el mostrador sobre el renglón.
+   */
+  @ApiProperty({ enum: CONFIRM_LINE_DECISIONS })
+  @IsIn([...CONFIRM_LINE_DECISIONS])
+  decision!: (typeof CONFIRM_LINE_DECISIONS)[number];
+}
+
+/** Cuerpo de `POST /pharmacy/orders/:id/confirm` (FAR-E2). */
+export class ConfirmPharmacyOrderDto {
+  /**
+   * Ajustes por renglón; sin ajustes, se confirma todo tal como está.
+   */
+  @ApiPropertyOptional({ type: [ConfirmOrderAdjustmentDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ConfirmOrderAdjustmentDto)
+  adjustments?: ConfirmOrderAdjustmentDto[];
+}
+
+/** Cuerpo de `POST /pharmacy/orders/:id/reject` (FAR-E2). */
+export class RejectPharmacyOrderDto {
+  /**
+   * Motivo del rechazo, obligatorio y en palabras.
+   *
+   * **No se persiste en el pedido** (bloqueador de modelo): viaja en el evento
+   * de dominio y en el aviso inmediato al paciente, y el `GET` del pedido no
+   * puede devolverlo hasta que el modelo declare la columna.
+   */
+  @ApiProperty({ description: 'Motivo del rechazo (no se persiste todavía)' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(500)
+  reason!: string;
 }
 
 /** Respuesta de `GET /pharmacy/orders/me`. */
