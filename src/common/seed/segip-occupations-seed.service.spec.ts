@@ -15,6 +15,8 @@ import {
   SEGIP_OCCUPATIONS,
   segipOccupationConceptCode,
   segipOccupationConceptId,
+  segipOccupationDesignationId,
+  segipOccupationGroupPropertyId,
   segipOccupationMemberId,
   segipOccupationValueSetId,
   segipOccupationVersionId,
@@ -166,8 +168,6 @@ describe('SegipOccupationsSeedService', () => {
       ]);
       // Las designaciones y las propiedades tienen su propio derivador; se
       // agregan por su id real para que la pasada no cree ninguna.
-      const { segipOccupationDesignationId, segipOccupationGroupPropertyId } =
-        await import('./segip-occupations.catalog');
       for (const ocupacion of SEGIP_OCCUPATIONS) {
         todo.add(segipOccupationDesignationId(ocupacion.code));
         todo.add(segipOccupationGroupPropertyId(ocupacion.code));
