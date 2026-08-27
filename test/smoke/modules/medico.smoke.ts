@@ -315,13 +315,22 @@ export const MEDICO_SMOKE: SmokeCase[] = [
     expectedStatus: 422,
   },
   {
+    // v4.2.2 — el permiso de lectura de la historia nace del TURNO, no del rol.
+    // Este doctor no tiene reserva con este paciente (su único vínculo era una
+    // `care_relationship`, revocada más arriba en este mismo archivo), así que el
+    // resumen se le cierra: es exactamente la regla nueva, comprobada.
+    //
+    // Antes esto esperaba 200, y ese 200 ERA el defecto: cualquier médico con
+    // sesión leía la historia de cualquiera. Para volver a ejercitar el camino
+    // feliz hay que agendar un turno de hoy entre los dos, que es media agenda
+    // montada en el smoke — queda anotado como mejora del carril.
     module: 'Médico',
     endpoint: 'GET /clinical/patients/{id}/summary',
-    name: 'happy: abre el resumen clínico de su paciente',
+    name: 'guard: sin turno de hoy no se abre el resumen clínico',
     method: 'get',
     token: asDoctor,
     path: (c) => `/clinical/patients/${c.vars.medPatientProfileId}/summary`,
-    expectedStatus: 200,
+    expectedStatus: 403,
   },
   {
     module: 'Médico',
