@@ -792,14 +792,24 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
   if (!vitrina.ok) return null;
   const profileId = vitrina.body.id;
 
-  // El retrato. Se sube con el token del propio médico —`AttachableFileService`
-  // exige que el archivo sea suyo— y se fija con un segundo PUT: `avatarFileId`
-  // sólo acepta un id ya subido. Sin foto la ficha cae a iniciales, que es
-  // digno pero se lee como perfil sin terminar.
+  // El retrato y la portada. Se suben con el token del propio médico —
+  // `AttachableFileService` exige que el archivo sea suyo— y se fijan con un
+  // segundo PUT: `avatarFileId`/`coverFileId` sólo aceptan un id ya subido.
+  // Sin foto la ficha cae a iniciales, que es digno pero se lee como perfil
+  // sin terminar; sin portada cae al degradado de marca, que también lo es,
+  // pero no deja ver cómo queda la ficha con las dos cosas puestas.
   let avatarPuesto = false;
+  let portadaPuesta = false;
   const avatarFileId = await retrato(suToken, indice, `retrato-${slug}.jpg`);
-  if (avatarFileId) {
-    const conFoto = await call('medicos', `retrato de ${medico.nombre}`, 'PUT', '/community/profiles/me', {
+  const coverFileId = await imagenTematica(
+    suToken,
+    `${medico.codigoEspecialidad}-consultorio`,
+    `portada-${slug}.jpg`,
+    1600,
+    500,
+  );
+  if (avatarFileId || coverFileId) {
+    const conFotos = await call('medicos', `fotos de ${medico.nombre}`, 'PUT', '/community/profiles/me', {
       token: suToken,
       body: {
         tenantId,
@@ -808,10 +818,12 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
         headline: `${medico.titulo} · ${medico.especialidad}`,
         biography: medico.bio,
         visibility: 'PUBLIC',
-        avatarFileId,
+        ...(avatarFileId ? { avatarFileId } : {}),
+        ...(coverFileId ? { coverFileId } : {}),
       },
     });
-    avatarPuesto = conFoto.ok;
+    avatarPuesto = conFotos.ok && Boolean(avatarFileId);
+    portadaPuesta = conFotos.ok && Boolean(coverFileId);
   }
 
   // La especialidad: sin ella el médico cae bajo «Sin especialidad
@@ -906,6 +918,7 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
     especialidad: medico.especialidad,
     especialidadAsignada,
     avatarPuesto,
+    portadaPuesta,
     trayectoriaSembrada,
     publicacionesConImagen,
     ciudad: medico.ciudad,
@@ -1042,6 +1055,7 @@ async function main() {
     `\n  ${sembrado.medicos.length} médicos ` +
       `(${sembrado.medicos.filter((m) => m.especialidadAsignada).length} con especialidad, ` +
       `${sembrado.medicos.filter((m) => m.avatarPuesto).length} con foto, ` +
+      `${sembrado.medicos.filter((m) => m.portadaPuesta).length} con portada, ` +
       `${sembrado.medicos.filter((m) => m.trayectoriaSembrada === 2).length} con trayectoria completa) · ` +
       `${sembrado.publicaciones} publicaciones (${sembrado.medicos.reduce((n, m) => n + (m.publicacionesConImagen ?? 0), 0)} con imagen) · ` +
       `${sembrado.organizaciones.filter((o) => o.verificada).length}/${sembrado.organizaciones.length} organizaciones verificadas y ubicadas en el mapa`,

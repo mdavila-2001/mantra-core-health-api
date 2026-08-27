@@ -8,6 +8,24 @@ import {
   VerifiedBadges,
 } from '../entities';
 import { COMM } from '../community.concepts';
+import { PROF } from '../../profiles/profiles.concepts';
+
+/**
+ * Los estados de un vínculo laboral que se publican en la ficha pública.
+ *
+ * `DECLARADO` y `APROBADO` —con sus dos alias de v4.1.9, ver
+ * `ProfilesAffiliationsService.IDS_ACEPTADOS`—: un vínculo **declarado** sin
+ * sede de la plataforma «publica igual, lo que no tiene es el sello de la
+ * institución» (mismo criterio que ese servicio documenta), y es el caso más
+ * común —una línea de currículum sin sede asociada—. `PENDIENTE`, `RECHAZADO`
+ * y `REVOCADO` quedan fuera: no son un hecho confirmado que mostrarle a un
+ * anónimo.
+ */
+const AFFILIATION_ESTADOS_PUBLICOS: readonly string[] = [
+  PROF.AFFILIATION_DECLARED,
+  PROF.AFFILIATION_APPROVED,
+  PROF.AFFILIATION_ACTIVE,
+];
 
 /**
  * Lecturas del directorio público (P2).
@@ -453,9 +471,9 @@ export class PublicSearchRepository {
               department_text, start_date, end_date
          FROM profiles.practitioner_affiliations
         WHERE practitioner_profile_id IN (?)
-          AND status_concept_id = ?
+          AND status_concept_id IN (?)
         ORDER BY start_date DESC`,
-      [practitionerProfileIds, CONCEPTS.STATE_ACTIVE],
+      [practitionerProfileIds, AFFILIATION_ESTADOS_PUBLICOS],
       'all',
     );
 
