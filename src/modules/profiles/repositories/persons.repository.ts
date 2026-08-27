@@ -51,7 +51,7 @@ export interface CreatePersonData {
    */
   sexAtBirthConceptId?: string;
   /**
-   * Ocupación (miembro de `VS_SEGIP_OCCUPATION`).
+   * Ocupación (miembro de `VS_BO_OCCUPATION`).
    */
   occupationConceptId?: string;
   /**
