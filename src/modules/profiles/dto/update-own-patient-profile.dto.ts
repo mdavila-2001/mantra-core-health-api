@@ -127,7 +127,44 @@ export class UpdateOwnPatientProfileDto {
   sexAtBirth?: BirthSexCode;
 
   /**
+   * Ocupación del catálogo (miembro de `VS_BO_OCCUPATION`). En blanco, se borra.
+   *
+   * Existe porque el alta ya la guarda así: quien eligió la suya del desplegable
+   * tiene el concepto y no el texto, y sin este campo el formulario de edición le
+   * mostraba la ocupación vacía y sólo podía volver a declararla como texto
+   * libre, degradando un dato del catálogo a uno suelto.
+   *
+   * **El catálogo gana**, igual que en el alta: cuando viene un concepto el texto
+   * libre queda en `NULL`, aunque el mismo cuerpo traiga los dos. El texto libre
+   * es la salida para lo que no está en la lista, así que tener ambos declararía
+   * dos ocupaciones para la misma persona.
+   *
+   * Un uuid que no sea de ningún concepto responde **422**: la columna es FK a
+   * `terminology.catalog_concepts` y la base lo rechaza. Que sea del conjunto
+   * correcto no se comprueba acá —el alta tampoco lo hace—, y las opciones
+   * válidas salen de `GET /terminology/value-sets?code=VS_BO_OCCUPATION` y su
+   * expansión, las dos públicas.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta.',
+  })
+  // Mismo motivo que el teléfono: `''` no es un uuid mal escrito, es la ausencia
+  // de ocupación. Sin esto, quitar la del catálogo sería un 400.
+  @ValidateIf(
+    (dto: UpdateOwnPatientProfileDto) => dto.occupationConceptId !== '',
+  )
+  @IsOptional()
+  @IsUUID()
+  occupationConceptId?: string;
+
+  /**
    * Ocupación en texto libre. En blanco, se borra.
+   *
+   * Declararla como texto es decir que no está en el catálogo, así que borra el
+   * concepto que hubiera —salvo que el mismo cuerpo traiga uno, y entonces manda
+   * el catálogo y este texto se descarta—.
    */
   @ApiPropertyOptional({
     maxLength: OCCUPATION_FREE_TEXT_MAX_LENGTH,

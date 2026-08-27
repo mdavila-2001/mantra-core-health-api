@@ -352,7 +352,26 @@ export class OwnPatientProfileResponseDto {
   sexAtBirth?: BirthSexCode;
 
   /**
+   * Ocupación del catálogo.
+   *
+   * Va el uuid y no un código, al revés que el sexo al nacer: aquél sale de una
+   * lista corta y fija que el contrato enumera, y las ocupaciones son un catálogo
+   * abierto que el formulario ya tiene que pedir para pintar el desplegable
+   * (`GET /terminology/value-sets?code=VS_BO_OCCUPATION` y su expansión). Con la
+   * lista en la mano, el uuid es lo que le sirve para marcar la opción elegida.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Ocupación elegida del catálogo (VS_BO_OCCUPATION)',
+  })
+  occupationConceptId?: string;
+
+  /**
    * Ocupación en texto libre.
+   *
+   * Nunca viaja junto a {@link OwnPatientProfileResponseDto.occupationConceptId}:
+   * es la salida para lo que no está en el catálogo, y la escritura deja sólo una
+   * de las dos.
    */
   @ApiPropertyOptional({ description: 'Ocupación declarada en texto libre' })
   occupationFreeText?: string;

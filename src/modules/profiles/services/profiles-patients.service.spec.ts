@@ -16,6 +16,7 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
+import { boOccupationConceptId } from '../../../common/seed/bo-occupations.catalog';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -25,6 +26,13 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * de llegar a la parte que estas pruebas ejercen.
  */
 const BO_MUNICIPALITY_CONCEPT_ID = boMunicipalityConceptId('031001');
+
+/**
+ * Una ocupación real del catálogo (`VS_BO_OCCUPATION`). Mismo criterio que el
+ * municipio: la columna es FK a los conceptos, así que un uuid inventado sería
+ * rechazado por la base en el camino real.
+ */
+const BO_OCCUPATION_CONCEPT_ID = boOccupationConceptId('DOCENTE');
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -641,6 +649,7 @@ describe('ProfilesPatientsService', () => {
         name: 'Ada',
         middleName: null,
         motherLastName: null,
+        occupationConceptId: null,
         occupationFreeText: null,
         sexAtBirthConceptId: null,
         personStatusConceptId: PROF.PERSON_ACTIVE,
@@ -650,10 +659,28 @@ describe('ProfilesPatientsService', () => {
 
       expect(res).not.toHaveProperty('middleName');
       expect(res).not.toHaveProperty('motherLastName');
+      expect(res).not.toHaveProperty('occupationConceptId');
       expect(res).not.toHaveProperty('occupationFreeText');
       expect(res).not.toHaveProperty('sexAtBirth');
       expect(res).not.toHaveProperty('phone');
       expect(res).not.toHaveProperty('residenceMunicipalityConceptId');
+    });
+
+    it('devuelve la ocupación del catálogo de quien la eligió del desplegable', async () => {
+      const d = conPaciente();
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        name: 'Ada',
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+        occupationConceptId: BO_OCCUPATION_CONCEPT_ID,
+      });
+
+      const res = await d.service.getOwnProfile(titular);
+
+      // Sin esto, quien se registró eligiendo del catálogo abría el formulario de
+      // edición con la ocupación vacía: el perfil sólo sabía leer el texto libre.
+      expect(res.occupationConceptId).toBe(BO_OCCUPATION_CONCEPT_ID);
+      expect(res).not.toHaveProperty('occupationFreeText');
     });
 
     it('sin identidad verificada no viaja el código de paciente', async () => {
@@ -935,6 +962,112 @@ describe('ProfilesPatientsService', () => {
 
       expect(d.addressesRepo.closeVigente).not.toHaveBeenCalled();
       expect(d.addressesRepo.create).not.toHaveBeenCalled();
+    });
+
+    /**
+     * La ocupación se declara de dos formas —el concepto del catálogo y el texto
+     * libre— que no pueden convivir: la persona tiene una sola. Estas seis
+     * pruebas fijan los seis cuerpos posibles, porque la regla no se puede leer
+     * de un campo aislado: cuál gana depende de qué más vino en el mismo `PATCH`.
+     */
+    describe('ocupación', () => {
+      it('elegir una del catálogo borra el texto libre que hubiera', async () => {
+        const d = conPaciente();
+
+        await d.service.updateOwnProfile(
+          { occupationConceptId: BO_OCCUPATION_CONCEPT_ID },
+          titular,
+        );
+
+        expect(d.person.occupationConceptId).toBe(BO_OCCUPATION_CONCEPT_ID);
+        // Escribir la ocupación a mano era la salida para lo que no está en la
+        // lista: encontrada la suya, ese texto ya no describe nada.
+        expect(d.person.occupationFreeText).toBeUndefined();
+      });
+
+      it('vaciar la del catálogo la deja en NULL y no toca el texto libre', async () => {
+        const d = conPaciente();
+        d.person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
+
+        await d.service.updateOwnProfile({ occupationConceptId: '' }, titular);
+
+        expect(d.person.occupationConceptId).toBeUndefined();
+        // Quitar una de las dos formas es dejar de declararla, no negar la otra.
+        expect(d.person.occupationFreeText).toBe('Matemática');
+      });
+
+      it('declararla en texto libre borra la del catálogo', async () => {
+        const d = conPaciente();
+        d.person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
+
+        await d.service.updateOwnProfile(
+          { occupationFreeText: 'Docente' },
+          titular,
+        );
+
+        expect(d.person.occupationFreeText).toBe('Docente');
+        // Escribirla a mano es decir que no está en la lista.
+        expect(d.person.occupationConceptId).toBeUndefined();
+      });
+
+      it('vaciar el texto libre no borra la del catálogo', async () => {
+        const d = conPaciente();
+        d.person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
+
+        await d.service.updateOwnProfile({ occupationFreeText: '' }, titular);
+
+        expect(d.person.occupationFreeText).toBeUndefined();
+        // Un texto vacío no es una ocupación nueva: no hay nada que desplace al
+        // concepto, y borrarlo dejaría a la persona sin ninguna de las dos.
+        expect(d.person.occupationConceptId).toBe(BO_OCCUPATION_CONCEPT_ID);
+      });
+
+      it('con las dos en el mismo cuerpo gana el catálogo', async () => {
+        const d = conPaciente();
+
+        await d.service.updateOwnProfile(
+          {
+            occupationConceptId: BO_OCCUPATION_CONCEPT_ID,
+            occupationFreeText: 'Docente',
+          },
+          titular,
+        );
+
+        // La misma regla del alta: guardar las dos diría que tiene dos
+        // ocupaciones y obligaría a la lectura a elegir una por su cuenta.
+        expect(d.person.occupationConceptId).toBe(BO_OCCUPATION_CONCEPT_ID);
+        expect(d.person.occupationFreeText).toBeUndefined();
+      });
+
+      it('vaciar la del catálogo y declarar texto en el mismo cuerpo deja el texto', async () => {
+        const d = conPaciente();
+        d.person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
+
+        await d.service.updateOwnProfile(
+          { occupationConceptId: '', occupationFreeText: 'Docente' },
+          titular,
+        );
+
+        // Es el cuerpo de quien no encontró la suya en la lista y la escribe:
+        // el catálogo sólo gana cuando trae un concepto, no cuando lo quita.
+        expect(d.person.occupationConceptId).toBeUndefined();
+        expect(d.person.occupationFreeText).toBe('Docente');
+      });
+
+      it('un PATCH que sólo trae la del catálogo marca la fila como modificada', async () => {
+        const d = conPaciente();
+        const antes = d.person.updatedAt;
+
+        await d.service.updateOwnProfile(
+          { occupationConceptId: BO_OCCUPATION_CONCEPT_ID },
+          titular,
+        );
+
+        // La ocupación vive en `profiles.persons`: escribirla es cambiar la fila,
+        // y la auditoría tiene que decirlo igual que con el resto de sus campos.
+        expect(d.person.updatedByUserId).toBe('user-1');
+        expect(d.person.updatedAt).not.toBe(antes);
+      });
     });
 
     it('sin vínculo activo de cuenta falla con el error tipificado', async () => {

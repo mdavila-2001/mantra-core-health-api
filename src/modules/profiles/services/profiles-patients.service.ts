@@ -99,6 +99,50 @@ function textoOpcional(valor: string): string | undefined {
   return valor.trim() === '' ? undefined : valor;
 }
 
+/**
+ * Escribe la ocupación, que se declara de dos formas que no pueden convivir.
+ *
+ * La persona tiene una sola ocupación, y el modelo la guarda en dos columnas: el
+ * concepto del catálogo (`VS_BO_OCCUPATION`) para lo que está en la lista y el
+ * texto libre para lo que no. Dejar las dos con valor diría que tiene dos, y la
+ * lectura tendría que elegir una por su cuenta.
+ *
+ * La regla es la misma del alta: **el catálogo gana**. Declarar un concepto borra
+ * el texto libre —aunque venga en el mismo cuerpo—, y declarar un texto borra el
+ * concepto, porque escribir la ocupación a mano es decir que no está en la lista.
+ * Vaciar uno de los dos no toca al otro: es quitar lo que se declaró, no
+ * redeclararlo.
+ *
+ * @param person - La persona bajo edición, que se muta.
+ * @param dto - Los campos que llegaron en el cuerpo.
+ */
+function aplicarOcupacion(
+  person: Persons,
+  dto: UpdateOwnPatientProfileDto,
+): void {
+  const conceptoDeclarado = dto.occupationConceptId;
+
+  if (dto.occupationFreeText !== undefined) {
+    person.occupationFreeText = textoOpcional(dto.occupationFreeText);
+    // Sólo un texto con contenido desplaza al concepto: vaciarlo es quedarse sin
+    // texto, no negar la ocupación del catálogo. Y si el cuerpo también trae
+    // concepto, decide el bloque de abajo y éste sobra.
+    if (
+      person.occupationFreeText !== undefined &&
+      conceptoDeclarado === undefined
+    ) {
+      person.occupationConceptId = undefined;
+    }
+  }
+
+  if (conceptoDeclarado !== undefined) {
+    person.occupationConceptId = textoOpcional(conceptoDeclarado);
+    if (person.occupationConceptId !== undefined) {
+      person.occupationFreeText = undefined;
+    }
+  }
+}
+
 /** Las cuatro partes del nombre, que son las que recomponen `display_name`. */
 const PARTES_DEL_NOMBRE = [
   'name',
@@ -121,6 +165,7 @@ const CAMPOS_DE_LA_PERSONA = [
   ...PARTES_DEL_NOMBRE,
   'birthDate',
   'sexAtBirth',
+  'occupationConceptId',
   'occupationFreeText',
 ] as const satisfies readonly (keyof UpdateOwnPatientProfileDto)[];
 
@@ -389,6 +434,11 @@ export class ProfilesPatientsService {
       sexAtBirth: person.sexAtBirthConceptId
         ? BIRTH_SEX_CODE_BY_CONCEPT[person.sexAtBirthConceptId]
         : undefined,
+      // Las dos formas de declarar la ocupación viajan juntas y sólo una tiene
+      // valor: el formulario no puede pintar el desplegable con el texto libre,
+      // y quien eligió del catálogo veía su ocupación vacía mientras acá sólo
+      // salía el texto.
+      occupationConceptId: person.occupationConceptId,
       occupationFreeText: person.occupationFreeText,
       phone: telefono?.value,
       residenceMunicipalityConceptId: domicilio?.municipalityConceptId,
@@ -475,9 +525,9 @@ export class ProfilesPatientsService {
         // guarda el concepto.
         person.sexAtBirthConceptId = BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth];
       }
-      if (dto.occupationFreeText !== undefined) {
-        person.occupationFreeText = textoOpcional(dto.occupationFreeText);
-      }
+      // Las dos columnas de la ocupación se deciden juntas: ver
+      // {@link aplicarOcupacion}, porque cuál gana depende de la otra.
+      aplicarOcupacion(person, dto);
       // Sólo si de verdad se escribió algo en la fila: ver {@link cambiaLaPersona}.
       if (cambiaLaPersona(dto)) {
         touch(person, actor.id);

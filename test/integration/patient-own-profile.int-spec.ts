@@ -2,6 +2,7 @@ import request from 'supertest';
 import { randomUUID } from 'node:crypto';
 import { bootstrapTestApp, bearer, type TestContext } from './harness';
 import { boMunicipalityConceptId } from '../../src/common/seed/bo-geography.catalog';
+import { BO_OCCUPATION_VALUE_SET } from '../../src/common/seed/bo-occupations.catalog';
 
 /**
  * El paciente edita, con su propia sesión, los datos que dio al registrarse.
@@ -91,7 +92,9 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
     // Verificarse es un trámite posterior: sin aserción vigente, el código de
     // paciente no viaja —ausente, no `null`—.
     expect(res.body.patientCode).toBeUndefined();
-    // Nunca declaró ocupación: el campo no viaja en vez de llegar vacío.
+    // Nunca declaró ocupación, ni del catálogo ni escrita: ninguna de las dos
+    // claves viaja, en vez de llegar vacías.
+    expect(res.body).not.toHaveProperty('occupationConceptId');
     expect(res.body).not.toHaveProperty('occupationFreeText');
   });
 
@@ -202,6 +205,78 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
     expect(releido.body).not.toHaveProperty('phone');
   });
 
+  it('elige su ocupación del catálogo, y después la reemplaza por una escrita', async () => {
+    // El alta ya guarda la ocupación como concepto cuando el paciente la elige
+    // del desplegable. El uuid se resuelve por los dos endpoints públicos —el
+    // mismo camino que recorre el formulario— y no se escribe acá: un literal
+    // ataría la prueba a un id que depende de cómo se sembró el catálogo.
+    const ocupacion = await primeraOcupacionSeleccionable();
+
+    const elegida = await http()
+      .patch('/profiles/patients/me')
+      .set(bearer(patientToken))
+      .send({ occupationConceptId: ocupacion })
+      .expect(200);
+
+    expect(elegida.body.occupationConceptId).toBe(ocupacion);
+
+    const conCatalogo = await http()
+      .get('/profiles/patients/me')
+      .set(bearer(patientToken))
+      .expect(200);
+
+    expect(conCatalogo.body.occupationConceptId).toBe(ocupacion);
+    // Una sola ocupación: la del catálogo no deja un texto libre al lado.
+    expect(conCatalogo.body).not.toHaveProperty('occupationFreeText');
+
+    // Y al revés: escribirla a mano es decir que no está en la lista, así que
+    // el concepto deja de estar declarado.
+    await http()
+      .patch('/profiles/patients/me')
+      .set(bearer(patientToken))
+      .send({ occupationFreeText: 'Docente' })
+      .expect(200);
+
+    const conTexto = await http()
+      .get('/profiles/patients/me')
+      .set(bearer(patientToken))
+      .expect(200);
+
+    expect(conTexto.body.occupationFreeText).toBe('Docente');
+    expect(conTexto.body).not.toHaveProperty('occupationConceptId');
+  });
+
+  it('vaciar la del catálogo la borra y no deja un texto en su lugar', async () => {
+    const ocupacion = await primeraOcupacionSeleccionable();
+
+    await http()
+      .patch('/profiles/patients/me')
+      .set(bearer(patientToken))
+      .send({ occupationConceptId: ocupacion })
+      .expect(200);
+
+    // La cadena vacía no es un uuid mal escrito, es la ausencia de ocupación:
+    // sin dejarla pasar, quitarse la del catálogo sería un 400 y no habría forma
+    // de hacerlo. Mismo criterio que el teléfono.
+    const vaciada = await http()
+      .patch('/profiles/patients/me')
+      .set(bearer(patientToken))
+      .send({ occupationConceptId: '' })
+      .expect(200);
+
+    expect(vaciada.body).not.toHaveProperty('occupationConceptId');
+
+    const releido = await http()
+      .get('/profiles/patients/me')
+      .set(bearer(patientToken))
+      .expect(200);
+
+    expect(releido.body).not.toHaveProperty('occupationConceptId');
+    // Y el texto que había antes ya lo había borrado el concepto: quitar uno no
+    // resucita al otro.
+    expect(releido.body).not.toHaveProperty('occupationFreeText');
+  });
+
   it('un cuerpo vacío es válido y no cambia nada', async () => {
     const res = await http()
       .patch('/profiles/patients/me')
@@ -230,6 +305,18 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
       .expect(400);
   });
 
+  it('una ocupación que no existe en el catálogo no se guarda', async () => {
+    // El perfil no comprueba la pertenencia al conjunto de valores —el alta
+    // tampoco—: la columna es FK a `terminology.catalog_concepts` y la base
+    // rechaza el uuid inexistente. Lo que se fija acá es que esa negativa llegue
+    // como un error de precondición del contrato y no como un 500.
+    await http()
+      .patch('/profiles/patients/me')
+      .set(bearer(patientToken))
+      .send({ occupationConceptId: randomUUID() })
+      .expect(422);
+  });
+
   it('sin token, ninguna de las dos rutas responde', async () => {
     await http().get('/profiles/patients/me').expect(401);
     await http().patch('/profiles/patients/me').send({}).expect(401);
@@ -238,5 +325,46 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
   /** Cliente HTTP contra la app bajo prueba. */
   function http(): request.Agent {
     return request(ctx.app.getHttpServer());
+  }
+
+  /**
+   * Resuelve el uuid de una ocupación real recorriendo los dos endpoints
+   * públicos del catálogo, que son los que tiene delante el formulario: primero
+   * el conjunto por su código estable y después su expansión.
+   *
+   * Si el catálogo no está sembrado, falla diciéndolo: un salto silencioso
+   * dejaría la prueba en verde sin haber ejercido nada.
+   *
+   * @returns El concepto de la primera ocupación seleccionable.
+   */
+  async function primeraOcupacionSeleccionable(): Promise<string> {
+    const conjuntos = await http()
+      .get('/terminology/value-sets')
+      .query({ code: BO_OCCUPATION_VALUE_SET })
+      .expect(200);
+
+    const conjunto = conjuntos.body.items[0];
+    if (!conjunto) {
+      throw new Error(
+        `${BO_OCCUPATION_VALUE_SET} no está sembrado en la base de integración`,
+      );
+    }
+
+    const expansion = await http()
+      .get(`/terminology/value-sets/${conjunto.id}/$expand`)
+      .expect(200);
+
+    // Los conceptos abstractos agrupan y no se eligen; el catálogo de
+    // ocupaciones hoy no tiene ninguno, y filtrarlos igual evita que la prueba
+    // dependa de que siga siendo así.
+    const miembro = expansion.body.items.find(
+      (item: { selectable?: boolean }) => item.selectable !== false,
+    );
+    if (!miembro) {
+      throw new Error(
+        `${BO_OCCUPATION_VALUE_SET} no está sembrado en la base de integración`,
+      );
+    }
+    return miembro.conceptId;
   }
 });
