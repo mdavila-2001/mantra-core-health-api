@@ -784,6 +784,61 @@ export class SchedulingBookingsRepository {
   }
 
   /**
+   * Las reservas vivas de un profesional CON un paciente concreto, en una ventana.
+   *
+   * La usa el permiso de lectura de la historia clínica (v4.2.2): quien atiende abre
+   * el resumen de alguien sólo si hoy lo tiene citado. Devuelve la zona horaria del
+   * recurso junto a cada fila porque «hoy» es el día de la SEDE, no el del servidor:
+   * un turno de las 23:30 en La Paz ya es «mañana» en UTC, y decidir con la fecha del
+   * servidor le cerraría la historia al profesional que lo está atendiendo.
+   *
+   * Mira `appointment_bookings` y no `clinical.appointments` a propósito: la cita
+   * clínica NO refleja las cancelaciones —`APPT_CANCELLED` no se escribe en ningún
+   * lado— así que un turno cancelado seguiría abriendo la historia todo el día.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - El profesional que quiere leer.
+   * @param patientProfileId - El paciente cuya historia se pide.
+   * @param desde - Inicio de la ventana a mirar.
+   * @param hasta - Fin de la ventana.
+   * @param estados - Estados de reserva que cuentan como turno vivo.
+   * @returns Las reservas del par, con la zona de su sede, de la más próxima en adelante.
+   */
+  async findConfirmadasConPacienteEntre(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+    desde: Date,
+    hasta: Date,
+    estados: readonly string[],
+  ): Promise<{ startAt: Date; timeZone: string | null }[]> {
+    if (estados.length === 0) return [];
+
+    const filas: { startAt: Date | string; timeZone: string | null }[] =
+      await em.getConnection().execute(
+        `SELECT s.start_at AS "startAt",
+                r.time_zone AS "timeZone"
+           FROM scheduling.appointment_bookings b
+           JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
+           JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
+          WHERE r.resource_ref_id = ?
+            AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
+            AND b.patient_profile_id = ?
+            AND b.status_concept_id IN (?)
+            AND s.start_at >= ?
+            AND s.start_at <  ?
+          ORDER BY s.start_at ASC`,
+        [practitionerProfileId, patientProfileId, [...estados], desde, hasta],
+      );
+
+    // Mismo cuidado que arriba: el driver devuelve los timestamptz como texto.
+    return filas.map((fila) => ({
+      ...fila,
+      startAt: new Date(fila.startAt),
+    }));
+  }
+
+  /**
    * El tiempo ocupado del profesional que pisa una franja, cruzando sus sedes.
    *
    * Son las excepciones de NO disponibilidad con rango horario — la reunión de
