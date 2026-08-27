@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1186 de 1186 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **65 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1190 de 1190 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **65 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -57,7 +57,7 @@ Esta referencia documenta **1186 de 1186 operaciones HTTP** registradas en `open
 | [clinical](clinical.md) | 25 | `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records` | 6 |
 | [clinical_ext](clinical-ext.md) | 26 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 8 |
 | [common](common.md) | 15 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files` | 5 |
-| [community](community.md) | 73 | `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline` | 12 |
+| [community](community.md) | 75 | `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline` | 12 |
 | [consent](consent.md) | 12 | `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-patient-objections`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents` | 8 |
 | [content_packs](content-packs.md) | 2 | `content-packs` | 1 |
 | [crm](crm.md) | 16 | `crm` | 1 |
@@ -98,7 +98,7 @@ Esta referencia documenta **1186 de 1186 operaciones HTTP** registradas en `open
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
 | [redis_runtime](redis-runtime.md) | 5 | `redis-runtime` | 1 |
 | [reporting](reporting.md) | 12 | `reporting` | 1 |
-| [scheduling](scheduling.md) | 39 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 6 |
+| [scheduling](scheduling.md) | 41 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 6 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
 | [surveys](surveys.md) | 12 | `surveys-assignments`, `surveys-patient`, `surveys-templates` | 3 |
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
@@ -116,4 +116,4 @@ Esta referencia documenta **1186 de 1186 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1186 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1190 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

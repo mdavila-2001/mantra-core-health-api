@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 73 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 75 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline`
 - **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`
@@ -74,16 +74,18 @@ Referencia exhaustiva de 73 operación(es) del módulo `community`, derivada del
 61. [GET /l/{slug}](#61-get-l-slug) — Ficha pública de un laboratorio
 62. [GET /o/{slug}](#62-get-o-slug) — Ficha pública de una organización
 63. [GET /p/{slug}](#63-get-p-slug) — Ficha pública de un profesional
-64. [GET /public/nearby](#64-get-public-nearby) — Prestadores cercanos, en línea recta
-65. [GET /public/profiles/{prefijo}/{slug}](#65-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-66. [GET /public/search](#66-get-public-search) — Buscador público unificado
-67. [GET /public/search/diagnostic-units](#67-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-68. [GET /public/search/insurers](#68-get-public-search-insurers) — Aseguradoras en el directorio público
-69. [GET /public/search/medications](#69-get-public-search-medications) — Medicamentos ofertados públicamente
-70. [GET /public/search/organizations](#70-get-public-search-organizations) — Organizaciones en el directorio público
-71. [GET /public/search/pharmacies](#71-get-public-search-pharmacies) — Farmacias en el directorio público
-72. [GET /public/search/practitioners](#72-get-public-search-practitioners) — Profesionales en el directorio público
-73. [GET /s/{slug}](#73-get-s-slug) — Ficha pública de una aseguradora
+64. [GET /public/media/{id}](#64-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+65. [GET /public/nearby](#65-get-public-nearby) — Prestadores cercanos, en línea recta
+66. [GET /public/posts](#66-get-public-posts) — Últimas publicaciones de todos los profesionales
+67. [GET /public/profiles/{prefijo}/{slug}](#67-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+68. [GET /public/search](#68-get-public-search) — Buscador público unificado
+69. [GET /public/search/diagnostic-units](#69-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+70. [GET /public/search/insurers](#70-get-public-search-insurers) — Aseguradoras en el directorio público
+71. [GET /public/search/medications](#71-get-public-search-medications) — Medicamentos ofertados públicamente
+72. [GET /public/search/organizations](#72-get-public-search-organizations) — Organizaciones en el directorio público
+73. [GET /public/search/pharmacies](#73-get-public-search-pharmacies) — Farmacias en el directorio público
+74. [GET /public/search/practitioners](#74-get-public-search-practitioners) — Profesionales en el directorio público
+75. [GET /s/{slug}](#75-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -6356,6 +6358,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "visibility": "PUBLIC",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "avatarFileId": "00000000-0000-4000-8000-000000000001",
+  "coverFileId": "00000000-0000-4000-8000-000000000001",
   "statusConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -6375,6 +6378,7 @@ Campos de la respuesta:
 | `visibility` | Sí | `string` | valores: `PUBLIC`, `PRIVATE` | Si la vitrina está listada en el directorio público. Se devuelve como el código y no como el concept id: es la única forma de que la pantalla de edición muestre el interruptor en la posición correcta sin tener que resolver un uuid contra el catálogo de conceptos. `PRIVATE` cubre también la columna nula — las vitrinas anteriores a este campo. | `PUBLIC` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid`; admite null | Lo otorga la plataforma; se muestra, no se declara. | `00000000-0000-4000-8000-000000000001` |
 | `avatarFileId` | Sí | `string` | formato `uuid`; admite null | La foto de la vitrina, o `null` si todavía no subió ninguna. Viaja porque es una de las tres condiciones que hacen a un perfil "completo" para presentar un grupo público (TP-3, regla 06), y sin ella la pantalla no puede anticipar el rechazo: tendría que dejar que la persona llene el formulario entero para enterarse recién al enviar. | `00000000-0000-4000-8000-000000000001` |
+| `coverFileId` | Sí | `string` | formato `uuid`; admite null | La portada de la vitrina, o `null` si todavía no subió ninguna. | `00000000-0000-4000-8000-000000000001` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -6459,6 +6463,7 @@ Content-Type: application/json
 | `acceptsReviews` | No | `boolean` | Sin restricción adicional declarada | Acepta reseñas | `true` |
 | `visibility` | No | `string` | valores: `PUBLIC`, `PRIVATE` | Listar la vitrina en el directorio público | `PUBLIC` |
 | `avatarFileId` | No | `object` | formato `uuid`; admite null | Archivo ya subido que será el avatar; null lo quita | `{}` |
+| `coverFileId` | No | `object` | formato `uuid`; admite null | Archivo ya subido que será la portada; null la quita | `{}` |
 
 ### Payload completo de ejemplo
 
@@ -6478,7 +6483,8 @@ Content-Type: application/json
   "biography": "valor-ejemplo",
   "acceptsReviews": true,
   "visibility": "PUBLIC",
-  "avatarFileId": {}
+  "avatarFileId": {},
+  "coverFileId": {}
 }
 ```
 
@@ -6511,6 +6517,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "visibility": "PUBLIC",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "avatarFileId": "00000000-0000-4000-8000-000000000001",
+  "coverFileId": "00000000-0000-4000-8000-000000000001",
   "statusConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -6530,6 +6537,7 @@ Campos de la respuesta:
 | `visibility` | Sí | `string` | valores: `PUBLIC`, `PRIVATE` | Si la vitrina está listada en el directorio público. Se devuelve como el código y no como el concept id: es la única forma de que la pantalla de edición muestre el interruptor en la posición correcta sin tener que resolver un uuid contra el catálogo de conceptos. `PRIVATE` cubre también la columna nula — las vitrinas anteriores a este campo. | `PUBLIC` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid`; admite null | Lo otorga la plataforma; se muestra, no se declara. | `00000000-0000-4000-8000-000000000001` |
 | `avatarFileId` | Sí | `string` | formato `uuid`; admite null | La foto de la vitrina, o `null` si todavía no subió ninguna. Viaja porque es una de las tres condiciones que hacen a un perfil "completo" para presentar un grupo público (TP-3, regla 06), y sin ella la pantalla no puede anticipar el rechazo: tendría que dejar que la persona llene el formulario entero para enterarse recién al enviar. | `00000000-0000-4000-8000-000000000001` |
+| `coverFileId` | Sí | `string` | formato `uuid`; admite null | La portada de la vitrina, o `null` si todavía no subió ninguna. | `00000000-0000-4000-8000-000000000001` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -8803,7 +8811,102 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. GET /public/nearby
+## 64. GET /public/media/{id}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Servir una imagen pública (avatar, portada o post)
+- **Operation ID:** `CommunityPublicController_getPublicMedia`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.getPublicMedia](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Servir una imagen pública (avatar, portada o post). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Imagen de la superficie pública: el avatar o la portada de una vitrina, o una foto de una de sus publicaciones. La ficha y el buscador devuelven la URL `/public/media/:id` en vez del id de archivo pelado —un uuid interno regalado a un anónimo no se vuelve a esconder—, así que esta ruta es la contraparte que sirve esos bytes. Lo que autoriza es qué es el archivo, no quién lo pide: sin esto, cada foto del directorio es un enlace roto. `ParseUUIDPipe` rechaza con 400 lo que no es un uuid antes de tocar la base; el resto de los «no» son un 404 indistinguible del «no existe».
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/media/{id}` en `CommunityPublicController_getPublicMedia`. El controlador delega en `CommunityPublicService.getPublicMedia`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/media/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Deben ser UUID válidos: `id`.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/media/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Consulta completada correctamente. | `Promise<void>` | No |
+| 404 | Consulta completada correctamente. | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | Versión vigente no encontrada | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo está borrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo no tiene una versión vigente | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión vigente todavía no está lista para servirse públicamente | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/media/{id}"
+}
+```
+
+---
+
+## 65. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -8896,7 +8999,96 @@ Ejemplo de error normalizado:
 
 ---
 
-## 65. GET /public/profiles/{prefijo}/{slug}
+## 66. GET /public/posts
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Últimas publicaciones de todos los profesionales
+- **Operation ID:** `CommunityPublicController_feedPublico`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.feedPublico](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Últimas publicaciones de todos los profesionales. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El feed de la portada: lo último de todas las vitrinas, mezclado. Va declarado **antes** que `public/search` por la misma razón que todo este controlador va antes que `read_models`: Nest resuelve por orden, y una ruta hermana con parámetro capturaría este segmento.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/posts` en `CommunityPublicController_feedPublico`. El controlador delega en `CommunityPublicService.feedPublico`. No recibe body. El tipo de retorno estático es `Promise<PublicFeedPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/posts?cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/posts?cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicFeedPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
+
+El controlador declara `PublicFeedPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/posts"
+}
+```
+
+---
+
+## 67. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9089,7 +9281,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 66. GET /public/search
+## 68. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9182,7 +9374,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 67. GET /public/search/diagnostic-units
+## 69. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9275,7 +9467,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 68. GET /public/search/insurers
+## 70. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9368,7 +9560,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 69. GET /public/search/medications
+## 71. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9461,7 +9653,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 70. GET /public/search/organizations
+## 72. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9554,7 +9746,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. GET /public/search/pharmacies
+## 73. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9647,7 +9839,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. GET /public/search/practitioners
+## 74. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9741,7 +9933,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. GET /s/{slug}
+## 75. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`

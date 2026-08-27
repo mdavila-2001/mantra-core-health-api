@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1186 de 1186 endpoints** en **65 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1190 de 1190 endpoints** en **65 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -19,7 +19,7 @@ Se documentan **1186 de 1186 endpoints** en **65 módulos**. La referencia compl
 | `clinical` | 25 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 26 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 15 | [Abrir referencia](endpoints/common.md) |
-| `community` | 73 | [Abrir referencia](endpoints/community.md) |
+| `community` | 75 | [Abrir referencia](endpoints/community.md) |
 | `consent` | 12 | [Abrir referencia](endpoints/consent.md) |
 | `content_packs` | 2 | [Abrir referencia](endpoints/content-packs.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
@@ -60,7 +60,7 @@ Se documentan **1186 de 1186 endpoints** en **65 módulos**. La referencia compl
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |
 | `redis_runtime` | 5 | [Abrir referencia](endpoints/redis-runtime.md) |
 | `reporting` | 12 | [Abrir referencia](endpoints/reporting.md) |
-| `scheduling` | 39 | [Abrir referencia](endpoints/scheduling.md) |
+| `scheduling` | 41 | [Abrir referencia](endpoints/scheduling.md) |
 | `search_platform` | 3 | [Abrir referencia](endpoints/search-platform.md) |
 | `surveys` | 12 | [Abrir referencia](endpoints/surveys.md) |
 | `system_context` | 13 | [Abrir referencia](endpoints/system-context.md) |

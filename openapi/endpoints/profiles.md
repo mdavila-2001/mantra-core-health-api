@@ -1115,6 +1115,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "displayName": "Nombre de ejemplo",
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
   "phone": "+59170000000",
   "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1136,6 +1137,7 @@ Campos de la respuesta:
 | `displayName` | No | `string` | Sin restricción adicional declarada | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `Nombre de ejemplo` |
 | `birthDate` | No | `string` | formato `date` | Fecha sin hora: serializarla como instante la desplazaría un día | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `MALE` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
 | `phone` | No | `string` | Sin restricción adicional declarada | Teléfono de contacto vigente (`common.contact_points`) | `+59170000000` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `00000000-0000-4000-8000-000000000001` |
@@ -1220,6 +1222,7 @@ Content-Type: application/json
 | `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Quispe` |
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `valor-ejemplo` |
 | `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres. Cadena vacía para quedarse sin teléfono. | `+59170000000` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
@@ -1241,6 +1244,7 @@ Content-Type: application/json
   "motherLastName": "Quispe",
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
   "phone": "+59170000000",
   "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001"
@@ -1274,6 +1278,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "displayName": "Nombre de ejemplo",
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
   "phone": "+59170000000",
   "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1295,6 +1300,7 @@ Campos de la respuesta:
 | `displayName` | No | `string` | Sin restricción adicional declarada | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `Nombre de ejemplo` |
 | `birthDate` | No | `string` | formato `date` | Fecha sin hora: serializarla como instante la desplazaría un día | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `MALE` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
 | `phone` | No | `string` | Sin restricción adicional declarada | Teléfono de contacto vigente (`common.contact_points`) | `+59170000000` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `00000000-0000-4000-8000-000000000001` |
