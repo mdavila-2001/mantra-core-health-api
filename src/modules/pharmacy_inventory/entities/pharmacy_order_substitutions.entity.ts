@@ -1,6 +1,25 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
+/**
+ * Propuestas de sustitución de un pedido de farmacia, renglón por renglón
+ * (Patch v4.2.1).
+ *
+ * «Te proponen genérico X (Bs 25) en lugar de marca Y (Bs 60)»: la farmacia lo
+ * propone al confirmar el pedido y **la decisión es siempre del paciente** —
+ * aceptar o preferir el original.
+ *
+ * Cuelga de la **línea** además del pedido: la sustitución es de un renglón
+ * concreto, y un pedido puede tener varias propuestas vivas a la vez.
+ *
+ * Es una **bitácora, no un campo mutable**: aceptar y preferir-el-original dejan
+ * la fila viva como historia, así que no hay único por línea — una línea cuya
+ * propuesta se rechazó puede recibir otra.
+ *
+ * No confundir con `medication_dispensations.substitution_reason_concept_id`:
+ * aquél es el motivo que el mostrador registra **al dispensar**, no la propuesta
+ * previa que el paciente todavía puede rechazar.
+ */
 @Entity({
   schema: 'pharmacy_inventory',
   tableName: 'pharmacy_order_substitutions',
