@@ -10,6 +10,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { findCurrentIdentityAssertionForPerson } from '../../identity_assurance/repositories/identity-assertions.repository';
 import { PROF } from '../profiles.concepts';
 import {
   PersonsRepository,
@@ -161,12 +162,16 @@ export class ProfilesPatientsService {
   }
 
   /**
-   * Resumen del propio paciente, tras la verificación de identidad.
+   * Resumen del propio paciente, verificada su identidad o no.
    *
-   * Es el ejemplo mínimo de una función que exige identidad probada (el guard
-   * `@RequiresVerifiedIdentity` la corta antes de llegar aquí): no es la ficha
-   * médica completa, es el patrón que seguirían los endpoints clínicos cuando se
-   * les aplique el mismo guard.
+   * Verificarse es un trámite posterior e independiente del alta, así que el
+   * titular ve desde el primer día lo que él mismo declaró al registrarse. Lo
+   * único que la verificación habilita es el **código de paciente**: mientras no
+   * haya aserción vigente, `patientCode` no viaja —ausente, no `null`— y
+   * `identityVerified` dice por qué. Es el servidor quien decide qué ve cada
+   * sesión; el cliente no oculta campos por su cuenta.
+   *
+   * No es la ficha médica: es filiación, nunca dato clínico.
    *
    * @param actor - Usuario autenticado.
    * @returns Datos básicos del paciente.
@@ -193,13 +198,20 @@ export class ProfilesPatientsService {
       });
     }
 
+    const identityVerified = Boolean(
+      await findCurrentIdentityAssertionForPerson(em, link.personId),
+    );
+
     return {
       personId: person.id,
       patientProfileId: patient.profileId,
-      patientCode: patient.patientCode,
+      identityVerified,
       displayName: person.displayName,
       birthDate: person.birthDate,
       personStatus: person.personStatusConceptId,
+      // Ausente mientras no esté verificado: quien no puede verlo tampoco tiene
+      // que distinguir «no lo tiene» de «todavía no puede verlo».
+      ...(identityVerified ? { patientCode: patient.patientCode } : {}),
     };
   }
 

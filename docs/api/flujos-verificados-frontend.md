@@ -57,7 +57,7 @@ el interior del front va a consumir la cuenta era:
 
 | Módulo | Rutas | Con `GET` |
 | --- | --- | --- |
-| `/profiles` | 13 | 1 — sólo `patients/me/summary`, y detrás del guard de identidad verificada |
+| `/profiles` | 13 | 1 — sólo `patients/me/summary` (desde F-34 basta con la sesión; sin identidad verificada llega sin el código de paciente) |
 | `/scheduling` | 20 | 2 — reglas de confirmación y un endpoint interno de worker |
 | `/charts` | 12 | **0** |
 | `/clinical` | 24 | 1 — políticas de firma |

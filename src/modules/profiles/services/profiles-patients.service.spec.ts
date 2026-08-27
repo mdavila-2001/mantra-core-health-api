@@ -23,7 +23,13 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  // `findOne` además de `flush`: el resumen propio consulta la aserción de
+  // identidad con el EM forkeado, sin repositorio de por medio (el predicado
+  // vive en `identity_assurance`, que no se puede inyectar aquí sin ciclo).
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    findOne: mockFn().mockResolvedValue(null),
+  };
   // `fork` además de `transactional`: las lecturas del servicio no abren
   // transacción —forkean un EM propio— y sin este doble ninguna se puede probar.
   const em = {
@@ -464,6 +470,75 @@ describe('ProfilesPatientsService', () => {
       expect(person.vitalStatusConceptId).toBe(PROF.VITAL_DECEASED);
       expect(person.displayName).toBe('ANONYMIZED');
       expect(res).toMatchObject({ revokedAccountLinks: 2, revokedProxies: 1 });
+    });
+  });
+
+  describe('getOwnSummary (F-34)', () => {
+    const titular = { id: 'user-1', roles: [] } as any;
+
+    /**
+     * Deja al titular con persona y perfil de paciente resueltos, que es lo
+     * único que el resumen necesita antes de mirar la verificación.
+     * @returns El sistema bajo prueba con sus dobles.
+     */
+    function conPaciente() {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Ada Lovelace',
+        birthDate: new Date('1990-05-05'),
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        patientCode: 'PC-1',
+      });
+      return d;
+    }
+
+    it('sin identidad verificada devuelve la filiación y NO el código de paciente', async () => {
+      const d = conPaciente();
+      // Sin aserción vigente para la persona.
+      d.tx.findOne.mockResolvedValue(null);
+
+      const res = await d.service.getOwnSummary(titular);
+
+      expect(res).toMatchObject({
+        personId: 'per-1',
+        patientProfileId: 'pp-1',
+        displayName: 'Ada Lovelace',
+        identityVerified: false,
+      });
+      // Ausente, no `null`: el cliente distingue por `identityVerified`, no por
+      // un campo vacío que parezca un dato que la persona no tiene.
+      expect(res).not.toHaveProperty('patientCode');
+    });
+
+    it('con identidad verificada suma el código de paciente', async () => {
+      const d = conPaciente();
+      d.tx.findOne.mockResolvedValue({ id: 'assertion-1' });
+
+      const res = await d.service.getOwnSummary(titular);
+
+      expect(res).toMatchObject({
+        identityVerified: true,
+        patientCode: 'PC-1',
+      });
+    });
+
+    it('pregunta por la aserción de la persona del titular, no por otra', async () => {
+      const d = conPaciente();
+
+      await d.service.getOwnSummary(titular);
+
+      const [, filtro] = d.tx.findOne.mock.calls[0];
+      expect(filtro).toMatchObject({
+        subjectEntityId: 'per-1',
+        revokedAt: null,
+      });
     });
   });
 });

@@ -18,7 +18,6 @@ import {
 import {
   CurrentUser,
   ParseOptionalLimitPipe,
-  RequiresVerifiedIdentity,
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
@@ -52,7 +51,8 @@ import {
  *
  * Las operaciones de gobierno exigen rol `SECURITY_ADMIN`. La excepción es
  * `GET /profiles/patients/me/summary`, que el propio paciente consulta sobre sí
- * mismo y que, en su lugar, exige tener la identidad verificada.
+ * mismo y para la que basta con la sesión: lo único que le pide es ser el
+ * titular de la cuenta.
  */
 @ApiTags('profiles-patients')
 @ApiBearerAuth()
@@ -66,14 +66,16 @@ export class ProfilesPatientsController {
   constructor(private readonly patientsService: ProfilesPatientsService) {}
 
   /**
-   * Resumen del propio paciente. Ejemplo de función que sólo se habilita con la
-   * identidad verificada: sin aserción vigente el guard responde 403.
+   * Resumen del propio paciente. No exige identidad verificada: verificarse es
+   * un trámite aparte, y el titular ve desde el alta lo que él mismo declaró. La
+   * verificación sólo decide si el resumen incluye el código de paciente, y eso
+   * lo resuelve el servicio (`identityVerified` en la respuesta).
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Datos básicos del paciente.
    */
   @Get('patients/me/summary')
-  @RequiresVerifiedIdentity()
-  @ApiOperation({
-    summary: 'Consultar el resumen propio (requiere identidad verificada)',
-  })
+  @ApiOperation({ summary: 'Consultar el resumen propio' })
   getOwnSummary(
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PatientSummaryResponseDto> {
