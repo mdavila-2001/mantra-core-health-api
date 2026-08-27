@@ -26,6 +26,22 @@ export const BOOKING_CHANNELS: readonly BookingChannel[] = [
   'PHONE',
 ];
 
+/**
+ * Por qué medio ocurre la ATENCIÓN — la modalidad de la cita.
+ *
+ * Distinto de {@link BookingChannel}, que dice cómo se **pidió** el turno. Un
+ * turno pedido por teléfono puede atenderse en persona, y uno pedido por el
+ * portal puede ser una teleconsulta: son dos ejes y viven en dos columnas
+ * (`appointment_bookings.booking_channel_concept_id` y
+ * `clinical.appointments.channel_concept_id`).
+ */
+export type AppointmentChannel = 'PRESENCIAL' | 'TELECONSULTA' | 'DOMICILIO';
+export const APPOINTMENT_CHANNELS: readonly AppointmentChannel[] = [
+  'PRESENCIAL',
+  'TELECONSULTA',
+  'DOMICILIO',
+];
+
 /** Cuerpo de `POST /scheduling/slots/{id}/holds` (UC-41-05). */
 export class CreateHoldDto {
   /**
@@ -913,6 +929,28 @@ export class CreateDirectAppointmentDto {
   @IsString()
   @MaxLength(500)
   reasonText?: string;
+
+  /**
+   * Por qué medio ocurre la atención.
+   *
+   * Se escribe en `clinical.appointments.channel_concept_id`, que es donde el
+   * modelo declara la modalidad. **Omitirlo significa presencial**: es lo que
+   * fueron todas las citas hasta hoy, así que el valor por defecto no afirma
+   * nada que nadie haya registrado.
+   *
+   * No confundir con el canal de la RESERVA (`booking_channel_concept_id`),
+   * que dice cómo se pidió el turno —portal, mostrador, teléfono—, no cómo se
+   * atiende. Un turno pedido por teléfono puede ser presencial, y uno pedido
+   * por el portal puede ser teleconsulta.
+   */
+  @ApiPropertyOptional({
+    enum: APPOINTMENT_CHANNELS,
+    description:
+      'Modalidad de la atención. Ausente = PRESENCIAL. No es el canal de la reserva.',
+  })
+  @IsOptional()
+  @IsIn(APPOINTMENT_CHANNELS as readonly string[])
+  channel?: AppointmentChannel;
 }
 
 /** Respuesta de la cita puntual. */

@@ -72,12 +72,33 @@ import {
   type BookingChannel,
   CreateDirectAppointmentDto,
   DirectAppointmentResponseDto,
+  type AppointmentChannel,
 } from '../dto';
 
 const CHANNEL_CONCEPT: Readonly<Record<BookingChannel, string>> = {
   PORTAL: CONCEPTS.CHANNEL_PORTAL,
   DESK: CONCEPTS.CHANNEL_DESK,
   PHONE: CONCEPTS.CHANNEL_PHONE,
+};
+
+/**
+ * La modalidad de la atención → su concepto de catálogo.
+ *
+ * Ojo con el vecino de arriba: `CHANNEL_CONCEPT` es cómo se **pidió** el turno
+ * y va en la reserva; éste es por qué medio **ocurre** y va en la cita clínica
+ * (`clinical.appointments.channel_concept_id`). Dos ejes, dos columnas.
+ *
+ * `PRESENCIAL` no se omite aunque sea el valor por defecto: cuando alguien lo
+ * elige explícitamente, se guarda: «nadie lo dijo» y «dijeron que es
+ * presencial» son cosas distintas, y sólo la primera puede cambiar de
+ * significado si mañana el default cambia.
+ */
+const APPOINTMENT_CHANNEL_CONCEPT: Readonly<
+  Record<AppointmentChannel, string>
+> = {
+  PRESENCIAL: CLIN.APPOINTMENT_CHANNEL_IN_PERSON,
+  TELECONSULTA: CLIN.APPOINTMENT_CHANNEL_TELEHEALTH,
+  DOMICILIO: CLIN.APPOINTMENT_CHANNEL_HOME_VISIT,
 };
 
 /**
@@ -805,6 +826,10 @@ export class SchedulingBookingsService {
         endAt,
         reasonText: dto.reasonText,
         statusConceptId: CLIN.APPOINTMENT_BOOKED,
+        // Ausente = presencial: no se escribe un valor que nadie eligió.
+        ...(dto.channel === undefined
+          ? {}
+          : { channelConceptId: APPOINTMENT_CHANNEL_CONCEPT[dto.channel] }),
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -2390,6 +2415,12 @@ export class SchedulingBookingsService {
       reasonText?: string;
       /** Estado clínico con el que nace: pendiente si se solicitó, reservada si se confirmó. */
       statusConceptId: string;
+      /**
+       * Por qué medio ocurre la atención. Ausente = presencial, que es lo que
+       * fueron todas las citas hasta que existió este conjunto: no se escribe
+       * un valor que nadie eligió.
+       */
+      channelConceptId?: string;
       actorUserId?: string;
     },
   ): Appointments {
@@ -2409,6 +2440,9 @@ export class SchedulingBookingsService {
       ...(datos.reasonText === undefined
         ? {}
         : { reasonText: datos.reasonText }),
+      ...(datos.channelConceptId === undefined
+        ? {}
+        : { channelConceptId: datos.channelConceptId }),
       ...(datos.actorUserId === undefined
         ? {}
         : { actorUserId: datos.actorUserId }),
