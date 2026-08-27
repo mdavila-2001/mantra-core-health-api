@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `messaging`
 
-Referencia exhaustiva de 13 operación(es) del módulo `messaging`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 17 operación(es) del módulo `messaging`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `messaging`, `messaging-internal`, `messaging-webhooks`
 - **Controladores:** `MessagingController`, `MessagingInternalController`, `ProviderWebhooksController`
@@ -20,10 +20,14 @@ Referencia exhaustiva de 13 operación(es) del módulo `messaging`, derivada del
 7. [POST /internal/outbox/relay/run](#7-post-internal-outbox-relay-run) — Reclamar y publicar un lote del outbox
 8. [POST /internal/queues/{code}/claim](#8-post-internal-queues-code-claim) — Reclamar un lote de trabajos de la cola
 9. [POST /notifications/in-app/{id}/read](#9-post-notifications-in-app-id-read) — Marcar una notificación in-app como leída
-10. [POST /notifications/requests](#10-post-notifications-requests) — Crear una solicitud de notificación
-11. [POST /queues/{code}/jobs](#11-post-queues-code-jobs) — Encolar un trabajo
-12. [POST /queues/dead-letter/{deadLetterJobId}/redrive](#12-post-queues-dead-letter-deadletterjobid-redrive) — Reencolar un trabajo desde la cola muerta
-13. [POST /webhooks/providers/{providerCode}/receipts](#13-post-webhooks-providers-providercode-receipts) — Conciliar el acuse de entrega que envía el proveedor
+10. [POST /notifications/in-app/read-all](#10-post-notifications-in-app-read-all) — Marcar toda mi bandeja como leída
+11. [GET /notifications/me](#11-get-notifications-me) — Mis notificaciones in-app
+12. [GET /notifications/preferences/me](#12-get-notifications-preferences-me) — Mis preferencias de notificación in-app
+13. [PUT /notifications/preferences/me](#13-put-notifications-preferences-me) — Guardar mis preferencias de notificación in-app
+14. [POST /notifications/requests](#14-post-notifications-requests) — Crear una solicitud de notificación
+15. [POST /queues/{code}/jobs](#15-post-queues-code-jobs) — Encolar un trabajo
+16. [POST /queues/dead-letter/{deadLetterJobId}/redrive](#16-post-queues-dead-letter-deadletterjobid-redrive) — Reencolar un trabajo desde la cola muerta
+17. [POST /webhooks/providers/{providerCode}/receipts](#17-post-webhooks-providers-providercode-receipts) — Conciliar el acuse de entrega que envía el proveedor
 
 ---
 
@@ -803,7 +807,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "clave": "valor"
       },
       "recipientAddress": "valor-ejemplo",
-      "recipientUserId": "00000000-0000-4000-8000-000000000001"
+      "recipientUserId": "00000000-0000-4000-8000-000000000001",
+      "channelTypeConceptId": "00000000-0000-4000-8000-000000000001"
     }
   ]
 }
@@ -813,13 +818,14 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `requests` | Sí | `array<PendingNotificationRequestDto>` | Sin restricción adicional declarada | Valor de requests mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","channelId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","payloadJson":{"clave":"valor"},"recipientAddress":"valor-ejemplo","recipientUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `requests` | Sí | `array<PendingNotificationRequestDto>` | Sin restricción adicional declarada | Valor de requests mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","channelId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","payloadJson":{"clave":"valor"},"recipientAddress":"valor-ejemplo","recipientUserId":"00000000-0000-4000-8000-000000000001","channelTypeConceptId":"00000000-0000-4000-8000-000000000001"}]` |
 | `requests[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `requests[].channelId` | Sí | `string` | formato `uuid` | Identificador asociado a channel. | `00000000-0000-4000-8000-000000000001` |
 | `requests[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 | `requests[].payloadJson` | No | `object` | Sin restricción adicional declarada | Carga de la solicitud | `{"clave":"valor"}` |
 | `requests[].recipientAddress` | No | `string` | Sin restricción adicional declarada | Valor de recipient address mantenido por la instancia. | `valor-ejemplo` |
 | `requests[].recipientUserId` | No | `string` | formato `uuid` | Identificador asociado a recipient user. | `00000000-0000-4000-8000-000000000001` |
+| `requests[].channelTypeConceptId` | No | `string` | formato `uuid` | Tipo del canal (correo, in-app…). Viaja con el lote porque el worker necesita saber si hay un tercero al que llamar **antes** de llamarlo: una notificación in-app no sale a ningún proveedor, y sin este dato el adaptador por defecto la marcaba `FAILED` con `PROVIDER_NOT_CONFIGURED` — un fallo inventado por preguntarle a un proveedor que para ese canal no tiene que existir. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1250,7 +1256,520 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /notifications/requests
+## 10. POST /notifications/in-app/read-all
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging`
+- **Nombre:** Marcar toda mi bandeja como leída
+- **Operation ID:** `MessagingController_markAllInAppRead`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MessagingController.markAllInAppRead](../../src/modules/messaging/controllers/messaging.controller.ts)
+
+### Descripción de negocio
+
+Acota el lote y devuelve cuántas quedaron sin leer.
+
+Contexto declarado en el controlador: Carril P1 · marcar todo como leído. Sin esto, bajar un badge de cuarenta exige abrir cuarenta notificaciones, y quien tiene cuarenta avisos viejos no los abre: aprende a ignorar la campana. Una campana que se ignora no notifica.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /notifications/in-app/read-all` en `MessagingController_markAllInAppRead`. El controlador delega en `NotificationsService.markAllInAppRead`. No recibe body. El tipo de retorno estático es `Promise<MarkAllInAppReadResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /notifications/in-app/read-all HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `USER`, `MESSAGING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /notifications/in-app/read-all HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MarkAllInAppReadResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "marked": 1,
+  "unreadCount": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `marked` | Sí | `number` | Sin restricción adicional declarada | Cuántas se marcaron en esta pasada. | `1` |
+| `unreadCount` | Sí | `number` | Sin restricción adicional declarada | Cuántas quedan sin leer después de marcar. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: USER, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/notifications/in-app/read-all"
+}
+```
+
+---
+
+## 11. GET /notifications/me
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging`
+- **Nombre:** Mis notificaciones in-app
+- **Operation ID:** `MessagingController_listMyNotifications`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MessagingController.listMyNotifications](../../src/modules/messaging/controllers/messaging.controller.ts)
+
+### Descripción de negocio
+
+Bandeja propia con el total sin leer. Nadie lee la bandeja de otro.
+
+Contexto declarado en el controlador: Carril P1 · la bandeja de la campana. Es la lectura **del usuario final**, la que faltaba. El módulo tenía `GET /internal/notifications/pending` —que reclama solicitudes para que un worker las entregue— y nada con lo que dibujar una campana: se podía marcar como leída una notificación cuyo id no había forma de conocer. `?unread=true&limit=1` alcanza para el badge; sin filtro es el centro de notificaciones. Es la misma lectura porque es la misma bandeja.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /notifications/me` en `MessagingController_listMyNotifications`. El controlador delega en `NotificationsService.listMine`. No recibe body. El tipo de retorno estático es `Promise<InAppNotificationPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `unread` | query | No | `boolean` | Sin restricción adicional declarada | Sólo las no leídas | `true` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor de la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `20` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /notifications/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `USER`, `MESSAGING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /notifications/me?unread=true&cursor=valor-ejemplo&limit=20 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InAppNotificationPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "category": {},
+      "subject": "valor-ejemplo",
+      "bodyText": "valor-ejemplo",
+      "destination": {
+        "type": "valor-ejemplo",
+        "id": "00000000-0000-4000-8000-000000000001"
+      },
+      "payloadJson": {
+        "clave": "valor"
+      },
+      "unread": true,
+      "availableAt": "2026-07-31T12:00:00.000Z",
+      "readAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo",
+  "unreadCount": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<InAppNotificationDto>` | Sin restricción adicional declarada | Las notificaciones de la página, de la más reciente a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","category":{},"subject":"valor-ejemplo","bodyText":"valor-ejemplo","destination":{"type":"valor-ejemplo","id":"00000000-0000-4000-8000-000000000001"},"payloadJson":{"clave":"valor"},"unread":true,"availableAt":"2026-07-31T12:00:00.000Z","readAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la notificación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].category` | No | `object` | Sin restricción adicional declarada | Categoría en el vocabulario del contrato (`CLINICAL`, `MESSAGES`…). Va resuelta y no como concept id: el front tendría que mantener una tabla de uuids para poder decir «clínica» en la pantalla de preferencias, y esa tabla se desincroniza el día que alguien vuelve a sembrar. | `{}` |
+| `items[].subject` | No | `string` | admite null | Título corto. | `valor-ejemplo` |
+| `items[].bodyText` | No | `string` | admite null | Cuerpo de una o dos líneas. | `valor-ejemplo` |
+| `items[].destination` | No | `NotificationDestinationDto` | Sin restricción adicional declarada | A dónde lleva al abrirla, si lleva a algo. | `{"type":"valor-ejemplo","id":"00000000-0000-4000-8000-000000000001"}` |
+| `items[].destination.type` | No | `string` | Sin restricción adicional declarada | Clase de objeto: PRESCRIPTION, CONVERSATION… | `valor-ejemplo` |
+| `items[].destination.id` | No | `string` | formato `uuid` | Identificador de ese objeto. | `00000000-0000-4000-8000-000000000001` |
+| `items[].payloadJson` | No | `object` | Sin restricción adicional declarada | Datos extra que la pantalla de destino quiera aprovechar. | `{"clave":"valor"}` |
+| `items[].unread` | Sí | `boolean` | Sin restricción adicional declarada | `true` mientras siga sin leer. | `true` |
+| `items[].availableAt` | Sí | `string` | formato `date-time` | Cuándo quedó disponible para el destinatario. | `2026-07-31T12:00:00.000Z` |
+| `items[].readAt` | No | `string` | formato `date-time`; admite null | Cuándo la leyó, si la leyó. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null`. | `valor-ejemplo` |
+| `unreadCount` | Sí | `number` | Sin restricción adicional declarada | Cuántas quedan sin leer **en total**, no en esta página. Viaja con cada página porque es el número del badge, y pedirlo aparte obligaría a la campana a hacer dos llamadas por cada tic de sondeo. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: USER, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/notifications/me"
+}
+```
+
+---
+
+## 12. GET /notifications/preferences/me
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging`
+- **Nombre:** Mis preferencias de notificación in-app
+- **Operation ID:** `MessagingController_readMyPreferences`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MessagingController.readMyPreferences](../../src/modules/messaging/controllers/messaging.controller.ts)
+
+### Descripción de negocio
+
+Las cuatro categorías y la ventana de silencio.
+
+Contexto declarado en el controlador: Carril P9 · qué avisos quiere recibir. Devuelve **siempre las cuatro categorías**, haya filas o no: quien nunca las tocó las recibe todas aceptadas, que es lo que efectivamente le pasa.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /notifications/preferences/me` en `MessagingController_readMyPreferences`. El controlador delega en `NotificationsService.readMyPreferences`. No recibe body. El tipo de retorno estático es `Promise<MyPreferencesDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /notifications/preferences/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `USER`, `MESSAGING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /notifications/preferences/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPreferencesDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "categories": [
+    {
+      "category": "CLINICAL",
+      "optedIn": true
+    }
+  ],
+  "quietHours": {
+    "start": "22:00",
+    "end": "07:00"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `categories` | Sí | `array<CategoryPreferenceDto>` | Sin restricción adicional declarada | Decisión por categoría: **siempre las cuatro**, aunque nunca las tocó. | `[{"category":"CLINICAL","optedIn":true}]` |
+| `categories[].category` | Sí | `string` | valores: `CLINICAL`, `SCHEDULING`, `MESSAGES`, `SOCIAL` | Sin descripción específica en el contrato OpenAPI. | `CLINICAL` |
+| `categories[].optedIn` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `quietHours` | No | `QuietHoursDto` | Sin restricción adicional declarada | Ventana de silencio, o `null` si no configuró ninguna. | `{"start":"22:00","end":"07:00"}` |
+| `quietHours.start` | No | `string` | patrón runtime `/^([01]\d\|2[0-3]):[0-5]\d$/` | Sin descripción específica en el contrato OpenAPI. | `22:00` |
+| `quietHours.end` | No | `string` | patrón runtime `/^([01]\d\|2[0-3]):[0-5]\d$/` | Sin descripción específica en el contrato OpenAPI. | `07:00` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: USER, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/notifications/preferences/me"
+}
+```
+
+---
+
+## 13. PUT /notifications/preferences/me
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging`
+- **Nombre:** Guardar mis preferencias de notificación in-app
+- **Operation ID:** `MessagingController_updateMyPreferences`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MessagingController.updateMyPreferences](../../src/modules/messaging/controllers/messaging.controller.ts)
+
+### Descripción de negocio
+
+Reemplaza sólo las categorías que vienen en el cuerpo.
+
+Contexto declarado en el controlador: Carril P9 · guardar las preferencias. Reemplazo **por categoría**: lo que no viene no se toca. `quietHours` ausente significa «no la toques» y `null`, «quitala».
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /notifications/preferences/me` en `MessagingController_updateMyPreferences`. El controlador delega en `NotificationsService.updateMyPreferences`. Valida el body como `UpdateMyPreferencesDto` y consume `application/json`. El tipo de retorno estático es `Promise<MyPreferencesDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateMyPreferencesDto`; los campos opcionales se omiten.
+
+```http
+PUT /notifications/preferences/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `USER`, `MESSAGING_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `categories` | No | `array<CategoryPreferenceDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"category":"CLINICAL","optedIn":true}]` |
+| `categories[].category` | No | `string` | valores: `CLINICAL`, `SCHEDULING`, `MESSAGES`, `SOCIAL` | Sin descripción específica en el contrato OpenAPI. | `CLINICAL` |
+| `categories[].optedIn` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `quietHours` | No | `QuietHoursDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"start":"22:00","end":"07:00"}` |
+| `quietHours.start` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `22:00` |
+| `quietHours.end` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `07:00` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /notifications/preferences/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "categories": [
+    {
+      "category": "CLINICAL",
+      "optedIn": true
+    }
+  ],
+  "quietHours": {
+    "start": "22:00",
+    "end": "07:00"
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPreferencesDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "categories": [
+    {
+      "category": "CLINICAL",
+      "optedIn": true
+    }
+  ],
+  "quietHours": {
+    "start": "22:00",
+    "end": "07:00"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `categories` | Sí | `array<CategoryPreferenceDto>` | Sin restricción adicional declarada | Decisión por categoría: **siempre las cuatro**, aunque nunca las tocó. | `[{"category":"CLINICAL","optedIn":true}]` |
+| `categories[].category` | Sí | `string` | valores: `CLINICAL`, `SCHEDULING`, `MESSAGES`, `SOCIAL` | Sin descripción específica en el contrato OpenAPI. | `CLINICAL` |
+| `categories[].optedIn` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `quietHours` | No | `QuietHoursDto` | Sin restricción adicional declarada | Ventana de silencio, o `null` si no configuró ninguna. | `{"start":"22:00","end":"07:00"}` |
+| `quietHours.start` | No | `string` | patrón runtime `/^([01]\d\|2[0-3]):[0-5]\d$/` | Sin descripción específica en el contrato OpenAPI. | `22:00` |
+| `quietHours.end` | No | `string` | patrón runtime `/^([01]\d\|2[0-3]):[0-5]\d$/` | Sin descripción específica en el contrato OpenAPI. | `07:00` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: USER, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/notifications/preferences/me"
+}
+```
+
+---
+
+## 14. POST /notifications/requests
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -1409,7 +1928,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /queues/{code}/jobs
+## 15. POST /queues/{code}/jobs
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -1551,7 +2070,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /queues/dead-letter/{deadLetterJobId}/redrive
+## 16. POST /queues/dead-letter/{deadLetterJobId}/redrive
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -1685,7 +2204,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /webhooks/providers/{providerCode}/receipts
+## 17. POST /webhooks/providers/{providerCode}/receipts
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging-webhooks`

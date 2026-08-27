@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `practice`
 
-Referencia exhaustiva de 18 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 24 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `practice`
 - **Controladores:** `AccreditationsController`, `InventoryItemsController`, `PracticesController`, `PractitionerSitesController`, `RoleAssignmentsController`, `SitesController`
@@ -20,15 +20,21 @@ Referencia exhaustiva de 18 operación(es) del módulo `practice`, derivada del 
 7. [POST /practices/{practiceId}/inventory-items](#7-post-practices-practiceid-inventory-items) — Dar de alta un insumo de inventario de práctica
 8. [GET /practices/{practiceId}/organization](#8-get-practices-practiceid-organization) — Consola de organización médica: estructura, plantilla y legajo
 9. [POST /practices/{practiceId}/role-assignments](#9-post-practices-practiceid-role-assignments) — Asignar un rol de profesional a sitio/unidad/servicio
-10. [PUT /practices/{practiceId}/settings/{settingKey}](#10-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
-11. [GET /practices/{practiceId}/sites](#11-get-practices-practiceid-sites) — Listar las sedes de una práctica
-12. [POST /practices/{practiceId}/sites](#12-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
-13. [DELETE /practices/{practiceId}/sites/{siteId}](#13-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
-14. [GET /practitioners/{profileId}/sites](#14-get-practitioners-profileid-sites) — Consultorios donde atiende el profesional
-15. [POST /role-assignments/{roleId}/support-assignments](#15-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
-16. [GET /sites/{siteId}/care-spaces](#16-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
-17. [POST /sites/{siteId}/care-spaces](#17-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
-18. [POST /sites/{siteId}/clinical-units](#18-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
+10. [POST /practices/{practiceId}/role-assignments/self-request](#10-post-practices-practiceid-role-assignments-self-request) — Solicitar la propia vinculación a una organización
+11. [PUT /practices/{practiceId}/settings/{settingKey}](#11-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
+12. [GET /practices/{practiceId}/sites](#12-get-practices-practiceid-sites) — Listar las sedes de una práctica
+13. [POST /practices/{practiceId}/sites](#13-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
+14. [DELETE /practices/{practiceId}/sites/{siteId}](#14-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
+15. [GET /practitioners/{profileId}/sites](#15-get-practitioners-profileid-sites) — Consultorios donde atiende el profesional
+16. [GET /practitioners/me/role-assignments](#16-get-practitioners-me-role-assignments) — Mis vinculaciones con organizaciones
+17. [POST /role-assignments/{roleId}/approve](#17-post-role-assignments-roleid-approve) — Aprobar una vinculación pendiente
+18. [POST /role-assignments/{roleId}/end](#18-post-role-assignments-roleid-end) — Finalizar una vinculación
+19. [POST /role-assignments/{roleId}/reject](#19-post-role-assignments-roleid-reject) — Rechazar una vinculación pendiente
+20. [POST /role-assignments/{roleId}/support-assignments](#20-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
+21. [POST /role-assignments/{roleId}/suspend](#21-post-role-assignments-roleid-suspend) — Suspender una vinculación activa
+22. [GET /sites/{siteId}/care-spaces](#22-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
+23. [POST /sites/{siteId}/care-spaces](#23-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
+24. [POST /sites/{siteId}/clinical-units](#24-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
 
 ---
 
@@ -1547,7 +1553,149 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. PUT /practices/{practiceId}/settings/{settingKey}
+## 10. POST /practices/{practiceId}/role-assignments/self-request
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Solicitar la propia vinculación a una organización
+- **Operation ID:** `PracticesController_selfRequestRoleAssignment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PracticesController.selfRequestRoleAssignment](../../src/modules/practice/controllers/practices.controller.ts)
+
+### Descripción de negocio
+
+Autoservicio del profesional: queda PENDING hasta que la organización la apruebe, rechace, suspenda o finalice. No concede acceso a pacientes de la organización.
+
+Contexto declarado en el controlador: Carril 18 — el profesional pide vincularse a la organización por su cuenta; queda `PENDING` hasta que la organización la apruebe (ver `/role-assignments/:roleId/approve` en `RoleAssignmentsController`).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /practices/{practiceId}/role-assignments/self-request` en `PracticesController_selfRequestRoleAssignment`. El controlador delega en `PracticeWorkforceService.selfRequestAffiliation`. Valida el body como `PracticeSelfRequestRoleAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<RoleAssignmentResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PracticeSelfRequestRoleAssignmentDto`; los campos opcionales se omiten.
+
+```http
+POST /practices/00000000-0000-4000-8000-000000000001/role-assignments/self-request HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `practiceId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `practiceSiteId` | No | `string` | formato `uuid` | Sitio de la práctica | `00000000-0000-4000-8000-000000000001` |
+| `roleConceptId` | No | `string` | formato `uuid` | Concepto de cargo/rol | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptId` | No | `string` | formato `uuid` | Concepto de especialidad | `00000000-0000-4000-8000-000000000001` |
+| `validFrom` | No | `string` | Sin restricción adicional declarada | Vigente desde (ISO date) | `valor-ejemplo` |
+| `note` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /practices/00000000-0000-4000-8000-000000000001/role-assignments/self-request HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "roleConceptId": "00000000-0000-4000-8000-000000000001",
+  "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+  "validFrom": "valor-ejemplo",
+  "note": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "status": "ok",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | Sin restricción adicional declarada | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Valor de status mantenido por la instancia. | `ok` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 422 | `PRECONDITION_FAILED` | La práctica no está activa | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 422 | `PRECONDITION_FAILED` | El sitio no pertenece a la práctica | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practices/{practiceId}/role-assignments/self-request"
+}
+```
+
+---
+
+## 11. PUT /practices/{practiceId}/settings/{settingKey}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1680,7 +1828,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /practices/{practiceId}/sites
+## 12. GET /practices/{practiceId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1792,7 +1940,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /practices/{practiceId}/sites
+## 13. POST /practices/{practiceId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1943,7 +2091,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. DELETE /practices/{practiceId}/sites/{siteId}
+## 14. DELETE /practices/{practiceId}/sites/{siteId}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2054,7 +2202,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /practitioners/{profileId}/sites
+## 15. GET /practitioners/{profileId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2179,7 +2327,517 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /role-assignments/{roleId}/support-assignments
+## 16. GET /practitioners/me/role-assignments
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Mis vinculaciones con organizaciones
+- **Operation ID:** `PractitionerSitesController_listMyAssignments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSitesController.listMyAssignments](../../src/modules/practice/controllers/practitioner-sites.controller.ts)
+
+### Descripción de negocio
+
+Incluye pendientes, activas, suspendidas, rechazadas y finalizadas. No implica acceso a pacientes de esas organizaciones.
+
+Contexto declarado en el controlador: Carril 18 — «mis organizaciones»: todas las vinculaciones del profesional autenticado (cualquier estado, cualquier organización). Cuelga de `me` y no de un `:profileId` porque es autoservicio: cada profesional ve las suyas, no las de otro.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /practitioners/me/role-assignments` en `PractitionerSitesController_listMyAssignments`. El controlador delega en `PracticeWorkforceService.listMyAssignments`. No recibe body. El tipo de retorno estático es `Promise<MyRoleAssignmentResponseDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /practitioners/me/role-assignments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /practitioners/me/role-assignments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyRoleAssignmentResponseDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "practiceId": "00000000-0000-4000-8000-000000000001",
+    "practiceName": "Nombre de ejemplo",
+    "practiceType": "00000000-0000-4000-8000-000000000001",
+    "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+    "roleConceptId": "00000000-0000-4000-8000-000000000001",
+    "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+    "status": "00000000-0000-4000-8000-000000000001",
+    "isPrimary": true,
+    "validFrom": "2026-07-31T12:00:00.000Z",
+    "validTo": "2026-07-31T12:00:00.000Z",
+    "createdAt": "2026-07-31T12:00:00.000Z"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioners/me/role-assignments"
+}
+```
+
+---
+
+## 17. POST /role-assignments/{roleId}/approve
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Aprobar una vinculación pendiente
+- **Operation ID:** `RoleAssignmentsController_approve`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [RoleAssignmentsController.approve](../../src/modules/practice/controllers/role-assignments.controller.ts)
+
+### Descripción de negocio
+
+Aprobar una vinculación pendiente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Carril 18: `PENDING → ACTIVE`.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /role-assignments/{roleId}/approve` en `RoleAssignmentsController_approve`. El controlador delega en `PracticeWorkforceService.approveAssignment`. Valida el body como `PracticeRoleAssignmentTransitionDto` y consume `application/json`. El tipo de retorno estático es `Promise<RoleAssignmentResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `roleId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PracticeRoleAssignmentTransitionDto`; los campos opcionales se omiten.
+
+```http
+POST /role-assignments/00000000-0000-4000-8000-000000000001/approve HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `roleId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /role-assignments/00000000-0000-4000-8000-000000000001/approve HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "status": "ok",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | Sin restricción adicional declarada | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Valor de status mantenido por la instancia. | `ok` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vinculación profesional-organización no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La vinculación no admite esa transición desde su estado actual | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/role-assignments/{roleId}/approve"
+}
+```
+
+---
+
+## 18. POST /role-assignments/{roleId}/end
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Finalizar una vinculación
+- **Operation ID:** `RoleAssignmentsController_end`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [RoleAssignmentsController.end](../../src/modules/practice/controllers/role-assignments.controller.ts)
+
+### Descripción de negocio
+
+Finalizar una vinculación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Carril 18: `ACTIVE|SUSPENDED → ENDED`.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /role-assignments/{roleId}/end` en `RoleAssignmentsController_end`. El controlador delega en `PracticeWorkforceService.endAssignment`. Valida el body como `PracticeRoleAssignmentTransitionDto` y consume `application/json`. El tipo de retorno estático es `Promise<RoleAssignmentResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `roleId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PracticeRoleAssignmentTransitionDto`; los campos opcionales se omiten.
+
+```http
+POST /role-assignments/00000000-0000-4000-8000-000000000001/end HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `roleId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /role-assignments/00000000-0000-4000-8000-000000000001/end HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "status": "ok",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | Sin restricción adicional declarada | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Valor de status mantenido por la instancia. | `ok` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vinculación profesional-organización no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La vinculación no admite esa transición desde su estado actual | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/role-assignments/{roleId}/end"
+}
+```
+
+---
+
+## 19. POST /role-assignments/{roleId}/reject
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Rechazar una vinculación pendiente
+- **Operation ID:** `RoleAssignmentsController_reject`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [RoleAssignmentsController.reject](../../src/modules/practice/controllers/role-assignments.controller.ts)
+
+### Descripción de negocio
+
+Rechazar una vinculación pendiente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Carril 18: `PENDING → REJECTED`.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /role-assignments/{roleId}/reject` en `RoleAssignmentsController_reject`. El controlador delega en `PracticeWorkforceService.rejectAssignment`. Valida el body como `PracticeRoleAssignmentTransitionDto` y consume `application/json`. El tipo de retorno estático es `Promise<RoleAssignmentResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `roleId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PracticeRoleAssignmentTransitionDto`; los campos opcionales se omiten.
+
+```http
+POST /role-assignments/00000000-0000-4000-8000-000000000001/reject HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `roleId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /role-assignments/00000000-0000-4000-8000-000000000001/reject HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "status": "ok",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | Sin restricción adicional declarada | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Valor de status mantenido por la instancia. | `ok` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vinculación profesional-organización no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La vinculación no admite esa transición desde su estado actual | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/role-assignments/{roleId}/reject"
+}
+```
+
+---
+
+## 20. POST /role-assignments/{roleId}/support-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2318,7 +2976,139 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /sites/{siteId}/care-spaces
+## 21. POST /role-assignments/{roleId}/suspend
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Suspender una vinculación activa
+- **Operation ID:** `RoleAssignmentsController_suspend`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [RoleAssignmentsController.suspend](../../src/modules/practice/controllers/role-assignments.controller.ts)
+
+### Descripción de negocio
+
+Suspender una vinculación activa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Carril 18: `ACTIVE → SUSPENDED`.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /role-assignments/{roleId}/suspend` en `RoleAssignmentsController_suspend`. El controlador delega en `PracticeWorkforceService.suspendAssignment`. Valida el body como `PracticeRoleAssignmentTransitionDto` y consume `application/json`. El tipo de retorno estático es `Promise<RoleAssignmentResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `roleId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PracticeRoleAssignmentTransitionDto`; los campos opcionales se omiten.
+
+```http
+POST /role-assignments/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `roleId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /role-assignments/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "status": "ok",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | Sin restricción adicional declarada | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Valor de status mantenido por la instancia. | `ok` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vinculación profesional-organización no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La vinculación no admite esa transición desde su estado actual | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/role-assignments/{roleId}/suspend"
+}
+```
+
+---
+
+## 22. GET /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2431,7 +3221,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /sites/{siteId}/care-spaces
+## 23. POST /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2580,7 +3370,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /sites/{siteId}/clinical-units
+## 24. POST /sites/{siteId}/clinical-units
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`

@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 54 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 73 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline`
-- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySocialController`, `CommunityTimelineController`
+- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline`
+- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -29,42 +29,61 @@ Referencia exhaustiva de 54 operación(es) del módulo `community`, derivada del
 16. [POST /community/follows](#16-post-community-follows) — Seguir un objeto social
 17. [GET /community/groups](#17-get-community-groups) — Grupos de una organización
 18. [POST /community/groups](#18-post-community-groups) — Crear un grupo/comunidad
-19. [GET /community/groups/{groupId}/members](#19-get-community-groups-groupid-members) — Integrantes de un grupo
-20. [POST /community/groups/{groupId}/members](#20-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
-21. [POST /community/moderation/decisions/{decisionId}/appeal](#21-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
-22. [POST /community/moderation/queue/{queueId}/decision](#22-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
-23. [GET /community/notifications](#23-get-community-notifications) — Notificaciones sociales de un perfil
-24. [GET /community/polls/{pollId}](#24-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
-25. [POST /community/polls/{pollId}/votes](#25-post-community-polls-pollid-votes) — Votar en una encuesta
-26. [GET /community/posts/{postId}](#26-get-community-posts-postid) — Publicación con media, hashtags y menciones
-27. [GET /community/posts/{postId}/comments](#27-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
-28. [POST /community/posts/{postId}/polls](#28-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
-29. [GET /community/posts/{postId}/reactions](#29-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
-30. [GET /community/profiles/{profileId}](#30-get-community-profiles-profileid) — Ficha de un perfil público
-31. [GET /community/profiles/{profileId}/posts](#31-get-community-profiles-profileid-posts) — Publicaciones de un perfil
-32. [POST /community/profiles/{profileId}/posts](#32-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
-33. [GET /community/profiles/{profileId}/reviews](#33-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
-34. [POST /community/profiles/{profileId}/reviews](#34-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
-35. [GET /community/profiles/me](#35-get-community-profiles-me) — Consultar la vitrina pública propia
-36. [PUT /community/profiles/me](#36-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
-37. [POST /community/public-profiles](#37-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
-38. [PUT /community/reactions](#38-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
-39. [POST /community/reports](#39-post-community-reports) — Reportar contenido y encolar moderación
-40. [GET /f/{slug}](#40-get-f-slug) — Ficha pública de una farmacia
-41. [GET /internal/community/feed/pending](#41-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-42. [POST /internal/community/feed/rebuild](#42-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
-43. [GET /l/{slug}](#43-get-l-slug) — Ficha pública de un laboratorio
-44. [GET /o/{slug}](#44-get-o-slug) — Ficha pública de una organización
-45. [GET /p/{slug}](#45-get-p-slug) — Ficha pública de un profesional
-46. [GET /public/nearby](#46-get-public-nearby) — Prestadores cercanos, en línea recta
-47. [GET /public/search](#47-get-public-search) — Buscador público unificado
-48. [GET /public/search/diagnostic-units](#48-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-49. [GET /public/search/insurers](#49-get-public-search-insurers) — Aseguradoras en el directorio público
-50. [GET /public/search/medications](#50-get-public-search-medications) — Medicamentos ofertados públicamente
-51. [GET /public/search/organizations](#51-get-public-search-organizations) — Organizaciones en el directorio público
-52. [GET /public/search/pharmacies](#52-get-public-search-pharmacies) — Farmacias en el directorio público
-53. [GET /public/search/practitioners](#53-get-public-search-practitioners) — Profesionales en el directorio público
-54. [GET /s/{slug}](#54-get-s-slug) — Ficha pública de una aseguradora
+19. [GET /community/groups/{groupId}](#19-get-community-groups-groupid) — Ficha de un grupo
+20. [GET /community/groups/{groupId}/members](#20-get-community-groups-groupid-members) — Integrantes de un grupo
+21. [POST /community/groups/{groupId}/members](#21-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
+22. [PATCH /community/groups/{groupId}/members/{memberId}](#22-patch-community-groups-groupid-members-memberid) — Aprobar/rechazar un alta o cambiar el rol
+23. [DELETE /community/groups/{groupId}/members/{memberProfileId}](#23-delete-community-groups-groupid-members-memberprofileid) — Salir del grupo o dar de baja a un integrante
+24. [GET /community/groups/{groupId}/posts](#24-get-community-groups-groupid-posts) — Muro de un grupo
+25. [POST /community/groups/{groupId}/posts](#25-post-community-groups-groupid-posts) — Publicar en el muro del grupo
+26. [GET /community/moderation/appeals](#26-get-community-moderation-appeals) — Apelaciones presentadas, con su decisión
+27. [POST /community/moderation/appeals/{appealId}/resolve](#27-post-community-moderation-appeals-appealid-resolve) — Resolver una apelación de moderación
+28. [GET /community/moderation/decisions](#28-get-community-moderation-decisions) — Decisiones de moderación tomadas
+29. [POST /community/moderation/decisions/{decisionId}/appeal](#29-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
+30. [GET /community/moderation/queue](#30-get-community-moderation-queue) — Cola de moderación con filtros y cursor
+31. [POST /community/moderation/queue/{queueId}/decision](#31-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
+32. [GET /community/notifications](#32-get-community-notifications) — Notificaciones sociales de un perfil
+33. [GET /community/polls/{pollId}](#33-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
+34. [POST /community/polls/{pollId}/votes](#34-post-community-polls-pollid-votes) — Votar en una encuesta
+35. [GET /community/posts/{postId}](#35-get-community-posts-postid) — Publicación con media, hashtags y menciones
+36. [GET /community/posts/{postId}/comments](#36-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
+37. [POST /community/posts/{postId}/polls](#37-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
+38. [GET /community/posts/{postId}/reactions](#38-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
+39. [GET /community/profiles/{profileId}](#39-get-community-profiles-profileid) — Ficha de un perfil público
+40. [GET /community/profiles/{profileId}/posts](#40-get-community-profiles-profileid-posts) — Publicaciones de un perfil
+41. [POST /community/profiles/{profileId}/posts](#41-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
+42. [GET /community/profiles/{profileId}/reviews](#42-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
+43. [POST /community/profiles/{profileId}/reviews](#43-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
+44. [POST /community/profiles/{profileId}/reviews/{reviewId}/responses](#44-post-community-profiles-profileid-reviews-reviewid-responses) — Responder una reseña de la propia vitrina
+45. [GET /community/profiles/by-slug/{slug}](#45-get-community-profiles-by-slug-slug) — Ficha de un perfil público por su slug
+46. [GET /community/profiles/me](#46-get-community-profiles-me) — Consultar la vitrina pública propia
+47. [PUT /community/profiles/me](#47-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
+48. [GET /community/profiles/me/stats](#48-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
+49. [POST /community/public-profiles](#49-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
+50. [PUT /community/reactions](#50-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
+51. [POST /community/reports](#51-post-community-reports) — Reportar contenido y encolar moderación
+52. [GET /community/topics](#52-get-community-topics) — Temas de la comunidad
+53. [GET /f/{slug}](#53-get-f-slug) — Ficha pública de una farmacia
+54. [GET /internal/community/feed/pending](#54-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+55. [POST /internal/community/feed/rebuild](#55-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+56. [GET /internal/community/search/health](#56-get-internal-community-search-health) — Estado del índice del directorio público
+57. [POST /internal/community/search/reindex](#57-post-internal-community-search-reindex) — Reindexar el directorio público
+58. [POST /internal/community/verification/badges](#58-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
+59. [POST /internal/community/verification/badges/{targetId}/revoke](#59-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
+60. [POST /internal/community/verification/badges/expire-sweep](#60-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
+61. [GET /l/{slug}](#61-get-l-slug) — Ficha pública de un laboratorio
+62. [GET /o/{slug}](#62-get-o-slug) — Ficha pública de una organización
+63. [GET /p/{slug}](#63-get-p-slug) — Ficha pública de un profesional
+64. [GET /public/nearby](#64-get-public-nearby) — Prestadores cercanos, en línea recta
+65. [GET /public/profiles/{prefijo}/{slug}](#65-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+66. [GET /public/search](#66-get-public-search) — Buscador público unificado
+67. [GET /public/search/diagnostic-units](#67-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+68. [GET /public/search/insurers](#68-get-public-search-insurers) — Aseguradoras en el directorio público
+69. [GET /public/search/medications](#69-get-public-search-medications) — Medicamentos ofertados públicamente
+70. [GET /public/search/organizations](#70-get-public-search-organizations) — Organizaciones en el directorio público
+71. [GET /public/search/pharmacies](#71-get-public-search-pharmacies) — Farmacias en el directorio público
+72. [GET /public/search/practitioners](#72-get-public-search-practitioners) — Profesionales en el directorio público
+73. [GET /s/{slug}](#73-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -1020,7 +1039,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "bodyText": "valor-ejemplo",
         "sentAt": "2026-07-31T12:00:00.000Z"
       },
-      "unreadCount": 1
+      "unreadCount": 1,
+      "peers": [
+        {
+          "profileId": "00000000-0000-4000-8000-000000000001",
+          "displayName": "Nombre de ejemplo",
+          "avatarUrl": "valor-ejemplo"
+        }
+      ]
     }
   ],
   "count": 1,
@@ -1033,7 +1059,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1}]` |
+| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1,"peers":[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la conversación. | `00000000-0000-4000-8000-000000000001` |
 | `items[].conversationTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de conversación (directa, grupal). | `00000000-0000-4000-8000-000000000001` |
 | `items[].groupId` | No | `string` | formato `uuid`; admite null | Grupo al que pertenece, si es de grupo. | `00000000-0000-4000-8000-000000000001` |
@@ -1045,6 +1071,10 @@ Campos de la respuesta:
 | `items[].lastMessage.bodyText` | No | `string` | admite null | Cuerpo del mensaje. | `valor-ejemplo` |
 | `items[].lastMessage.sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
 | `items[].unreadCount` | Sí | `number` | Sin restricción adicional declarada | Cuántos mensajes le quedan sin leer al actor. | `1` |
+| `items[].peers` | Sí | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]` |
+| `items[].peers[].profileId` | Sí | `string` | formato `uuid` | Perfil público del participante. | `00000000-0000-4000-8000-000000000001` |
+| `items[].peers[].displayName` | No | `string` | admite null | Cómo se llama, para poder pintar la fila. | `Nombre de ejemplo` |
+| `items[].peers[].avatarUrl` | No | `string` | admite null | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `valor-ejemplo` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
 | `nextCursor` | No | `string` | admite null | Siempre `null`: la bandeja devuelve las conversaciones activas del actor de una vez, acotadas por el tope. Se mantiene el campo para que la forma de la respuesta sea la misma que la de los demás listados. | `valor-ejemplo` |
@@ -1293,7 +1323,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   ],
   "count": 1,
   "limit": 1,
-  "nextCursor": "valor-ejemplo"
+  "nextCursor": "valor-ejemplo",
+  "peerReadUpTo": "2026-07-31T12:00:00.000Z"
 }
 ```
 
@@ -1314,6 +1345,7 @@ Campos de la respuesta:
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántos trae esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null`. | `valor-ejemplo` |
+| `peerReadUpTo` | No | `string` | formato `date-time`; admite null | Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT. `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios cuyo `sentAt` sea anterior o igual a esta marca. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1460,9 +1492,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El remitente no es participante activo | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | Existe un bloqueo entre los participantes | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2171,6 +2206,8 @@ NestJS resuelve `GET /community/groups` en `CommunityGroupsController_listGroups
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `tenantId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `topicId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
 
@@ -2179,7 +2216,7 @@ NestJS resuelve `GET /community/groups` en `CommunityGroupsController_listGroups
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /community/groups?tenantId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+GET /community/groups?tenantId=00000000-0000-4000-8000-000000000001&topicId=00000000-0000-4000-8000-000000000001&q=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -2197,7 +2234,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /community/groups?tenantId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+GET /community/groups?tenantId=00000000-0000-4000-8000-000000000001&topicId=00000000-0000-4000-8000-000000000001&q=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -2337,6 +2374,7 @@ Content-Type: application/json
 | `description` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
 | `visibility` | No | `string` | valores: `PUBLIC`, `PRIVATE`, `SECRET` | Visibilidad | `PUBLIC` |
 | `groupType` | No | `string` | valores: `GENERAL`, `SUPPORT` | Tipo de grupo | `GENERAL` |
+| `topicId` | No | `string` | formato `uuid` | Tema del grupo | `00000000-0000-4000-8000-000000000001` |
 | `ownerProfileId` | No | `string` | formato `uuid` | Perfil propietario | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
@@ -2355,6 +2393,7 @@ Content-Type: application/json
   "description": "Texto descriptivo de ejemplo",
   "visibility": "PUBLIC",
   "groupType": "GENERAL",
+  "topicId": "00000000-0000-4000-8000-000000000001",
   "ownerProfileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -2396,7 +2435,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Tema no encontrado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 409 | `CONFLICT` | Ya hay un grupo con ese slug | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Para crear un grupo necesitás tu perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para crear un grupo público necesitás tu perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para crear un grupo público, tu perfil público tiene que estar completo | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2414,7 +2459,157 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /community/groups/{groupId}/members
+## 19. GET /community/groups/{groupId}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-groups`
+- **Nombre:** Ficha de un grupo
+- **Operation ID:** `CommunityGroupsController_getGroup`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityGroupsController.getGroup](../../src/modules/community/controllers/community-groups.controller.ts)
+
+### Descripción de negocio
+
+Ficha de un grupo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P7: ficha del grupo con la posición del lector frente a él.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/groups/{groupId}` en `CommunityGroupsController_getGroup`. El controlador delega en `CommunityGroupsReadService.getGroup`. No recibe body. El tipo de retorno estático es `Promise<GroupDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `groupId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `actorProfileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/groups/00000000-0000-4000-8000-000000000001?actorProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `groupId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/groups/00000000-0000-4000-8000-000000000001?actorProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GroupDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GroupDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "name": "Nombre de ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "visibilityConceptId": "00000000-0000-4000-8000-000000000001",
+  "groupTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "topicId": "00000000-0000-4000-8000-000000000001",
+  "ownerProfileId": "00000000-0000-4000-8000-000000000001",
+  "coverFileId": "00000000-0000-4000-8000-000000000001",
+  "memberCount": 1,
+  "postCount": 1,
+  "pendingCount": 1,
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "viewer": {
+    "isMember": true,
+    "canAdminister": true,
+    "canPost": true,
+    "membershipId": "00000000-0000-4000-8000-000000000001",
+    "memberRoleConceptId": "00000000-0000-4000-8000-000000000001",
+    "joinStatusConceptId": "00000000-0000-4000-8000-000000000001"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador del grupo. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid`; admite null | Organización a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Ruta del grupo. | `valor-ejemplo` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
+| `description` | No | `string` | admite null | Descripción. | `Texto descriptivo de ejemplo` |
+| `visibilityConceptId` | Sí | `string` | formato `uuid` | Concept id de la visibilidad. | `00000000-0000-4000-8000-000000000001` |
+| `groupTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de grupo. | `00000000-0000-4000-8000-000000000001` |
+| `topicId` | No | `string` | formato `uuid`; admite null | Tema por el que se clasifica, si tiene uno. | `00000000-0000-4000-8000-000000000001` |
+| `ownerProfileId` | No | `string` | formato `uuid`; admite null | Perfil dueño. | `00000000-0000-4000-8000-000000000001` |
+| `coverFileId` | No | `string` | formato `uuid`; admite null | Imagen de portada. | `00000000-0000-4000-8000-000000000001` |
+| `memberCount` | No | `number` | admite null | Cuántos integrantes activos tiene. | `1` |
+| `postCount` | No | `number` | admite null | Cuántas publicaciones lleva el muro. | `1` |
+| `pendingCount` | No | `number` | admite null | Altas esperando aprobación. Sólo se informa a quien administra. | `1` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado del grupo. | `00000000-0000-4000-8000-000000000001` |
+| `viewer` | Sí | `GroupViewerMembershipDto` | Sin restricción adicional declarada | Cómo se para el lector frente a este grupo. | `{"isMember":true,"canAdminister":true,"canPost":true,"membershipId":"00000000-0000-4000-8000-000000000001","memberRoleConceptId":"00000000-0000-4000-8000-000000000001","joinStatusConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `viewer.isMember` | Sí | `boolean` | Sin restricción adicional declarada | `true` si el lector tiene membresía activa. | `true` |
+| `viewer.canAdminister` | Sí | `boolean` | Sin restricción adicional declarada | `true` si puede aprobar altas y moderar el muro. | `true` |
+| `viewer.canPost` | Sí | `boolean` | Sin restricción adicional declarada | `true` si puede escribir en el muro. | `true` |
+| `viewer.membershipId` | No | `string` | formato `uuid`; admite null | Membresía del lector, si tiene una (aunque esté pendiente). | `00000000-0000-4000-8000-000000000001` |
+| `viewer.memberRoleConceptId` | No | `string` | formato `uuid`; admite null | Concept id del rol del lector, o `null`. | `00000000-0000-4000-8000-000000000001` |
+| `viewer.joinStatusConceptId` | No | `string` | formato `uuid`; admite null | Concept id del estado de la membresía del lector, o `null`. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/groups/{groupId}"
+}
+```
+
+---
+
+## 20. GET /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -2439,6 +2634,7 @@ NestJS resuelve `GET /community/groups/{groupId}/members` en `CommunityGroupsCon
 |---|---|:---:|---|---|---|---|
 | `groupId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `actorProfileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `joinStatus` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
 
@@ -2447,7 +2643,7 @@ NestJS resuelve `GET /community/groups/{groupId}/members` en `CommunityGroupsCon
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /community/groups/00000000-0000-4000-8000-000000000001/members?actorProfileId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+GET /community/groups/00000000-0000-4000-8000-000000000001/members?actorProfileId=00000000-0000-4000-8000-000000000001&joinStatus=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -2466,7 +2662,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /community/groups/00000000-0000-4000-8000-000000000001/members?actorProfileId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+GET /community/groups/00000000-0000-4000-8000-000000000001/members?actorProfileId=00000000-0000-4000-8000-000000000001&joinStatus=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -2546,7 +2742,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /community/groups/{groupId}/members
+## 21. POST /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -2674,7 +2870,974 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /community/moderation/decisions/{decisionId}/appeal
+## 22. PATCH /community/groups/{groupId}/members/{memberId}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-groups`
+- **Nombre:** Aprobar/rechazar un alta o cambiar el rol
+- **Operation ID:** `CommunityGroupsController_updateMember`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityGroupsController.updateMember](../../src/modules/community/controllers/community-groups.controller.ts)
+
+### Descripción de negocio
+
+Aprobar/rechazar un alta o cambiar el rol. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P7: resuelve un alta pendiente y/o cambia el rol de un integrante.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /community/groups/{groupId}/members/{memberId}` en `CommunityGroupsController_updateMember`. El controlador delega en `CommunityGroupsService.updateMember`. Valida el body como `UpdateGroupMemberDto` y consume `application/json`. El tipo de retorno estático es `Promise<GroupMemberUpdatedDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `groupId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `memberId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateGroupMemberDto`; los campos opcionales se omiten.
+
+```http
+PATCH /community/groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `groupId`, `memberId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `role` | No | `string` | valores: `MEMBER`, `MODERATOR`, `ADMIN` | Rol dentro del grupo | `MEMBER` |
+| `decision` | No | `string` | valores: `APPROVE`, `REJECT` | Resolución de la solicitud de ingreso | `APPROVE` |
+| `actorProfileId` | No | `string` | formato `uuid` | Perfil administrador | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /community/groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "role": "MEMBER",
+  "decision": "APPROVE",
+  "actorProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupMemberUpdatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "memberRoleConceptId": "00000000-0000-4000-8000-000000000001",
+  "joinStatusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Membresía afectada. | `00000000-0000-4000-8000-000000000001` |
+| `memberRoleConceptId` | Sí | `string` | formato `uuid` | Concept id del rol resultante. | `00000000-0000-4000-8000-000000000001` |
+| `joinStatusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado resultante. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 403 | `FORBIDDEN` | Sólo quien administra el grupo puede resolver sus membresías | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 404 | `NOT_FOUND` | Membresía no encontrada | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Hay que indicar una decisión o un rol | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | La solicitud de ingreso ya estaba resuelta | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/groups/{groupId}/members/{memberId}"
+}
+```
+
+---
+
+## 23. DELETE /community/groups/{groupId}/members/{memberProfileId}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-groups`
+- **Nombre:** Salir del grupo o dar de baja a un integrante
+- **Operation ID:** `CommunityGroupsController_leaveGroup`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityGroupsController.leaveGroup](../../src/modules/community/controllers/community-groups.controller.ts)
+
+### Descripción de negocio
+
+Salir del grupo o dar de baja a un integrante. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P7: baja de un integrante. Lleva el **perfil** y no el id de membresía porque quien se da de baja a sí mismo conoce su perfil, no el uuid de su fila en `group_members`.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /community/groups/{groupId}/members/{memberProfileId}` en `CommunityGroupsController_leaveGroup`. El controlador delega en `CommunityGroupsService.leaveGroup`. No recibe body. El tipo de retorno estático es `Promise<GroupMemberUpdatedDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `groupId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `memberProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /community/groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `groupId`, `memberProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /community/groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupMemberUpdatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "memberRoleConceptId": "00000000-0000-4000-8000-000000000001",
+  "joinStatusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Membresía afectada. | `00000000-0000-4000-8000-000000000001` |
+| `memberRoleConceptId` | Sí | `string` | formato `uuid` | Concept id del rol resultante. | `00000000-0000-4000-8000-000000000001` |
+| `joinStatusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado resultante. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 403 | `FORBIDDEN` | Sólo quien administra el grupo puede resolver sus membresías | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 404 | `NOT_FOUND` | El perfil no es del grupo | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 409 | `CONFLICT` | Al dueño del grupo no lo puede sacar otro: sólo él puede irse, o transferir el grupo antes | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/groups/{groupId}/members/{memberProfileId}"
+}
+```
+
+---
+
+## 24. GET /community/groups/{groupId}/posts
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-groups`
+- **Nombre:** Muro de un grupo
+- **Operation ID:** `CommunityGroupsController_listWall`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityGroupsController.listWall](../../src/modules/community/controllers/community-groups.controller.ts)
+
+### Descripción de negocio
+
+Muro de un grupo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P7: muro del grupo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/groups/{groupId}/posts` en `CommunityGroupsController_listWall`. El controlador delega en `CommunityGroupWallService.listWall`. No recibe body. El tipo de retorno estático es `Promise<GroupWallPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `groupId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `actorProfileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/groups/00000000-0000-4000-8000-000000000001/posts?actorProfileId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `groupId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/groups/00000000-0000-4000-8000-000000000001/posts?actorProfileId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GroupWallPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GroupWallPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupWallPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "bodyText": "valor-ejemplo",
+      "parentCommentId": "00000000-0000-4000-8000-000000000001",
+      "threadDepth": 1,
+      "replyCount": 1,
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "replies": [
+        "<GroupWallItemDto>"
+      ]
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<GroupWallItemDto>` | Sin restricción adicional declarada | Publicaciones de la página, cada una con su hilo. | `[{"id":"00000000-0000-4000-8000-000000000001","authorProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","parentCommentId":"00000000-0000-4000-8000-000000000001","threadDepth":1,"replyCount":1,"createdAt":"2026-07-31T12:00:00.000Z","replies":["<GroupWallItemDto>"]}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la publicación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].authorProfileId` | Sí | `string` | formato `uuid` | Perfil autor. | `00000000-0000-4000-8000-000000000001` |
+| `items[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Cuerpo del mensaje. | `valor-ejemplo` |
+| `items[].parentCommentId` | No | `string` | formato `uuid`; admite null | Publicación a la que responde, si es una respuesta. | `00000000-0000-4000-8000-000000000001` |
+| `items[].threadDepth` | No | `number` | admite null | Profundidad dentro del hilo. | `1` |
+| `items[].replyCount` | No | `number` | admite null | Cuántas respuestas tiene registradas. | `1` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se publicó. | `2026-07-31T12:00:00.000Z` |
+| `items[].replies` | Sí | `array<GroupWallItemDto>` | Sin restricción adicional declarada | Respuestas anidadas. | `["<GroupWallItemDto>"]` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null`. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 403 | `FORBIDDEN` | Hay que ser integrante del grupo para ver su contenido | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/groups/{groupId}/posts"
+}
+```
+
+---
+
+## 25. POST /community/groups/{groupId}/posts
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-groups`
+- **Nombre:** Publicar en el muro del grupo
+- **Operation ID:** `CommunityGroupsController_createGroupPost`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityGroupsController.createGroupPost](../../src/modules/community/controllers/community-groups.controller.ts)
+
+### Descripción de negocio
+
+Publicar en el muro del grupo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P7: publica en el muro del grupo, o responde a una publicación.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /community/groups/{groupId}/posts` en `CommunityGroupsController_createGroupPost`. El controlador delega en `CommunityGroupWallService.createPost`. Valida el body como `CreateGroupPostDto` y consume `application/json`. El tipo de retorno estático es `Promise<GroupWallItemDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `groupId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateGroupPostDto`; los campos opcionales se omiten.
+
+```http
+POST /community/groups/00000000-0000-4000-8000-000000000001/posts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "authorProfileId": "00000000-0000-4000-8000-000000000001",
+  "bodyText": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `groupId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `authorProfileId` | Sí | `string` | formato `uuid` | Perfil autor | `00000000-0000-4000-8000-000000000001` |
+| `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 5000 | Cuerpo del mensaje | `valor-ejemplo` |
+| `parentCommentId` | No | `string` | formato `uuid` | Publicación del muro a la que responde | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /community/groups/00000000-0000-4000-8000-000000000001/posts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "authorProfileId": "00000000-0000-4000-8000-000000000001",
+  "bodyText": "valor-ejemplo",
+  "parentCommentId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GroupWallItemDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupWallItemDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "authorProfileId": "00000000-0000-4000-8000-000000000001",
+  "bodyText": "valor-ejemplo",
+  "parentCommentId": "00000000-0000-4000-8000-000000000001",
+  "threadDepth": 1,
+  "replyCount": 1,
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "replies": [
+    "<GroupWallItemDto>"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la publicación. | `00000000-0000-4000-8000-000000000001` |
+| `authorProfileId` | Sí | `string` | formato `uuid` | Perfil autor. | `00000000-0000-4000-8000-000000000001` |
+| `bodyText` | Sí | `string` | Sin restricción adicional declarada | Cuerpo del mensaje. | `valor-ejemplo` |
+| `parentCommentId` | No | `string` | formato `uuid`; admite null | Publicación a la que responde, si es una respuesta. | `00000000-0000-4000-8000-000000000001` |
+| `threadDepth` | No | `number` | admite null | Profundidad dentro del hilo. | `1` |
+| `replyCount` | No | `number` | admite null | Cuántas respuestas tiene registradas. | `1` |
+| `createdAt` | Sí | `string` | formato `date-time` | Cuándo se publicó. | `2026-07-31T12:00:00.000Z` |
+| `replies` | Sí | `array<GroupWallItemDto>` | Sin restricción adicional declarada | Respuestas anidadas. | `["<GroupWallItemDto>"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 403 | `FORBIDDEN` | Hay que ser integrante del grupo para publicar en su muro | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 404 | `NOT_FOUND` | Perfil autor no encontrado | Excepción explícita en src/modules/community/services/community-group-wall.service.ts |
+| 404 | `NOT_FOUND` | La publicación a la que responde no es de este grupo | Excepción explícita en src/modules/community/services/community-group-wall.service.ts |
+| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/groups/{groupId}/posts"
+}
+```
+
+---
+
+## 26. GET /community/moderation/appeals
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-moderation`
+- **Nombre:** Apelaciones presentadas, con su decisión
+- **Operation ID:** `CommunityModerationController_listAppeals`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityModerationController.listAppeals](../../src/modules/community/controllers/community-moderation.controller.ts)
+
+### Descripción de negocio
+
+Apelaciones presentadas, con su decisión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Apelaciones, con la decisión que cada una impugna.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/moderation/appeals` en `CommunityModerationController_listAppeals`. El controlador delega en `CommunityModerationReadService.listAppeals`. No recibe body. El tipo de retorno estático es `Promise<ModerationAppealPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `status` | query | No | `array<string>` | Sin restricción adicional declarada | Estados admitidos (lista separada por comas) | `["OPEN"]` |
+| `appellantProfileId` | query | No | `string` | formato `uuid` | Perfil que apeló | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor de la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1 | Tope de filas | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/moderation/appeals HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/moderation/appeals?status=OPEN&appellantProfileId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ModerationAppealPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModerationAppealPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "moderationDecisionId": "00000000-0000-4000-8000-000000000001",
+      "appellantProfileId": "00000000-0000-4000-8000-000000000001",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "resolutionConceptId": "00000000-0000-4000-8000-000000000001",
+      "reviewedByUserId": "00000000-0000-4000-8000-000000000001",
+      "resolvedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "decision": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "moderationQueueId": "00000000-0000-4000-8000-000000000001",
+        "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+        "policyConceptId": "00000000-0000-4000-8000-000000000001",
+        "rationaleText": "valor-ejemplo",
+        "actionTakenConceptId": "00000000-0000-4000-8000-000000000001",
+        "decidedByUserId": "00000000-0000-4000-8000-000000000001",
+        "decidedAt": "2026-07-31T12:00:00.000Z"
+      }
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ModerationAppealItemDto>` | Sin restricción adicional declarada | Apelaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","moderationDecisionId":"00000000-0000-4000-8000-000000000001","appellantProfileId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","resolutionConceptId":"00000000-0000-4000-8000-000000000001","reviewedByUserId":"00000000-0000-4000-8000-000000000001","resolvedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","decision":{"id":"00000000-0000-4000-8000-000000000001","moderationQueueId":"00000000-0000-4000-8000-000000000001","decisionConceptId":"00000000-0000-4000-8000-000000000001","policyConceptId":"00000000-0000-4000-8000-000000000001","rationaleText":"valor-ejemplo","actionTakenConceptId":"00000000-0000-4000-8000-000000000001","decidedByUserId":"00000000-0000-4000-8000-000000000001","decidedAt":"2026-07-31T12:00:00.000Z"}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la apelación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].moderationDecisionId` | Sí | `string` | formato `uuid` | Decisión impugnada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].appellantProfileId` | Sí | `string` | formato `uuid` | Perfil que apeló. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reasonText` | Sí | `string` | Sin restricción adicional declarada | Motivo de la apelación. | `Texto descriptivo de ejemplo` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado de la apelación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].resolutionConceptId` | No | `string` | formato `uuid`; admite null | Concept id de la resolución, si ya se resolvió. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reviewedByUserId` | No | `string` | formato `uuid`; admite null | Quién la revisó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].resolvedAt` | No | `string` | formato `date-time`; admite null | Cuándo se resolvió. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se presentó. | `2026-07-31T12:00:00.000Z` |
+| `items[].decision` | No | `ModerationDecisionItemDto` | Sin restricción adicional declarada | La decisión impugnada, resuelta. Va embebida porque resolver una apelación sin leer qué se decidió y por qué es resolverla a ciegas, y pedirla aparte serían N lecturas por pantalla. | `{"id":"00000000-0000-4000-8000-000000000001","moderationQueueId":"00000000-0000-4000-8000-000000000001","decisionConceptId":"00000000-0000-4000-8000-000000000001","policyConceptId":"00000000-0000-4000-8000-000000000001","rationaleText":"valor-ejemplo","actionTakenConceptId":"00000000-0000-4000-8000-000000000001","decidedByUserId":"00000000-0000-4000-8000-000000000001","decidedAt":"2026-07-31T12:00:00.000Z"}` |
+| `items[].decision.id` | No | `string` | formato `uuid` | Identificador de la decisión. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decision.moderationQueueId` | No | `string` | formato `uuid` | Entrada de cola que resolvió. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decision.decisionConceptId` | No | `string` | formato `uuid` | Concept id de la decisión tomada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decision.policyConceptId` | No | `string` | formato `uuid` | Concept id de la política aplicada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decision.rationaleText` | No | `string` | admite null | Motivo escrito por quien decidió. | `valor-ejemplo` |
+| `items[].decision.actionTakenConceptId` | No | `string` | formato `uuid`; admite null | Concept id de la acción ejecutada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decision.decidedByUserId` | No | `string` | formato `uuid` | Quién decidió. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decision.decidedAt` | No | `string` | formato `date-time`; admite null | Cuándo se decidió. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null` si no hay más. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/moderation/appeals"
+}
+```
+
+---
+
+## 27. POST /community/moderation/appeals/{appealId}/resolve
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-moderation`
+- **Nombre:** Resolver una apelación de moderación
+- **Operation ID:** `CommunityModerationController_resolveAppeal`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityModerationController.resolveAppeal](../../src/modules/community/controllers/community-moderation.controller.ts)
+
+### Descripción de negocio
+
+Resolver una apelación de moderación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-19-10, cierre: resuelve una apelación abierta.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /community/moderation/appeals/{appealId}/resolve` en `CommunityModerationController_resolveAppeal`. El controlador delega en `CommunityModerationService.resolveAppeal`. Valida el body como `CommunityResolveAppealDto` y consume `application/json`. El tipo de retorno estático es `Promise<IdResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `appealId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CommunityResolveAppealDto`; los campos opcionales se omiten.
+
+```http
+POST /community/moderation/appeals/00000000-0000-4000-8000-000000000001/resolve HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "resolution": "UPHELD"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `appealId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `resolution` | Sí | `string` | valores: `UPHELD`, `OVERTURNED`, `PARTIAL` | Resolución de la apelación | `UPHELD` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /community/moderation/appeals/00000000-0000-4000-8000-000000000001/resolve HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "resolution": "UPHELD"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Apelación no encontrada | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
+| 409 | `CONFLICT` | La apelación ya está resuelta | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/moderation/appeals/{appealId}/resolve"
+}
+```
+
+---
+
+## 28. GET /community/moderation/decisions
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-moderation`
+- **Nombre:** Decisiones de moderación tomadas
+- **Operation ID:** `CommunityModerationController_listDecisions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityModerationController.listDecisions](../../src/modules/community/controllers/community-moderation.controller.ts)
+
+### Descripción de negocio
+
+Decisiones de moderación tomadas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Decisiones tomadas, de la más reciente hacia atrás.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/moderation/decisions` en `CommunityModerationController_listDecisions`. El controlador delega en `CommunityModerationReadService.listDecisions`. No recibe body. El tipo de retorno estático es `Promise<ModerationDecisionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `moderationQueueId` | query | No | `string` | formato `uuid` | Entrada de cola | `00000000-0000-4000-8000-000000000001` |
+| `decision` | query | No | `array<string>` | Sin restricción adicional declarada | Decisiones admitidas (lista separada por comas) | `["REMOVED"]` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor de la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1 | Tope de filas | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/moderation/decisions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/moderation/decisions?moderationQueueId=00000000-0000-4000-8000-000000000001&decision=REMOVED&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ModerationDecisionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModerationDecisionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "moderationQueueId": "00000000-0000-4000-8000-000000000001",
+      "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+      "policyConceptId": "00000000-0000-4000-8000-000000000001",
+      "rationaleText": "valor-ejemplo",
+      "actionTakenConceptId": "00000000-0000-4000-8000-000000000001",
+      "decidedByUserId": "00000000-0000-4000-8000-000000000001",
+      "decidedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ModerationDecisionItemDto>` | Sin restricción adicional declarada | Decisiones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","moderationQueueId":"00000000-0000-4000-8000-000000000001","decisionConceptId":"00000000-0000-4000-8000-000000000001","policyConceptId":"00000000-0000-4000-8000-000000000001","rationaleText":"valor-ejemplo","actionTakenConceptId":"00000000-0000-4000-8000-000000000001","decidedByUserId":"00000000-0000-4000-8000-000000000001","decidedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la decisión. | `00000000-0000-4000-8000-000000000001` |
+| `items[].moderationQueueId` | Sí | `string` | formato `uuid` | Entrada de cola que resolvió. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decisionConceptId` | Sí | `string` | formato `uuid` | Concept id de la decisión tomada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].policyConceptId` | Sí | `string` | formato `uuid` | Concept id de la política aplicada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].rationaleText` | No | `string` | admite null | Motivo escrito por quien decidió. | `valor-ejemplo` |
+| `items[].actionTakenConceptId` | No | `string` | formato `uuid`; admite null | Concept id de la acción ejecutada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decidedByUserId` | Sí | `string` | formato `uuid` | Quién decidió. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decidedAt` | No | `string` | formato `date-time`; admite null | Cuándo se decidió. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null` si no hay más. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/moderation/decisions"
+}
+```
+
+---
+
+## 29. POST /community/moderation/decisions/{decisionId}/appeal
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -2781,6 +3944,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Decisión no encontrada | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
 | 409 | `CONFLICT` | Ya existe una apelación abierta para esta decisión | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -2801,7 +3965,155 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /community/moderation/queue/{queueId}/decision
+## 30. GET /community/moderation/queue
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-moderation`
+- **Nombre:** Cola de moderación con filtros y cursor
+- **Operation ID:** `CommunityModerationController_listQueue`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityModerationController.listQueue](../../src/modules/community/controllers/community-moderation.controller.ts)
+
+### Descripción de negocio
+
+Cola de moderación con filtros y cursor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cola de moderación con filtros de trabajo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/moderation/queue` en `CommunityModerationController_listQueue`. El controlador delega en `CommunityModerationReadService.listQueue`. No recibe body. El tipo de retorno estático es `Promise<ModerationQueuePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `status` | query | No | `array<string>` | Sin restricción adicional declarada | Estados admitidos (lista separada por comas) | `["QUEUED"]` |
+| `priority` | query | No | `array<string>` | Sin restricción adicional declarada | Prioridades admitidas (lista separada por comas) | `["LOW"]` |
+| `contentType` | query | No | `array<string>` | Sin restricción adicional declarada | Tipos de contenido admitidos (lista separada por comas) | `["POST"]` |
+| `minAgeHours` | query | No | `number` | mínimo 0 | Sólo lo encolado hace al menos estas horas | `1` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor de la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1 | Tope de filas | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/moderation/queue HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/moderation/queue?status=QUEUED&priority=LOW&contentType=POST&minAgeHours=1&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ModerationQueuePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModerationQueuePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "contentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "contentRefId": "00000000-0000-4000-8000-000000000001",
+      "sourceConceptId": "00000000-0000-4000-8000-000000000001",
+      "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "assignedToUserId": "00000000-0000-4000-8000-000000000001",
+      "queuedAt": "2026-07-31T12:00:00.000Z",
+      "reportCount": 1,
+      "report": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "reasonConceptId": "00000000-0000-4000-8000-000000000001",
+        "detailText": "valor-ejemplo",
+        "createdAt": "2026-07-31T12:00:00.000Z"
+      }
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ModerationQueueItemDto>` | Sin restricción adicional declarada | Entradas de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","contentRefId":"00000000-0000-4000-8000-000000000001","sourceConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","assignedToUserId":"00000000-0000-4000-8000-000000000001","queuedAt":"2026-07-31T12:00:00.000Z","reportCount":1,"report":{"id":"00000000-0000-4000-8000-000000000001","reasonConceptId":"00000000-0000-4000-8000-000000000001","detailText":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la entrada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].contentTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de contenido en revisión. | `00000000-0000-4000-8000-000000000001` |
+| `items[].contentRefId` | Sí | `string` | formato `uuid` | Identificador del contenido en revisión. | `00000000-0000-4000-8000-000000000001` |
+| `items[].sourceConceptId` | Sí | `string` | formato `uuid` | Concept id del origen (reporte de usuario, apelación, automático). | `00000000-0000-4000-8000-000000000001` |
+| `items[].priorityConceptId` | No | `string` | formato `uuid`; admite null | Concept id de la prioridad. | `00000000-0000-4000-8000-000000000001` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado de la entrada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].assignedToUserId` | No | `string` | formato `uuid`; admite null | A quién está asignada, si a alguien. | `00000000-0000-4000-8000-000000000001` |
+| `items[].queuedAt` | No | `string` | formato `date-time`; admite null | Cuándo entró a la cola. | `2026-07-31T12:00:00.000Z` |
+| `items[].reportCount` | Sí | `number` | Sin restricción adicional declarada | Cuántos reportes acumula este contenido. La cola deduplica por contenido, así que sin este número una entrada reportada por diez personas se ve igual que una reportada por una. | `1` |
+| `items[].report` | No | `QueueReportContextDto` | Sin restricción adicional declarada | El reporte que abrió la entrada, si lo hubo. | `{"id":"00000000-0000-4000-8000-000000000001","reasonConceptId":"00000000-0000-4000-8000-000000000001","detailText":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}` |
+| `items[].report.id` | No | `string` | formato `uuid` | Identificador del reporte. | `00000000-0000-4000-8000-000000000001` |
+| `items[].report.reasonConceptId` | No | `string` | formato `uuid` | Concept id de la razón declarada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].report.detailText` | No | `string` | admite null | Detalle que escribió quien reportó. Es texto libre de un usuario y puede contener datos de terceros; viaja porque el moderador **necesita** leerlo para decidir, y no sale de esta lectura, que exige rol de moderación. | `valor-ejemplo` |
+| `items[].report.createdAt` | No | `string` | formato `date-time` | Cuándo se reportó. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null` si no hay más. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/moderation/queue"
+}
+```
+
+---
+
+## 31. POST /community/moderation/queue/{queueId}/decision
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -2837,7 +4149,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "decision": "REMOVED"
+  "decision": "REMOVED",
+  "rationaleText": "valor-ejemplo"
 }
 ```
 
@@ -2853,7 +4166,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `decision` | Sí | `string` | valores: `REMOVED`, `RESTRICTED`, `WARNED`, `DISMISSED` | Decisión | `REMOVED` |
-| `rationaleText` | No | `string` | longitud máxima 2000 | Motivación de la decisión | `valor-ejemplo` |
+| `rationaleText` | Sí | `string` | longitud mínima 1; longitud máxima 2000 | Motivación de la decisión | `valor-ejemplo` |
 | `subjectProfileId` | No | `string` | formato `uuid` | Perfil sancionado (si la decisión emite strike) | `00000000-0000-4000-8000-000000000001` |
 | `strikeSeverity` | No | `string` | valores: `LOW`, `MEDIUM`, `HIGH` | Severidad del strike | `LOW` |
 
@@ -2937,7 +4250,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /community/notifications
+## 32. GET /community/notifications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-timeline`
@@ -3073,7 +4386,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /community/polls/{pollId}
+## 33. GET /community/polls/{pollId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -3211,7 +4524,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /community/polls/{pollId}/votes
+## 34. POST /community/polls/{pollId}/votes
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -3341,7 +4654,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /community/posts/{postId}
+## 35. GET /community/posts/{postId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3485,7 +4798,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /community/posts/{postId}/comments
+## 36. GET /community/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3623,7 +4936,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /community/posts/{postId}/polls
+## 37. POST /community/posts/{postId}/polls
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -3764,7 +5077,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /community/posts/{postId}/reactions
+## 38. GET /community/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3888,7 +5201,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /community/profiles/{profileId}
+## 39. GET /community/profiles/{profileId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -4044,7 +5357,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /community/profiles/{profileId}/posts
+## 40. GET /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -4201,7 +5514,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /community/profiles/{profileId}/posts
+## 41. POST /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -4375,7 +5688,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /community/profiles/{profileId}/reviews
+## 42. GET /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -4531,7 +5844,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /community/profiles/{profileId}/reviews
+## 43. POST /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -4566,7 +5879,7 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "reviewerPatientProfileId": "00000000-0000-4000-8000-000000000001",
+  "verifiedEncounterId": "00000000-0000-4000-8000-000000000001",
   "overallRating": 1
 }
 ```
@@ -4581,8 +5894,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `reviewerPatientProfileId` | Sí | `string` | formato `uuid` | Perfil de paciente que reseña | `00000000-0000-4000-8000-000000000001` |
-| `verifiedEncounterId` | No | `string` | formato `uuid` | Encuentro verificado (nunca se expone públicamente) | `00000000-0000-4000-8000-000000000001` |
+| `verifiedEncounterId` | Sí | `string` | formato `uuid` | Atención que respalda la reseña (nunca se expone) | `00000000-0000-4000-8000-000000000001` |
 | `overallRating` | Sí | `number` | mínimo 1; máximo 5 | Calificación global 1..5 | `1` |
 | `reviewText` | No | `string` | longitud máxima 4000 | Texto de la review | `valor-ejemplo` |
 | `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer | `REAL_NAME` |
@@ -4601,7 +5913,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "reviewerPatientProfileId": "00000000-0000-4000-8000-000000000001",
   "verifiedEncounterId": "00000000-0000-4000-8000-000000000001",
   "overallRating": 1,
   "reviewText": "valor-ejemplo",
@@ -4659,10 +5970,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo un paciente con atención registrada puede calificar | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
 | 404 | `NOT_FOUND` | Perfil objetivo no encontrado | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
 | 409 | `CONFLICT` | Ya existe una review verificada para este encuentro | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El perfil no acepta reviews | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atención declarada no habilita una reseña | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atención todavía no terminó | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atención declarada no fue con este profesional | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4680,7 +5995,291 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /community/profiles/me
+## 44. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-reviews`
+- **Nombre:** Responder una reseña de la propia vitrina
+- **Operation ID:** `CommunityReviewsController_respondToReview`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityReviewsController.respondToReview](../../src/modules/community/controllers/community-reviews.controller.ts)
+
+### Descripción de negocio
+
+Responder una reseña de la propia vitrina. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-19-11: el profesional contesta una reseña de su propia vitrina. `community.review_responses` existía como tabla y la lectura ya devolvía las respuestas, pero no había forma de crear ninguna: un profesional podía ser calificado en público sin poder contestar.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /community/profiles/{profileId}/reviews/{reviewId}/responses` en `CommunityReviewsController_respondToReview`. El controlador delega en `CommunityReviewsService.respondToReview`. Valida el body como `CommunityCreateReviewResponseDto` y consume `application/json`. El tipo de retorno estático es `Promise<IdResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reviewId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CommunityCreateReviewResponseDto`; los campos opcionales se omiten.
+
+```http
+POST /community/profiles/00000000-0000-4000-8000-000000000001/reviews/00000000-0000-4000-8000-000000000001/responses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "responseText": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `profileId`, `reviewId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `responseText` | Sí | `string` | longitud máxima 4000 | Respuesta del profesional | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /community/profiles/00000000-0000-4000-8000-000000000001/reviews/00000000-0000-4000-8000-000000000001/responses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "responseText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<IdResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Perfil objetivo no encontrado | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 404 | `NOT_FOUND` | Reseña no encontrada | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 409 | `CONFLICT` | Ya respondiste esta reseña | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/profiles/{profileId}/reviews/{reviewId}/responses"
+}
+```
+
+---
+
+## 45. GET /community/profiles/by-slug/{slug}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-social`
+- **Nombre:** Ficha de un perfil público por su slug
+- **Operation ID:** `CommunitySocialController_getProfileBySlug`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySocialController.getProfileBySlug](../../src/modules/community/controllers/community-social.controller.ts)
+
+### Descripción de negocio
+
+Ficha de un perfil público por su slug. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La misma ficha, por el slug del directorio público (carril P2). **Va declarada antes que `profiles/:profileId`**, y no es un detalle de estilo: el router prueba en orden, y aunque el parámetro lleva `ParseUUIDPipe` —que rechazaría `by-slug`— dejar que la ruta específica quede después de la genérica es la forma de que un cambio futuro del pipe la apague sin que nadie se entere.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/profiles/by-slug/{slug}` en `CommunitySocialController_getProfileBySlug`. El controlador delega en `CommunitySocialReadService.getProfileBySlug`. No recibe body. El tipo de retorno estático es `Promise<PublicProfileDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `slug` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/profiles/by-slug/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/profiles/by-slug/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicProfileDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicProfileDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "targetTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "avatarFileId": "00000000-0000-4000-8000-000000000001",
+  "coverFileId": "00000000-0000-4000-8000-000000000001",
+  "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "acceptsReviews": true,
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "badges": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "prestige": {
+    "totalPoints": "valor-ejemplo",
+    "levelConceptId": "00000000-0000-4000-8000-000000000001",
+    "rankPosition": 1,
+    "calculatedAt": "2026-07-31T12:00:00.000Z"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador del perfil. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | Sí | `string` | formato `uuid` | Organización a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `targetTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de sujeto (usuario, profesional, organización). | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Ruta pública del perfil. | `valor-ejemplo` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
+| `headline` | No | `string` | admite null | Titular o especialidad declarada. | `valor-ejemplo` |
+| `biography` | No | `string` | admite null | Descripción larga. | `valor-ejemplo` |
+| `avatarFileId` | No | `string` | formato `uuid`; admite null | Foto de perfil (`common.files`). | `00000000-0000-4000-8000-000000000001` |
+| `coverFileId` | No | `string` | formato `uuid`; admite null | Imagen de portada (`common.files`). | `00000000-0000-4000-8000-000000000001` |
+| `verificationStatusConceptId` | No | `string` | formato `uuid`; admite null | Concept id del estado de verificación. | `00000000-0000-4000-8000-000000000001` |
+| `acceptsReviews` | No | `boolean` | admite null | Si acepta reseñas de servicio. | `true` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado del perfil. | `00000000-0000-4000-8000-000000000001` |
+| `badges` | Sí | `array<VerifiedBadgeDto>` | Sin restricción adicional declarada | Sellos de verificación vigentes. | `[{"id":"00000000-0000-4000-8000-000000000001","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `badges[].id` | Sí | `string` | formato `uuid` | Identificador del sello. | `00000000-0000-4000-8000-000000000001` |
+| `badges[].badgeTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de sello. | `00000000-0000-4000-8000-000000000001` |
+| `badges[].verificationMethodConceptId` | Sí | `string` | formato `uuid` | Concept id del método con que se verificó. | `00000000-0000-4000-8000-000000000001` |
+| `badges[].validFrom` | No | `string` | formato `date-time`; admite null | Desde cuándo rige. | `2026-07-31T12:00:00.000Z` |
+| `badges[].validTo` | No | `string` | formato `date-time`; admite null | Hasta cuándo rige. | `2026-07-31T12:00:00.000Z` |
+| `prestige` | No | `PrestigeScoreDto` | Sin restricción adicional declarada | Prestigio acumulado, si el perfil tiene saldo calculado. | `{"totalPoints":"valor-ejemplo","levelConceptId":"00000000-0000-4000-8000-000000000001","rankPosition":1,"calculatedAt":"2026-07-31T12:00:00.000Z"}` |
+| `prestige.totalPoints` | No | `string` | Sin restricción adicional declarada | Puntos acumulados (numeric, viaja como texto) | `valor-ejemplo` |
+| `prestige.levelConceptId` | No | `string` | formato `uuid`; admite null | Concept id del nivel alcanzado. | `00000000-0000-4000-8000-000000000001` |
+| `prestige.rankPosition` | No | `number` | admite null | Posición en el ranking, si se calculó. | `1` |
+| `prestige.calculatedAt` | No | `string` | formato `date-time`; admite null | Cuándo se recalculó por última vez. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Perfil no encontrado | Excepción explícita en src/modules/community/services/community-social-read.service.ts |
+| 404 | `NOT_FOUND` | Perfil público no encontrado | Excepción explícita en src/modules/community/services/community-social-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/profiles/by-slug/{slug}"
+}
+```
+
+---
+
+## 46. GET /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -4754,7 +6353,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "headline": "valor-ejemplo",
   "biography": "valor-ejemplo",
   "acceptsReviews": true,
+  "visibility": "PUBLIC",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "avatarFileId": "00000000-0000-4000-8000-000000000001",
   "statusConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -4771,7 +6372,9 @@ Campos de la respuesta:
 | `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `acceptsReviews` | Sí | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `visibility` | Sí | `string` | valores: `PUBLIC`, `PRIVATE` | Si la vitrina está listada en el directorio público. Se devuelve como el código y no como el concept id: es la única forma de que la pantalla de edición muestre el interruptor en la posición correcta sin tener que resolver un uuid contra el catálogo de conceptos. `PRIVATE` cubre también la columna nula — las vitrinas anteriores a este campo. | `PUBLIC` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid`; admite null | Lo otorga la plataforma; se muestra, no se declara. | `00000000-0000-4000-8000-000000000001` |
+| `avatarFileId` | Sí | `string` | formato `uuid`; admite null | La foto de la vitrina, o `null` si todavía no subió ninguna. Viaja porque es una de las tres condiciones que hacen a un perfil "completo" para presentar un grupo público (TP-3, regla 06), y sin ella la pantalla no puede anticipar el rechazo: tendría que dejar que la persona llene el formulario entero para enterarse recién al enviar. | `00000000-0000-4000-8000-000000000001` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -4799,7 +6402,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. PUT /community/profiles/me
+## 47. PUT /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -4854,6 +6457,8 @@ Content-Type: application/json
 | `headline` | No | `string` | longitud máxima 200 | Titular de una línea | `valor-ejemplo` |
 | `biography` | No | `string` | longitud máxima 2000 | Presentación pública | `valor-ejemplo` |
 | `acceptsReviews` | No | `boolean` | Sin restricción adicional declarada | Acepta reseñas | `true` |
+| `visibility` | No | `string` | valores: `PUBLIC`, `PRIVATE` | Listar la vitrina en el directorio público | `PUBLIC` |
+| `avatarFileId` | No | `object` | formato `uuid`; admite null | Archivo ya subido que será el avatar; null lo quita | `{}` |
 
 ### Payload completo de ejemplo
 
@@ -4871,7 +6476,9 @@ Content-Type: application/json
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
   "biography": "valor-ejemplo",
-  "acceptsReviews": true
+  "acceptsReviews": true,
+  "visibility": "PUBLIC",
+  "avatarFileId": {}
 }
 ```
 
@@ -4901,7 +6508,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "headline": "valor-ejemplo",
   "biography": "valor-ejemplo",
   "acceptsReviews": true,
+  "visibility": "PUBLIC",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "avatarFileId": "00000000-0000-4000-8000-000000000001",
   "statusConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -4918,7 +6527,9 @@ Campos de la respuesta:
 | `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `acceptsReviews` | Sí | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `visibility` | Sí | `string` | valores: `PUBLIC`, `PRIVATE` | Si la vitrina está listada en el directorio público. Se devuelve como el código y no como el concept id: es la única forma de que la pantalla de edición muestre el interruptor en la posición correcta sin tener que resolver un uuid contra el catálogo de conceptos. `PRIVATE` cubre también la columna nula — las vitrinas anteriores a este campo. | `PUBLIC` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid`; admite null | Lo otorga la plataforma; se muestra, no se declara. | `00000000-0000-4000-8000-000000000001` |
+| `avatarFileId` | Sí | `string` | formato `uuid`; admite null | La foto de la vitrina, o `null` si todavía no subió ninguna. Viaja porque es una de las tres condiciones que hacen a un perfil "completo" para presentar un grupo público (TP-3, regla 06), y sin ella la pantalla no puede anticipar el rechazo: tendría que dejar que la persona llene el formulario entero para enterarse recién al enviar. | `00000000-0000-4000-8000-000000000001` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -4930,9 +6541,15 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 409 | `CONFLICT` | Ese enlace ya está en uso | Excepción explícita en src/modules/community/services/community-social.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | No se pudo recuperar el perfil público recién guardado | Excepción explícita en src/modules/community/services/community-social.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4950,7 +6567,125 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /community/public-profiles
+## 48. GET /community/profiles/me/stats
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-social`
+- **Nombre:** Estadísticas de la vitrina pública propia
+- **Operation ID:** `CommunitySocialController_ownProfileStats`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySocialController.ownProfileStats](../../src/modules/community/controllers/community-social.controller.ts)
+
+### Descripción de negocio
+
+Visitas y apariciones en búsquedas de los últimos 7 días. Son visitas, no visitantes únicos: no se guarda ningún rastro del visitante.
+
+Contexto declarado en el controlador: «Tu perfil esta semana» (`ORG-PUB-005`). Va declarado **antes** que `profiles/:profileId`, igual que `profiles/me`: Nest resuelve por orden de declaración y un parámetro capturaría `me`. Sin `@Roles`: el sujeto lo resuelve el servidor desde la sesión, así que no hay forma de pedir las estadísticas de otro. Es la misma regla que `GET profiles/me`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/profiles/me/stats` en `CommunitySocialController_ownProfileStats`. El controlador delega en `CommunitySocialService.getOwnProfileStats`. No recibe body. El tipo de retorno estático es `Promise<ProfileStatsDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/profiles/me/stats HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/profiles/me/stats HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ProfileStatsDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ProfileStatsDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ProfileStatsDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ProfileStatsDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ProfileStatsDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ProfileStatsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProfileStatsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "windowDays": 1,
+  "views": 1,
+  "searchAppearances": 1,
+  "daily": [
+    {
+      "date": "valor-ejemplo",
+      "views": 1,
+      "searchAppearances": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `windowDays` | Sí | `number` | Sin restricción adicional declarada | Días que cubre la ventana | `1` |
+| `views` | Sí | `number` | Sin restricción adicional declarada | Visitas a la ficha en la ventana | `1` |
+| `searchAppearances` | Sí | `number` | Sin restricción adicional declarada | Apariciones en resultados en la ventana | `1` |
+| `daily` | Sí | `array<ProfileStatsDayDto>` | Sin restricción adicional declarada | Del más viejo al más nuevo | `[{"date":"valor-ejemplo","views":1,"searchAppearances":1}]` |
+| `daily[].date` | Sí | `string` | Sin restricción adicional declarada | Día en YYYY-MM-DD (UTC) | `valor-ejemplo` |
+| `daily[].views` | Sí | `number` | Sin restricción adicional declarada | Visitas a la ficha pública ese día | `1` |
+| `daily[].searchAppearances` | Sí | `number` | Sin restricción adicional declarada | Veces que apareció en resultados ese día | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/profiles/me/stats"
+}
+```
+
+---
+
+## 49. POST /community/public-profiles
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -5008,6 +6743,7 @@ Content-Type: application/json
 | `displayName` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre visible | `Nombre de ejemplo` |
 | `headline` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `biography` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `visibility` | No | `string` | valores: `PUBLIC`, `PRIVATE` | Visibilidad de la vitrina; omitirla la deja privada | `PUBLIC` |
 | `acceptsReviews` | No | `boolean` | Sin restricción adicional declarada | Acepta reviews de servicio | `true` |
 
 ### Payload completo de ejemplo
@@ -5028,6 +6764,7 @@ Content-Type: application/json
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
   "biography": "valor-ejemplo",
+  "visibility": "PUBLIC",
   "acceptsReviews": true
 }
 ```
@@ -5093,7 +6830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. PUT /community/reactions
+## 50. PUT /community/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -5225,7 +6962,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /community/reports
+## 51. POST /community/reports
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5354,7 +7091,125 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /f/{slug}
+## 52. GET /community/topics
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-groups`
+- **Nombre:** Temas de la comunidad
+- **Operation ID:** `CommunityTopicsController_listTopics`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityTopicsController.listTopics](../../src/modules/community/controllers/community-topics.controller.ts)
+
+### Descripción de negocio
+
+Temas de la comunidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Temas activos con los que se clasifican grupos y publicaciones.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/topics` en `CommunityTopicsController_listTopics`. El controlador delega en `CommunityGroupsReadService.listTopics`. No recibe body. El tipo de retorno estático es `Promise<TopicPageDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/topics HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/topics HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TopicPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TopicPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TopicPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TopicPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TopicPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TopicPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TopicPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "parentTopicId": "00000000-0000-4000-8000-000000000001",
+      "specialtyConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "count": 1,
+  "limit": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<TopicListItemDto>` | Sin restricción adicional declarada | Temas devueltos. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","parentTopicId":"00000000-0000-4000-8000-000000000001","specialtyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador del tema. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable. | `CODIGO_EJEMPLO` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
+| `items[].parentTopicId` | No | `string` | formato `uuid`; admite null | Tema padre, si cuelga de otro. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specialtyConceptId` | No | `string` | formato `uuid`; admite null | Especialidad con la que se corresponde, si se declaró. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántos trae. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/topics"
+}
+```
+
+---
+
+## 53. GET /f/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -5436,9 +7291,27 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "specialties": [
     "valor-ejemplo"
   ],
+  "trajectory": [
+    {
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "departmentText": "valor-ejemplo",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31"
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
+  "verifiedBadge": {
+    "status": "VERIFIED",
+    "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
+    "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "hasPublishedAgenda": true,
+  "nextAvailableDate": "valor-ejemplo",
   "posts": [
     {
       "id": "00000000-0000-4000-8000-000000000001",
@@ -5473,9 +7346,23 @@ Campos de la respuesta:
 | `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
 | `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
 | `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `trajectory` | Sí | `array<PublicAffiliationDto>` | Sin restricción adicional declarada | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `[{"organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","startDate":"2026-07-31","endDate":"2026-07-31"}]` |
+| `trajectory[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución, tal como la declaró el profesional | `Nombre de ejemplo` |
+| `trajectory[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo ejercido | `valor-ejemplo` |
+| `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
+| `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
+| `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
+| `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
 | `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -5493,6 +7380,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5510,7 +7399,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. GET /internal/community/feed/pending
+## 54. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -5626,7 +7515,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /internal/community/feed/rebuild
+## 55. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -5754,7 +7643,597 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /l/{slug}
+## 56. GET /internal/community/search/health
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community`
+- **Nombre:** Estado del índice del directorio público
+- **Operation ID:** `CommunitySearchIndexController_health`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySearchIndexController.health](../../src/modules/community/controllers/community-search-index.controller.ts)
+
+### Descripción de negocio
+
+Estado del índice del directorio público. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Estado del índice frente a la base: cuántos perfiles hay y cuántos indexados. Es lo que mira el worker antes de decidir si hace falta un barrido, y lo que responde «¿el buscador está sirviendo el índice o el SQL?» sin tener que provocar una búsqueda.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /internal/community/search/health` en `CommunitySearchIndexController_health`. El controlador delega en `CommunitySearchIndexService.health`. No recibe body. El tipo de retorno estático es `Promise<SearchIndexHealthDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /internal/community/search/health HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`, `SEARCH_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /internal/community/search/health HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SearchIndexHealthDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchIndexHealthDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "available": true,
+  "profiles": 1,
+  "documents": 1,
+  "serving": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `available` | Sí | `boolean` | Sin restricción adicional declarada | Si el cluster de búsqueda responde | `true` |
+| `profiles` | Sí | `number` | Sin restricción adicional declarada | Perfiles públicos en la base | `1` |
+| `documents` | Sí | `number` | admite null | Documentos en el índice; `null` si el índice no responde | `1` |
+| `serving` | Sí | `boolean` | Sin restricción adicional declarada | Si el buscador público está sirviéndose del índice (y no del SQL) | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/search/health"
+}
+```
+
+---
+
+## 57. POST /internal/community/search/reindex
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community`
+- **Nombre:** Reindexar el directorio público
+- **Operation ID:** `CommunitySearchIndexController_reindex`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySearchIndexController.reindex](../../src/modules/community/controllers/community-search-index.controller.ts)
+
+### Descripción de negocio
+
+Recrea el índice y proyecta todos los perfiles públicos. Idempotente.
+
+Contexto declarado en el controlador: Reindexa el directorio público completo. Idempotente: correrlo dos veces deja el índice igual, porque el id del documento es el id del perfil. Devuelve «indexados N de N» y lo que el índice confirma tener, que es lo único que prueba que el barrido sirvió.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/community/search/reindex` en `CommunitySearchIndexController_reindex`. El controlador delega en `CommunitySearchIndexService.reindexAll`. Valida el body como `ReindexRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReindexResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReindexRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /internal/community/search/reindex HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`, `SEARCH_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `recreate` | No | `boolean` | Sin restricción adicional declarada | Recrear el índice antes de indexar. En `false` sólo se hace upsert, lo que conserva documentos de perfiles que ya no son públicos: usarlo sólo para rellenar, nunca para reconstruir. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /internal/community/search/reindex HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "recreate": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReindexResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReindexResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "indexed": 1,
+  "total": 1,
+  "confirmed": 1,
+  "errors": true,
+  "summary": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `indexed` | Sí | `number` | Sin restricción adicional declarada | Documentos efectivamente indexados | `1` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Perfiles públicos que había que indexar | `1` |
+| `confirmed` | Sí | `number` | Sin restricción adicional declarada | Documentos que el índice confirma tener | `1` |
+| `errors` | Sí | `boolean` | Sin restricción adicional declarada | Si algún lote reportó errores parciales | `true` |
+| `summary` | Sí | `string` | Sin restricción adicional declarada | Rótulo legible: «indexados N de N» | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | El documento trae campos no declarados para este índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/search/reindex"
+}
+```
+
+---
+
+## 58. POST /internal/community/verification/badges
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community`
+- **Nombre:** Emitir un sello a mano (auditado)
+- **Operation ID:** `CommunityVerificationController_grant`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityVerificationController.grant](../../src/modules/community/controllers/community-verification.controller.ts)
+
+### Descripción de negocio
+
+Escotilla de operación: el camino normal es el puente desde identity_assurance. Queda marcado como manual y anotado en auditoría.
+
+Contexto declarado en el controlador: Alta manual de un sello, sólo para `SECURITY_ADMIN` y siempre auditada. Existe porque una autoridad puede estar caída o no tener API. El sello queda marcado como `BADGE_METHOD_MANUAL_ADMIN`, así que la ficha puede decir cómo se verificó y una auditoría puede separarlos después.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/community/verification/badges` en `CommunityVerificationController_grant`. El controlador delega en `EntityManager.transactional`, `CommunityVerificationService.applyVerified`. Valida el body como `GrantBadgeDto` y consume `application/json`. El tipo de retorno estático es `Promise<GrantBadgeResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `GrantBadgeDto`; los campos opcionales se omiten.
+
+```http
+POST /internal/community/verification/badges HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "targetId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `targetId` | Sí | `string` | formato `uuid` | Sujeto de dominio (profesional, institución) | `00000000-0000-4000-8000-000000000001` |
+| `evidenceRef` | No | `string` | Sin restricción adicional declarada | Referencia a la evidencia que justifica el alta manual. Se guarda en el sello y queda en auditoría: es lo que hace revisable la escotilla. | `valor-ejemplo` |
+| `validTo` | No | `string` | Sin restricción adicional declarada | Hasta cuándo vale el sello (ISO). Sin esto no vence solo. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /internal/community/verification/badges HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "evidenceRef": "valor-ejemplo",
+  "validTo": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GrantBadgeResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GrantBadgeResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "action": "granted"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `action` | Sí | `string` | valores: `granted`, `renewed`, `no-profile` | `no-profile` si el sujeto no tiene vitrina pública | `granted` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/verification/badges"
+}
+```
+
+---
+
+## 59. POST /internal/community/verification/badges/{targetId}/revoke
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community`
+- **Nombre:** Bajar los sellos de un sujeto (auditado)
+- **Operation ID:** `CommunityVerificationController_revoke`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityVerificationController.revoke](../../src/modules/community/controllers/community-verification.controller.ts)
+
+### Descripción de negocio
+
+Bajar los sellos de un sujeto (auditado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Baja los sellos de un sujeto a mano.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/community/verification/badges/{targetId}/revoke` en `CommunityVerificationController_revoke`. El controlador delega en `EntityManager.transactional`, `CommunityVerificationService.applyRevoked`. Valida el body como `RevokeBadgeDto` y consume `application/json`. El tipo de retorno estático es `Promise<{ revoked: number }>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `targetId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RevokeBadgeDto`; los campos opcionales se omiten.
+
+```http
+POST /internal/community/verification/badges/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | No | `string` | valores: `REVOKED`, `EXPIRED` | `REVOKED` = la autoridad retiró el respaldo; `EXPIRED` = sólo venció. No significan lo mismo y la pantalla los muestra distinto. | `REVOKED` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /internal/community/verification/badges/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "REVOKED"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 400 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 401 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 403 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 404 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 409 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 413 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 422 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 429 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+| 500 | Operación completada correctamente. | `Promise<{ revoked: number }>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ revoked: number }`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "revoked": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `revoked` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/verification/badges/{targetId}/revoke"
+}
+```
+
+---
+
+## 60. POST /internal/community/verification/badges/expire-sweep
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community`
+- **Nombre:** Bajar los sellos cuya vigencia ya venció
+- **Operation ID:** `CommunityVerificationController_expireSweep`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityVerificationController.expireSweep](../../src/modules/community/controllers/community-verification.controller.ts)
+
+### Descripción de negocio
+
+Sin este barrido, un sello con vencimiento se seguiría mostrando activo hasta que alguien revocara el caso a mano.
+
+Contexto declarado en el controlador: Barrido de sellos vencidos. Lo llama el worker.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/community/verification/badges/expire-sweep` en `CommunityVerificationController_expireSweep`. El controlador delega en `CommunityVerificationService.expireSweep`. No recibe body. El tipo de retorno estático es `Promise<BadgeSweepResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /internal/community/verification/badges/expire-sweep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /internal/community/verification/badges/expire-sweep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<BadgeSweepResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BadgeSweepResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "expired": 1,
+  "profiles": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expired` | Sí | `number` | Sin restricción adicional declarada | Sellos que cayeron | `1` |
+| `profiles` | Sí | `number` | Sin restricción adicional declarada | Perfiles que dejaron de estar verificados | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/verification/badges/expire-sweep"
+}
+```
+
+---
+
+## 61. GET /l/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -5836,9 +8315,27 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "specialties": [
     "valor-ejemplo"
   ],
+  "trajectory": [
+    {
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "departmentText": "valor-ejemplo",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31"
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
+  "verifiedBadge": {
+    "status": "VERIFIED",
+    "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
+    "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "hasPublishedAgenda": true,
+  "nextAvailableDate": "valor-ejemplo",
   "posts": [
     {
       "id": "00000000-0000-4000-8000-000000000001",
@@ -5873,9 +8370,23 @@ Campos de la respuesta:
 | `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
 | `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
 | `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `trajectory` | Sí | `array<PublicAffiliationDto>` | Sin restricción adicional declarada | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `[{"organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","startDate":"2026-07-31","endDate":"2026-07-31"}]` |
+| `trajectory[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución, tal como la declaró el profesional | `Nombre de ejemplo` |
+| `trajectory[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo ejercido | `valor-ejemplo` |
+| `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
+| `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
+| `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
+| `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
 | `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -5893,6 +8404,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5910,7 +8423,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. GET /o/{slug}
+## 62. GET /o/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -5992,9 +8505,27 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "specialties": [
     "valor-ejemplo"
   ],
+  "trajectory": [
+    {
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "departmentText": "valor-ejemplo",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31"
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
+  "verifiedBadge": {
+    "status": "VERIFIED",
+    "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
+    "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "hasPublishedAgenda": true,
+  "nextAvailableDate": "valor-ejemplo",
   "posts": [
     {
       "id": "00000000-0000-4000-8000-000000000001",
@@ -6029,9 +8560,23 @@ Campos de la respuesta:
 | `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
 | `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
 | `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `trajectory` | Sí | `array<PublicAffiliationDto>` | Sin restricción adicional declarada | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `[{"organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","startDate":"2026-07-31","endDate":"2026-07-31"}]` |
+| `trajectory[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución, tal como la declaró el profesional | `Nombre de ejemplo` |
+| `trajectory[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo ejercido | `valor-ejemplo` |
+| `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
+| `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
+| `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
+| `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
 | `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -6049,6 +8594,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6066,7 +8613,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /p/{slug}
+## 63. GET /p/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -6148,9 +8695,27 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "specialties": [
     "valor-ejemplo"
   ],
+  "trajectory": [
+    {
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "departmentText": "valor-ejemplo",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31"
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
+  "verifiedBadge": {
+    "status": "VERIFIED",
+    "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
+    "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "hasPublishedAgenda": true,
+  "nextAvailableDate": "valor-ejemplo",
   "posts": [
     {
       "id": "00000000-0000-4000-8000-000000000001",
@@ -6185,9 +8750,23 @@ Campos de la respuesta:
 | `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
 | `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
 | `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `trajectory` | Sí | `array<PublicAffiliationDto>` | Sin restricción adicional declarada | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `[{"organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","startDate":"2026-07-31","endDate":"2026-07-31"}]` |
+| `trajectory[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución, tal como la declaró el profesional | `Nombre de ejemplo` |
+| `trajectory[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo ejercido | `valor-ejemplo` |
+| `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
+| `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
+| `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
+| `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
 | `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -6205,6 +8784,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6222,7 +8803,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /public/nearby
+## 64. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -6295,6 +8876,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 400 | `VALIDATION_FAILED` | Se requieren coordenadas válidas: lat en [-90,90] y lng en [-180,180] | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6312,7 +8896,200 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. GET /public/search
+## 65. GET /public/profiles/{prefijo}/{slug}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Ficha pública por prefijo de vertical
+- **Operation ID:** `CommunityPublicController_getProfileByPrefix`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.getProfileByPrefix](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Ficha pública por prefijo de vertical. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ficha pública por vertical, bajo el prefijo `/public`. ## Por qué existe además de las cinco rutas cortas Porque `/p/:slug` es a la vez **la URL de la página** y la de su dato. En el navegador eso choca: el servidor de desarrollo enruta por prefijo de texto, así que mandar `/p` a la API se come la ruta del router y abrir la ficha devuelve JSON en vez de la pantalla; no mandarla deja al cliente pidiendo `/p/:slug` al servidor de Angular, que responde el `index.html` con **200** y el cliente recibe HTML donde espera JSON. Las dos salidas rompen algo, y `check-client-prefixes.mjs` lo denuncia desde el 2026-08-17. Las cinco rutas cortas **se quedan**: son las que alguien pega en un mensaje y las que un rastreador sigue, y su contrato no cambia. Esta es la que llama el cliente, y no es ambigua porque cuelga de `/public`, que ya está enrutado. El comportamiento es idéntico, incluido el 404 del tipo equivocado: es el mismo servicio con el mismo concepto de sujeto, no una segunda implementación que pueda separarse de la primera.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/profiles/{prefijo}/{slug}` en `CommunityPublicController_getProfileByPrefix`. El controlador delega en `CommunityPublicService.getBySlug`. No recibe body. El tipo de retorno estático es `Promise<PublicDirectoryProfileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `prefijo` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `slug` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/profiles/valor-ejemplo/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/profiles/valor-ejemplo/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "kind": {},
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "avatarUrl": "valor-ejemplo",
+  "coverUrl": "valor-ejemplo",
+  "verified": true,
+  "city": "valor-ejemplo",
+  "address": "valor-ejemplo",
+  "location": {
+    "lat": 1,
+    "lng": 1
+  },
+  "specialties": [
+    "valor-ejemplo"
+  ],
+  "trajectory": [
+    {
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "departmentText": "valor-ejemplo",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31"
+    }
+  ],
+  "ratingAverage": 1,
+  "ratingCount": 1,
+  "acceptsReviews": true,
+  "verifiedBadge": {
+    "status": "VERIFIED",
+    "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
+    "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "hasPublishedAgenda": true,
+  "nextAvailableDate": "valor-ejemplo",
+  "posts": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "bodyText": "valor-ejemplo",
+      "publishedAt": "valor-ejemplo",
+      "mediaUrls": [
+        "valor-ejemplo"
+      ],
+      "reactionCount": 1,
+      "commentCount": 1
+    }
+  ],
+  "updatedAt": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `avatarUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `coverUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `verified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `city` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `address` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `location` | No | `PublicLocationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lat":1,"lng":1}` |
+| `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `trajectory` | Sí | `array<PublicAffiliationDto>` | Sin restricción adicional declarada | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `[{"organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","startDate":"2026-07-31","endDate":"2026-07-31"}]` |
+| `trajectory[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución, tal como la declaró el profesional | `Nombre de ejemplo` |
+| `trajectory[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo ejercido | `valor-ejemplo` |
+| `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
+| `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
+| `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
+| `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
+| `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
+| `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `posts[].publishedAt` | Sí | `string` | Sin restricción adicional declarada | Instante ISO-8601 en UTC | `valor-ejemplo` |
+| `posts[].mediaUrls` | Sí | `array<string>` | Sin restricción adicional declarada | Vacío, nunca null | `["valor-ejemplo"]` |
+| `posts[].reactionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `posts[].commentCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | Sin restricción adicional declarada | Alimenta el ETag y el <lastmod> del sitemap | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/profiles/{prefijo}/{slug}"
+}
+```
+
+---
+
+## 66. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -6383,6 +9160,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6400,7 +9182,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. GET /public/search/diagnostic-units
+## 67. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -6471,6 +9253,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6488,7 +9275,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. GET /public/search/insurers
+## 68. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -6559,6 +9346,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6576,7 +9368,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. GET /public/search/medications
+## 69. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -6647,6 +9439,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6664,7 +9461,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. GET /public/search/organizations
+## 70. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -6735,6 +9532,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6752,7 +9554,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. GET /public/search/pharmacies
+## 71. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -6823,6 +9625,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6840,7 +9647,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. GET /public/search/practitioners
+## 72. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -6912,6 +9719,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6929,7 +9741,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. GET /s/{slug}
+## 73. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -7011,9 +9823,27 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "specialties": [
     "valor-ejemplo"
   ],
+  "trajectory": [
+    {
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "departmentText": "valor-ejemplo",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31"
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
+  "verifiedBadge": {
+    "status": "VERIFIED",
+    "badgeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "verificationMethodConceptId": "00000000-0000-4000-8000-000000000001",
+    "verifiedAt": "valor-ejemplo",
+    "validUntil": "valor-ejemplo"
+  },
+  "hasPublishedAgenda": true,
+  "nextAvailableDate": "valor-ejemplo",
   "posts": [
     {
       "id": "00000000-0000-4000-8000-000000000001",
@@ -7048,9 +9878,23 @@ Campos de la respuesta:
 | `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
 | `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
 | `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `trajectory` | Sí | `array<PublicAffiliationDto>` | Sin restricción adicional declarada | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `[{"organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","startDate":"2026-07-31","endDate":"2026-07-31"}]` |
+| `trajectory[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución, tal como la declaró el profesional | `Nombre de ejemplo` |
+| `trajectory[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo ejercido | `valor-ejemplo` |
+| `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
+| `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
+| `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
+| `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
+| `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
 | `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -7068,6 +9912,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
+| 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

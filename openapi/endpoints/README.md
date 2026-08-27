@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1108 de 1108 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **64 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1184 de 1184 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **65 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -44,7 +44,7 @@ Esta referencia documenta **1108 de 1108 operaciones HTTP** registradas en `open
 
 | Módulo | Endpoints | Etiquetas OpenAPI | Controladores |
 |---|---:|---|---:|
-| [accounting](accounting.md) | 24 | `accounting-accruals`, `accounting-assets`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-subledger` | 7 |
+| [accounting](accounting.md) | 27 | `accounting-accruals`, `accounting-assets`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger` | 8 |
 | [ads](ads.md) | 18 | `ads` | 1 |
 | [app](app.md) | 6 | `app` | 2 |
 | [audio_assets](audio-assets.md) | 10 | `audio-assets`, `audio-assets-internal` | 2 |
@@ -54,21 +54,22 @@ Esta referencia documenta **1108 de 1108 operaciones HTTP** registradas en `open
 | [automation](automation.md) | 17 | `automation` | 2 |
 | [billing](billing.md) | 15 | `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog` | 4 |
 | [chart](chart.md) | 16 | `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates` | 5 |
-| [clinical](clinical.md) | 24 | `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records` | 6 |
-| [clinical_ext](clinical-ext.md) | 23 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 7 |
+| [clinical](clinical.md) | 25 | `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records` | 6 |
+| [clinical_ext](clinical-ext.md) | 26 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 8 |
 | [common](common.md) | 15 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files` | 5 |
-| [community](community.md) | 54 | `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline` | 9 |
+| [community](community.md) | 73 | `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline` | 12 |
 | [consent](consent.md) | 12 | `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-patient-objections`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents` | 8 |
+| [content_packs](content-packs.md) | 2 | `content-packs` | 1 |
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
 | [delegated_access](delegated-access.md) | 11 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
 | [diagnostic_units](diagnostic-units.md) | 21 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
-| [diagnostics](diagnostics.md) | 26 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reports`, `diagnostics-specimens` | 6 |
-| [directory](directory.md) | 16 | `directory-admin-tenants`, `directory-tenants` | 2 |
+| [diagnostics](diagnostics.md) | 27 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reports`, `diagnostics-specimens` | 6 |
+| [directory](directory.md) | 18 | `directory-admin-tenants`, `directory-tenants` | 2 |
 | [document_store](document-store.md) | 5 | `document-store` | 1 |
 | [education](education.md) | 14 | `education` | 1 |
 | [erp](erp.md) | 17 | `erp` | 1 |
-| [forms](forms.md) | 18 | `forms-assignments`, `forms-definition-sets`, `forms-fields`, `forms-instances`, `forms-values` | 5 |
+| [forms](forms.md) | 21 | `forms-assignments`, `forms-definition-sets`, `forms-fields`, `forms-instances`, `forms-me`, `forms-values` | 6 |
 | [geo](geo.md) | 10 | `geo-geofences`, `geo-tracked-subjects`, `geo-tracking-sessions`, `geo-trips` | 4 |
 | [graph_intelligence](graph-intelligence.md) | 15 | `graph_intelligence` | 2 |
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
@@ -80,30 +81,30 @@ Esta referencia documenta **1108 de 1108 operaciones HTTP** registradas en `open
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
 | [lakehouse](lakehouse.md) | 13 | `lakehouse` | 2 |
 | [marketing](marketing.md) | 14 | `marketing` | 2 |
-| [messaging](messaging.md) | 13 | `messaging`, `messaging-internal`, `messaging-webhooks` | 3 |
+| [messaging](messaging.md) | 17 | `messaging`, `messaging-internal`, `messaging-webhooks` | 3 |
 | [object_storage](object-storage.md) | 13 | `dicomweb`, `object-storage` | 2 |
 | [organization_extensions](organization-extensions.md) | 9 | `orgext-affiliations`, `orgext-data-boundaries`, `orgext-facility-licenses`, `orgext-hospitals` | 4 |
 | [payments](payments.md) | 14 | `payments`, `payments-intents`, `payments-transactions` | 3 |
 | [pharma_lab](pharma-lab.md) | 76 | `pharma-lab-catalog`, `pharma-lab-notices`, `pharma-lab-pharmacovigilance`, `pharma-lab-reference`, `pharma-lab-regulatory`, `pharma-lab-social-accounting`, `pharma-lab-visit-agenda`, `pharma-lab-visit-records`, `pharma-lab-visit-requests`, `pharma-lab-visit-surveys`, `pharma-lab-visitors`, `pharma-labs` | 12 |
-| [pharmacy](pharmacy.md) | 11 | `pharmacy` | 1 |
-| [pharmacy_inventory](pharmacy-inventory.md) | 15 | `pharmacy-inventory`, `pharmacy-inventory-internal` | 4 |
+| [pharmacy](pharmacy.md) | 15 | `pharmacy`, `pharmacy-directory` | 2 |
+| [pharmacy_inventory](pharmacy-inventory.md) | 26 | `pharmacy-inventory`, `pharmacy-inventory-directory`, `pharmacy-inventory-internal`, `pharmacy-orders` | 6 |
 | [platform_ops](platform-ops.md) | 15 | `platform-ops` | 1 |
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
-| [practice](practice.md) | 18 | `practice` | 6 |
+| [practice](practice.md) | 24 | `practice` | 6 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
-| [profiles](profiles.md) | 24 | `profiles-patients`, `profiles-practitioners` | 2 |
+| [profiles](profiles.md) | 30 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 3 |
 | [promotions](promotions.md) | 15 | `loyalty`, `promotions` | 2 |
 | [qa_lab](qa-lab.md) | 13 | `qa`, `qa-internal` | 2 |
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
 | [redis_runtime](redis-runtime.md) | 5 | `redis-runtime` | 1 |
 | [reporting](reporting.md) | 12 | `reporting` | 1 |
-| [scheduling](scheduling.md) | 31 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal` | 5 |
+| [scheduling](scheduling.md) | 39 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 6 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
 | [surveys](surveys.md) | 12 | `surveys-assignments`, `surveys-patient`, `surveys-templates` | 3 |
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
 | [system_ops](system-ops.md) | 24 | `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention` | 8 |
 | [telemetry](telemetry.md) | 13 | `telemetry-consent`, `telemetry-events`, `telemetry-governance` | 3 |
-| [terminology](terminology.md) | 17 | `terminology` | 6 |
+| [terminology](terminology.md) | 20 | `terminology` | 6 |
 | [time_series](time-series.md) | 14 | `time_series` | 2 |
 | [tracking](tracking.md) | 11 | `tracking` | 1 |
 | [vector_rag](vector-rag.md) | 16 | `vector_rag` | 2 |
@@ -115,4 +116,4 @@ Esta referencia documenta **1108 de 1108 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1108 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1184 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

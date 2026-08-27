@@ -9,7 +9,7 @@
 # Módulo `community`
 
 **Fuente:** [`src/modules/community/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/community/README.md)
-· 9 controllers · 18 services · 17 repositories · 38 entidades · 25 DTO
+· 12 controllers · 26 services · 18 repositories · 38 entidades · 30 DTO
 
 ---
 
@@ -22,28 +22,28 @@ padre que ningún UC crea (perfil público, conversación, encuesta, grupo).
 
 ## Endpoints
 
-| UC | Método y ruta | Permiso | Descripción |
-|----|---------------|---------|-------------|
-| bootstrap | `POST /community/public-profiles` | `SECURITY_ADMIN` | Proyecta un sujeto (user/patient/org) como perfil público (nodo raíz social) |
-| UC-19-01 | `POST /community/profiles/{profileId}/posts` | auth | Publica post con hashtags, media y menciones |
-| UC-19-02 | `POST /community/comments` | auth | Comenta (hilo anidado) con contadores |
-| UC-19-03 | `PUT /community/reactions` | auth | Reacciona (upsert una reacción por actor/objeto) |
-| UC-19-04 | `POST /community/bookmarks` | auth | Guarda bookmark en colección |
-| UC-19-05 | `POST /community/follows` | auth | Sigue objeto social (perfil/tópico/hashtag/grupo) |
-| UC-19-06 | `POST /community/conversations/{conversationId}/messages` | auth | Envía mensaje directo |
-| UC-19-07 | `POST /community/conversations/{conversationId}/read` | auth | Marca mensajes como leídos (recibos) |
-| UC-19-08 | `POST /community/reports` | auth | Reporta contenido y encola moderación |
-| UC-19-09 | `POST /community/moderation/queue/{queueId}/decision` | `SECURITY_ADMIN` | Resuelve moderación (decisión + strike) |
-| UC-19-10 | `POST /community/moderation/decisions/{decisionId}/appeal` | auth | Apela una decisión |
-| UC-19-11 | `POST /community/profiles/{profileId}/reviews` | auth | Publica review verificada de servicio |
-| UC-19-12 | `POST /community/polls/{pollId}/votes` | auth | Vota en encuesta |
-| UC-19-13 | `POST /community/groups/{groupId}/members` | auth | Se une a grupo/comunidad |
-| UC-19-14 | `POST /community/blocks` | auth | Bloquea a un usuario |
-| UC-19-15 | `POST /internal/community/feed/rebuild` | `SYSTEM`, `SECURITY_ADMIN` | Fan-out del feed (lo dispara `worker-community`) |
-| UC-19-15 | `GET /internal/community/feed/pending` | `SYSTEM`, `SECURITY_ADMIN` | Lote de posts publicados sin repartir, con sus seguidores |
-| bootstrap | `POST /community/conversations` | auth | Crea conversación con participantes |
-| bootstrap | `POST /community/posts/{postId}/polls` | auth | Crea encuesta con opciones |
-| bootstrap | `POST /community/groups` | auth | Crea grupo/comunidad |
+| UC        | Método y ruta                                              | Permiso                    | Descripción                                                                  |
+| --------- | ---------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------- |
+| bootstrap | `POST /community/public-profiles`                          | `SECURITY_ADMIN`           | Proyecta un sujeto (user/patient/org) como perfil público (nodo raíz social) |
+| UC-19-01  | `POST /community/profiles/{profileId}/posts`               | auth                       | Publica post con hashtags, media y menciones                                 |
+| UC-19-02  | `POST /community/comments`                                 | auth                       | Comenta (hilo anidado) con contadores                                        |
+| UC-19-03  | `PUT /community/reactions`                                 | auth                       | Reacciona (upsert una reacción por actor/objeto)                             |
+| UC-19-04  | `POST /community/bookmarks`                                | auth                       | Guarda bookmark en colección                                                 |
+| UC-19-05  | `POST /community/follows`                                  | auth                       | Sigue objeto social (perfil/tópico/hashtag/grupo)                            |
+| UC-19-06  | `POST /community/conversations/{conversationId}/messages`  | auth                       | Envía mensaje directo                                                        |
+| UC-19-07  | `POST /community/conversations/{conversationId}/read`      | auth                       | Marca mensajes como leídos (recibos)                                         |
+| UC-19-08  | `POST /community/reports`                                  | auth                       | Reporta contenido y encola moderación                                        |
+| UC-19-09  | `POST /community/moderation/queue/{queueId}/decision`      | `SECURITY_ADMIN`           | Resuelve moderación (decisión + strike)                                      |
+| UC-19-10  | `POST /community/moderation/decisions/{decisionId}/appeal` | auth                       | Apela una decisión                                                           |
+| UC-19-11  | `POST /community/profiles/{profileId}/reviews`             | auth                       | Publica review verificada de servicio                                        |
+| UC-19-12  | `POST /community/polls/{pollId}/votes`                     | auth                       | Vota en encuesta                                                             |
+| UC-19-13  | `POST /community/groups/{groupId}/members`                 | auth                       | Se une a grupo/comunidad                                                     |
+| UC-19-14  | `POST /community/blocks`                                   | auth                       | Bloquea a un usuario                                                         |
+| UC-19-15  | `POST /internal/community/feed/rebuild`                    | `SYSTEM`, `SECURITY_ADMIN` | Fan-out del feed (lo dispara `worker-community`)                             |
+| UC-19-15  | `GET /internal/community/feed/pending`                     | `SYSTEM`, `SECURITY_ADMIN` | Lote de posts publicados sin repartir, con sus seguidores                    |
+| bootstrap | `POST /community/conversations`                            | auth                       | Crea conversación con participantes                                          |
+| bootstrap | `POST /community/posts/{postId}/polls`                     | auth                       | Crea encuesta con opciones                                                   |
+| bootstrap | `POST /community/groups`                                   | auth                       | Crea grupo/comunidad                                                         |
 
 ### Lecturas
 
@@ -53,24 +53,24 @@ comentar, reaccionar, seguir y bloquear, y no había forma de volver a leer nada
 sesión y ninguna lleva `@Roles`; las que exponen contenido privado comprueban
 la propiedad del perfil en el servicio.
 
-| Método y ruta | Descripción |
-|---------------|-------------|
-| `GET /community/profiles/{profileId}` | Ficha con sellos de verificación y prestigio |
-| `GET /community/profiles/{profileId}/posts` | Muro del perfil, filtrado por visibilidad |
-| `GET /community/posts/{postId}` | Post con media, hashtags y menciones |
-| `GET /community/posts/{postId}/comments` | Hilo con respuestas anidadas |
-| `GET /community/posts/{postId}/reactions` | Recuento por tipo + reacción del actor |
-| `GET /community/follows?followerProfileId=` | Seguimientos activos |
-| `GET /community/bookmarks?profileId=` | Marcadores propios |
-| `GET /community/blocks?profileId=` | Bloqueos propios |
-| `GET /community/profiles/{profileId}/reviews` | Reviews publicadas del perfil |
-| `GET /community/conversations?profileId=` | Bandeja con vista previa y no leídos |
-| `GET /community/conversations/{id}/messages?profileId=` | Mensajes de la conversación |
-| `GET /community/groups?tenantId=` | Directorio de grupos de la organización |
-| `GET /community/groups/{groupId}/members` | Integrantes del grupo |
-| `GET /community/polls/{pollId}` | Encuesta con recuentos y voto propio |
-| `GET /community/feed?profileId=` | Timeline propio, con las publicaciones hidratadas |
-| `GET /community/notifications?profileId=` | Bandeja social + `unreadCount` |
+| Método y ruta                                           | Descripción                                       |
+| ------------------------------------------------------- | ------------------------------------------------- |
+| `GET /community/profiles/{profileId}`                   | Ficha con sellos de verificación y prestigio      |
+| `GET /community/profiles/{profileId}/posts`             | Muro del perfil, filtrado por visibilidad         |
+| `GET /community/posts/{postId}`                         | Post con media, hashtags y menciones              |
+| `GET /community/posts/{postId}/comments`                | Hilo con respuestas anidadas                      |
+| `GET /community/posts/{postId}/reactions`               | Recuento por tipo + reacción del actor            |
+| `GET /community/follows?followerProfileId=`             | Seguimientos activos                              |
+| `GET /community/bookmarks?profileId=`                   | Marcadores propios                                |
+| `GET /community/blocks?profileId=`                      | Bloqueos propios                                  |
+| `GET /community/profiles/{profileId}/reviews`           | Reviews publicadas del perfil                     |
+| `GET /community/conversations?profileId=`               | Bandeja con vista previa y no leídos              |
+| `GET /community/conversations/{id}/messages?profileId=` | Mensajes de la conversación                       |
+| `GET /community/groups?tenantId=`                       | Directorio de grupos de la organización           |
+| `GET /community/groups/{groupId}/members`               | Integrantes del grupo                             |
+| `GET /community/polls/{pollId}`                         | Encuesta con recuentos y voto propio              |
+| `GET /community/feed?profileId=`                        | Timeline propio, con las publicaciones hidratadas |
+| `GET /community/notifications?profileId=`               | Bandeja social + `unreadCount`                    |
 
 Todas paginan con el cursor keyset opaco de `common/pagination` (default 50
 filas). Excepción: la bandeja de conversaciones devuelve las activas de una vez
@@ -147,7 +147,7 @@ Dos cosas que no se deducen del código:
   `SystemApiClient` de los workers firma con rol `SYSTEM`: con sólo
   `SECURITY_ADMIN` el worker recibía 403 y el fan-out no se ejecutaba nunca.
 
-Pendiente declarado: el reparto es siempre *push*. El umbral híbrido push/pull
+Pendiente declarado: el reparto es siempre _push_. El umbral híbrido push/pull
 para autores con muchísimos seguidores es una decisión abierta del equipo; el
 tope de seguidores por pasada acota el daño mientras tanto.
 
