@@ -11,26 +11,26 @@ import {
 } from '../../modules/terminology/entities';
 import { CONCEPTS, SEED } from '../constants/concepts';
 import {
-  SEGIP_OCCUPATION_GROUP_PROPERTY_CODE,
-  SEGIP_OCCUPATION_VALUE_SET,
-  SEGIP_OCCUPATION_VALUE_SET_NAME,
-  SEGIP_OCCUPATION_VERSION,
-  SEGIP_OCCUPATIONS,
-  segipOccupationCanonicalUrl,
-  segipOccupationConceptCode,
-  segipOccupationConceptId,
-  segipOccupationDesignationId,
-  segipOccupationGroupPropertyId,
-  segipOccupationMemberId,
-  segipOccupationValueSetId,
-  segipOccupationVersionId,
-} from './segip-occupations.catalog';
+  BO_OCCUPATION_GROUP_PROPERTY_CODE,
+  BO_OCCUPATION_VALUE_SET,
+  BO_OCCUPATION_VALUE_SET_NAME,
+  BO_OCCUPATION_VERSION,
+  BO_OCCUPATIONS,
+  boOccupationCanonicalUrl,
+  boOccupationConceptCode,
+  boOccupationConceptId,
+  boOccupationDesignationId,
+  boOccupationGroupPropertyId,
+  boOccupationMemberId,
+  boOccupationValueSetId,
+  boOccupationVersionId,
+} from './bo-occupations.catalog';
 
 /** Tipo de dato de la propiedad de rama, en el vocabulario de `concept_properties`. */
 const STRING_DATA_TYPE = 'string';
 
 /**
- * Materializa `VS_SEGIP_OCCUPATION`: las ocupaciones que el alta de paciente
+ * Materializa `VS_BO_OCCUPATION`: las ocupaciones que el alta de paciente
  * ofrece como «¿en qué trabajás?».
  *
  * ## Por qué existe
@@ -41,6 +41,11 @@ const STRING_DATA_TYPE = 'string';
  * el texto libre, que es de donde salen «Docente», «docente» y «Prof.» como
  * tres ocupaciones distintas. Sin conjunto sembrado no hay ocupación
  * catalogada, por más que el DTO la acepte.
+ *
+ * La API es **el único dueño** de este conjunto: el paquete del modelo no lo
+ * siembra, y así lo fija la nota de entidad de `profiles.persons` (v4.1.8).
+ * Sobre por qué la lista de hoy es provisional y qué pasa cuando llegue la
+ * COB-2023, ver `bo-occupations.catalog.ts`.
  *
  * ## Idempotencia
  *
@@ -54,7 +59,7 @@ const STRING_DATA_TYPE = 'string';
  * lo impone `SeedBootstrapService`.
  */
 @Injectable()
-export class SegipOccupationsSeedService {
+export class BoOccupationsSeedService {
   /**
    * Inicializa la instancia y sus dependencias.
    *
@@ -65,7 +70,7 @@ export class SegipOccupationsSeedService {
     private readonly orm: MikroORM,
     private readonly logger: PinoLogger,
   ) {
-    this.logger.setContext(SegipOccupationsSeedService.name);
+    this.logger.setContext(BoOccupationsSeedService.name);
   }
 
   /**
@@ -102,7 +107,7 @@ export class SegipOccupationsSeedService {
     };
 
     // --- Nivel 1: el conjunto de valores ---
-    const valueSetIdentifier = segipOccupationValueSetId();
+    const valueSetIdentifier = boOccupationValueSetId();
     const existingValueSets = await this.existingIds(em, ValueSets, [
       valueSetIdentifier,
     ]);
@@ -111,9 +116,9 @@ export class SegipOccupationsSeedService {
         ValueSets,
         {
           id: valueSetIdentifier,
-          internalCode: SEGIP_OCCUPATION_VALUE_SET,
-          name: SEGIP_OCCUPATION_VALUE_SET_NAME,
-          canonicalUrl: segipOccupationCanonicalUrl(),
+          internalCode: BO_OCCUPATION_VALUE_SET,
+          name: BO_OCCUPATION_VALUE_SET_NAME,
+          canonicalUrl: boOccupationCanonicalUrl(),
           stateConceptId: CONCEPTS.TERM_ACTIVE,
           createdAt: now,
           updatedAt: now,
@@ -125,7 +130,7 @@ export class SegipOccupationsSeedService {
     await em.flush();
 
     // --- Nivel 2: su versión única, marcada vigente ---
-    const versionIdentifier = segipOccupationVersionId();
+    const versionIdentifier = boOccupationVersionId();
     const existingVersions = await this.existingIds(em, ValueSetVersions, [
       versionIdentifier,
     ]);
@@ -135,7 +140,7 @@ export class SegipOccupationsSeedService {
         {
           id: versionIdentifier,
           valueSetId: valueSetIdentifier,
-          version: SEGIP_OCCUPATION_VERSION,
+          version: BO_OCCUPATION_VERSION,
           validFrom: now,
           // `readExpansion` sin `valueSetVersionId` lee la vigente: sin esta
           // marca la lectura del desplegable devolvería 404 aunque el conjunto
@@ -155,19 +160,19 @@ export class SegipOccupationsSeedService {
     const existingConcepts = await this.existingIds(
       em,
       CatalogConcepts,
-      SEGIP_OCCUPATIONS.map((occupation) =>
-        segipOccupationConceptId(occupation.code),
+      BO_OCCUPATIONS.map((occupation) =>
+        boOccupationConceptId(occupation.code),
       ),
     );
-    for (const occupation of SEGIP_OCCUPATIONS) {
-      const id = segipOccupationConceptId(occupation.code);
+    for (const occupation of BO_OCCUPATIONS) {
+      const id = boOccupationConceptId(occupation.code);
       if (existingConcepts.has(id)) continue;
       em.create(
         CatalogConcepts,
         {
           id,
           codeSystemVersionId: SEED.codeSystemVersionId,
-          code: segipOccupationConceptCode(occupation.code),
+          code: boOccupationConceptCode(occupation.code),
           // `display` es lo que devuelve la expansión y lo que pinta el
           // desplegable, así que va en castellano: es un oficio boliviano, no
           // un término de terminología internacional.
@@ -199,8 +204,8 @@ export class SegipOccupationsSeedService {
     );
     if (total > 0) {
       this.logger.info(
-        { operation: 'seed.segip-occupations', ...counters },
-        'Catálogo de ocupaciones del SEGIP materializado',
+        { operation: 'seed.bo-occupations', ...counters },
+        'Catálogo de ocupaciones de Bolivia materializado',
       );
     }
     return counters;
@@ -215,7 +220,7 @@ export class SegipOccupationsSeedService {
    */
   private assertUniqueCodes(): void {
     const vistos = new Set<string>();
-    for (const occupation of SEGIP_OCCUPATIONS) {
+    for (const occupation of BO_OCCUPATIONS) {
       if (vistos.has(occupation.code)) {
         throw new Error(
           `El catálogo de ocupaciones declara el código "${occupation.code}" más de una vez`,
@@ -233,20 +238,20 @@ export class SegipOccupationsSeedService {
     const existing = await this.existingIds(
       em,
       ConceptDesignations,
-      SEGIP_OCCUPATIONS.map((occupation) =>
-        segipOccupationDesignationId(occupation.code),
+      BO_OCCUPATIONS.map((occupation) =>
+        boOccupationDesignationId(occupation.code),
       ),
     );
 
     let creadas = 0;
-    for (const occupation of SEGIP_OCCUPATIONS) {
-      const id = segipOccupationDesignationId(occupation.code);
+    for (const occupation of BO_OCCUPATIONS) {
+      const id = boOccupationDesignationId(occupation.code);
       if (existing.has(id)) continue;
       em.create(
         ConceptDesignations,
         {
           id,
-          conceptId: segipOccupationConceptId(occupation.code),
+          conceptId: boOccupationConceptId(occupation.code),
           value: occupation.name,
           languageConceptId: CONCEPTS.LANG_ES,
           designationTypeConceptId: CONCEPTS.DESIG_PREFERRED,
@@ -276,21 +281,21 @@ export class SegipOccupationsSeedService {
     const existing = await this.existingIds(
       em,
       ConceptProperties,
-      SEGIP_OCCUPATIONS.map((occupation) =>
-        segipOccupationGroupPropertyId(occupation.code),
+      BO_OCCUPATIONS.map((occupation) =>
+        boOccupationGroupPropertyId(occupation.code),
       ),
     );
 
     let creadas = 0;
-    for (const occupation of SEGIP_OCCUPATIONS) {
-      const id = segipOccupationGroupPropertyId(occupation.code);
+    for (const occupation of BO_OCCUPATIONS) {
+      const id = boOccupationGroupPropertyId(occupation.code);
       if (existing.has(id)) continue;
       em.create(
         ConceptProperties,
         {
           id,
-          conceptId: segipOccupationConceptId(occupation.code),
-          propertyCode: SEGIP_OCCUPATION_GROUP_PROPERTY_CODE,
+          conceptId: boOccupationConceptId(occupation.code),
+          propertyCode: BO_OCCUPATION_GROUP_PROPERTY_CODE,
           dataType: STRING_DATA_TYPE,
           valueJson: occupation.group,
           createdAt: now,
@@ -312,22 +317,20 @@ export class SegipOccupationsSeedService {
     const existing = await this.existingIds(
       em,
       ValueSetMembers,
-      SEGIP_OCCUPATIONS.map((occupation) =>
-        segipOccupationMemberId(occupation.code),
-      ),
+      BO_OCCUPATIONS.map((occupation) => boOccupationMemberId(occupation.code)),
     );
 
     let creadas = 0;
-    const versionIdentifier = segipOccupationVersionId();
-    SEGIP_OCCUPATIONS.forEach((occupation, ordinal) => {
-      const id = segipOccupationMemberId(occupation.code);
+    const versionIdentifier = boOccupationVersionId();
+    BO_OCCUPATIONS.forEach((occupation, ordinal) => {
+      const id = boOccupationMemberId(occupation.code);
       if (existing.has(id)) return;
       em.create(
         ValueSetMembers,
         {
           id,
           valueSetVersionId: versionIdentifier,
-          conceptId: segipOccupationConceptId(occupation.code),
+          conceptId: boOccupationConceptId(occupation.code),
           included: true,
           ordinal,
           createdAt: now,

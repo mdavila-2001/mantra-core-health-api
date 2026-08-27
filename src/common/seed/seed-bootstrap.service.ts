@@ -7,7 +7,7 @@ import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
-import { SegipOccupationsSeedService } from './segip-occupations-seed.service';
+import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
@@ -115,7 +115,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
-   * @param segipOccupations - Ocupaciones del SEGIP (`VS_SEGIP_OCCUPATION`).
+   * @param boOccupations - Ocupaciones de Bolivia (`VS_BO_OCCUPATION`).
    * @param boliviaFacilities - Directorio de establecimientos de salud de
    *   Santa Cruz (`VS_BO_HEALTH_FACILITY`).
    * @param boliviaInsurance - Aseguradoras bolivianas con su producto de
@@ -137,7 +137,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
-    private readonly segipOccupations: SegipOccupationsSeedService,
+    private readonly boOccupations: BoOccupationsSeedService,
     private readonly boliviaFacilities: BoliviaFacilitiesSeedService,
     private readonly boliviaInsurance: BoliviaInsuranceSeedService,
     private readonly boliviaFeeSchedule: BoliviaFeeScheduleSeedService,
@@ -267,13 +267,13 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         run: () => this.boGeography.run(),
       },
       // Y con ellos, por lo mismo: el alta de paciente resuelve
-      // `VS_SEGIP_OCCUPATION` por su código para el desplegable de ocupación.
+      // `VS_BO_OCCUPATION` por su código para el desplegable de ocupación.
       // Es núcleo y no contenido porque sin el conjunto el campo se queda en el
       // texto libre que este catálogo vino a cerrar.
       {
-        name: 'ocupaciones del SEGIP',
+        name: 'ocupaciones de Bolivia',
         kind: 'core',
-        run: () => this.segipOccupations.run(),
+        run: () => this.boOccupations.run(),
       },
       // Junto a los departamentos y por lo mismo: son catálogos de referencia de
       // Bolivia que las pantallas resuelven por el código del conjunto. El

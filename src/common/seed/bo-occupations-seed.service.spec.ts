@@ -8,22 +8,22 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { SegipOccupationsSeedService } from './segip-occupations-seed.service';
+import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import {
-  SEGIP_OCCUPATION_GROUP_PROPERTY_CODE,
-  SEGIP_OCCUPATION_VALUE_SET,
-  SEGIP_OCCUPATIONS,
-  segipOccupationConceptCode,
-  segipOccupationConceptId,
-  segipOccupationDesignationId,
-  segipOccupationGroupPropertyId,
-  segipOccupationMemberId,
-  segipOccupationValueSetId,
-  segipOccupationVersionId,
-} from './segip-occupations.catalog';
+  BO_OCCUPATION_GROUP_PROPERTY_CODE,
+  BO_OCCUPATION_VALUE_SET,
+  BO_OCCUPATIONS,
+  boOccupationConceptCode,
+  boOccupationConceptId,
+  boOccupationDesignationId,
+  boOccupationGroupPropertyId,
+  boOccupationMemberId,
+  boOccupationValueSetId,
+  boOccupationVersionId,
+} from './bo-occupations.catalog';
 
 /** Cuántas ocupaciones declara el catálogo; el resto de las cuentas sale de acá. */
-const OCUPACIONES = SEGIP_OCCUPATIONS.length;
+const OCUPACIONES = BO_OCCUPATIONS.length;
 
 /**
  * Construye el seed con un contexto de persistencia controlado — el mismo
@@ -51,7 +51,7 @@ function build(existing: Set<string> = new Set()) {
   };
   const orm = { em: { fork: mockFn(() => em) } };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new SegipOccupationsSeedService(orm as any, logger as any);
+  const service = new BoOccupationsSeedService(orm as any, logger as any);
 
   return {
     service,
@@ -63,7 +63,7 @@ function build(existing: Set<string> = new Set()) {
   };
 }
 
-describe('SegipOccupationsSeedService', () => {
+describe('BoOccupationsSeedService', () => {
   describe('primera corrida sobre una base vacía', () => {
     it('materializa el conjunto, su versión vigente y todas las ocupaciones', async () => {
       const { service, rowsOf } = build();
@@ -82,8 +82,8 @@ describe('SegipOccupationsSeedService', () => {
 
       const [conjunto] = rowsOf('ValueSets');
       expect(conjunto).toMatchObject({
-        id: segipOccupationValueSetId(),
-        internalCode: SEGIP_OCCUPATION_VALUE_SET,
+        id: boOccupationValueSetId(),
+        internalCode: BO_OCCUPATION_VALUE_SET,
       });
 
       // Sin `isDefault`, `readExpansion` sin versión explícita devolvería 404
@@ -91,8 +91,8 @@ describe('SegipOccupationsSeedService', () => {
       // del alta de paciente.
       const [version] = rowsOf('ValueSetVersions');
       expect(version).toMatchObject({
-        id: segipOccupationVersionId(),
-        valueSetId: segipOccupationValueSetId(),
+        id: boOccupationVersionId(),
+        valueSetId: boOccupationValueSetId(),
         isDefault: true,
       });
     });
@@ -104,7 +104,7 @@ describe('SegipOccupationsSeedService', () => {
 
       const conceptos = rowsOf('CatalogConcepts');
       expect(conceptos[0]).toMatchObject({
-        code: segipOccupationConceptCode('ABOGADO'),
+        code: boOccupationConceptCode('ABOGADO'),
         display: 'Abogado / Abogada',
       });
       // La expansión filtra por `selectable`: una ocupación no seleccionable
@@ -115,7 +115,7 @@ describe('SegipOccupationsSeedService', () => {
       // una sola.
       expect(
         conceptos.every((fila) =>
-          String(fila.code).startsWith('occupation:segip:'),
+          String(fila.code).startsWith('occupation:bo:'),
         ),
       ).toBe(true);
     });
@@ -129,16 +129,16 @@ describe('SegipOccupationsSeedService', () => {
       // `ordinal`, que es lo que hace que la lista se recorra por la letra.
       const miembros = rowsOf('ValueSetMembers');
       expect(miembros.map((fila) => fila.ordinal)).toEqual(
-        SEGIP_OCCUPATIONS.map((_, indice) => indice),
+        BO_OCCUPATIONS.map((_, indice) => indice),
       );
       expect(miembros[0]).toMatchObject({
-        id: segipOccupationMemberId('ABOGADO'),
-        conceptId: segipOccupationConceptId('ABOGADO'),
+        id: boOccupationMemberId('ABOGADO'),
+        conceptId: boOccupationConceptId('ABOGADO'),
         included: true,
       });
       // «Otra ocupación» va al final a propósito: ofrecida entre medio se elige
       // por comodidad antes de haber buscado.
-      expect(SEGIP_OCCUPATIONS[OCUPACIONES - 1]?.code).toBe('OTRA');
+      expect(BO_OCCUPATIONS[OCUPACIONES - 1]?.code).toBe('OTRA');
     });
 
     it('cada ocupación guarda su rama de actividad', async () => {
@@ -149,8 +149,8 @@ describe('SegipOccupationsSeedService', () => {
       const propiedades = rowsOf('ConceptProperties');
       expect(propiedades).toHaveLength(OCUPACIONES);
       expect(propiedades[0]).toMatchObject({
-        conceptId: segipOccupationConceptId('ABOGADO'),
-        propertyCode: SEGIP_OCCUPATION_GROUP_PROPERTY_CODE,
+        conceptId: boOccupationConceptId('ABOGADO'),
+        propertyCode: BO_OCCUPATION_GROUP_PROPERTY_CODE,
         valueJson: 'Profesionales',
       });
     });
@@ -159,18 +159,18 @@ describe('SegipOccupationsSeedService', () => {
   describe('segunda corrida', () => {
     it('no escribe nada: los ids son deterministas y ya están', async () => {
       const todo = new Set<string>([
-        segipOccupationValueSetId(),
-        segipOccupationVersionId(),
-        ...SEGIP_OCCUPATIONS.flatMap((ocupacion) => [
-          segipOccupationConceptId(ocupacion.code),
-          segipOccupationMemberId(ocupacion.code),
+        boOccupationValueSetId(),
+        boOccupationVersionId(),
+        ...BO_OCCUPATIONS.flatMap((ocupacion) => [
+          boOccupationConceptId(ocupacion.code),
+          boOccupationMemberId(ocupacion.code),
         ]),
       ]);
       // Las designaciones y las propiedades tienen su propio derivador; se
       // agregan por su id real para que la pasada no cree ninguna.
-      for (const ocupacion of SEGIP_OCCUPATIONS) {
-        todo.add(segipOccupationDesignationId(ocupacion.code));
-        todo.add(segipOccupationGroupPropertyId(ocupacion.code));
+      for (const ocupacion of BO_OCCUPATIONS) {
+        todo.add(boOccupationDesignationId(ocupacion.code));
+        todo.add(boOccupationGroupPropertyId(ocupacion.code));
       }
 
       const { service, created } = build(todo);
@@ -193,12 +193,12 @@ describe('SegipOccupationsSeedService', () => {
     it('ningún código se declara dos veces', () => {
       // Dos entradas con el mismo código colapsarían en el mismo id
       // determinista y una taparía a la otra sin que nadie se entere.
-      const codigos = SEGIP_OCCUPATIONS.map((ocupacion) => ocupacion.code);
+      const codigos = BO_OCCUPATIONS.map((ocupacion) => ocupacion.code);
       expect(new Set(codigos).size).toBe(codigos.length);
     });
 
     it('ningún nombre se repite: dos opciones iguales en un desplegable no se pueden elegir', () => {
-      const nombres = SEGIP_OCCUPATIONS.map((ocupacion) => ocupacion.name);
+      const nombres = BO_OCCUPATIONS.map((ocupacion) => ocupacion.name);
       expect(new Set(nombres).size).toBe(nombres.length);
     });
   });

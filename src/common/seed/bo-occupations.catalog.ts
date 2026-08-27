@@ -7,62 +7,78 @@ import {
 } from './dynamic-enum-catalog';
 
 /**
- * Las ocupaciones del SEGIP, que es el catálogo que el alta de paciente pide
+ * Las ocupaciones de Bolivia, que es el catálogo que el alta de paciente pide
  * como «¿en qué trabajás?».
  *
  * ## Qué columna gobierna
  *
- * `profiles.persons.occupation_concept_id`, el mismo campo que
- * `RegisterPatientDto.occupationConceptId` declara como «miembro de
- * `VS_SEGIP_OCCUPATION`». El DTO lo declaraba desde el principio y el conjunto
- * no existía en ninguna base —el comentario lo dejaba anotado como backlog
- * T-02—, así que el formulario no tenía más remedio que mandar
- * `occupationFreeText`: cada persona escribía su oficio a mano y «Docente»,
- * «docente», «Profesor» y «Prof.» quedaban como cuatro ocupaciones distintas.
+ * `profiles.persons.occupation_concept_id`, que el modelo v4.1.8 declara junto
+ * a `occupation_free_text` —el catálogo gana cuando vienen los dos—.
+ *
+ * ## Por qué `VS_BO_OCCUPATION` y no `VS_SEGIP_OCCUPATION`
+ *
+ * Porque el modelo lo nombra así y porque **un catálogo tiene un solo dueño**
+ * (`SALUD/Arquitectura/materializacion-fisica-bd.md`). `RegisterPatientDto`
+ * decía `VS_SEGIP_OCCUPATION` desde el 21/08; la nota de entidad del vault lo
+ * fijó como `VS_BO_OCCUPATION` un día después, y es la que manda: sembrar los
+ * dos habría dejado dos conjuntos con las mismas ocupaciones y ninguna forma de
+ * saber cuál mira cada pantalla.
+ *
+ * ## Por qué la lista NO es la del SEGIP
+ *
+ * Porque **no existe en ninguna parte publicada**. Está investigado y escrito
+ * en el patch v4.1.4 del vault: `segip.gob.bo/images/documentos/MANUAL_PUESTOS.pdf`
+ * responde 404, y el reglamento del Registro Único de Identificación Personal
+ * (RA SEGIP/DGE/N° 632/2017) confirma que «Ocupación» es un campo *declarativo,
+ * no requiere respaldo* — o sea que el SEGIP no publica opciones. Es el mismo
+ * bloqueo que el backlog T-02 ya declaraba.
+ *
+ * Lo que el modelo eligió en su lugar es la **Clasificación de Ocupaciones de
+ * Bolivia (COB-2023)** del INE, nivel «OCUPACIÓN» (código de 5 dígitos,
+ * CIUO-08 adaptado): **606 entradas**. Esa extracción se hizo una vez con
+ * `pdfplumber` sobre el PDF del INE y quedó en un patch —
+ * `SQL/patches/2026-08-20_v414_catalogo-geografico-y-ocupaciones-bo.sql`— que
+ * **no está en este workspace**: la propuesta del vault quedó sin aplicar.
+ *
+ * ## Entonces qué es esta lista
+ *
+ * Las 64 ocupaciones que el alta necesita para dejar de guardar texto libre,
+ * escritas como la gente las reconoce. Es **provisional y está declarado que lo
+ * es**: cierra hoy el campo —que es lo que el equipo pidió— sin fingir que es
+ * la COB-2023.
+ *
+ * > **Al reemplazarla por la COB-2023 hay migración de datos.** El id de cada
+ * > concepto se deriva de su `code`, y los de la COB son numéricos de cinco
+ * > dígitos: al re-sembrar, ningún `occupation_concept_id` ya guardado apunta a
+ * > nada. Lo que corresponde entonces no es reemplazar en el sitio sino sembrar
+ * > la COB **al lado** —el vault ya contempla dos `code_system` conviviendo— y
+ * > mapear lo guardado antes de retirar estos códigos.
  *
  * ## Por qué no es una enumeración dinámica
  *
  * Mismo caso que la geografía boliviana (`bo-geography.catalog.ts`): la columna
  * es FK a `terminology.catalog_concepts` y **no** tiene `DynamicEnumBinding`
  * que la ate a un campo destino, así que el cliente resuelve el catálogo por su
- * **código de conjunto de valores** —`GET /terminology/value-sets?code=VS_SEGIP_OCCUPATION`
- * y después la expansión del que encuentre—. Lo que tiene que existir es el
- * conjunto con ese código, no un amarre columna → enumeración.
+ * **código de conjunto de valores** —`GET /terminology/value-sets?code=VS_BO_OCCUPATION`
+ * y después la expansión del que encuentre—.
  *
  * Se reutilizan sólo los derivadores deterministas de id de
  * `dynamic-enum-catalog.ts`, que son funciones puras `código -> uuid`.
- *
- * ## De dónde sale la lista
- *
- * Del campo «Ocupación» de la cédula de identidad boliviana: son los oficios
- * que el SEGIP imprime en el documento, agrupados por rama de actividad y
- * escritos en la forma en que la gente los reconoce. Es la lista de trabajo del
- * alta, no un volcado de la tabla oficial del SEGIP —que no es pública—: el día
- * que llegue el archivo oficial se reemplaza el contenido de
- * {@link SEGIP_OCCUPATIONS} y nada más, porque la clave estable de cada
- * concepto es su `code` y no su posición ni su nombre.
- *
- * ## Por qué el código es un identificador y no un número
- *
- * Porque no hay numeración oficial que copiar, y un número inventado se lee
- * como si la tuviera. `AGRICULTOR`, `DOCENTE`… se entienden en una consulta a
- * la base sin abrir este archivo, que es lo que un código tiene que conseguir.
  */
-
 /** Código interno del conjunto de valores, el que el cliente pide por `?code=`. */
-export const SEGIP_OCCUPATION_VALUE_SET = 'VS_SEGIP_OCCUPATION';
+export const BO_OCCUPATION_VALUE_SET = 'VS_BO_OCCUPATION';
 
 /** Nombre del conjunto; `ValueSets.name` no tiene idioma declarado y la plataforma es ES. */
-export const SEGIP_OCCUPATION_VALUE_SET_NAME = 'Ocupaciones (SEGIP)';
+export const BO_OCCUPATION_VALUE_SET_NAME = 'Ocupaciones de Bolivia';
 
 /** Única versión que recibe el conjunto. */
-export const SEGIP_OCCUPATION_VERSION = '1.0.0';
+export const BO_OCCUPATION_VERSION = '1.0.0';
 
 /** Código de la propiedad que guarda la rama de actividad de cada ocupación. */
-export const SEGIP_OCCUPATION_GROUP_PROPERTY_CODE = 'segip:occupation-group';
+export const BO_OCCUPATION_GROUP_PROPERTY_CODE = 'bo:occupation-group';
 
 /** Una ocupación: su código estable, su nombre y la rama a la que pertenece. */
-export interface SegipOccupationSeed {
+export interface BoOccupationSeed {
   /** Clave estable del concepto, en mayúsculas y sin acentos. */
   readonly code: string;
   /** Nombre en castellano, tal como se muestra en el desplegable. */
@@ -88,7 +104,7 @@ export interface SegipOccupationSeed {
  * `OTRA` va al final a propósito: es la salida para quien no se encuentra en la
  * lista, y ofrecida entre medio se elige por comodidad antes de haber buscado.
  */
-export const SEGIP_OCCUPATIONS: readonly SegipOccupationSeed[] = [
+export const BO_OCCUPATIONS: readonly BoOccupationSeed[] = [
   { code: 'ABOGADO', name: 'Abogado / Abogada', group: 'Profesionales' },
   {
     code: 'ADMINISTRADOR',
@@ -200,38 +216,35 @@ export const SEGIP_OCCUPATIONS: readonly SegipOccupationSeed[] = [
 ];
 
 /** Id determinista del conjunto de valores. */
-export const segipOccupationValueSetId = (): string =>
-  valueSetId(SEGIP_OCCUPATION_VALUE_SET);
+export const boOccupationValueSetId = (): string =>
+  valueSetId(BO_OCCUPATION_VALUE_SET);
 
 /** Id determinista de la versión única del conjunto. */
-export const segipOccupationVersionId = (): string =>
-  valueSetVersionId(SEGIP_OCCUPATION_VALUE_SET);
+export const boOccupationVersionId = (): string =>
+  valueSetVersionId(BO_OCCUPATION_VALUE_SET);
 
 /** URL canónica FHIR del conjunto. */
-export const segipOccupationCanonicalUrl = (): string =>
-  valueSetCanonicalUrl(SEGIP_OCCUPATION_VALUE_SET);
+export const boOccupationCanonicalUrl = (): string =>
+  valueSetCanonicalUrl(BO_OCCUPATION_VALUE_SET);
 
 /** Id determinista del concepto de una ocupación, a partir de su código. */
-export function segipOccupationConceptId(code: string): string {
-  return deterministicId(`occupation:segip:${code}`);
+export function boOccupationConceptId(code: string): string {
+  return deterministicId(`occupation:bo:${code}`);
 }
 
 /** Id determinista de la membresía `(conjunto, ocupación)`. */
-export function segipOccupationMemberId(code: string): string {
-  return valueSetMemberId(
-    SEGIP_OCCUPATION_VALUE_SET,
-    segipOccupationConceptId(code),
-  );
+export function boOccupationMemberId(code: string): string {
+  return valueSetMemberId(BO_OCCUPATION_VALUE_SET, boOccupationConceptId(code));
 }
 
 /** Id determinista de la designación preferida (ES) de una ocupación. */
-export function segipOccupationDesignationId(code: string): string {
-  return deterministicId(`occupation:segip:designation:${code}`);
+export function boOccupationDesignationId(code: string): string {
+  return deterministicId(`occupation:bo:designation:${code}`);
 }
 
 /** Id determinista de la propiedad que guarda la rama de actividad. */
-export function segipOccupationGroupPropertyId(code: string): string {
-  return deterministicId(`occupation:segip:property:group:${code}`);
+export function boOccupationGroupPropertyId(code: string): string {
+  return deterministicId(`occupation:bo:property:group:${code}`);
 }
 
 /**
@@ -242,6 +255,6 @@ export function segipOccupationGroupPropertyId(code: string): string {
  * todo el catálogo interno comparte una sola, así que un `MEDICO` a secas
  * chocaría con cualquier otro catálogo que use la misma palabra.
  */
-export function segipOccupationConceptCode(code: string): string {
-  return `occupation:segip:${code}`;
+export function boOccupationConceptCode(code: string): string {
+  return `occupation:bo:${code}`;
 }
