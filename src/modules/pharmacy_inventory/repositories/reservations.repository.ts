@@ -83,6 +83,14 @@ export interface CreateReservationLineData {
    */
   statusConceptId: string;
   /**
+   * Precio unitario congelado del renglón (lo que paga el paciente), v4.2.1.
+   */
+  unitPriceAmount?: string;
+  /**
+   * Moneda del precio congelado, copiada de la lista — jamás acuñada.
+   */
+  currencyConceptId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -184,6 +192,8 @@ export class ReservationsRepository {
         requestedQuantity: data.requestedQuantity,
         reservedQuantity: data.reservedQuantity,
         statusConceptId: data.statusConceptId,
+        unitPriceAmount: data.unitPriceAmount,
+        currencyConceptId: data.currencyConceptId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

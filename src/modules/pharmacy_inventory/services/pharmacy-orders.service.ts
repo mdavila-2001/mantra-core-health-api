@@ -23,6 +23,7 @@ import type {
   InventoryReservations,
   InventoryReservationLines,
   InventoryStockPositions,
+  PharmacyOrderSubstitutions,
 } from '../entities';
 import {
   PharmacyOrdersRepository,
@@ -31,17 +32,27 @@ import {
   LedgerRepository,
   InventoryReadRepository,
   DispensationsRepository,
+  PharmacyOrderSubstitutionsRepository,
 } from '../repositories';
 import { PharmacyReadRepository } from '../../pharmacy/repositories';
+import { isRetailList } from '../../pharmacy/services/pharmacy-read.service';
+import {
+  multiplyAmounts,
+  payableAmount,
+  sumAmounts,
+  winningPriceFor,
+} from './pharmacy-pricing';
 import { InventoryReservationsService } from './inventory-reservations.service';
 import { PharmacyOrderNotificationsService } from './pharmacy-order-notifications.service';
 import type {
+  ConfirmOrderAdjustmentDto,
   ConfirmPharmacyOrderDto,
   CreatePharmacyOrderDto,
   DispensePharmacyOrderDto,
   PharmacyOrderDto,
   PharmacyOrderLineDto,
   PharmacyOrderListResponseDto,
+  PharmacyOrderSubstitutionDto,
   RejectPharmacyOrderDto,
   InventoryConceptDto,
 } from '../dto';
@@ -73,6 +84,16 @@ export const PICKUP_CODE_LENGTH = 6;
  * casi imposibles; tres intentos están de sobra.
  */
 const PICKUP_CODE_MAX_ATTEMPTS = 3;
+
+/**
+ * El único parcial que respalda la unicidad del código de retiro, POR SEDE
+ * desde v4.2.2. El detector de colisiones compara contra ESTE nombre y nada
+ * más; un spec lo contrasta contra el catálogo ORM (`pharmacy_inventory.idx`)
+ * para que el próximo rename rompa un test en vez de matar el reintento en
+ * silencio — que es exactamente lo que el rename de v4.2.2 le hizo a v4.2.1.
+ */
+export const PICKUP_CODE_UNIQUE_INDEX =
+  'ux_inventory_reservations_pharmacy_site_pickup_code';
 
 /** Del código de modalidad del contrato (`RETIRO`…) al concepto persistible. */
 const DELIVERY_MODE_ID_BY_CODE: ReadonlyMap<string, string> = new Map([
@@ -120,16 +141,17 @@ export const ORDER_NON_TERMINAL_STATUS_IDS: readonly string[] =
  *
  * Espejo exacto de los helpers del front (`puedeConfirmarse`,
  * `puedeRechazarsePorFarmacia`, `puedePrepararse`): recepcionar lo enviado,
- * confirmar lo no revisado o en revisión, rechazar todo lo vivo salvo lo que
- * ya espera en el mostrador, y dejar listo lo confirmado o aceptado.
- * `ACEPTACION_PENDIENTE`/`ACEPTADO` figuran por completitud — hoy son
- * inalcanzables (la persistencia de propuestas de sustitución va en su propia
- * rama) pero la máquina no debe reescribirse cuando lleguen.
+ * confirmar lo no revisado o en revisión (a `CONFIRMADO`, o a
+ * `ACEPTACION_PENDIENTE` cuando la confirmación trae propuestas de genérico),
+ * rechazar todo lo vivo salvo lo que ya espera en el mostrador, y dejar listo
+ * lo confirmado o aceptado.
  *
- * Fuera de esta tabla viven las dos transiciones que E1 ya posee: la
+ * Fuera de esta tabla viven las transiciones que no son del mostrador: la
  * cancelación del titular (no-terminal → CANCELADO, con su 409 sobre
- * terminales, contrato ya publicado) y el vencimiento por reloj
- * (no-terminal → VENCIDO). Una transición que no figura acá responde 422.
+ * terminales), el vencimiento por reloj (no-terminal → VENCIDO) y la decisión
+ * del paciente sobre las propuestas (`ACEPTACION_PENDIENTE → ACEPTADO` al
+ * aceptar, `→ CONFIRMADO` al preferir el original — la guarda vive en sus
+ * casos de uso). Una transición que no figura acá responde 422.
  */
 export const ORDER_STAFF_TRANSITIONS: ReadonlyMap<
   string,
@@ -140,12 +162,17 @@ export const ORDER_STAFF_TRANSITIONS: ReadonlyMap<
     new Set([
       PINV.ORDER_EN_REVISION,
       PINV.ORDER_CONFIRMADO,
+      PINV.ORDER_ACEPTACION_PENDIENTE,
       PINV.ORDER_RECHAZADO,
     ]),
   ],
   [
     PINV.ORDER_EN_REVISION,
-    new Set([PINV.ORDER_CONFIRMADO, PINV.ORDER_RECHAZADO]),
+    new Set([
+      PINV.ORDER_CONFIRMADO,
+      PINV.ORDER_ACEPTACION_PENDIENTE,
+      PINV.ORDER_RECHAZADO,
+    ]),
   ],
   [
     PINV.ORDER_CONFIRMADO,
@@ -217,6 +244,14 @@ const orderNotFound = (id: string): ResourceNotFoundException =>
  */
 type OrderViewer = 'owner' | 'staff';
 
+/** Un precio congelado: lo que paga el paciente + la moneda de la lista. */
+interface FrozenPrice {
+  /** Importe unitario, texto exacto. */
+  readonly unitPriceAmount?: string;
+  /** Moneda copiada de la lista de precios. */
+  readonly currencyConceptId?: string;
+}
+
 /**
  * Pedido de farmacia del paciente (FAR-E1): creación con reserva parcial,
  * lectura del titular, cancelación con liberación de stock y vencimiento a las
@@ -260,6 +295,7 @@ export class PharmacyOrdersService {
    * @param ledgerRepo - Ledger append-only del inventario.
    * @param inventoryReadRepo - Ubicaciones y posiciones, en lote.
    * @param dispensationsRepo - Alta de dispensaciones (la entrega de FAR-E3).
+   * @param substitutionsRepo - Bitácora de propuestas de sustitución (v4.2.1).
    * @param pharmacyRepo - Visibilidad del directorio de farmacias (módulo 24).
    * @param reservationsService - Primitiva compartida de liberación (UC-25-05).
    * @param outbox - Publicación transaccional de eventos de dominio.
@@ -274,6 +310,7 @@ export class PharmacyOrdersService {
     private readonly ledgerRepo: LedgerRepository,
     private readonly inventoryReadRepo: InventoryReadRepository,
     private readonly dispensationsRepo: DispensationsRepository,
+    private readonly substitutionsRepo: PharmacyOrderSubstitutionsRepository,
     private readonly pharmacyRepo: PharmacyReadRepository,
     private readonly reservationsService: InventoryReservationsService,
     private readonly outbox: OutboxService,
@@ -355,6 +392,16 @@ export class PharmacyOrdersService {
         );
       }
 
+      // El precio se CONGELA acá, al crear (v4.2.1): lo que el paciente vio
+      // al pedir es lo que el comprobante va a decir, aunque la lista cambie
+      // mañana. La regla de elección es la MISMA del comparador (pricing).
+      const frozenPrices = await this.freezePricesFor(
+        tx,
+        pharmacy.id,
+        site.id,
+        productIds,
+      );
+
       const reservation = this.reservationsRepo.create(tx, {
         pharmacyId: pharmacy.id,
         pharmacySiteId: site.id,
@@ -373,6 +420,13 @@ export class PharmacyOrdersService {
         reservation,
         dto,
         actor,
+        frozenPrices,
+      );
+
+      // El total congelado de cabecera, desde las líneas recién selladas.
+      this.sealFrozenTotal(
+        reservation,
+        await this.ordersRepo.findLinesByReservationIds(tx, [reservation.id]),
       );
 
       await this.outbox.publishDomainEvent(tx, {
@@ -671,20 +725,25 @@ export class PharmacyOrdersService {
   }
 
   /**
-   * FAR-E2: confirmar el pedido **sin sustituciones** —
-   * `ENVIADO|EN_REVISION → CONFIRMADO`, sellando el `confirmed_at` que el
-   * modelo ya declara (la creación de E1 lo deja nulo a propósito).
+   * FAR-E2: confirmar el pedido — `ENVIADO|EN_REVISION → CONFIRMADO`, o
+   * `→ ACEPTACION_PENDIENTE` si la confirmación trae propuestas de genérico
+   * (v4.2.1). En ambos casos se sella `confirmed_at`: la farmacia revisó.
    *
    * Un ajuste `NO_DISPONIBLE` devuelve el stock de ESE renglón con la
    * primitiva compartida (`onlyLineIds`) y deja la línea como
    * `RES_LINE_OUT_OF_STOCK` con reservado 0 — la misma forma que tiene una
    * línea que nació sin stock; una línea ya sin stock no se libera dos veces.
    *
-   * Un ajuste `PROPONER_GENERICO` responde 422 tipificado SIN tocar nada:
-   * la propuesta de sustitución exige persistencia por línea que el modelo
-   * v4.0.10 no declara (bloqueador FAR-E1/E2), y `ACEPTACION_PENDIENTE` es
-   * inalcanzable hasta ese patch. No se recalculan ni fingen precios: el
-   * pedido no tiene precios persistidos.
+   * Un ajuste `PROPONER_GENERICO` persiste la propuesta como **bitácora** en
+   * `pharmacy_order_substitutions` (estado `PROPUESTA`, sin `decided_at`):
+   * el propuesto debe ser un producto activo de la MISMA farmacia y del MISMO
+   * medicamento del vademécum, con los precios de ambos congelados al proponer
+   * — la oferta que el paciente decide no puede moverse debajo suyo. El stock
+   * del original queda reservado mientras tanto: si el paciente prefiere el
+   * original, el pedido sigue tal cual.
+   *
+   * El total congelado de cabecera se RE-congela al final: las líneas que
+   * quedaron sin stock salen de la suma.
    */
   async confirm(
     id: string,
@@ -693,76 +752,89 @@ export class PharmacyOrdersService {
   ): Promise<PharmacyOrderDto> {
     const tenantId = requireTenantId();
     const adjustments = dto.adjustments ?? [];
+    this.assertOneAdjustmentPerProduct(adjustments);
+    const proposals = adjustments.filter(
+      (adjustment) => adjustment.decision === 'PROPONER_GENERICO',
+    );
 
     const { patientProfileId } = await this.em.transactional(async (tx) => {
       const order = await this.loadTenantOrderForUpdate(tx, id, tenantId);
-      // Antes que nada y antes de mutar: la capacidad bloqueada corta entera.
-      const proposed = adjustments.filter(
-        (adjustment) => adjustment.decision === 'PROPONER_GENERICO',
-      );
-      if (proposed.length > 0) {
-        throw new PreconditionFailedException(
-          'La propuesta de sustitución está bloqueada por modelo: no existe persistencia de propuestas por línea. El pedido no se modificó.',
-          {
-            orderId: id,
-            blockedByModel: 'substitutions',
-            productIds: proposed.map((adjustment) => adjustment.productId),
-          },
-        );
+      const target =
+        proposals.length > 0
+          ? PINV.ORDER_ACEPTACION_PENDIENTE
+          : PINV.ORDER_CONFIRMADO;
+      this.assertStaffTransition(order, target);
+
+      const lines = await this.ordersRepo.findLinesByReservationIds(tx, [
+        order.id,
+      ]);
+      const linesByProduct = new Map<string, InventoryReservationLines[]>();
+      for (const line of lines) {
+        const list = linesByProduct.get(line.pharmacyProductId) ?? [];
+        list.push(line);
+        linesByProduct.set(line.pharmacyProductId, list);
       }
-      this.assertStaffTransition(order, PINV.ORDER_CONFIRMADO);
 
       let adjusted = 0;
-      if (adjustments.length > 0) {
-        const lines = await this.ordersRepo.findLinesByReservationIds(tx, [
-          order.id,
-        ]);
-        const linesByProduct = new Map<string, InventoryReservationLines[]>();
-        for (const line of lines) {
-          const list = linesByProduct.get(line.pharmacyProductId) ?? [];
-          list.push(line);
-          linesByProduct.set(line.pharmacyProductId, list);
-        }
-
-        for (const adjustment of adjustments) {
-          const portions = linesByProduct.get(adjustment.productId);
-          if (!portions) {
-            throw new PreconditionFailedException(
-              'El ajuste refiere un producto que no está en el pedido',
-              { orderId: id, productId: adjustment.productId },
-            );
-          }
-          // Solo lo CONFIRMED tiene stock que devolver; una línea que nació
-          // SIN_STOCK ya está en la forma final y no genera asientos.
-          const confirmed = portions.filter(
-            (portion) => portion.statusConceptId === PINV.RES_LINE_CONFIRMED,
+      for (const adjustment of adjustments) {
+        const portions = linesByProduct.get(adjustment.productId);
+        if (!portions) {
+          throw new PreconditionFailedException(
+            'El ajuste refiere un producto que no está en el pedido',
+            { orderId: id, productId: adjustment.productId },
           );
-          if (confirmed.length > 0) {
-            await this.reservationsService.releaseConfirmedLines(
-              tx,
-              order,
-              actor,
-              { onlyLineIds: confirmed.map((portion) => portion.id) },
-            );
-            for (const portion of confirmed) {
-              portion.statusConceptId = PINV.RES_LINE_OUT_OF_STOCK;
-              portion.reservedQuantity = '0';
-              touch(portion, actor.id);
-            }
-            adjusted += 1;
+        }
+        if (adjustment.decision !== 'NO_DISPONIBLE') continue;
+        // Solo lo CONFIRMED tiene stock que devolver; una línea que nació
+        // SIN_STOCK ya está en la forma final y no genera asientos.
+        const confirmed = portions.filter(
+          (portion) => portion.statusConceptId === PINV.RES_LINE_CONFIRMED,
+        );
+        if (confirmed.length > 0) {
+          await this.reservationsService.releaseConfirmedLines(
+            tx,
+            order,
+            actor,
+            { onlyLineIds: confirmed.map((portion) => portion.id) },
+          );
+          for (const portion of confirmed) {
+            portion.statusConceptId = PINV.RES_LINE_OUT_OF_STOCK;
+            portion.reservedQuantity = '0';
+            touch(portion, actor.id);
           }
+          adjusted += 1;
         }
       }
 
-      order.reservationStatusConceptId = PINV.ORDER_CONFIRMADO;
+      if (proposals.length > 0) {
+        await this.persistProposals(
+          tx,
+          order,
+          proposals,
+          linesByProduct,
+          actor,
+        );
+      }
+
+      order.reservationStatusConceptId = target;
       order.confirmedAt = new Date();
       touch(order, actor.id);
+      this.sealFrozenTotal(order, lines);
 
       await this.publishStaffEvent(tx, tenantId, order, {
-        eventType: 'PharmacyOrderConfirmed',
-        statusCode: 'PINV_ORDER_CONFIRMADO',
+        eventType:
+          proposals.length > 0
+            ? 'PharmacyOrderSubstitutionsProposed'
+            : 'PharmacyOrderConfirmed',
+        statusCode:
+          proposals.length > 0
+            ? 'PINV_ORDER_ACEPTACION_PENDIENTE'
+            : 'PINV_ORDER_CONFIRMADO',
         actor,
-        extra: { unavailableLineCount: adjusted },
+        extra: {
+          unavailableLineCount: adjusted,
+          proposalCount: proposals.length,
+        },
       });
       await tx.flush();
 
@@ -771,6 +843,7 @@ export class PharmacyOrdersService {
           operation: 'pharmacy_inventory.order.confirm',
           orderId: order.id,
           unavailableLines: adjusted,
+          proposals: proposals.length,
         },
         'Pharmacy order confirmed',
       );
@@ -778,13 +851,195 @@ export class PharmacyOrdersService {
     });
 
     if (patientProfileId) {
-      await this.orderNotifications.orderConfirmed(
-        id,
-        patientProfileId,
-        actor.id,
-      );
+      if (proposals.length > 0) {
+        await this.orderNotifications.substitutionsProposed(
+          id,
+          patientProfileId,
+          proposals.length,
+          actor.id,
+        );
+      } else {
+        await this.orderNotifications.orderConfirmed(
+          id,
+          patientProfileId,
+          actor.id,
+        );
+      }
     }
     return this.readOrderForTenant(id, tenantId);
+  }
+
+  /**
+   * FAR-E2/I2: el paciente ACEPTA los genéricos propuestos —
+   * `ACEPTACION_PENDIENTE → ACEPTADO`, todo-o-nada (los dos botones del
+   * contrato del front deciden el pedido entero).
+   *
+   * Por cada propuesta en pie: el stock reservado del original se devuelve
+   * con la primitiva compartida, el propuesto se reserva con la MISMA
+   * contabilidad de la creación (sin stock suficiente la línea queda
+   * `SIN_STOCK`, dicha, no fingida), y la línea nueva nace con el precio que
+   * la propuesta CONGELÓ — el paciente aceptó esa oferta, no la lista de
+   * mañana. La propuesta sobrevive como historia: `ACEPTADA` + `decided_at`.
+   */
+  async acceptSubstitutions(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    const tenantId = requireTenantId();
+    const patientProfileId = this.requirePatientProfile(actor);
+
+    await this.em.transactional(async (tx) => {
+      const order = await this.loadOwnOrderForUpdate(
+        tx,
+        id,
+        tenantId,
+        patientProfileId,
+      );
+      const pending = await this.pendingProposalsOf(tx, order);
+
+      const lines = await this.ordersRepo.findLinesByReservationIds(tx, [
+        order.id,
+      ]);
+      const locations = await this.inventoryReadRepo.findActiveLocationsBySites(
+        tx,
+        [order.pharmacySiteId],
+      );
+      const positions = await this.inventoryReadRepo.findStockPositions(
+        tx,
+        locations.map((location) => location.id),
+        pending.map((proposal) => proposal.proposedPharmacyProductId),
+      );
+      const positionsByProduct = new Map<string, InventoryStockPositions[]>();
+      for (const position of positions) {
+        const list = positionsByProduct.get(position.pharmacyProductId) ?? [];
+        list.push(position);
+        positionsByProduct.set(position.pharmacyProductId, list);
+      }
+
+      for (const proposal of pending) {
+        const portions = lines.filter(
+          (line) =>
+            line.pharmacyProductId === proposal.originalPharmacyProductId,
+        );
+        const requestedTotal = portions.reduce(
+          (sum, portion) => sum + num(portion.requestedQuantity),
+          0,
+        );
+        const confirmed = portions.filter(
+          (portion) => portion.statusConceptId === PINV.RES_LINE_CONFIRMED,
+        );
+        if (confirmed.length > 0) {
+          await this.reservationsService.releaseConfirmedLines(
+            tx,
+            order,
+            actor,
+            { onlyLineIds: confirmed.map((portion) => portion.id) },
+          );
+        }
+        const candidates = (
+          positionsByProduct.get(proposal.proposedPharmacyProductId) ?? []
+        )
+          .filter((position) => num(position.availableQuantity) > 0)
+          .sort(comparePositions);
+        await this.reserveLineStock(
+          tx,
+          order,
+          candidates,
+          proposal.proposedPharmacyProductId,
+          requestedTotal,
+          actor,
+          {
+            unitPriceAmount: proposal.proposedUnitPriceAmount,
+            currencyConceptId: proposal.currencyConceptId,
+          },
+        );
+
+        proposal.statusConceptId = PINV.SUBSTITUTION_ACEPTADA;
+        proposal.decidedAt = new Date();
+        touch(proposal, actor.id);
+      }
+
+      order.reservationStatusConceptId = PINV.ORDER_ACEPTADO;
+      touch(order, actor.id);
+      // El total se RE-congela con las líneas nuevas: el comprobante tiene
+      // que decir lo que se va a cobrar tras el cambio.
+      this.sealFrozenTotal(
+        order,
+        await this.ordersRepo.findLinesByReservationIds(tx, [order.id]),
+      );
+
+      await this.publishStaffEvent(tx, tenantId, order, {
+        eventType: 'PharmacyOrderSubstitutionsAccepted',
+        statusCode: 'PINV_ORDER_ACEPTADO',
+        actor,
+        extra: { acceptedCount: pending.length },
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'pharmacy_inventory.order.accept_substitutions',
+          orderId: order.id,
+          accepted: pending.length,
+        },
+        'Pharmacy order substitutions accepted',
+      );
+    });
+
+    return this.readOwnOrder(id, tenantId, patientProfileId);
+  }
+
+  /**
+   * FAR-E2/I2: el paciente PREFIERE los originales —
+   * `ACEPTACION_PENDIENTE → CONFIRMADO`. Las líneas no se tocan (el stock del
+   * original siguió reservado todo el tiempo); las propuestas quedan como
+   * historia: `RECHAZADA` + `decided_at`. La farmacia ya había revisado el
+   * pedido, así que vuelve a la cola del mostrador como confirmado.
+   */
+  async preferOriginal(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    const tenantId = requireTenantId();
+    const patientProfileId = this.requirePatientProfile(actor);
+
+    await this.em.transactional(async (tx) => {
+      const order = await this.loadOwnOrderForUpdate(
+        tx,
+        id,
+        tenantId,
+        patientProfileId,
+      );
+      const pending = await this.pendingProposalsOf(tx, order);
+
+      for (const proposal of pending) {
+        proposal.statusConceptId = PINV.SUBSTITUTION_RECHAZADA;
+        proposal.decidedAt = new Date();
+        touch(proposal, actor.id);
+      }
+
+      order.reservationStatusConceptId = PINV.ORDER_CONFIRMADO;
+      touch(order, actor.id);
+
+      await this.publishStaffEvent(tx, tenantId, order, {
+        eventType: 'PharmacyOrderOriginalPreferred',
+        statusCode: 'PINV_ORDER_CONFIRMADO',
+        actor,
+        extra: { declinedCount: pending.length },
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'pharmacy_inventory.order.prefer_original',
+          orderId: order.id,
+          declined: pending.length,
+        },
+        'Pharmacy order substitutions declined',
+      );
+    });
+
+    return this.readOwnOrder(id, tenantId, patientProfileId);
   }
 
   /**
@@ -793,10 +1048,8 @@ export class PharmacyOrdersService {
    * guarda por línea y el lock de cabecera lo garantizan; un reintento ve el
    * pedido ya terminal y recibe 422 sin tocar el ledger).
    *
-   * **El motivo NO se persiste** (bloqueador de modelo): viaja en el evento de
-   * dominio y en la campana inmediata al paciente, y el `GET` del pedido no
-   * puede devolverlo. Cuando el modelo declare la columna, este método la
-   * sella y la limitación desaparece del contrato.
+   * El motivo **se persiste** en `rejection_reason_text` (v4.2.1) además de
+   * viajar en el evento y en la campana: el `GET` del pedido lo devuelve.
    */
   async reject(
     id: string,
@@ -817,6 +1070,7 @@ export class PharmacyOrdersService {
       this.assertStaffTransition(order, PINV.ORDER_RECHAZADO);
 
       order.reservationStatusConceptId = PINV.ORDER_RECHAZADO;
+      order.rejectionReasonText = reason;
       order.releasedAt = new Date();
       touch(order, actor.id);
       await this.reservationsService.releaseConfirmedLines(tx, order, actor);
@@ -863,9 +1117,10 @@ export class PharmacyOrdersService {
    * En la MISMA transacción se sella el código de retiro (solo si no lo tenía:
    * un reintento no rota el código de alguien ya avisado) y se renueva
    * `expires_at` +48 h — el código caduca con el pedido, sin ventana propia.
-   * La unicidad del código la garantiza el índice parcial
-   * `ux_inventory_reservations_pickup_code`: ante la colisión (rarísima) se
-   * reintenta la transacción entera con un código nuevo, hasta 3 veces.
+   * La unicidad del código la garantiza el índice parcial **por sede**
+   * `ux_inventory_reservations_pharmacy_site_pickup_code` (v4.2.2): ante la
+   * colisión (rarísima) se reintenta la transacción entera con un código
+   * nuevo, hasta 3 veces.
    */
   async ready(id: string, actor: AuthenticatedUser): Promise<PharmacyOrderDto> {
     const tenantId = requireTenantId();
@@ -976,7 +1231,7 @@ export class PharmacyOrdersService {
   ): Promise<PharmacyOrderDto> {
     const tenantId = requireTenantId();
 
-    await this.em.transactional(async (tx) => {
+    const outcome = await this.em.transactional(async (tx) => {
       const order = await this.loadTenantOrderForUpdate(tx, id, tenantId);
 
       // Idempotencia ANTES que el estado: el reintento de la entrega que dejó
@@ -987,7 +1242,7 @@ export class PharmacyOrdersService {
           order.pharmacyId,
           dto.idempotencyKey,
         );
-        if (existing?.inventoryReservationId === order.id) return;
+        if (existing?.inventoryReservationId === order.id) return undefined;
         if (existing) {
           throw new ConflictException(
             'La clave de idempotencia ya se usó para otra entrega',
@@ -1161,7 +1416,25 @@ export class PharmacyOrdersService {
         },
         'Pharmacy order dispensed at the counter',
       );
+      return { complete, medicationRequestId: order.medicationRequestId };
     });
+
+    // El cierre del bucle (FAR-E3): con el pedido RETIRADO, quien recetó se
+    // entera. Post-commit, como toda campana; sin receta no hay a quién.
+    if (outcome?.complete && outcome.medicationRequestId) {
+      const prescriberProfileId = await this.ordersRepo.findPrescriberProfileId(
+        this.em.fork(),
+        outcome.medicationRequestId,
+      );
+      if (prescriberProfileId) {
+        await this.orderNotifications.dispensedToPrescriber(
+          id,
+          outcome.medicationRequestId,
+          prescriberProfileId,
+          actor.id,
+        );
+      }
+    }
 
     return this.readOrderForTenant(id, tenantId);
   }
@@ -1231,14 +1504,20 @@ export class PharmacyOrdersService {
     actor: AuthenticatedUser,
     ids?: readonly string[],
   ): Promise<{ expiredCount: number }> {
-    return this.em.transactional(async (tx) => {
+    const expired = await this.em.transactional(async (tx) => {
       const due = await this.ordersRepo.findDueOrdersForUpdate(
         tx,
         ORDER_NON_TERMINAL_STATUS_IDS,
         new Date(),
         ids,
       );
-      if (due.length === 0) return { expiredCount: 0 };
+      if (due.length === 0) {
+        return [] as {
+          orderId: string;
+          patientProfileId?: string;
+          medicationRequestId?: string;
+        }[];
+      }
 
       // El worker corre sin tenant HTTP: el tenant del evento es el de la
       // farmacia del pedido.
@@ -1278,8 +1557,42 @@ export class PharmacyOrdersService {
         },
         'Pharmacy orders expired',
       );
-      return { expiredCount: due.length };
+      return due.map((order) => ({
+        orderId: order.id,
+        patientProfileId: order.patientProfileId,
+        medicationRequestId: order.medicationRequestId,
+      }));
     });
+
+    // «Vence sin retiro → aviso» (FAR-E3), post-commit como toda campana: al
+    // paciente, y **también al prescriptor** cuando hay receta — la regla del
+    // bucle abierto («no retiró» es dato clínico). El `debounceKey` por
+    // estado hace que el lazy y el worker no dupliquen ninguno de los dos.
+    for (const notice of expired) {
+      if (notice.patientProfileId) {
+        await this.orderNotifications.orderExpired(
+          notice.orderId,
+          notice.patientProfileId,
+          actor.id,
+        );
+      }
+      if (notice.medicationRequestId) {
+        const prescriberProfileId =
+          await this.ordersRepo.findPrescriberProfileId(
+            this.em.fork(),
+            notice.medicationRequestId,
+          );
+        if (prescriberProfileId) {
+          await this.orderNotifications.expiredToPrescriber(
+            notice.orderId,
+            notice.medicationRequestId,
+            prescriberProfileId,
+            actor.id,
+          );
+        }
+      }
+    }
+    return { expiredCount: expired.length };
   }
 
   // --- Apoyo ---
@@ -1320,6 +1633,266 @@ export class PharmacyOrdersService {
     );
     if (!pharmacy) throw orderNotFound(id);
     return order;
+  }
+
+  /**
+   * El pedido bajo lock, verificado contra tenant Y titularidad: la decisión
+   * sobre las propuestas es del dueño. Inexistente, ajeno o de otro tenant:
+   * el mismo 404 (el patrón de `cancel`).
+   */
+  private async loadOwnOrderForUpdate(
+    tx: EntityManager,
+    id: string,
+    tenantId: string,
+    patientProfileId: string,
+  ): Promise<InventoryReservations> {
+    const order = await this.ordersRepo.findOrderByIdForUpdate(
+      tx,
+      id,
+      ORDER_STATUS_IDS,
+    );
+    if (!order || order.patientProfileId !== patientProfileId) {
+      throw orderNotFound(id);
+    }
+    const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
+      tx,
+      tenantId,
+      [order.pharmacyId],
+    );
+    if (!pharmacy) throw orderNotFound(id);
+    return order;
+  }
+
+  /**
+   * Las propuestas EN PIE del pedido, con la guarda de estado: la decisión
+   * solo existe en `ACEPTACION_PENDIENTE`, y sin propuestas vivas no hay nada
+   * que decidir — ambos casos responden 422 sin efectos.
+   */
+  private async pendingProposalsOf(
+    tx: EntityManager,
+    order: InventoryReservations,
+  ): Promise<PharmacyOrderSubstitutions[]> {
+    if (order.reservationStatusConceptId !== PINV.ORDER_ACEPTACION_PENDIENTE) {
+      throw new PreconditionFailedException(
+        'El pedido no tiene una decisión de sustituciones pendiente',
+        {
+          orderId: order.id,
+          from: moduleConcept(order.reservationStatusConceptId).code,
+        },
+      );
+    }
+    const pending = (
+      await this.substitutionsRepo.findByReservationIds(tx, [order.id])
+    ).filter(
+      (proposal) => proposal.statusConceptId === PINV.SUBSTITUTION_PROPUESTA,
+    );
+    if (pending.length === 0) {
+      throw new PreconditionFailedException(
+        'El pedido no tiene propuestas de sustitución en pie',
+        { orderId: order.id },
+      );
+    }
+    return pending;
+  }
+
+  /** Dos ajustes sobre el mismo renglón se contradicen: uno por producto. */
+  private assertOneAdjustmentPerProduct(
+    adjustments: readonly ConfirmOrderAdjustmentDto[],
+  ): void {
+    const seen = new Set<string>();
+    const repeated = new Set<string>();
+    for (const adjustment of adjustments) {
+      if (seen.has(adjustment.productId)) repeated.add(adjustment.productId);
+      seen.add(adjustment.productId);
+    }
+    if (repeated.size > 0) {
+      throw new PreconditionFailedException(
+        'Hay más de un ajuste para el mismo renglón',
+        { productIds: [...repeated] },
+      );
+    }
+  }
+
+  /**
+   * Persiste las propuestas de genérico de una confirmación (v4.2.1).
+   *
+   * El propuesto debe ser un producto activo de la MISMA farmacia, distinto
+   * del original y del MISMO medicamento del vademécum — «genérico» acá es
+   * exactamente eso, no un texto libre. Los precios de ambos se CONGELAN al
+   * proponer con la regla del comparador: la oferta que el paciente va a
+   * decidir no puede moverse debajo suyo. La fila ancla en la primera porción
+   * del renglón — la identidad de negocio es `(pedido, producto original)`;
+   * las porciones son contabilidad.
+   */
+  private async persistProposals(
+    tx: EntityManager,
+    order: InventoryReservations,
+    proposals: readonly ConfirmOrderAdjustmentDto[],
+    linesByProduct: ReadonlyMap<string, InventoryReservationLines[]>,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const withoutProposed = proposals.filter(
+      (proposal) => !proposal.proposedProductId,
+    );
+    if (withoutProposed.length > 0) {
+      throw new PreconditionFailedException(
+        'PROPONER_GENERICO exige el producto propuesto (proposedProductId)',
+        {
+          orderId: order.id,
+          productIds: withoutProposed.map((proposal) => proposal.productId),
+        },
+      );
+    }
+
+    const originalIds = proposals.map((proposal) => proposal.productId);
+    const proposedIds = proposals.map(
+      (proposal) => proposal.proposedProductId as string,
+    );
+    const products = await this.ordersRepo.findProductsByIds(tx, [
+      ...new Set([...originalIds, ...proposedIds]),
+    ]);
+    const productById = new Map(
+      products.map((product) => [product.id, product]),
+    );
+
+    const frozen = await this.freezePricesFor(
+      tx,
+      order.pharmacyId,
+      order.pharmacySiteId,
+      [...new Set([...originalIds, ...proposedIds])],
+    );
+
+    for (const proposal of proposals) {
+      const proposedId = proposal.proposedProductId as string;
+      const original = productById.get(proposal.productId);
+      const proposed = productById.get(proposedId);
+      if (
+        !proposed ||
+        proposed.pharmacyId !== order.pharmacyId ||
+        proposedId === proposal.productId
+      ) {
+        throw new PreconditionFailedException(
+          'El producto propuesto no está disponible en esta farmacia',
+          { orderId: order.id, proposedProductId: proposedId },
+        );
+      }
+      // Mismo medicamento del vademécum, y conocido en ambos: sin concepto no
+      // puede demostrarse la equivalencia, y una sustitución indemostrable no
+      // se propone.
+      if (
+        !original?.medicationConceptId ||
+        original.medicationConceptId !== proposed.medicationConceptId
+      ) {
+        throw new PreconditionFailedException(
+          'El producto propuesto no es del mismo medicamento que el original',
+          {
+            orderId: order.id,
+            productId: proposal.productId,
+            proposedProductId: proposedId,
+          },
+        );
+      }
+
+      const portions = linesByProduct.get(proposal.productId);
+      if (!portions || portions.length === 0) {
+        throw new PreconditionFailedException(
+          'El ajuste refiere un producto que no está en el pedido',
+          { orderId: order.id, productId: proposal.productId },
+        );
+      }
+      const anchor = portions[0];
+      const proposedPrice = frozen.get(proposedId);
+      this.substitutionsRepo.create(tx, {
+        inventoryReservationId: order.id,
+        inventoryReservationLineId: anchor.id,
+        originalPharmacyProductId: proposal.productId,
+        proposedPharmacyProductId: proposedId,
+        // El original congelado al crear el pedido manda; si aquel pedido es
+        // anterior al congelamiento, se congela recién ahora.
+        originalUnitPriceAmount:
+          anchor.unitPriceAmount ??
+          frozen.get(proposal.productId)?.unitPriceAmount,
+        proposedUnitPriceAmount: proposedPrice?.unitPriceAmount,
+        currencyConceptId:
+          proposedPrice?.currencyConceptId ?? anchor.currencyConceptId,
+        statusConceptId: PINV.SUBSTITUTION_PROPUESTA,
+        actorUserId: actor.id,
+      });
+    }
+  }
+
+  /**
+   * Los precios a CONGELAR de un conjunto de productos en una sede: el
+   * ganador del comparador (lista de la sede sobre la general; a igualdad, el
+   * más barato), como «lo que paga el paciente» + la moneda **copiada** de la
+   * lista — el módulo arrastra cuatro juegos de conceptos de moneda sin
+   * unificar y la lectura los compara por `code`: acuñar uno propio haría que
+   * el total congelado y el recalculado no se reconocieran.
+   */
+  private async freezePricesFor(
+    tx: EntityManager,
+    pharmacyId: string,
+    siteId: string,
+    productIds: readonly string[],
+  ): Promise<ReadonlyMap<string, FrozenPrice>> {
+    const now = new Date();
+    const priceLists = (
+      await this.pharmacyRepo.findCurrentPublicPriceLists(tx, [pharmacyId], now)
+    ).filter(isRetailList);
+    const prices = await this.pharmacyRepo.findCurrentPrices(
+      tx,
+      priceLists.map((list) => list.id),
+      productIds,
+      now,
+    );
+    const listById = new Map(priceLists.map((list) => [list.id, list]));
+
+    const frozen = new Map<string, FrozenPrice>();
+    for (const productId of productIds) {
+      const winner = winningPriceFor(productId, siteId, prices, listById);
+      if (winner) {
+        frozen.set(productId, {
+          unitPriceAmount: payableAmount(winner.price),
+          currencyConceptId: winner.list.currencyConceptId,
+        });
+      }
+    }
+    return frozen;
+  }
+
+  /**
+   * RE-congela el total de cabecera desde las líneas en pie (CONFIRMED):
+   * Σ (precio congelado × reservado). Si a alguna le falta precio o las
+   * monedas difieren, el total es NULL — una suma con huecos o que mezcla
+   * monedas afirma un costo que nadie publicó. Nunca se recalcula en un GET.
+   */
+  private sealFrozenTotal(
+    order: InventoryReservations,
+    lines: readonly InventoryReservationLines[],
+  ): void {
+    const alive = lines.filter(
+      (line) => line.statusConceptId === PINV.RES_LINE_CONFIRMED,
+    );
+    const priceable =
+      alive.length > 0 &&
+      alive.every(
+        (line) =>
+          line.unitPriceAmount !== undefined &&
+          line.unitPriceAmount !== null &&
+          line.currencyConceptId,
+      );
+    const currencies = new Set(alive.map((line) => line.currencyConceptId));
+    if (!priceable || currencies.size > 1) {
+      order.totalAmount = undefined;
+      order.currencyConceptId = undefined;
+      return;
+    }
+    order.totalAmount = sumAmounts(
+      alive.map((line) =>
+        multiplyAmounts(line.unitPriceAmount as string, line.reservedQuantity),
+      ),
+    );
+    order.currencyConceptId = alive[0].currencyConceptId;
   }
 
   /**
@@ -1447,6 +2020,7 @@ export class PharmacyOrdersService {
     reservation: InventoryReservations,
     dto: CreatePharmacyOrderDto,
     actor: AuthenticatedUser,
+    frozenPrices: ReadonlyMap<string, FrozenPrice>,
   ): Promise<number> {
     const locations = await this.inventoryReadRepo.findActiveLocationsBySites(
       tx,
@@ -1469,88 +2043,117 @@ export class PharmacyOrdersService {
       const candidates = (byProduct.get(line.productId) ?? [])
         .filter((position) => num(position.availableQuantity) > 0)
         .sort(comparePositions);
-
-      // Fase 1: bloquear las candidatas y releer su disponible ya con lock.
-      const locked: InventoryStockPositions[] = [];
-      for (const candidate of candidates) {
-        const position = await this.stockRepo.findByKeyForUpdate(tx, {
-          inventoryLocationId: candidate.inventoryLocationId,
-          pharmacyProductId: candidate.pharmacyProductId,
-          inventoryLotId: candidate.inventoryLotId,
-        });
-        if (position && num(position.availableQuantity) > 0) {
-          locked.push(position);
-        }
-      }
-
-      // Fase 2: plan de porciones en avaricia sobre los valores bloqueados.
-      const portions: { position: InventoryStockPositions; take: number }[] =
-        [];
-      let remaining = line.quantity;
-      for (const position of locked) {
-        if (remaining <= 0) break;
-        const take = Math.min(remaining, num(position.availableQuantity));
-        portions.push({ position, take });
-        remaining -= take;
-      }
-
-      if (remaining > 0) {
-        // Sin stock suficiente: la línea queda dicha, el pedido sigue en pie.
-        this.reservationsRepo.createLine(tx, {
-          inventoryReservationId: reservation.id,
-          pharmacyProductId: line.productId,
-          requestedQuantity: String(line.quantity),
-          reservedQuantity: '0',
-          statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
-          actorUserId: actor.id,
-        });
-        outOfStock += 1;
-        continue;
-      }
-
-      // Fase 3: escribir porciones con la contabilidad de UC-25-04.
-      for (const { position, take } of portions) {
-        this.reservationsRepo.createLine(tx, {
-          inventoryReservationId: reservation.id,
-          pharmacyProductId: line.productId,
-          inventoryLotId: position.inventoryLotId,
-          inventoryLocationId: position.inventoryLocationId,
-          requestedQuantity: String(take),
-          reservedQuantity: String(take),
-          statusConceptId: PINV.RES_LINE_CONFIRMED,
-          actorUserId: actor.id,
-        });
-        const sequence = await this.ledgerRepo.nextSequence(
-          tx,
-          reservation.pharmacyId,
-        );
-        this.ledgerRepo.append(tx, {
-          pharmacyId: reservation.pharmacyId,
-          pharmacySiteId: reservation.pharmacySiteId,
-          inventoryLocationId: position.inventoryLocationId,
-          pharmacyProductId: line.productId,
-          inventoryLotId: position.inventoryLotId,
-          ledgerSequence: sequence,
-          movementTypeConceptId: PINV.MV_RESERVE,
-          quantityDelta: '0',
-          reservationDelta: String(take),
-          sourceId: reservation.id,
-          recordedByUserId: actor.id,
-        });
-        position.reservedQuantity = String(
-          num(position.reservedQuantity) + take,
-        );
-        position.availableQuantity = recompute(
-          position.onHandQuantity,
-          position.reservedQuantity,
-          position.quarantineQuantity,
-        );
-        position.lastLedgerSequence = sequence;
-        position.updatedAt = new Date();
-      }
+      const reserved = await this.reserveLineStock(
+        tx,
+        reservation,
+        candidates,
+        line.productId,
+        line.quantity,
+        actor,
+        frozenPrices.get(line.productId),
+      );
+      if (!reserved) outOfStock += 1;
     }
     await tx.flush();
     return outOfStock;
+  }
+
+  /**
+   * Reserva UN renglón con la contabilidad de UC-25-04, variante parcial: se
+   * cubre entero o queda `SIN_STOCK` (dicho, sin asientos). La comparten la
+   * creación del pedido y la aceptación de un genérico — dos entradas, UNA
+   * contabilidad. El precio congelado del renglón viaja a cada porción.
+   *
+   * @returns `true` si el renglón quedó reservado entero.
+   */
+  private async reserveLineStock(
+    tx: EntityManager,
+    reservation: InventoryReservations,
+    candidates: readonly InventoryStockPositions[],
+    productId: string,
+    quantity: number,
+    actor: AuthenticatedUser,
+    frozen?: FrozenPrice,
+  ): Promise<boolean> {
+    // Fase 1: bloquear las candidatas y releer su disponible ya con lock.
+    const locked: InventoryStockPositions[] = [];
+    for (const candidate of candidates) {
+      const position = await this.stockRepo.findByKeyForUpdate(tx, {
+        inventoryLocationId: candidate.inventoryLocationId,
+        pharmacyProductId: candidate.pharmacyProductId,
+        inventoryLotId: candidate.inventoryLotId,
+      });
+      if (position && num(position.availableQuantity) > 0) {
+        locked.push(position);
+      }
+    }
+
+    // Fase 2: plan de porciones en avaricia sobre los valores bloqueados.
+    const portions: { position: InventoryStockPositions; take: number }[] = [];
+    let remaining = quantity;
+    for (const position of locked) {
+      if (remaining <= 0) break;
+      const take = Math.min(remaining, num(position.availableQuantity));
+      portions.push({ position, take });
+      remaining -= take;
+    }
+
+    if (remaining > 0) {
+      // Sin stock suficiente: la línea queda dicha, el pedido sigue en pie.
+      this.reservationsRepo.createLine(tx, {
+        inventoryReservationId: reservation.id,
+        pharmacyProductId: productId,
+        requestedQuantity: String(quantity),
+        reservedQuantity: '0',
+        statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
+        unitPriceAmount: frozen?.unitPriceAmount,
+        currencyConceptId: frozen?.currencyConceptId,
+        actorUserId: actor.id,
+      });
+      return false;
+    }
+
+    // Fase 3: escribir porciones con la contabilidad de UC-25-04.
+    for (const { position, take } of portions) {
+      this.reservationsRepo.createLine(tx, {
+        inventoryReservationId: reservation.id,
+        pharmacyProductId: productId,
+        inventoryLotId: position.inventoryLotId,
+        inventoryLocationId: position.inventoryLocationId,
+        requestedQuantity: String(take),
+        reservedQuantity: String(take),
+        statusConceptId: PINV.RES_LINE_CONFIRMED,
+        unitPriceAmount: frozen?.unitPriceAmount,
+        currencyConceptId: frozen?.currencyConceptId,
+        actorUserId: actor.id,
+      });
+      const sequence = await this.ledgerRepo.nextSequence(
+        tx,
+        reservation.pharmacyId,
+      );
+      this.ledgerRepo.append(tx, {
+        pharmacyId: reservation.pharmacyId,
+        pharmacySiteId: reservation.pharmacySiteId,
+        inventoryLocationId: position.inventoryLocationId,
+        pharmacyProductId: productId,
+        inventoryLotId: position.inventoryLotId,
+        ledgerSequence: sequence,
+        movementTypeConceptId: PINV.MV_RESERVE,
+        quantityDelta: '0',
+        reservationDelta: String(take),
+        sourceId: reservation.id,
+        recordedByUserId: actor.id,
+      });
+      position.reservedQuantity = String(num(position.reservedQuantity) + take);
+      position.availableQuantity = recompute(
+        position.onHandQuantity,
+        position.reservedQuantity,
+        position.quarantineQuantity,
+      );
+      position.lastLedgerSequence = sequence;
+      position.updatedAt = new Date();
+    }
+    return true;
   }
 
   /** La lectura del propio pedido tras crear o cancelar (el titular siempre ve). */
@@ -1604,14 +2207,34 @@ export class PharmacyOrdersService {
         ),
       ]),
     ]);
+    // La historia de sustituciones viaja con el pedido; sus productos entran
+    // al mismo lote de nombres.
+    const substitutions = await this.substitutionsRepo.findByReservationIds(
+      em,
+      orders.map((order) => order.id),
+    );
     const products = await this.ordersRepo.findProductsByIds(em, [
-      ...new Set(lines.map((line) => line.pharmacyProductId)),
+      ...new Set([
+        ...lines.map((line) => line.pharmacyProductId),
+        ...substitutions.flatMap((substitution) => [
+          substitution.originalPharmacyProductId,
+          substitution.proposedPharmacyProductId,
+        ]),
+      ]),
     ]);
+    // Un solo lote de terminología: medicamentos del vademécum + las monedas
+    // congeladas (líneas, cabeceras y ofertas) — son conceptos globales, no
+    // del módulo, así que se resuelven contra la base.
     const concepts = await this.ordersRepo.findConceptsByIds(em, [
       ...new Set(
-        products
-          .map((product) => product.medicationConceptId)
-          .filter((id): id is string => Boolean(id)),
+        [
+          ...products.map((product) => product.medicationConceptId),
+          ...lines.map((line) => line.currencyConceptId),
+          ...orders.map((order) => order.currencyConceptId),
+          ...substitutions.map(
+            (substitution) => substitution.currencyConceptId,
+          ),
+        ].filter((id): id is string => Boolean(id)),
       ),
     ]);
 
@@ -1620,6 +2243,16 @@ export class PharmacyOrdersService {
       const list = linesByOrder.get(line.inventoryReservationId) ?? [];
       list.push(line);
       linesByOrder.set(line.inventoryReservationId, list);
+    }
+    const substitutionsByOrder = new Map<
+      string,
+      PharmacyOrderSubstitutions[]
+    >();
+    for (const substitution of substitutions) {
+      const list =
+        substitutionsByOrder.get(substitution.inventoryReservationId) ?? [];
+      list.push(substitution);
+      substitutionsByOrder.set(substitution.inventoryReservationId, list);
     }
     const siteById = new Map(sites.map((site) => [site.id, site]));
     const pharmacyById = new Map(
@@ -1643,6 +2276,7 @@ export class PharmacyOrdersService {
           pharmacy,
           site,
           linesByOrder.get(order.id) ?? [],
+          substitutionsByOrder.get(order.id) ?? [],
           productById,
           conceptById,
           order.patientProfileId
@@ -1678,7 +2312,10 @@ function generatePickupCode(): string {
  * ¿El flush murió por el único parcial del código de retiro? Solo esa
  * violación se reintenta con un código nuevo; cualquier otra unicidad
  * (idempotencia, por ejemplo) es un error real y sube tal cual. El nombre de
- * la constraint se busca en la cadena de causas, como hace el filtro global.
+ * la constraint se busca en la cadena de causas, como hace el filtro global,
+ * y se compara contra {@link PICKUP_CODE_UNIQUE_INDEX} y NADA más — el spec
+ * que lo ata al catálogo ORM es lo que impide que un rename futuro deje el
+ * reintento muerto en silencio.
  */
 function isPickupCodeCollision(error: unknown): boolean {
   if (!(error instanceof UniqueConstraintViolationException)) return false;
@@ -1694,12 +2331,12 @@ function isPickupCodeCollision(error: unknown): boolean {
       /** Causa envuelta (convención del driver). */
       previous?: unknown;
     };
-    if (candidate.constraint === 'ux_inventory_reservations_pickup_code') {
+    if (candidate.constraint === PICKUP_CODE_UNIQUE_INDEX) {
       return true;
     }
     if (
       typeof candidate.message === 'string' &&
-      candidate.message.includes('ux_inventory_reservations_pickup_code')
+      candidate.message.includes(PICKUP_CODE_UNIQUE_INDEX)
     ) {
       return true;
     }
@@ -1746,6 +2383,7 @@ function toOrderDto(
   pharmacy: Pharmacies,
   site: PharmacySites | undefined,
   lines: readonly InventoryReservationLines[],
+  substitutions: readonly PharmacyOrderSubstitutions[],
   productById: ReadonlyMap<string, PharmacyProducts>,
   conceptById: ReadonlyMap<string, CatalogConcepts>,
   patientName: string | null,
@@ -1781,6 +2419,9 @@ function toOrderDto(
           (sum, portion) => sum + num(portion.fulfilledQuantity),
           0,
         ),
+        // El precio congelado del renglón: las porciones comparten valor.
+        unitPriceAmount: portions[0].unitPriceAmount ?? null,
+        currency: optionalConcept(conceptById, portions[0].currencyConceptId),
         status: moduleConcept(portions[0].statusConceptId),
       };
     })
@@ -1806,6 +2447,43 @@ function toOrderDto(
       : null,
     // La prueba de posesión es del titular: el staff la sirve null siempre.
     pickupCode: viewer === 'owner' ? (order.pickupCode ?? null) : null,
+    totalAmount: order.totalAmount ?? null,
+    currency: optionalConcept(conceptById, order.currencyConceptId),
+    rejectionReasonText: order.rejectionReasonText ?? null,
+    substitutions: substitutions.map((substitution) =>
+      toSubstitutionDto(substitution, productById, conceptById),
+    ),
     lines: lineDtos,
+  };
+}
+
+/** El nombre con que un producto se pinta: marca, o genérico, o el código. */
+function productName(product: PharmacyProducts | undefined): string {
+  return (
+    product?.brandName ?? product?.genericName ?? product?.productCode ?? ''
+  );
+}
+
+/** Una propuesta de sustitución, en palabras. */
+function toSubstitutionDto(
+  substitution: PharmacyOrderSubstitutions,
+  productById: ReadonlyMap<string, PharmacyProducts>,
+  conceptById: ReadonlyMap<string, CatalogConcepts>,
+): PharmacyOrderSubstitutionDto {
+  return {
+    id: substitution.id,
+    originalProductId: substitution.originalPharmacyProductId,
+    originalName: productName(
+      productById.get(substitution.originalPharmacyProductId),
+    ),
+    originalUnitPriceAmount: substitution.originalUnitPriceAmount ?? null,
+    proposedProductId: substitution.proposedPharmacyProductId,
+    proposedName: productName(
+      productById.get(substitution.proposedPharmacyProductId),
+    ),
+    proposedUnitPriceAmount: substitution.proposedUnitPriceAmount ?? null,
+    currency: optionalConcept(conceptById, substitution.currencyConceptId),
+    status: moduleConcept(substitution.statusConceptId),
+    decidedAt: substitution.decidedAt?.toISOString() ?? null,
   };
 }

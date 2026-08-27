@@ -12,6 +12,7 @@ import type {
 } from '../../pharmacy/entities';
 import { PharmacyReadRepository } from '../../pharmacy/repositories';
 import { isRetailList } from '../../pharmacy/services/pharmacy-read.service';
+import { sumAmounts, winningPriceFor } from './pharmacy-pricing';
 import type { InventoryStockPositions } from '../entities';
 import type {
   AvailabilityPriceDto,
@@ -444,28 +445,9 @@ function currentPriceFor(
   listById: ReadonlyMap<string, PharmacyPriceLists>,
   conceptById: ReadonlyMap<string, CatalogConcepts>,
 ): AvailabilityPriceDto | null {
-  const candidates = prices
-    .filter((price) => price.pharmacyProductId === productId)
-    .map((price) => ({ price, list: listById.get(price.pharmacyPriceListId) }))
-    .filter(
-      (
-        candidate,
-      ): candidate is {
-        price: PharmacyProductPrices;
-        list: PharmacyPriceLists;
-      } =>
-        candidate.list !== undefined &&
-        (!candidate.list.pharmacySiteId ||
-          candidate.list.pharmacySiteId === siteId),
-    )
-    .sort((a, b) => {
-      const aSiteSpecific = a.list.pharmacySiteId ? 0 : 1;
-      const bSiteSpecific = b.list.pharmacySiteId ? 0 : 1;
-      if (aSiteSpecific !== bSiteSpecific) return aSiteSpecific - bSiteSpecific;
-      return payable(a.price) - payable(b.price);
-    });
-
-  const winner = candidates[0];
+  // La elección vive en el módulo compartido: el pedido congela con la MISMA
+  // regla con la que este comparador muestra (cierre de farmacia, v4.2.1).
+  const winner = winningPriceFor(productId, siteId, prices, listById);
   if (!winner) return null;
   return {
     unitAmount: winner.price.unitAmount,
@@ -473,11 +455,6 @@ function currentPriceFor(
     currency: optionalConcept(conceptById, winner.list.currencyConceptId),
     priceListCode: winner.list.code,
   };
-}
-
-/** Lo que efectivamente paga el paciente por una versión de precio. */
-function payable(price: PharmacyProductPrices): number {
-  return quantity(price.patientAmount ?? price.unitAmount);
 }
 
 /**
@@ -506,45 +483,6 @@ function totalOf(
     ),
     currency: priced[0].currency ?? null,
   };
-}
-
-/** Un importe `numeric` de BD bien formado: dígitos y a lo sumo un punto. */
-const DECIMAL_PATTERN = /^-?\d+(?:\.\d+)?$/;
-
-/** Cuántos decimales trae un importe. */
-function decimalsOf(value: string): number {
-  const dot = value.indexOf('.');
-  return dot === -1 ? 0 : value.length - dot - 1;
-}
-
-/** El importe como entero a la escala dada; lo ilegible cuenta 0. */
-function scaledAmount(value: string, scale: number): bigint {
-  if (!DECIMAL_PATTERN.test(value)) return 0n;
-  const negative = value.startsWith('-');
-  const [whole, fraction = ''] = (negative ? value.slice(1) : value).split('.');
-  const digits = whole + fraction.padEnd(scale, '0').slice(0, scale);
-  return negative ? -BigInt(digits) : BigInt(digits);
-}
-
-/**
- * Suma exacta de importes `numeric` (strings de BD): se alinean los decimales
- * y se suma en enteros — el punto flotante binario no sabe sumar dinero
- * decimal. El resultado se sirve con 2 decimales (half-up), el formato del
- * contrato.
- */
-function sumAmounts(values: readonly string[]): string {
-  const amounts = values.map((value) => value.trim());
-  const scale = Math.max(2, ...amounts.map(decimalsOf));
-  const total = amounts.reduce(
-    (sum, amount) => sum + scaledAmount(amount, scale),
-    0n,
-  );
-  const rest = 10n ** BigInt(scale - 2);
-  const half = total < 0n ? -(rest / 2n) : rest / 2n;
-  const cents = (total + half) / rest;
-  const sign = cents < 0n ? '-' : '';
-  const abs = cents < 0n ? -cents : cents;
-  return `${sign}${(abs / 100n).toString()}.${(abs % 100n).toString().padStart(2, '0')}`;
 }
 
 /** El orden de candidatura: completas, cerca, baratas, y por nombre. */

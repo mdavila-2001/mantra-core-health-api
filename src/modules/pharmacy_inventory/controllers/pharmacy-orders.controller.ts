@@ -168,14 +168,14 @@ export class PharmacyOrdersController {
     return this.orders.openReview(id, actor);
   }
 
-  /** FAR-E2: confirmar sin sustituciones (proponer genérico: 422, bloqueado). */
+  /** FAR-E2: confirmar, con genéricos propuestos si el mostrador los declara. */
   @Post(':id/confirm')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Confirmar el pedido (FAR-E2)',
     description:
-      'Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea; PROPONER_GENERICO responde 422 porque la sustitución está bloqueada por modelo.',
+      'Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea. PROPONER_GENERICO (con proposedProductId del mismo medicamento) persiste la propuesta con sus precios congelados y deja el pedido en ACEPTACION_PENDIENTE: decide el paciente.',
   })
   confirm(
     @Param('id', ParseUUIDPipe) id: string,
@@ -185,14 +185,52 @@ export class PharmacyOrdersController {
     return this.orders.confirm(id, dto, actor);
   }
 
-  /** FAR-E2: rechazar con motivo (el motivo aún no se persiste: viaja en el aviso). */
+  /**
+   * FAR-E2/I2: el titular acepta los genéricos propuestos. Todo-o-nada, como
+   * los dos botones del front: `ACEPTACION_PENDIENTE → ACEPTADO`.
+   */
+  @Post(':id/accept-substitutions')
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Aceptar los genéricos propuestos (paciente)',
+    description:
+      'Devuelve el stock del original, reserva el propuesto con la misma contabilidad y re-congela el total con el precio de la oferta. La propuesta queda como historia (ACEPTADA + decided_at).',
+  })
+  acceptSubstitutions(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.acceptSubstitutions(id, actor);
+  }
+
+  /**
+   * FAR-E2/I2: el titular prefiere los originales.
+   * `ACEPTACION_PENDIENTE → CONFIRMADO`; las líneas no se tocan.
+   */
+  @Post(':id/prefer-original')
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Preferir los productos originales (paciente)',
+    description:
+      'Las propuestas quedan como historia (RECHAZADA + decided_at) y el pedido vuelve a la cola del mostrador como CONFIRMADO — el stock del original siguió reservado todo el tiempo.',
+  })
+  preferOriginal(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.preferOriginal(id, actor);
+  }
+
+  /** FAR-E2: rechazar con motivo (v4.2.1 lo persiste en el pedido). */
   @Post(':id/reject')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Rechazar el pedido (FAR-E2)',
     description:
-      'Libera el stock reservado. El motivo es obligatorio y viaja en el evento y la campana; no se persiste todavía (bloqueador de modelo).',
+      'Libera el stock reservado. El motivo es obligatorio: se persiste en rejection_reason_text y viaja además en el evento y la campana.',
   })
   reject(
     @Param('id', ParseUUIDPipe) id: string,
