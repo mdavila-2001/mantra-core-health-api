@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ProfilesPatientsService } from './profiles-patients.service';
 import { PROF } from '../profiles.concepts';
+import { CONCEPTS } from '../../../common';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -45,6 +46,13 @@ function build() {
   const tx = {
     flush: mockFn().mockResolvedValue(undefined),
     findOne: mockFn().mockResolvedValue(null),
+    // El perfil propio lee además identificadores (documento y NIT) con `find`,
+    // y coberturas y tutores por SQL: por defecto nada declarado, que es el
+    // caso de quien se registró con lo mínimo.
+    find: mockFn().mockResolvedValue([]),
+    getConnection: mockFn(() => ({
+      execute: mockFn().mockResolvedValue([]),
+    })),
   };
   // `fork` además de `transactional`: las lecturas del servicio no abren
   // transacción —forkean un EM propio— y sin este doble ninguna se puede probar.
@@ -638,6 +646,96 @@ describe('ProfilesPatientsService', () => {
         phone: '+591 700 12345',
         residenceMunicipalityConceptId: 'mun-1',
       });
+    });
+
+    /**
+     * El perfil devuelve TODO lo que el alta capturó.
+     *
+     * La pantalla mostraba tres campos de quince: el documento, el correo, las
+     * direcciones, los seguros y el tutor ya estaban en la base —los escribe el
+     * alta— y sencillamente no volvían. Estas pruebas fijan que vuelvan, y con
+     * la forma que la pantalla necesita para pintarlos sin resolver catálogos.
+     */
+    it('devuelve documento, departamento emisor y NIT', async () => {
+      const d = conPaciente();
+      d.tx.find.mockResolvedValue([
+        {
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: '7678614',
+          issuerAdministrativeAreaConceptId: 'depto-sc',
+        },
+        { typeConceptId: CONCEPTS.ID_TYPE_TAX, value: '1234567890' },
+      ]);
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res).toMatchObject({
+        nationalId: '7678614',
+        issuerAdministrativeAreaConceptId: 'depto-sc',
+        taxId: '1234567890',
+      });
+    });
+
+    it('devuelve las dos direcciones, y las coordenadas viajan juntas', async () => {
+      // Media coordenada no ubica nada: si falta una, no viaja ninguna.
+      const d = conPaciente();
+      d.addressesRepo.findVigenteByOwnerAndUse
+        .mockResolvedValueOnce({
+          lines: 'Av. Banzer #1234',
+          city: 'Santa Cruz',
+          municipalityConceptId: 'mun-1',
+          latitude: -17.7695,
+          longitude: -63.1854,
+        })
+        .mockResolvedValueOnce({ lines: 'Calle Warnes #45', latitude: -17.78 });
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res.homeAddress).toMatchObject({
+        lines: 'Av. Banzer #1234',
+        latitude: -17.7695,
+        longitude: -63.1854,
+      });
+      expect(res.workAddress).toMatchObject({ lines: 'Calle Warnes #45' });
+      expect(res.workAddress?.latitude).toBeUndefined();
+    });
+
+    it('los seguros vuelven con la aseguradora y el plan EN PALABRAS', async () => {
+      // Sin esto la pantalla tendría que resolver dos catálogos más para
+      // pintar una línea de texto.
+      const d = conPaciente();
+      d.tx.getConnection.mockReturnValue({
+        execute: mockFn().mockResolvedValue([
+          {
+            carrier_id: 'car-1',
+            carrier_name: 'Alianza Vida Seguros',
+            plan_name: 'AFI Gold',
+            member_identifier: '7678614',
+            verification_status_concept_id: null,
+          },
+        ]),
+      });
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res.coverages).toHaveLength(1);
+      expect(res.coverages[0]).toMatchObject({
+        carrierName: 'Alianza Vida Seguros',
+        planName: 'AFI Gold',
+        // Lo declarado al registrarse nace SIN verificar.
+        verified: false,
+      });
+    });
+
+    it('sin nada declarado, las listas llegan vacías y no ausentes', async () => {
+      // Quien las pinta distingue «no declaró ninguna» de «esta respuesta no
+      // las trae»; por eso viajan siempre.
+      const d = conPaciente();
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res.coverages).toEqual([]);
+      expect(res.guardians).toEqual([]);
     });
 
     it('lo que la persona no declaró llega ausente, no null', async () => {
