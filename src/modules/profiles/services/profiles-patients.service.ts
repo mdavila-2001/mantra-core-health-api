@@ -57,8 +57,17 @@ import {
   SearchPatientsResponseDto,
   PatientDetailResponseDto,
   OwnPatientProfileResponseDto,
+  OwnAddressDto,
+  OwnCoverageDto,
+  OwnGuardianDto,
   UpdateOwnPatientProfileDto,
 } from '../dto';
+import { Addresses, Identifiers } from '../../common/entities';
+import { INS } from '../../insurance/insurance.concepts';
+// `isPublic` no es columna: el modelo todavía no persiste el tipo de pagador
+// (deuda declarada en el alta, PR #258), así que se deriva del catálogo
+// sembrado — mismo criterio que usa el propio alta al aceptarlos.
+import { isPublicCarrierId } from '../../../common/seed/bolivia-insurance.catalog';
 import { ProfileOwnershipService } from './profile-ownership.service';
 
 /**
@@ -226,6 +235,28 @@ function cambiaLaPersona(dto: UpdateOwnPatientProfileDto): boolean {
  * padre antes de crear hijos, porque las FK son columnas uuid planas y MikroORM
  * no ordena inserts entre entidades no relacionadas.
  */
+/**
+ * Una fila de `common.addresses` como la ve el perfil.
+ *
+ * Devuelve `undefined` —y no un objeto vacío— cuando no hay dirección: la
+ * pantalla distingue «no la declaró» de «la declaró sin datos», y un objeto con
+ * todo ausente pintaría una tarjeta vacía.
+ */
+function aDireccion(fila?: Addresses | null): OwnAddressDto | undefined {
+  if (!fila) return undefined;
+  return {
+    ...(fila.lines === undefined ? {} : { lines: fila.lines }),
+    ...(fila.city === undefined ? {} : { city: fila.city }),
+    ...(fila.municipalityConceptId === undefined
+      ? {}
+      : { municipalityConceptId: fila.municipalityConceptId }),
+    // Las coordenadas viajan juntas o no viajan: media coordenada no ubica nada.
+    ...(fila.latitude === undefined || fila.longitude === undefined
+      ? {}
+      : { latitude: Number(fila.latitude), longitude: Number(fila.longitude) }),
+  };
+}
+
 @Injectable()
 export class ProfilesPatientsService {
   /**
@@ -403,7 +434,18 @@ export class ProfilesPatientsService {
 
     // Las tres lecturas son independientes entre sí y ninguna depende del
     // resultado de otra: encadenarlas sólo sumaría latencia.
-    const [assertion, telefono, domicilio] = await Promise.all([
+    // Todas son independientes entre sí: se piden juntas porque encadenarlas
+    // sólo sumaría latencia a una pantalla que se abre en cada visita.
+    const [
+      assertion,
+      telefono,
+      domicilio,
+      trabajo,
+      correo,
+      identificadores,
+      coberturas,
+      tutores,
+    ] = await Promise.all([
       findCurrentIdentityAssertionForPerson(em, person.id),
       this.contactPointsRepo.findVigenteByOwnerAndSystem(
         em,
@@ -415,6 +457,19 @@ export class ProfilesPatientsService {
         person.id,
         CONCEPTS.ADDR_USE_HOME,
       ),
+      this.addressesRepo.findVigenteByOwnerAndUse(
+        em,
+        person.id,
+        CONCEPTS.ADDR_USE_WORK,
+      ),
+      this.contactPointsRepo.findVigenteByOwnerAndSystem(
+        em,
+        person.id,
+        CONCEPTS.CONTACT_EMAIL,
+      ),
+      this.leerIdentificadores(em, person.id),
+      this.leerCoberturas(em, patient.profileId),
+      this.leerTutores(em, patient.profileId),
     ]);
     const identityVerified = Boolean(assertion);
 
@@ -445,6 +500,16 @@ export class ProfilesPatientsService {
       identityVerified,
       // Mismo criterio que el resumen: ausente mientras no esté verificado.
       ...(identityVerified ? { patientCode: patient.patientCode } : {}),
+      nationalId: identificadores.nationalId,
+      issuerAdministrativeAreaConceptId: identificadores.issuerArea,
+      taxId: identificadores.taxId,
+      email: correo?.value,
+      homeAddress: aDireccion(domicilio),
+      workAddress: aDireccion(trabajo),
+      // Listas siempre presentes, aunque vengan vacías: quien las pinta
+      // distingue «no declaró ninguna» de «esta respuesta no las trae».
+      coverages: coberturas,
+      guardians: tutores,
     });
   }
 
@@ -559,6 +624,127 @@ export class ProfilesPatientsService {
     // escribir: así quien edita ve lo mismo que vería al recargar, incluido el
     // `displayName` recompuesto y el teléfono que quedó vigente.
     return this.getOwnProfile(actor);
+  }
+
+
+  /**
+   * Documento, departamento emisor y NIT, de una sola lectura.
+   *
+   * Los tres viven en `common.identifiers` distinguidos por tipo, así que
+   * pedirlos por separado serían tres viajes por la misma fila-vecina.
+   */
+  private async leerIdentificadores(
+    em: EntityManager,
+    personId: string,
+  ): Promise<{
+    nationalId?: string;
+    issuerArea?: string;
+    taxId?: string;
+  }> {
+    const filas = await em.find(Identifiers, {
+      ownerId: personId,
+      validTo: null,
+    });
+    const documento = filas.find(
+      (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    );
+    const fiscal = filas.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
+    return {
+      nationalId: documento?.value,
+      issuerArea: documento?.issuerAdministrativeAreaConceptId,
+      taxId: fiscal?.value,
+    };
+  }
+
+  /**
+   * Los seguros declarados, con la aseguradora y el plan EN PALABRAS.
+   *
+   * Se resuelven acá y no en la pantalla porque son dos catálogos más que el
+   * cliente tendría que pedir para pintar una línea de texto.
+   *
+   * `isPublic` se deriva del catálogo sembrado y no de una columna: el modelo
+   * todavía no persiste el tipo de pagador —deuda declarada en el DTO del alta
+   * (PR #258)—, así que una aseguradora cargada por otra vía cae en «privada»
+   * hasta que eso exista.
+   */
+  private async leerCoberturas(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<OwnCoverageDto[]> {
+    const filas = await em.getConnection().execute<
+      {
+        carrier_id: string;
+        carrier_name: string;
+        plan_name: string | null;
+        member_identifier: string | null;
+        verification_status_concept_id: string | null;
+      }[]
+    >(
+      // El vínculo pasa por `insurance_products`: un plan cuelga de un producto
+      // y el producto de la aseguradora. Saltarse el intermedio fallaba con
+      // «column pl.insurance_carrier_id does not exist».
+      `select ca.id         as carrier_id,
+              ca.legal_name as carrier_name,
+              pl.name       as plan_name,
+              c.member_identifier,
+              c.verification_status_concept_id
+         from insurance.patient_coverages c
+         join insurance.insurance_plans pl on pl.id = c.insurance_plan_id
+         join insurance.insurance_products pr on pr.id = pl.insurance_product_id
+         join insurance.insurance_carriers ca on ca.id = pr.insurance_carrier_id
+        where c.patient_profile_id = ?
+        order by c.coverage_order nulls last`,
+      [patientProfileId],
+    );
+    return filas.map((f) => ({
+      carrierName: f.carrier_name,
+      ...(f.plan_name === null ? {} : { planName: f.plan_name }),
+      isPublic: isPublicCarrierId(f.carrier_id),
+      ...(f.member_identifier === null
+        ? {}
+        : { memberIdentifier: f.member_identifier }),
+      verified:
+        f.verification_status_concept_id === INS.VERIFY_VERIFIED,
+    }));
+  }
+
+  /** Tutores y personas autorizadas, con su nombre y su teléfono. */
+  private async leerTutores(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<OwnGuardianDto[]> {
+    const filas = await em.getConnection().execute<
+      {
+        display_name: string | null;
+        relationship_concept_id: string | null;
+        is_emergency_contact: boolean;
+        is_legal_guardian: boolean;
+        phone: string | null;
+      }[]
+    >(
+      `select p.display_name,
+              r.relationship_concept_id,
+              r.is_emergency_contact,
+              r.is_legal_guardian,
+              (select cp.value from common.contact_points cp
+                where cp.owner_id = r.person_id
+                  and cp.system_concept_id = ?
+                  and cp.valid_to is null
+                order by cp.rank nulls last limit 1) as phone
+         from profiles.related_persons r
+         join profiles.persons p on p.id = r.person_id
+        where r.patient_profile_id = ?`,
+      [CONCEPTS.CONTACT_PHONE, patientProfileId],
+    );
+    return filas.map((f) => ({
+      ...(f.display_name === null ? {} : { displayName: f.display_name }),
+      ...(f.relationship_concept_id === null
+        ? {}
+        : { relationshipConceptId: f.relationship_concept_id }),
+      isEmergencyContact: f.is_emergency_contact,
+      isLegalGuardian: f.is_legal_guardian,
+      ...(f.phone === null ? {} : { phone: f.phone }),
+    }));
   }
 
   /**

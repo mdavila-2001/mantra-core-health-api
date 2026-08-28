@@ -270,6 +270,80 @@ export class PatientDetailResponseDto {
   updatedAt!: Date;
 }
 
+
+/** Una dirección del paciente, con su ubicación si la declaró. */
+export class OwnAddressDto {
+  @ApiPropertyOptional({ description: 'Calle y número, tal como la escribió' })
+  lines?: string;
+
+  @ApiPropertyOptional({ description: 'Ciudad, derivada del municipio' })
+  city?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Municipio (VS_BO_MUNICIPALITY)' })
+  municipalityConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Latitud, si marcó el punto en el mapa' })
+  latitude?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud; viaja siempre junto a la latitud' })
+  longitude?: number;
+}
+
+/**
+ * Un seguro declarado por el paciente.
+ *
+ * Se devuelve el NOMBRE de la aseguradora y del plan, no sus identificadores:
+ * quien lee su propio perfil necesita ver «Alianza · Salud Flexible», y pedirle
+ * a la pantalla que resuelva dos catálogos más para pintar una línea sería
+ * mover trabajo sin motivo.
+ */
+export class OwnCoverageDto {
+  @ApiProperty({ description: 'Aseguradora, en palabras' })
+  carrierName!: string;
+
+  @ApiPropertyOptional({ description: 'Plan contratado, en palabras' })
+  planName?: string;
+
+  @ApiProperty({
+    description:
+      'Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador.',
+  })
+  isPublic!: boolean;
+
+  @ApiPropertyOptional({ description: 'Con qué documento figura afiliado' })
+  memberIdentifier?: string;
+
+  @ApiProperty({
+    description:
+      'Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar.',
+  })
+  verified!: boolean;
+}
+
+/**
+ * Un tutor o persona autorizada.
+ *
+ * El teléfono viaja acá y no en una lectura aparte porque es el dato por el que
+ * existe el registro: el proceso del stakeholder pide «número celular persona
+ * tutor o autorizada», y un tutor sin forma de contacto no cumple su función.
+ */
+export class OwnGuardianDto {
+  @ApiPropertyOptional({ description: 'Cómo se llama' })
+  displayName?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Parentesco (concept id)' })
+  relationshipConceptId?: string;
+
+  @ApiProperty({ description: 'Es a quien llamar en una urgencia' })
+  isEmergencyContact!: boolean;
+
+  @ApiProperty({ description: 'Es su representante legal' })
+  isLegalGuardian!: boolean;
+
+  @ApiPropertyOptional({ description: 'Su teléfono' })
+  phone?: string;
+}
+
 /**
  * El propio perfil del paciente: exactamente lo que declaró al registrarse, tal
  * como lo ve —y lo edita— el titular de la cuenta.
@@ -411,4 +485,51 @@ export class OwnPatientProfileResponseDto {
       'Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`.',
   })
   patientCode?: string;
+
+  /* --- lo que el alta captura y hasta ahora no volvía ----------------------
+     El registro del stakeholder pide que el paciente vea SUS datos, y la
+     pantalla mostraba tres campos de quince. Todo esto ya estaba en la base
+     —lo escribe el alta— y sólo faltaba devolverlo. */
+
+  @ApiPropertyOptional({
+    description:
+      'Documento de identidad. Es su usuario de acceso, así que no se edita desde acá.',
+  })
+  nationalId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Departamento que emitió el documento (VS_BO_DEPARTMENT)',
+  })
+  issuerAdministrativeAreaConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'NIT para facturación' })
+  taxId?: string;
+
+  @ApiPropertyOptional({ description: 'Correo de contacto vigente' })
+  email?: string;
+
+  @ApiPropertyOptional({
+    type: OwnAddressDto,
+    description: 'Domicilio, con calle y punto en el mapa si los declaró',
+  })
+  homeAddress?: OwnAddressDto;
+
+  @ApiPropertyOptional({
+    type: OwnAddressDto,
+    description: 'Dirección de trabajo',
+  })
+  workAddress?: OwnAddressDto;
+
+  @ApiProperty({
+    type: [OwnCoverageDto],
+    description: 'Seguros declarados. Vacío si no declaró ninguno.',
+  })
+  coverages!: OwnCoverageDto[];
+
+  @ApiProperty({
+    type: [OwnGuardianDto],
+    description: 'Tutores y personas autorizadas, con su teléfono.',
+  })
+  guardians!: OwnGuardianDto[];
 }
