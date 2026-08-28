@@ -179,11 +179,19 @@ describe('CommunitySearchIndexService', () => {
       }
     });
 
-    it('el avatar va como ruta servida por la API, nunca como id de archivo', async () => {
+    it('las fotos van como ruta servida por la API, nunca como id de archivo', async () => {
       const documento = await documentoIndexado(build());
 
       expect(documento.avatarUrl).toBe('/public/media/archivo-1');
-      expect(JSON.stringify(documento)).not.toContain('archivo-2');
+      // La portada sale por la MISMA vía desde que la tarjeta del directorio la
+      // pinta. Antes esta prueba afirmaba que `archivo-2` no aparecía en ningún
+      // lado, lo que era cierto sólo porque la portada no se servía: el
+      // invariante que importa no es que el identificador no se vea nunca —el
+      // del avatar se ve, dentro de la ruta— sino que **no haya una clave
+      // `*FileId` cruda**, que es lo que comprueba el caso de arriba.
+      expect(documento.coverUrl).toBe('/public/media/archivo-2');
+      expect(documento).not.toHaveProperty('avatarFileId');
+      expect(documento).not.toHaveProperty('coverFileId');
     });
 
     it('las especialidades van legibles, no como conceptos', async () => {
