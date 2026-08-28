@@ -261,6 +261,13 @@ export class IamPatientSelfRegistrationService {
         occupationFreeText: dto.occupationConceptId
           ? undefined
           : dto.occupationFreeText,
+        // La empresa sigue exactamente la misma regla, y por el mismo motivo:
+        // el texto libre sólo tenía sentido para quien no encontró la suya en
+        // el catálogo, así que con el concepto elegido sobra.
+        workEmployerConceptId: dto.workEmployerConceptId,
+        workEmployerFreeText: dto.workEmployerConceptId
+          ? undefined
+          : dto.workEmployerFreeText,
         actorUserId: user.id,
       });
       await tx.flush();
