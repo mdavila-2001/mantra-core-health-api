@@ -124,6 +124,9 @@ import { MessagingModule } from '../messaging/messaging.module';
     // son especialidades.
     PractitionerSpecialtiesRepository,
     MedicalSpecialtyCatalogService,
+    // Y desde que el alta de paciente registra al tutor o persona autorizada
+    // que lo acompaña, también la de personas relacionadas.
+    RelatedPersonsRepository,
   ],
 })
 export class ProfilesModule {}

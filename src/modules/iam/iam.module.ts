@@ -8,6 +8,9 @@ import { DirectoryModule } from '../directory/directory.module';
 // El emisor del token pregunta a `authz` por los roles de negocio vigentes del
 // sujeto; `authz` no importa `iam`, así que la dependencia no cierra ciclo.
 import { AuthzModule } from '../authz/authz.module';
+// El alta de paciente anota el seguro declarado; `insurance` no importa `iam`,
+// así que la dependencia no cierra ciclo.
+import { InsuranceModule } from '../insurance/insurance.module';
 import { IamUsersController, IamAuthController } from './controllers';
 import {
   IamUsersService,
@@ -57,6 +60,7 @@ import {
     MessagingModule,
     DirectoryModule,
     AuthzModule,
+    InsuranceModule,
   ],
   controllers: [IamUsersController, IamAuthController],
   providers: [

@@ -8,12 +8,28 @@ import {
 } from '../../../common/seed/bo-geography.catalog';
 import type { AddressesRepository } from '../repositories';
 
-/** Lo que hace falta para escribir el domicilio de residencia de una persona. */
+/** Lo que hace falta para escribir una dirección de una persona. */
 export interface ResidenceAddressData {
   /** La persona dueña de la dirección. */
   readonly personId: string;
   /** Municipio elegido en el alta; `undefined` si no eligió ninguno. */
   readonly municipalityConceptId?: string;
+  /**
+   * Calle y número, tal como la persona lo escribe.
+   *
+   * La columna es un varchar único (`common.addresses.lines`), no un arreglo.
+   */
+  readonly lines?: string;
+  /**
+   * Latitud, si la persona compartió su ubicación.
+   *
+   * Llega como número y se guarda como texto: la columna es `numeric` y la
+   * entidad la mapea a string, así que convertirla acá evita que cada llamador
+   * repita el `String(...)`.
+   */
+  readonly latitude?: number;
+  /** Longitud. Ver {@link ResidenceAddressData.latitude}. */
+  readonly longitude?: number;
   /** Quién escribe la fila, para la auditoría. */
   readonly actorUserId: string;
 }
@@ -62,12 +78,53 @@ export function createResidenceAddress(
   tx: EntityManager,
   data: ResidenceAddressData,
 ): boolean {
-  if (!data.municipalityConceptId) {
+  return writeAddress(repo, tx, data, CONCEPTS.ADDR_USE_HOME);
+}
+
+/**
+ * Escribe el domicilio **laboral** de una persona.
+ *
+ * Es una segunda fila de `common.addresses` sobre la misma persona, distinguida
+ * por `use_concept_id`: para eso existe esa columna. El registro de paciente
+ * pide domicilio y trabajo por separado, y quien reparte un medicamento necesita
+ * saber a cuál de los dos ir.
+ *
+ * @param repo - Repositorio de `common.addresses`.
+ * @param tx - Contexto transaccional.
+ * @param data - Persona, municipio, calle, coordenadas y actor.
+ * @returns `true` si escribió la dirección.
+ * @throws BadRequestException si el municipio no pertenece a `VS_BO_MUNICIPALITY`.
+ */
+export function createWorkAddress(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  data: ResidenceAddressData,
+): boolean {
+  return writeAddress(repo, tx, data, CONCEPTS.ADDR_USE_WORK);
+}
+
+/**
+ * El cuerpo compartido por los dos usos: lo único que los distingue es el
+ * concepto de uso.
+ */
+function writeAddress(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  data: ResidenceAddressData,
+  useConceptId: string,
+): boolean {
+  const coordenadas = coordinatesOf(data);
+
+  // Sin municipio, sin calle y sin coordenadas no hay dirección: una fila con
+  // país y nada más no es un dato, es una fila.
+  if (!data.municipalityConceptId && !data.lines && !coordenadas) {
     return false;
   }
 
-  const municipality = boMunicipalityByConceptId(data.municipalityConceptId);
-  if (!municipality) {
+  const municipality = data.municipalityConceptId
+    ? boMunicipalityByConceptId(data.municipalityConceptId)
+    : undefined;
+  if (data.municipalityConceptId && !municipality) {
     throw new BadRequestException(
       'El municipio indicado no pertenece al catálogo de municipios de Bolivia',
     );
@@ -79,14 +136,38 @@ export function createResidenceAddress(
     countryConceptId: CONCEPTS.COUNTRY_BO,
     municipalityConceptId: data.municipalityConceptId,
     // Derivado, nunca recibido: ver arriba.
-    administrativeAreaConceptId: boDepartmentConceptId(municipality.department),
+    administrativeAreaConceptId: municipality
+      ? boDepartmentConceptId(municipality.department)
+      : undefined,
     // `city` es texto libre y el municipio ya es el dato de catálogo; se copia
     // el nombre para que quien lea la dirección sin resolver conceptos —un
     // export, un sobre— tenga algo legible.
-    city: municipality.name,
-    useConceptId: CONCEPTS.ADDR_USE_HOME,
+    city: municipality?.name,
+    lines: data.lines,
+    latitude: coordenadas?.latitude,
+    longitude: coordenadas?.longitude,
+    useConceptId,
     typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
     actorUserId: data.actorUserId,
   });
   return true;
+}
+
+/**
+ * El par de coordenadas, sólo si vinieron las dos.
+ *
+ * Media coordenada no ubica nada, y guardar una sola dejaría una fila que
+ * miente: parece tener ubicación y no la tiene. El DTO ya rechaza el par
+ * incompleto; esto protege a los demás llamadores.
+ */
+function coordinatesOf(
+  data: ResidenceAddressData,
+): { latitude: string; longitude: string } | undefined {
+  if (data.latitude === undefined || data.longitude === undefined) {
+    return undefined;
+  }
+  return {
+    latitude: String(data.latitude),
+    longitude: String(data.longitude),
+  };
 }

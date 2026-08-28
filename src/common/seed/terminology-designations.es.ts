@@ -914,6 +914,13 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CONCEPTS.ADDR_USE_WORK,
+    {
+      display: 'Domicilio laboral',
+      definition: 'Dirección donde la persona trabaja.',
+    },
+  ],
+  [
     CONCEPTS.ADDR_TYPE_POSTAL,
     {
       display: 'Dirección postal',

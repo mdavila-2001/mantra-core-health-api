@@ -9,6 +9,11 @@ import { UnauthorizedException } from '@nestjs/common';
 import { CONCEPTS, ConflictException } from '../../../common';
 import { PROF } from '../../profiles/profiles.concepts';
 import { DIR } from '../../directory/directory.concepts';
+import { INS } from '../../insurance/insurance.concepts';
+import {
+  BOLIVIA_PUBLIC_INSURERS,
+  carrierPlanId,
+} from '../../../common/seed/bolivia-insurance.catalog';
 import type { RegisterPatientDto } from '../dto';
 
 const dto: RegisterPatientDto = {
@@ -61,6 +66,17 @@ describe('IamPatientSelfRegistrationService', () => {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
     };
     const tenantMembershipsRepo = { create: fn() };
+    const relatedPersonsRepo = { create: fn() };
+    const insuranceCatalogRepo = {
+      findPlan: fn().mockResolvedValue({
+        id: 'plan-1',
+        statusConceptId: INS.PLAN_ACTIVE,
+      }),
+    };
+    const coverageRepo = {
+      findByMemberAndPlan: fn().mockResolvedValue(null),
+      createCoverage: fn(),
+    };
 
     const service = new IamPatientSelfRegistrationService(
       em as never,
@@ -77,6 +93,9 @@ describe('IamPatientSelfRegistrationService', () => {
       identifiersRepo as never,
       contactPointsRepo as never,
       addressesRepo as never,
+      relatedPersonsRepo as never,
+      insuranceCatalogRepo as never,
+      coverageRepo as never,
       notificationsService as never,
       tenantMembershipsRepo as never,
       logger as never,
@@ -95,6 +114,10 @@ describe('IamPatientSelfRegistrationService', () => {
       accountLinksRepo,
       identifiersRepo,
       contactPointsRepo,
+      addressesRepo,
+      relatedPersonsRepo,
+      insuranceCatalogRepo,
+      coverageRepo,
       notificationsService,
       tenantMembershipsRepo,
     };
@@ -181,6 +204,175 @@ describe('IamPatientSelfRegistrationService', () => {
           value: dto.nationalId,
         }),
       );
+    });
+
+    it('does not record a tax identifier when no NIT is given', async () => {
+      const d = build();
+
+      await d.service.registerPatient(dto);
+
+      expect(d.identifiersRepo.create).not.toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ typeConceptId: CONCEPTS.ID_TYPE_TAX }),
+      );
+    });
+
+    it('records the NIT as a tax identifier of the person', async () => {
+      const d = build();
+
+      await d.service.registerPatient({ ...dto, billingTaxId: '1023456789' });
+
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'person-1',
+          typeConceptId: CONCEPTS.ID_TYPE_TAX,
+          value: '1023456789',
+        }),
+      );
+    });
+
+    it('writes the street and the coordinates of the home address', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        homeAddressLines: 'Av. Banzer 3er anillo #42',
+        homeLatitude: -17.78,
+        homeLongitude: -63.18,
+      });
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          lines: 'Av. Banzer 3er anillo #42',
+          // La columna es numeric y la entidad la mapea a texto.
+          latitude: '-17.78',
+          longitude: '-63.18',
+          useConceptId: CONCEPTS.ADDR_USE_HOME,
+        }),
+      );
+    });
+
+    it('writes the work address as a second row with its own use', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        workAddressLines: 'Calle Ayacucho 120',
+      });
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          lines: 'Calle Ayacucho 120',
+          useConceptId: CONCEPTS.ADDR_USE_WORK,
+        }),
+      );
+    });
+
+    it('writes no address at all when nothing about it was given', async () => {
+      const d = build();
+
+      await d.service.registerPatient(dto);
+
+      expect(d.addressesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('registers the guardian and hangs their phone off OWNER_PERSON', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        guardianName: 'Rosa Quispe',
+        guardianPhone: '+59171234567',
+      });
+
+      expect(d.relatedPersonsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          relationshipConceptId: PROF.RELATIONSHIP_GUARDIAN,
+          isEmergencyContact: true,
+          // Nadie verificó la tutela en el alta.
+          isLegalGuardian: false,
+        }),
+      );
+      expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerTypeConceptId: CONCEPTS.OWNER_PERSON,
+          value: '+59171234567',
+        }),
+      );
+    });
+
+    it('rejects a guardian phone with no guardian name', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPatient({ ...dto, guardianPhone: '+59171234567' }),
+      ).rejects.toThrow();
+      expect(d.relatedPersonsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('records the declared private and public coverages in order', async () => {
+      const d = build();
+      const privado = carrierPlanId(
+        'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A',
+        'RED_MAX',
+      );
+      const publico = carrierPlanId(BOLIVIA_PUBLIC_INSURERS[0].code, 'BASE');
+
+      await d.service.registerPatient({
+        ...dto,
+        privateInsurancePlanId: privado,
+        publicInsurancePlanId: publico,
+      });
+
+      expect(d.coverageRepo.createCoverage).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          insurancePlanId: privado,
+          coverageOrder: 1,
+          // Es lo que la persona declara, no lo que la aseguradora confirmó.
+          verificationStatusConceptId: INS.VERIFY_PENDING,
+          memberIdentifier: dto.nationalId,
+        }),
+      );
+      expect(d.coverageRepo.createCoverage).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ insurancePlanId: publico, coverageOrder: 2 }),
+      );
+    });
+
+    it('rejects a public insurer declared as the private one', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPatient({
+          ...dto,
+          privateInsurancePlanId: carrierPlanId(
+            BOLIVIA_PUBLIC_INSURERS[0].code,
+            'BASE',
+          ),
+        }),
+      ).rejects.toThrow();
+      expect(d.coverageRepo.createCoverage).not.toHaveBeenCalled();
+    });
+
+    it('skips a coverage that is already on file instead of failing the signup', async () => {
+      const d = build();
+      d.coverageRepo.findByMemberAndPlan.mockResolvedValue({ id: 'cov-1' });
+
+      await d.service.registerPatient({
+        ...dto,
+        privateInsurancePlanId: carrierPlanId(
+          'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A',
+          'RED_MAX',
+        ),
+      });
+
+      expect(d.coverageRepo.createCoverage).not.toHaveBeenCalled();
     });
 
     it('skips every email side effect when no email is given', async () => {
