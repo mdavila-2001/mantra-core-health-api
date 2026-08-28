@@ -70,7 +70,13 @@ import {
   SetPractitionerPhotoDto,
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
-import { ContactPointsRepository } from '../../common/repositories';
+import {
+  AddressesRepository,
+  ContactPointsRepository,
+} from '../../common/repositories';
+import { Identifiers } from '../../common/entities';
+import { composeAccountDisplayName } from '../person-name';
+import { createResidenceAddress } from '../../common/services/residence-address';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
 
@@ -130,6 +136,7 @@ export class ProfilesPractitionersService {
     private readonly affiliations: ProfilesAffiliationsService,
     private readonly attachableFiles: AttachableFileService,
     private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly addressesRepo: AddressesRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly verificationBypass: VerificationBypassService,
@@ -480,6 +487,114 @@ export class ProfilesPractitionersService {
     return this.buildSummary(em, profileId, link?.userId);
   }
 
+
+
+  /**
+   * Deja vigente el teléfono nuevo y cierra el anterior.
+   *
+   * No se edita la fila: `common.contact_points` lleva vigencia, así que
+   * cambiar el valor en su lugar borraría el historial de por dónde se lo pudo
+   * contactar antes. Se cierra el vigente y se abre otro — mismos dueño,
+   * sistema y uso que escribe el alta del profesional (`CONTACT_USE_WORK`: el
+   * teléfono que declara es el de su consulta).
+   *
+   * Una cadena vacía cierra el vigente y no abre ninguno: es cómo se borra.
+   */
+  private async reemplazarTelefono(
+    tx: EntityManager,
+    personId: string,
+    telefono: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const nuevo = telefono.trim() === '' ? undefined : telefono.trim();
+    const vigente = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+      tx,
+      personId,
+      CONCEPTS.CONTACT_PHONE,
+    );
+
+    if (nuevo === undefined) {
+      if (vigente) this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+      return;
+    }
+    if (vigente?.value === nuevo) return;
+    if (vigente) this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+
+    this.contactPointsRepo.create(tx, {
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      ownerId: personId,
+      systemConceptId: CONCEPTS.CONTACT_PHONE,
+      value: nuevo,
+      useConceptId: CONCEPTS.CONTACT_USE_WORK,
+      actorUserId,
+    });
+  }
+
+  /**
+   * Deja vigente el domicilio nuevo y cierra el anterior.
+   *
+   * Mismo criterio de vigencia que el teléfono, y misma función que usa el alta
+   * (`createResidenceAddress`) para derivar ciudad y departamento del municipio:
+   * si la derivación viviera en dos lados, una mudanza escribiría una fila con
+   * otra forma que la del registro.
+   */
+  private async reemplazarDomicilio(
+    tx: EntityManager,
+    personId: string,
+    municipalityConceptId: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
+      tx,
+      personId,
+      CONCEPTS.ADDR_USE_HOME,
+    );
+    if (vigente?.municipalityConceptId === municipalityConceptId) return;
+    if (vigente) this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
+
+    createResidenceAddress(this.addressesRepo, tx, {
+      personId,
+      municipalityConceptId,
+      actorUserId,
+    });
+  }
+
+  /**
+   * El documento de identidad y el municipio del domicilio.
+   *
+   * Los dos los escribe el alta y ninguno volvía en la ficha. Van juntos en una
+   * lectura porque se piden a la vez y ninguno depende del otro; y devuelve un
+   * objeto vacío en vez de fallar, para que la envoltura `sinTumbarLaFicha`
+   * tenga algo neutro con lo que seguir.
+   */
+  private async leerDocumentoYDomicilio(
+    em: EntityManager,
+    personId: string,
+  ): Promise<{
+    nationalId?: string;
+    issuerArea?: string;
+    municipio?: string;
+  }> {
+    const [documentos, domicilio] = await Promise.all([
+      em.find(Identifiers, { ownerId: personId, validTo: null }),
+      this.addressesRepo.findVigenteByOwnerAndUse(
+        em,
+        personId,
+        CONCEPTS.ADDR_USE_HOME,
+      ),
+    ]);
+    const documento = documentos.find(
+      (d: Identifiers) => d.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    );
+    return {
+      nationalId: documento?.value,
+      issuerArea: documento?.issuerAdministrativeAreaConceptId,
+      municipio: domicilio?.municipalityConceptId,
+    };
+  }
+
   /**
    * Arma el summary de un perfil ya identificado.
    *
@@ -534,6 +649,7 @@ export class ProfilesPractitionersService {
       affiliations,
       activity,
       contactos,
+      filiacion,
     ] = await Promise.all([
       this.sinTumbarLaFicha(
         () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
@@ -590,6 +706,17 @@ export class ProfilesPractitionersService {
             { profileId, pieza: 'contacto' },
           )
         : Promise.resolve([]),
+      // El documento y el domicilio: sólo en la lectura propia y envueltos como
+      // el resto. Un fallo acá deja la ficha sin esos dos datos, no sin ficha.
+      incluyeContacto
+        ? this.sinTumbarLaFicha(
+            () => this.leerDocumentoYDomicilio(em, person.id),
+            {} as Awaited<ReturnType<typeof this.leerDocumentoYDomicilio>>,
+            { profileId, pieza: 'filiación' },
+          )
+        : Promise.resolve(
+            {} as Awaited<ReturnType<typeof this.leerDocumentoYDomicilio>>,
+          ),
     ]);
 
     // El primero de cada sistema gana: el repositorio ya los devuelve por
@@ -607,6 +734,16 @@ export class ProfilesPractitionersService {
       photoFileId: practitioner.photoFileId,
       email: contacto(CONCEPTS.CONTACT_EMAIL),
       phone: contacto(CONCEPTS.CONTACT_PHONE),
+      // Las cuatro partes del nombre viajan además del compuesto: es lo único
+      // con lo que se puede corregir un apellido sin adivinar dónde cortarlo.
+      name: person.name,
+      middleName: person.middleName,
+      lastName: person.lastName,
+      motherLastName: person.motherLastName,
+      birthDate: person.birthDate,
+      nationalId: filiacion.nationalId,
+      issuerAdministrativeAreaConceptId: filiacion.issuerArea,
+      residenceMunicipalityConceptId: filiacion.municipio,
       practitionerCategoryConceptId: practitioner.practitionerCategoryConceptId,
       verificationStatusConceptId: practitioner.verificationStatusConceptId,
       practiceStatusConceptId: practitioner.practiceStatusConceptId,
@@ -723,6 +860,56 @@ export class ProfilesPractitionersService {
         practitioner.telehealthAvailable = dto.telehealthAvailable;
       }
       touch(practitioner, actor.id);
+
+      // --- los datos personales, que viven en `persons` y no en el perfil ----
+      const person = await this.personsRepo.findById(tx, link.personId);
+      if (person) {
+        const ahora = new Date();
+        // Una cadena vacía BORRA el dato opcional: es lo que hace falta cuando
+        // alguien descubre que no lleva segundo nombre ni apellido materno.
+        if (dto.name !== undefined) person.name = dto.name;
+        if (dto.middleName !== undefined) {
+          person.middleName = dto.middleName === '' ? undefined : dto.middleName;
+        }
+        if (dto.lastName !== undefined) person.lastName = dto.lastName;
+        if (dto.motherLastName !== undefined) {
+          person.motherLastName =
+            dto.motherLastName === '' ? undefined : dto.motherLastName;
+        }
+        // El nombre visible lo compone el backend: quien corrige su apellido
+        // espera verlo corregido en su ficha, no la versión anterior.
+        if (
+          dto.name !== undefined ||
+          dto.middleName !== undefined ||
+          dto.lastName !== undefined ||
+          dto.motherLastName !== undefined
+        ) {
+          person.displayName = composeAccountDisplayName({
+            name: person.name,
+            middleName: person.middleName,
+            lastName: person.lastName,
+            motherLastName: person.motherLastName,
+          });
+        }
+        if (dto.birthDate !== undefined) {
+          person.birthDate = new Date(dto.birthDate);
+        }
+        touch(person, actor.id);
+
+        if (dto.phone !== undefined) {
+          await this.reemplazarTelefono(tx, person.id, dto.phone, actor.id, ahora);
+        }
+        if (dto.residenceMunicipalityConceptId !== undefined) {
+          await this.reemplazarDomicilio(
+            tx,
+            person.id,
+            dto.residenceMunicipalityConceptId,
+            actor.id,
+            ahora,
+          );
+        }
+      }
+
       await tx.flush();
     });
 
