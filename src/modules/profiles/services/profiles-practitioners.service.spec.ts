@@ -150,6 +150,17 @@ function build() {
   // El contacto del profesional (`common.contact_points`). Vacío por defecto.
   const contactPointsRepo = {
     findVigentesByOwner: mockFn(() => Promise.resolve([])),
+    findVigenteByOwnerAndSystem: mockFn(() => Promise.resolve(null)),
+    closeVigente: mockFn(),
+    create: mockFn(),
+  };
+
+  // El domicilio del profesional. Sin dirección por defecto: es el caso de casi
+  // todo perfil sembrado, y quien la afirme la declara en su prueba.
+  const addressesRepo = {
+    findVigenteByOwnerAndUse: mockFn(() => Promise.resolve(null)),
+    closeVigente: mockFn(),
+    create: mockFn(),
   };
 
   const service = new ProfilesPractitionersService(
@@ -171,6 +182,7 @@ function build() {
     // Sin contactos por defecto: es el caso de casi todo perfil sembrado, y
     // las pruebas que hablan del correo lo declaran ellas.
     contactPointsRepo as any,
+    addressesRepo as any,
     accountLinksRepo as any,
     effectiveRoles as any,
     verificationBypass as any,
