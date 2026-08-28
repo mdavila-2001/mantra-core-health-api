@@ -1108,6 +1108,41 @@ describe('ProfilesPractitionersService', () => {
       expect(practitioner.professionalBio).toBe('');
     });
 
+    /**
+     * Lo encontró una prueba de punta a punta contra la base: mandar
+     * `birthDate: null` para borrar la fecha la guardaba como **1/1/1970**,
+     * porque `new Date(null)` es la época Unix y no «sin fecha». El médico
+     * quedaba nacido en 1970 sin haber escrito eso en ningún lado.
+     */
+    it('borrar la fecha de nacimiento la deja sin valor, no en 1970', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+      const person = { id: 'per-1', displayName: 'Dr. Uno', birthDate: new Date(1979, 10, 5) };
+      d.personsRepo.findById.mockResolvedValue(person);
+
+      await d.service.updateOwnPractitionerProfile({ birthDate: null }, {
+        id: 'u-1',
+      } as any);
+
+      expect(person.birthDate).toBeUndefined();
+    });
+
+    it('y una fecha de verdad sí se guarda', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+      const person: any = { id: 'per-1', displayName: 'Dr. Uno' };
+      d.personsRepo.findById.mockResolvedValue(person);
+
+      await d.service.updateOwnPractitionerProfile({ birthDate: '1979-11-05' }, {
+        id: 'u-1',
+      } as any);
+
+      expect(person.birthDate).toBeInstanceOf(Date);
+      expect((person.birthDate as Date).getUTCFullYear()).toBe(1979);
+    });
+
     /** Igual que la lectura: sin persona vinculada no hay nada que editar. */
     it('sin persona vinculada falla con precondición', async () => {
       const d = build();

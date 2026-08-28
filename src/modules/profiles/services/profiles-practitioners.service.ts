@@ -892,7 +892,10 @@ export class ProfilesPractitionersService {
           });
         }
         if (dto.birthDate !== undefined) {
-          person.birthDate = new Date(dto.birthDate);
+          // `new Date(null)` es el 1/1/1970, no «sin fecha»: mandar `null` para
+          // borrarla dejaba a la persona nacida en la época Unix. Se borra
+          // igual que las partes opcionales del nombre, con `undefined`.
+          person.birthDate = dto.birthDate ? new Date(dto.birthDate) : undefined;
         }
         touch(person, actor.id);
 
