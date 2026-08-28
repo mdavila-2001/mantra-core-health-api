@@ -1018,18 +1018,43 @@ async function sembrarOrganizacion(org, indice, adminUserId) {
 /**
  * Los conceptos de especialidad del catálogo, por su código corto.
  *
- * Los mismos que siembra `seed-dev-data.mjs`: `clinical-forms:specialty:*`, en
- * castellano. No se inventa ningún concepto acá — si el catálogo no los tiene
- * todavía (una base recién creada, antes de que corra el otro seeder), la
- * especialidad de cada médico simplemente no se asigna y queda anotado en el
- * resumen de la corrida.
+ * Se leen de **`VS_MEDICAL_SPECIALTY`**, que es el conjunto que gobierna
+ * `practitioner_specialties.specialty_concept_id`. Antes se leían de
+ * `clinical-forms:specialty:*` —los de las fichas clínicas— y el alta los
+ * rechazaba con `422 La especialidad no pertenece al catálogo`: son dos
+ * catálogos distintos con los mismos nombres, y `MedicalSpecialtyCatalogService`
+ * exige el del modelo. Se veía como «0 con especialidad» en el resumen de la
+ * corrida, con quince médicos sin nada bajo su nombre en la guía.
+ *
+ * Los códigos coinciden entre los dos (`CARDIOLOGIA`, `MEDICINA_INTERNA`), así
+ * que la normalización de abajo no cambia; lo único que cambia es de dónde se
+ * leen.
+ *
+ * No se inventa ningún concepto acá: si el conjunto no está sembrado, la
+ * especialidad no se asigna y queda anotado en el resumen.
  */
 async function especialidadesDelCatalogo() {
+  // Dos pasos, como hace el front: el conjunto se nombra por su código estable
+  // (`VS_MEDICAL_SPECIALTY`) y se expande por su uuid, que es derivado y cambia
+  // si el paquete de seeds se regenera.
+  const conjuntos = await call(
+    'especialidades-conjunto',
+    'El conjunto de especialidades médicas',
+    'GET',
+    '/terminology/value-sets?code=VS_MEDICAL_SPECIALTY&limit=5',
+  );
+  const conjunto = (conjuntos.body?.items ?? []).find(
+    (c) => c.internalCode === 'VS_MEDICAL_SPECIALTY',
+  );
+  if (!conjunto) return new Map();
+
+  // El `$` va literal: Express enruta sobre el path sin decodificar, así que
+  // `%24expand` no casa con la ruta y vuelve 404.
   const pagina = await call(
     'especialidades',
     'Conceptos de especialidad del catálogo',
     'GET',
-    '/terminology/concepts?q=clinical-forms:specialty:&limit=60',
+    `/terminology/value-sets/${conjunto.id}/$expand?limit=100`,
   );
   const mapa = new Map();
   for (const item of pagina.body?.items ?? []) {
