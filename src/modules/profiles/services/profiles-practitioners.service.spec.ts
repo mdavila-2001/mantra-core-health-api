@@ -1753,4 +1753,140 @@ describe('ProfilesPractitionersService', () => {
       expect(d.em.count).not.toHaveBeenCalled();
     });
   });
+
+  /**
+   * **Los títulos propios, varios y con diploma adjunto.**
+   *
+   * El registro de procesos (MÓDULO MÉDICO §1.17 a §1.20) pide «espacio para
+   * poder subir varios diplomados», y lo mismo para maestrías, doctorados y
+   * especialidades. Hasta acá el alta creaba UNA credencial y no existía forma
+   * de agregar la segunda.
+   */
+  describe('addOwnCredential', () => {
+    const cuerpo = {
+      credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+      number: 'DIP-2024-17',
+      issuingInstitutionText: 'Universidad Gabriel René Moreno',
+      issueDate: '2024-03-15',
+    };
+
+    it('agrega el título y lo deja PENDIENTE de verificación', async () => {
+      const d = build();
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+        number: 'DIP-2024-17',
+        stateConceptId: PROF.CRED_PENDING,
+        createdAt: new Date(),
+      });
+
+      const creada = await d.service.addOwnCredential(cuerpo as any, {
+        id: 'u-1',
+      } as any);
+
+      expect(creada.stateConceptId).toBe(PROF.CRED_PENDING);
+      const escrito = d.credentialsRepo.create.mock.calls[0][1];
+      expect(escrito.practitionerProfileId).toBe('pp1');
+      expect(escrito.credentialTypeConceptId).toBe(PROF.CREDENTIAL_TYPE_DIPLOMA);
+    });
+
+    /**
+     * La trampa del repositorio: `em.create` sólo escribe lo que el objeto
+     * NOMBRA, así que un campo que el repo no lista se descarta en silencio —
+     * compila, pasa los tests de servicio, y la columna queda en NULL. Ya pasó
+     * con el canal de teleconsulta. Esta prueba mira el borde.
+     */
+    it('el archivo del diploma llega hasta el repositorio, no se pierde', async () => {
+      const d = build();
+      // El archivo lo subió el mismo que declara el título. Decirlo explícito:
+      // el doble por defecto lo pone a nombre de otro usuario.
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'u-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        stateConceptId: PROF.CRED_PENDING,
+        fileId: 'file-1',
+        createdAt: new Date(),
+      });
+
+      await d.service.addOwnCredential({ ...cuerpo, fileId: 'file-1' } as any, {
+        id: 'u-1',
+      } as any);
+
+      expect(d.credentialsRepo.create.mock.calls[0][1].fileId).toBe('file-1');
+    });
+
+    /**
+     * La FK acepta cualquier concepto del catálogo, así que sin la lista
+     * cerrada un profesional podría declarar como «título» el concepto de un
+     * idioma o de un estado de cita.
+     */
+    it('un concepto que no es tipo de credencial se rechaza', async () => {
+      const d = build();
+
+      await expect(
+        d.service.addOwnCredential(
+          { ...cuerpo, credentialTypeConceptId: PROF.LANGUAGE_SPANISH } as any,
+          { id: 'u-1' } as any,
+        ),
+      ).rejects.toThrow(PreconditionFailedException);
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+    });
+
+    /** Un diploma en PDF: el tipo va contra la lista de DOCUMENTO, no la de imagen. */
+    it('acepta un PDF como diploma', async () => {
+      const d = build();
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'u-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        mimeType: 'application/pdf',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      });
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        stateConceptId: PROF.CRED_PENDING,
+        createdAt: new Date(),
+      });
+
+      await expect(
+        d.service.addOwnCredential({ ...cuerpo, fileId: 'file-1' } as any, {
+          id: 'u-1',
+        } as any),
+      ).resolves.toBeDefined();
+    });
+
+    /**
+     * Apareció al escribir las pruebas de arriba: el doble por defecto pone el
+     * archivo a nombre de otro usuario y el alta se cortó sola. Vale fijarlo —
+     * sin esto, cualquiera podría colgar su título del archivo de otro
+     * conociendo el id.
+     */
+    it('no se puede colgar el título del archivo de otro', async () => {
+      const d = build();
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'OTRO-USUARIO',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        d.service.addOwnCredential({ ...cuerpo, fileId: 'file-1' } as any, {
+          id: 'u-1',
+        } as any),
+      ).rejects.toThrow();
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+
 });

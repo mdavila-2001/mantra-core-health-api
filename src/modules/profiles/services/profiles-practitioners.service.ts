@@ -68,6 +68,8 @@ import {
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
   SetPractitionerPhotoDto,
+  AddOwnCredentialDto,
+  OwnCredentialResponseDto,
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
 import {
@@ -1750,6 +1752,109 @@ export class ProfilesPractitionersService {
       afiliacion.practitionerProfileId,
     );
   }
+
+  /**
+   * Los cinco tipos que el modelo admite para una credencial académica.
+   *
+   * La FK acepta CUALQUIER concepto del catálogo, así que sin esta lista un
+   * profesional podría declarar como «título» el concepto de un idioma o de un
+   * estado de cita. Quién decide cuáles son tipos de credencial es la
+   * enumeración `professional-credential-type`, la misma que siembra la app.
+   */
+  private static readonly TIPOS_DE_CREDENCIAL: readonly string[] = [
+    PROF.CREDENTIAL_TYPE_DEGREE,
+    PROF.CREDENTIAL_TYPE_DIPLOMA,
+    PROF.CREDENTIAL_TYPE_MASTER,
+    PROF.CREDENTIAL_TYPE_DOCTORATE,
+    PROF.CREDENTIAL_TYPE_SPECIALTY,
+  ];
+
+  /**
+   * Agrega un título propio a la formación, con su diploma adjunto.
+   *
+   * El registro de procesos pide «espacio para poder subir varios diplomados»
+   * —y lo mismo para maestrías, doctorados y especialidades—, pero tanto el
+   * alta administrativa como la de autorregistro creaban **una** credencial y
+   * ahí terminaba: no había forma de agregar la segunda. Cada llamada agrega
+   * una fila.
+   *
+   * Nace PENDIENTE a propósito: declarar un título no es haberlo acreditado, y
+   * quien lo verifica es `POST /profiles/credentials/{id}/verify`, que exige
+   * `SECURITY_ADMIN`. Si el alta lo diera por verificado, el sello del perfil
+   * dejaría de significar algo.
+   */
+  async addOwnCredential(
+    dto: AddOwnCredentialDto,
+    actor: AuthenticatedUser,
+  ): Promise<OwnCredentialResponseDto> {
+    if (
+      !ProfilesPractitionersService.TIPOS_DE_CREDENCIAL.includes(
+        dto.credentialTypeConceptId,
+      )
+    ) {
+      throw new PreconditionFailedException(
+        'Ese concepto no es un tipo de credencial profesional',
+        { credentialTypeConceptId: dto.credentialTypeConceptId },
+      );
+    }
+
+    this.logger.info(
+      { operation: 'profiles.credential.addOwn', actorId: actor.id },
+      'Adding own professional credential',
+    );
+
+    const creada = await this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+
+      // Dentro de la MISMA transacción que la escritura: comprobar el archivo
+      // contra un estado y escribir sobre otro no comprueba nada. `assertUsableBy`
+      // es también lo que impide colgarse del archivo de otro.
+      if (dto.fileId !== undefined) {
+        await this.attachableFiles.assertUsableBy(
+          tx,
+          dto.fileId,
+          actor,
+          {
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.DOCUMENT,
+            operation: 'profiles.credential.addOwn',
+          },
+          {
+            subject: 'El archivo del título',
+            notFound: 'El archivo del título no existe',
+          },
+        );
+      }
+
+      const credencial = this.credentialsRepo.create(tx, {
+        practitionerProfileId: profileId,
+        credentialTypeConceptId: dto.credentialTypeConceptId,
+        number: dto.number.trim(),
+        issuingInstitutionText: dto.issuingInstitutionText?.trim(),
+        issueDate: dto.issueDate ? new Date(dto.issueDate) : undefined,
+        fileId: dto.fileId,
+        stateConceptId: PROF.CRED_PENDING,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+      return credencial;
+    });
+
+    return {
+      id: creada.id,
+      credentialTypeConceptId: creada.credentialTypeConceptId,
+      number: creada.number,
+      issuingInstitutionText: creada.issuingInstitutionText,
+      issueDate: creada.issueDate,
+      stateConceptId: creada.stateConceptId,
+      fileId: creada.fileId,
+      createdAt: creada.createdAt,
+    };
+  }
+
+
 }
 
 /**
