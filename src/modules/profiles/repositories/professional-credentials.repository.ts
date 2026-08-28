@@ -57,6 +57,11 @@ export interface CreateCredentialData {
    */
   stateConceptId: string;
   /**
+   * El archivo del diploma. `em.create` sólo escribe lo que este objeto nombra,
+   * así que omitirlo acá dejaría la columna en `NULL` sin que nada fallara.
+   */
+  fileId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -100,6 +105,7 @@ export class ProfessionalCredentialsRepository {
         issueDate: data.issueDate,
         verificationSourceUri: data.verificationSourceUri,
         stateConceptId: data.stateConceptId,
+        fileId: data.fileId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

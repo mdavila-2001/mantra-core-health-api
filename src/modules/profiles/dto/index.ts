@@ -4,6 +4,7 @@ export * from './create-practitioner.dto';
 export * from './create-jurisdiction-authorization.dto';
 export * from './verify-credential.dto';
 export * from './add-specialty.dto';
+export * from './own-credential.dto';
 export * from './affiliation.dto';
 export * from './add-identity-link.dto';
 export * from './merge-patients.dto';

@@ -34,6 +34,8 @@ import {
   VerifyCredentialDto,
   CredentialResponseDto,
   AddSpecialtyDto,
+  AddOwnCredentialDto,
+  OwnCredentialResponseDto,
   SpecialtyResponseDto,
   CreateAffiliationDto,
   AffiliationResponseDto,
@@ -364,6 +366,27 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AffiliationResponseDto> {
     return this.practitionersService.addOwnAffiliation(dto, actor);
+  }
+
+  /**
+   * Los títulos propios, uno por llamada.
+   *
+   * Va bajo `practitioners/me` y no bajo `practitioners/:profileId` porque el
+   * sujeto sale de la sesión: así no existe la forma de escribir la formación
+   * de otro profesional, ni siquiera equivocándose de id.
+   */
+  @Post('practitioners/me/credentials')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Agregar un título propio (diplomado, maestría, doctorado…)',
+    description:
+      'Cada llamada agrega uno: el registro de procesos pide poder cargar varios de cada clase. Nace pendiente de verificación y admite el PDF o la foto del diploma, ya subido por POST /common/files/upload.',
+  })
+  addOwnCredential(
+    @Body() dto: AddOwnCredentialDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OwnCredentialResponseDto> {
+    return this.practitionersService.addOwnCredential(dto, actor);
   }
 
   /** UC-05-06. */

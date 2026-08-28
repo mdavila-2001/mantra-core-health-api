@@ -102,9 +102,33 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
     AUTH_EXPIRED: { code: 'AUTH_EXPIRED', display: 'Authorization expired' },
 
     // Credenciales profesionales
+    // Los cinco que el registro de procesos enumera para el médico (MÓDULO
+    // MÉDICO §1.15 a §1.20). No son escalones de una escala: son documentos
+    // distintos, y el registro pide poder cargar VARIOS de cada uno —«espacio
+    // para poder subir varios diplomados»—, así que el tipo vive en la fila y
+    // no en una columna del perfil.
     CREDENTIAL_TYPE_DEGREE: {
       code: 'CREDENTIAL_TYPE_DEGREE',
       display: 'Academic degree credential',
+    },
+    CREDENTIAL_TYPE_DIPLOMA: {
+      code: 'CREDENTIAL_TYPE_DIPLOMA',
+      display: 'Diploma course credential',
+    },
+    CREDENTIAL_TYPE_MASTER: {
+      code: 'CREDENTIAL_TYPE_MASTER',
+      display: "Master's degree credential",
+    },
+    CREDENTIAL_TYPE_DOCTORATE: {
+      code: 'CREDENTIAL_TYPE_DOCTORATE',
+      display: 'Doctorate degree credential',
+    },
+    // El TÍTULO de especialidad, que no es lo mismo que la especialidad que
+    // ejerce: aquélla es una fila de `practitioner_specialties` y dice qué
+    // atiende; ésta es el diploma que la respalda.
+    CREDENTIAL_TYPE_SPECIALTY: {
+      code: 'CREDENTIAL_TYPE_SPECIALTY',
+      display: 'Specialty degree credential',
     },
     CRED_PENDING: {
       code: 'CRED_PENDING',
