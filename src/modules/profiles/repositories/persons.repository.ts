@@ -59,6 +59,14 @@ export interface CreatePersonData {
    */
   occupationFreeText?: string;
   /**
+   * Empresa donde trabaja (miembro de `VS_BO_EMPLOYER`).
+   */
+  workEmployerConceptId?: string;
+  /**
+   * Empresa en texto libre, para cuando no está en el catálogo.
+   */
+  workEmployerFreeText?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -121,6 +129,8 @@ export class PersonsRepository {
         sexAtBirthConceptId: data.sexAtBirthConceptId,
         occupationConceptId: data.occupationConceptId,
         occupationFreeText: data.occupationFreeText,
+        workEmployerConceptId: data.workEmployerConceptId,
+        workEmployerFreeText: data.workEmployerFreeText,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

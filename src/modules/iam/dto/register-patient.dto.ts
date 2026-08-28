@@ -42,6 +42,14 @@ export const PERSON_NAME_PART_MAX_LENGTH = 100;
  */
 export const OCCUPATION_FREE_TEXT_MAX_LENGTH = 200;
 
+/**
+ * Largo máximo del nombre de empresa escrito a mano.
+ *
+ * El mismo que el de la ocupación: es una razón social, no una descripción, y
+ * doscientos caracteres cubren hasta las más largas con su sigla.
+ */
+export const EMPLOYER_FREE_TEXT_MAX_LENGTH = 200;
+
 /** Tope del teléfono, tal como lo guarda `common.contact_points.value`. */
 export const PHONE_MAX_LENGTH = 40;
 
@@ -262,6 +270,42 @@ export class RegisterPatientDto {
   @IsString()
   @MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)
   occupationFreeText?: string;
+
+  /**
+   * Empresa donde trabaja, como miembro de `VS_BO_EMPLOYER`.
+   *
+   * **Reemplazó a la ubicación del trabajo** en el alta pública: municipio,
+   * calle y coordenadas del trabajo eran tres campos para un dato que casi
+   * nadie completaba. La empresa es una sola pregunta, se sabe de memoria, y
+   * es la que agrupa —salud ocupacional, convenios corporativos—.
+   *
+   * Lo siembra `BoEmployersSeedService`, en esta API, que es su único dueño.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)',
+  })
+  @IsOptional()
+  @IsUUID()
+  workEmployerConceptId?: string;
+
+  /**
+   * Empresa en texto libre, para cuando no está en el catálogo. Se ignora si
+   * viene `workEmployerConceptId`.
+   *
+   * Acá el respaldo pesa más que en la ocupación: el catálogo de empresas no
+   * puede ser exhaustivo —el SEPREC no publica su base empresarial y son unas
+   * 394.000 unidades económicas—, así que «no está en la lista» es el caso
+   * normal, no la excepción. Ver `bo-employers.catalog.ts`.
+   */
+  @ApiPropertyOptional({
+    maxLength: EMPLOYER_FREE_TEXT_MAX_LENGTH,
+    description: 'Empresa en texto libre, para cuando no está en el catálogo',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)
+  workEmployerFreeText?: string;
 
   /**
    * Género administrativo por código legible.
