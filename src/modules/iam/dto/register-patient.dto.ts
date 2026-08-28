@@ -3,11 +3,14 @@ import {
   IsEmail,
   IsIn,
   IsISO8601,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   Matches,
+  Max,
   MaxLength,
+  Min,
   MinLength,
   ValidateIf,
 } from 'class-validator';
@@ -309,6 +312,174 @@ export class RegisterPatientDto {
   @IsString()
   @MaxLength(100)
   timeZone?: string;
+
+  /**
+   * Calle y número del domicilio, tal como la persona lo escribe.
+   *
+   * La columna `common.addresses.lines` es un varchar único, no un arreglo: acá
+   * viaja el texto entero, sin partirlo en líneas.
+   */
+  @ApiPropertyOptional({
+    maxLength: 500,
+    description: 'Calle y número del domicilio',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  homeAddressLines?: string;
+
+  /**
+   * Latitud del domicilio.
+   *
+   * El par de coordenadas es **ambos o ninguno**: el `ValidateIf` mira las dos
+   * propiedades, así que mandar una sola hace caer a la que falta en su
+   * `@IsNumber` y la petición termina en 400. Media coordenada no ubica nada.
+   */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: RegisterPatientDto) =>
+      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  homeLatitude?: number;
+
+  /** Longitud del domicilio. Ver {@link RegisterPatientDto.homeLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: RegisterPatientDto) =>
+      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  homeLongitude?: number;
+
+  /**
+   * Municipio donde trabaja (miembro de `VS_BO_MUNICIPALITY`).
+   *
+   * Mismo criterio que el municipio de residencia: el departamento se deriva del
+   * código del INE y no se recibe del cliente.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Municipio del trabajo (catálogo VS_BO_MUNICIPALITY)',
+  })
+  @IsOptional()
+  @IsUUID()
+  workMunicipalityConceptId?: string;
+
+  /** Calle y número del trabajo. */
+  @ApiPropertyOptional({
+    maxLength: 500,
+    description: 'Calle y número del lugar de trabajo',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  workAddressLines?: string;
+
+  /** Latitud del trabajo. Mismo par ambos-o-ninguno que el domicilio. */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: RegisterPatientDto) =>
+      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  workLatitude?: number;
+
+  /** Longitud del trabajo. Ver {@link RegisterPatientDto.workLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: RegisterPatientDto) =>
+      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  workLongitude?: number;
+
+  /**
+   * Nombre del tutor o persona autorizada.
+   *
+   * Es quien acompaña a un menor de edad o a un adulto a su cargo. Se guarda
+   * como persona relacionada del paciente, no como usuario de la plataforma.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Nombre del tutor o persona autorizada',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  guardianName?: string;
+
+  /**
+   * Teléfono del tutor o persona autorizada.
+   *
+   * Que no se pueda mandar sin `guardianName` lo comprueba el servicio, no un
+   * `ValidateIf`: saltear los validadores dejaría entrar un teléfono sin dueño.
+   */
+  @ApiPropertyOptional({
+    maxLength: 40,
+    description: 'Teléfono del tutor, en formato E.164 o nacional',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(/^[+]?[0-9 ()-]{6,}$/, {
+    message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
+  })
+  guardianPhone?: string;
+
+  /**
+   * Plan de salud privado que la persona declara tener.
+   *
+   * Viaja el **plan**, no la aseguradora: `insurance.patient_coverages` apunta a
+   * `insurance_plan_id`, y varias compañías publican más de un plan. Para las
+   * que tienen uno solo, elegir la compañía en la pantalla ya elige su plan.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Plan de la aseguradora privada declarada',
+  })
+  @IsOptional()
+  @IsUUID()
+  privateInsurancePlanId?: string;
+
+  /**
+   * Plan del seguro público que la persona declara tener (CNS, CPS, SUS…).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Plan del seguro público declarado',
+  })
+  @IsOptional()
+  @IsUUID()
+  publicInsurancePlanId?: string;
+
+  /**
+   * NIT para las facturas que la persona recibe de las instituciones.
+   *
+   * Sólo el número: la razón social no tiene hoy dónde vivir en el modelo, así
+   * que no se pide un dato que se perdería.
+   */
+  @ApiPropertyOptional({
+    description: 'NIT para facturación (sólo el número)',
+    maxLength: 20,
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[0-9]{4,20}$/, {
+    message: 'El NIT sólo admite dígitos',
+  })
+  billingTaxId?: string;
 }
 
 /** Resultado del auto-registro de un paciente. */
