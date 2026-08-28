@@ -108,10 +108,15 @@ export class UpdateOwnPractitionerProfileDto {
   @MaxLength(100)
   motherLastName?: string;
 
-  @ApiPropertyOptional({ format: 'date' })
+  /**
+   * `null` la BORRA, igual que la cadena vacía borra un apellido opcional.
+   * `@IsOptional()` deja pasar `null` además de `undefined`, así que el tipo
+   * lo dice explícito en vez de dejarlo como un efecto lateral del validador.
+   */
+  @ApiPropertyOptional({ format: 'date', nullable: true })
   @IsOptional()
   @IsISO8601()
-  birthDate?: string;
+  birthDate?: string | null;
 
   @ApiPropertyOptional({ maxLength: 40, description: 'Teléfono de contacto' })
   @IsOptional()
