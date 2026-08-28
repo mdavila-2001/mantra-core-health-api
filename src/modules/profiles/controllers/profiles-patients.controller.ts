@@ -6,11 +6,13 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -18,7 +20,6 @@ import {
 import {
   CurrentUser,
   ParseOptionalLimitPipe,
-  RequiresVerifiedIdentity,
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
@@ -44,15 +45,18 @@ import {
   PatientSummaryResponseDto,
   SearchPatientsResponseDto,
   PatientDetailResponseDto,
+  OwnPatientProfileResponseDto,
+  UpdateOwnPatientProfileDto,
 } from '../dto';
 
 /**
  * Endpoints de personas y pacientes. Capa fina: valida parámetros y delega en el
  * servicio de dominio.
  *
- * Las operaciones de gobierno exigen rol `SECURITY_ADMIN`. La excepción es
- * `GET /profiles/patients/me/summary`, que el propio paciente consulta sobre sí
- * mismo y que, en su lugar, exige tener la identidad verificada.
+ * Las operaciones de gobierno exigen rol `SECURITY_ADMIN`. La excepción son las
+ * rutas `patients/me/*`, que el propio paciente ejerce sobre sí mismo y para las
+ * que basta con la sesión: lo único que le piden es ser el titular de la cuenta,
+ * y el sujeto lo resuelve el servidor —no hay parámetro que apunte a otro—.
  */
 @ApiTags('profiles-patients')
 @ApiBearerAuth()
@@ -66,18 +70,73 @@ export class ProfilesPatientsController {
   constructor(private readonly patientsService: ProfilesPatientsService) {}
 
   /**
-   * Resumen del propio paciente. Ejemplo de función que sólo se habilita con la
-   * identidad verificada: sin aserción vigente el guard responde 403.
+   * Resumen del propio paciente. No exige identidad verificada: verificarse es
+   * un trámite aparte, y el titular ve desde el alta lo que él mismo declaró. La
+   * verificación sólo decide si el resumen incluye el código de paciente, y eso
+   * lo resuelve el servicio (`identityVerified` en la respuesta).
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Datos básicos del paciente.
    */
   @Get('patients/me/summary')
-  @RequiresVerifiedIdentity()
-  @ApiOperation({
-    summary: 'Consultar el resumen propio (requiere identidad verificada)',
-  })
+  @ApiOperation({ summary: 'Consultar el resumen propio' })
   getOwnSummary(
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PatientSummaryResponseDto> {
     return this.patientsService.getOwnSummary(actor);
+  }
+
+  /**
+   * Los propios datos de filiación, tal como los declaró el paciente.
+   *
+   * Es la lectura que faltaba para poder editarlos: el resumen devuelve el
+   * nombre ya compuesto, y con eso un formulario no puede corregir un apellido.
+   * Acá viajan sus partes, la fecha de nacimiento, el sexo al nacer, la
+   * ocupación, el teléfono vigente y el municipio del domicilio.
+   *
+   * Sin `@Roles` por lo mismo que el resumen: el sujeto lo resuelve el servidor
+   * desde la sesión y no hay parámetro que apunte a otro.
+   *
+   * @param actor - Usuario autenticado, que es también el sujeto.
+   * @returns Sus datos de filiación.
+   */
+  @Get('patients/me')
+  @ApiOperation({ summary: 'Consultar los propios datos de filiación' })
+  @ApiOkResponse({
+    type: OwnPatientProfileResponseDto,
+    description:
+      'Lo que el paciente declaró al registrarse. Los campos que no declaró llegan ausentes, no `null`.',
+  })
+  getOwnProfile(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    return this.patientsService.getOwnProfile(actor);
+  }
+
+  /**
+   * Editar los propios datos de filiación.
+   *
+   * Sin `@Roles` por lo mismo que la lectura. Lo editable es lo que la persona
+   * **declara** sobre sí misma; el documento de identidad, el correo, la
+   * contraseña, el código de paciente y los estados quedan fuera porque tienen
+   * su propio circuito.
+   *
+   * @param dto - Los campos a cambiar; lo que no viene no se toca.
+   * @param actor - Usuario autenticado, que es también el sujeto.
+   * @returns El perfil releído, ya actualizado.
+   */
+  @Patch('patients/me')
+  @ApiOperation({ summary: 'Editar los propios datos de filiación' })
+  @ApiOkResponse({
+    type: OwnPatientProfileResponseDto,
+    description:
+      'El perfil releído. Un cuerpo vacío es válido y devuelve el perfil sin cambios.',
+  })
+  updateOwnProfile(
+    @Body() dto: UpdateOwnPatientProfileDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    return this.patientsService.updateOwnProfile(dto, actor);
   }
 
   /**

@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `directory`
 
-Referencia exhaustiva de 16 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `directory-admin-tenants`, `directory-tenants`
 - **Controladores:** `AdminTenantsController`, `TenantsController`
@@ -16,17 +16,19 @@ Referencia exhaustiva de 16 operación(es) del módulo `directory`, derivada del
 3. [POST /admin/tenants/{tenantId}/suspend](#3-post-admin-tenants-tenantid-suspend) — Suspender un tenant con cascada de revocación
 4. [POST /admin/tenants/{tenantId}/verification](#4-post-admin-tenants-tenantid-verification) — Verificar y activar un tenant
 5. [GET /tenants/{tenantId}](#5-get-tenants-tenantid) — Ficha de una organización
-6. [GET /tenants/{tenantId}/branches](#6-get-tenants-tenantid-branches) — Sucursales de la organización
-7. [POST /tenants/{tenantId}/branches](#7-post-tenants-tenantid-branches) — Crear una branch / sede física con geolocalización
-8. [GET /tenants/{tenantId}/child-tenants](#8-get-tenants-tenantid-child-tenants) — Sub-organizaciones de una organización
-9. [POST /tenants/{tenantId}/child-tenants](#9-post-tenants-tenantid-child-tenants) — Crear una organización hija / sub-tenant
-10. [GET /tenants/{tenantId}/memberships](#10-get-tenants-tenantid-memberships) — Plantilla de la organización
-11. [POST /tenants/{tenantId}/memberships](#11-post-tenants-tenantid-memberships) — Incorporar un usuario al tenant (membership)
-12. [GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#12-get-tenants-tenantid-memberships-membershipid-branch-assignments) — Sucursales asignadas a una membresía
-13. [POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#13-post-tenants-tenantid-memberships-membershipid-branch-assignments) — Asignar la membresía a una branch
-14. [POST /tenants/{tenantId}/memberships/{membershipId}/offboard](#14-post-tenants-tenantid-memberships-membershipid-offboard) — Revocar / offboarding de un miembro
-15. [PATCH /tenants/{tenantId}/memberships/{membershipId}/role](#15-patch-tenants-tenantid-memberships-membershipid-role) — Cambiar rol / scope de la membresía
-16. [POST /tenants/{tenantId}/memberships/{membershipId}/transfer](#16-post-tenants-tenantid-memberships-membershipid-transfer) — Transferir la membresía entre branches
+6. [PATCH /tenants/{tenantId}](#6-patch-tenants-tenantid) — Editar los datos de la propia organización
+7. [GET /tenants/{tenantId}/branches](#7-get-tenants-tenantid-branches) — Sucursales de la organización
+8. [POST /tenants/{tenantId}/branches](#8-post-tenants-tenantid-branches) — Crear una branch / sede física con geolocalización
+9. [GET /tenants/{tenantId}/child-tenants](#9-get-tenants-tenantid-child-tenants) — Sub-organizaciones de una organización
+10. [POST /tenants/{tenantId}/child-tenants](#10-post-tenants-tenantid-child-tenants) — Crear una organización hija / sub-tenant
+11. [GET /tenants/{tenantId}/memberships](#11-get-tenants-tenantid-memberships) — Plantilla de la organización
+12. [POST /tenants/{tenantId}/memberships](#12-post-tenants-tenantid-memberships) — Incorporar un usuario al tenant (membership)
+13. [GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#13-get-tenants-tenantid-memberships-membershipid-branch-assignments) — Sucursales asignadas a una membresía
+14. [POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#14-post-tenants-tenantid-memberships-membershipid-branch-assignments) — Asignar la membresía a una branch
+15. [POST /tenants/{tenantId}/memberships/{membershipId}/offboard](#15-post-tenants-tenantid-memberships-membershipid-offboard) — Revocar / offboarding de un miembro
+16. [PATCH /tenants/{tenantId}/memberships/{membershipId}/role](#16-patch-tenants-tenantid-memberships-membershipid-role) — Cambiar rol / scope de la membresía
+17. [POST /tenants/{tenantId}/memberships/{membershipId}/transfer](#17-post-tenants-tenantid-memberships-membershipid-transfer) — Transferir la membresía entre branches
+18. [GET /tenants/me](#18-get-tenants-me) — Las organizaciones del actor, con su rol en cada una
 
 ---
 
@@ -224,8 +226,10 @@ Content-Type: application/json
 | `legalEntityTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de entidad legal | `00000000-0000-4000-8000-000000000001` |
 | `dataResidencyRegionConceptId` | No | `string` | formato `uuid` | Concept id de la región de residencia de datos | `00000000-0000-4000-8000-000000000001` |
 | `timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
-| `payer` | No | `PayerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `payer` | No | `PayerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"}` |
 | `payer.carrierCode` | No | `string` | longitud mínima 1; longitud máxima 60 | Código de la aseguradora | `CODIGO_EJEMPLO` |
+| `payer.sigla` | No | `string` | longitud mínima 1; longitud máxima 20 | Sigla de la aseguradora | `BUPA` |
+| `payer.address` | No | `string` | longitud mínima 1; longitud máxima 300 | Dirección de la aseguradora | `valor-ejemplo` |
 | `payer.regulatorIdentifier` | No | `string` | longitud mínima 1; longitud máxima 100 | Identificador ante el regulador de seguros | `valor-ejemplo` |
 | `payer.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `broker` | No | `BrokerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"}` |
@@ -286,6 +290,8 @@ Content-Type: application/json
   "timeZone": "America/La_Paz",
   "payer": {
     "carrierCode": "CODIGO_EJEMPLO",
+    "sigla": "BUPA",
+    "address": "valor-ejemplo",
     "regulatorIdentifier": "valor-ejemplo",
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001"
   },
@@ -685,7 +691,6 @@ Ejemplo de error normalizado:
 
 Ficha de una organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Ficha de una organización. Estas lecturas no exigen rol global: el alcance lo decide la membresía activa en la propia organización (`assertCanRead`). Pedir `SECURITY_ADMIN` para leer dejaría a la organización sin poder consultarse a sí misma, que es el mismo problema que `TenantAdministrationService` corrigió para las escrituras.
 
 ### Descripción del sistema
 
@@ -792,7 +797,157 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /tenants/{tenantId}/branches
+## 6. PATCH /tenants/{tenantId}
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Editar los datos de la propia organización
+- **Operation ID:** `TenantsController_updateTenant`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TenantsController.updateTenant](../../src/modules/directory/controllers/tenants.controller.ts)
+
+### Descripción de negocio
+
+Editar los datos de la propia organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: TP-1: la organización corrige sus propios datos. Sólo owner o admin **de esa** organización (o la plataforma): un `staff` la ve y no la edita.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /tenants/{tenantId}` en `TenantsController_updateTenant`. El controlador delega en `DirectoryTenantsService.updateTenant`. Valida el body como `UpdateTenantDto` y consume `application/json`. El tipo de retorno estático es `Promise<TenantResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateTenantDto`; los campos opcionales se omiten.
+
+```http
+PATCH /tenants/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `tenantId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `legalName` | No | `string` | longitud mínima 1; longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `tradeName` | No | `string` | longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `payer` | No | `UpdatePayerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"sigla":"BUPA","address":"valor-ejemplo","regulatorIdentifier":"valor-ejemplo"}` |
+| `payer.sigla` | No | `string` | longitud máxima 20 | Sin descripción específica en el contrato OpenAPI. | `BUPA` |
+| `payer.address` | No | `string` | longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `payer.regulatorIdentifier` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /tenants/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "legalName": "Nombre de ejemplo",
+  "tradeName": "Nombre de ejemplo",
+  "timeZone": "America/La_Paz",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "payer": {
+    "sigla": "BUPA",
+    "address": "valor-ejemplo",
+    "regulatorIdentifier": "valor-ejemplo"
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<TenantResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TenantResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "legalName": "Nombre de ejemplo",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "verificationStatus": "00000000-0000-4000-8000-000000000001",
+  "parentTenantId": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Valor de code mantenido por la instancia. | `CODIGO_EJEMPLO` |
+| `legalName` | Sí | `string` | Sin restricción adicional declarada | Valor de legal name mantenido por la instancia. | `Nombre de ejemplo` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado del tenant | `00000000-0000-4000-8000-000000000001` |
+| `verificationStatus` | Sí | `string` | formato `uuid` | Concept id del estado de verificación | `00000000-0000-4000-8000-000000000001` |
+| `parentTenantId` | No | `string` | formato `uuid` | Tenant padre si es sub-tenant | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 404 | `NOT_FOUND` | Organización no encontrada | Excepción explícita en src/modules/directory/services/directory-tenants.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/{tenantId}"
+}
+```
+
+---
+
+## 7. GET /tenants/{tenantId}/branches
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -919,7 +1074,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /tenants/{tenantId}/branches
+## 8. POST /tenants/{tenantId}/branches
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1066,7 +1221,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /tenants/{tenantId}/child-tenants
+## 9. GET /tenants/{tenantId}/child-tenants
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1203,7 +1358,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /tenants/{tenantId}/child-tenants
+## 10. POST /tenants/{tenantId}/child-tenants
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1263,8 +1418,10 @@ Content-Type: application/json
 | `tenantTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de tenant. Si viene `tenantType`, se ignora. | `00000000-0000-4000-8000-000000000001` |
 | `legalEntityTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de entidad legal | `00000000-0000-4000-8000-000000000001` |
 | `dataResidencyRegionConceptId` | No | `string` | formato `uuid` | Región de residencia de datos (por defecto hereda la del padre) | `00000000-0000-4000-8000-000000000001` |
-| `payer` | No | `PayerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `payer` | No | `PayerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"}` |
 | `payer.carrierCode` | No | `string` | longitud mínima 1; longitud máxima 60 | Código de la aseguradora | `CODIGO_EJEMPLO` |
+| `payer.sigla` | No | `string` | longitud mínima 1; longitud máxima 20 | Sigla de la aseguradora | `BUPA` |
+| `payer.address` | No | `string` | longitud mínima 1; longitud máxima 300 | Dirección de la aseguradora | `valor-ejemplo` |
 | `payer.regulatorIdentifier` | No | `string` | longitud mínima 1; longitud máxima 100 | Identificador ante el regulador de seguros | `valor-ejemplo` |
 | `payer.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `broker` | No | `BrokerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"}` |
@@ -1323,6 +1480,8 @@ Content-Type: application/json
   "dataResidencyRegionConceptId": "00000000-0000-4000-8000-000000000001",
   "payer": {
     "carrierCode": "CODIGO_EJEMPLO",
+    "sigla": "BUPA",
+    "address": "valor-ejemplo",
     "regulatorIdentifier": "valor-ejemplo",
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001"
   },
@@ -1450,7 +1609,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /tenants/{tenantId}/memberships
+## 11. GET /tenants/{tenantId}/memberships
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1588,7 +1747,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /tenants/{tenantId}/memberships
+## 12. POST /tenants/{tenantId}/memberships
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1727,7 +1886,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 13. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1852,7 +2011,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 14. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1991,7 +2150,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
+## 15. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2104,7 +2263,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
+## 16. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2241,7 +2400,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
+## 17. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2368,6 +2527,127 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/tenants/{tenantId}/memberships/{membershipId}/transfer"
+}
+```
+
+---
+
+## 18. GET /tenants/me
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Las organizaciones del actor, con su rol en cada una
+- **Operation ID:** `TenantsController_listMyTenants`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TenantsController.listMyTenants](../../src/modules/directory/controllers/tenants.controller.ts)
+
+### Descripción de negocio
+
+Con esto el panel de la organización puede abrirse sin que la pantalla conozca de antemano el identificador de la organización.
+
+Contexto declarado en el controlador: TP-1: las organizaciones del actor. Va declarada **antes** que `:tenantId`: Nest resuelve por orden y el parámetro capturaría `me` —y `ParseUUIDPipe` lo rechazaría con un 400 que no explica nada—. Sin `@Roles`: lo único que puede devolver es lo del propio actor, porque el sujeto sale de la sesión y no hay parámetro que apunte a otro. Una lista vacía es una respuesta legítima —quien no pertenece a ninguna organización no tiene panel—, no un 403.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /tenants/me` en `TenantsController_listMyTenants`. El controlador delega en `DirectoryReadService.listMyTenants`. No recibe body. El tipo de retorno estático es `Promise<MyOrganizationsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /tenants/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /tenants/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyOrganizationsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyOrganizationsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyOrganizationsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyOrganizationsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyOrganizationsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyOrganizationsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyOrganizationsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "myRoleConceptId": "00000000-0000-4000-8000-000000000001",
+      "canAdminister": true,
+      "isVerified": true,
+      "payer": {
+        "carrierCode": "CODIGO_EJEMPLO",
+        "regulatorIdentifier": "valor-ejemplo",
+        "sigla": "valor-ejemplo",
+        "address": "valor-ejemplo"
+      }
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MyOrganizationDto>` | Sin restricción adicional declarada | Sus organizaciones, de la más recientemente creada a la más antigua. | `[{"myRoleConceptId":"00000000-0000-4000-8000-000000000001","canAdminister":true,"isVerified":true,"payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","sigla":"valor-ejemplo","address":"valor-ejemplo"}}]` |
+| `items[].myRoleConceptId` | Sí | `string` | formato `uuid` | Concepto del rol de la membresía activa (owner/admin/staff) | `00000000-0000-4000-8000-000000000001` |
+| `items[].canAdminister` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero para owner y admin de la organización | `true` |
+| `items[].isVerified` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero cuando la plataforma verificó la organización | `true` |
+| `items[].payer` | No | `PayerOrganizationProfileDto` | Sin restricción adicional declarada | Datos propios de la aseguradora. Presente sólo si el tenant es `PAYER`. | `{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","sigla":"valor-ejemplo","address":"valor-ejemplo"}` |
+| `items[].payer.carrierCode` | No | `string` | Sin restricción adicional declarada | Código de la aseguradora | `CODIGO_EJEMPLO` |
+| `items[].payer.regulatorIdentifier` | No | `string` | Sin restricción adicional declarada | Identificador ante el regulador de seguros | `valor-ejemplo` |
+| `items[].payer.sigla` | No | `string` | Sin restricción adicional declarada | Sigla de la aseguradora | `valor-ejemplo` |
+| `items[].payer.address` | No | `string` | Sin restricción adicional declarada | Dirección de la aseguradora | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/me"
 }
 ```
 

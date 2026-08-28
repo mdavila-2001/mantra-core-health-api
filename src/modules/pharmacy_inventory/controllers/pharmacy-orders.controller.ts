@@ -26,6 +26,7 @@ import { PharmacyOrdersService } from '../services';
 import {
   ConfirmPharmacyOrderDto,
   CreatePharmacyOrderDto,
+  DispensePharmacyOrderDto,
   PharmacyOrderDto,
   PharmacyOrderListResponseDto,
   RejectPharmacyOrderDto,
@@ -167,14 +168,14 @@ export class PharmacyOrdersController {
     return this.orders.openReview(id, actor);
   }
 
-  /** FAR-E2: confirmar sin sustituciones (proponer genérico: 422, bloqueado). */
+  /** FAR-E2: confirmar, con genéricos propuestos si el mostrador los declara. */
   @Post(':id/confirm')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Confirmar el pedido (FAR-E2)',
     description:
-      'Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea; PROPONER_GENERICO responde 422 porque la sustitución está bloqueada por modelo.',
+      'Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea. PROPONER_GENERICO (con proposedProductId del mismo medicamento) persiste la propuesta con sus precios congelados y deja el pedido en ACEPTACION_PENDIENTE: decide el paciente.',
   })
   confirm(
     @Param('id', ParseUUIDPipe) id: string,
@@ -184,14 +185,52 @@ export class PharmacyOrdersController {
     return this.orders.confirm(id, dto, actor);
   }
 
-  /** FAR-E2: rechazar con motivo (el motivo aún no se persiste: viaja en el aviso). */
+  /**
+   * FAR-E2/I2: el titular acepta los genéricos propuestos. Todo-o-nada, como
+   * los dos botones del front: `ACEPTACION_PENDIENTE → ACEPTADO`.
+   */
+  @Post(':id/accept-substitutions')
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Aceptar los genéricos propuestos (paciente)',
+    description:
+      'Devuelve el stock del original, reserva el propuesto con la misma contabilidad y re-congela el total con el precio de la oferta. La propuesta queda como historia (ACEPTADA + decided_at).',
+  })
+  acceptSubstitutions(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.acceptSubstitutions(id, actor);
+  }
+
+  /**
+   * FAR-E2/I2: el titular prefiere los originales.
+   * `ACEPTACION_PENDIENTE → CONFIRMADO`; las líneas no se tocan.
+   */
+  @Post(':id/prefer-original')
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Preferir los productos originales (paciente)',
+    description:
+      'Las propuestas quedan como historia (RECHAZADA + decided_at) y el pedido vuelve a la cola del mostrador como CONFIRMADO — el stock del original siguió reservado todo el tiempo.',
+  })
+  preferOriginal(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.preferOriginal(id, actor);
+  }
+
+  /** FAR-E2: rechazar con motivo (v4.2.1 lo persiste en el pedido). */
   @Post(':id/reject')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Rechazar el pedido (FAR-E2)',
     description:
-      'Libera el stock reservado. El motivo es obligatorio y viaja en el evento y la campana; no se persiste todavía (bloqueador de modelo).',
+      'Libera el stock reservado. El motivo es obligatorio: se persiste en rejection_reason_text y viaja además en el evento y la campana.',
   })
   reject(
     @Param('id', ParseUUIDPipe) id: string,
@@ -202,23 +241,43 @@ export class PharmacyOrdersController {
   }
 
   /**
-   * FAR-E2: dejar listo en mostrador — **bloqueado por modelo**. La ruta queda
-   * por compatibilidad y responde 422 tipificado: sin modalidad persistida no
-   * puede demostrarse que el pedido sea un retiro, y «listo para retiro» sobre
-   * un pedido de entrega sería mentirle al mostrador y al paciente.
+   * FAR-E2/E3: dejar listo en mostrador (habilitado por el modelo v4.2.1).
+   * Exige que el pedido sea demostrablemente un RETIRO y que la sede ofrezca
+   * mostrador; sella el código de retiro y renueva la reserva 48 h.
    */
   @Post(':id/ready')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Marcar el pedido listo para retiro (FAR-E2 — bloqueado)',
+    summary: 'Marcar el pedido listo para retiro (FAR-E2/E3)',
     description:
-      'Responde 422 (blockedByModel: deliveryMode) sin ningún efecto: la modalidad del pedido no se persiste y no puede demostrarse que sea un retiro. Se habilita con el patch de modelo.',
+      'CONFIRMADO|ACEPTADO → LISTO_PARA_RETIRO. Solo pedidos con modalidad RETIRO y sede con mostrador; sella el código de retiro (una sola vez) y renueva expires_at +48 h. Un pedido de envío o sin modalidad responde 422 tipificado sin efectos.',
   })
   ready(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
     return this.orders.ready(id, actor);
+  }
+
+  /**
+   * FAR-E3: la entrega en el mostrador, contra el código de retiro. Parcial
+   * acumulativa: mientras quede saldo el pedido sigue LISTO_PARA_RETIRO con el
+   * mismo código, y pasa a RETIRADO cuando la última línea se cubre.
+   */
+  @Post(':id/dispense')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Dispensar el pedido en el mostrador (FAR-E3)',
+    description:
+      'Valida el código de retiro (insensible a mayúsculas; mismatch: 422 sin efectos) y entrega el saldo en pie — todo, o solo productIds. Acumula fulfilled_quantity por línea; con saldo cero el pedido pasa a RETIRADO. Repetir la idempotencyKey no duplica stock ni ledger.',
+  })
+  dispense(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DispensePharmacyOrderDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderDto> {
+    return this.orders.dispense(id, dto, actor);
   }
 }

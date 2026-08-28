@@ -52,9 +52,16 @@ import {
 // no duplican fuente de verdad. Importar `ProfilesModule` además cerraría un
 // ciclo: `profiles` ya cuenta lo que un profesional dejó asentado en `clinical`.
 import {
+  HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../profiles/repositories';
+// v4.2.2 — el permiso de lectura de la historia nace del turno, así que la lectura
+// clínica necesita preguntarle a la agenda. Mismo criterio de arriba: es una clase
+// sin estado que recibe el `EntityManager` por parámetro. El cruce inverso ya
+// existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
+// tampoco acá se importa el módulo entero ni se cierra un ciclo.
+import { SchedulingBookingsRepository } from '../scheduling/repositories';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -80,6 +87,8 @@ import {
     // Repositorios
     PersonAccountLinksRepository,
     PatientProfilesRepository,
+    HealthPractitionerProfilesRepository,
+    SchedulingBookingsRepository,
     CareEpisodesRepository,
     AppointmentsRepository,
     EncountersRepository,

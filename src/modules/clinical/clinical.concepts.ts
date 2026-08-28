@@ -635,6 +635,41 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Appointment cancelled',
     },
 
+    /* --- canal de la cita: POR QUÉ MEDIO ocurre la atención --------------------
+       `clinical.appointments.channel_concept_id` existía desde el modelo y estaba
+       sin conjunto y sin usar: nadie lo leía ni lo escribía. Es la columna donde
+       vive la **modalidad**, y por no tener valores la teleconsulta no se podía
+       declarar aunque el modelo ya la admitiera.
+
+       **Canal no es tipo.** `type_concept_id`, en la misma tabla, responde *qué
+       clase de atención es* —primera consulta, control, procedimiento—; el canal
+       responde *por qué medio ocurre*. Son ejes independientes: un control puede
+       ser presencial o por video, y una cirugía es presencial siempre. Escribir
+       acá el motivo asistencial, o allá el medio, deja las dos columnas
+       peleando por el mismo significado.
+
+       **`NULL` se lee como presencial.** Es lo que fueron todas las citas hasta
+       hoy, así que el histórico no necesita backfill ni afirma algo que nadie
+       registró.
+
+       El conjunto lo declara la API y no una nota `vs_*.md` de la bóveda: con
+       nota, `gen_seeds.py` se adueñaría del conjunto con ids de otro namespace y
+       quedarían dos catálogos sobre la misma columna (el problema del módulo 64,
+       criterio fijado en v4.1.9). */
+    APPOINTMENT_CHANNEL_IN_PERSON: {
+      code: 'APPT_CH_PRESENCIAL',
+      display: 'In-person appointment',
+    },
+    APPOINTMENT_CHANNEL_TELEHEALTH: {
+      code: 'APPT_CH_TELECONSULTA',
+      display: 'Telehealth appointment',
+    },
+    /** La atención ocurre donde vive el paciente: el profesional se traslada. */
+    APPOINTMENT_CHANNEL_HOME_VISIT: {
+      code: 'APPT_CH_DOMICILIO',
+      display: 'Home visit appointment',
+    },
+
     /* --- vademécum inicial de la receta ---------------------------------------
        ⚠️ CATÁLOGO INICIAL, NO UN VADEMÉCUM. Estos doce fármacos existen para que
        `clinical.medication_requests.medication_concept_id` tenga un conjunto de

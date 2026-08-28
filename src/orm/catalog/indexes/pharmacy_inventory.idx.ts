@@ -70,7 +70,7 @@ export const pharmacyInventoryIndexes: readonly IndexTuple[] = [
   ['inventory_reservations', 'ix_inventory_reservations_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['inventory_reservations', 'ix_inventory_reservations_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],
   ['inventory_reservations', 'uq_inventory_reservations_idempotency', ['idempotency_key'], true, 'btree'],
-  ['inventory_reservations', 'ux_inventory_reservations_pickup_code', ['pickup_code'], true, 'btree', 'pickup_code IS NOT NULL'],
+  ['inventory_reservations', 'ux_inventory_reservations_pharmacy_site_pickup_code', ['pharmacy_site_id', 'pickup_code'], true, 'btree', 'pickup_code IS NOT NULL'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_inventory_reservation_id', ['inventory_reservation_id'], false, 'btree'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_pharmacy_product_id', ['pharmacy_product_id'], false, 'btree'],
   ['inventory_reservation_lines', 'ix_inventory_reservation_lines_inventory_lot_id', ['inventory_lot_id'], false, 'btree'],

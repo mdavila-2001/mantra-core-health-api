@@ -3,17 +3,13 @@ import { Reflector } from '@nestjs/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PersonAccountLinks } from '../../modules/profiles/entities';
 import { PROF } from '../../modules/profiles/profiles.concepts';
-import { IdentityAssertions } from '../../modules/identity_assurance/entities';
-import { IDA } from '../../modules/identity_assurance/identity_assurance.concepts';
+// Del archivo concreto y no del barril `repositories/`: ese barril arrastra
+// repositorios que importan el barril `common`, que re-exporta este mismo guard
+// — el ciclo deja la clase sin inicializar al cargar el módulo.
+import { findCurrentIdentityAssertionForPerson } from '../../modules/identity_assurance/repositories/identity-assertions.repository';
 import { IdentityVerificationRequiredException } from '../errors/domain.exception';
 import { REQUIRES_VERIFIED_IDENTITY_KEY } from './requires-verified-identity.decorator';
 import type { AuthenticatedRequest } from './authenticated-user.interface';
-
-/** Sujetos cuya aserción prueba la identidad de una persona. */
-const PERSON_SUBJECT_TYPES = [
-  IDA.SUBJECT_PATIENT_IDENTITY,
-  IDA.SUBJECT_PRACTITIONER_IDENTITY,
-];
 
 /**
  * Exige una aserción de identidad vigente para los handlers marcados con
@@ -80,14 +76,12 @@ export class VerifiedIdentityGuard implements CanActivate {
       );
     }
 
-    const now = new Date();
-    const assertion = await em.findOne(IdentityAssertions, {
-      subjectTypeConceptId: { $in: PERSON_SUBJECT_TYPES },
-      subjectEntityId: link.personId,
-      revokedAt: null,
-      // Una aserción sin caducidad no expira; con caducidad, debe estar vigente.
-      $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }],
-    });
+    // El predicado de «identidad vigente» vive en `identity_assurance`, que es
+    // su dueño; aquí sólo se decide qué hacer con la respuesta.
+    const assertion = await findCurrentIdentityAssertionForPerson(
+      em,
+      link.personId,
+    );
     if (!assertion) {
       throw new IdentityVerificationRequiredException(
         'Verifique su identidad para acceder a esta función',

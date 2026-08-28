@@ -53,6 +53,19 @@ export class ScheduleRules {
   capacityPerSlot?: number;
 
   /**
+   * Receso entre consultas de esta franja, en minutos (v4.2.2).
+   *
+   * El paso del generador de cupos es `slotMinutes + gapMinutes`, pero cada turno
+   * sigue midiendo su duración real: el respiro es aire del profesional, no un cupo
+   * que alguien pueda reservar.
+   *
+   * `undefined` ≡ sin respiro: nullable y sin default, como `slotMinutes`. El `?? 0`
+   * lo pone el servicio.
+   */
+  @Property({ fieldName: 'gap_minutes', columnType: 'int', nullable: true })
+  gapMinutes?: number;
+
+  /**
    * Valor de valid from mantenido por la instancia.
    */
   @Property({ fieldName: 'valid_from', columnType: 'date', nullable: true })

@@ -50,7 +50,7 @@ import {
   VerifyEmailDto,
   VerifyEmailResponseDto,
 } from '../dto';
-import { createResidenceAddress } from './residence-address';
+import { createResidenceAddress } from '../../common/services/residence-address';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */

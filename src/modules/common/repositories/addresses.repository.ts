@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Addresses } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, touch } from '../../../common';
 
 /** Datos mínimos para dar de alta una dirección postal. */
 export interface CreateAddressData {
@@ -62,6 +62,57 @@ export interface CreateAddressData {
  */
 @Injectable()
 export class AddressesRepository {
+  /**
+   * La dirección vigente de un dueño para un uso (domicilio, trabajo).
+   *
+   * Vigente = sin `validTo`, o con uno todavía por venir. Una dirección dada de
+   * baja sigue en la tabla —es donde esa persona vivía— pero no es donde vive
+   * hoy, y devolverla mezclada haría que la ficha mostrara un domicilio del que
+   * ya se mudó.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ownerId - El dueño (para un paciente, su `personId`).
+   * @param useConceptId - Uso de la dirección (`CONCEPTS.ADDR_USE_HOME`…).
+   * @returns La dirección vigente, o `null` si no tiene ninguna.
+   */
+  async findVigenteByOwnerAndUse(
+    em: EntityManager,
+    ownerId: string,
+    useConceptId: string,
+  ): Promise<Addresses | null> {
+    const ahora = new Date();
+    return em.findOne(
+      Addresses,
+      {
+        ownerId,
+        useConceptId,
+        $or: [{ validTo: null }, { validTo: { $gt: ahora } }],
+      },
+      { orderBy: { createdAt: 'desc' } },
+    );
+  }
+
+  /**
+   * Da de baja una dirección poniéndole fin de vigencia.
+   *
+   * Mismo criterio que los puntos de contacto: mudarse no borra dónde vivía
+   * antes. `valid_to` es una columna `date`, así que con la fecha de hoy la
+   * dirección deja de ser vigente en la misma petición.
+   *
+   * @param direccion - La dirección a cerrar.
+   * @param validTo - Fecha de fin de vigencia (normalmente hoy).
+   * @param actorUserId - Quién la cierra, para la auditoría.
+   * @returns La misma dirección, ya cerrada.
+   */
+  closeVigente(
+    direccion: Addresses,
+    validTo: Date,
+    actorUserId?: string,
+  ): Addresses {
+    direccion.validTo = validTo;
+    return touch(direccion, actorUserId);
+  }
+
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateAddressData): Addresses {
     return em.create(

@@ -30,6 +30,11 @@ export interface CreateReservationData {
    */
   reservationStatusConceptId: string;
   /**
+   * Modalidad de entrega del pedido de paciente (`PINV_DELIVERY_*`, v4.2.1).
+   * Las reservas de mostrador no la llevan: queda sin sellar.
+   */
+  deliveryModeConceptId?: string;
+  /**
    * Valor de expires at mantenido por la instancia.
    */
   expiresAt: Date;
@@ -77,6 +82,14 @@ export interface CreateReservationLineData {
    * Identificador asociado a status concept.
    */
   statusConceptId: string;
+  /**
+   * Precio unitario congelado del renglón (lo que paga el paciente), v4.2.1.
+   */
+  unitPriceAmount?: string;
+  /**
+   * Moneda del precio congelado, copiada de la lista — jamás acuñada.
+   */
+  currencyConceptId?: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -148,6 +161,7 @@ export class ReservationsRepository {
         medicationRequestId: data.medicationRequestId,
         quotationId: data.quotationId,
         reservationStatusConceptId: data.reservationStatusConceptId,
+        deliveryModeConceptId: data.deliveryModeConceptId,
         expiresAt: data.expiresAt,
         confirmedAt: data.confirmedAt,
         idempotencyKey: data.idempotencyKey,
@@ -178,6 +192,8 @@ export class ReservationsRepository {
         requestedQuantity: data.requestedQuantity,
         reservedQuantity: data.reservedQuantity,
         statusConceptId: data.statusConceptId,
+        unitPriceAmount: data.unitPriceAmount,
+        currencyConceptId: data.currencyConceptId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
