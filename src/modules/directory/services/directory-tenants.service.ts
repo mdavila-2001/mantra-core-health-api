@@ -30,6 +30,7 @@ import {
   TenantResponseDto,
   UpdateTenantDto,
   VerifyTenantDto,
+  UpdateTenantPublicProfileDto,
 } from '../dto';
 import { TenantAdministrationService } from './tenant-administration.service';
 import { PublicProfileProjectionService } from '../../community/services';
@@ -168,6 +169,65 @@ export class DirectoryTenantsService {
         { operation: 'directory.tenant.provision', tenantId: tenant.id },
         'Tenant provisioned',
       );
+      return this.toResponse(tenant);
+    });
+  }
+
+  /**
+   * Llena la vitrina pública de una organización verificada.
+   *
+   * ## Por qué hace falta un endpoint, y por qué vive acá
+   *
+   * `verify()` proyecta la vitrina con el nombre y el slug —es todo lo que la
+   * verificación sabe— y hasta acá **no había ninguna forma de completarla**.
+   * La vitrina de un profesional se edita por `PUT /community/profiles/me`,
+   * que resuelve el sujeto desde la sesión; el sujeto de una organización es su
+   * tenant, y ninguna sesión «es» un tenant. Por eso el directorio de centros
+   * de salud se veía vacío: no era la pantalla, era que no había nada cargado
+   * ni manera de cargarlo.
+   *
+   * Va en `/admin/tenants/:id/public-profile`, al lado del alta y de la
+   * verificación, porque es el mismo trámite —lo que la plataforma administra
+   * de una organización— y no una acción del grafo social.
+   *
+   * @param tenantId - La organización cuya vitrina se llena.
+   * @param dto - Campos a cambiar; los omitidos se conservan.
+   * @param actor - Quién lo hace, para la auditoría.
+   * @returns La organización, tal como la devuelven el alta y la verificación.
+   */
+  async updatePublicProfile(
+    tenantId: string,
+    dto: UpdateTenantPublicProfileDto,
+    actor: AuthenticatedUser,
+  ): Promise<TenantResponseDto> {
+    this.logger.info(
+      {
+        operation: 'directory.tenant.updatePublicProfile',
+        tenantId,
+        actorId: actor.id,
+      },
+      'Updating tenant public profile',
+    );
+    return this.em.transactional(async (tx) => {
+      const tenant = await this.tenantsRepo.findById(tx, tenantId);
+      if (!tenant)
+        throw new ResourceNotFoundException('Tenant no encontrado', {
+          tenantId,
+        });
+
+      // El sujeto de la vitrina de una organización es su propio tenant: es lo
+      // que escribe `verify()` (`targetId: tenant.id`) y lo que lee la ficha
+      // pública. Si eso cambiara, cambia en los dos lados o en ninguno.
+      await this.publicProfiles.updateOrganizationVitrina(tx, {
+        targetId: tenant.id,
+        displayName: dto.displayName,
+        headline: dto.headline,
+        biography: dto.biography,
+        avatarFileId: dto.avatarFileId,
+        coverFileId: dto.coverFileId,
+        actorUserId: actor.id,
+      });
+
       return this.toResponse(tenant);
     });
   }

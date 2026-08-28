@@ -109,6 +109,8 @@ export class PublicSearchRepository {
       targetTypeConceptId?: string;
       /** Sólo verificados. */
       verified?: boolean;
+      /** Ciudad exacta, sin distinguir tildes ni mayúsculas. */
+      city?: string;
       /** Clave de continuación `(displayName, id)`. */
       after?: { displayName: string; id: string };
     },
@@ -122,6 +124,22 @@ export class PublicSearchRepository {
       where.targetTypeConceptId = filtros.targetTypeConceptId;
     if (filtros.verified)
       where.verificationStatusConceptId = CONCEPTS.STATE_ACTIVE;
+
+    // La ciudad vive en `common.addresses`, no en el perfil: se resuelve a
+    // sujetos primero y se acota la búsqueda a ésos. Va **antes** de paginar,
+    // por lo mismo que el filtro de texto: acotar después de traer la página
+    // devolvería páginas de menos, y un directorio que muestra tres de veinte
+    // resultados se lee como un directorio con tres resultados.
+    //
+    // Ninguno es la respuesta honesta a «filtrá por una ciudad donde no hay
+    // nada», y por eso corta acá en vez de dejar caer el filtro: dejarlo caer
+    // devolvería el directorio entero y le diría a quien filtró, sin decírselo,
+    // que todos esos centros están en esa ciudad.
+    if (filtros.city) {
+      const sujetos = await this.targetIdsByCity(em, filtros.city);
+      if (sujetos.length === 0) return [];
+      where.targetId = { $in: sujetos };
+    }
 
     // El keyset va sobre `(display_name, id)`: `display_name` solo no es único
     // —hay homónimos— y una página que empieza en un empate se saltea filas.
@@ -147,6 +165,57 @@ export class PublicSearchRepository {
     const ids = await this.matchIdsByText(em, filtros.q, where, limit);
     const permitidos = new Set(ids);
     return rows.filter((row) => permitidos.has(row.id));
+  }
+
+  /**
+   * Los sujetos con una dirección vigente en esa ciudad.
+   *
+   * Es el filtro de ciudad del buscador público por la vía SQL. Existe porque
+   * el índice puede no responder, y un filtro que sólo funciona cuando
+   * OpenSearch está arriba es peor que ninguno: el día que se cae, la lista
+   * deja de acotar **sin avisar** y quien filtró «Cochabamba» recibe el
+   * directorio entero creyendo que es Cochabamba.
+   *
+   * Compara sin tildes y sin distinguir mayúsculas —«la paz» y «La Paz» son la
+   * misma ciudad—, con la misma degradación que el filtro de texto: si
+   * `unaccent` no está instalada, cae a `lower(...)` en vez de romper.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param city - Ciudad tal como la escribió quien filtra.
+   * @returns Los `owner_id` con dirección vigente en esa ciudad.
+   */
+  private async targetIdsByCity(
+    em: EntityManager,
+    city: string,
+  ): Promise<string[]> {
+    const base = `
+      SELECT DISTINCT owner_id FROM common.addresses
+       WHERE (valid_to IS NULL OR valid_to >= CURRENT_DATE)
+         AND %NORM%(lower(coalesce(city, ''))) = %NORM%(lower(?))
+       LIMIT ?`;
+    // El tope existe para que el `IN` no crezca sin límite en una ciudad
+    // grande. Es holgado a propósito: por debajo del tamaño de cualquier
+    // directorio de una ciudad real, y muy por encima del de éste.
+    const params = [city, 5000];
+    try {
+      const filas = await em
+        .getConnection()
+        .execute<{ owner_id: string }[]>(
+          base.replace(/%NORM%/g, 'unaccent'),
+          params,
+          'all',
+        );
+      return filas.map((f) => f.owner_id);
+    } catch {
+      const filas = await em
+        .getConnection()
+        .execute<{ owner_id: string }[]>(
+          base.replace(/%NORM%/g, ''),
+          params,
+          'all',
+        );
+      return filas.map((f) => f.owner_id);
+    }
   }
 
   /**
