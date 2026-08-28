@@ -389,6 +389,58 @@ describe('catálogo de formularios estándar', () => {
     expect(reparaciones).toHaveLength(0);
   });
 
+  /* ---- el catálogo de especialidades, cuando el modelo no lo trajo -------- */
+
+  it('sin value set del modelo publica VS_MEDICAL_SPECIALTY con los conceptos acuñados', async () => {
+    const { service, rowsOf } = build();
+
+    await service.run();
+
+    const conjuntos = rowsOf('ValueSets');
+    expect(conjuntos).toHaveLength(1);
+    expect(conjuntos[0].internalCode).toBe('VS_MEDICAL_SPECIALTY');
+
+    const versiones = rowsOf('ValueSetVersions');
+    expect(versiones).toHaveLength(1);
+    // Sin `isDefault` no hay versión vigente que expandir, y el catálogo
+    // seguiría contando como ausente aunque el conjunto exista.
+    expect(versiones[0].isDefault).toBe(true);
+    expect(versiones[0].valueSetId).toBe(conjuntos[0].id);
+
+    const miembros = rowsOf('ValueSetMembers');
+    expect(miembros.length).toBeGreaterThan(0);
+    expect(miembros.every((fila: any) => fila.included === true)).toBe(true);
+    expect(
+      miembros.every((fila: any) => fila.valueSetVersionId === versiones[0].id),
+    ).toBe(true);
+    // Los mismos conceptos que este seed acuña, no unos nuevos.
+    expect(miembros.map((fila: any) => fila.conceptId)).toContain(
+      deterministicId('clinical-forms:specialty:CARDIOLOGIA'),
+    );
+  });
+
+  it('lo transversal no entra al catálogo: no es una especialidad médica', async () => {
+    const { service, rowsOf } = build();
+
+    await service.run();
+
+    expect(
+      rowsOf('ValueSetMembers').map((fila: any) => fila.conceptId),
+    ).not.toContain(
+      deterministicId(`clinical-forms:specialty:${CODIGO_TRANSVERSAL}`),
+    );
+  });
+
+  it('con el value set del modelo presente no escribe una sola fila de catálogo', async () => {
+    const { service, rowsOf } = build(new Set(), ESPECIALIDADES_DEL_MODELO);
+
+    await service.run();
+
+    expect(rowsOf('ValueSets')).toHaveLength(0);
+    expect(rowsOf('ValueSetVersions')).toHaveLength(0);
+    expect(rowsOf('ValueSetMembers')).toHaveLength(0);
+  });
+
   /* ---- el odontograma del formulario OMS ----------------------------------- */
 
   it('el formulario OMS declara el odontograma como json y ya no exige la prosa', () => {
