@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * seed-vitrina-publica.mjs — Puebla la **cara pública** de AloVida: médicos con
- * vitrina y publicaciones, clínicas, laboratorios y farmacias verificados.
+ * vitrina, trayectoria completa y publicaciones; clínicas, laboratorios y
+ * farmacias verificados; y la gente que los lee, los comenta y reacciona.
  *
  * ## Por qué hace falta otro seeder
  *
@@ -22,38 +23,43 @@
  * 2. **Su vitrina pública** (`PUT /community/profiles/me`): sin ella un médico
  *    existe para el sistema pero **no** para el buscador público, porque la
  *    búsqueda lee `community.public_profiles` y filtra por visibilidad.
- * 3. **Publicaciones.** Es lo que convierte una ficha en un perfil vivo: sin
- *    posts, la sección «Publicaciones» dice siempre lo mismo y no se puede
- *    juzgar cómo se ve llena.
- * 4. **Clínicas, laboratorios y farmacias.** Se aprovisionan como tenants y se
+ * 3. **Trayectoria completa, con universidades bolivianas.** Siete etapas por
+ *    profesional —pregrado, internado rotatorio, servicio social rural
+ *    obligatorio, residencia, posgrado, ejercicio actual y docencia— con
+ *    instituciones reales del sistema boliviano. La formación académica se
+ *    guarda como afiliación porque **el modelo no tiene otra cosa**: no existe
+ *    tabla de títulos ni endpoint para declarar universidad y año de egreso, y
+ *    `practitioner_affiliations` es exactamente lo que la ficha pública muestra
+ *    como «Trayectoria». Ver la cabecera de `datos/elenco-medico.mjs`.
+ * 4. **Publicaciones, cuatro por profesional.** Con quince profesionales son
+ *    **sesenta**, todas distintas, de dos a cuatro párrafos, con etiquetas e
+ *    imagen. Es lo que convierte una ficha en un perfil vivo: sin posts, la
+ *    sección «Publicaciones» dice siempre lo mismo y no se puede juzgar cómo se
+ *    ve llena.
+ * 5. **Comentarios y reacciones de gente que existe.** Dos comentarios por
+ *    publicación y entre cinco y once reacciones, escritos por dieciséis
+ *    cuentas de vecino con documento y contraseña propios. No se pueden
+ *    falsear: `reaction_count` y `comment_count` salen de contar filas reales,
+ *    y cada fila exige un perfil titular que la firme
+ *    (`assertActsAsProfile`). Además la tarjeta de la ficha **esconde el bloque
+ *    de interacción cuando los dos contadores son cero**, así que sin esto se
+ *    sembraba justamente el estado que hace invisible media tarjeta.
+ * 6. **Clínicas, laboratorios y farmacias.** Se aprovisionan como tenants y se
  *    **verifican**: la vitrina pública de una organización no se crea a mano,
  *    la proyecta `PublicProfileProjectionService` cuando el tenant se verifica.
  *    Sembrar sin verificar deja la organización invisible y sin explicación.
- * 5. **Especialidad real, no sólo en el titular.** Antes esta corrida sólo
- *    escribía la especialidad dentro de `headline` («Cardióloga ·
- *    Cardiología»): la guía de profesionales agrupa y filtra por
- *    `practitioner_specialties`, así que sin este paso los diez médicos caían
- *    todos bajo «Sin especialidad registrada» y el chip de cada especialidad
- *    no tenía a nadie debajo. Ahora se resuelve el concepto real del catálogo
- *    (`clinical-forms:specialty:*`, los mismos que siembra `seed-dev-data.mjs`)
- *    y se asigna con `POST /profiles/practitioners/{id}/specialties`.
- * 6. **Dirección con coordenadas, para cada organización.** La ficha pública
+ * 7. **Especialidad real, no sólo en el titular.** La guía de profesionales
+ *    agrupa y filtra por `practitioner_specialties`; sin este paso todos caen
+ *    bajo «Sin especialidad registrada». Se resuelve el concepto real del
+ *    catálogo (`clinical-forms:specialty:*`) y se asigna con
+ *    `POST /profiles/practitioners/{id}/specialties`.
+ * 8. **Dirección con coordenadas, para cada organización.** La ficha pública
  *    (`/o/`, `/l/`, `/f/`) tiene un mapa aparte de la descripción escrita; sin
  *    una fila en `common.addresses` con `latitude`/`longitude` no hay qué
- *    dibujar ahí. Cada organización cae cerca del centro de su ciudad, con un
- *    corrimiento chico y determinístico (`dispersar()`) para que no queden
- *    todas apiladas en el mismo punto.
- *
- * 7. **Trayectoria profesional, para todos.** Dos etapas por médico —una
- *    cerrada y una en curso— por `POST /profiles/practitioners/me/affiliations`.
- *    Antes de esto, de los ~78 médicos que dejaban los tres seeders **uno solo**
- *    tenía historial: ese endpoint es self-service puro, sin atajo de
- *    plataforma, y ningún seeder con sesión propia lo llamaba. La pestaña
- *    «Trayectoria» del perfil sólo se podía ver vacía.
- * 8. **Teléfono, y la matrícula completa.** El teléfono viaja en el alta y se
- *    escribe en `common.contact_points` junto al correo: es lo primero que un
- *    médico busca en su propio perfil y ningún seeder lo sembraba. La matrícula
- *    va con autoridad emisora y fecha, que sin ellas era un número pelado.
+ *    dibujar ahí.
+ * 9. **Teléfono y matrícula completa.** El teléfono viaja en el alta y se
+ *    escribe en `common.contact_points` junto al correo. La matrícula va con
+ *    autoridad emisora y fecha, que sin ellas era un número pelado.
  *
  * **Lo que sigue faltando, y por qué esta corrida no lo resuelve:** los
  * médicos no tienen consultorio propio en `common.addresses` — el tipo de
@@ -62,24 +68,26 @@
  * escribir esa fila. Es un hueco del contrato, no del seeder: agregarlo a mano
  * con el `ownerId` equivocado dejaría datos que no se pueden leer de vuelta.
  *
- * Y tampoco hay **formación académica** (universidad, carrera, año de egreso):
- * el modelo no la tiene. Lo más parecido es `professional_credentials`, que es
- * un documento con número —no una formación—, y el auto-registro no acepta ni
- * la institución ni la fecha del título; sólo el alta administrativa lo hace.
- * Un profesional ya dado de alta **no puede agregar un título**: no existe el
- * endpoint. Sembrarlo pediría modelo nuevo, no un seeder más largo.
- *
  * No es un mock: escribe por la API real, con sus guards y validaciones. Si el
  * contrato cambia, la corrida termina en rojo en vez de dejar datos a medias.
  *
  * ## Uso
  *
  *   yarn seed:vitrina
- *   yarn seed:vitrina --doctors 12 --posts 3
- *   yarn seed:vitrina --base-url http://localhost:3011
+ *   yarn seed:vitrina --doctors 15 --posts 4 --comentarios 2
+ *   yarn seed:vitrina --base-url http://localhost:3031
+ *   yarn seed:vitrina --sin-imagenes        (sin red hacia bancos de fotos)
+ *   yarn seed:vitrina --solo-interaccion    (no crea nada nuevo: comenta y
+ *                                            reacciona sobre lo ya publicado)
  *
  * Requiere una API levantada con el administrador de arranque
  * (`BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`).
+ *
+ * **Sobre el límite de peticiones:** el alta de cuentas está limitada a diez
+ * por minuto por IP y el resto de la API a trescientas. Esta corrida hace
+ * bastante más que eso, así que reintenta sola ante un `429` esperando lo que
+ * diga `Retry-After`. Corre mucho más rápido contra una API levantada con
+ * `RATE_LIMIT_DISABLED=true`, y esa es la forma recomendada.
  *
  * Es **acumulativo**: cada corrida agrega una tanda con sufijo propio, así que
  * repetirlo aumenta el volumen en vez de chocar por unicidad del slug.
@@ -88,6 +96,16 @@ import 'dotenv/config';
 import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { MEDICOS } from './datos/elenco-medico.mjs';
+import { publicacionesPara } from './datos/publicaciones.mjs';
+import {
+  CIUDADANOS,
+  COMENTARIOS_GENERALES,
+  COMENTARIOS_POR_ESPECIALIDAD,
+  REACCIONES,
+  RESPUESTAS_DEL_AUTOR,
+} from './datos/comunidad.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../..');
@@ -114,8 +132,12 @@ const ADMIN_PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd'
  */
 const CLAVE = process.env.SEED_PASSWORD ?? 'D3mo-passw0rd!';
 
-const DOCTORES = Number(arg('doctors', 10));
-const POSTS_POR_DOCTOR = Number(arg('posts', 2));
+const DOCTORES = Number(arg('doctors', MEDICOS.length));
+const POSTS_POR_DOCTOR = Number(arg('posts', 4));
+const COMENTARIOS_POR_POST = Number(arg('comentarios', 2));
+const CIUDADANOS_PEDIDOS = Number(arg('vecinos', CIUDADANOS.length));
+/** Piso de reacciones por publicación; el techo se calcula sobre este número. */
+const REACCIONES_MINIMAS = Number(arg('reacciones', 5));
 const OUT = resolve(REPO, 'output.seed-vitrina.json');
 
 if (process.env.NODE_ENV === 'production' && !flag('force')) {
@@ -131,31 +153,26 @@ if (process.env.NODE_ENV === 'production' && !flag('force')) {
 const log = [];
 let token = null;
 
+/** Espera `ms` milisegundos. Sólo se usa para respetar un `429`. */
+const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Una llamada a la API, anotada en el registro de la corrida.
+ *
+ * ## El reintento ante `429`
+ *
+ * El alta de cuentas admite diez por minuto por IP y el resto de la API
+ * trescientas. Esta corrida hace del orden de mil peticiones, así que chocar
+ * con el limitador no es un caso raro: es lo normal cuando se corre contra una
+ * API que no lo tiene desactivado. Frenar la corrida entera por eso dejaría
+ * datos a medias —médicos sin publicaciones, publicaciones sin comentarios—,
+ * que es peor que tardar. Así que espera y vuelve a intentar, hasta tres veces,
+ * respetando `Retry-After` cuando el servidor lo manda.
+ */
 async function call(section, title, method, path, options = {}) {
   const headers = { 'Content-Type': 'application/json' };
   const bearer = options.token === undefined ? token : options.token;
   if (options.auth !== false && bearer) headers.Authorization = `Bearer ${bearer}`;
-
-  let status = 0;
-  let body = null;
-  let transportError = null;
-  const started = Date.now();
-  try {
-    const res = await fetch(`${BASE}${path}`, {
-      method,
-      headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    });
-    status = res.status;
-    const text = await res.text();
-    try {
-      body = text ? JSON.parse(text) : null;
-    } catch {
-      body = text;
-    }
-  } catch (error) {
-    transportError = error instanceof Error ? error.message : String(error);
-  }
 
   const expected =
     options.expect === undefined
@@ -163,6 +180,42 @@ async function call(section, title, method, path, options = {}) {
       : Array.isArray(options.expect)
         ? options.expect
         : [options.expect];
+
+  let status = 0;
+  let body = null;
+  let transportError = null;
+  let esperas = 0;
+  const started = Date.now();
+
+  for (let intento = 0; intento < 4; intento += 1) {
+    transportError = null;
+    try {
+      const res = await fetch(`${BASE}${path}`, {
+        method,
+        headers,
+        body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      });
+      status = res.status;
+      const text = await res.text();
+      try {
+        body = text ? JSON.parse(text) : null;
+      } catch {
+        body = text;
+      }
+      if (status !== 429 || (expected && expected.includes(429))) break;
+      const retry = Number(res.headers.get('retry-after'));
+      const espera = Number.isFinite(retry) && retry > 0 ? retry * 1000 : 61_000;
+      esperas += 1;
+      process.stdout.write(
+        `    · límite de peticiones alcanzado; esperando ${Math.round(espera / 1000)} s…\n`,
+      );
+      await dormir(espera);
+    } catch (error) {
+      transportError = error instanceof Error ? error.message : String(error);
+      break;
+    }
+  }
+
   const ok =
     expected === null ? status >= 200 && status < 300 : expected.includes(status);
 
@@ -174,6 +227,7 @@ async function call(section, title, method, path, options = {}) {
     status,
     expected,
     ok,
+    esperas: esperas || undefined,
     durationMs: Date.now() - started,
     detail: ok ? undefined : resumir(transportError ?? body),
   });
@@ -214,9 +268,9 @@ function slugificar(texto) {
  * Un perfil sin foto se lee como una cuenta a medio hacer, y una sección de
  * publicaciones sin una sola imagen no deja juzgar cómo se ve la tarjeta cuando
  * la lleva. Las fotos salen de bancos de imágenes libres —retratos de
- * `pravatar.cc`, fotos temáticas de `loremflickr.com`—, se bajan una vez y se
- * suben a `common.files` con `POST /common/files/upload`. Son marcadores
- * visuales, no personas reales: `--sin-imagenes` las apaga si no hay red.        */
+ * `pravatar.cc`, fotos de `picsum.photos`—, se bajan una vez y se suben a
+ * `common.files` con `POST /common/files/upload`. Son marcadores visuales, no
+ * personas reales: `--sin-imagenes` las apaga si no hay red.                   */
 
 const SIN_IMAGENES = flag('sin-imagenes');
 const cacheImagenes = new Map();
@@ -316,260 +370,14 @@ async function imagenTematica(bearer, consulta, nombre, ancho = 1200, alto = 675
   return subirImagen(bearer, await bajarImagen(url), nombre);
 }
 
-/** El retrato del médico, de `pravatar.cc`. Determinístico por índice. */
+/** Un retrato de `pravatar.cc`. Determinístico por índice. */
 async function retrato(bearer, indice, nombre) {
   if (SIN_IMAGENES) return null;
   const url = `https://i.pravatar.cc/512?img=${(indice % 70) + 1}`;
   return subirImagen(bearer, await bajarImagen(url), nombre);
 }
 
-/* ── El elenco ──────────────────────────────────────────────────────────── */
-
-/**
- * Diez médicos con especialidad, ciudad y una presentación escrita como la
- * escribiría una persona.
- *
- * Los textos importan más de lo que parece: una ficha con «Lorem ipsum» no
- * permite juzgar si la tipografía, el ancho de lectura o el recorte funcionan,
- * que es para lo que se mira una pantalla sembrada.
- */
-const MEDICOS = [
-  {
-    nombre: 'Marisol',
-    apellido: 'Quispe',
-    titulo: 'Cardióloga',
-    especialidad: 'Cardiología',
-    codigoEspecialidad: 'cardiologia',
-    ciudad: 'La Paz',
-    bio: 'Cardióloga con 14 años de práctica. Atiendo hipertensión, arritmias y control de riesgo cardiovascular. Trabajo con ergometría y Holter propios, y derivo a electrofisiología cuando el caso lo pide.',
-  },
-  {
-    nombre: 'Ramiro',
-    apellido: 'Mamani',
-    titulo: 'Pediatra',
-    especialidad: 'Pediatría',
-    codigoEspecialidad: 'pediatria',
-    ciudad: 'El Alto',
-    bio: 'Pediatra de atención primaria. Control del niño sano, vacunas y las consultas que no pueden esperar: fiebre, bronquiolitis, diarreas. Atiendo con la libreta de vacunas a la vista y explico cada indicación.',
-  },
-  {
-    nombre: 'Lucía',
-    apellido: 'Salas',
-    titulo: 'Médica internista',
-    especialidad: 'Medicina interna',
-    codigoEspecialidad: 'medicina-interna',
-    ciudad: 'Cochabamba',
-    bio: 'Medicina interna: el paciente adulto con varias cosas a la vez. Diabetes, tiroides, hipertensión y el seguimiento que las mantiene ordenadas en vez de tratarlas por separado.',
-  },
-  {
-    nombre: 'Diego',
-    apellido: 'Rivas',
-    titulo: 'Médico general',
-    especialidad: 'Medicina general',
-    codigoEspecialidad: 'medicina-general',
-    ciudad: 'Santa Cruz de la Sierra',
-    bio: 'Consulta general para adultos. Suelo ser la primera puerta: escucho el motivo, pido lo que hace falta y, si corresponde otro especialista, lo digo el mismo día en vez de mandar a dar vueltas.',
-  },
-  {
-    nombre: 'Verónica',
-    apellido: 'Aliaga',
-    titulo: 'Ginecóloga',
-    especialidad: 'Ginecología y obstetricia',
-    codigoEspecialidad: 'ginecologia-obstetricia',
-    ciudad: 'La Paz',
-    bio: 'Control ginecológico, planificación y embarazo de bajo riesgo. Consulta larga a propósito: la mayoría de lo que trae una mujer al consultorio no entra en quince minutos.',
-  },
-  {
-    nombre: 'Jorge',
-    apellido: 'Terceros',
-    titulo: 'Traumatólogo',
-    especialidad: 'Traumatología',
-    codigoEspecialidad: 'traumatologia',
-    ciudad: 'Santa Cruz de la Sierra',
-    bio: 'Lesiones de rodilla y hombro, y la traumatología del que hace deporte sin ser profesional. Opero lo que hay que operar y digo con la misma claridad lo que no.',
-  },
-  {
-    nombre: 'Patricia',
-    apellido: 'Vargas',
-    titulo: 'Dermatóloga',
-    especialidad: 'Dermatología',
-    codigoEspecialidad: 'dermatologia',
-    ciudad: 'Cochabamba',
-    bio: 'Dermatología clínica: acné, dermatitis, caída de cabello y control de lunares con dermatoscopía. Reviso la piel entera aunque la consulta venga por una sola mancha.',
-  },
-  {
-    nombre: 'Andrés',
-    apellido: 'Colque',
-    titulo: 'Psiquiatra',
-    especialidad: 'Psiquiatría',
-    codigoEspecialidad: 'psiquiatria',
-    ciudad: 'La Paz',
-    bio: 'Ansiedad, depresión y trastornos del sueño en adultos. Trabajo con psicoterapia y, cuando hace falta, medicación explicada: qué hace, cuánto tarda y qué esperar los primeros días.',
-  },
-  {
-    nombre: 'Silvia',
-    apellido: 'Rojas',
-    titulo: 'Endocrinóloga',
-    especialidad: 'Endocrinología',
-    codigoEspecialidad: 'endocrinologia',
-    ciudad: 'Sucre',
-    bio: 'Diabetes, tiroides y obesidad con enfoque metabólico. Ajusto tratamiento con los datos del paciente, no con un esquema fijo, y eso pide controles más seguidos al principio.',
-  },
-  {
-    nombre: 'Fernando',
-    apellido: 'Peña',
-    titulo: 'Oftalmólogo',
-    especialidad: 'Oftalmología',
-    codigoEspecialidad: 'oftalmologia',
-    ciudad: 'Tarija',
-    bio: 'Consulta oftalmológica general, control de glaucoma y cirugía de catarata. Reviso fondo de ojo en todo paciente con diabetes, aunque venga sólo por lentes.',
-  },
-];
-
-/** Lo que publica un médico. Corto, concreto y en su voz. */
-/**
- * Lo que publica un médico: un repositorio de divulgación, no un muro de frases
- * sueltas. Cada entrada tiene un cuerpo largo —de varios párrafos, como un
- * artículo corto—, sus etiquetas, y una pista de qué foto la acompaña. La
- * sección «Publicaciones» sólo se puede juzgar —tipografía, ancho de lectura,
- * recorte de la tarjeta, imagen a lo ancho— cuando el contenido tiene el peso
- * que va a tener en producción.
- *
- * `imagen` es una consulta para un banco de fotos libres (`loremflickr`): el
- * seeder la baja, la sube a `common.files` y la adjunta al post. `null` deja el
- * post sólo de texto, que también hay que poder ver.
- */
-const GENERALES = [
-  {
-    texto:
-      'Traer los estudios previos a la consulta cambia el resultado.\n\nNo es burocracia. Sin el laboratorio anterior no se puede saber si un valor subió, bajó o siempre fue así, y esa diferencia decide si hoy pedimos algo nuevo o esperamos. Un mismo colesterol de 210 es una buena noticia en quien venía de 260 y una señal de alarma en quien venía de 170.\n\nSi los tenés en papel, una foto legible alcanza. Si están en otra institución, casi siempre te los dan pidiéndolos en admisión con tu documento.',
-    hashtags: ['prevención', 'consultaMédica', 'saludBolivia'],
-    imagen: 'medical,records,paperwork',
-  },
-  {
-    texto:
-      'El control anual no es un trámite.\n\nLa mitad de lo que encontramos a tiempo no daba ningún síntoma cuando lo encontramos: presión alta, azúcar en el límite, una tiroides que empieza a fallar. Ninguna de esas cosas duele hasta que ya hizo daño.\n\nUn control razonable para un adulto sano es una consulta clínica al año, con presión, peso, y análisis de sangre y orina. Si hay antecedentes en la familia, el médico ajusta desde ahí.',
-    hashtags: ['chequeoAnual', 'prevención', 'medicinaPreventiva'],
-    imagen: 'doctor,checkup,stethoscope',
-  },
-  {
-    texto:
-      'Si te indicaron un antibiótico, terminá el esquema completo.\n\nAunque te sientas bien al segundo día. Cortarlo antes deja vivas a las bacterias más resistentes justamente las que costó más matar y esas son las que vuelven, ahora sin miedo a ese antibiótico.\n\nY al revés: el antibiótico no sirve para la gripe, ni para la mayoría de los dolores de garganta, ni para el resfrío. Tomarlo «por las dudas» no acorta nada y sí gasta una herramienta que es de todos.',
-    hashtags: ['usoResponsableDeAntibióticos', 'resistenciaAntimicrobiana'],
-    imagen: 'pills,medicine,pharmacy',
-  },
-  {
-    texto:
-      'Cómo saber si una fiebre es de las que pueden esperar al día siguiente.\n\nEn un adulto, una fiebre sola, que baja con paracetamol y deja hacer vida más o menos normal, casi siempre puede verse en un turno normal. Lo que cambia el plan es la compañía: falta de aire, dolor de pecho, confusión, una mancha en la piel que no desaparece al apretarla, o fiebre que ya lleva más de tres días sin ceder.\n\nEn bebés menores de tres meses, cualquier fiebre es consulta el mismo día. Ahí no se espera.',
-    hashtags: ['fiebre', 'cuándoConsultar', 'urgencias'],
-    imagen: 'thermometer,fever,sick',
-  },
-];
-
-const POR_ESPECIALIDAD = {
-  cardiologia: [
-    {
-      texto:
-        'La presión se mide sentado, con la espalda apoyada, los pies en el piso y el brazo a la altura del corazón, después de cinco minutos quieto y sin haber tomado café ni fumado en la media hora previa.\n\nMedida de cualquier otra forma parado, apurado, con la vejiga llena el número sale alto y no sirve para decidir nada. Un tratamiento que se ajusta con mediciones mal tomadas es un tratamiento mal ajustado.\n\nLo mejor para el control es un registro en casa: dos tomas a la mañana y dos a la noche, durante una semana, anotadas. Eso vale más que una sola medición en el consultorio.',
-      hashtags: ['hipertensión', 'presiónArterial', 'cardiología'],
-      imagen: 'blood,pressure,measurement',
-    },
-    {
-      texto:
-        'Tres señales que sí ameritan ir a una emergencia, no esperar un turno:\n\n1. Dolor o presión en el pecho que aparece con el esfuerzo y cede con el reposo.\n2. Falta de aire que aparece al acostarse y obliga a dormir con más almohadas.\n3. Desmayo sin aviso, sobre todo si fue haciendo un esfuerzo.\n\nEl resto de las molestias del pecho pinchazos que duran un segundo, dolor que cambia al respirar o al apretar casi siempre no son del corazón, pero si hay dudas, se consulta.',
-      hashtags: ['infarto', 'señalesDeAlarma', 'cardiología'],
-      imagen: 'heart,cardiology,ecg',
-    },
-  ],
-  pediatria: [
-    {
-      texto:
-        'La libreta de vacunas es el documento de salud más importante que tiene tu hijo. Traela a cada consulta, aunque la visita sea por otra cosa.\n\nEn cada control revisamos qué toca y qué quedó pendiente. Una vacuna atrasada no se pierde: se retoma desde donde quedó, no se empieza de cero. Lo que no se recupera es el tiempo en que el chico estuvo sin protección.\n\nSi la perdiste, en el centro de salud donde lo vacunaron tienen el registro y te la reconstruyen.',
-      hashtags: ['vacunas', 'pediatría', 'controlDelNiñoSano'],
-      imagen: 'child,vaccination,pediatric',
-    },
-    {
-      texto:
-        'Bronquiolitis: qué es y cuándo preocuparse.\n\nEs una infección viral de las vías respiratorias chicas, común en menores de dos años, sobre todo en invierno. Empieza como un resfrío y al segundo o tercer día aparece la tos y la respiración silbante.\n\nLo que se vigila en casa: que respire rápido o con el pecho hundido, que le cueste comer o dormir por la falta de aire, que se ponga pálido o azulado alrededor de la boca. Cualquiera de esas cosas es consulta inmediata. El resto se maneja con paciencia, líquidos y lavados nasales.',
-      hashtags: ['bronquiolitis', 'pediatría', 'saludRespiratoria'],
-      imagen: 'baby,nebulizer,respiratory',
-    },
-  ],
-  'medicina-interna': [
-    {
-      texto:
-        'Tener varias enfermedades crónicas a la vez diabetes, presión, tiroides, colesterol no es tener varios problemas separados. Es un solo sistema que hay que mantener en equilibrio.\n\nEl error frecuente es que cada especialista ajusta lo suyo sin mirar el resto, y el paciente termina con doce pastillas que compiten entre sí. La medicina interna existe para ordenar eso: una sola mirada, una lista de medicación revisada entera, y controles que se agrupan en vez de multiplicarse.\n\nSi tomás más de cinco medicamentos, pedí una revisión completa de la lista al menos una vez al año.',
-      hashtags: ['enfermedadesCrónicas', 'polifarmacia', 'medicinaInterna'],
-      imagen: 'medication,organizer,pills',
-    },
-  ],
-  'medicina-general': [
-    {
-      texto:
-        'Qué esperar de una consulta con el médico general.\n\nNo soy el final del camino: muchas veces soy la primera puerta. Escucho el motivo entero, examino, y pido lo que hace falta para entender qué está pasando. Si el problema se resuelve ahí, lo resolvemos. Si necesitás un especialista, te lo digo el mismo día y con una indicación clara de a quién y por qué, en vez de mandarte a dar vueltas.\n\nUna buena derivación ahorra meses. Una consulta general bien hecha evita la mitad de las derivaciones.',
-      hashtags: ['atenciónPrimaria', 'medicinaGeneral', 'saludBolivia'],
-      imagen: 'general,practitioner,clinic',
-    },
-  ],
-  'ginecologia-obstetricia': [
-    {
-      texto:
-        'El Papanicolaou detecta cambios en el cuello del útero años antes de que se conviertan en un problema serio. Ese margen de años es lo que lo hace tan efectivo: da tiempo de sobra para actuar.\n\nLa recomendación general es empezar a los 25 y repetir cada tres años si los resultados son normales, o según lo que indique tu ginecóloga si hubo algún hallazgo. Sumado a la vacuna contra el VPH, es la prevención de cáncer más eficaz que tenemos hoy.\n\nNo duele, dura dos minutos, y no necesitás derivación para pedirlo.',
-      hashtags: ['papanicolaou', 'prevención', 'saludDeLaMujer', 'VPH'],
-      imagen: 'gynecology,women,health',
-    },
-  ],
-  traumatologia: [
-    {
-      texto:
-        'Torcedura de tobillo: los primeros dos días deciden cómo sigue.\n\nLo básico sigue siendo lo de siempre: frío 20 minutos cada 2 o 3 horas, el pie en alto por encima del corazón, y una venda elástica que comprima sin cortar la circulación.\n\nCuándo hace falta radiografía: si no podés apoyar el pie ni dar cuatro pasos, si el dolor está justo sobre el hueso y no sobre el ligamento, o si a las 48 horas la hinchazón no bajó nada. Si podés caminar aunque duela, casi siempre es ligamento y se maneja sin placa.',
-      hashtags: ['esguince', 'traumatología', 'lesionesDeportivas', 'RICE'],
-      imagen: 'ankle,injury,bandage',
-    },
-  ],
-  dermatologia: [
-    {
-      texto:
-        'La regla del ABCDE para mirar un lunar:\n\nA de Asimetría una mitad distinta de la otra.\nB de Bordes irregulares o mal definidos.\nC de Color más de un tono, o muy oscuro.\nD de Diámetro mayor a 6 milímetros.\nE de Evolución cualquier cambio de tamaño, forma, color o síntomas en los últimos meses.\n\nLa E es la más importante. Un lunar que cambia se revisa, tenga el aspecto que tenga. Una vez al año, alguien que te mire la piel entera con dermatoscopio: es rápido y cambia pronósticos.',
-      hashtags: ['lunares', 'cáncerDePiel', 'dermatología', 'ABCDE'],
-      imagen: 'skin,dermatology,examination',
-    },
-  ],
-  psiquiatria: [
-    {
-      texto:
-        'Sobre empezar una medicación para la ansiedad o la depresión.\n\nLo que suele no contarse bien: los antidepresivos no hacen efecto el primer día. Tardan entre dos y cuatro semanas en mostrar el beneficio real, y las primeras dos semanas pueden traer molestias que después se van. Saber eso de entrada evita abandonarlos justo antes de que empiecen a funcionar.\n\nNo generan dependencia como se cree, pero no se cortan de golpe: se bajan de a poco y con acompañamiento. Y no reemplazan a la psicoterapia trabajan mejor juntas.',
-      hashtags: ['saludMental', 'depresión', 'ansiedad', 'psiquiatría'],
-      imagen: 'mental,health,therapy',
-    },
-  ],
-  endocrinologia: [
-    {
-      texto:
-        'La hemoglobina glicosilada (HbA1c) es un promedio de tu azúcar en sangre de los últimos tres meses. Por eso vale más que un pinchazo aislado: no la podés «preparar» con dos días de dieta antes del análisis.\n\nEn una persona con diabetes, la meta habitual es mantenerla por debajo de 7%, pero eso se individualiza edad, años de enfermedad, riesgo de hipoglucemia. Bajarla de 9 a 8 ya reduce complicaciones de forma medible. No hace falta llegar a un número perfecto para que el esfuerzo valga la pena.',
-      hashtags: ['diabetes', 'HbA1c', 'endocrinología'],
-      imagen: 'diabetes,glucose,test',
-    },
-  ],
-  oftalmologia: [
-    {
-      texto:
-        'Si tenés diabetes, necesitás un control de fondo de ojo una vez al año aunque veas perfecto.\n\nLa retinopatía diabética el daño que el azúcar alto le hace a los vasos de la retina no da ningún síntoma en sus etapas tempranas, que son justo las que se pueden tratar. Cuando aparece la visión borrosa o las manchas, el daño ya avanzó.\n\nEl estudio es simple: unas gotas para dilatar la pupila y una foto de la retina. Media hora, una vez al año, y se detecta a tiempo lo que de otro modo se ve cuando ya es tarde.',
-      hashtags: ['retinopatíaDiabética', 'diabetes', 'oftalmología', 'fondoDeOjo'],
-      imagen: 'eye,exam,ophthalmology',
-    },
-  ],
-};
-
-/**
- * La cola de publicaciones de un médico: primero lo específico de su
- * especialidad, después lo general, sin repetir hasta agotar. Así un
- * cardiólogo abre con algo de cardiología y no con un consejo genérico.
- */
-function publicacionesPara(codigoEspecialidad) {
-  const propias = POR_ESPECIALIDAD[codigoEspecialidad] ?? [];
-  return [...propias, ...GENERALES];
-}
+/* ── Geografía de las organizaciones ────────────────────────────────────── */
 
 /**
  * País y jurisdicción de Bolivia, con sus uuid derivados del catálogo
@@ -600,6 +408,8 @@ const CENTRO_POR_CIUDAD = {
   'Santa Cruz de la Sierra': { lat: -17.7833, lng: -63.1821 },
   Sucre: { lat: -19.0333, lng: -65.2627 },
   Tarija: { lat: -21.5355, lng: -64.7296 },
+  Oruro: { lat: -17.9833, lng: -67.15 },
+  Potosí: { lat: -19.5836, lng: -65.7531 },
 };
 
 /**
@@ -620,50 +430,6 @@ function dispersar(ciudad, indice) {
   };
 }
 
-/**
- * La trayectoria de cada médico, por ciudad.
- *
- * ## Por qué hacía falta
- *
- * Sin esto la pestaña «Trayectoria» del perfil decía «No hay actividad actual
- * registrada» y «No hay experiencia histórica registrada» para **todos** los
- * médicos sembrados: de los ~78 que dejaban los tres seeders, uno solo tenía
- * afiliaciones. Una pantalla que sólo se puede ver vacía no se puede juzgar —
- * ni el orden de la línea de tiempo, ni cómo se lee un cargo largo, ni qué
- * pasa cuando hay tres etapas encimadas.
- *
- * Son dos etapas por médico: una **en curso** (sin `hasta`, que es lo que la
- * pantalla marca como actividad actual) y una **cerrada** (la residencia o el
- * puesto anterior). Los hospitales son reales de cada ciudad, porque un
- * seeder con «Hospital 1» y «Hospital 2» tampoco deja juzgar el recorte.
- */
-const TRAYECTORIA_POR_CIUDAD = {
-  'La Paz': [
-    { organizacion: 'Hospital Obrero N.º 1', cargo: 'Médico residente' },
-    { organizacion: 'Clínica del Sur', cargo: 'Médico de planta' },
-  ],
-  'El Alto': [
-    { organizacion: 'Hospital Municipal Boliviano Holandés', cargo: 'Médico residente' },
-    { organizacion: 'Centro de Salud Villa Adela', cargo: 'Médico de planta' },
-  ],
-  Cochabamba: [
-    { organizacion: 'Hospital Viedma', cargo: 'Médico residente' },
-    { organizacion: 'Clínica Los Olivos', cargo: 'Jefe de servicio' },
-  ],
-  'Santa Cruz de la Sierra': [
-    { organizacion: 'Hospital San Juan de Dios', cargo: 'Médico residente' },
-    { organizacion: 'Clínica Foianini', cargo: 'Médico de planta' },
-  ],
-  Sucre: [
-    { organizacion: 'Hospital Santa Bárbara', cargo: 'Médico residente' },
-    { organizacion: 'Clínica Cristo de las Américas', cargo: 'Médico de planta' },
-  ],
-  Tarija: [
-    { organizacion: 'Hospital San Juan de Dios de Tarija', cargo: 'Médico residente' },
-    { organizacion: 'Clínica Los Chacos', cargo: 'Médico de planta' },
-  ],
-};
-
 /** Organizaciones con cara pública: clínicas, laboratorios y farmacias. */
 const ORGANIZACIONES = [
   {
@@ -676,7 +442,7 @@ const ORGANIZACIONES = [
     tipo: 'HOSPITAL',
     nombre: 'Hospital Santa María',
     ciudad: 'Santa Cruz de la Sierra',
-    calle: 'Av. San Martín 4to Anillo',
+    calle: 'Av. San Martín, 4.º Anillo',
   },
   {
     tipo: 'MEDICAL_OFFICE',
@@ -706,13 +472,24 @@ const ORGANIZACIONES = [
     tipo: 'PHARMACY',
     nombre: 'Farmacia Vida Plena',
     ciudad: 'Santa Cruz de la Sierra',
-    calle: 'Av. Cristo Redentor 3er Anillo',
+    calle: 'Av. Cristo Redentor, 3.er Anillo',
   },
 ];
 
 /* ── La corrida ─────────────────────────────────────────────────────────── */
 
-const sembrado = { medicos: [], organizaciones: [], publicaciones: 0 };
+const sembrado = {
+  medicos: [],
+  ciudadanos: [],
+  organizaciones: [],
+  publicaciones: 0,
+  comentarios: 0,
+  respuestas: 0,
+  reacciones: 0,
+};
+
+/** Todo lo publicado en esta corrida, para la pasada de interacción. */
+const publicaciones = [];
 
 async function entrarComoAdmin() {
   paso('· Entrando como administrador de arranque…');
@@ -737,18 +514,27 @@ async function entrarComoAdmin() {
   };
 }
 
+/**
+ * Da de alta un profesional entero: cuenta, vitrina, fotos, especialidad,
+ * trayectoria y publicaciones.
+ *
+ * Devuelve la ficha del médico con su token y su perfil, porque las dos cosas
+ * hacen falta después: el token para que responda a los comentarios de su
+ * propia publicación, y el perfil para que reaccione a las de sus colegas.
+ */
 async function sembrarMedico(medico, indice, tenantId, especialidades) {
   const sufijo = `${TANDA}${indice}`;
   const email = `${slugificar(medico.nombre)}.${slugificar(medico.apellido)}.${sufijo}@alovida.test`;
+  const quien = `${medico.nombre} ${medico.apellido}`;
 
-  const alta = await call('medicos', `alta de ${medico.nombre} ${medico.apellido}`, 'POST', '/iam/auth/register-practitioner', {
+  const alta = await call('medicos', `alta de ${quien}`, 'POST', '/iam/auth/register-practitioner', {
     auth: false,
     body: {
       email,
       password: CLAVE,
       name: medico.nombre,
       lastName: medico.apellido,
-      licenseNumber: `MP-${sufijo}`,
+      licenseNumber: `${medico.matricula}-${sufijo}`,
       credentialNumber: `TIT-${sufijo}`,
       professionalTitle: medico.titulo,
       // El teléfono: se escribe en `common.contact_points` junto al correo, y
@@ -759,7 +545,7 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
       // La matrícula, completa: sin autoridad ni fecha, la pestaña de
       // credenciales mostraba un número pelado que no dice quién lo emitió.
       regulatoryAuthority: 'Colegio Médico de Bolivia',
-      licenseIssueDate: `${2006 + (indice % 12)}-03-15`,
+      licenseIssueDate: `${primerEjercicio(medico)}-03-15`,
     },
     expect: 201,
   });
@@ -773,21 +559,22 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
   const suToken = acceso.body.accessToken;
 
   // La vitrina: sin esto el médico no existe para el buscador público.
-  const slug = `${slugificar(`${medico.nombre} ${medico.apellido}`)}-${sufijo}`;
-  const vitrina = await call('medicos', `vitrina de ${medico.nombre}`, 'PUT', '/community/profiles/me', {
+  const slug = `${slugificar(quien)}-${sufijo}`;
+  const vitrinaBase = {
+    tenantId,
+    slug,
+    // El nombre, y nada más. Un prefijo armado a mano daba «DrPatricia
+    // Vargas» —sin espacio y en el género equivocado—, y el tratamiento ya
+    // viaja en el `headline` («Dermatóloga · Dermatología»), que es donde
+    // corresponde y donde no hay que adivinarle el género a nadie.
+    displayName: quien,
+    headline: `${medico.titulo} · ${medico.especialidad}`,
+    biography: medico.bio,
+    visibility: 'PUBLIC',
+  };
+  const vitrina = await call('medicos', `vitrina de ${quien}`, 'PUT', '/community/profiles/me', {
     token: suToken,
-    body: {
-      tenantId,
-      slug,
-      // El nombre, y nada más. Un prefijo armado a mano daba «DrPatricia
-      // Vargas» —sin espacio y en el género equivocado—, y el tratamiento ya
-      // viaja en el `headline` («Dermatóloga · Dermatología»), que es donde
-      // corresponde y donde no hay que adivinarle el género a nadie.
-      displayName: `${medico.nombre} ${medico.apellido}`,
-      headline: `${medico.titulo} · ${medico.especialidad}`,
-      biography: medico.bio,
-      visibility: 'PUBLIC',
-    },
+    body: vitrinaBase,
   });
   if (!vitrina.ok) return null;
   const profileId = vitrina.body.id;
@@ -809,15 +596,10 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
     500,
   );
   if (avatarFileId || coverFileId) {
-    const conFotos = await call('medicos', `fotos de ${medico.nombre}`, 'PUT', '/community/profiles/me', {
+    const conFotos = await call('medicos', `fotos de ${quien}`, 'PUT', '/community/profiles/me', {
       token: suToken,
       body: {
-        tenantId,
-        slug,
-        displayName: `${medico.nombre} ${medico.apellido}`,
-        headline: `${medico.titulo} · ${medico.especialidad}`,
-        biography: medico.bio,
-        visibility: 'PUBLIC',
+        ...vitrinaBase,
         ...(avatarFileId ? { avatarFileId } : {}),
         ...(coverFileId ? { coverFileId } : {}),
       },
@@ -835,7 +617,7 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
   if (concepto) {
     const especialidad = await call(
       'medicos',
-      `especialidad de ${medico.nombre}`,
+      `especialidad de ${quien}`,
       'POST',
       `/profiles/practitioners/${alta.body.practitionerProfileId}/specialties`,
       {
@@ -847,54 +629,51 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
     especialidadAsignada = especialidad.ok;
   }
 
-  // La trayectoria: dos etapas, una cerrada y una en curso. Va con el token
-  // del propio médico porque `me/affiliations` es self-service puro — no hay
-  // atajo de plataforma, y es la razón por la que hasta ahora sólo un médico
-  // de todos los sembrados tenía historial.
-  const etapas = TRAYECTORIA_POR_CIUDAD[medico.ciudad] ?? TRAYECTORIA_POR_CIUDAD['La Paz'];
-  const egreso = 2006 + (indice % 12);
-  let trayectoriaSembrada = 0;
-  const afiliaciones = [
-    {
-      organizationName: etapas[0].organizacion,
-      roleTitle: etapas[0].cargo,
-      departmentText: medico.especialidad,
-      startDate: `${egreso}-06-01`,
-      endDate: `${egreso + 4}-05-31`,
-    },
-    {
-      organizationName: etapas[1].organizacion,
-      roleTitle: etapas[1].cargo,
-      departmentText: medico.especialidad,
-      // Sin `endDate`: es lo que la pantalla lee como «actividad actual».
-      startDate: `${egreso + 4}-07-01`,
-    },
-  ];
-  for (const afiliacion of afiliaciones) {
+  // La trayectoria entera. Va con el token del propio médico porque
+  // `me/affiliations` es self-service puro — no hay atajo de plataforma, y es
+  // la razón por la que hasta hace poco casi ningún médico sembrado tenía
+  // historial. Se siembra de la etapa más antigua a la más reciente para que
+  // el orden de creación acompañe al de la línea de tiempo.
+  const trayectoria = { pedidas: medico.trayectoria.length, puestas: 0, porTipo: {} };
+  for (const etapa of medico.trayectoria) {
     const puesta = await call(
       'trayectoria',
-      `${afiliacion.organizationName} de ${medico.nombre}`,
+      `${etapa.tipo} · ${etapa.organizacion} de ${quien}`,
       'POST',
       '/profiles/practitioners/me/affiliations',
-      { token: suToken, body: afiliacion, expect: 201 },
+      {
+        token: suToken,
+        body: {
+          organizationName: etapa.organizacion,
+          roleTitle: etapa.cargo,
+          ...(etapa.departamento ? { departmentText: etapa.departamento } : {}),
+          startDate: etapa.desde,
+          // Sin `endDate`: es lo que la pantalla lee como «actividad actual».
+          ...(etapa.hasta ? { endDate: etapa.hasta } : {}),
+        },
+        expect: 201,
+      },
     );
-    if (puesta.ok) trayectoriaSembrada += 1;
+    if (puesta.ok) {
+      trayectoria.puestas += 1;
+      trayectoria.porTipo[etapa.tipo] = (trayectoria.porTipo[etapa.tipo] ?? 0) + 1;
+    }
   }
 
   // Publicaciones: es lo que convierte una ficha en un perfil vivo. Cada médico
   // abre con lo específico de su especialidad y sigue con lo general. La mayoría
-  // lleva una imagen; una de cada tres lleva **varias**, para poder ver el
+  // lleva una imagen; una de cada cuatro lleva **varias**, para poder ver el
   // carrusel deslizable de la tarjeta; alguna va sólo de texto.
   const cola = publicacionesPara(medico.codigoEspecialidad);
   let publicacionesConImagen = 0;
   for (let i = 0; i < POSTS_POR_DOCTOR; i += 1) {
     const entrada = cola[i % cola.length];
-    const cuantasImagenes = i % 3 === 2 ? 3 : 1;
+    const cuantasImagenes = i % 4 === 3 ? 3 : 1;
     const media = [];
     for (let n = 0; n < cuantasImagenes; n += 1) {
       const fileId = await imagenTematica(
         suToken,
-        `${entrada.imagen}-${i}-${n}`,
+        `${entrada.imagen}-${medico.codigoEspecialidad}-${i}-${n}`,
         `post-${slug}-${i + 1}-${n + 1}.jpg`,
       );
       if (fileId) {
@@ -906,7 +685,7 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
         });
       }
     }
-    const post = await call('publicaciones', `post ${i + 1} de ${medico.nombre}`, 'POST', `/community/profiles/${profileId}/posts`, {
+    const post = await call('publicaciones', `post ${i + 1} de ${quien}`, 'POST', `/community/profiles/${profileId}/posts`, {
       token: suToken,
       body: {
         bodyText: entrada.texto,
@@ -920,24 +699,268 @@ async function sembrarMedico(medico, indice, tenantId, especialidades) {
     if (post.ok) {
       sembrado.publicaciones += 1;
       if (media.length > 0) publicacionesConImagen += 1;
+      publicaciones.push({
+        id: post.body.id,
+        autor: quien,
+        autorToken: suToken,
+        autorProfileId: profileId,
+        codigoEspecialidad: medico.codigoEspecialidad,
+        indiceEnLaEspecialidad: i,
+      });
     }
   }
 
-  sembrado.medicos.push({
-    nombre: `${medico.nombre} ${medico.apellido}`,
+  const ficha = {
+    nombre: quien,
     especialidad: medico.especialidad,
     especialidadAsignada,
     avatarPuesto,
     portadaPuesta,
-    trayectoriaSembrada,
+    trayectoria,
     publicacionesConImagen,
     ciudad: medico.ciudad,
     email,
     clave: CLAVE,
     slug,
+    profileId,
     fichaPublica: `/p/${slug}`,
+  };
+  sembrado.medicos.push(ficha);
+  return { ...ficha, token: suToken };
+}
+
+/** El año en que el profesional empezó a ejercer, para fechar su matrícula. */
+function primerEjercicio(medico) {
+  const rural = medico.trayectoria.find((e) => e.tipo === 'SSSRO');
+  const referencia = rural ?? medico.trayectoria[medico.trayectoria.length - 1];
+  return Number(referencia.desde.slice(0, 4));
+}
+
+/**
+ * Da de alta un vecino: cuenta de paciente, sesión y vitrina **privada**.
+ *
+ * Privada a propósito: `kindOf` mapea al valor por defecto `PRACTITIONER`
+ * cualquier perfil cuyo sujeto sea una cuenta de usuario, así que una vitrina
+ * pública de vecino aparecería en el buscador como si fuera médico. Ver la
+ * cabecera de `datos/comunidad.mjs`.
+ */
+async function sembrarCiudadano(persona, indice, tenantId) {
+  const ci = `${persona.ci}${TANDA.slice(-2)}`;
+  const quien = `${persona.nombre} ${persona.apellido}`;
+  const correo = `${slugificar(persona.nombre)}.${slugificar(persona.apellido)}.${TANDA}${indice}@alovida.test`;
+
+  const alta = await call('vecinos', `alta de ${quien}`, 'POST', '/iam/auth/register-patient', {
+    auth: false,
+    body: {
+      nationalId: ci,
+      password: CLAVE,
+      name: persona.nombre,
+      lastName: persona.apellido,
+      motherLastName: persona.segundoApellido,
+      email: correo,
+      birthDate: persona.nacimiento,
+    },
+    expect: 201,
   });
-  return profileId;
+  if (!alta.ok) return null;
+
+  const acceso = await call('vecinos', `login de ${quien}`, 'POST', '/iam/auth/login', {
+    auth: false,
+    body: { nationalId: ci, password: CLAVE },
+  });
+  if (!acceso.ok) return null;
+  const suToken = acceso.body.accessToken;
+
+  const slug = `${slugificar(quien)}-${TANDA}${indice}`;
+  const base = {
+    tenantId,
+    slug,
+    displayName: quien,
+    headline: persona.titular,
+    visibility: 'PRIVATE',
+  };
+  const vitrina = await call('vecinos', `vitrina de ${quien}`, 'PUT', '/community/profiles/me', {
+    token: suToken,
+    body: base,
+  });
+  if (!vitrina.ok) return null;
+
+  // El retrato: un comentario firmado por unas iniciales grises se lee como
+  // relleno. Se corren los índices para no repetir los retratos de los médicos.
+  const avatarFileId = await retrato(suToken, indice + 30, `retrato-${slug}.jpg`);
+  if (avatarFileId) {
+    await call('vecinos', `foto de ${quien}`, 'PUT', '/community/profiles/me', {
+      token: suToken,
+      body: { ...base, avatarFileId },
+    });
+  }
+
+  const ficha = {
+    nombre: quien,
+    ciudad: persona.ciudad,
+    ci,
+    email: correo,
+    clave: CLAVE,
+    profileId: vitrina.body.id,
+    conFoto: Boolean(avatarFileId),
+  };
+  sembrado.ciudadanos.push(ficha);
+  return { ...ficha, token: suToken };
+}
+
+/**
+ * La pasada de interacción: comentarios, respuestas del autor y reacciones.
+ *
+ * ## Por qué va después y no dentro del alta de cada médico
+ *
+ * Porque las reacciones más creíbles vienen de perfiles que **no** son los dos
+ * o tres que ya existían cuando se publicó. Sembrando al final, cualquier
+ * publicación puede recibir reacciones de los dieciséis vecinos y de los otros
+ * catorce profesionales, y el reparto se ve como un muro y no como una fila.
+ *
+ * ## Cómo se reparte
+ *
+ * - **Comentarios**: dos por publicación, tomados del pool de la especialidad
+ *   en el mismo orden en que están escritas las publicaciones, de modo que cada
+ *   uno cae bajo el texto al que responde. Los firman vecinos distintos.
+ * - **Respuestas**: en una de cada tres publicaciones el autor contesta el
+ *   primer comentario. Sin al menos algunos hilos de dos niveles no se puede
+ *   ver cómo se dibuja una respuesta anidada.
+ * - **Reacciones**: entre `REACCIONES_MINIMAS` y ese número más seis por
+ *   publicación, de vecinos y de colegas, con el tipo tomado de una bolsa donde
+ *   `LIKE` pesa más — como en cualquier muro real. También se reacciona a los
+ *   comentarios, que es lo que hace que el hilo no se vea muerto.
+ */
+async function sembrarInteraccion(vecinos, medicos) {
+  const firmantes = [...vecinos, ...medicos];
+  if (firmantes.length === 0) {
+    paso('· Sin cuentas para comentar ni reaccionar: se salta la interacción.');
+    return;
+  }
+
+  let usados = 0;
+  /** Cursor del pool general, para que dos publicaciones seguidas no repitan. */
+  let generales = 0;
+  for (const [n, post] of publicaciones.entries()) {
+    // Con especialidad conocida, los comentarios escritos para esa publicación;
+    // sin ella —una publicación de una corrida vieja, recuperada del feed—, el
+    // pool general, que funciona bajo cualquier texto de divulgación.
+    const pool = COMENTARIOS_POR_ESPECIALIDAD[post.codigoEspecialidad] ?? [];
+    const comentarios = [];
+    const faltan = Math.max(0, COMENTARIOS_POR_POST - (post.comentariosYa ?? 0));
+
+    for (let c = 0; c < faltan; c += 1) {
+      // Dos por publicación y en el orden del pool: la publicación `i` de una
+      // especialidad se lleva los comentarios `2i` y `2i+1`, que son los que
+      // están escritos para ella.
+      const texto =
+        pool.length > 0
+          ? pool[(post.indiceEnLaEspecialidad * COMENTARIOS_POR_POST + c) % pool.length]
+          : COMENTARIOS_GENERALES[
+              (generales++) % COMENTARIOS_GENERALES.length
+            ];
+      if (!texto) break;
+      // Vecinos y no colegas: quien comenta una publicación de divulgación es
+      // el público. Se recorren en orden y con corrimiento para que no siempre
+      // comente el mismo primero.
+      const firma = vecinos[(usados + c) % Math.max(vecinos.length, 1)] ?? firmantes[0];
+      const comentario = await call(
+        'comentarios',
+        `comentario ${c + 1} de ${firma.nombre} en el post ${n + 1}`,
+        'POST',
+        '/community/comments',
+        {
+          token: firma.token,
+          body: {
+            authorProfileId: firma.profileId,
+            commentableType: 'POST',
+            commentableRefId: post.id,
+            bodyText: texto,
+          },
+          expect: 201,
+        },
+      );
+      if (comentario.ok) {
+        sembrado.comentarios += 1;
+        comentarios.push({ id: comentario.body.id, firma });
+      }
+    }
+    usados += COMENTARIOS_POR_POST;
+
+    // La respuesta del autor, en una de cada tres publicaciones.
+    if (n % 3 === 0 && comentarios.length > 0 && post.autorToken) {
+      const respuesta = await call(
+        'comentarios',
+        `respuesta de ${post.autor} en el post ${n + 1}`,
+        'POST',
+        '/community/comments',
+        {
+          token: post.autorToken,
+          body: {
+            authorProfileId: post.autorProfileId,
+            commentableType: 'POST',
+            commentableRefId: post.id,
+            parentCommentId: comentarios[0].id,
+            bodyText: RESPUESTAS_DEL_AUTOR[n % RESPUESTAS_DEL_AUTOR.length],
+          },
+          expect: 201,
+        },
+      );
+      if (respuesta.ok) sembrado.respuestas += 1;
+    }
+
+    // Las reacciones a la publicación. Nadie reacciona a lo suyo.
+    //
+    // El corrimiento va con un multiplicador **coprimo con 7** (5, no 7): con
+    // `(n * 7) % 7` el resto era siempre cero y todas las publicaciones salían
+    // con exactamente el mínimo, que es justo el reparto plano que este seeder
+    // existe para no producir.
+    const cuantas = REACCIONES_MINIMAS + ((n * 5) % 7);
+    for (let r = 0; r < cuantas; r += 1) {
+      const firma = firmantes[(n * 5 + r * 3) % firmantes.length];
+      if (firma.profileId === post.autorProfileId) continue;
+      const reaccion = await call(
+        'reacciones',
+        `reacción de ${firma.nombre} en el post ${n + 1}`,
+        'PUT',
+        '/community/reactions',
+        {
+          token: firma.token,
+          body: {
+            actorProfileId: firma.profileId,
+            reactableType: 'POST',
+            reactableRefId: post.id,
+            reactionType: REACCIONES[(n + r) % REACCIONES.length],
+          },
+          expect: 200,
+        },
+      );
+      if (reaccion.ok && reaccion.body?.created) sembrado.reacciones += 1;
+    }
+
+    // Y a los comentarios: un hilo donde nadie reacciona se ve muerto.
+    for (const [c, comentario] of comentarios.entries()) {
+      const firma = firmantes[(n * 3 + c * 11 + 1) % firmantes.length];
+      if (firma.profileId === comentario.firma.profileId) continue;
+      const reaccion = await call(
+        'reacciones',
+        `reacción al comentario ${c + 1} del post ${n + 1}`,
+        'PUT',
+        '/community/reactions',
+        {
+          token: firma.token,
+          body: {
+            actorProfileId: firma.profileId,
+            reactableType: 'COMMENT',
+            reactableRefId: comentario.id,
+            reactionType: REACCIONES[(n + c) % REACCIONES.length],
+          },
+          expect: 200,
+        },
+      );
+      if (reaccion.ok && reaccion.body?.created) sembrado.reacciones += 1;
+    }
+  }
 }
 
 async function sembrarOrganizacion(org, indice, adminUserId) {
@@ -1006,7 +1029,7 @@ async function especialidadesDelCatalogo() {
     'especialidades',
     'Conceptos de especialidad del catálogo',
     'GET',
-    '/terminology/concepts?q=clinical-forms:specialty:&limit=50',
+    '/terminology/concepts?q=clinical-forms:specialty:&limit=60',
   );
   const mapa = new Map();
   for (const item of pagina.body?.items ?? []) {
@@ -1025,29 +1048,100 @@ async function especialidadesDelCatalogo() {
   return mapa;
 }
 
+/**
+ * Recupera las publicaciones ya sembradas, para `--solo-interaccion`.
+ *
+ * Existe porque volver a sembrar sesenta publicaciones sólo para poder
+ * comentarlas sería una hora perdida y el doble de datos. Con esta pasada, una
+ * corrida anterior que quedó sin interacción se completa sin duplicar nada.
+ */
+async function publicacionesYaSembradas() {
+  // **Paginando**, no con un `limit` grande: el feed público recorta el tope
+  // pedido (`clampLimit`) a cincuenta, así que `?limit=200` devuelve cincuenta
+  // y calla. Una corrida anterior dejó justamente eso: las cincuenta
+  // publicaciones más nuevas con reacciones y las diez más viejas sin ninguna,
+  // que es el reparto que más se parece a un error de datos.
+  let cursor = null;
+  for (let vuelta = 0; vuelta < 40; vuelta += 1) {
+    const pagina = await call(
+      'publicaciones',
+      `publicaciones existentes (página ${vuelta + 1})`,
+      'GET',
+      `/public/posts?limit=50${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
+    );
+    const items = pagina.body?.items ?? [];
+    for (const item of items) {
+      publicaciones.push({
+        id: item.id,
+        autor: item.authorDisplayName ?? 'desconocido',
+        autorToken: null,
+        autorProfileId: null,
+        codigoEspecialidad: null,
+        indiceEnLaEspecialidad: 0,
+        // Lo que ya tiene: la pasada de saneamiento **completa** hasta el
+        // objetivo en vez de sumar dos más a cada publicación cada vez que se
+        // corre. Sin esto, repetir la pasada dejaría publicaciones con ocho
+        // comentarios y ninguna forma de volver atrás.
+        comentariosYa: item.commentCount ?? 0,
+      });
+    }
+    cursor = pagina.body?.nextCursor ?? null;
+    if (!cursor || items.length === 0) break;
+  }
+}
+
 async function main() {
   paso(`\nSembrando la vitrina pública contra ${BASE}\n`);
   const { tenantId, userId: adminUserId } = await entrarComoAdmin();
-  const especialidades = await especialidadesDelCatalogo();
-  if (especialidades.size === 0) {
+  const soloInteraccion = flag('solo-interaccion');
+
+  const medicos = [];
+  if (!soloInteraccion) {
+    const especialidades = await especialidadesDelCatalogo();
+    if (especialidades.size === 0) {
+      paso(
+        '· El catálogo no tiene especialidades todavía (¿corriste `yarn seed:dev` primero?); ' +
+          'los médicos quedan sin especialidad asignada.',
+      );
+    }
+
+    const cuantos = Math.min(DOCTORES, MEDICOS.length);
     paso(
-      '· El catálogo no tiene especialidades todavía (¿corriste `yarn seed:dev` primero?); ' +
-        'los médicos quedan sin especialidad asignada.',
+      `· Sembrando ${cuantos} profesionales con vitrina, trayectoria completa y ` +
+        `${POSTS_POR_DOCTOR} publicaciones cada uno…`,
     );
+    for (let i = 0; i < cuantos; i += 1) {
+      const ficha = await sembrarMedico(MEDICOS[i], i, tenantId, especialidades);
+      if (ficha) medicos.push(ficha);
+      paso(
+        `    ${i + 1}/${cuantos}  ${MEDICOS[i].nombre} ${MEDICOS[i].apellido} — ` +
+          `${ficha ? `${ficha.trayectoria.puestas}/${ficha.trayectoria.pedidas} etapas de trayectoria` : 'no se pudo sembrar'}`,
+      );
+    }
+  } else {
+    paso('· `--solo-interaccion`: no se crea nada nuevo, se toma lo ya publicado.');
+    await publicacionesYaSembradas();
   }
 
-  paso(`· Sembrando ${Math.min(DOCTORES, MEDICOS.length)} médicos con vitrina y publicaciones…`);
-  for (let i = 0; i < Math.min(DOCTORES, MEDICOS.length); i += 1) {
-    await sembrarMedico(MEDICOS[i], i, tenantId, especialidades);
+  const vecinos = [];
+  const cuantosVecinos = Math.min(CIUDADANOS_PEDIDOS, CIUDADANOS.length);
+  paso(`· Sembrando ${cuantosVecinos} cuentas de vecino que van a comentar y reaccionar…`);
+  for (let i = 0; i < cuantosVecinos; i += 1) {
+    const ficha = await sembrarCiudadano(CIUDADANOS[i], i, tenantId);
+    if (ficha) vecinos.push(ficha);
   }
 
-  if (adminUserId) {
+  paso(
+    `· Sembrando la interacción sobre ${publicaciones.length} publicaciones ` +
+      `(${COMENTARIOS_POR_POST} comentarios y ${REACCIONES_MINIMAS}+ reacciones cada una)…`,
+  );
+  await sembrarInteraccion(vecinos, medicos);
+
+  if (!soloInteraccion && adminUserId) {
     paso(`· Sembrando ${ORGANIZACIONES.length} organizaciones (clínicas, laboratorios y farmacias)…`);
     for (let i = 0; i < ORGANIZACIONES.length; i += 1) {
       await sembrarOrganizacion(ORGANIZACIONES[i], i, adminUserId);
     }
-  } else {
-    paso('· Sin id de usuario del admin: se saltan las organizaciones.');
   }
 
   const fallos = log.filter((l) => !l.ok);
@@ -1056,18 +1150,32 @@ async function main() {
     JSON.stringify({ base: BASE, tanda: TANDA, sembrado, llamadas: log }, null, 2),
   );
 
-  paso('\n─── Cuentas de médico, todas con la misma clave ───');
-  for (const m of sembrado.medicos) {
-    paso(`  ${m.email}   ${m.especialidad} · ${m.ciudad}   ficha: ${m.fichaPublica}`);
+  if (sembrado.medicos.length > 0) {
+    paso('\n─── Cuentas de profesional (entran con el correo) ───');
+    for (const m of sembrado.medicos) {
+      paso(`  ${m.email}   ${m.especialidad} · ${m.ciudad}   ficha: ${m.fichaPublica}`);
+    }
+  }
+  if (sembrado.ciudadanos.length > 0) {
+    paso('\n─── Cuentas de vecino (entran con el documento) ───');
+    for (const c of sembrado.ciudadanos) {
+      paso(`  CI ${c.ci}   ${c.nombre} · ${c.ciudad}   (${c.email})`);
+    }
   }
   paso(`\n  Contraseña de todas: ${CLAVE}`);
+
+  const etapas = sembrado.medicos.reduce((n, m) => n + m.trayectoria.puestas, 0);
   paso(
-    `\n  ${sembrado.medicos.length} médicos ` +
+    `\n  ${sembrado.medicos.length} profesionales ` +
       `(${sembrado.medicos.filter((m) => m.especialidadAsignada).length} con especialidad, ` +
       `${sembrado.medicos.filter((m) => m.avatarPuesto).length} con foto, ` +
       `${sembrado.medicos.filter((m) => m.portadaPuesta).length} con portada, ` +
-      `${sembrado.medicos.filter((m) => m.trayectoriaSembrada === 2).length} con trayectoria completa) · ` +
-      `${sembrado.publicaciones} publicaciones (${sembrado.medicos.reduce((n, m) => n + (m.publicacionesConImagen ?? 0), 0)} con imagen) · ` +
+      `${etapas} etapas de trayectoria en total)\n` +
+      `  ${sembrado.publicaciones} publicaciones ` +
+      `(${sembrado.medicos.reduce((n, m) => n + (m.publicacionesConImagen ?? 0), 0)} con imagen) · ` +
+      `${sembrado.comentarios} comentarios + ${sembrado.respuestas} respuestas del autor · ` +
+      `${sembrado.reacciones} reacciones\n` +
+      `  ${sembrado.ciudadanos.length} vecinos con cuenta propia · ` +
       `${sembrado.organizaciones.filter((o) => o.verificada).length}/${sembrado.organizaciones.length} organizaciones verificadas y ubicadas en el mapa`,
   );
   paso(`  Detalle de la corrida: ${OUT}`);
