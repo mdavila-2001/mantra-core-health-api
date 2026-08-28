@@ -579,7 +579,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 120s
     depends_on:
       # No basta con que Postgres esté healthy: `TerminologySeedService`
       # corre en `onApplicationBootstrap` y necesita el esquema ya aplicado
