@@ -1762,6 +1762,67 @@ describe('ProfilesPractitionersService', () => {
    * especialidades. Hasta acá el alta creaba UNA credencial y no existía forma
    * de agregar la segunda.
    */
+  /**
+   * **La ficha de directorio: un profesional sin matrícula conocida.**
+   *
+   * El padrón de una aseguradora dice quién atiende, de qué y dónde, pero no
+   * publica el número de matrícula de nadie. El alta exigía los dos números, y
+   * el modelo nunca: `health_practitioner_profiles` no tiene columna ni FK que
+   * pida una autorización. Esa obligatoriedad vivía sólo en el DTO, y forzaba a
+   * inventar una credencial para 961 médicos reales.
+   */
+  describe('alta sin matrícula ni credencial', () => {
+    function prepararAlta(d: ReturnType<typeof build>) {
+      d.practitionersRepo.findByCode.mockResolvedValue(null);
+      d.personsRepo.create.mockReturnValue({ id: 'per-9' });
+      d.personProfilesRepo.create.mockReturnValue({ id: 'per-9' });
+      d.practitionersRepo.create.mockReturnValue({
+        profileId: 'per-9',
+        practitionerCode: 'DIR-1',
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+    }
+
+    const fichaDeDirectorio = {
+      practitionerCode: 'DIR-1',
+      displayName: 'ABASTO VEGA, ROSEMARY',
+    } as any;
+
+    it('da de alta la ficha sin crear matrícula ni credencial', async () => {
+      const d = build();
+      prepararAlta(d);
+
+      const creada = await d.service.onboardPractitioner(fichaDeDirectorio, actor);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+      expect(creada.licenseId).toBeUndefined();
+      expect(creada.credentialId).toBeUndefined();
+    });
+
+    /**
+     * Lo contrario también importa: quien SÍ trae los números sigue teniendo sus
+     * dos filas. Sin esta prueba, «hacerlo opcional» podría haber sido «dejar de
+     * crearlo nunca».
+     */
+    it('y las crea igual cuando el alta sí trae los números', async () => {
+      const d = build();
+      prepararAlta(d);
+      d.authorizationsRepo.create.mockReturnValue({ id: 'lic-1' });
+      d.credentialsRepo.create.mockReturnValue({ id: 'cred-1' });
+
+      const creada = await d.service.onboardPractitioner(
+        { ...fichaDeDirectorio, licenseNumber: 'MP-77', credentialNumber: 'TIT-9' },
+        actor,
+      );
+
+      expect(creada.licenseId).toBe('lic-1');
+      expect(creada.credentialId).toBe('cred-1');
+    });
+  });
+
   describe('addOwnCredential', () => {
     const cuerpo = {
       credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
