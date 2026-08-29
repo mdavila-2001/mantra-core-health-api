@@ -282,14 +282,17 @@ def extraer_aseguradoras(fuente: Path) -> list[dict]:
 #  2 · Establecimientos  (registro de procesos · MEDICO §3.1 y §3.2)
 # --------------------------------------------------------------------------- #
 
-def extraer_establecimientos(fuente: Path) -> list[dict]:
+def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> list[dict]:
     """Clínicas privadas, hospitales de los tres niveles y cajas de salud.
 
     El nivel y la naturaleza (privada, pública, seguridad social) salen del
     archivo de origen y del encabezado de sección, no de adivinar por el nombre.
     """
     salida: list[dict] = []
-    usados: set[str] = set()
+    # Compartido con `consultorios_de_las_redes` cuando lo pasa el llamador: los
+    # códigos tienen que ser únicos a lo largo de TODO el padrón, no por pasada.
+    if usados is None:
+        usados = set()
 
     # -- clínicas privadas --------------------------------------------------
     for cabecera, fila in filas_de_tabla(leer(exigir(fuente, "LISTA_DE_CLINICAS_PRIVADAS_1", "LISTA DE CLINICAS PRIVADAS"))):
@@ -466,6 +469,97 @@ def limpiar_nan(valor: str) -> str | None:
 # --------------------------------------------------------------------------- #
 #  3 · Redes de prestadores  (registro de procesos · PACIENTE §3.2)
 # --------------------------------------------------------------------------- #
+
+def consultorios_de_las_redes(fuente: Path, usados: set[str]) -> list[dict]:
+    """Los consultorios que sólo nombran las redes de las aseguradoras.
+
+    ## Por qué se suman al mismo padrón
+
+    Cuando un médico declara dónde trabaja, la lista de la que elige es
+    `VS_BO_HEALTH_FACILITY` — el padrón. Si el lugar no está ahí, no lo puede
+    elegir. Y las redes nombran **148 clínicas**, de las que sólo **12** están
+    en el padrón oficial: las otras 136 son consultorios privados y centros
+    chicos que el listado del Ministerio nunca iba a tener. Sin esto, un médico
+    de «CLINICA AOD» no tiene forma de decir dónde atiende.
+
+    ## De dónde sale el nombre
+
+    Las redes no traen una columna de establecimiento: lo pegan al final de la
+    dirección, después de una raya —«AC. IRALA ESQ. CHUQUISACA NRO. 737 –
+    CLINICA FOIANINI»—. Se parte por ahí y se conserva **la dirección entera**
+    tal como vino, porque el nombre extraído es una lectura nuestra y la
+    dirección es el dato.
+
+    Las direcciones sin raya no producen establecimiento: son un domicilio y
+    nada más, y fabricar un nombre a partir de una calle sería inventar.
+
+    ## Por qué van marcados
+
+    `naturaleza` los distingue como `RED_ASEGURADORA`: no son el padrón
+    oficial, los declaró una aseguradora en su red. Un gimnasio y un hospital de
+    tercer nivel pueden convivir en la misma lista mientras cada uno diga de
+    dónde salió.
+    """
+    ya_en_el_padron = {
+        _clave_de_establecimiento(e["nombre"]) for e in _PADRON_OFICIAL_CACHE
+    }
+    vistos: dict[str, dict] = {}
+
+    for red in extraer_redes(fuente)["redes"]:
+        for profesional in red["profesionales"]:
+            for sede in profesional["sedes"]:
+                direccion = (sede.get("direccion") or "").strip()
+                nombre = _nombre_pegado_a_la_direccion(direccion)
+                if not nombre:
+                    continue
+                clave = _clave_de_establecimiento(nombre)
+                if not clave or clave in ya_en_el_padron:
+                    continue
+                ficha = vistos.get(clave)
+                if ficha is None:
+                    vistos[clave] = {
+                        "code": codigo("BO_EST", nombre, usados),
+                        "nombre": nombre,
+                        "razonSocial": None,
+                        "nit": None,
+                        "direccion": direccion,
+                        "telefonos": list(sede.get("telefonos") or []),
+                        "departamento": "SC",
+                        "municipio": (profesional.get("ciudad") or "").upper()
+                        or "SANTA CRUZ DE LA SIERRA",
+                        "tipo": "CONSULTORIO",
+                        "nivel": None,
+                        "naturaleza": "RED_ASEGURADORA",
+                    }
+                else:
+                    for t in sede.get("telefonos") or []:
+                        if t not in ficha["telefonos"]:
+                            ficha["telefonos"].append(t)
+
+    return sorted(vistos.values(), key=lambda e: e["nombre"])
+
+
+# Las mismas palabras de relleno que hacen que «CLINICA DE LAS AMERICAS» y «LAS
+# AMERICAS» sean el mismo lugar. Sin esto se cargarían por duplicado.
+_RELLENO = r"\b(CLINICA|CENTRO|MEDICO|MEDICA|HOSPITAL|INSTITUTO|SRL|SA|LTDA|DE|DEL|LA|EL|LOS|LAS|Y)\b"
+
+_PADRON_OFICIAL_CACHE: list[dict] = []
+
+
+def _clave_de_establecimiento(nombre: str) -> str:
+    """Cómo se decide que dos nombres son el mismo lugar."""
+    limpio = re.sub(_RELLENO, " ", normalizar(nombre).upper())
+    return re.sub(r"[^A-Z0-9]+", " ", limpio).strip()
+
+
+def _nombre_pegado_a_la_direccion(direccion: str) -> str:
+    """Lo que va después de la raya, si hay raya y si parece un nombre."""
+    for separador in ("\u2013", "\u2014"):
+        if separador in direccion:
+            cola = direccion.rsplit(separador, 1)[1].strip().strip('"').strip()
+            # Un número suelto o dos letras no son el nombre de un lugar.
+            return cola if len(cola) >= 3 and not cola.isdigit() else ""
+    return ""
 
 def extraer_redes(fuente: Path) -> dict:
     """Los médicos habilitados por cada aseguradora, con sus planes y sedes.
@@ -709,12 +803,24 @@ def main() -> int:
         "Aseguradoras de Bolivia. Origen: LISTADO_DE_ASEGURADORAS_1.md. "
         "Regenerar con tools/bolivia-datasets/extract_datasets.py.",
     )
+    # El padrón oficial primero; los consultorios de las redes se suman después
+    # y se descartan contra él, para no cargar dos veces el mismo lugar con dos
+    # nombres. `usados` viaja entre las dos pasadas para que ningún código choque.
+    codigos_de_establecimiento: set[str] = set()
+    padron = extraer_establecimientos(args.fuente, codigos_de_establecimiento)
+    _PADRON_OFICIAL_CACHE.clear()
+    _PADRON_OFICIAL_CACHE.extend(padron)
+    consultorios = consultorios_de_las_redes(args.fuente, codigos_de_establecimiento)
+    print(f"Padrón : {len(padron)} oficiales + {len(consultorios)} de redes")
     escribir(
         args.salida, "health-facilities.dataset.json",
-        extraer_establecimientos(args.fuente),
+        padron + consultorios,
         "Establecimientos de salud de Santa Cruz. Origen: LISTA_DE_CLINICAS_PRIVADAS_1.md, "
         "LISTA_DE_HOSPITAL_DE_TERCER_SEGUNDO_NIVEL_Y_CAJAS_1.md y "
-        "LISTA_DE_HOSPITAL_DE_PRIMER_NIVEL_SANTA_CRUZ_1.md.",
+        "LISTA_DE_HOSPITAL_DE_PRIMER_NIVEL_SANTA_CRUZ_1.md. Los de naturaleza "
+        "RED_ASEGURADORA salen de las redes de Alianza y Nacional: son consultorios "
+        "que el padrón oficial no lista y sin los cuales un médico no puede declarar "
+        "dónde atiende.",
     )
     escribir(
         args.salida, "provider-networks.dataset.json",
