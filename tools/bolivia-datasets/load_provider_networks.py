@@ -171,6 +171,36 @@ def catalogo_de_especialidades(api: Api) -> dict[str, str]:
     return {normalizar(i["display"]): i["conceptId"] for i in cuerpo.get("items", [])}
 
 
+def cargar_consultorios(api: "Api", profile_id: str | None, ficha: dict) -> int:
+    """Registra como afiliaciones los consultorios donde atiende el profesional.
+
+    Un médico que atiende en tres lugares es UNO con tres sedes, no tres fichas.
+    El perfil las muestra desde `practitioner_affiliations`, así que sin esto la
+    ficha salía sin ningún consultorio y no había forma de ver que tiene más de
+    uno — que es justo lo que las redes traen y el registro de procesos pide
+    («los horarios en las diferentes clínicas privadas o centros que atiende»).
+
+    La dirección va COMPLETA como nombre de la institución: es lo que la red
+    publica, y recortarla al nombre de la clínica perdería la referencia de
+    calle que el paciente necesita para llegar.
+    """
+    if not profile_id:
+        return 0
+    puestas = 0
+    for direccion in ficha["sedes"]:
+        estado, _ = api.post(
+            f"/profiles/practitioners/{profile_id}/affiliations",
+            {
+                "organizationName": direccion[:200],
+                "roleTitle": "Consultorio de atención",
+                "startDate": "2020-01-01",
+            },
+        )
+        if estado in (200, 201):
+            puestas += 1
+    return puestas
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--api", default="http://localhost:3000")
@@ -194,7 +224,7 @@ def main() -> int:
     especialidades = catalogo_de_especialidades(api)
     print(f"Catálogo: {len(especialidades)} especialidades conocidas\n")
 
-    creados = existentes = fallidos = 0
+    creados = existentes = fallidos = sedes = 0
     sin_especialidad_conocida: set[str] = set()
 
     # Una ficha por PERSONA, no por fila ni por red: quien está en las dos redes
@@ -204,12 +234,20 @@ def main() -> int:
         for prof in red["profesionales"]:
             clave = normalizar(prof["nombre"])
             ficha = personas.setdefault(
-                clave, {"nombre": prof["nombre"], "especialidades": [], "redes": []}
+                clave,
+                {"nombre": prof["nombre"], "especialidades": [], "redes": [], "sedes": []},
             )
             ficha["redes"].append(red["aseguradora"])
             for esp in prof["especialidades"]:
                 if esp not in ficha["especialidades"]:
                     ficha["especialidades"].append(esp)
+            # Los consultorios. Un médico que atiende en tres lugares es UNO con
+            # tres sedes, no tres fichas: por eso se acumulan acá y se cargan
+            # como afiliaciones, que es donde el perfil las muestra.
+            for sede in prof.get("sedes") or []:
+                direccion = (sede.get("direccion") or "").strip()
+                if direccion and direccion not in ficha["sedes"]:
+                    ficha["sedes"].append(direccion)
 
     en_las_dos = sum(1 for f in personas.values() if len(f["redes"]) > 1)
     print(f"Personas: {len(personas)} distintas ({en_las_dos} habilitadas por las dos redes)\n")
@@ -240,6 +278,7 @@ def main() -> int:
         estado, resp = api.post("/profiles/practitioners", cuerpo)
         if estado in (200, 201):
             creados += 1
+            sedes += cargar_consultorios(api, resp.get("profileId"), ficha)
         elif estado == 409:
             existentes += 1
         else:
@@ -249,6 +288,8 @@ def main() -> int:
 
     print(f"\n{'CARGADOS' if args.yes else 'SE CARGARÍAN'}: {creados}"
           f" · ya existían: {existentes} · fallidos: {fallidos}")
+    if args.yes:
+        print(f"Consultorios registrados: {sedes}")
     if sin_especialidad_conocida:
         print(f"\nEspecialidades del padrón que NO están en VS_MEDICAL_SPECIALTY "
               f"({len(sin_especialidad_conocida)}):")

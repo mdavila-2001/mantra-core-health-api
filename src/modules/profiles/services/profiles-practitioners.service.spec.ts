@@ -1950,4 +1950,76 @@ describe('ProfilesPractitionersService', () => {
   });
 
 
+  /**
+   * **Las fichas de directorio no pueden declarar dónde atienden.**
+   *
+   * Los profesionales que publican las redes de las aseguradoras no tienen
+   * cuenta —no traen correo—, así que `addOwnAffiliation` no les sirve: resuelve
+   * el sujeto desde la sesión. Sin una ruta administrativa, un médico con tres
+   * consultorios se veía sin ninguno, o había que cargarlo tres veces para que
+   * se notara — que es justo el duplicado que las redes ya traen y que hubo que
+   * deshacer.
+   */
+  describe('addAffiliationFor', () => {
+    const admin = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+    const cuerpo = {
+      organizationName: 'AV. IRALA 737 – CLINICA FOIANINI',
+      roleTitle: 'Consultorio de atención',
+      startDate: '2020-01-01',
+    } as any;
+
+    it('escribe la afiliación del perfil indicado, no del actor', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({ profileId: 'otro-1' });
+      d.affiliationsRepo.findSame.mockResolvedValue(null);
+      d.affiliationsRepo.create.mockReturnValue({
+        id: 'af-1',
+        practitionerProfileId: 'otro-1',
+        organizationName: cuerpo.organizationName,
+        roleTitle: cuerpo.roleTitle,
+        startDate: new Date('2020-01-01'),
+        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await d.service.addAffiliationFor('otro-1', cuerpo, admin);
+
+      const [, data] = d.affiliationsRepo.create.mock.calls[0];
+      expect(data.practitionerProfileId).toBe('otro-1');
+      // No se consultó la sesión: el sujeto vino en la ruta.
+      expect(d.ownership.requireOwnPractitionerProfileId).not.toHaveBeenCalled();
+    });
+
+    /** Un id que no existe no puede crear un vínculo colgando de la nada. */
+    it('un perfil inexistente responde no encontrado', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.addAffiliationFor('fantasma', cuerpo, admin),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.affiliationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    /** El alta propia no cambió: sigue resolviendo el sujeto desde la sesión. */
+    it('el alta propia sigue tomando el perfil de la sesión', async () => {
+      const d = build();
+      d.affiliationsRepo.findSame.mockResolvedValue(null);
+      d.affiliationsRepo.create.mockReturnValue({
+        id: 'af-2',
+        practitionerProfileId: 'pp1',
+        organizationName: cuerpo.organizationName,
+        roleTitle: cuerpo.roleTitle,
+        startDate: new Date('2020-01-01'),
+        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await d.service.addOwnAffiliation(cuerpo, { id: 'u-1' } as any);
+
+      expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalled();
+      expect(d.affiliationsRepo.create.mock.calls[0][1].practitionerProfileId).toBe('pp1');
+    });
+  });
+
 });

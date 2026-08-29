@@ -389,6 +389,32 @@ export class ProfilesPractitionersController {
     return this.practitionersService.addOwnCredential(dto, actor);
   }
 
+  /**
+   * Un consultorio de OTRO profesional — las fichas de directorio.
+   *
+   * Los profesionales que publican las redes de las aseguradoras no tienen
+   * cuenta —no traen correo— y por eso no pueden declarar dónde atienden. Sin
+   * esta ruta, un médico con tres consultorios se veía sin ninguno.
+   *
+   * Pide rol administrativo: escribir el historial laboral de alguien que no
+   * está mirando es otra cosa que escribir el propio.
+   */
+  @Post('practitioners/:profileId/affiliations')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrar un consultorio de un profesional sin cuenta',
+    description:
+      'Mismas reglas que el alta propia: no repite un vínculo ya declarado y respeta el estado inicial según la sede.',
+  })
+  addAffiliationFor(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: CreateAffiliationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    return this.practitionersService.addAffiliationFor(profileId, dto, actor);
+  }
+
   /** UC-05-06. */
   @Post('practitioners/:profileId/specialties')
   @HttpCode(HttpStatus.CREATED)
