@@ -25,7 +25,7 @@ cambio de esquema (`SchemaBootstrapService` con `ORM_SCHEMA_SYNC=safe`/`dry-run`
   el DDL inverso manualmente si el cambio ya se aplicó parcialmente.
 - Si falló antes de aplicarse (validación previa): corregir el DDL y reintentar.
 - Regenerar el catálogo y las entidades después de cualquier corrección:
-  `yarn orm:catalog && python ../salud-db/gen_entities.py all && yarn format && yarn docs:tsdoc && yarn orm:audit`
+  `yarn orm:catalog && python ../mantra-core-health-model/salud-db/gen_entities.py all && yarn format && yarn docs:tsdoc && yarn orm:audit`
   (`orm:gen` se retiró en v4.0.10 — ver
   [ADR-0022](../../adr/ADR-0022-generacion-de-entidades.md)).
 

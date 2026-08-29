@@ -82,7 +82,7 @@
     "orm": "mikro-orm",
     "docs:tsdoc": "node tools/documentation/generate-documentation.mjs",
     "orm:catalog": "node tools/catalog/generate-catalog.mjs",
-    "ddl:sources": "python ../salud-db/check_ddl_sources.py",
+    "ddl:sources": "python ../mantra-core-health-model/salud-db/check_ddl_sources.py",
     "orm:entities:missing": "node tools/catalog/generate-missing-entities.mjs",
     "orm:audit": "node tools/catalog/audit-fidelity.mjs fidelity-audit.json",
     "orm:schema:dump": "cross-env ORM_SCHEMA_SYNC=dry-run node dist/src/main.js",

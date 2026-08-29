@@ -40,7 +40,9 @@ from pathlib import Path
 from typing import Iterable, Iterator
 
 RAIZ_API = Path(__file__).resolve().parents[2]
-FUENTE_POR_DEFECTO = RAIZ_API.parent / "markdown_convertidos"
+# Los padrones viven en el repositorio del modelo, que se clona como hermano de
+# este. Se reapunta con `--fuente` si están en otro lado.
+FUENTE_POR_DEFECTO = RAIZ_API.parent / "mantra-core-health-model" / "markdown_convertidos"
 SALIDA_POR_DEFECTO = RAIZ_API / "src" / "common" / "seed" / "data" / "bolivia"
 
 # Marcas de daño de OCR: letras y dígitos mezclados dentro de una palabra, o

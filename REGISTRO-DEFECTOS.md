@@ -73,6 +73,31 @@ Ningún cambio de esquema puede viajar en un PR: se distribuye por zip. Es la ca
 B-3 y de que el ajuste de `rebuild_stack.py` del PR #107 no pueda revisarse.
 *(`CARRIL_REPORT.md:98-103`)*
 
+> **CERRADO el 28/08.** Las seis carpetas (`Mantra Core Health Context/`, `SQL/`, `NoSQL/`,
+> `salud-db/`, `seedsGenerales/`, `seedsProd/`) viven ahora en
+> **`mantra-core-technologies/mantra-core-health-model`**, privado, con `dev` como rama por
+> defecto. Se clona como **hermano** de este repo, no adentro:
+>
+> ```bash
+> git clone https://github.com/mantra-core-technologies/mantra-core-health-model.git
+> ```
+>
+> Mover las carpetas rompía la forma en que los generadores encontraban todo —resolvían las
+> rutas como «mi carpeta padre es el workspace»—, así que ahora hay dos raíces declaradas en
+> `salud-db/paths.py`: `MODEL_ROOT` (ese repo) y `WORKSPACE` (la carpeta que lo contiene, donde
+> la bóveda y esta API son hermanas suyas; reapuntable con `SALUD_WORKSPACE`). Verificado
+> regenerando: `gen_ddl.py all` deja `SQL/` byte a byte idéntico.
+>
+> De este lado cambiaron los montajes del compose (`../SQL` → `../mantra-core-health-model/SQL`
+> y los tres de `NoSQL`), el script `ddl:sources`, el default de `tools/bolivia-datasets/` y las
+> referencias en docs y en la plantilla de PR.
+>
+> El corpus MeSH (`seedsProd/modules/`, 501 MB) no se versiona: va como asset de Release y se
+> verifica contra el `seedsProd/checksums.json` que sí está en el repo.
+>
+> **Esto habilita revisar B-3**: su condición era «regenerar sin el vault rompe», y ahora tanto
+> el generador como el vault se clonan.
+
 **B-3 · `gen_ddl.py 05` pierde 7 FK ya resueltas** al regenerar: lee un vault ausente.
 *(`CARRIL_REPORT.md:86-92`)*
 
@@ -184,6 +209,22 @@ arreglo; el catálogo por lo tanto **no es reproducible hoy**: `yarn orm:catalog
 byte a byte idéntico, al revés de lo que documenta `CLAUDE.md`. La salida canónica es escribir
 las notas del módulo 65 en la bóveda (entidades + FKs + `<<INDEX_SET>>`), no volver a editar el
 catálogo a mano. Es trabajo de bóveda, con su propia tarjeta.
+
+**B-11 · Ampliar un value set deja su propia ficha diciendo el número viejo.** `upsert_rows` de
+`gen_seeds.py` sólo inserta filas con PK nueva y **nunca actualiza una existente**. Los ids de
+`value_sets` y `code_system_versions` son estables por value set, así que al agregarle miembros:
+
+- `value_sets.description` sigue diciendo cuántos conceptos gobernaba **antes** —tras la
+  ampliación del 28/08 dice «36 conceptos gobernados» con 63 miembros—, y
+- `code_system_versions.checksum`, que es `sha256` de la lista de códigos, **ya no corresponde a
+  esa lista**: queda congelado en el de la lista vieja.
+
+Es la misma raíz que el hallazgo de v4.1.9 sobre el `cache_token` de las enumeraciones dinámicas
+(el sembrador no renueva el testigo al ampliar un conjunto en base poblada), pero visible **en el
+paquete**, no sólo en base viva. Impacto hoy: informativo —nadie decide nada con esos dos
+campos—, pero el checksum existe justamente para detectar deriva y ahora miente. La salida es que
+esas dos entidades usen `replace_rows` en vez de `upsert_rows`, midiendo antes el diff sobre los
+35 value sets para no arrastrar cambios no buscados.
 
 ---
 
