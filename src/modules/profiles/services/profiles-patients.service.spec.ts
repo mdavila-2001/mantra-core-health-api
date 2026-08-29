@@ -1288,4 +1288,47 @@ describe('ProfilesPatientsService', () => {
     });
   });
 
+  /**
+   * **Una dirección sin GPS no puede salir ubicada en el golfo de Guinea.**
+   *
+   * `aDireccion` descartaba las coordenadas comparando con `=== undefined`, pero
+   * la columna es nullable y la base devuelve **null**. La comparación estricta
+   * tomaba la rama de «sí hay coordenadas» y emitía `Number(null)`, que es 0. La
+   * ficha del paciente dibujaba entonces un «Ver en el mapa» que apuntaba a
+   * `0,0`. Se vio en pantalla con una dirección de trabajo cargada sin GPS.
+   */
+  describe('las coordenadas de una dirección', () => {
+    const titular = { id: 'user-1', roles: [] } as any;
+
+    function conDireccion(direccion: any) {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: 'per-1' });
+      d.personsRepo.findById.mockResolvedValue({ id: 'per-1', name: 'Ana' });
+      d.patientProfilesRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        patientCode: 'PC-1',
+      });
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(direccion);
+      return d;
+    }
+
+    it('sin coordenadas no viaja ninguna, ni como cero', async () => {
+      const d = conDireccion({ lines: 'Calle Ayacucho 241', latitude: null, longitude: null });
+
+      const perfil = await d.service.getOwnProfile(titular);
+
+      expect(perfil.homeAddress?.latitude).toBeUndefined();
+      expect(perfil.homeAddress?.longitude).toBeUndefined();
+    });
+
+    it('y con coordenadas viajan como números', async () => {
+      const d = conDireccion({ lines: 'Av. Beni 5100', latitude: '-17.758', longitude: '-63.178' });
+
+      const perfil = await d.service.getOwnProfile(titular);
+
+      expect(perfil.homeAddress?.latitude).toBe(-17.758);
+      expect(perfil.homeAddress?.longitude).toBe(-63.178);
+    });
+  });
+
 });

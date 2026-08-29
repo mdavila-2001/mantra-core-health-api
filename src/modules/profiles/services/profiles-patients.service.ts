@@ -252,7 +252,13 @@ function aDireccion(fila?: Addresses | null): OwnAddressDto | undefined {
       ? {}
       : { municipalityConceptId: fila.municipalityConceptId }),
     // Las coordenadas viajan juntas o no viajan: media coordenada no ubica nada.
-    ...(fila.latitude === undefined || fila.longitude === undefined
+    //
+    // Se compara con `== null` y no con `=== undefined`: la columna es nullable y
+    // la base devuelve **null**, que no es `undefined`. Con la comparación
+    // estricta el ternario tomaba la rama de «sí hay coordenadas» y emitía
+    // `Number(null)` — que es **0**. Una dirección sin ubicar salía en el mapa
+    // en el golfo de Guinea. Se vio con una dirección de trabajo cargada sin GPS.
+    ...(fila.latitude == null || fila.longitude == null
       ? {}
       : { latitude: Number(fila.latitude), longitude: Number(fila.longitude) }),
   };
