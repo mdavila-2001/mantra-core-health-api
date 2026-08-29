@@ -111,7 +111,7 @@ export class UpdateOwnPatientProfileDto {
   @ApiPropertyOptional({ format: 'date' })
   @IsOptional()
   @IsISO8601()
-  birthDate?: string;
+  birthDate?: string | null;
 
   /**
    * Sexo asignado al nacer, por código legible. El servidor lo traduce al
@@ -215,4 +215,51 @@ export class UpdateOwnPatientProfileDto {
   @IsOptional()
   @IsUUID()
   residenceMunicipalityConceptId?: string;
+
+  /**
+   * NIT para facturación (registro de procesos · PACIENTE §1.15.2).
+   *
+   * Se podía declarar al registrarse y después no había forma de corregirlo: el
+   * perfil lo mostraba y el editor no lo ofrecía. Cadena vacía para quitarlo —
+   * mismo criterio que el teléfono: `''` no es un NIT mal escrito, es la
+   * ausencia de NIT.
+   */
+  @ApiPropertyOptional({
+    maxLength: 20,
+    description: 'NIT para facturación. Cadena vacía para quedarse sin NIT.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  taxId?: string;
+
+  /**
+   * Domicilio (§1.8) y dirección de trabajo (§1.10), con su ubicación.
+   *
+   * Van como texto libre y coordenadas opcionales porque eso es lo que
+   * `common.addresses` guarda, y porque una dirección boliviana real —«Av.
+   * Prolongación Beni #5100, esq. 6to anillo»— no entra en un catálogo. El
+   * municipio sí sale del catálogo, y viaja aparte en
+   * `residenceMunicipalityConceptId`.
+   *
+   * Editarlas **cierra la vigente y abre otra**: `common.addresses` lleva
+   * `valid_to`, así que mudarse no borra dónde vivías cuando te atendieron.
+   */
+  @ApiPropertyOptional({
+    maxLength: 300,
+    description: 'Domicilio, tal como lo escribe la persona. Vacío para quitarlo.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  homeAddressLines?: string;
+
+  @ApiPropertyOptional({
+    maxLength: 300,
+    description: 'Dirección de trabajo. Vacío para quitarla.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  workAddressLines?: string;
 }

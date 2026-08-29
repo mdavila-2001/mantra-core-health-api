@@ -15,6 +15,7 @@ import { findCurrentIdentityAssertionForPerson } from '../../identity_assurance/
 import {
   AddressesRepository,
   ContactPointsRepository,
+  IdentifiersRepository,
 } from '../../common/repositories';
 import { createResidenceAddress } from '../../common/services/residence-address';
 import {
@@ -251,7 +252,13 @@ function aDireccion(fila?: Addresses | null): OwnAddressDto | undefined {
       ? {}
       : { municipalityConceptId: fila.municipalityConceptId }),
     // Las coordenadas viajan juntas o no viajan: media coordenada no ubica nada.
-    ...(fila.latitude === undefined || fila.longitude === undefined
+    //
+    // Se compara con `== null` y no con `=== undefined`: la columna es nullable y
+    // la base devuelve **null**, que no es `undefined`. Con la comparación
+    // estricta el ternario tomaba la rama de «sí hay coordenadas» y emitía
+    // `Number(null)` — que es **0**. Una dirección sin ubicar salía en el mapa
+    // en el golfo de Guinea. Se vio con una dirección de trabajo cargada sin GPS.
+    ...(fila.latitude == null || fila.longitude == null
       ? {}
       : { latitude: Number(fila.latitude), longitude: Number(fila.longitude) }),
   };
@@ -290,6 +297,7 @@ export class ProfilesPatientsService {
     // para que quien da de alta a la persona los escriba en su transacción.
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly identifiersRepo: IdentifiersRepository,
     private readonly ownership: ProfileOwnershipService,
     private readonly logger: PinoLogger,
   ) {
@@ -583,7 +591,10 @@ export class ProfilesPatientsService {
       }
 
       if (dto.birthDate !== undefined) {
-        person.birthDate = new Date(dto.birthDate);
+        // `new Date(null)` es el 1/1/1970, no «sin fecha»: mandar `null` para
+        // borrarla dejaba a la persona nacida en la época Unix. Es el mismo
+        // defecto que se corrigió en el perfil del profesional; vivía también acá.
+        person.birthDate = dto.birthDate ? new Date(dto.birthDate) : undefined;
       }
       if (dto.sexAtBirth !== undefined) {
         // El mismo mapeo del alta: el formulario manda un código y la columna
@@ -612,6 +623,33 @@ export class ProfilesPatientsService {
           tx,
           person.id,
           dto.residenceMunicipalityConceptId,
+          actor.id,
+          ahora,
+        );
+      }
+
+      // El NIT y las dos direcciones: se declaraban al registrarse y después no
+      // había forma de corregirlos. El perfil los mostraba y el editor no los
+      // ofrecía, que es la peor combinación —ves el dato viejo y no podés tocarlo—.
+      if (dto.taxId !== undefined) {
+        await this.reemplazarNit(tx, person.id, dto.taxId, actor.id, ahora);
+      }
+      if (dto.homeAddressLines !== undefined) {
+        await this.reemplazarTextoDeDireccion(
+          tx,
+          person.id,
+          CONCEPTS.ADDR_USE_HOME,
+          dto.homeAddressLines,
+          actor.id,
+          ahora,
+        );
+      }
+      if (dto.workAddressLines !== undefined) {
+        await this.reemplazarTextoDeDireccion(
+          tx,
+          person.id,
+          CONCEPTS.ADDR_USE_WORK,
+          dto.workAddressLines,
           actor.id,
           ahora,
         );
@@ -898,6 +936,91 @@ export class ProfilesPatientsService {
     createResidenceAddress(this.addressesRepo, tx, {
       personId,
       municipalityConceptId,
+      actorUserId,
+    });
+  }
+
+  /**
+   * El NIT de facturación, que vive en `common.identifiers` como un tipo más.
+   *
+   * Se cierra el vigente y se abre otro en vez de sobrescribir el valor: la
+   * tabla lleva `valid_to`, y una factura emitida con el NIT anterior tiene que
+   * seguir explicándose. Cadena vacía cierra sin abrir: es quedarse sin NIT.
+   */
+  private async reemplazarNit(
+    tx: EntityManager,
+    personId: string,
+    nit: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const filas = await tx.find(Identifiers, {
+      ownerId: personId,
+      validTo: null,
+    });
+    const vigente = filas.find(
+      (f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX,
+    );
+    const limpio = nit.trim();
+    if (vigente?.value === limpio) return;
+
+    if (vigente) {
+      vigente.validTo = ahora;
+      touch(vigente, actorUserId);
+    }
+    if (limpio === '') return;
+
+    this.identifiersRepo.create(tx, {
+      ownerId: personId,
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      typeConceptId: CONCEPTS.ID_TYPE_TAX,
+      value: limpio,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+      actorUserId,
+    });
+  }
+
+  /**
+   * El texto de una dirección —domicilio o trabajo— conservando su municipio.
+   *
+   * Cierra la vigente y abre otra, como el municipio: `common.addresses` lleva
+   * `valid_to`, así que mudarse no borra dónde vivía la persona cuando la
+   * atendieron. El municipio y las coordenadas de la anterior se arrastran
+   * porque cambiar la calle no es cambiar de municipio; para eso está
+   * `residenceMunicipalityConceptId`, que viaja aparte.
+   */
+  private async reemplazarTextoDeDireccion(
+    tx: EntityManager,
+    personId: string,
+    usoConceptId: string,
+    lineas: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
+      tx,
+      personId,
+      usoConceptId,
+    );
+    const limpio = lineas.trim();
+    if ((vigente?.lines ?? '') === limpio) return;
+
+    if (vigente) {
+      this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
+    }
+    if (limpio === '') return;
+
+    this.addressesRepo.create(tx, {
+      ownerId: personId,
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      useConceptId: usoConceptId,
+      lines: limpio,
+      // Se arrastran del anterior: cambiar la calle no es cambiar de país ni de
+      // municipio, y perder las coordenadas dejaría el «Ver en el mapa» mudo.
+      countryConceptId: vigente?.countryConceptId ?? CONCEPTS.COUNTRY_BOLIVIA,
+      municipalityConceptId: vigente?.municipalityConceptId,
+      latitude: vigente?.latitude,
+      longitude: vigente?.longitude,
       actorUserId,
     });
   }
