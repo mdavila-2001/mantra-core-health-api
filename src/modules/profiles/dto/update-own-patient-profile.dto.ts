@@ -234,6 +234,26 @@ export class UpdateOwnPatientProfileDto {
   taxId?: string;
 
   /**
+   * A nombre de quién sale el comprobante (registro · PACIENTE §1.15.1).
+   *
+   * El registro pide «Nombre o Razón social» **y** «Número de NIT»: hasta ahora
+   * sólo existía el número, y la ficha mostraba un NIT sin decir de quién era.
+   *
+   * Viaja **con** el NIT: son el mismo hecho, y separarlos dejaría una razón
+   * social colgada de un número que ya no existe. Mandar sólo una de las dos
+   * conserva la otra.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description:
+      'Nombre o razón social del titular del NIT. Cadena vacía para quitarla.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  taxHolderName?: string;
+
+  /**
    * Domicilio (§1.8) y dirección de trabajo (§1.10), con su ubicación.
    *
    * Van como texto libre y coordenadas opcionales porque eso es lo que
