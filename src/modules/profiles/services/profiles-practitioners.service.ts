@@ -1646,6 +1646,42 @@ export class ProfilesPractitionersService {
     dto: CreateAffiliationDto,
     actor: AuthenticatedUser,
   ): Promise<AffiliationResponseDto> {
+    return this.agregarAfiliacion(dto, actor, null);
+  }
+
+  /**
+   * Registra un consultorio de un profesional que NO es quien llama.
+   *
+   * Existe para las fichas de directorio: los profesionales que las redes de
+   * las aseguradoras publican no tienen cuenta —no traen correo— y por eso no
+   * pueden declarar sus consultorios ellos mismos. Sin esto, un médico que
+   * atiende en tres lugares se veía sin ninguno, o peor, había que cargarlo
+   * tres veces para que se notara.
+   *
+   * Es la misma escritura que la propia: mismas reglas de duplicado, mismo
+   * estado inicial y el mismo aviso a la organización cuando corresponde. Lo
+   * único que cambia es de dónde sale el sujeto, y por eso pide rol
+   * administrativo — sin eso sería una forma de escribirle el currículum a
+   * cualquiera.
+   */
+  async addAffiliationFor(
+    profileId: string,
+    dto: CreateAffiliationDto,
+    actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    return this.agregarAfiliacion(dto, actor, profileId);
+  }
+
+  /**
+   * El cuerpo compartido por las dos altas de afiliación.
+   *
+   * @param perfilExplicito - `null` para tomar el perfil del actor.
+   */
+  private async agregarAfiliacion(
+    dto: CreateAffiliationDto,
+    actor: AuthenticatedUser,
+    perfilExplicito: string | null,
+  ): Promise<AffiliationResponseDto> {
     const startDate = new Date(dto.startDate);
     const endDate = dto.endDate ? new Date(dto.endDate) : undefined;
     if (endDate && endDate < startDate) {
@@ -1660,10 +1696,17 @@ export class ProfilesPractitionersService {
       'Adding practitioner affiliation',
     );
     const creado = await this.em.transactional(async (tx) => {
-      const profileId = await this.ownership.requireOwnPractitionerProfileId(
-        tx,
-        actor,
-      );
+      const profileId =
+        perfilExplicito ??
+        (await this.ownership.requireOwnPractitionerProfileId(tx, actor));
+      if (perfilExplicito !== null) {
+        const existe = await this.practitionersRepo.findById(tx, profileId);
+        if (!existe) {
+          throw new ResourceNotFoundException('Profesional no encontrado', {
+            profileId,
+          });
+        }
+      }
 
       const organizationName = dto.organizationName.trim();
       const roleTitle = dto.roleTitle.trim();
