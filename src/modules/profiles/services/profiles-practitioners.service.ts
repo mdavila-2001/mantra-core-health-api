@@ -489,8 +489,6 @@ export class ProfilesPractitionersService {
     return this.buildSummary(em, profileId, link?.userId);
   }
 
-
-
   /**
    * Deja vigente el teléfono nuevo y cierra el anterior.
    *
@@ -517,11 +515,13 @@ export class ProfilesPractitionersService {
     );
 
     if (nuevo === undefined) {
-      if (vigente) this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+      if (vigente)
+        this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
       return;
     }
     if (vigente?.value === nuevo) return;
-    if (vigente) this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+    if (vigente)
+      this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
 
     this.contactPointsRepo.create(tx, {
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
@@ -871,7 +871,8 @@ export class ProfilesPractitionersService {
         // alguien descubre que no lleva segundo nombre ni apellido materno.
         if (dto.name !== undefined) person.name = dto.name;
         if (dto.middleName !== undefined) {
-          person.middleName = dto.middleName === '' ? undefined : dto.middleName;
+          person.middleName =
+            dto.middleName === '' ? undefined : dto.middleName;
         }
         if (dto.lastName !== undefined) person.lastName = dto.lastName;
         if (dto.motherLastName !== undefined) {
@@ -897,12 +898,20 @@ export class ProfilesPractitionersService {
           // `new Date(null)` es el 1/1/1970, no «sin fecha»: mandar `null` para
           // borrarla dejaba a la persona nacida en la época Unix. Se borra
           // igual que las partes opcionales del nombre, con `undefined`.
-          person.birthDate = dto.birthDate ? new Date(dto.birthDate) : undefined;
+          person.birthDate = dto.birthDate
+            ? new Date(dto.birthDate)
+            : undefined;
         }
         touch(person, actor.id);
 
         if (dto.phone !== undefined) {
-          await this.reemplazarTelefono(tx, person.id, dto.phone, actor.id, ahora);
+          await this.reemplazarTelefono(
+            tx,
+            person.id,
+            dto.phone,
+            actor.id,
+            ahora,
+          );
         }
         if (dto.residenceMunicipalityConceptId !== undefined) {
           await this.reemplazarDomicilio(
@@ -1180,31 +1189,41 @@ export class ProfilesPractitionersService {
       await tx.flush();
 
       // Licencia inicial (UC-05-04) + credencial de soporte (verificable UC-05-05).
-      const license = this.authorizationsRepo.create(tx, {
-        practitionerProfileId: personId,
-        jurisdictionConceptId:
-          dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
-        licenseNumber: dto.licenseNumber,
-        regulatoryAuthority: dto.regulatoryAuthority,
-        stateConceptId: PROF.AUTH_PENDING,
-        actorUserId: actor.id,
-      });
-      const credential = this.credentialsRepo.create(tx, {
-        practitionerProfileId: personId,
-        credentialTypeConceptId:
-          dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
-        number: dto.credentialNumber,
-        // Dónde y cuándo se cursó. Las dos columnas existían y ninguna
-        // escritura las llenaba: la formación se guardaba sin decir de dónde
-        // salía, que es justamente lo que la hace legible en un perfil.
-        issuingInstitutionText: dto.credentialIssuingInstitutionText,
-        issueDate:
-          dto.credentialIssueDate === undefined
-            ? undefined
-            : new Date(dto.credentialIssueDate),
-        stateConceptId: PROF.CRED_PENDING,
-        actorUserId: actor.id,
-      });
+      // Las dos son OPCIONALES: una ficha de directorio —el padrón de una
+      // aseguradora, que dice quién atiende y dónde pero no publica matrículas—
+      // se da de alta sin ellas. Crearlas con un número inventado sería peor que
+      // no tenerlas: la ficha afirmaría una credencial que nadie declaró.
+      const license =
+        dto.licenseNumber === undefined
+          ? undefined
+          : this.authorizationsRepo.create(tx, {
+              practitionerProfileId: personId,
+              jurisdictionConceptId:
+                dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
+              licenseNumber: dto.licenseNumber,
+              regulatoryAuthority: dto.regulatoryAuthority,
+              stateConceptId: PROF.AUTH_PENDING,
+              actorUserId: actor.id,
+            });
+      const credential =
+        dto.credentialNumber === undefined
+          ? undefined
+          : this.credentialsRepo.create(tx, {
+              practitionerProfileId: personId,
+              credentialTypeConceptId:
+                dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
+              number: dto.credentialNumber,
+              // Dónde y cuándo se cursó. Las dos columnas existían y ninguna
+              // escritura las llenaba: la formación se guardaba sin decir de dónde
+              // salía, que es justamente lo que la hace legible en un perfil.
+              issuingInstitutionText: dto.credentialIssuingInstitutionText,
+              issueDate:
+                dto.credentialIssueDate === undefined
+                  ? undefined
+                  : new Date(dto.credentialIssueDate),
+              stateConceptId: PROF.CRED_PENDING,
+              actorUserId: actor.id,
+            });
       this.languagesRepo.create(tx, {
         practitionerProfileId: personId,
         languageConceptId: dto.languageConceptId ?? PROF.LANGUAGE_SPANISH,
@@ -1230,8 +1249,9 @@ export class ProfilesPractitionersService {
         practitionerCode: practitioner.practitionerCode,
         verificationStatus: practitioner.verificationStatusConceptId,
         practiceStatus: practitioner.practiceStatusConceptId,
-        licenseId: license.id,
-        credentialId: credential.id,
+        // Ausentes cuando la ficha es de directorio: no hay matrícula que citar.
+        licenseId: license?.id,
+        credentialId: credential?.id,
         createdAt: practitioner.createdAt,
       };
     });
@@ -1853,8 +1873,6 @@ export class ProfilesPractitionersService {
       createdAt: creada.createdAt,
     };
   }
-
-
 }
 
 /**
