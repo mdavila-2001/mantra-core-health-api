@@ -1204,6 +1204,71 @@ describe('ProfilesPatientsService', () => {
       return { ...d, person };
     }
 
+    /**
+     * El registro pide «Nombre o Razón social» Y «Número de NIT» (§1.15). Sólo
+     * existía el número: la ficha mostraba un NIT sin decir de quién era.
+     */
+    it('la razón social se guarda junto al NIT', async () => {
+      const d = conPaciente();
+      d.tx.find.mockResolvedValue([]);
+
+      await d.service.updateOwnProfile(
+        { taxId: '1234567', taxHolderName: 'Comercial Rojas S.R.L.' } as any,
+        titular,
+      );
+
+      const [, data] = d.identifiersRepo.create.mock.calls[0];
+      expect(data.value).toBe('1234567');
+      expect(data.holderName).toBe('Comercial Rojas S.R.L.');
+    });
+
+    /**
+     * Son el mismo hecho, y editar uno no puede borrar el otro: si sólo llega la
+     * razón social, el número se conserva de la fila vigente.
+     */
+    it('cambiar sólo la razón social conserva el número', async () => {
+      const d = conPaciente();
+      d.tx.find.mockResolvedValue([
+        { typeConceptId: CONCEPTS.ID_TYPE_TAX, value: '999', holderName: 'Viejo', validTo: null },
+      ] as any);
+
+      await d.service.updateOwnProfile(
+        { taxHolderName: 'Nuevo Titular S.A.' } as any,
+        titular,
+      );
+
+      const [, data] = d.identifiersRepo.create.mock.calls[0];
+      expect(data.value).toBe('999');
+      expect(data.holderName).toBe('Nuevo Titular S.A.');
+    });
+
+    /** Y al revés: cambiar el número no pierde a nombre de quién factura. */
+    it('cambiar sólo el número conserva la razón social', async () => {
+      const d = conPaciente();
+      d.tx.find.mockResolvedValue([
+        { typeConceptId: CONCEPTS.ID_TYPE_TAX, value: '999', holderName: 'Comercial Rojas', validTo: null },
+      ] as any);
+
+      await d.service.updateOwnProfile({ taxId: '888' } as any, titular);
+
+      const [, data] = d.identifiersRepo.create.mock.calls[0];
+      expect(data.value).toBe('888');
+      expect(data.holderName).toBe('Comercial Rojas');
+    });
+
+    /** Una razón social sola no es un NIT: no se abre una fila fiscal sin valor. */
+    it('sin número no se abre identificador, aunque venga la razón social', async () => {
+      const d = conPaciente();
+      d.tx.find.mockResolvedValue([]);
+
+      await d.service.updateOwnProfile(
+        { taxHolderName: 'Comercial Sin NIT' } as any,
+        titular,
+      );
+
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    });
+
     it('cargar el NIT abre un identificador fiscal', async () => {
       const d = conPaciente();
       d.tx.find.mockResolvedValue([]);

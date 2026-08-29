@@ -511,6 +511,7 @@ export class ProfilesPatientsService {
       nationalId: identificadores.nationalId,
       issuerAdministrativeAreaConceptId: identificadores.issuerArea,
       taxId: identificadores.taxId,
+      taxHolderName: identificadores.taxHolderName,
       email: correo?.value,
       homeAddress: aDireccion(domicilio),
       workAddress: aDireccion(trabajo),
@@ -631,8 +632,19 @@ export class ProfilesPatientsService {
       // El NIT y las dos direcciones: se declaraban al registrarse y después no
       // había forma de corregirlos. El perfil los mostraba y el editor no los
       // ofrecía, que es la peor combinación —ves el dato viejo y no podés tocarlo—.
-      if (dto.taxId !== undefined) {
-        await this.reemplazarNit(tx, person.id, dto.taxId, actor.id, ahora);
+      // La razón social viaja CON el NIT: son el mismo hecho —a nombre de quién
+      // factura esta persona—, y separarlos permitiría dejar una razón social
+      // colgada de un NIT que ya no existe. Si sólo llega una de las dos, la
+      // otra se conserva de la fila vigente.
+      if (dto.taxId !== undefined || dto.taxHolderName !== undefined) {
+        await this.reemplazarNit(
+          tx,
+          person.id,
+          dto.taxId,
+          dto.taxHolderName,
+          actor.id,
+          ahora,
+        );
       }
       if (dto.homeAddressLines !== undefined) {
         await this.reemplazarTextoDeDireccion(
@@ -678,6 +690,7 @@ export class ProfilesPatientsService {
     nationalId?: string;
     issuerArea?: string;
     taxId?: string;
+    taxHolderName?: string;
   }> {
     const filas = await em.find(Identifiers, {
       ownerId: personId,
@@ -691,6 +704,7 @@ export class ProfilesPatientsService {
       nationalId: documento?.value,
       issuerArea: documento?.issuerAdministrativeAreaConceptId,
       taxId: fiscal?.value,
+      taxHolderName: fiscal?.holderName,
     };
   }
 
@@ -950,7 +964,8 @@ export class ProfilesPatientsService {
   private async reemplazarNit(
     tx: EntityManager,
     personId: string,
-    nit: string,
+    nit: string | undefined,
+    razonSocial: string | undefined,
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
@@ -961,20 +976,28 @@ export class ProfilesPatientsService {
     const vigente = filas.find(
       (f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX,
     );
-    const limpio = nit.trim();
-    if (vigente?.value === limpio) return;
+    // Lo que no llegó se conserva de la fila vigente: editar sólo la razón
+    // social no puede borrar el NIT, ni al revés.
+    const numero = (nit ?? vigente?.value ?? '').trim();
+    const titular = (razonSocial ?? vigente?.holderName ?? '').trim();
+    if (vigente?.value === numero && (vigente?.holderName ?? '') === titular) {
+      return;
+    }
 
     if (vigente) {
       vigente.validTo = ahora;
       touch(vigente, actorUserId);
     }
-    if (limpio === '') return;
+    // Sin número no hay identificador que abrir: una razón social sola no es un
+    // NIT, y guardarla suelta dejaría una fila fiscal sin valor.
+    if (numero === '') return;
 
     this.identifiersRepo.create(tx, {
       ownerId: personId,
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
       typeConceptId: CONCEPTS.ID_TYPE_TAX,
-      value: limpio,
+      value: numero,
+      holderName: titular === '' ? undefined : titular,
       stateConceptId: CONCEPTS.STATE_ACTIVE,
       actorUserId,
     });

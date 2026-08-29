@@ -77,6 +77,19 @@ export class Identifiers {
   assignerTenantId?: string;
 
   /**
+   * A nombre de quién sale el comprobante — la razón social del NIT.
+   *
+   * Va con el identificador y no con la persona porque es el titular DEL
+   * IDENTIFICADOR: alguien puede facturar a nombre de su empresa, y el día que
+   * cambie de NIT la razón social cambia con él.
+   *
+   * Nullable porque un CI no tiene razón social: sólo se llena en los de tipo
+   * fiscal.
+   */
+  @Property({ fieldName: 'holder_name', nullable: true })
+  holderName?: string;
+
+  /**
    * Valor de valid from mantenido por la instancia.
    */
   @Property({ fieldName: 'valid_from', columnType: 'date', nullable: true })

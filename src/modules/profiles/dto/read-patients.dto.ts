@@ -506,6 +506,10 @@ export class OwnPatientProfileResponseDto {
   @ApiPropertyOptional({ description: 'NIT para facturación' })
   taxId?: string;
 
+  /** A nombre de quién sale el comprobante. Acompaña al NIT. */
+  @ApiPropertyOptional()
+  taxHolderName?: string;
+
   @ApiPropertyOptional({ description: 'Correo de contacto vigente' })
   email?: string;
 
