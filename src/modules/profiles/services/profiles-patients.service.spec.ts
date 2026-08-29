@@ -122,6 +122,8 @@ function build() {
     closeVigente: mockFn(),
     create: mockFn(),
   };
+  // El NIT vive en `common.identifiers` como un tipo más, igual que el CI.
+  const identifiersRepo = { create: mockFn() };
   // La propiedad del perfil se prueba en `profile-ownership.service.spec.ts`; aquí el
   // doble deja pasar para no mezclar el permiso con la lógica del servicio.
   const ownership = {
@@ -141,6 +143,7 @@ function build() {
     portalProxiesRepo,
     contactPointsRepo,
     addressesRepo,
+    identifiersRepo as never,
     ownership as never,
     logger as any,
   );
@@ -157,6 +160,7 @@ function build() {
     portalProxiesRepo,
     contactPointsRepo,
     addressesRepo,
+    identifiersRepo,
   };
 }
 
@@ -1178,4 +1182,110 @@ describe('ProfilesPatientsService', () => {
       expect(d.tx.flush).not.toHaveBeenCalled();
     });
   });
+  /**
+   * **Los tres datos que se veían y no se podían corregir.**
+   *
+   * El NIT, el domicilio y la dirección de trabajo se declaraban al registrarse
+   * y después el editor no los ofrecía: la ficha mostraba el valor viejo y no
+   * había forma de cambiarlo. Es la peor combinación de las dos.
+   */
+  describe('updateOwnProfile · NIT y direcciones', () => {
+    const titular = { id: 'user-1', roles: [] } as any;
+
+    function conPaciente() {
+      const d = build();
+      const person = { id: 'per-1', name: 'Ada', lastName: 'Lovelace' } as any;
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: 'per-1' });
+      d.personsRepo.findById.mockResolvedValue(person);
+      d.patientProfilesRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        patientCode: 'PC-1',
+      });
+      return { ...d, person };
+    }
+
+    it('cargar el NIT abre un identificador fiscal', async () => {
+      const d = conPaciente();
+      d.tx.find.mockResolvedValue([]);
+
+      await d.service.updateOwnProfile({ taxId: '1234567' } as any, titular);
+
+      const [, data] = d.identifiersRepo.create.mock.calls[0];
+      expect(data.value).toBe('1234567');
+      expect(data.typeConceptId).toBe(CONCEPTS.ID_TYPE_TAX);
+    });
+
+    /**
+     * No se sobrescribe el valor: la tabla lleva `valid_to` y una factura
+     * emitida con el NIT anterior tiene que seguir explicándose.
+     */
+    it('cambiarlo cierra el anterior en vez de pisarlo', async () => {
+      const d = conPaciente();
+      const anterior = { typeConceptId: CONCEPTS.ID_TYPE_TAX, value: '111', validTo: null } as any;
+      d.tx.find.mockResolvedValue([anterior]);
+
+      await d.service.updateOwnProfile({ taxId: '222' } as any, titular);
+
+      expect(anterior.validTo).toBeInstanceOf(Date);
+    });
+
+    it('vaciarlo cierra el anterior y no abre otro', async () => {
+      const d = conPaciente();
+      const anterior = { typeConceptId: CONCEPTS.ID_TYPE_TAX, value: '111', validTo: null } as any;
+      d.tx.find.mockResolvedValue([anterior]);
+      await d.service.updateOwnProfile({ taxId: '' } as any, titular);
+
+      expect(anterior.validTo).toBeInstanceOf(Date);
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Cambiar la calle no es cambiar de municipio ni perder las coordenadas: si
+     * se perdieran, el «Ver en el mapa» de la ficha quedaría mudo.
+     */
+    it('mudarse conserva el municipio y las coordenadas', async () => {
+      const d = conPaciente();
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+        lines: 'Calle vieja 1',
+        municipalityConceptId: 'muni-1',
+        latitude: '-17.78',
+        longitude: '-63.18',
+        countryConceptId: 'bo',
+      });
+
+      await d.service.updateOwnProfile(
+        { homeAddressLines: 'Av. Nueva 200' } as any,
+        titular,
+      );
+
+      const [, data] = d.addressesRepo.create.mock.calls[0];
+      expect(data.lines).toBe('Av. Nueva 200');
+      expect(data.municipalityConceptId).toBe('muni-1');
+      expect(data.latitude).toBe('-17.78');
+      expect(d.addressesRepo.closeVigente).toHaveBeenCalled();
+    });
+
+    it('el mismo texto no abre una dirección nueva', async () => {
+      const d = conPaciente();
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({ lines: 'Av. Nueva 200' });
+
+      await d.service.updateOwnProfile(
+        { homeAddressLines: 'Av. Nueva 200' } as any,
+        titular,
+      );
+
+      expect(d.addressesRepo.create).not.toHaveBeenCalled();
+    });
+
+    /** El mismo defecto que el perfil del profesional tenía, y que vivía acá también. */
+    it('borrar la fecha de nacimiento la deja sin valor, no en 1970', async () => {
+      const d = conPaciente();
+      d.person.birthDate = new Date(1990, 4, 5);
+
+      await d.service.updateOwnProfile({ birthDate: null } as any, titular);
+
+      expect(d.person.birthDate).toBeUndefined();
+    });
+  });
+
 });
