@@ -270,7 +270,6 @@ export class PatientDetailResponseDto {
   updatedAt!: Date;
 }
 
-
 /** Una dirección del paciente, con su ubicación si la declaró. */
 export class OwnAddressDto {
   @ApiPropertyOptional({ description: 'Calle y número, tal como la escribió' })
@@ -279,13 +278,18 @@ export class OwnAddressDto {
   @ApiPropertyOptional({ description: 'Ciudad, derivada del municipio' })
   city?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Municipio (VS_BO_MUNICIPALITY)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Municipio (VS_BO_MUNICIPALITY)',
+  })
   municipalityConceptId?: string;
 
   @ApiPropertyOptional({ description: 'Latitud, si marcó el punto en el mapa' })
   latitude?: number;
 
-  @ApiPropertyOptional({ description: 'Longitud; viaja siempre junto a la latitud' })
+  @ApiPropertyOptional({
+    description: 'Longitud; viaja siempre junto a la latitud',
+  })
   longitude?: number;
 }
 
@@ -331,7 +335,10 @@ export class OwnGuardianDto {
   @ApiPropertyOptional({ description: 'Cómo se llama' })
   displayName?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Parentesco (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Parentesco (concept id)',
+  })
   relationshipConceptId?: string;
 
   @ApiProperty({ description: 'Es a quien llamar en una urgencia' })
@@ -512,6 +519,21 @@ export class OwnPatientProfileResponseDto {
 
   @ApiPropertyOptional({ description: 'Correo de contacto vigente' })
   email?: string;
+
+  /**
+   * Foto de perfil de la persona (`profiles.persons.photo_file_id`).
+   *
+   * Es la foto de la persona, no de un perfil en particular —la misma
+   * columna que ya usaba `education.instructors`—: identifica a quien entra
+   * por la puerta cualquiera sea su rol. Viaja como id de archivo, igual que
+   * el resto de las referencias a `common.files`; quien la pinta la resuelve
+   * con `POST /common/files/:id/download-url`.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Foto de perfil (id de archivo en `common.files`)',
+  })
+  photoFileId?: string;
 
   @ApiPropertyOptional({
     type: OwnAddressDto,
