@@ -28,6 +28,8 @@ function build() {
     decease: mockFn(),
     getOwnProfile: mockFn(),
     updateOwnProfile: mockFn(),
+    setOwnPhoto: mockFn(),
+    removeOwnPhoto: mockFn(),
   };
   const controller = new ProfilesPatientsController(patientsService as any);
   return { controller, patientsService };
@@ -144,5 +146,26 @@ describe('ProfilesPatientsController', () => {
       dto,
       titular,
     );
+  });
+
+  it('delega setOwnPhoto con el cuerpo y el actor', async () => {
+    const d = build();
+    const dto = { fileId: 'file-1' };
+    d.patientsService.setOwnPhoto.mockResolvedValue({ personId: 'per-1' });
+
+    await expect(d.controller.setOwnPhoto(dto, titular)).resolves.toEqual({
+      personId: 'per-1',
+    });
+    expect(d.patientsService.setOwnPhoto).toHaveBeenCalledWith(dto, titular);
+  });
+
+  it('delega removeOwnPhoto con el actor de la sesión', async () => {
+    const d = build();
+    d.patientsService.removeOwnPhoto.mockResolvedValue({ personId: 'per-1' });
+
+    await expect(d.controller.removeOwnPhoto(titular)).resolves.toEqual({
+      personId: 'per-1',
+    });
+    expect(d.patientsService.removeOwnPhoto).toHaveBeenCalledWith(titular);
   });
 });

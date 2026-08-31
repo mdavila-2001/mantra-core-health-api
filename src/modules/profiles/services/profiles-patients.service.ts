@@ -6,11 +6,13 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UPLOAD_MIME_ALLOWLIST,
   decodeKeysetCursor,
   encodeKeysetCursor,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { AttachableFileService } from '../../common/services';
 import { findCurrentIdentityAssertionForPerson } from '../../identity_assurance/repositories/identity-assertions.repository';
 import {
   AddressesRepository,
@@ -62,6 +64,7 @@ import {
   OwnCoverageDto,
   OwnGuardianDto,
   UpdateOwnPatientProfileDto,
+  SetOwnPatientPhotoDto,
 } from '../dto';
 import { Addresses, Identifiers } from '../../common/entities';
 import { INS } from '../../insurance/insurance.concepts';
@@ -280,6 +283,7 @@ export class ProfilesPatientsService {
    * @param portalProxiesRepo - Valor de portal proxies repo requerido por la operación.
    * @param contactPointsRepo - Teléfono del paciente (`common.contact_points`).
    * @param addressesRepo - Domicilio del paciente (`common.addresses`).
+   * @param attachableFiles - La regla compartida de qué archivo se puede referenciar.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -299,6 +303,7 @@ export class ProfilesPatientsService {
     private readonly addressesRepo: AddressesRepository,
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly ownership: ProfileOwnershipService,
+    private readonly attachableFiles: AttachableFileService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPatientsService.name);
@@ -504,6 +509,7 @@ export class ProfilesPatientsService {
       occupationConceptId: person.occupationConceptId,
       occupationFreeText: person.occupationFreeText,
       phone: telefono?.value,
+      photoFileId: person.photoFileId,
       residenceMunicipalityConceptId: domicilio?.municipalityConceptId,
       identityVerified,
       // Mismo criterio que el resumen: ausente mientras no esté verificado.
@@ -676,6 +682,104 @@ export class ProfilesPatientsService {
     return this.getOwnProfile(actor);
   }
 
+  /**
+   * Fija la foto de perfil de la persona.
+   *
+   * Escribe `profiles.persons.photo_file_id`, no una columna de
+   * `patient_profiles`: la foto es de la **persona**, igual que decidió
+   * v4.0.11 al declarar la columna —identifica a quien entra por la puerta
+   * cualquiera sea su rol—. Un médico que además tenga un vínculo de paciente
+   * activo comparte la misma foto en los dos perfiles, y es lo esperado, no
+   * un cruce accidental.
+   *
+   * ## La tensión que esto no resuelve
+   *
+   * El perfil profesional tiene su propia
+   * `profiles.health_practitioner_profiles.photo_file_id`
+   * ({@link ProfilesPractitionersService.setPractitionerPhoto}), y encima
+   * `community.public_profiles.avatar_file_id` es una tercera columna para la
+   * vitrina pública. Las tres coexisten hoy sin sincronizarse: este método no
+   * las unifica ni escribe en cascada —eso acoplaría tres dominios distintos
+   * detrás de un solo botón—. Si el día de mañana se decide que
+   * `health_practitioner_profiles` deje de tener su propia foto, la salida
+   * natural es que su lectura haga *fallback* a esta columna, no que este
+   * método escriba en las otras.
+   *
+   * @param dto - El archivo ya subido que pasa a ser la foto.
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo releído, ya con su foto.
+   * @throws PreconditionFailedException si la cuenta no tiene persona
+   *   vinculada, o si el archivo está borrado, sin versión vigente,
+   *   infectado o no es una imagen.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de
+   *   paciente, o si el archivo no existe o no es del titular.
+   */
+  async setOwnPhoto(
+    dto: SetOwnPatientPhotoDto,
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.setOwnPhoto', actorId: actor.id },
+      'Setting own patient photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      const { person } = await this.resolveOwnPatient(tx, actor);
+      // Dentro de la misma transacción que la escritura: comprobar contra un
+      // estado y escribir sobre otro no comprueba nada.
+      await this.attachableFiles.assertUsableBy(
+        tx,
+        dto.fileId,
+        actor,
+        {
+          allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+          operation: 'profiles.patient.setOwnPhoto',
+        },
+        {
+          subject: 'El archivo de la foto',
+          notFound: 'El archivo de la foto no existe',
+        },
+      );
+      person.photoFileId = dto.fileId;
+      touch(person, actor.id);
+      await tx.flush();
+    });
+
+    return this.getOwnProfile(actor);
+  }
+
+  /**
+   * Quita la foto de perfil de la persona.
+   *
+   * Deja `photo_file_id` en nulo y no toca el archivo: quitar la foto de la
+   * ficha es una decisión de presentación, borrar un archivo del
+   * almacenamiento es otra cosa y tiene su propio camino. Es idempotente
+   * —quitar la foto de un perfil que ya no la tiene no es un error—.
+   *
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo releído, ya sin foto.
+   * @throws PreconditionFailedException si la cuenta no tiene persona
+   *   vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de
+   *   paciente.
+   */
+  async removeOwnPhoto(
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.removeOwnPhoto', actorId: actor.id },
+      'Removing own patient photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      const { person } = await this.resolveOwnPatient(tx, actor);
+      person.photoFileId = undefined;
+      touch(person, actor.id);
+      await tx.flush();
+    });
+
+    return this.getOwnProfile(actor);
+  }
 
   /**
    * Documento, departamento emisor y NIT, de una sola lectura.
@@ -755,8 +859,7 @@ export class ProfilesPatientsService {
       ...(f.member_identifier === null
         ? {}
         : { memberIdentifier: f.member_identifier }),
-      verified:
-        f.verification_status_concept_id === INS.VERIFY_VERIFIED,
+      verified: f.verification_status_concept_id === INS.VERIFY_VERIFIED,
     }));
   }
 
@@ -973,9 +1076,7 @@ export class ProfilesPatientsService {
       ownerId: personId,
       validTo: null,
     });
-    const vigente = filas.find(
-      (f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX,
-    );
+    const vigente = filas.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
     // Lo que no llegó se conserva de la fila vigente: editar sólo la razón
     // social no puede borrar el NIT, ni al revés.
     const numero = (nit ?? vigente?.value ?? '').trim();

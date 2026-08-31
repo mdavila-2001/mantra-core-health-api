@@ -322,6 +322,131 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
     await http().patch('/profiles/patients/me').send({}).expect(401);
   });
 
+  describe('foto de perfil (profiles.persons.photo_file_id)', () => {
+    /** PNG de 1×1 px, válido por su firma binaria — lo que exige el upload. */
+    const PNG_1PX = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAAA6fptVAAAACklEQVR4nGNgAAIAAAUAAen63NgAAAAASUVORK5CYII=',
+      'base64',
+    );
+
+    it('sube, fija y quita la foto propia; vuelve a leerse en cada paso', async () => {
+      // Antes de subir nada: la clave no viaja.
+      const inicial = await http()
+        .get('/profiles/patients/me')
+        .set(bearer(patientToken))
+        .expect(200);
+      expect(inicial.body).not.toHaveProperty('photoFileId');
+
+      const subido = await http()
+        .post('/common/files/upload')
+        .set(bearer(patientToken))
+        .field('category', 'IMAGE')
+        .field('sensitivity', 'NORMAL')
+        .attach('file', PNG_1PX, {
+          filename: 'foto.png',
+          contentType: 'image/png',
+        })
+        .expect(201);
+      const fileId = subido.body.id;
+      expect(fileId).toBeDefined();
+
+      const fijada = await http()
+        .put('/profiles/patients/me/photo')
+        .set(bearer(patientToken))
+        .send({ fileId })
+        .expect(200);
+      expect(fijada.body.photoFileId).toBe(fileId);
+
+      const releida = await http()
+        .get('/profiles/patients/me')
+        .set(bearer(patientToken))
+        .expect(200);
+      expect(releida.body.photoFileId).toBe(fileId);
+
+      const quitada = await http()
+        .delete('/profiles/patients/me/photo')
+        .set(bearer(patientToken))
+        .expect(200);
+      expect(quitada.body).not.toHaveProperty('photoFileId');
+
+      const releidaSinFoto = await http()
+        .get('/profiles/patients/me')
+        .set(bearer(patientToken))
+        .expect(200);
+      expect(releidaSinFoto.body).not.toHaveProperty('photoFileId');
+    });
+
+    it('no acepta el archivo de otro usuario', async () => {
+      // Un segundo paciente sube su propia foto; el primero no puede apuntar la
+      // suya a un archivo que no le pertenece.
+      const otroDocumento = `INT-OWN-${randomUUID().slice(0, 8)}`;
+      await http()
+        .post('/iam/auth/register-patient')
+        .send({
+          nationalId: otroDocumento,
+          password,
+          name: 'Otro',
+          lastName: 'Paciente',
+          birthDate: '1985-01-01',
+          sexAtBirth: 'MALE',
+          residenceMunicipalityConceptId: municipioInicial,
+        })
+        .expect(201);
+      const otroLogin = await http()
+        .post('/iam/auth/login')
+        .send({ nationalId: otroDocumento, password })
+        .expect(200);
+
+      const subidoPorOtro = await http()
+        .post('/common/files/upload')
+        .set(bearer(otroLogin.body.accessToken))
+        .field('category', 'IMAGE')
+        .field('sensitivity', 'NORMAL')
+        .attach('file', PNG_1PX, {
+          filename: 'foto.png',
+          contentType: 'image/png',
+        })
+        .expect(201);
+
+      await http()
+        .put('/profiles/patients/me/photo')
+        .set(bearer(patientToken))
+        .send({ fileId: subidoPorOtro.body.id })
+        .expect(403);
+    });
+
+    it('rechaza un archivo que no es imagen', async () => {
+      const subidoDocumento = await http()
+        .post('/common/files/upload')
+        .set(bearer(patientToken))
+        .field('category', 'DOCUMENT')
+        .field('sensitivity', 'NORMAL')
+        .attach('file', Buffer.from('%PDF-1.4 no es un pdf real'), {
+          filename: 'papel.pdf',
+          contentType: 'application/pdf',
+        })
+        .expect(201);
+
+      await http()
+        .put('/profiles/patients/me/photo')
+        .set(bearer(patientToken))
+        .send({ fileId: subidoDocumento.body.id })
+        .expect(422);
+    });
+
+    it('quitar la foto sin tenerla no falla', async () => {
+      await http()
+        .delete('/profiles/patients/me/photo')
+        .set(bearer(patientToken))
+        .expect(200);
+    });
+
+    it('sin token, ninguna de las dos rutas responde', async () => {
+      await http().put('/profiles/patients/me/photo').send({}).expect(401);
+      await http().delete('/profiles/patients/me/photo').expect(401);
+    });
+  });
+
   /** Cliente HTTP contra la app bajo prueba. */
   function http(): request.Agent {
     return request(ctx.app.getHttpServer());

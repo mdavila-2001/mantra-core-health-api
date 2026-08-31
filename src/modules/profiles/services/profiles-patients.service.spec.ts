@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { ForbiddenException } from '@nestjs/common';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
 /**
@@ -16,6 +17,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { AttachableFileService } from '../../common/services';
 import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
 import { boOccupationConceptId } from '../../../common/seed/bo-occupations.catalog';
 
@@ -129,6 +131,35 @@ function build() {
   const ownership = {
     assertOwnsPatientProfile: mockFn().mockResolvedValue(undefined),
   };
+  // Por defecto el archivo de la foto existe, es del actor, está vivo y es una
+  // imagen: así las pruebas que no hablan de la foto no tienen que montarlo.
+  // Mismo doble que `profiles-practitioners.service.spec.ts`.
+  const filesRepo = {
+    findById: mockFn(() =>
+      Promise.resolve({
+        id: 'file-1',
+        createdByUserId: 'user-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      }),
+    ),
+  };
+  const fileVersionsRepo = {
+    findById: mockFn(() =>
+      Promise.resolve({
+        id: 'v1',
+        mimeType: 'image/png',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      }),
+    ),
+  };
+  // El servicio compartido va de verdad: la foto tiene que apoyarse en la misma
+  // regla que corre en producción, no en un doble que diga que sí.
+  const attachableFiles = new AttachableFileService(
+    filesRepo as any,
+    fileVersionsRepo as any,
+    { setContext: mockFn(), info: mockFn(), warn: mockFn() } as any,
+  );
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ProfilesPatientsService(
@@ -145,6 +176,7 @@ function build() {
     addressesRepo,
     identifiersRepo as never,
     ownership as never,
+    attachableFiles,
     logger as any,
   );
   return {
@@ -161,6 +193,8 @@ function build() {
     contactPointsRepo,
     addressesRepo,
     identifiersRepo,
+    filesRepo,
+    fileVersionsRepo,
   };
 }
 
@@ -817,6 +851,121 @@ describe('ProfilesPatientsService', () => {
     });
   });
 
+  describe('setOwnPhoto / removeOwnPhoto (foto de perfil de la persona)', () => {
+    const titular = { id: 'user-1', roles: [] } as any;
+
+    /**
+     * Deja al titular con persona y perfil de paciente resueltos, igual que
+     * `conPaciente()` de `getOwnProfile`.
+     * @param d - El sistema bajo prueba.
+     * @returns La persona resuelta, para que la prueba lea/asigne sobre ella.
+     */
+    function conPaciente(d: ReturnType<typeof build>) {
+      const person: any = {
+        id: 'per-1',
+        name: 'Ada',
+        lastName: 'Lovelace',
+        displayName: 'Ada Lovelace',
+      };
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue(person);
+      d.patientProfilesRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        patientCode: 'PC-1',
+      });
+      return person;
+    }
+
+    it('escribe photo_file_id y lo devuelve en el perfil releído', async () => {
+      const d = build();
+      const person = conPaciente(d);
+
+      const perfil = await d.service.setOwnPhoto({ fileId: 'file-1' }, titular);
+
+      expect(person.photoFileId).toBe('file-1');
+      expect(perfil.photoFileId).toBe('file-1');
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('sin vínculo activo de cuenta falla con el error tipificado', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+      await expect(
+        d.service.setOwnPhoto({ fileId: 'file-1' }, titular),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('no acepta el archivo de otra persona', async () => {
+      const d = build();
+      conPaciente(d);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'otro-usuario',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        d.service.setOwnPhoto({ fileId: 'file-1' }, titular),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('no acepta un archivo que no existe', async () => {
+      const d = build();
+      conPaciente(d);
+      d.filesRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.setOwnPhoto({ fileId: 'fantasma' }, titular),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('no acepta un archivo que no es imagen', async () => {
+      const d = build();
+      conPaciente(d);
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        mimeType: 'application/pdf',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      });
+
+      await expect(
+        d.service.setOwnPhoto({ fileId: 'file-1' }, titular),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('quitar la foto deja la referencia en nulo sin tocar el archivo', async () => {
+      const d = build();
+      const person = conPaciente(d);
+      person.photoFileId = 'file-1';
+
+      const perfil = await d.service.removeOwnPhoto(titular);
+
+      expect(person.photoFileId).toBeUndefined();
+      expect(perfil.photoFileId).toBeUndefined();
+      expect(d.filesRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('quitar la foto de un perfil que no la tiene no falla', async () => {
+      const d = build();
+      conPaciente(d);
+
+      await expect(d.service.removeOwnPhoto(titular)).resolves.toBeDefined();
+    });
+
+    it('quitar la foto sin vínculo activo falla con el error tipificado', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+      await expect(d.service.removeOwnPhoto(titular)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+    });
+  });
+
   describe('updateOwnProfile', () => {
     const titular = { id: 'user-1', roles: [] } as any;
 
@@ -1195,7 +1344,9 @@ describe('ProfilesPatientsService', () => {
     function conPaciente() {
       const d = build();
       const person = { id: 'per-1', name: 'Ada', lastName: 'Lovelace' } as any;
-      d.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: 'per-1' });
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
       d.personsRepo.findById.mockResolvedValue(person);
       d.patientProfilesRepo.findById.mockResolvedValue({
         profileId: 'pp-1',
@@ -1229,7 +1380,12 @@ describe('ProfilesPatientsService', () => {
     it('cambiar sólo la razón social conserva el número', async () => {
       const d = conPaciente();
       d.tx.find.mockResolvedValue([
-        { typeConceptId: CONCEPTS.ID_TYPE_TAX, value: '999', holderName: 'Viejo', validTo: null },
+        {
+          typeConceptId: CONCEPTS.ID_TYPE_TAX,
+          value: '999',
+          holderName: 'Viejo',
+          validTo: null,
+        },
       ] as any);
 
       await d.service.updateOwnProfile(
@@ -1246,7 +1402,12 @@ describe('ProfilesPatientsService', () => {
     it('cambiar sólo el número conserva la razón social', async () => {
       const d = conPaciente();
       d.tx.find.mockResolvedValue([
-        { typeConceptId: CONCEPTS.ID_TYPE_TAX, value: '999', holderName: 'Comercial Rojas', validTo: null },
+        {
+          typeConceptId: CONCEPTS.ID_TYPE_TAX,
+          value: '999',
+          holderName: 'Comercial Rojas',
+          validTo: null,
+        },
       ] as any);
 
       await d.service.updateOwnProfile({ taxId: '888' } as any, titular);
@@ -1286,7 +1447,11 @@ describe('ProfilesPatientsService', () => {
      */
     it('cambiarlo cierra el anterior en vez de pisarlo', async () => {
       const d = conPaciente();
-      const anterior = { typeConceptId: CONCEPTS.ID_TYPE_TAX, value: '111', validTo: null } as any;
+      const anterior = {
+        typeConceptId: CONCEPTS.ID_TYPE_TAX,
+        value: '111',
+        validTo: null,
+      } as any;
       d.tx.find.mockResolvedValue([anterior]);
 
       await d.service.updateOwnProfile({ taxId: '222' } as any, titular);
@@ -1296,7 +1461,11 @@ describe('ProfilesPatientsService', () => {
 
     it('vaciarlo cierra el anterior y no abre otro', async () => {
       const d = conPaciente();
-      const anterior = { typeConceptId: CONCEPTS.ID_TYPE_TAX, value: '111', validTo: null } as any;
+      const anterior = {
+        typeConceptId: CONCEPTS.ID_TYPE_TAX,
+        value: '111',
+        validTo: null,
+      } as any;
       d.tx.find.mockResolvedValue([anterior]);
       await d.service.updateOwnProfile({ taxId: '' } as any, titular);
 
@@ -1332,7 +1501,9 @@ describe('ProfilesPatientsService', () => {
 
     it('el mismo texto no abre una dirección nueva', async () => {
       const d = conPaciente();
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({ lines: 'Av. Nueva 200' });
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+        lines: 'Av. Nueva 200',
+      });
 
       await d.service.updateOwnProfile(
         { homeAddressLines: 'Av. Nueva 200' } as any,
@@ -1367,7 +1538,9 @@ describe('ProfilesPatientsService', () => {
 
     function conDireccion(direccion: any) {
       const d = build();
-      d.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: 'per-1' });
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
       d.personsRepo.findById.mockResolvedValue({ id: 'per-1', name: 'Ana' });
       d.patientProfilesRepo.findById.mockResolvedValue({
         profileId: 'pp-1',
@@ -1378,7 +1551,11 @@ describe('ProfilesPatientsService', () => {
     }
 
     it('sin coordenadas no viaja ninguna, ni como cero', async () => {
-      const d = conDireccion({ lines: 'Calle Ayacucho 241', latitude: null, longitude: null });
+      const d = conDireccion({
+        lines: 'Calle Ayacucho 241',
+        latitude: null,
+        longitude: null,
+      });
 
       const perfil = await d.service.getOwnProfile(titular);
 
@@ -1387,7 +1564,11 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('y con coordenadas viajan como números', async () => {
-      const d = conDireccion({ lines: 'Av. Beni 5100', latitude: '-17.758', longitude: '-63.178' });
+      const d = conDireccion({
+        lines: 'Av. Beni 5100',
+        latitude: '-17.758',
+        longitude: '-63.178',
+      });
 
       const perfil = await d.service.getOwnProfile(titular);
 
@@ -1395,5 +1576,4 @@ describe('ProfilesPatientsService', () => {
       expect(perfil.homeAddress?.longitude).toBe(-63.178);
     });
   });
-
 });

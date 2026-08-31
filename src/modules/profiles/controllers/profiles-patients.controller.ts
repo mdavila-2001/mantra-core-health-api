@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -8,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -47,6 +49,7 @@ import {
   PatientDetailResponseDto,
   OwnPatientProfileResponseDto,
   UpdateOwnPatientProfileDto,
+  SetOwnPatientPhotoDto,
 } from '../dto';
 
 /**
@@ -137,6 +140,44 @@ export class ProfilesPatientsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<OwnPatientProfileResponseDto> {
     return this.patientsService.updateOwnProfile(dto, actor);
+  }
+
+  /**
+   * Fijar la foto de perfil propia.
+   *
+   * Sin `@Roles` por lo mismo que el resto de `patients/me/*`: el sujeto lo
+   * resuelve el servidor desde la sesión y no hay parámetro que apunte a otro.
+   *
+   * `PUT` porque el resultado no depende de cuántas veces se pida: la persona
+   * queda con esa foto.
+   *
+   * @param dto - El archivo ya subido que pasa a ser la foto.
+   * @param actor - Usuario autenticado, que es también el sujeto.
+   * @returns El perfil releído, ya con su foto.
+   */
+  @Put('patients/me/photo')
+  @ApiOperation({ summary: 'Fijar la propia foto de perfil' })
+  setOwnPhoto(
+    @Body() dto: SetOwnPatientPhotoDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    return this.patientsService.setOwnPhoto(dto, actor);
+  }
+
+  /**
+   * Quitar la foto de perfil propia.
+   *
+   * Quita la referencia; el archivo no se toca. Idempotente.
+   *
+   * @param actor - Usuario autenticado, que es también el sujeto.
+   * @returns El perfil releído, ya sin foto.
+   */
+  @Delete('patients/me/photo')
+  @ApiOperation({ summary: 'Quitar la propia foto de perfil' })
+  removeOwnPhoto(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    return this.patientsService.removeOwnPhoto(actor);
   }
 
   /**
