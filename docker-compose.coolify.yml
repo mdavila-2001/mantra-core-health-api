@@ -1,0 +1,661 @@
+# =========================================================================
+# Mantra Core Technologies · ALOVIDA
+# Despliegue en un VPS gestionado por Coolify.
+# -------------------------------------------------------------------------
+# Este archivo NO es `docker-compose.yml`. Aquél levanta el entorno de
+# desarrollo de la máquina de quien programa; éste levanta el sistema en un
+# servidor. Las diferencias no son cosméticas y cada una viene de un modo de
+# fallo concreto que se comprobó antes de escribirlas:
+#
+#  1. EL DDL SE MONTA DESDE `./database`, NO DESDE `../SQL`.
+#     Coolify clona ESTE repositorio y nada más. `../SQL` es una carpeta
+#     hermana que en el servidor no existe: el contenedor de inicialización
+#     arrancaba con `/init/SQL` vacío, la base quedaba sin una sola tabla y la
+#     aplicación devolvía 500 en la primera escritura. `database/` es la copia
+#     versionada; se refresca con `yarn db:vendor` y CI la verifica con
+#     `yarn db:vendor:check`.
+#
+#  2. HAY UN PASO DE MIGRACIÓN EXPLÍCITO (`api-migrate`) ANTES DE LA API.
+#     Medido contra una base recién construida desde `database/SQL`: **130
+#     diferencias** entre el modelo y la base (82 tablas ausentes —`pharma_lab`,
+#     `surveys`, `audio_assets` enteros—, 22 columnas ausentes y 26
+#     divergencias de obligatoriedad). Las lecturas no se enteran, porque
+#     MikroORM proyecta `select "p0".*`; **las altas sí**, porque un INSERT
+#     nombra cada columna. Es exactamente el fallo que se arrastraba: «alta de
+#     paciente → 500, column "…" of relation "…" does not exist».
+#     `api-migrate` corre `seed-cli` con `ORM_SCHEMA_SYNC=safe` (aditivo, nunca
+#     destructivo, con cerrojo de aviso) y deja la base en «1238 entidades
+#     coinciden», y de paso siembra el catálogo. La API arranca después, con
+#     `ORM_SCHEMA_SYNC=off`: en un servidor, quien toca la estructura es un paso
+#     de despliegue con código de salida, no el proceso que sirve tráfico.
+#
+#  3. NINGÚN PUERTO SE PUBLICA EN EL HOST.
+#     El proxy de Coolify (Traefik) llega a los contenedores por la red de
+#     Docker. Publicar 5432 o 9200 en el VPS es exponer la base y el buscador
+#     a Internet. Solo `api` se anuncia, y ni siquiera hace falta si el
+#     frontend va delante (ver punto 5).
+#
+#  4. LOS SECRETOS DE PRODUCCIÓN ESTÁN COMPLETOS.
+#     Con `NODE_ENV=production` hacen falta CINCO claves de 32+ caracteres:
+#     `JWT_SECRET`, `MFA_ENCRYPTION_KEY`, `WEBHOOK_SIGNING_KEY`,
+#     `DOWNLOAD_URL_SECRET` y `AUDIO_TTS_DATA_KEY`. Las tres últimas no
+#     figuraban en el compose de desarrollo, así que un despliegue copiado de
+#     allí moría en el arranque —«"WEBHOOK_SIGNING_KEY" is required»— sin
+#     ninguna pista de por qué en desarrollo sí funcionaba.
+#     `AUDIO_TTS_DATA_KEY` es la más desconcertante de las cinco: se exige
+#     aunque la síntesis de voz esté APAGADA, porque quien la lee es el cifrador
+#     que se instancia con el módulo (`loadAudioEnv`), no el proveedor.
+#     Ver `.env.coolify.example`.
+#
+#  5. LA RED `alovida` ES EXTERNA Y COMPARTIDA CON EL FRONTEND.
+#     El frontend (`mantra-core-health`) sirve la API bajo el MISMO dominio a
+#     través de su nginx —es la decisión de arquitectura del proyecto, y es lo
+#     que permite que `PUBLIC_API_BASE_URL` quede vacía y que la API mantenga
+#     `CORS` denegado por defecto (`main.ts`: `enableCors({ origin: false })`)—.
+#     Para que aquel nginx alcance a este contenedor, los dos stacks comparten
+#     una red creada UNA VEZ en el servidor:
+#
+#         docker network create alovida
+#
+#     Se declara externa en los dos lados a propósito: si un stack la creara,
+#     el otro fallaría con «network alovida was found but has incorrect label».
+#
+#  6. EL EMULADOR DE PROVEEDORES NO EXISTE AQUÍ.
+#     `mock-provider-server` acepta TODA verificación de identidad y de
+#     matrícula profesional. `assertMockProviderNotInProduction` aborta el
+#     arranque de cualquier worker si `MOCK_PROVIDER_BASE_URL` trae valor en
+#     producción; la variable se fija vacía explícitamente más abajo.
+#
+# -------------------------------------------------------------------------
+# RECURSOS. Con los 22 workers el stack pide del orden de **8 GB de RAM**.
+# Para un VPS de 4 GB, comentar los servicios de la sección «WORKERS
+# OPCIONALES»: la API y las altas funcionan sin ellos; lo que se pierde es el
+# procesamiento en segundo plano de esos dominios.
+# -------------------------------------------------------------------------
+# Puesta en marcha en Coolify:
+#   Nuevo recurso → Docker Compose → este repositorio, rama `dev`
+#   Compose file: docker-compose.coolify.yml
+#   Variables: copiar de `.env.coolify.example` (las marcadas OBLIGATORIA)
+# Ver docs/operations/coolify.md para el paso a paso completo.
+# =========================================================================
+
+x-app-env: &app-env
+  NODE_ENV: production
+  PORT: "3000"
+
+  # --- PostgreSQL ---------------------------------------------------------
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_USER: ${POSTGRES_USER}
+  DB_PASSWORD: ${POSTGRES_PASSWORD}
+  DB_NAME: ${POSTGRES_DB}
+
+  # --- Los otros cuatro motores ------------------------------------------
+  MONGODB_URI: mongodb://mongodb:27017/${MONGO_DB:-alovida_document_store}
+  MONGO_DB: ${MONGO_DB:-alovida_document_store}
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  OPENSEARCH_NODE: http://opensearch:9200
+  MINIO_ENDPOINT: minio
+  MINIO_PORT: "9000"
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+  MINIO_BUCKET: ${MINIO_BUCKET:-alovida-files}
+
+  # --- Almacenamiento de archivos ----------------------------------------
+  # `local` sobre un volumen persistente: un único proceso de API escribe, y el
+  # volumen sobrevive al redespliegue. Para varias réplicas hay que pasar a
+  # `s3`, porque un volumen local no se comparte entre contenedores.
+  FILE_STORAGE_ADAPTER: ${FILE_STORAGE_ADAPTER:-local}
+  FILE_STORAGE_LOCAL_DIR: ${FILE_STORAGE_LOCAL_DIR:-./storage/uploads}
+  FILE_STORAGE_MAX_SIZE_BYTES: ${FILE_STORAGE_MAX_SIZE_BYTES:-10485760}
+  FILE_STORAGE_S3_BUCKET: ${MINIO_BUCKET:-alovida-files}
+  FILE_STORAGE_S3_REGION: ${FILE_STORAGE_S3_REGION:-us-east-1}
+  FILE_STORAGE_S3_ENDPOINT: http://minio:9000
+  FILE_STORAGE_S3_FORCE_PATH_STYLE: "true"
+  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-audio-assets}
+  FILE_STORAGE_S3_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+  FILE_STORAGE_S3_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+
+  # --- Secretos. LOS CUATRO son obligatorios con NODE_ENV=production ------
+  JWT_SECRET: ${JWT_SECRET}
+  MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY}
+  WEBHOOK_SIGNING_KEY: ${WEBHOOK_SIGNING_KEY}
+  DOWNLOAD_URL_SECRET: ${DOWNLOAD_URL_SECRET}
+  # La quinta, y la que no se ve venir: se exige con la síntesis de voz apagada.
+  AUDIO_TTS_DATA_KEY: ${AUDIO_TTS_DATA_KEY}
+  JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+  JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
+  ACCOUNT_LOCK_THRESHOLD: ${ACCOUNT_LOCK_THRESHOLD:-5}
+
+  # Número de proxies de confianza delante de la API. En este despliegue son
+  # dos: el Traefik de Coolify y el nginx del frontend. Sin esto, Express toma
+  # la IP del último salto —siempre la misma— y el limitador de tasa mete a
+  # todos los usuarios en el mismo cubo de 300 peticiones/minuto: con una
+  # decena de pantallas abiertas empiezan los 429 sin que nadie entienda por
+  # qué. Es un número y no `true` a propósito: confiar en toda la cadena deja
+  # que cualquiera falsifique su IP con una cabecera `X-Forwarded-For`.
+  TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-2}
+
+  # --- Primer administrador ----------------------------------------------
+  # `BOOTSTRAP_ADMIN_ALLOW_PRODUCTION` tiene que ser `true` explícito o el seed
+  # se salta en producción y no queda NINGUNA cuenta con SECURITY_ADMIN: sin
+  # ella, `POST /iam/users` es inalcanzable y no hay forma de crear el primer
+  # usuario por API. Dejarlo en `true` para el arranque en frío y volverlo a
+  # `false` cuando el administrador ya exista.
+  BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+  BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+  BOOTSTRAP_ADMIN_ALLOW_PRODUCTION: ${BOOTSTRAP_ADMIN_ALLOW_PRODUCTION:-false}
+  # Cuentas de demostración de socios comerciales. Apagadas: en un servidor real
+  # son cuatro credenciales conocidas.
+  SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
+  SEED_DEMO_ALLOW_PRODUCTION: ${SEED_DEMO_ALLOW_PRODUCTION:-false}
+
+  # --- Postura de seguridad ----------------------------------------------
+  AUTH_REFRESH_COOKIE_ENABLED: ${AUTH_REFRESH_COOKIE_ENABLED:-false}
+  AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
+  RLS_ENFORCE: ${RLS_ENFORCE:-false}
+  # El bypass de verificación aborta el arranque si llega en `true` con
+  # NODE_ENV=production; se deja escrito para que nadie lo herede de un `.env`.
+  DEV_VERIFICATION_BYPASS: "false"
+  MIKRO_ORM_DEBUG: "false"
+
+  # --- Esquema y siembra: los hace `api-migrate`, no el proceso que sirve --
+  ORM_SCHEMA_SYNC: "off"
+  # Con `off`, `SchemaBootstrapService` retorna antes de comparar nada, así que
+  # esta variable no hace efecto en la API: quien verifica la fidelidad es
+  # `api-migrate`, y lo hace en CADA despliegue porque es un paso obligatorio
+  # del arranque del stack. Se deja declarada para que el día que alguien
+  # cambie el modo en un incidente, la comprobación venga incluida.
+  ORM_VERIFY_FIDELITY: "true"
+  SEED_ON_BOOT: "false"
+
+  # --- Workers ------------------------------------------------------------
+  WORKER_API_BASE_URL: http://api:3000
+  WORKER_HTTP_TIMEOUT_MS: ${WORKER_HTTP_TIMEOUT_MS:-30000}
+  WORKER_HEALTH_PORT: "9100"
+  WORKER_TICK_TIMEOUT_MS: ${WORKER_TICK_TIMEOUT_MS:-300000}
+  WORKER_STUCK_TICK_MS: ${WORKER_STUCK_TICK_MS:-600000}
+  WORKER_DRAIN_TIMEOUT_MS: ${WORKER_DRAIN_TIMEOUT_MS:-20000}
+  WORKER_SHUTDOWN_TIMEOUT_MS: ${WORKER_SHUTDOWN_TIMEOUT_MS:-30000}
+  WORKER_HTTP_RETRY_ATTEMPTS: ${WORKER_HTTP_RETRY_ATTEMPTS:-3}
+  WORKER_HTTP_MAX_CONCURRENT: ${WORKER_HTTP_MAX_CONCURRENT:-16}
+  MESSAGING_QUEUE_CODES: ${MESSAGING_QUEUE_CODES:-}
+  # VACÍA, y es una condición de arranque: ver el punto 6 de la cabecera.
+  MOCK_PROVIDER_BASE_URL: ""
+
+  # --- Plazos HTTP --------------------------------------------------------
+  # `keepAlive` por encima del idle timeout del proxy que va delante, o
+  # aparecen 502 esporádicos sin rastro en los logs de la aplicación.
+  API_SHUTDOWN_TIMEOUT_MS: ${API_SHUTDOWN_TIMEOUT_MS:-30000}
+  HTTP_KEEPALIVE_TIMEOUT_MS: ${HTTP_KEEPALIVE_TIMEOUT_MS:-65000}
+  HTTP_HEADERS_TIMEOUT_MS: ${HTTP_HEADERS_TIMEOUT_MS:-70000}
+  HTTP_REQUEST_TIMEOUT_MS: ${HTTP_REQUEST_TIMEOUT_MS:-120000}
+
+  # --- Correo real (Gmail API). Vacías = el envío queda sin proveedor -----
+  GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID:-}
+  GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
+  GOOGLE_OAUTH_REFRESH_TOKEN: ${GOOGLE_OAUTH_REFRESH_TOKEN:-}
+  GOOGLE_SENDER_EMAIL: ${GOOGLE_SENDER_EMAIL:-}
+
+  # --- Audio / TTS: apagado; encenderlo cuesta dinero por petición --------
+  AUDIO_TTS_ENABLED: ${AUDIO_TTS_ENABLED:-false}
+  AUDIO_TTS_PROVIDER: ${AUDIO_TTS_PROVIDER:-disabled}
+  AUDIO_TTS_ALLOW_RUNTIME_GENERATION: ${AUDIO_TTS_ALLOW_RUNTIME_GENERATION:-false}
+  ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+
+  # --- Trazas -------------------------------------------------------------
+  OTEL_ENABLED: ${OTEL_ENABLED:-false}
+  OTEL_SERVICE_NAMESPACE: ${OTEL_SERVICE_NAMESPACE:-alovida}
+  OTEL_DEPLOYMENT_ENVIRONMENT: ${OTEL_DEPLOYMENT_ENVIRONMENT:-production}
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-}
+
+x-api-resources: &api-resources
+  limits:
+    cpus: "2.0"
+    memory: 1536M
+
+x-worker-resources: &worker-resources
+  limits:
+    cpus: "0.5"
+    memory: 384M
+
+x-worker-healthcheck: &worker-healthcheck
+  test:
+    [
+      "CMD",
+      "node",
+      "-e",
+      "fetch('http://localhost:9100/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+    ]
+  interval: 30s
+  timeout: 5s
+  retries: 3
+  start_period: 60s
+
+# Plantilla de los 22 workers: misma imagen que la API, mismo entorno, y lo
+# único que cambia es el `command`. Se fusiona con `<<:` para no repetir
+# veintidós veces catorce líneas idénticas — repetidas, un cambio se aplica a
+# veintiuno y se olvida en el que nadie mira.
+x-worker: &worker
+  image: ${API_IMAGE:-alovida-api:coolify}
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      GIT_COMMIT: ${SOURCE_COMMIT:-desconocido}
+      APP_VERSION: ${APP_VERSION:-desconocido}
+  restart: always
+  environment:
+    <<: *app-env
+  deploy:
+    resources: *worker-resources
+  healthcheck: *worker-healthcheck
+  # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s): el drenaje del tick en
+  # vuelo tiene que terminar antes del SIGKILL, o cada despliegue corta lotes
+  # a la mitad y nadie deja escrito qué quedó pendiente.
+  stop_grace_period: 45s
+  depends_on:
+    api:
+      condition: service_healthy
+  networks:
+    - alovida
+
+services:
+  # =======================================================================
+  # MOTORES DE DATOS
+  # =======================================================================
+  postgres:
+    image: timescale/timescaledb-ha:pg18
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      # `timescaledb-ha` usa PGDATA=/home/postgres/pgdata/data, NO la ruta de la
+      # imagen oficial de postgres. Montado en /var/lib/postgresql/data el
+      # volumen queda vacío y los datos viven en la capa efímera del contenedor:
+      # se pierden enteros en el primer redespliegue.
+      - postgres_data:/home/postgres/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - alovida
+
+  # One-shot: aplica el DDL canónico versionado en `database/`.
+  postgres-init:
+    image: timescale/timescaledb-ha:pg18
+    restart: "no"
+    entrypoint: ["bash", "/init/bin/init-postgres.sh"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      # RUTAS DENTRO DEL REPOSITORIO. Ver el punto 1 de la cabecera.
+      - ./database/SQL:/init/SQL:ro
+      - ./database/NoSQL:/init/NoSQL:ro
+      - ./docker/db-init:/init/bin:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - alovida
+
+  mongodb:
+    image: mongo:8.2.12
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\"ping\").ok' --quiet"]
+      interval: 15s
+      timeout: 30s
+      retries: 5
+      start_period: 40s
+    networks:
+      - alovida
+
+  mongo-init:
+    image: mongo:8.2.12
+    restart: "no"
+    entrypoint: ["bash", "/init/bin/init-mongo.sh"]
+    environment:
+      MONGO_DB: ${MONGO_DB:-alovida_document_store}
+    volumes:
+      - ./database/NoSQL/55_document_store_mongodb:/init/mongo:ro
+      - ./docker/db-init:/init/bin:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - alovida
+
+  redis:
+    image: redis:8.10-alpine
+    restart: always
+    # `--save 60 1` conserva el snapshot: Redis guarda el estado del limitador
+    # de tasa y de las colas, y perderlo en cada reinicio del contenedor no es
+    # gratis.
+    command: redis-server --save 60 1 --loglevel notice
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - alovida
+
+  opensearch:
+    image: opensearchproject/opensearch:3.8.0
+    restart: always
+    environment:
+      - cluster.name=alovida-cluster
+      - node.name=alovida-node1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      # Sin plugin de seguridad porque OpenSearch NO se publica: solo lo
+      # alcanzan los contenedores de esta red. Si algún día se le pone dominio,
+      # esto tiene que cambiar antes.
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - alovida
+
+  opensearch-init:
+    image: curlimages/curl:8.21.0
+    restart: "no"
+    entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
+    volumes:
+      - ./database/NoSQL/57_search_platform_opensearch:/init/os:ro
+      - ./docker/db-init:/init/bin:ro
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    networks:
+      - alovida
+
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - alovida
+
+  # One-shot que NO existe en el compose de desarrollo, y por eso hacía falta:
+  # ningún punto del código crea el bucket (no hay un solo `CreateBucketCommand`
+  # en `src/`). Contra un MinIO recién levantado, la primera subida de audio o
+  # de archivo por S3 muere con `NoSuchBucket` — y el worker lo registra como
+  # fallo de proveedor, que manda a buscar el problema donde no está.
+  minio-init:
+    image: minio/mc:RELEASE.2024-09-16T17-43-14Z
+    restart: "no"
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        mc alias set alovida http://minio:9000 "$$MINIO_ACCESS_KEY" "$$MINIO_SECRET_KEY"
+        mc mb --ignore-existing "alovida/$$MINIO_BUCKET"
+        echo "=== minio-init: bucket $$MINIO_BUCKET listo"
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET:-alovida-files}
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - alovida
+
+  # =======================================================================
+  # PASO DE MIGRACIÓN. Ver el punto 2 de la cabecera.
+  # =======================================================================
+  # Corre `seed-cli`, que construye el contexto de Nest sin servidor HTTP: eso
+  # dispara `onApplicationBootstrap` —y con él `SchemaBootstrapService` en modo
+  # `safe`— y después siembra el catálogo, terminando con un código de salida
+  # que dice si algo falló. Ese código es lo que hace que `api` NO arranque
+  # contra una base a medio construir: `service_completed_successfully`.
+  api-migrate:
+    image: ${API_IMAGE:-alovida-api:coolify}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GIT_COMMIT: ${SOURCE_COMMIT:-desconocido}
+        APP_VERSION: ${APP_VERSION:-desconocido}
+    restart: "no"
+    command: ["node", "dist/src/seed-cli.js"]
+    environment:
+      <<: *app-env
+      # Las dos únicas diferencias con el resto del stack, y son el motivo de
+      # que este servicio exista.
+      ORM_SCHEMA_SYNC: "safe"
+      ORM_VERIFY_FIDELITY: "true"
+    deploy:
+      resources: *api-resources
+    depends_on:
+      postgres:
+        condition: service_healthy
+      postgres-init:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
+      opensearch:
+        condition: service_healthy
+      opensearch-init:
+        condition: service_completed_successfully
+      minio-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    networks:
+      - alovida
+
+  # =======================================================================
+  # API
+  # =======================================================================
+  api:
+    image: ${API_IMAGE:-alovida-api:coolify}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GIT_COMMIT: ${SOURCE_COMMIT:-desconocido}
+        BUILD_TIME: ${BUILD_TIME:-desconocido}
+        APP_VERSION: ${APP_VERSION:-desconocido}
+    restart: always
+    command: ["node", "dist/src/main.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *api-resources
+    volumes:
+      - api_storage:/app/storage
+    # Sin `ports:`. Quien entra desde fuera es el nginx del frontend, por la red
+    # `alovida`. Para exponer la API con dominio propio, ponerle uno en Coolify
+    # a este servicio: Coolify añade las etiquetas de Traefik solo.
+    expose:
+      - "3000"
+    stop_grace_period: 45s
+    healthcheck:
+      # `node:24-bookworm-slim` no trae curl ni wget: se usa el `fetch` nativo
+      # de Node en vez de engordar la imagen por un healthcheck.
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    depends_on:
+      api-migrate:
+        condition: service_completed_successfully
+    networks:
+      alovida:
+        # El nginx del frontend resuelve `http://api:3000`. Coolify renombra los
+        # contenedores, así que el alias se declara explícito en vez de confiar
+        # en que el nombre del servicio sobreviva al renombrado.
+        aliases:
+          - api
+          - alovida-api
+
+  # =======================================================================
+  # WORKERS ESENCIALES
+  # Mensajería entrega los correos (activación de cuenta incluida), y sin
+  # planificación ni flujos de trabajo la agenda y los procesos clínicos no
+  # avanzan solos. Estos cuatro son los que se notan apagados el primer día.
+  # =======================================================================
+  worker-messaging:
+    <<: *worker
+    command: ["node", "dist/src/worker-messaging.js"]
+
+  worker-scheduling:
+    <<: *worker
+    command: ["node", "dist/src/worker-scheduling.js"]
+
+  worker-workflow:
+    <<: *worker
+    command: ["node", "dist/src/worker-workflow.js"]
+
+  worker-read_models:
+    <<: *worker
+    command: ["node", "dist/src/worker-read_models.js"]
+
+  # =======================================================================
+  # WORKERS OPCIONALES
+  # Comentar este bloque entero en un VPS de 4 GB: la API, el alta de
+  # pacientes y el resto del uso sincrónico funcionan sin ellos. Lo que se
+  # detiene es el procesamiento en segundo plano de cada dominio.
+  # =======================================================================
+  worker-identity_assurance:
+    <<: *worker
+    command: ["node", "dist/src/worker-identity_assurance.js"]
+
+  worker-consent:
+    <<: *worker
+    command: ["node", "dist/src/worker-consent.js"]
+
+  worker-health_context:
+    <<: *worker
+    command: ["node", "dist/src/worker-health_context.js"]
+
+  worker-automation:
+    <<: *worker
+    command: ["node", "dist/src/worker-automation.js"]
+
+  worker-billing:
+    <<: *worker
+    command: ["node", "dist/src/worker-billing.js"]
+
+  worker-community:
+    <<: *worker
+    command: ["node", "dist/src/worker-community.js"]
+
+  worker-cross_store_consistency:
+    <<: *worker
+    command: ["node", "dist/src/worker-cross_store_consistency.js"]
+
+  worker-delegated_access:
+    <<: *worker
+    command: ["node", "dist/src/worker-delegated_access.js"]
+
+  worker-integrations:
+    <<: *worker
+    command: ["node", "dist/src/worker-integrations.js"]
+
+  worker-pharmacy_inventory:
+    <<: *worker
+    command: ["node", "dist/src/worker-pharmacy_inventory.js"]
+
+  worker-promotions:
+    <<: *worker
+    command: ["node", "dist/src/worker-promotions.js"]
+
+  worker-qa_lab:
+    <<: *worker
+    command: ["node", "dist/src/worker-qa_lab.js"]
+
+  worker-reporting:
+    <<: *worker
+    command: ["node", "dist/src/worker-reporting.js"]
+
+  worker-tracking:
+    <<: *worker
+    command: ["node", "dist/src/worker-tracking.js"]
+
+  worker-audio-assets:
+    <<: *worker
+    command: ["node", "dist/src/worker-audio-assets.js"]
+
+  worker-vector_rag:
+    <<: *worker
+    command: ["node", "dist/src/worker-vector_rag.js"]
+
+  worker-lakehouse:
+    <<: *worker
+    command: ["node", "dist/src/worker-lakehouse.js"]
+
+  worker-time_series:
+    <<: *worker
+    command: ["node", "dist/src/worker-time_series.js"]
+
+# -------------------------------------------------------------------------
+# Volúmenes. Son lo único del stack que no se puede reconstruir: Coolify
+# recrea contenedores en cada despliegue y los datos tienen que sobrevivir.
+# -------------------------------------------------------------------------
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  opensearch_data:
+  minio_data:
+  api_storage:
+
+# -------------------------------------------------------------------------
+# Red compartida con el stack del frontend. Crear UNA VEZ en el servidor:
+#
+#     docker network create alovida
+#
+# Externa en los dos lados: si uno la creara, el otro fallaría al arrancar con
+# «network alovida was found but has incorrect label».
+# -------------------------------------------------------------------------
+networks:
+  alovida:
+    external: true
+    name: ${ALOVIDA_NETWORK:-alovida}

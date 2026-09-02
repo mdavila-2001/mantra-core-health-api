@@ -103,6 +103,20 @@ x-app-env: &app-env
   JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
   ACCOUNT_LOCK_THRESHOLD: ${ACCOUNT_LOCK_THRESHOLD:-5}
   MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY}
+  # Los otros dos secretos que `appSecurityEnvSchema` exige. Faltaban en esta
+  # lista, y el hueco solo se ve en un despliegue real: fuera de producción los
+  # tres caen a su valor de desarrollo y nadie los echa de menos, pero con
+  # `NODE_ENV=production` el esquema los declara `required()` y el contenedor
+  # muere en el arranque con «"WEBHOOK_SIGNING_KEY" is required» — sin ninguna
+  # pista de por qué en la máquina de al lado sí arrancaba. Declararlos aquí
+  # también hace que el compose de desarrollo y el de despliegue
+  # (`docker-compose.coolify.yml`) enumeren el mismo entorno.
+  WEBHOOK_SIGNING_KEY: ${WEBHOOK_SIGNING_KEY:-}
+  DOWNLOAD_URL_SECRET: ${DOWNLOAD_URL_SECRET:-}
+  # Saltos de proxy de confianza para `req.ip`. En local no hay ninguno; en un
+  # despliegue detrás de balanceador es lo que evita que el limitador de tasa
+  # meta a todos los clientes en el mismo cubo. Ver `main.ts`.
+  TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-0}
   # Primer administrador del arranque en frío. Mismo caso que `ORM_SCHEMA_SYNC`
   # más abajo: Compose usa el `.env` para sustituir `${VARIABLE}` en este YAML,
   # pero NO lo inyecta dentro de los contenedores. Mientras estas tres no
