@@ -10,6 +10,19 @@ import { MessagingModule } from '../messaging/messaging.module';
 // el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
 // `clinical`: es una clase sin estado que recibe el `EntityManager`.
 import { PersonAccountLinksRepository } from '../profiles/repositories';
+// El filtro por especialidad del directorio público valida contra el value set
+// `VS_MEDICAL_SPECIALTY` con **el mismo servicio** que el alta de profesional.
+// Se provee la clase suelta y no se importa `ProfilesModule` por el mismo
+// motivo que `PersonAccountLinksRepository`, y además porque no se podría:
+// `ProfilesModule` importa `DirectoryModule`, que importa este módulo. La clase
+// no tiene estado —no cachea, y su propio TSDoc explica por qué— así que una
+// segunda instancia responde exactamente lo mismo que la de `profiles`.
+import { MedicalSpecialtyCatalogService } from '../profiles/services/medical-specialty-catalog.service';
+// De acá sale `ValueSetsRepository`, que es de donde el servicio de arriba lee
+// los 36 conceptos, y `CatalogConceptsRepository`, que da el rótulo con el que
+// el índice de búsqueda guarda la especialidad. `terminology` no importa ningún
+// módulo de dominio, así que no hay ciclo.
+import { TerminologyModule } from '../terminology/terminology.module';
 import { ClinicalModule } from '../clinical/clinical.module';
 import { SearchPlatformModule } from '../search_platform/search_platform.module';
 import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
@@ -109,6 +122,7 @@ import {
     // rastro de cada visitante anónimo para poder contarlo.
     RedisRuntimeModule,
     MessagingModule,
+    TerminologyModule,
   ],
   controllers: [
     CommunitySocialController,
@@ -147,6 +161,9 @@ import {
     PublicSearchRepository,
     VerifiedBadgesRepository,
     PersonAccountLinksRepository,
+    // La regla de «qué uuid es una especialidad médica», compartida con el alta
+    // de profesional. Ver la nota del import.
+    MedicalSpecialtyCatalogService,
     // Auth del gateway WS — `WsJwtGuard` no es un `APP_GUARD` (los gateways no
     // pasan por el pipeline HTTP de guards), así que hay que proveerlo acá
     // explícitamente para que `CommunityMessagingGateway` pueda inyectarlo.
