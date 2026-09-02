@@ -68,6 +68,87 @@ cerró el PR #115 el 17/08; el registro quedó desactualizado.
 
 ## Bloqueantes abiertos
 
+**B-12 · La lista de precios de una práctica la lee cualquier sesión autenticada, de cualquier
+tenant.** *(Levantado por Marcelo el 02/09 como P-21-10; verificado de nuevo el mismo día antes
+de registrarlo.)*
+
+`GET /billing/service-catalog` no comprueba **nada** sobre quién pregunta: el único acotamiento
+es el `practiceId` que manda el propio cliente.
+
+| Capa | Qué hace | Verificado |
+|---|---|---|
+| Controlador | `@Get()` **sin `@Roles` y sin `@CurrentUser()`** — el actor no se toca | `billing-service-catalog.controller.ts:62,93` |
+| Repositorio | `const where = { practiceId: filters.practiceId }` | `service-catalog.repository.ts:113` |
+| Entidad | **No tiene `tenant_id`** — no habría por dónde filtrar aunque se quisiera | `service_catalog.entity.ts:19` (sólo `practiceId`) |
+
+Consecuencia: cualquier usuario autenticado —incluido `PATIENT`, y de **otro** tenant— que
+tenga un `practiceId` lee la lista completa con `defaultPrice`, `taxCodeId` e
+`incomeAccountId`. Los uuid no se adivinan, pero viajan en URLs, presupuestos y facturas.
+
+**El proyecto sabe hacerlo bien al lado**: `GET /practices` lleva `@Roles(...)` y llama
+`listPractices(requireTenantId())` (`practices.controller.ts:90-108`). Es este endpoint el que
+se olvidó, y el arreglo tiene su precedente pegado.
+
+**Preexistente**, del módulo `billing`; no lo introduce ninguna tarea del lote actual. **No se
+arregló de contrabando dentro de T21/T24 a propósito**: falta decidir si la lista de precios es
+dato de la organización (entonces es un IDOR y se cierra con `requireTenantId()`) o es pública
+para cualquier autenticado (entonces se documenta como diseño). Hoy el código no declara
+ninguna de las dos. Es la pregunta **P-21-10** al propietario.
+
+---
+
+**B-13 · Hay 17 medicamentos con contraindicaciones, efectos adversos e interacciones escritos a
+mano, sembrados en la base viva y legibles sin rol.** *(Levantado por Marcelo el 02/09 como
+P-25-10; ampliado acá con lo que él no midió.)*
+
+`src/common/seed/data/vademecum/vademecum.dataset.json` siembra 17 conceptos con **155
+propiedades** y **5 interacciones**. El comentario del servicio lo dice sin eufemismo: «17
+medicamentos **tipeados a mano** para poder ejercitar la receta en desarrollo»
+(`vademecum-seed.service.ts:45`).
+
+Medido contra `mantra_redesa_health` el 02/09 — **no es hipotético, está cargado**:
+
+```text
+vademecum                  17 conceptos
+contraindications          17 filas
+indications                17 filas
+adverse_effects            17 filas
+monitoring                 17 filas
+```
+
+Más `interactions`, con `mechanism_text` redactado (por ejemplo, azitromicina potenciando
+warfarina).
+
+**Lo que agrava el hallazgo, y no estaba en el informe de Marcelo:**
+
+1. **El dataset declara tres fuentes autoritativas —RxNorm, SNOMED CT y WHO ATC/DDD— que no
+   publican nada de esto.** RxNorm y ATC son nomenclaturas de códigos; ninguna emite
+   contraindicaciones, efectos adversos ni mecanismos de interacción. Las fuentes cubren el
+   `code_system`, no el contenido clínico. El efecto es peor que el dato inventado a secas:
+   **hace que un dato sin fuente parezca tenerla.**
+2. **Se lee sin rol.** `GET /terminology/concepts/:conceptId` no lleva `@Roles`, y el comentario
+   que lo justifica dice «el catálogo es metadato compartido, **sin datos de paciente**»
+   (`terminology-concepts.controller.ts:207-208`). Es cierto sobre datos de paciente y es
+   exactamente el hueco: hoy el catálogo **sí** contiene contenido clínico, que es otra clase de
+   riesgo. Cualquier sesión autenticada lee esas contraindicaciones.
+
+**Lo que NO pasa, para no exagerarlo:** el vademécum **no pertenece a ningún value set**
+(consulta contra la base: cero filas), así que la lectura en lote con `includeProperties=true`
+del PR #288 **no lo alcanza**. Se lee de a uno. Pero si alguien agrega estos 17 a un value set,
+esa lectura pasa a devolverlos en bloque sin ningún cambio de código.
+
+**Los tres caminos** (la decisión no es de un carril, es de producto):
+
+- marcarlos `dev-only` y excluirlos de toda superficie de usuario —incluida la receta, que hoy
+  los consume—;
+- borrarlos y dejar la receta sin catálogo hasta tener fuente;
+- reemplazarlos cuando se resuelva **P-25-1** (de qué fuente salen posología, dosis y
+  contraindicaciones, y con qué licencia).
+
+Mientras tanto, lo mínimo que no cuesta una decisión: **quitar del dataset las tres fuentes que
+no respaldan el contenido**, porque hoy están firmando algo que no escribieron.
+
+
 **B-2 · `.puml`, `SQL/` y `salud-db/` no están bajo control de versiones.**
 Ningún cambio de esquema puede viajar en un PR: se distribuye por zip. Es la causa raíz de
 B-3 y de que el ajuste de `rebuild_stack.py` del PR #107 no pueda revisarse.
