@@ -1,41 +1,9 @@
--- SALUD v4.0.1 · módulo 53 · schema procedures_perioperative
+-- SALUD v4.0.10 · módulo 53 · schema procedures_perioperative
 -- Generado de diagram_53_procedures_perioperative.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
---   procedure_cases.requested_by_profile_id
---   procedure_cases.primary_surgeon_profile_id
---   procedure_cases.anesthesiologist_profile_id
---   procedure_cases.operating_room_id
---   procedure_case_team_members.practitioner_profile_id
---   procedure_case_status_history.workflow_transition_id
---   procedure_case_milestones.recorded_by_profile_id
---   preoperative_assessments.assessed_by_profile_id
---   preoperative_orders.verified_by_profile_id
---   surgical_safety_checklists.coordinator_profile_id
---   surgical_safety_responses.responded_by_profile_id
---   anesthesia_plans.anesthesiologist_profile_id
---   anesthesia_airway_assessments.assessed_by_profile_id
---   anesthesia_events.medication_administration_id
---   anesthesia_events.performed_by_profile_id
---   operative_steps.performed_by_profile_id
---   operative_findings.recorded_by_profile_id
---   procedure_performers.practitioner_profile_id
 --   procedure_performers.organization_id
---   procedure_medication_uses.medication_administration_id
---   procedure_complications.reported_by_profile_id
---   operative_reports.author_profile_id
---   operative_reports.signature_id
---   pacu_stays.admitted_by_profile_id
---   pacu_stays.discharged_by_profile_id
---   pacu_assessments.assessed_by_profile_id
---   postoperative_orders.verified_by_profile_id
---   postoperative_followups.completed_by_profile_id
---   procedure_cancellations.replacement_case_id
---   procedure_charge_items.billable_item_id
---   procedure_charge_items.billing_claim_line_id
---   operating_room_utilization_events.operating_room_id
---   sterility_verification_checks.checked_by_profile_id
 --   sterility_verification_checks.sterilization_load_id
 --   sterility_verification_checks.instrument_set_id
 
@@ -103,11 +71,39 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_cases"
+        ADD CONSTRAINT "fk_procedure_cases_requested_by_profile_id" FOREIGN KEY ("requested_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_cases"
+        ADD CONSTRAINT "fk_procedure_cases_primary_surgeon_profile_id" FOREIGN KEY ("primary_surgeon_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_cases"
+        ADD CONSTRAINT "fk_procedure_cases_anesthesiologist_profile_id" FOREIGN KEY ("anesthesiologist_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: practice.practice_sites (requiere schema practice)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."procedure_cases"
         ADD CONSTRAINT "fk_procedure_cases_practice_site_id" FOREIGN KEY ("practice_site_id")
         REFERENCES "practice"."practice_sites" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_cases"
+        ADD CONSTRAINT "fk_procedure_cases_operating_room_id" FOREIGN KEY ("operating_room_id")
+        REFERENCES "practice"."care_spaces" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -143,6 +139,13 @@ DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."procedure_case_diagnoses"
         ADD CONSTRAINT "fk_procedure_case_diagnoses_diagnosis_role_concept_id" FOREIGN KEY ("diagnosis_role_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_case_team_members"
+        ADD CONSTRAINT "fk_procedure_case_team_members_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -222,6 +225,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: workflow.state_transition_events (requiere schema workflow)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_case_status_history"
+        ADD CONSTRAINT "fk_procedure_case_status_history_workflow_transition_id" FOREIGN KEY ("workflow_transition_id")
+        REFERENCES "workflow"."state_transition_events" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."procedure_case_milestones"
@@ -236,11 +246,25 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_case_milestones"
+        ADD CONSTRAINT "fk_procedure_case_milestones_recorded_by_profile_id" FOREIGN KEY ("recorded_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."preoperative_assessments"
         ADD CONSTRAINT "fk_preoperative_assessments_assessment_type_concept_id" FOREIGN KEY ("assessment_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."preoperative_assessments"
+        ADD CONSTRAINT "fk_preoperative_assessments_assessed_by_profile_id" FOREIGN KEY ("assessed_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -355,6 +379,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."preoperative_orders"
+        ADD CONSTRAINT "fk_preoperative_orders_verified_by_profile_id" FOREIGN KEY ("verified_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."surgical_safety_checklists"
@@ -367,6 +398,13 @@ DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."surgical_safety_checklists"
         ADD CONSTRAINT "fk_surgical_safety_checklists_status_concept_id" FOREIGN KEY ("status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."surgical_safety_checklists"
+        ADD CONSTRAINT "fk_surgical_safety_checklists_coordinator_profile_id" FOREIGN KEY ("coordinator_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -425,6 +463,20 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."surgical_safety_responses"
+        ADD CONSTRAINT "fk_surgical_safety_responses_responded_by_profile_id" FOREIGN KEY ("responded_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."anesthesia_plans"
+        ADD CONSTRAINT "fk_anesthesia_plans_anesthesiologist_profile_id" FOREIGN KEY ("anesthesiologist_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."anesthesia_plans"
@@ -467,6 +519,13 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."anesthesia_airway_assessments"
+        ADD CONSTRAINT "fk_anesthesia_airway_assessments_assessed_by_profile_id" FOREIGN KEY ("assessed_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."anesthesia_airway_assessments"
@@ -495,6 +554,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: clinical.medication_records (requiere schema clinical)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."anesthesia_events"
+        ADD CONSTRAINT "fk_anesthesia_events_medication_administration_id" FOREIGN KEY ("medication_administration_id")
+        REFERENCES "clinical"."medication_records" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: clinical.observations (requiere schema clinical)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."anesthesia_events"
@@ -507,6 +573,13 @@ DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."anesthesia_events"
         ADD CONSTRAINT "fk_anesthesia_events_device_id" FOREIGN KEY ("device_id")
         REFERENCES "iam"."devices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."anesthesia_events"
+        ADD CONSTRAINT "fk_anesthesia_events_performed_by_profile_id" FOREIGN KEY ("performed_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -528,6 +601,13 @@ DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."operative_steps"
         ADD CONSTRAINT "fk_operative_steps_step_code_concept_id" FOREIGN KEY ("step_code_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."operative_steps"
+        ADD CONSTRAINT "fk_operative_steps_performed_by_profile_id" FOREIGN KEY ("performed_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -607,6 +687,13 @@ DO $$ BEGIN
         REFERENCES "clinical"."observations" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."operative_findings"
+        ADD CONSTRAINT "fk_operative_findings_recorded_by_profile_id" FOREIGN KEY ("recorded_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: clinical.procedures (requiere schema clinical)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."procedure_body_sites"
@@ -640,6 +727,13 @@ DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."procedure_performers"
         ADD CONSTRAINT "fk_procedure_performers_procedure_id" FOREIGN KEY ("procedure_id")
         REFERENCES "clinical"."procedures" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_performers"
+        ADD CONSTRAINT "fk_procedure_performers_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -754,6 +848,13 @@ DO $$ BEGIN
         REFERENCES "clinical"."procedures" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: clinical.medication_records (requiere schema clinical)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_medication_uses"
+        ADD CONSTRAINT "fk_procedure_medication_uses_medication_administration_id" FOREIGN KEY ("medication_administration_id")
+        REFERENCES "clinical"."medication_records" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."procedure_medication_uses"
@@ -831,11 +932,25 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_complications"
+        ADD CONSTRAINT "fk_procedure_complications_reported_by_profile_id" FOREIGN KEY ("reported_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: clinical.procedures (requiere schema clinical)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."operative_reports"
         ADD CONSTRAINT "fk_operative_reports_procedure_id" FOREIGN KEY ("procedure_id")
         REFERENCES "clinical"."procedures" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."operative_reports"
+        ADD CONSTRAINT "fk_operative_reports_author_profile_id" FOREIGN KEY ("author_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -859,11 +974,32 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: chart.clinical_note_signatures (requiere schema chart)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."operative_reports"
+        ADD CONSTRAINT "fk_operative_reports_signature_id" FOREIGN KEY ("signature_id")
+        REFERENCES "chart"."clinical_note_signatures" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: practice.care_spaces (requiere schema practice)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."pacu_stays"
         ADD CONSTRAINT "fk_pacu_stays_care_space_id" FOREIGN KEY ("care_space_id")
         REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."pacu_stays"
+        ADD CONSTRAINT "fk_pacu_stays_admitted_by_profile_id" FOREIGN KEY ("admitted_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."pacu_stays"
+        ADD CONSTRAINT "fk_pacu_stays_discharged_by_profile_id" FOREIGN KEY ("discharged_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -892,6 +1028,13 @@ DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."pacu_stays"
         ADD CONSTRAINT "fk_pacu_stays_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."pacu_assessments"
+        ADD CONSTRAINT "fk_pacu_assessments_assessed_by_profile_id" FOREIGN KEY ("assessed_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -929,6 +1072,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."postoperative_orders"
+        ADD CONSTRAINT "fk_postoperative_orders_verified_by_profile_id" FOREIGN KEY ("verified_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."postoperative_followups"
@@ -941,7 +1091,14 @@ DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."postoperative_followups"
         ADD CONSTRAINT "fk_postoperative_followups_appointment_id" FOREIGN KEY ("appointment_id")
         REFERENCES "clinical"."appointments" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."postoperative_followups"
+        ADD CONSTRAINT "fk_postoperative_followups_completed_by_profile_id" FOREIGN KEY ("completed_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -1041,6 +1198,20 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: billing.service_catalog (requiere schema billing)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_charge_items"
+        ADD CONSTRAINT "fk_procedure_charge_items_billable_item_id" FOREIGN KEY ("billable_item_id")
+        REFERENCES "billing"."service_catalog" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: insurance.insurance_claim_lines (requiere schema insurance)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_charge_items"
+        ADD CONSTRAINT "fk_procedure_charge_items_billing_claim_line_id" FOREIGN KEY ("billing_claim_line_id")
+        REFERENCES "insurance"."insurance_claim_lines" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: billing.invoice_lines (requiere schema billing)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."procedure_charge_items"
@@ -1069,6 +1240,13 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."operating_room_utilization_events"
+        ADD CONSTRAINT "fk_operating_room_utilization_events_operating_room_id" FOREIGN KEY ("operating_room_id")
+        REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."operating_room_utilization_events"
@@ -1086,7 +1264,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."operating_room_utilization_events"
-        ADD CONSTRAINT "fk_operating_room_utilization_events_turnover_category_concept_id" FOREIGN KEY ("turnover_category_concept_id")
+        ADD CONSTRAINT "fk_operating_room_utilization_events_turnover_category_c499a812" FOREIGN KEY ("turnover_category_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -1102,6 +1280,13 @@ DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."sterility_verification_checks"
         ADD CONSTRAINT "fk_sterility_verification_checks_check_type_concept_id" FOREIGN KEY ("check_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."sterility_verification_checks"
+        ADD CONSTRAINT "fk_sterility_verification_checks_checked_by_profile_id" FOREIGN KEY ("checked_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

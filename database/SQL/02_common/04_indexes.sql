@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 02 · schema common
+-- SALUD v4.0.10 · módulo 02 · schema common
 -- Generado de diagram_02_common.puml — NO editar a mano.
 
 
@@ -9,6 +9,8 @@ CREATE INDEX IF NOT EXISTS "ix_identifiers_use_concept_id" ON "common"."identifi
 CREATE INDEX IF NOT EXISTS "ix_identifiers_type_concept_id" ON "common"."identifiers" ("type_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_identifiers_issuer_country_concept_id" ON "common"."identifiers" ("issuer_country_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_identifiers_issuer_administrative_area_concept_id" ON "common"."identifiers" ("issuer_administrative_area_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_identifiers_assigner_tenant_id" ON "common"."identifiers" ("assigner_tenant_id");
 
@@ -35,6 +37,8 @@ CREATE INDEX IF NOT EXISTS "ix_addresses_use_concept_id" ON "common"."addresses"
 CREATE INDEX IF NOT EXISTS "ix_addresses_type_concept_id" ON "common"."addresses" ("type_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_addresses_administrative_area_concept_id" ON "common"."addresses" ("administrative_area_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_addresses_municipality_concept_id" ON "common"."addresses" ("municipality_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_addresses_country_concept_id" ON "common"."addresses" ("country_concept_id");
 

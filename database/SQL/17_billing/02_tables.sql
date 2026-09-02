@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 17 · schema billing
+-- SALUD v4.0.10 · módulo 17 · schema billing
 -- Generado de diagram_17_billing.puml — NO editar a mano.
 
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "billing"."service_catalog" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_catalog" PRIMARY KEY ("id")
 );
 
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS "billing"."invoices" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_invoices" PRIMARY KEY ("id")
 );
 
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS "billing"."invoice_lines" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_invoice_lines" PRIMARY KEY ("id")
 );
 
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS "billing"."payments_received" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payments_received" PRIMARY KEY ("id")
 );
 
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS "billing"."patient_statements" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_patient_statements" PRIMARY KEY ("id")
 );
 
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS "billing"."vendors" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_vendors" PRIMARY KEY ("id")
 );
 
@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS "billing"."bills" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_bills" PRIMARY KEY ("id")
 );
 
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS "billing"."bill_lines" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_bill_lines" PRIMARY KEY ("id")
 );
 
@@ -198,7 +198,7 @@ CREATE TABLE IF NOT EXISTS "billing"."payments_made" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payments_made" PRIMARY KEY ("id")
 );
 
@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS "billing"."reimbursements" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_reimbursements" PRIMARY KEY ("id")
 );
 
@@ -231,7 +231,7 @@ CREATE TABLE IF NOT EXISTS "billing"."tax_codes" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tax_codes" PRIMARY KEY ("id")
 );
 
@@ -248,7 +248,7 @@ CREATE TABLE IF NOT EXISTS "billing"."tax_periods" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tax_periods" PRIMARY KEY ("id")
 );
 
@@ -262,7 +262,7 @@ CREATE TABLE IF NOT EXISTS "billing"."budgets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_budgets" PRIMARY KEY ("id")
 );
 
@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS "billing"."budget_lines" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_budget_lines" PRIMARY KEY ("id")
 );
 

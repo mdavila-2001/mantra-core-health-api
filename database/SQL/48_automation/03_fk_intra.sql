@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 48 · schema automation
+-- SALUD v4.0.10 · módulo 48 · schema automation
 -- Generado de diagram_48_automation.puml — NO editar a mano.
 
 
@@ -51,6 +51,18 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "automation"."workflow_steps"
+        ADD CONSTRAINT "fk_workflow_steps_on_success_step_id" FOREIGN KEY ("on_success_step_id")
+        REFERENCES "automation"."workflow_steps" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "automation"."workflow_steps"
+        ADD CONSTRAINT "fk_workflow_steps_on_failure_step_id" FOREIGN KEY ("on_failure_step_id")
+        REFERENCES "automation"."workflow_steps" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "automation"."automation_triggers"
         ADD CONSTRAINT "fk_automation_triggers_workflow_id" FOREIGN KEY ("workflow_id")
         REFERENCES "automation"."workflows" ("id");
@@ -72,6 +84,12 @@ DO $$ BEGIN
     ALTER TABLE "automation"."workflow_runs"
         ADD CONSTRAINT "fk_workflow_runs_workflow_id" FOREIGN KEY ("workflow_id")
         REFERENCES "automation"."workflows" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "automation"."workflow_runs"
+        ADD CONSTRAINT "fk_workflow_runs_trigger_id" FOREIGN KEY ("trigger_id")
+        REFERENCES "automation"."automation_triggers" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

@@ -1,13 +1,5 @@
--- SALUD v4.0.1 · módulo 14 · schema practice
+-- SALUD v4.0.10 · módulo 14 · schema practice
 -- Generado de diagram_14_practice.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   clinical_units.parent_unit_id
---   care_spaces.parent_space_id
---   practitioner_role_assignments.practitioner_profile_id
---   practitioner_role_assignments.supervisor_practitioner_profile_id
---   practitioner_support_assignments.support_profile_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -283,6 +275,13 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "practice"."practitioner_role_assignments"
+        ADD CONSTRAINT "fk_practitioner_role_assignments_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "practice"."practitioner_role_assignments"
@@ -295,6 +294,13 @@ DO $$ BEGIN
     ALTER TABLE "practice"."practitioner_role_assignments"
         ADD CONSTRAINT "fk_practitioner_role_assignments_specialty_concept_id" FOREIGN KEY ("specialty_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "practice"."practitioner_role_assignments"
+        ADD CONSTRAINT "fk_practitioner_role_assignments_supervisor_practition_9edea495" FOREIGN KEY ("supervisor_practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -316,6 +322,13 @@ DO $$ BEGIN
     ALTER TABLE "practice"."practitioner_role_assignments"
         ADD CONSTRAINT "fk_practitioner_role_assignments_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.secretary_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "practice"."practitioner_support_assignments"
+        ADD CONSTRAINT "fk_practitioner_support_assignments_support_profile_id" FOREIGN KEY ("support_profile_id")
+        REFERENCES "profiles"."secretary_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

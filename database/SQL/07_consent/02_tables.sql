@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 07 · schema consent
+-- SALUD v4.0.10 · módulo 07 · schema consent
 -- Generado de diagram_07_consent.puml — NO editar a mano.
 
 
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "consent"."processing_purposes" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_processing_purposes" PRIMARY KEY ("id")
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "consent"."processing_legal_bases" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_processing_legal_bases" PRIMARY KEY ("id")
 );
 
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS "consent"."consents" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_consents" PRIMARY KEY ("id")
 );
 
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS "consent"."consent_provisions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_consent_provisions" PRIMARY KEY ("id")
 );
 
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS "consent"."hipaa_authorizations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_hipaa_authorizations" PRIMARY KEY ("id")
 );
 
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS "consent"."treatment_informed_consents" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_treatment_informed_consents" PRIMARY KEY ("id")
 );
 
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS "consent"."privacy_restrictions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_privacy_restrictions" PRIMARY KEY ("id")
 );
 
@@ -161,7 +161,7 @@ CREATE TABLE IF NOT EXISTS "consent"."patient_objections" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_patient_objections" PRIMARY KEY ("id")
 );
 

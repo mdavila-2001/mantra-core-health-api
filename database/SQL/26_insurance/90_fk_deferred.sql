@@ -1,12 +1,5 @@
--- SALUD v4.0.1 · módulo 26 · schema insurance
+-- SALUD v4.0.10 · módulo 26 · schema insurance
 -- Generado de diagram_26_insurance.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   claim_adjudication_versions.supersedes_version_id
---   claim_appeal_decisions.supersedes_decision_id
---   claim_reversals.reversed_adjudication_version_id
---   claim_reversals.replacement_claim_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -14,7 +7,7 @@ DO $$ BEGIN
     ALTER TABLE "insurance"."insurance_carriers"
         ADD CONSTRAINT "fk_insurance_carriers_tenant_id" FOREIGN KEY ("tenant_id")
         REFERENCES "directory"."tenants" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -63,7 +56,7 @@ DO $$ BEGIN
     ALTER TABLE "insurance"."insurance_brokers"
         ADD CONSTRAINT "fk_insurance_brokers_tenant_id" FOREIGN KEY ("tenant_id")
         REFERENCES "directory"."tenants" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -516,7 +509,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "insurance"."coverage_eligibility_requests"
-        ADD CONSTRAINT "fk_coverage_eligibility_requests_requesting_provider_type_concept_id" FOREIGN KEY ("requesting_provider_type_concept_id")
+        ADD CONSTRAINT "fk_coverage_eligibility_requests_requesting_provider_t_48adc63f" FOREIGN KEY ("requesting_provider_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -572,7 +565,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "insurance"."prior_authorization_requests"
-        ADD CONSTRAINT "fk_prior_authorization_requests_requesting_provider_type_concept_id" FOREIGN KEY ("requesting_provider_type_concept_id")
+        ADD CONSTRAINT "fk_prior_authorization_requests_requesting_provider_ty_cccf5fb5" FOREIGN KEY ("requesting_provider_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

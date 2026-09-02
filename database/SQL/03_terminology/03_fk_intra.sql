@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 03 · schema terminology
+-- SALUD v4.0.10 · módulo 03 · schema terminology
 -- Generado de diagram_03_terminology.puml — NO editar a mano.
 
 
@@ -18,6 +18,12 @@ DO $$ BEGIN
     ALTER TABLE "terminology"."terminology_sources"
         ADD CONSTRAINT "fk_terminology_sources_state_concept_id" FOREIGN KEY ("state_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "terminology"."code_systems"
+        ADD CONSTRAINT "fk_code_systems_source_id" FOREIGN KEY ("source_id")
+        REFERENCES "terminology"."terminology_sources" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -180,6 +186,12 @@ DO $$ BEGIN
     ALTER TABLE "terminology"."concept_maps"
         ADD CONSTRAINT "fk_concept_maps_state_concept_id" FOREIGN KEY ("state_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "terminology"."catalog_import_batches"
+        ADD CONSTRAINT "fk_catalog_import_batches_source_id" FOREIGN KEY ("source_id")
+        REFERENCES "terminology"."terminology_sources" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

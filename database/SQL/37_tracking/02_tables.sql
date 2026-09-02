@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 37 · schema tracking
+-- SALUD v4.0.10 · módulo 37 · schema tracking
 -- Generado de diagram_37_tracking.puml — NO editar a mano.
 
 
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "tracking"."trackable_subjects" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_trackable_subjects" PRIMARY KEY ("id")
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "tracking"."milestone_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_milestone_definitions" PRIMARY KEY ("id")
 );
 
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS "tracking"."tracking_carriers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tracking_carriers" PRIMARY KEY ("id")
 );
 
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS "tracking"."shipments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_shipments" PRIMARY KEY ("id")
 );
 
@@ -144,6 +144,6 @@ CREATE TABLE IF NOT EXISTS "tracking"."delivery_proofs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_delivery_proofs" PRIMARY KEY ("id")
 );

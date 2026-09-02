@@ -1,19 +1,9 @@
--- SALUD v4.0.1 · módulo 28 · schema telemetry
+-- SALUD v4.0.10 · módulo 28 · schema telemetry
 -- Generado de diagram_28_telemetry.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
---   activity_event_schema_definitions.purpose_definition_id
---   analytics_subjects.rotated_from_subject_id
---   tracking_consents.purpose_definition_id
---   user_activity_events.event_schema_definition_id
 --   user_activity_events.consent_snapshot_id
---   user_activity_events.security_audit_event_id
---   session_journeys.entry_event_id
---   session_journeys.exit_event_id
---   funnel_definitions.purpose_definition_id
---   funnel_steps.event_schema_definition_id
---   conversion_events.completion_event_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -54,7 +44,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "telemetry"."activity_event_schema_definitions"
-        ADD CONSTRAINT "fk_activity_event_schema_definitions_pii_classification_concept_id" FOREIGN KEY ("pii_classification_concept_id")
+        ADD CONSTRAINT "fk_activity_event_schema_definitions_pii_classificatio_cf444a2d" FOREIGN KEY ("pii_classification_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -212,6 +202,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: iam.security_events (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "telemetry"."user_activity_events"
+        ADD CONSTRAINT "fk_user_activity_events_security_audit_event_id" FOREIGN KEY ("security_audit_event_id")
+        REFERENCES "iam"."security_events" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "telemetry"."user_activity_event_properties"
@@ -229,7 +226,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "telemetry"."user_activity_event_properties"
-        ADD CONSTRAINT "fk_user_activity_event_properties_data_classification_concept_id" FOREIGN KEY ("data_classification_concept_id")
+        ADD CONSTRAINT "fk_user_activity_event_properties_data_classification__e558232d" FOREIGN KEY ("data_classification_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

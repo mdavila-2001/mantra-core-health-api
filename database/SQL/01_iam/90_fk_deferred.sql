@@ -1,9 +1,5 @@
--- SALUD v4.0.1 · módulo 01 · schema iam
+-- SALUD v4.0.10 · módulo 01 · schema iam
 -- Generado de diagram_01_iam.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   refresh_tokens.replaced_by_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -47,6 +43,34 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_users_legal_basis_concept_id" FOREIGN KEY ("legal_basis_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "iam"."account_activations"
+        ADD CONSTRAINT "fk_account_activations_state_concept_id" FOREIGN KEY ("state_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: authz.patient_legal_representations (requiere schema authz)
+DO $$ BEGIN
+    ALTER TABLE "iam"."account_activations"
+        ADD CONSTRAINT "fk_account_activations_legal_representation_id" FOREIGN KEY ("legal_representation_id")
+        REFERENCES "authz"."patient_legal_representations" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "iam"."email_verifications"
+        ADD CONSTRAINT "fk_email_verifications_state_concept_id" FOREIGN KEY ("state_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "iam"."password_resets"
+        ADD CONSTRAINT "fk_password_resets_state_concept_id" FOREIGN KEY ("state_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -129,5 +153,68 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "iam"."security_events"
         ADD CONSTRAINT "fk_security_events_outcome_concept_id" FOREIGN KEY ("outcome_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "iam"."api_keys"
+        ADD CONSTRAINT "fk_api_keys_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "iam"."api_keys"
+        ADD CONSTRAINT "fk_api_keys_hash_algorithm_concept_id" FOREIGN KEY ("hash_algorithm_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: authz.service_principals (requiere schema authz)
+DO $$ BEGIN
+    ALTER TABLE "iam"."api_keys"
+        ADD CONSTRAINT "fk_api_keys_service_principal_id" FOREIGN KEY ("service_principal_id")
+        REFERENCES "authz"."service_principals" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: authz.ip_access_rules (requiere schema authz)
+DO $$ BEGIN
+    ALTER TABLE "iam"."api_keys"
+        ADD CONSTRAINT "fk_api_keys_ip_access_rule_id" FOREIGN KEY ("ip_access_rule_id")
+        REFERENCES "authz"."ip_access_rules" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "iam"."api_keys"
+        ADD CONSTRAINT "fk_api_keys_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "iam"."api_key_scopes"
+        ADD CONSTRAINT "fk_api_key_scopes_scope_concept_id" FOREIGN KEY ("scope_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "iam"."account_lockouts"
+        ADD CONSTRAINT "fk_account_lockouts_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "iam"."account_lockouts"
+        ADD CONSTRAINT "fk_account_lockouts_reason_concept_id" FOREIGN KEY ("reason_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "iam"."account_lockouts"
+        ADD CONSTRAINT "fk_account_lockouts_status_concept_id" FOREIGN KEY ("status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

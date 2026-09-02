@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 28 · schema telemetry
+-- SALUD v4.0.10 · módulo 28 · schema telemetry
 -- Generado de diagram_28_telemetry.puml — NO editar a mano.
 
 
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS "telemetry"."session_journeys" (
     "journey_status_concept_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_session_journeys" PRIMARY KEY ("id")
 );
 
@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS "telemetry"."funnel_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_funnel_definitions" PRIMARY KEY ("id")
 );
 

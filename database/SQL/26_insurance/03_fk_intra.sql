@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 26 · schema insurance
+-- SALUD v4.0.10 · módulo 26 · schema insurance
 -- Generado de diagram_26_insurance.puml — NO editar a mano.
 
 
@@ -88,7 +88,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "insurance"."coverage_eligibility_responses"
-        ADD CONSTRAINT "fk_coverage_eligibility_responses_coverage_eligibility_request_id" FOREIGN KEY ("coverage_eligibility_request_id")
+        ADD CONSTRAINT "fk_coverage_eligibility_responses_coverage_eligibility_13062047" FOREIGN KEY ("coverage_eligibility_request_id")
         REFERENCES "insurance"."coverage_eligibility_requests" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -106,13 +106,13 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "insurance"."prior_authorization_determinations"
-        ADD CONSTRAINT "fk_prior_authorization_determinations_prior_authorization_request_id" FOREIGN KEY ("prior_authorization_request_id")
+        ADD CONSTRAINT "fk_prior_authorization_determinations_prior_authorizat_e32a5f15" FOREIGN KEY ("prior_authorization_request_id")
         REFERENCES "insurance"."prior_authorization_requests" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "insurance"."prior_authorization_determinations"
-        ADD CONSTRAINT "fk_prior_authorization_determinations_prior_authorization_item_id" FOREIGN KEY ("prior_authorization_item_id")
+        ADD CONSTRAINT "fk_prior_authorization_determinations_prior_authorizat_cbb60fad" FOREIGN KEY ("prior_authorization_item_id")
         REFERENCES "insurance"."prior_authorization_items" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -147,6 +147,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "insurance"."claim_adjudication_versions"
+        ADD CONSTRAINT "fk_claim_adjudication_versions_supersedes_version_id" FOREIGN KEY ("supersedes_version_id")
+        REFERENCES "insurance"."claim_adjudication_versions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "insurance"."claim_line_adjudications"
         ADD CONSTRAINT "fk_claim_line_adjudications_claim_adjudication_version_id" FOREIGN KEY ("claim_adjudication_version_id")
         REFERENCES "insurance"."claim_adjudication_versions" ("id");
@@ -166,7 +172,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "insurance"."patient_explanations_of_benefit"
-        ADD CONSTRAINT "fk_patient_explanations_of_benefit_claim_adjudication_version_id" FOREIGN KEY ("claim_adjudication_version_id")
+        ADD CONSTRAINT "fk_patient_explanations_of_benefit_claim_adjudication__6194b135" FOREIGN KEY ("claim_adjudication_version_id")
         REFERENCES "insurance"."claim_adjudication_versions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -178,7 +184,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "insurance"."insurance_reconciliation_items"
-        ADD CONSTRAINT "fk_insurance_reconciliation_items_insurance_reconciliation_batch_id" FOREIGN KEY ("insurance_reconciliation_batch_id")
+        ADD CONSTRAINT "fk_insurance_reconciliation_items_insurance_reconcilia_c4896cd0" FOREIGN KEY ("insurance_reconciliation_batch_id")
         REFERENCES "insurance"."insurance_reconciliation_batches" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -243,7 +249,25 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "insurance"."claim_appeal_decisions"
+        ADD CONSTRAINT "fk_claim_appeal_decisions_supersedes_decision_id" FOREIGN KEY ("supersedes_decision_id")
+        REFERENCES "insurance"."claim_appeal_decisions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "insurance"."claim_reversals"
         ADD CONSTRAINT "fk_claim_reversals_insurance_claim_id" FOREIGN KEY ("insurance_claim_id")
+        REFERENCES "insurance"."insurance_claims" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "insurance"."claim_reversals"
+        ADD CONSTRAINT "fk_claim_reversals_reversed_adjudication_version_id" FOREIGN KEY ("reversed_adjudication_version_id")
+        REFERENCES "insurance"."claim_adjudication_versions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "insurance"."claim_reversals"
+        ADD CONSTRAINT "fk_claim_reversals_replacement_claim_id" FOREIGN KEY ("replacement_claim_id")
         REFERENCES "insurance"."insurance_claims" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

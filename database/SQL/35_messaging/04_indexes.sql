@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 35 · schema messaging
+-- SALUD v4.0.10 · módulo 35 · schema messaging
 -- Generado de diagram_35_messaging.puml — NO editar a mano.
 
 
@@ -254,7 +254,7 @@ CREATE INDEX IF NOT EXISTS "ix_adapter_tracking_capabilities_provider_id" ON "me
 
 CREATE INDEX IF NOT EXISTS "ix_adapter_tracking_capabilities_channel_id" ON "messaging"."adapter_tracking_capabilities" ("channel_id");
 
-CREATE INDEX IF NOT EXISTS "ix_adapter_tracking_capabilities_canonical_event_type_concept_id" ON "messaging"."adapter_tracking_capabilities" ("canonical_event_type_concept_id");
+CREATE INDEX IF NOT EXISTS "ix_adapter_tracking_capabilities_canonical_event_type__3130fd8b" ON "messaging"."adapter_tracking_capabilities" ("canonical_event_type_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_adapter_tracking_capabilities_support_level_concept_id" ON "messaging"."adapter_tracking_capabilities" ("support_level_concept_id");
 

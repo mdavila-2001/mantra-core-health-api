@@ -1,10 +1,5 @@
--- SALUD v4.0.1 · módulo 37 · schema tracking
+-- SALUD v4.0.10 · módulo 37 · schema tracking
 -- Generado de diagram_37_tracking.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   trackable_subjects.current_milestone_id
---   shipments.carrier_id
 
 
 -- destino: directory.tenants (requiere schema directory)

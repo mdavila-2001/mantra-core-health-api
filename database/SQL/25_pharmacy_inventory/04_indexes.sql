@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 25 · schema pharmacy_inventory
+-- SALUD v4.0.10 · módulo 25 · schema pharmacy_inventory
 -- Generado de diagram_25_pharmacy_inventory.puml — NO editar a mano.
 
 
@@ -90,6 +90,12 @@ CREATE INDEX IF NOT EXISTS "ix_inventory_reservations_quotation_id" ON "pharmacy
 
 CREATE INDEX IF NOT EXISTS "ix_inventory_reservations_reservation_status_concept_id" ON "pharmacy_inventory"."inventory_reservations" ("reservation_status_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_inventory_reservations_delivery_mode_concept_id" ON "pharmacy_inventory"."inventory_reservations" ("delivery_mode_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_inventory_reservations_delivery_address_id" ON "pharmacy_inventory"."inventory_reservations" ("delivery_address_id");
+
+CREATE INDEX IF NOT EXISTS "ix_inventory_reservations_currency_concept_id" ON "pharmacy_inventory"."inventory_reservations" ("currency_concept_id");
+
 CREATE INDEX IF NOT EXISTS "ix_inventory_reservations_created_by_user_id" ON "pharmacy_inventory"."inventory_reservations" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_inventory_reservations_updated_by_user_id" ON "pharmacy_inventory"."inventory_reservations" ("updated_by_user_id");
@@ -97,6 +103,8 @@ CREATE INDEX IF NOT EXISTS "ix_inventory_reservations_updated_by_user_id" ON "ph
 CREATE INDEX IF NOT EXISTS "ix_inventory_reservations_patient_profile_id_updated_at" ON "pharmacy_inventory"."inventory_reservations" ("patient_profile_id", "updated_at" DESC);
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_inventory_reservations_idempotency" ON "pharmacy_inventory"."inventory_reservations" ("idempotency_key");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_inventory_reservations_pharmacy_site_pickup_code" ON "pharmacy_inventory"."inventory_reservations" ("pharmacy_site_id", "pickup_code") WHERE pickup_code IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS "ix_inventory_reservation_lines_inventory_reservation_id" ON "pharmacy_inventory"."inventory_reservation_lines" ("inventory_reservation_id");
 
@@ -108,9 +116,27 @@ CREATE INDEX IF NOT EXISTS "ix_inventory_reservation_lines_inventory_location_id
 
 CREATE INDEX IF NOT EXISTS "ix_inventory_reservation_lines_status_concept_id" ON "pharmacy_inventory"."inventory_reservation_lines" ("status_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_inventory_reservation_lines_currency_concept_id" ON "pharmacy_inventory"."inventory_reservation_lines" ("currency_concept_id");
+
 CREATE INDEX IF NOT EXISTS "ix_inventory_reservation_lines_created_by_user_id" ON "pharmacy_inventory"."inventory_reservation_lines" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_inventory_reservation_lines_updated_by_user_id" ON "pharmacy_inventory"."inventory_reservation_lines" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_pharmacy_order_substitutions_inventory_reservation_id" ON "pharmacy_inventory"."pharmacy_order_substitutions" ("inventory_reservation_id");
+
+CREATE INDEX IF NOT EXISTS "ix_pharmacy_order_substitutions_inventory_reservation_line_id" ON "pharmacy_inventory"."pharmacy_order_substitutions" ("inventory_reservation_line_id");
+
+CREATE INDEX IF NOT EXISTS "ix_pharmacy_order_substitutions_original_pharmacy_product_id" ON "pharmacy_inventory"."pharmacy_order_substitutions" ("original_pharmacy_product_id");
+
+CREATE INDEX IF NOT EXISTS "ix_pharmacy_order_substitutions_proposed_pharmacy_product_id" ON "pharmacy_inventory"."pharmacy_order_substitutions" ("proposed_pharmacy_product_id");
+
+CREATE INDEX IF NOT EXISTS "ix_pharmacy_order_substitutions_currency_concept_id" ON "pharmacy_inventory"."pharmacy_order_substitutions" ("currency_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_pharmacy_order_substitutions_status_concept_id" ON "pharmacy_inventory"."pharmacy_order_substitutions" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_pharmacy_order_substitutions_created_by_user_id" ON "pharmacy_inventory"."pharmacy_order_substitutions" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_pharmacy_order_substitutions_updated_by_user_id" ON "pharmacy_inventory"."pharmacy_order_substitutions" ("updated_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_inventory_count_sessions_pharmacy_site_id" ON "pharmacy_inventory"."inventory_count_sessions" ("pharmacy_site_id");
 

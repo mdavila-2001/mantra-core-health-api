@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 16 · schema accounting
+-- SALUD v4.0.10 · módulo 16 · schema accounting
 -- Generado de diagram_16_accounting.puml — NO editar a mano.
 
 
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."exchange_rates" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_exchange_rates" PRIMARY KEY ("id")
 );
 
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."fiscal_years" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_fiscal_years" PRIMARY KEY ("id")
 );
 
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."fiscal_periods" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_fiscal_periods" PRIMARY KEY ("id")
 );
 
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."account_groups" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_account_groups" PRIMARY KEY ("id")
 );
 
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."accounts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_accounts" PRIMARY KEY ("id")
 );
 
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."cost_centers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_cost_centers" PRIMARY KEY ("id")
 );
 
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."cost_center_maps" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_cost_center_maps" PRIMARY KEY ("id")
 );
 
@@ -137,7 +137,9 @@ CREATE TABLE IF NOT EXISTS "accounting"."journal_transactions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
+    "approved_at" timestamptz,
+    "approved_by_user_id" uuid,
     CONSTRAINT "pk_journal_transactions" PRIMARY KEY ("id")
 );
 
@@ -157,7 +159,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."ledger_entries" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ledger_entries" PRIMARY KEY ("id")
 );
 
@@ -170,7 +172,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."transaction_files" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_transaction_files" PRIMARY KEY ("id")
 );
 
@@ -190,7 +192,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."sales" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_sales" PRIMARY KEY ("id")
 );
 
@@ -209,7 +211,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."purchases" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_purchases" PRIMARY KEY ("id")
 );
 
@@ -232,7 +234,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."assets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_assets" PRIMARY KEY ("id")
 );
 
@@ -247,7 +249,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."asset_depreciations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_asset_depreciations" PRIMARY KEY ("id")
 );
 
@@ -269,7 +271,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."liabilities" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_liabilities" PRIMARY KEY ("id")
 );
 
@@ -285,7 +287,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."liability_payments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_liability_payments" PRIMARY KEY ("id")
 );
 
@@ -303,7 +305,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."infrastructure_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_infrastructure_items" PRIMARY KEY ("id")
 );
 
@@ -321,7 +323,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."employee_payments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_employee_payments" PRIMARY KEY ("id")
 );
 
@@ -338,7 +340,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."controlling_areas" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_controlling_areas" PRIMARY KEY ("id")
 );
 
@@ -353,7 +355,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."segments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_segments" PRIMARY KEY ("id")
 );
 
@@ -368,7 +370,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."functional_areas" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_functional_areas" PRIMARY KEY ("id")
 );
 
@@ -388,7 +390,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."profit_centers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_profit_centers" PRIMARY KEY ("id")
 );
 
@@ -412,7 +414,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."internal_orders" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_internal_orders" PRIMARY KEY ("id")
 );
 
@@ -421,6 +423,8 @@ CREATE TABLE IF NOT EXISTS "accounting"."company_bank_accounts" (
     "tenant_id" uuid NOT NULL,
     "account_id" uuid NOT NULL,
     "bank_name" varchar NOT NULL,
+    "account_holder_name" varchar,
+    "account_holder_tax_id" varchar,
     "bank_identifier_code" varchar,
     "iban_masked" varchar,
     "account_number_hash" varchar,
@@ -432,7 +436,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."company_bank_accounts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_company_bank_accounts" PRIMARY KEY ("id")
 );
 
@@ -450,7 +454,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."subledger_accounts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_subledger_accounts" PRIMARY KEY ("id")
 );
 
@@ -508,7 +512,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."account_determination_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_account_determination_rules" PRIMARY KEY ("id")
 );
 
@@ -546,7 +550,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."open_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_open_items" PRIMARY KEY ("id")
 );
 
@@ -595,7 +599,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."asset_classes" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_asset_classes" PRIMARY KEY ("id")
 );
 
@@ -614,7 +618,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."asset_components" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_asset_components" PRIMARY KEY ("id")
 );
 
@@ -631,7 +635,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."depreciation_areas" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_depreciation_areas" PRIMARY KEY ("id")
 );
 
@@ -652,7 +656,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."asset_valuations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_asset_valuations" PRIMARY KEY ("id")
 );
 
@@ -688,7 +692,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."asset_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_asset_assignments" PRIMARY KEY ("id")
 );
 
@@ -707,7 +711,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."liability_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_liability_schedules" PRIMARY KEY ("id")
 );
 
@@ -745,7 +749,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."accrual_objects" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_accrual_objects" PRIMARY KEY ("id")
 );
 
@@ -761,7 +765,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."accrual_schedule_lines" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_accrual_schedule_lines" PRIMARY KEY ("id")
 );
 

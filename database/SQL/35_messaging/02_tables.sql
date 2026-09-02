@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 35 · schema messaging
+-- SALUD v4.0.10 · módulo 35 · schema messaging
 -- Generado de diagram_35_messaging.puml — NO editar a mano.
 
 
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."outbox_messages" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_outbox_messages" PRIMARY KEY ("id")
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."event_subscriptions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_event_subscriptions" PRIMARY KEY ("id")
 );
 
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."message_queues" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_message_queues" PRIMARY KEY ("id")
 );
 
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."queued_jobs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_queued_jobs" PRIMARY KEY ("id")
 );
 
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."in_app_notifications" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "notification_request_id" uuid NOT NULL,
     "notification_delivery_id" uuid NOT NULL,
     "dispatch_recipient_id" uuid,
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."message_channels" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_message_channels" PRIMARY KEY ("id")
 );
 
@@ -193,7 +193,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."messaging_providers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "adapter_code" varchar NOT NULL,
     "adapter_version" varchar NOT NULL,
     "is_builtin" boolean NOT NULL,
@@ -222,7 +222,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."provider_channel_configs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "adapter_config_version" integer NOT NULL,
     "webhook_endpoint_key" varchar,
     "webhook_secret_credential_id" uuid,
@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."message_templates" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_message_templates" PRIMARY KEY ("id")
 );
 
@@ -278,7 +278,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."notification_requests" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "dispatch_id" uuid,
     "dispatch_recipient_id" uuid,
     "recipient_type_concept_id" uuid NOT NULL,
@@ -313,7 +313,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."notification_deliveries" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "provider_channel_config_id" uuid NOT NULL,
     "adapter_code" varchar NOT NULL,
     "adapter_version" varchar NOT NULL,
@@ -361,7 +361,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."recipient_preferences" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_recipient_preferences" PRIMARY KEY ("id")
 );
 
@@ -384,7 +384,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."adapter_event_mappings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid NOT NULL,
     "updated_by_user_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_adapter_event_mappings" PRIMARY KEY ("id")
 );
 
@@ -428,7 +428,7 @@ CREATE TABLE IF NOT EXISTS "messaging"."adapter_tracking_capabilities" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid NOT NULL,
     "updated_by_user_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_adapter_tracking_capabilities" PRIMARY KEY ("id")
 );
 

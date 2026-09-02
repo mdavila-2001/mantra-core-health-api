@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 04 · schema directory
+-- SALUD v4.0.10 · módulo 04 · schema directory
 -- Generado de diagram_04_directory.puml — NO editar a mano.
 
 
@@ -174,5 +174,145 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "directory"."branch_memberships"
         ADD CONSTRAINT "fk_branch_memberships_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_document_type_concept_id" FOREIGN KEY ("document_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_issuing_authority_concept_id" FOREIGN KEY ("issuing_authority_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: common.files (requiere schema common)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_file_id" FOREIGN KEY ("file_id")
+        REFERENCES "common"."files" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: common.identifiers (requiere schema common)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_identifier_id" FOREIGN KEY ("identifier_id")
+        REFERENCES "common"."identifiers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.persons (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_related_person_id" FOREIGN KEY ("related_person_id")
+        REFERENCES "profiles"."persons" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_verification_status_concept_id" FOREIGN KEY ("verification_status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_verified_by_user_id" FOREIGN KEY ("verified_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_affiliation_documents"
+        ADD CONSTRAINT "fk_tenant_affiliation_documents_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.persons (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_legal_representatives"
+        ADD CONSTRAINT "fk_tenant_legal_representatives_person_id" FOREIGN KEY ("person_id")
+        REFERENCES "profiles"."persons" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_legal_representatives"
+        ADD CONSTRAINT "fk_tenant_legal_representatives_representative_role_concept_id" FOREIGN KEY ("representative_role_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: common.identifiers (requiere schema common)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_legal_representatives"
+        ADD CONSTRAINT "fk_tenant_legal_representatives_ci_identifier_id" FOREIGN KEY ("ci_identifier_id")
+        REFERENCES "common"."identifiers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_legal_representatives"
+        ADD CONSTRAINT "fk_tenant_legal_representatives_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_legal_representatives"
+        ADD CONSTRAINT "fk_tenant_legal_representatives_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_legal_representatives"
+        ADD CONSTRAINT "fk_tenant_legal_representatives_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_web_configs"
+        ADD CONSTRAINT "fk_tenant_web_configs_primary_language_concept_id" FOREIGN KEY ("primary_language_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_web_configs"
+        ADD CONSTRAINT "fk_tenant_web_configs_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_web_configs"
+        ADD CONSTRAINT "fk_tenant_web_configs_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "directory"."tenant_web_configs"
+        ADD CONSTRAINT "fk_tenant_web_configs_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

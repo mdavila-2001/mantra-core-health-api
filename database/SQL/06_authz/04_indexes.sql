@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 06 · schema authz
+-- SALUD v4.0.10 · módulo 06 · schema authz
 -- Generado de diagram_06_authz.puml — NO editar a mano.
 
 
@@ -155,3 +155,29 @@ CREATE INDEX IF NOT EXISTS "ix_clinical_access_grants_updated_by_user_id" ON "au
 CREATE INDEX IF NOT EXISTS "ix_clinical_access_grants_tenant_id_state_concept_id" ON "authz"."clinical_access_grants" ("tenant_id", "state_concept_id", "updated_at" DESC);
 
 CREATE INDEX IF NOT EXISTS "ix_clinical_access_grants_patient_profile_id_updated_at" ON "authz"."clinical_access_grants" ("tenant_id", "patient_profile_id", "updated_at" DESC);
+
+CREATE INDEX IF NOT EXISTS "ix_break_glass_sessions_user_id" ON "authz"."break_glass_sessions" ("user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_break_glass_sessions_tenant_id" ON "authz"."break_glass_sessions" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_break_glass_sessions_patient_ref_id" ON "authz"."break_glass_sessions" ("patient_ref_id");
+
+CREATE INDEX IF NOT EXISTS "ix_break_glass_sessions_status_concept_id" ON "authz"."break_glass_sessions" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_break_glass_sessions_review_outcome_concept_id" ON "authz"."break_glass_sessions" ("review_outcome_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_ip_access_rules_tenant_id" ON "authz"."ip_access_rules" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_ip_access_rules_scope_concept_id" ON "authz"."ip_access_rules" ("scope_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_ip_access_rules_rule_type_concept_id" ON "authz"."ip_access_rules" ("rule_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_care_relationships_tenant_id" ON "authz"."care_relationships" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_care_relationships_patient_profile_id" ON "authz"."care_relationships" ("patient_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_care_relationships_practitioner_profile_id" ON "authz"."care_relationships" ("practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_patient_legal_representations_tenant_id" ON "authz"."patient_legal_representations" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_patient_legal_representations_patient_profile_id" ON "authz"."patient_legal_representations" ("patient_profile_id");

@@ -1,22 +1,5 @@
--- SALUD v4.0.1 · módulo 50 · schema marketing
+-- SALUD v4.0.10 · módulo 50 · schema marketing
 -- Generado de diagram_50_marketing.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   segments.source_read_model_id
---   campaign_members.first_dispatch_id
---   campaign_members.last_dispatch_id
---   content_templates.messaging_template_id
---   journey_steps.next_step_id
---   journey_steps.branch_step_id
---   journey_enrollments.current_step_id
---   marketing_touchpoints.dispatch_id
---   marketing_touchpoints.dispatch_recipient_id
---   campaign_dispatches.schedule_id
---   campaign_dispatch_recipients.dispatch_id
---   campaign_dispatch_recipients.recipient_endpoint_id
---   campaign_dispatch_recipients.channel_id
---   campaign_dispatch_recipients.current_delivery_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -31,6 +14,13 @@ DO $$ BEGIN
     ALTER TABLE "marketing"."segments"
         ADD CONSTRAINT "fk_segments_segment_type_concept_id" FOREIGN KEY ("segment_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: read_models.read_model_definitions (requiere schema read_models)
+DO $$ BEGIN
+    ALTER TABLE "marketing"."segments"
+        ADD CONSTRAINT "fk_segments_source_read_model_id" FOREIGN KEY ("source_read_model_id")
+        REFERENCES "read_models"."read_model_definitions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -227,6 +217,13 @@ DO $$ BEGIN
     ALTER TABLE "marketing"."content_templates"
         ADD CONSTRAINT "fk_content_templates_language_concept_id" FOREIGN KEY ("language_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: messaging.message_templates (requiere schema messaging)
+DO $$ BEGIN
+    ALTER TABLE "marketing"."content_templates"
+        ADD CONSTRAINT "fk_content_templates_messaging_template_id" FOREIGN KEY ("messaging_template_id")
+        REFERENCES "messaging"."message_templates" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -530,11 +527,25 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: crm.contact_channel_endpoints (requiere schema crm)
+DO $$ BEGIN
+    ALTER TABLE "marketing"."campaign_dispatch_recipients"
+        ADD CONSTRAINT "fk_campaign_dispatch_recipients_recipient_endpoint_id" FOREIGN KEY ("recipient_endpoint_id")
+        REFERENCES "crm"."contact_channel_endpoints" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
     ALTER TABLE "marketing"."campaign_dispatch_recipients"
         ADD CONSTRAINT "fk_campaign_dispatch_recipients_recipient_user_id" FOREIGN KEY ("recipient_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: messaging.message_channels (requiere schema messaging)
+DO $$ BEGIN
+    ALTER TABLE "marketing"."campaign_dispatch_recipients"
+        ADD CONSTRAINT "fk_campaign_dispatch_recipients_channel_id" FOREIGN KEY ("channel_id")
+        REFERENCES "messaging"."message_channels" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -577,6 +588,13 @@ DO $$ BEGIN
     ALTER TABLE "marketing"."campaign_dispatch_recipients"
         ADD CONSTRAINT "fk_campaign_dispatch_recipients_notification_request_id" FOREIGN KEY ("notification_request_id")
         REFERENCES "messaging"."notification_requests" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: messaging.notification_deliveries (requiere schema messaging)
+DO $$ BEGIN
+    ALTER TABLE "marketing"."campaign_dispatch_recipients"
+        ADD CONSTRAINT "fk_campaign_dispatch_recipients_current_delivery_id" FOREIGN KEY ("current_delivery_id")
+        REFERENCES "messaging"."notification_deliveries" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 42 · schema payments
+-- SALUD v4.0.10 · módulo 42 · schema payments
 -- Generado de diagram_42_payments.puml — NO editar a mano.
 
 
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_gateways" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_gateways" PRIMARY KEY ("id")
 );
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS "payments"."gateway_connections" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_gateway_connections" PRIMARY KEY ("id")
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_methods" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_methods" PRIMARY KEY ("id")
 );
 
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_intents" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_intents" PRIMARY KEY ("id")
 );
 
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_transactions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_transactions" PRIMARY KEY ("id")
 );
 
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS "payments"."refunds" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_refunds" PRIMARY KEY ("id")
 );
 
@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_disputes" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_disputes" PRIMARY KEY ("id")
 );
 
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payouts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payouts" PRIMARY KEY ("id")
 );
 
@@ -191,7 +191,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payout_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payout_items" PRIMARY KEY ("id")
 );
 
@@ -210,7 +210,7 @@ CREATE TABLE IF NOT EXISTS "payments"."gateway_settlements" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_gateway_settlements" PRIMARY KEY ("id")
 );
 
@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS "payments"."settlement_lines" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_settlement_lines" PRIMARY KEY ("id")
 );
 
@@ -262,7 +262,7 @@ CREATE TABLE IF NOT EXISTS "payments"."wallets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_wallets" PRIMARY KEY ("id")
 );
 
@@ -303,7 +303,7 @@ CREATE TABLE IF NOT EXISTS "payments"."connected_accounts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_connected_accounts" PRIMARY KEY ("id")
 );
 
@@ -321,7 +321,7 @@ CREATE TABLE IF NOT EXISTS "payments"."kyc_verifications" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_kyc_verifications" PRIMARY KEY ("id")
 );
 
@@ -340,7 +340,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_splits" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_splits" PRIMARY KEY ("id")
 );
 
@@ -364,7 +364,7 @@ CREATE TABLE IF NOT EXISTS "payments"."fee_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_fee_schedules" PRIMARY KEY ("id")
 );
 
@@ -380,7 +380,7 @@ CREATE TABLE IF NOT EXISTS "payments"."transaction_fees" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_transaction_fees" PRIMARY KEY ("id")
 );
 
@@ -397,7 +397,7 @@ CREATE TABLE IF NOT EXISTS "payments"."tips" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tips" PRIMARY KEY ("id")
 );
 
@@ -407,6 +407,9 @@ CREATE TABLE IF NOT EXISTS "payments"."subscription_plans" (
     "practice_id" uuid,
     "code" varchar NOT NULL,
     "name" varchar NOT NULL,
+    "tier_concept_id" uuid NOT NULL,
+    "is_default" boolean,
+    "is_public" boolean,
     "billing_interval_concept_id" uuid NOT NULL,
     "interval_count" integer,
     "amount" numeric NOT NULL,
@@ -419,7 +422,7 @@ CREATE TABLE IF NOT EXISTS "payments"."subscription_plans" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_subscription_plans" PRIMARY KEY ("id")
 );
 
@@ -441,7 +444,7 @@ CREATE TABLE IF NOT EXISTS "payments"."subscriptions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_subscriptions" PRIMARY KEY ("id")
 );
 
@@ -457,7 +460,7 @@ CREATE TABLE IF NOT EXISTS "payments"."installment_plans" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_installment_plans" PRIMARY KEY ("id")
 );
 
@@ -474,7 +477,7 @@ CREATE TABLE IF NOT EXISTS "payments"."installment_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_installment_schedules" PRIMARY KEY ("id")
 );
 
@@ -494,7 +497,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_mandates" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_mandates" PRIMARY KEY ("id")
 );
 
@@ -512,7 +515,7 @@ CREATE TABLE IF NOT EXISTS "payments"."fx_rate_locks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_fx_rate_locks" PRIMARY KEY ("id")
 );
 
@@ -531,7 +534,7 @@ CREATE TABLE IF NOT EXISTS "payments"."risk_assessments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_risk_assessments" PRIMARY KEY ("id")
 );
 
@@ -553,7 +556,7 @@ CREATE TABLE IF NOT EXISTS "payments"."reconciliation_runs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_reconciliation_runs" PRIMARY KEY ("id")
 );
 
@@ -572,7 +575,7 @@ CREATE TABLE IF NOT EXISTS "payments"."reconciliation_exceptions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_reconciliation_exceptions" PRIMARY KEY ("id")
 );
 
@@ -592,7 +595,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_channel_catalog" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_channel_catalog" PRIMARY KEY ("id")
 );
 
@@ -607,7 +610,7 @@ CREATE TABLE IF NOT EXISTS "payments"."gateway_payment_channel_mappings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_gateway_payment_channel_mappings" PRIMARY KEY ("id")
 );
 
@@ -633,7 +636,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_debts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_debts" PRIMARY KEY ("id")
 );
 
@@ -654,7 +657,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_debt_lines" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_debt_lines" PRIMARY KEY ("id")
 );
 
@@ -695,7 +698,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_checkout_sessions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_checkout_sessions" PRIMARY KEY ("id")
 );
 
@@ -715,7 +718,7 @@ CREATE TABLE IF NOT EXISTS "payments"."provider_api_operations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_api_operations" PRIMARY KEY ("id")
 );
 
@@ -754,7 +757,7 @@ CREATE TABLE IF NOT EXISTS "payments"."provider_callback_endpoints" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_callback_endpoints" PRIMARY KEY ("id")
 );
 
@@ -845,7 +848,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_cancellation_requests" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_cancellation_requests" PRIMARY KEY ("id")
 );
 
@@ -868,7 +871,7 @@ CREATE TABLE IF NOT EXISTS "payments"."invoice_regeneration_requests" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_invoice_regeneration_requests" PRIMARY KEY ("id")
 );
 
@@ -890,7 +893,7 @@ CREATE TABLE IF NOT EXISTS "payments"."provider_invoice_artifacts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_invoice_artifacts" PRIMARY KEY ("id")
 );
 
@@ -912,7 +915,7 @@ CREATE TABLE IF NOT EXISTS "payments"."payment_receipts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payment_receipts" PRIMARY KEY ("id")
 );
 
@@ -935,4 +938,90 @@ CREATE TABLE IF NOT EXISTS "payments"."provider_reconciliation_records" (
     "recorded_at" timestamptz NOT NULL,
     "created_at" timestamptz NOT NULL,
     CONSTRAINT "pk_provider_reconciliation_records" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "payments"."plan_prices" (
+    "id" uuid NOT NULL,
+    "plan_id" uuid NOT NULL,
+    "currency_concept_id" uuid NOT NULL,
+    "billing_interval_concept_id" uuid NOT NULL,
+    "interval_count" integer,
+    "amount" numeric NOT NULL,
+    "region_concept_id" uuid,
+    "tax_included" boolean,
+    "valid_from" date,
+    "valid_to" date,
+    "state_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_plan_prices" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "payments"."plan_features" (
+    "id" uuid NOT NULL,
+    "plan_id" uuid NOT NULL,
+    "feature_concept_id" uuid NOT NULL,
+    "is_enabled" boolean NOT NULL,
+    "limit_value" numeric,
+    "value_json" jsonb,
+    "state_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_plan_features" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "payments"."plan_quotas" (
+    "id" uuid NOT NULL,
+    "plan_id" uuid NOT NULL,
+    "metric_concept_id" uuid NOT NULL,
+    "limit_value" numeric,
+    "soft_limit_value" numeric,
+    "quota_period_concept_id" uuid,
+    "overage_policy_concept_id" uuid,
+    "state_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_plan_quotas" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "payments"."plan_eligibility_rules" (
+    "id" uuid NOT NULL,
+    "plan_id" uuid NOT NULL,
+    "eligible_practice_type_concept_id" uuid NOT NULL,
+    "is_included" boolean NOT NULL,
+    "notes" varchar,
+    "state_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_plan_eligibility_rules" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "payments"."subscription_usage_counters" (
+    "id" uuid NOT NULL,
+    "subscription_id" uuid NOT NULL,
+    "metric_concept_id" uuid NOT NULL,
+    "period_start" timestamptz NOT NULL,
+    "period_end" timestamptz NOT NULL,
+    "used_value" numeric,
+    "limit_value" numeric,
+    "last_event_at" timestamptz,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_subscription_usage_counters" PRIMARY KEY ("id")
 );

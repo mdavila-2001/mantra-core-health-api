@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 22 · schema organization_extensions
+-- SALUD v4.0.10 · módulo 22 · schema organization_extensions
 -- Generado de diagram_22_organization_extensions.puml — NO editar a mano.
 
 
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS "organization_extensions"."hospitals" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_hospitals" PRIMARY KEY ("id")
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "organization_extensions"."hospital_service_lines" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_hospital_service_lines" PRIMARY KEY ("id")
 );
 
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS "organization_extensions"."facility_licenses" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_facility_licenses" PRIMARY KEY ("id")
 );
 
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS "organization_extensions"."organization_affiliations"
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_organization_affiliations" PRIMARY KEY ("id")
 );
 
@@ -102,6 +102,6 @@ CREATE TABLE IF NOT EXISTS "organization_extensions"."organization_data_boundari
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_organization_data_boundaries" PRIMARY KEY ("id")
 );

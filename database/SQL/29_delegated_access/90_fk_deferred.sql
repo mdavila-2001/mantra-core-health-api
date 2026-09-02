@@ -1,9 +1,5 @@
--- SALUD v4.0.1 · módulo 29 · schema delegated_access
+-- SALUD v4.0.10 · módulo 29 · schema delegated_access
 -- Generado de diagram_29_delegated_access.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   practitioner_delegate_assignments.delegate_user_assignment_id
 
 
 -- destino: directory.tenant_memberships (requiere schema directory)
@@ -142,7 +138,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: practice.practitioner_role_assignments (requiere schema practice)
 DO $$ BEGIN
     ALTER TABLE "delegated_access"."practitioner_delegate_assignments"
-        ADD CONSTRAINT "fk_practitioner_delegate_assignments_practitioner_role_assignment_id" FOREIGN KEY ("practitioner_role_assignment_id")
+        ADD CONSTRAINT "fk_practitioner_delegate_assignments_practitioner_role_7e0ebecf" FOREIGN KEY ("practitioner_role_assignment_id")
         REFERENCES "practice"."practitioner_role_assignments" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -163,7 +159,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "delegated_access"."practitioner_delegate_assignments"
-        ADD CONSTRAINT "fk_practitioner_delegate_assignments_appointment_scope_concept_id" FOREIGN KEY ("appointment_scope_concept_id")
+        ADD CONSTRAINT "fk_practitioner_delegate_assignments_appointment_scope_5c233325" FOREIGN KEY ("appointment_scope_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

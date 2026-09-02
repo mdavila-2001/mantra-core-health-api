@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 09 · schema forms
+-- SALUD v4.0.10 · módulo 09 · schema forms
 -- Generado de diagram_09_forms.puml — NO editar a mano.
 
 
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "forms"."dynamic_field_sections" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dynamic_field_sections" PRIMARY KEY ("id")
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS "forms"."dynamic_field_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dynamic_field_definitions" PRIMARY KEY ("id")
 );
 
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS "forms"."field_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_assignments" PRIMARY KEY ("id")
 );
 
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS "forms"."field_validation_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_validation_rules" PRIMARY KEY ("id")
 );
 
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS "forms"."field_dependencies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_dependencies" PRIMARY KEY ("id")
 );
 
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS "forms"."form_instances" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_form_instances" PRIMARY KEY ("id")
 );
 
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS "forms"."field_values" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_values" PRIMARY KEY ("id")
 );
 
@@ -192,7 +192,7 @@ CREATE TABLE IF NOT EXISTS "forms"."field_definition_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_definition_sets" PRIMARY KEY ("id")
 );
 
@@ -235,7 +235,7 @@ CREATE TABLE IF NOT EXISTS "forms"."field_definition_localizations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_definition_localizations" PRIMARY KEY ("id")
 );
 
@@ -272,7 +272,7 @@ CREATE TABLE IF NOT EXISTS "forms"."field_value_access_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_value_access_rules" PRIMARY KEY ("id")
 );
 
@@ -290,7 +290,7 @@ CREATE TABLE IF NOT EXISTS "forms"."field_schema_migrations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_schema_migrations" PRIMARY KEY ("id")
 );
 
@@ -309,6 +309,6 @@ CREATE TABLE IF NOT EXISTS "forms"."extension_target_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_extension_target_policies" PRIMARY KEY ("id")
 );

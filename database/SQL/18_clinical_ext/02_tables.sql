@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 18 · schema clinical_ext
+-- SALUD v4.0.10 · módulo 18 · schema clinical_ext
 -- Generado de diagram_18_clinical_ext.puml — NO editar a mano.
 
 
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."care_teams" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_care_teams" PRIMARY KEY ("id")
 );
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."care_team_members" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_care_team_members" PRIMARY KEY ("id")
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."referrals" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_referrals" PRIMARY KEY ("id")
 );
 
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."clinical_alerts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_clinical_alerts" PRIMARY KEY ("id")
 );
 
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."virtual_encounters" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_virtual_encounters" PRIMARY KEY ("id")
 );
 
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."cds_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_cds_rules" PRIMARY KEY ("id")
 );
 
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."drug_interactions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_drug_interactions" PRIMARY KEY ("id")
 );
 
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."reference_ranges" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_reference_ranges" PRIMARY KEY ("id")
 );
 
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."order_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_order_sets" PRIMARY KEY ("id")
 );
 
@@ -195,8 +195,28 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."order_set_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_order_set_items" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "clinical_ext"."prescription_favorites" (
+    "id" uuid NOT NULL,
+    "practitioner_profile_id" uuid NOT NULL,
+    "name" varchar NOT NULL,
+    "medication_concept_id" uuid NOT NULL,
+    "substance_atc_concept_id" uuid,
+    "dose_text" varchar,
+    "route_concept_id" uuid,
+    "frequency_text" varchar,
+    "quantity_decimal" numeric,
+    "unit_concept_id" uuid,
+    "patient_instructions_text" text,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_prescription_favorites" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "clinical_ext"."immunization_schedules" (
@@ -213,7 +233,7 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."immunization_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_immunization_schedules" PRIMARY KEY ("id")
 );
 
@@ -231,6 +251,6 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."care_gaps" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_care_gaps" PRIMARY KEY ("id")
 );

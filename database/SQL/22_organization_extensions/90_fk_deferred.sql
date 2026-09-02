@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 22 · schema organization_extensions
+-- SALUD v4.0.10 · módulo 22 · schema organization_extensions
 -- Generado de diagram_22_organization_extensions.puml — NO editar a mano.
 
 
@@ -11,14 +11,14 @@ DO $$ BEGIN
     ALTER TABLE "organization_extensions"."hospitals"
         ADD CONSTRAINT "fk_hospitals_tenant_id" FOREIGN KEY ("tenant_id")
         REFERENCES "directory"."tenants" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: practice.practices (requiere schema practice)
 DO $$ BEGIN
     ALTER TABLE "organization_extensions"."hospitals"
         ADD CONSTRAINT "fk_hospitals_practice_id" FOREIGN KEY ("practice_id")
         REFERENCES "practice"."practices" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: practice.practice_sites (requiere schema practice)
 DO $$ BEGIN

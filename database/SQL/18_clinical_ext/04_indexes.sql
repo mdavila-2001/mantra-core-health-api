@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 18 · schema clinical_ext
+-- SALUD v4.0.10 · módulo 18 · schema clinical_ext
 -- Generado de diagram_18_clinical_ext.puml — NO editar a mano.
 
 
@@ -159,6 +159,22 @@ CREATE INDEX IF NOT EXISTS "ix_order_set_items_default_route_concept_id" ON "cli
 CREATE INDEX IF NOT EXISTS "ix_order_set_items_created_by_user_id" ON "clinical_ext"."order_set_items" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_order_set_items_updated_by_user_id" ON "clinical_ext"."order_set_items" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prescription_favorites_practitioner_profile_id" ON "clinical_ext"."prescription_favorites" ("practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prescription_favorites_medication_concept_id" ON "clinical_ext"."prescription_favorites" ("medication_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prescription_favorites_substance_atc_concept_id" ON "clinical_ext"."prescription_favorites" ("substance_atc_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prescription_favorites_route_concept_id" ON "clinical_ext"."prescription_favorites" ("route_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prescription_favorites_unit_concept_id" ON "clinical_ext"."prescription_favorites" ("unit_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prescription_favorites_created_by_user_id" ON "clinical_ext"."prescription_favorites" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prescription_favorites_updated_by_user_id" ON "clinical_ext"."prescription_favorites" ("updated_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_prescription_favorites_practitioner_name" ON "clinical_ext"."prescription_favorites" ("practitioner_profile_id", "name");
 
 CREATE INDEX IF NOT EXISTS "ix_immunization_schedules_tenant_id" ON "clinical_ext"."immunization_schedules" ("tenant_id");
 

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 53 · schema procedures_perioperative
+-- SALUD v4.0.10 · módulo 53 · schema procedures_perioperative
 -- Generado de diagram_53_procedures_perioperative.puml — NO editar a mano.
 
 
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."procedure_cases" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_procedure_cases" PRIMARY KEY ("id")
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."procedure_case_team_membe
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_procedure_case_team_members" PRIMARY KEY ("id")
 );
 
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."preoperative_assessments"
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_preoperative_assessments" PRIMARY KEY ("id")
 );
 
@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."surgical_safety_checklist
     "coordinator_profile_id" uuid,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_surgical_safety_checklists" PRIMARY KEY ("id")
 );
 
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."surgical_safety_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_surgical_safety_items" PRIMARY KEY ("id")
 );
 
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."anesthesia_plans" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_anesthesia_plans" PRIMARY KEY ("id")
 );
 
@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."operative_steps" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_operative_steps" PRIMARY KEY ("id")
 );
 
@@ -352,7 +352,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."procedure_implants" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_procedure_implants" PRIMARY KEY ("id")
 );
 
@@ -450,7 +450,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."pacu_stays" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pacu_stays" PRIMARY KEY ("id")
 );
 
@@ -502,7 +502,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."postoperative_followups" 
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_postoperative_followups" PRIMARY KEY ("id")
 );
 
@@ -553,7 +553,7 @@ CREATE TABLE IF NOT EXISTS "procedures_perioperative"."procedure_charge_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_procedure_charge_items" PRIMARY KEY ("id")
 );
 

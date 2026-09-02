@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 30 · schema read_models
+-- SALUD v4.0.10 · módulo 30 · schema read_models
 -- Generado de diagram_30_read_models.puml — NO editar a mano.
 
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."portal_surfaces" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_portal_surfaces" PRIMARY KEY ("id")
 );
 
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."frontend_routes" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_frontend_routes" PRIMARY KEY ("id")
 );
 
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."read_model_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_read_model_definitions" PRIMARY KEY ("id")
 );
 
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."frontend_page_views" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_frontend_page_views" PRIMARY KEY ("id")
 );
 
@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."frontend_view_fields" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_frontend_view_fields" PRIMARY KEY ("id")
 );
 
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."frontend_view_filters" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_frontend_view_filters" PRIMARY KEY ("id")
 );
 
@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."frontend_view_sort_options" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_frontend_view_sort_options" PRIMARY KEY ("id")
 );
 
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."frontend_view_actions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_frontend_view_actions" PRIMARY KEY ("id")
 );
 
@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."frontend_view_kpis" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_frontend_view_kpis" PRIMARY KEY ("id")
 );
 
@@ -236,7 +236,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."frontend_view_states" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_frontend_view_states" PRIMARY KEY ("id")
 );
 
@@ -256,7 +256,7 @@ CREATE TABLE IF NOT EXISTS "read_models"."user_view_preferences" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_user_view_preferences" PRIMARY KEY ("id")
 );
 

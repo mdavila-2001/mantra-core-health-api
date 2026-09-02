@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 10 · schema audit
+-- SALUD v4.0.10 · módulo 10 · schema audit
 -- Generado de diagram_10_audit.puml — NO editar a mano.
 
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS "audit"."dsar_requests" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dsar_requests" PRIMARY KEY ("id")
 );
 
@@ -1188,7 +1188,7 @@ CREATE TABLE IF NOT EXISTS "audit"."custom_audiences_history" (
 CREATE TABLE IF NOT EXISTS "audit"."wallets_history" (
     "history_id" uuid NOT NULL,
     "wallets_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1202,7 +1202,7 @@ CREATE TABLE IF NOT EXISTS "audit"."wallets_history" (
 CREATE TABLE IF NOT EXISTS "audit"."subscription_plans_history" (
     "history_id" uuid NOT NULL,
     "subscription_plans_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1216,7 +1216,7 @@ CREATE TABLE IF NOT EXISTS "audit"."subscription_plans_history" (
 CREATE TABLE IF NOT EXISTS "audit"."subscriptions_history" (
     "history_id" uuid NOT NULL,
     "subscriptions_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1230,7 +1230,7 @@ CREATE TABLE IF NOT EXISTS "audit"."subscriptions_history" (
 CREATE TABLE IF NOT EXISTS "audit"."connected_accounts_history" (
     "history_id" uuid NOT NULL,
     "connected_accounts_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1244,7 +1244,7 @@ CREATE TABLE IF NOT EXISTS "audit"."connected_accounts_history" (
 CREATE TABLE IF NOT EXISTS "audit"."payment_mandates_history" (
     "history_id" uuid NOT NULL,
     "payment_mandates_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1258,7 +1258,7 @@ CREATE TABLE IF NOT EXISTS "audit"."payment_mandates_history" (
 CREATE TABLE IF NOT EXISTS "audit"."product_catalogs_history" (
     "history_id" uuid NOT NULL,
     "product_catalogs_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1272,7 +1272,7 @@ CREATE TABLE IF NOT EXISTS "audit"."product_catalogs_history" (
 CREATE TABLE IF NOT EXISTS "audit"."catalog_products_history" (
     "history_id" uuid NOT NULL,
     "catalog_products_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1286,7 +1286,7 @@ CREATE TABLE IF NOT EXISTS "audit"."catalog_products_history" (
 CREATE TABLE IF NOT EXISTS "audit"."product_sets_history" (
     "history_id" uuid NOT NULL,
     "product_sets_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1300,7 +1300,7 @@ CREATE TABLE IF NOT EXISTS "audit"."product_sets_history" (
 CREATE TABLE IF NOT EXISTS "audit"."automated_rules_history" (
     "history_id" uuid NOT NULL,
     "automated_rules_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1314,7 +1314,7 @@ CREATE TABLE IF NOT EXISTS "audit"."automated_rules_history" (
 CREATE TABLE IF NOT EXISTS "audit"."custom_conversions_history" (
     "history_id" uuid NOT NULL,
     "custom_conversions_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1328,7 +1328,7 @@ CREATE TABLE IF NOT EXISTS "audit"."custom_conversions_history" (
 CREATE TABLE IF NOT EXISTS "audit"."ad_experiments_history" (
     "history_id" uuid NOT NULL,
     "ad_experiments_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1342,7 +1342,7 @@ CREATE TABLE IF NOT EXISTS "audit"."ad_experiments_history" (
 CREATE TABLE IF NOT EXISTS "audit"."comments_history" (
     "history_id" uuid NOT NULL,
     "comments_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1356,7 +1356,7 @@ CREATE TABLE IF NOT EXISTS "audit"."comments_history" (
 CREATE TABLE IF NOT EXISTS "audit"."groups_history" (
     "history_id" uuid NOT NULL,
     "groups_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1370,7 +1370,7 @@ CREATE TABLE IF NOT EXISTS "audit"."groups_history" (
 CREATE TABLE IF NOT EXISTS "audit"."topics_history" (
     "history_id" uuid NOT NULL,
     "topics_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1384,7 +1384,7 @@ CREATE TABLE IF NOT EXISTS "audit"."topics_history" (
 CREATE TABLE IF NOT EXISTS "audit"."conversations_history" (
     "history_id" uuid NOT NULL,
     "conversations_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1398,7 +1398,7 @@ CREATE TABLE IF NOT EXISTS "audit"."conversations_history" (
 CREATE TABLE IF NOT EXISTS "audit"."verified_badges_history" (
     "history_id" uuid NOT NULL,
     "verified_badges_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1412,7 +1412,7 @@ CREATE TABLE IF NOT EXISTS "audit"."verified_badges_history" (
 CREATE TABLE IF NOT EXISTS "audit"."moderation_decisions_history" (
     "history_id" uuid NOT NULL,
     "moderation_decisions_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1426,7 +1426,7 @@ CREATE TABLE IF NOT EXISTS "audit"."moderation_decisions_history" (
 CREATE TABLE IF NOT EXISTS "audit"."courses_history" (
     "history_id" uuid NOT NULL,
     "courses_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1440,7 +1440,7 @@ CREATE TABLE IF NOT EXISTS "audit"."courses_history" (
 CREATE TABLE IF NOT EXISTS "audit"."course_versions_history" (
     "history_id" uuid NOT NULL,
     "course_versions_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1454,7 +1454,7 @@ CREATE TABLE IF NOT EXISTS "audit"."course_versions_history" (
 CREATE TABLE IF NOT EXISTS "audit"."enrollments_history" (
     "history_id" uuid NOT NULL,
     "enrollments_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1468,7 +1468,7 @@ CREATE TABLE IF NOT EXISTS "audit"."enrollments_history" (
 CREATE TABLE IF NOT EXISTS "audit"."certificates_history" (
     "history_id" uuid NOT NULL,
     "certificates_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1482,7 +1482,7 @@ CREATE TABLE IF NOT EXISTS "audit"."certificates_history" (
 CREATE TABLE IF NOT EXISTS "audit"."agents_history" (
     "history_id" uuid NOT NULL,
     "agents_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1496,7 +1496,7 @@ CREATE TABLE IF NOT EXISTS "audit"."agents_history" (
 CREATE TABLE IF NOT EXISTS "audit"."agent_versions_history" (
     "history_id" uuid NOT NULL,
     "agent_versions_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1510,7 +1510,7 @@ CREATE TABLE IF NOT EXISTS "audit"."agent_versions_history" (
 CREATE TABLE IF NOT EXISTS "audit"."workflows_history" (
     "history_id" uuid NOT NULL,
     "workflows_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1524,7 +1524,7 @@ CREATE TABLE IF NOT EXISTS "audit"."workflows_history" (
 CREATE TABLE IF NOT EXISTS "audit"."guardrail_policies_history" (
     "history_id" uuid NOT NULL,
     "guardrail_policies_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1538,7 +1538,7 @@ CREATE TABLE IF NOT EXISTS "audit"."guardrail_policies_history" (
 CREATE TABLE IF NOT EXISTS "audit"."record_automations_history" (
     "history_id" uuid NOT NULL,
     "record_automations_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1552,7 +1552,7 @@ CREATE TABLE IF NOT EXISTS "audit"."record_automations_history" (
 CREATE TABLE IF NOT EXISTS "audit"."crm_accounts_history" (
     "history_id" uuid NOT NULL,
     "crm_accounts_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1566,7 +1566,7 @@ CREATE TABLE IF NOT EXISTS "audit"."crm_accounts_history" (
 CREATE TABLE IF NOT EXISTS "audit"."contacts_history" (
     "history_id" uuid NOT NULL,
     "contacts_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1580,7 +1580,7 @@ CREATE TABLE IF NOT EXISTS "audit"."contacts_history" (
 CREATE TABLE IF NOT EXISTS "audit"."opportunities_history" (
     "history_id" uuid NOT NULL,
     "opportunities_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1594,7 +1594,7 @@ CREATE TABLE IF NOT EXISTS "audit"."opportunities_history" (
 CREATE TABLE IF NOT EXISTS "audit"."partnerships_history" (
     "history_id" uuid NOT NULL,
     "partnerships_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1608,7 +1608,7 @@ CREATE TABLE IF NOT EXISTS "audit"."partnerships_history" (
 CREATE TABLE IF NOT EXISTS "audit"."partnership_agreements_history" (
     "history_id" uuid NOT NULL,
     "partnership_agreements_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1622,7 +1622,7 @@ CREATE TABLE IF NOT EXISTS "audit"."partnership_agreements_history" (
 CREATE TABLE IF NOT EXISTS "audit"."segments_history" (
     "history_id" uuid NOT NULL,
     "segments_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1636,7 +1636,7 @@ CREATE TABLE IF NOT EXISTS "audit"."segments_history" (
 CREATE TABLE IF NOT EXISTS "audit"."marketing_campaigns_history" (
     "history_id" uuid NOT NULL,
     "marketing_campaigns_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1650,7 +1650,7 @@ CREATE TABLE IF NOT EXISTS "audit"."marketing_campaigns_history" (
 CREATE TABLE IF NOT EXISTS "audit"."journeys_history" (
     "history_id" uuid NOT NULL,
     "journeys_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1664,7 +1664,7 @@ CREATE TABLE IF NOT EXISTS "audit"."journeys_history" (
 CREATE TABLE IF NOT EXISTS "audit"."loyalty_programs_history" (
     "history_id" uuid NOT NULL,
     "loyalty_programs_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1678,7 +1678,7 @@ CREATE TABLE IF NOT EXISTS "audit"."loyalty_programs_history" (
 CREATE TABLE IF NOT EXISTS "audit"."loyalty_memberships_history" (
     "history_id" uuid NOT NULL,
     "loyalty_memberships_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1692,7 +1692,7 @@ CREATE TABLE IF NOT EXISTS "audit"."loyalty_memberships_history" (
 CREATE TABLE IF NOT EXISTS "audit"."promotions_history" (
     "history_id" uuid NOT NULL,
     "promotions_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1706,7 +1706,7 @@ CREATE TABLE IF NOT EXISTS "audit"."promotions_history" (
 CREATE TABLE IF NOT EXISTS "audit"."coupons_history" (
     "history_id" uuid NOT NULL,
     "coupons_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,
@@ -1720,7 +1720,7 @@ CREATE TABLE IF NOT EXISTS "audit"."coupons_history" (
 CREATE TABLE IF NOT EXISTS "audit"."referral_programs_history" (
     "history_id" uuid NOT NULL,
     "referral_programs_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "valid_from" timestamptz,
     "valid_to" timestamptz,

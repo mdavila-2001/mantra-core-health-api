@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 51 · schema promotions
+-- SALUD v4.0.10 · módulo 51 · schema promotions
 -- Generado de diagram_51_promotions.puml — NO editar a mano.
 
 
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS "promotions"."loyalty_programs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_loyalty_programs" PRIMARY KEY ("id")
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "promotions"."loyalty_tiers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_loyalty_tiers" PRIMARY KEY ("id")
 );
 
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS "promotions"."loyalty_memberships" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_loyalty_memberships" PRIMARY KEY ("id")
 );
 
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS "promotions"."earning_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_earning_rules" PRIMARY KEY ("id")
 );
 
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS "promotions"."promotions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_promotions" PRIMARY KEY ("id")
 );
 
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS "promotions"."discount_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_discount_rules" PRIMARY KEY ("id")
 );
 
@@ -161,7 +161,7 @@ CREATE TABLE IF NOT EXISTS "promotions"."coupons" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_coupons" PRIMARY KEY ("id")
 );
 
@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS "promotions"."redemptions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_redemptions" PRIMARY KEY ("id")
 );
 
@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS "promotions"."referral_programs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_referral_programs" PRIMARY KEY ("id")
 );
 
@@ -225,6 +225,6 @@ CREATE TABLE IF NOT EXISTS "promotions"."member_referrals" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_member_referrals" PRIMARY KEY ("id")
 );

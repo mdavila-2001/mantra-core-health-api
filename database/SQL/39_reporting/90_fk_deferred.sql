@@ -1,13 +1,5 @@
--- SALUD v4.0.1 · módulo 39 · schema reporting
+-- SALUD v4.0.10 · módulo 39 · schema reporting
 -- Generado de diagram_39_reporting.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   report_definitions.data_source_id
---   report_executions.schedule_id
---   report_distributions.schedule_id
---   report_distributions.channel_id
---   report_subscriptions.channel_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -283,6 +275,13 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: messaging.message_channels (requiere schema messaging)
+DO $$ BEGIN
+    ALTER TABLE "reporting"."report_distributions"
+        ADD CONSTRAINT "fk_report_distributions_channel_id" FOREIGN KEY ("channel_id")
+        REFERENCES "messaging"."message_channels" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "reporting"."report_distributions"
@@ -309,6 +308,13 @@ DO $$ BEGIN
     ALTER TABLE "reporting"."report_subscriptions"
         ADD CONSTRAINT "fk_report_subscriptions_subscriber_user_id" FOREIGN KEY ("subscriber_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: messaging.message_channels (requiere schema messaging)
+DO $$ BEGIN
+    ALTER TABLE "reporting"."report_subscriptions"
+        ADD CONSTRAINT "fk_report_subscriptions_channel_id" FOREIGN KEY ("channel_id")
+        REFERENCES "messaging"."message_channels" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)

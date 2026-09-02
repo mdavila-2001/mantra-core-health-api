@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 20 · schema diagnostics
+-- SALUD v4.0.10 · módulo 20 · schema diagnostics
 -- Generado de diagram_20_diagnostics.puml — NO editar a mano.
 
 
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."specimens" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_specimens" PRIMARY KEY ("id")
 );
 
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."imaging_endpoints" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_imaging_endpoints" PRIMARY KEY ("id")
 );
 
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."imaging_studies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_imaging_studies" PRIMARY KEY ("id")
 );
 
@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."clinical_media" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_clinical_media" PRIMARY KEY ("id")
 );
 
@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."media_annotations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_media_annotations" PRIMARY KEY ("id")
 );
 
@@ -234,7 +234,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."specimen_identifiers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_specimen_identifiers" PRIMARY KEY ("id")
 );
 
@@ -281,7 +281,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."specimen_containers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_specimen_containers" PRIMARY KEY ("id")
 );
 
@@ -348,7 +348,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."laboratory_accessions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_laboratory_accessions" PRIMARY KEY ("id")
 );
 
@@ -378,7 +378,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."laboratory_work_orders" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_laboratory_work_orders" PRIMARY KEY ("id")
 );
 
@@ -399,7 +399,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."laboratory_work_order_tests" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_laboratory_work_order_tests" PRIMARY KEY ("id")
 );
 
@@ -473,7 +473,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."critical_result_notifications" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_critical_result_notifications" PRIMARY KEY ("id")
 );
 
@@ -494,7 +494,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."imaging_procedure_steps" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_imaging_procedure_steps" PRIMARY KEY ("id")
 );
 
@@ -511,7 +511,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."imaging_selections" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_imaging_selections" PRIMARY KEY ("id")
 );
 
@@ -545,7 +545,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."dicom_object_locations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dicom_object_locations" PRIMARY KEY ("id")
 );
 
@@ -565,7 +565,7 @@ CREATE TABLE IF NOT EXISTS "diagnostics"."dicom_structured_reports" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dicom_structured_reports" PRIMARY KEY ("id")
 );
 

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 15 · schema chart
+-- SALUD v4.0.10 · módulo 15 · schema chart
 -- Generado de diagram_15_chart.puml — NO editar a mano.
 
 
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "chart"."clinical_note_headers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_clinical_note_headers" PRIMARY KEY ("id")
 );
 
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS "chart"."care_plans" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_care_plans" PRIMARY KEY ("id")
 );
 
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS "chart"."care_plan_activities" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_care_plan_activities" PRIMARY KEY ("id")
 );
 
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS "chart"."document_records" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_document_records" PRIMARY KEY ("id")
 );
 
@@ -160,7 +160,7 @@ CREATE TABLE IF NOT EXISTS "chart"."specialty_chart_templates" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_specialty_chart_templates" PRIMARY KEY ("id")
 );
 
@@ -175,6 +175,6 @@ CREATE TABLE IF NOT EXISTS "chart"."chart_template_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_chart_template_assignments" PRIMARY KEY ("id")
 );

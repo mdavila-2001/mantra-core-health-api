@@ -1,11 +1,16 @@
--- SALUD v4.0.1 · módulo 05 · schema profiles
+-- SALUD v4.0.10 · módulo 05 · schema profiles
 -- Generado de diagram_05_profiles.puml — NO editar a mano.
 
 
 CREATE TABLE IF NOT EXISTS "profiles"."persons" (
     "id" uuid NOT NULL,
     "person_status_concept_id" uuid NOT NULL,
+    "name" varchar,
+    "middle_name" varchar,
+    "last_name" varchar,
+    "mother_last_name" varchar,
     "display_name" varchar,
+    "photo_file_id" uuid,
     "birth_date" date,
     "administrative_gender_concept_id" uuid,
     "sex_at_birth_concept_id" uuid,
@@ -14,13 +19,15 @@ CREATE TABLE IF NOT EXISTS "profiles"."persons" (
     "deceased_at" timestamptz,
     "nationality_concept_id" uuid,
     "preferred_language_concept_id" uuid,
+    "occupation_concept_id" uuid,
+    "occupation_free_text" varchar,
     "merge_survivor_person_id" uuid,
     "anonymized_at" timestamptz,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_persons" PRIMARY KEY ("id")
 );
 
@@ -37,7 +44,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."person_account_links" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_person_account_links" PRIMARY KEY ("id")
 );
 
@@ -50,7 +57,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."person_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_person_profiles" PRIMARY KEY ("id")
 );
 
@@ -67,7 +74,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."patient_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_patient_profiles" PRIMARY KEY ("profile_id")
 );
 
@@ -86,7 +93,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."patient_identity_links" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_patient_identity_links" PRIMARY KEY ("id")
 );
 
@@ -118,7 +125,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."health_practitioner_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_practitioner_profiles" PRIMARY KEY ("profile_id")
 );
 
@@ -141,7 +148,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."professional_credentials" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_professional_credentials" PRIMARY KEY ("id")
 );
 
@@ -161,7 +168,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."practitioner_specialties" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practitioner_specialties" PRIMARY KEY ("id")
 );
 
@@ -175,7 +182,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."practitioner_languages" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practitioner_languages" PRIMARY KEY ("id")
 );
 
@@ -193,8 +200,29 @@ CREATE TABLE IF NOT EXISTS "profiles"."jurisdiction_authorizations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_jurisdiction_authorizations" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "profiles"."practitioner_affiliations" (
+    "id" uuid NOT NULL,
+    "practitioner_profile_id" uuid NOT NULL,
+    "organization_name" varchar NOT NULL,
+    "practice_site_id" uuid,
+    "health_facility_concept_id" uuid,
+    "role_title" varchar NOT NULL,
+    "department_text" varchar,
+    "affiliation_type_concept_id" uuid,
+    "start_date" date NOT NULL,
+    "end_date" date,
+    "status_concept_id" uuid NOT NULL,
+    "decision_reason_text" varchar,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_practitioner_affiliations" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "profiles"."related_persons" (
@@ -209,7 +237,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."related_persons" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_related_persons" PRIMARY KEY ("id")
 );
 
@@ -227,7 +255,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."patient_portal_proxies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_patient_portal_proxies" PRIMARY KEY ("id")
 );
 
@@ -239,7 +267,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."insurance_representative_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insurance_representative_profiles" PRIMARY KEY ("profile_id")
 );
 
@@ -251,7 +279,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."provider_operator_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_operator_profiles" PRIMARY KEY ("profile_id")
 );
 
@@ -263,7 +291,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."emergency_staff_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_emergency_staff_profiles" PRIMARY KEY ("profile_id")
 );
 
@@ -275,7 +303,7 @@ CREATE TABLE IF NOT EXISTS "profiles"."administrator_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_administrator_profiles" PRIMARY KEY ("profile_id")
 );
 
@@ -286,6 +314,6 @@ CREATE TABLE IF NOT EXISTS "profiles"."secretary_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_secretary_profiles" PRIMARY KEY ("profile_id")
 );

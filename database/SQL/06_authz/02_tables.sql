@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 06 · schema authz
+-- SALUD v4.0.10 · módulo 06 · schema authz
 -- Generado de diagram_06_authz.puml — NO editar a mano.
 
 
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS "authz"."permission_categories" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_permission_categories" PRIMARY KEY ("id")
 );
 
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS "authz"."permissions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "is_role_restricted" boolean NOT NULL,
     "required_role_code" varchar,
     "allow_direct_user_grant" boolean NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "authz"."roles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_roles" PRIMARY KEY ("id")
 );
 
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS "authz"."role_permissions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_role_permissions" PRIMARY KEY ("id")
 );
 
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS "authz"."user_role_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_user_role_assignments" PRIMARY KEY ("id")
 );
 
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS "authz"."user_permission_grants" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_user_permission_grants" PRIMARY KEY ("id")
 );
 
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS "authz"."field_permissions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_permissions" PRIMARY KEY ("id")
 );
 
@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS "authz"."resource_scope_grants" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_resource_scope_grants" PRIMARY KEY ("id")
 );
 
@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS "authz"."access_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_access_policies" PRIMARY KEY ("id")
 );
 
@@ -184,11 +184,93 @@ CREATE TABLE IF NOT EXISTS "authz"."clinical_access_grants" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_clinical_access_grants" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "authz"."service_principals" (
     "id" uuid NOT NULL,
     CONSTRAINT "pk_service_principals" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "authz"."break_glass_sessions" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "user_id" uuid NOT NULL,
+    "patient_ref_id" uuid NOT NULL,
+    "patient_ref_type_concept_id" uuid NOT NULL,
+    "justification" varchar NOT NULL,
+    "reason_concept_id" uuid NOT NULL,
+    "granted_by_policy_id" uuid,
+    "activated_at" timestamptz,
+    "expires_at" timestamptz,
+    "deactivated_at" timestamptz,
+    "reviewed_by_user_id" uuid,
+    "reviewed_at" timestamptz,
+    "review_outcome_concept_id" uuid,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_break_glass_sessions" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "authz"."ip_access_rules" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "scope_concept_id" uuid NOT NULL,
+    "subject_ref_id" uuid,
+    "subject_ref_type_concept_id" uuid,
+    "rule_type_concept_id" uuid NOT NULL,
+    "cidr" varchar NOT NULL,
+    "description" varchar,
+    "priority" integer,
+    "valid_from" timestamptz,
+    "valid_to" timestamptz,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_ip_access_rules" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "authz"."care_relationships" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "patient_profile_id" uuid NOT NULL,
+    "practitioner_profile_id" uuid NOT NULL,
+    "relationship_type_concept_id" uuid NOT NULL,
+    "status_concept_id" uuid NOT NULL,
+    "purpose_concept_id" uuid,
+    "valid_from" timestamptz NOT NULL,
+    "valid_to" timestamptz,
+    "established_by_user_id" uuid,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_care_relationships" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "authz"."patient_legal_representations" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "patient_profile_id" uuid NOT NULL,
+    "representative_user_id" uuid NOT NULL,
+    "representation_type_concept_id" uuid NOT NULL,
+    "status_concept_id" uuid NOT NULL,
+    "valid_from" timestamptz NOT NULL,
+    "valid_to" timestamptz,
+    "document_ref" varchar(200),
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_patient_legal_representations" PRIMARY KEY ("id")
 );

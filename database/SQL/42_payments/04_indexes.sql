@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 42 · schema payments
+-- SALUD v4.0.10 · módulo 42 · schema payments
 -- Generado de diagram_42_payments.puml — NO editar a mano.
 
 
@@ -781,3 +781,33 @@ CREATE INDEX IF NOT EXISTS "ix_provider_reconciliation_records_mismatch_reason_c
 CREATE INDEX IF NOT EXISTS "brin_provider_reconciliation_records_recorded_at" ON "payments"."provider_reconciliation_records" USING brin ("recorded_at") WITH (pages_per_range=128);
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uk_provider_reconciliation_connection_external_run" ON "payments"."provider_reconciliation_records" ("gateway_connection_id", "external_transaction_id", "reconciliation_run_id");
+
+CREATE INDEX IF NOT EXISTS "ix_plan_prices_plan_id" ON "payments"."plan_prices" ("plan_id");
+
+CREATE INDEX IF NOT EXISTS "ix_plan_prices_currency_concept_id" ON "payments"."plan_prices" ("currency_concept_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_plan_prices_plan_currency_interval" ON "payments"."plan_prices" ("plan_id", "currency_concept_id", "billing_interval_concept_id", "region_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_plan_features_plan_id" ON "payments"."plan_features" ("plan_id");
+
+CREATE INDEX IF NOT EXISTS "ix_plan_features_feature_concept_id" ON "payments"."plan_features" ("feature_concept_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_plan_features_plan_feature" ON "payments"."plan_features" ("plan_id", "feature_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_plan_quotas_plan_id" ON "payments"."plan_quotas" ("plan_id");
+
+CREATE INDEX IF NOT EXISTS "ix_plan_quotas_metric_concept_id" ON "payments"."plan_quotas" ("metric_concept_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_plan_quotas_plan_metric" ON "payments"."plan_quotas" ("plan_id", "metric_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_plan_eligibility_rules_plan_id" ON "payments"."plan_eligibility_rules" ("plan_id");
+
+CREATE INDEX IF NOT EXISTS "ix_plan_eligibility_rules_practice_type" ON "payments"."plan_eligibility_rules" ("eligible_practice_type_concept_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_plan_eligibility_rules_plan_type" ON "payments"."plan_eligibility_rules" ("plan_id", "eligible_practice_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_subscription_usage_counters_subscription_id" ON "payments"."subscription_usage_counters" ("subscription_id");
+
+CREATE INDEX IF NOT EXISTS "ix_subscription_usage_counters_metric_concept_id" ON "payments"."subscription_usage_counters" ("metric_concept_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_subscription_usage_counters_period" ON "payments"."subscription_usage_counters" ("subscription_id", "metric_concept_id", "period_start");

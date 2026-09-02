@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 04 · schema directory
+-- SALUD v4.0.10 · módulo 04 · schema directory
 -- Generado de diagram_04_directory.puml — NO editar a mano.
 
 
@@ -75,3 +75,33 @@ CREATE INDEX IF NOT EXISTS "ix_branch_memberships_status_concept_id" ON "directo
 CREATE INDEX IF NOT EXISTS "ix_branch_memberships_created_by_user_id" ON "directory"."branch_memberships" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_branch_memberships_updated_by_user_id" ON "directory"."branch_memberships" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_affiliation_documents_tenant_id" ON "directory"."tenant_affiliation_documents" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_affiliation_documents_document_type_concept_id" ON "directory"."tenant_affiliation_documents" ("document_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_affiliation_documents_issuing_authority_concept_id" ON "directory"."tenant_affiliation_documents" ("issuing_authority_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_affiliation_documents_verification_status_concept_id" ON "directory"."tenant_affiliation_documents" ("verification_status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_affiliation_documents_file_id" ON "directory"."tenant_affiliation_documents" ("file_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_affiliation_documents_identifier_id" ON "directory"."tenant_affiliation_documents" ("identifier_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_affiliation_documents_valid_to" ON "directory"."tenant_affiliation_documents" ("valid_to");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_tenant_affiliation_documents_tenant_type_file" ON "directory"."tenant_affiliation_documents" ("tenant_id", "document_type_concept_id", "file_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_legal_representatives_tenant_id" ON "directory"."tenant_legal_representatives" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_legal_representatives_person_id" ON "directory"."tenant_legal_representatives" ("person_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_legal_representatives_role_concept_id" ON "directory"."tenant_legal_representatives" ("representative_role_concept_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_tenant_legal_representatives_primary" ON "directory"."tenant_legal_representatives" ("tenant_id", "is_primary");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_tenant_web_configs_domain" ON "directory"."tenant_web_configs" ("domain");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_web_configs_tenant_id" ON "directory"."tenant_web_configs" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_tenant_web_configs_primary_language_concept_id" ON "directory"."tenant_web_configs" ("primary_language_concept_id");

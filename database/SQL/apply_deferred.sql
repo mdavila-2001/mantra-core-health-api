@@ -4,6 +4,8 @@
 \set ON_ERROR_STOP on
 \timing on
 
+\echo >>> 00_platform/90_fk_deferred.sql
+\ir 00_platform/90_fk_deferred.sql
 \echo >>> 01_iam/90_fk_deferred.sql
 \ir 01_iam/90_fk_deferred.sql
 \echo >>> 02_common/90_fk_deferred.sql
@@ -114,4 +116,8 @@
 \ir 62_cross_store_consistency/90_fk_deferred.sql
 \echo >>> 63_lakehouse/90_fk_deferred.sql
 \ir 63_lakehouse/90_fk_deferred.sql
+\echo >>> 64_audio_assets/90_fk_deferred.sql
+\ir 64_audio_assets/90_fk_deferred.sql
+\echo >>> 65_surveys/90_fk_deferred.sql
+\ir 65_surveys/90_fk_deferred.sql
 \echo === apply_deferred completado ===

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 46 · schema platform_ops
+-- SALUD v4.0.10 · módulo 46 · schema platform_ops
 -- Generado de diagram_46_platform_ops.puml — NO editar a mano.
 
 
@@ -9,9 +9,21 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "platform_ops"."component_tools"
+        ADD CONSTRAINT "fk_component_tools_tool_id" FOREIGN KEY ("tool_id")
+        REFERENCES "platform_ops"."tool_registry" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "platform_ops"."artifacts"
         ADD CONSTRAINT "fk_artifacts_service_component_id" FOREIGN KEY ("service_component_id")
         REFERENCES "platform_ops"."service_components" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "platform_ops"."artifacts"
+        ADD CONSTRAINT "fk_artifacts_produced_by_tool_id" FOREIGN KEY ("produced_by_tool_id")
+        REFERENCES "platform_ops"."tool_registry" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -66,6 +78,12 @@ DO $$ BEGIN
     ALTER TABLE "platform_ops"."health_incidents"
         ADD CONSTRAINT "fk_health_incidents_health_check_id" FOREIGN KEY ("health_check_id")
         REFERENCES "platform_ops"."health_checks" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "platform_ops"."health_incidents"
+        ADD CONSTRAINT "fk_health_incidents_detected_by_run_id" FOREIGN KEY ("detected_by_run_id")
+        REFERENCES "platform_ops"."health_check_runs" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -186,6 +204,18 @@ DO $$ BEGIN
     ALTER TABLE "platform_ops"."runbooks"
         ADD CONSTRAINT "fk_runbooks_service_component_id" FOREIGN KEY ("service_component_id")
         REFERENCES "platform_ops"."service_components" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "platform_ops"."runbooks"
+        ADD CONSTRAINT "fk_runbooks_current_version_id" FOREIGN KEY ("current_version_id")
+        REFERENCES "platform_ops"."runbook_versions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "platform_ops"."runbooks"
+        ADD CONSTRAINT "fk_runbooks_owner_team_id" FOREIGN KEY ("owner_team_id")
+        REFERENCES "platform_ops"."operational_teams" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

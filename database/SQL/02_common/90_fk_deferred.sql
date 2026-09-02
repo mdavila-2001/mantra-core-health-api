@@ -1,9 +1,5 @@
--- SALUD v4.0.1 · módulo 02 · schema common
+-- SALUD v4.0.10 · módulo 02 · schema common
 -- Generado de diagram_02_common.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   files.current_version_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -31,6 +27,13 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "common"."identifiers"
         ADD CONSTRAINT "fk_identifiers_issuer_country_concept_id" FOREIGN KEY ("issuer_country_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "common"."identifiers"
+        ADD CONSTRAINT "fk_identifiers_issuer_administrative_area_concept_id" FOREIGN KEY ("issuer_administrative_area_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -122,6 +125,13 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "common"."addresses"
         ADD CONSTRAINT "fk_addresses_administrative_area_concept_id" FOREIGN KEY ("administrative_area_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "common"."addresses"
+        ADD CONSTRAINT "fk_addresses_municipality_concept_id" FOREIGN KEY ("municipality_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

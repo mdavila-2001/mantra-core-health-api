@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 23 · schema diagnostic_units
+-- SALUD v4.0.10 · módulo 23 · schema diagnostic_units
 -- Generado de diagram_23_diagnostic_units.puml — NO editar a mano.
 
 
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_units" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_units" PRIMARY KEY ("id")
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_unit_sites" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_unit_sites" PRIMARY KEY ("id")
 );
 
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_unit_specialties" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_unit_specialties" PRIMARY KEY ("id")
 );
 
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_unit_practitioner_assi
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_unit_practitioner_assignments" PRIMARY KEY ("id")
 );
 
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_study_offerings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_study_offerings" PRIMARY KEY ("id")
 );
 
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_price_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_price_schedules" PRIMARY KEY ("id")
 );
 
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_equipment" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_equipment" PRIMARY KEY ("id")
 );
 
@@ -190,6 +190,6 @@ CREATE TABLE IF NOT EXISTS "diagnostic_units"."diagnostic_unit_accreditations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_unit_accreditations" PRIMARY KEY ("id")
 );

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 38 · schema erp
+-- SALUD v4.0.10 · módulo 38 · schema erp
 -- Generado de diagram_38_erp.puml — NO editar a mano.
 
 
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS "erp"."employees" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_employees" PRIMARY KEY ("id")
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "erp"."departments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_departments" PRIMARY KEY ("id")
 );
 
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "erp"."positions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_positions" PRIMARY KEY ("id")
 );
 
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS "erp"."employment_records" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_employment_records" PRIMARY KEY ("id")
 );
 
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS "erp"."employee_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_employee_assignments" PRIMARY KEY ("id")
 );
 
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS "erp"."time_off_requests" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_time_off_requests" PRIMARY KEY ("id")
 );
 
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS "erp"."performance_reviews" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_performance_reviews" PRIMARY KEY ("id")
 );
 
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contracts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contracts" PRIMARY KEY ("id")
 );
 
@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_parties" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_parties" PRIMARY KEY ("id")
 );
 
@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_line_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_line_items" PRIMARY KEY ("id")
 );
 
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_milestones" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_milestones" PRIMARY KEY ("id")
 );
 
@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_documents" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_documents" PRIMARY KEY ("id")
 );
 
@@ -258,7 +258,7 @@ CREATE TABLE IF NOT EXISTS "erp"."business_partners" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_business_partners" PRIMARY KEY ("id")
 );
 
@@ -274,7 +274,7 @@ CREATE TABLE IF NOT EXISTS "erp"."business_partner_roles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_business_partner_roles" PRIMARY KEY ("id")
 );
 
@@ -290,7 +290,7 @@ CREATE TABLE IF NOT EXISTS "erp"."business_partner_relationships" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_business_partner_relationships" PRIMARY KEY ("id")
 );
 
@@ -307,7 +307,7 @@ CREATE TABLE IF NOT EXISTS "erp"."business_partner_tax_registrations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_business_partner_tax_registrations" PRIMARY KEY ("id")
 );
 
@@ -315,6 +315,8 @@ CREATE TABLE IF NOT EXISTS "erp"."business_partner_bank_accounts" (
     "id" uuid NOT NULL,
     "business_partner_id" uuid NOT NULL,
     "bank_name" varchar NOT NULL,
+    "account_holder_name" varchar,
+    "account_holder_tax_id" varchar,
     "bank_identifier_code" varchar,
     "iban_masked" varchar,
     "account_number_hash" varchar,
@@ -326,7 +328,7 @@ CREATE TABLE IF NOT EXISTS "erp"."business_partner_bank_accounts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_business_partner_bank_accounts" PRIMARY KEY ("id")
 );
 
@@ -349,7 +351,7 @@ CREATE TABLE IF NOT EXISTS "erp"."projects" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_projects" PRIMARY KEY ("id")
 );
 
@@ -370,7 +372,7 @@ CREATE TABLE IF NOT EXISTS "erp"."wbs_elements" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_wbs_elements" PRIMARY KEY ("id")
 );
 
@@ -389,7 +391,7 @@ CREATE TABLE IF NOT EXISTS "erp"."purchase_requisitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_purchase_requisitions" PRIMARY KEY ("id")
 );
 
@@ -415,7 +417,7 @@ CREATE TABLE IF NOT EXISTS "erp"."purchase_requisition_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_purchase_requisition_items" PRIMARY KEY ("id")
 );
 
@@ -439,7 +441,7 @@ CREATE TABLE IF NOT EXISTS "erp"."purchase_orders" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_purchase_orders" PRIMARY KEY ("id")
 );
 
@@ -470,7 +472,7 @@ CREATE TABLE IF NOT EXISTS "erp"."purchase_order_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_purchase_order_items" PRIMARY KEY ("id")
 );
 
@@ -488,7 +490,7 @@ CREATE TABLE IF NOT EXISTS "erp"."goods_receipts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_goods_receipts" PRIMARY KEY ("id")
 );
 
@@ -507,7 +509,7 @@ CREATE TABLE IF NOT EXISTS "erp"."goods_receipt_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_goods_receipt_items" PRIMARY KEY ("id")
 );
 
@@ -526,7 +528,7 @@ CREATE TABLE IF NOT EXISTS "erp"."service_entry_sheets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_entry_sheets" PRIMARY KEY ("id")
 );
 
@@ -546,7 +548,7 @@ CREATE TABLE IF NOT EXISTS "erp"."service_entry_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_entry_items" PRIMARY KEY ("id")
 );
 
@@ -605,7 +607,7 @@ CREATE TABLE IF NOT EXISTS "erp"."sales_orders" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_sales_orders" PRIMARY KEY ("id")
 );
 
@@ -630,7 +632,7 @@ CREATE TABLE IF NOT EXISTS "erp"."sales_order_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_sales_order_items" PRIMARY KEY ("id")
 );
 
@@ -684,7 +686,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_amendments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_amendments" PRIMARY KEY ("id")
 );
 
@@ -702,7 +704,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_clauses" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_clauses" PRIMARY KEY ("id")
 );
 
@@ -721,7 +723,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_clause_instances" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_clause_instances" PRIMARY KEY ("id")
 );
 
@@ -745,7 +747,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_obligations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_obligations" PRIMARY KEY ("id")
 );
 
@@ -779,7 +781,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_renewals" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_renewals" PRIMARY KEY ("id")
 );
 
@@ -800,7 +802,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_terminations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_terminations" PRIMARY KEY ("id")
 );
 
@@ -871,7 +873,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_object_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_object_assignments" PRIMARY KEY ("id")
 );
 
@@ -895,7 +897,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_accounting_terms" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_accounting_terms" PRIMARY KEY ("id")
 );
 
@@ -917,7 +919,7 @@ CREATE TABLE IF NOT EXISTS "erp"."contract_payment_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_payment_schedules" PRIMARY KEY ("id")
 );
 
@@ -937,7 +939,7 @@ CREATE TABLE IF NOT EXISTS "erp"."lease_contracts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_lease_contracts" PRIMARY KEY ("id")
 );
 
@@ -955,7 +957,7 @@ CREATE TABLE IF NOT EXISTS "erp"."lease_objects" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_lease_objects" PRIMARY KEY ("id")
 );
 
@@ -974,7 +976,7 @@ CREATE TABLE IF NOT EXISTS "erp"."lease_cash_flows" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_lease_cash_flows" PRIMARY KEY ("id")
 );
 
@@ -1011,6 +1013,6 @@ CREATE TABLE IF NOT EXISTS "erp"."lease_accounting_links" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_lease_accounting_links" PRIMARY KEY ("id")
 );

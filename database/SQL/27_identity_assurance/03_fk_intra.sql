@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 27 · schema identity_assurance
+-- SALUD v4.0.10 · módulo 27 · schema identity_assurance
 -- Generado de diagram_27_identity_assurance.puml — NO editar a mano.
 
 
@@ -21,6 +21,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "identity_assurance"."identity_evidence_records"
+        ADD CONSTRAINT "fk_identity_evidence_records_issuer_authority_id" FOREIGN KEY ("issuer_authority_id")
+        REFERENCES "identity_assurance"."identity_authorities" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "identity_assurance"."identity_verification_attempts"
         ADD CONSTRAINT "fk_identity_verification_attempts_identity_verification_case_id" FOREIGN KEY ("identity_verification_case_id")
         REFERENCES "identity_assurance"."identity_verification_cases" ("id");
@@ -28,7 +34,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "identity_assurance"."identity_verification_attempts"
-        ADD CONSTRAINT "fk_identity_verification_attempts_identity_authority_endpoint_id" FOREIGN KEY ("identity_authority_endpoint_id")
+        ADD CONSTRAINT "fk_identity_verification_attempts_identity_authority_e_91da2d59" FOREIGN KEY ("identity_authority_endpoint_id")
         REFERENCES "identity_assurance"."identity_authority_endpoints" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -39,9 +45,21 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "identity_assurance"."identity_checks"
+        ADD CONSTRAINT "fk_identity_checks_authority_id" FOREIGN KEY ("authority_id")
+        REFERENCES "identity_assurance"."identity_authorities" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "identity_assurance"."identity_check_results"
         ADD CONSTRAINT "fk_identity_check_results_identity_check_id" FOREIGN KEY ("identity_check_id")
         REFERENCES "identity_assurance"."identity_checks" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "identity_assurance"."identity_check_results"
+        ADD CONSTRAINT "fk_identity_check_results_supersedes_result_id" FOREIGN KEY ("supersedes_result_id")
+        REFERENCES "identity_assurance"."identity_check_results" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

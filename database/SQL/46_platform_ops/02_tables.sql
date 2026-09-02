@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 46 · schema platform_ops
+-- SALUD v4.0.10 · módulo 46 · schema platform_ops
 -- Generado de diagram_46_platform_ops.puml — NO editar a mano.
 
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."service_components" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_components" PRIMARY KEY ("id")
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."tool_registry" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tool_registry" PRIMARY KEY ("id")
 );
 
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."component_tools" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_component_tools" PRIMARY KEY ("id")
 );
 
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."artifacts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_artifacts" PRIMARY KEY ("id")
 );
 
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."deployments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_deployments" PRIMARY KEY ("id")
 );
 
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."health_checks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_checks" PRIMARY KEY ("id")
 );
 
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."health_incidents" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_incidents" PRIMARY KEY ("id")
 );
 
@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."operational_teams" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_operational_teams" PRIMARY KEY ("id")
 );
 
@@ -205,7 +205,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."service_ownerships" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_ownerships" PRIMARY KEY ("id")
 );
 
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."service_dependencies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_dependencies" PRIMARY KEY ("id")
 );
 
@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."on_call_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_on_call_schedules" PRIMARY KEY ("id")
 );
 
@@ -255,7 +255,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."on_call_shifts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_on_call_shifts" PRIMARY KEY ("id")
 );
 
@@ -270,7 +270,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."escalation_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_escalation_policies" PRIMARY KEY ("id")
 );
 
@@ -288,7 +288,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."escalation_policy_steps" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_escalation_policy_steps" PRIMARY KEY ("id")
 );
 
@@ -307,7 +307,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."operational_readiness_reviews" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_operational_readiness_reviews" PRIMARY KEY ("id")
 );
 
@@ -327,7 +327,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."readiness_review_findings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_readiness_review_findings" PRIMARY KEY ("id")
 );
 
@@ -346,7 +346,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."service_level_indicators" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_level_indicators" PRIMARY KEY ("id")
 );
 
@@ -364,7 +364,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."service_level_objectives" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_level_objectives" PRIMARY KEY ("id")
 );
 
@@ -397,7 +397,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."error_budget_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_error_budget_policies" PRIMARY KEY ("id")
 );
 
@@ -429,7 +429,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."runbooks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_runbooks" PRIMARY KEY ("id")
 );
 
@@ -485,7 +485,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."change_requests" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_change_requests" PRIMARY KEY ("id")
 );
 
@@ -515,7 +515,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."maintenance_windows" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_maintenance_windows" PRIMARY KEY ("id")
 );
 
@@ -575,7 +575,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."postmortems" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_postmortems" PRIMARY KEY ("id")
 );
 
@@ -594,7 +594,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."postmortem_action_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_postmortem_action_items" PRIMARY KEY ("id")
 );
 
@@ -613,7 +613,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."recovery_objectives" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_recovery_objectives" PRIMARY KEY ("id")
 );
 
@@ -636,7 +636,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."resilience_exercises" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_resilience_exercises" PRIMARY KEY ("id")
 );
 
@@ -654,7 +654,7 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."capacity_plans" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_capacity_plans" PRIMARY KEY ("id")
 );
 
@@ -690,6 +690,6 @@ CREATE TABLE IF NOT EXISTS "platform_ops"."operational_improvement_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_operational_improvement_items" PRIMARY KEY ("id")
 );

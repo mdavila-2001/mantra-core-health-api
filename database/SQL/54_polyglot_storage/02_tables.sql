@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 54 · schema polyglot_storage
+-- SALUD v4.0.10 · módulo 54 · schema polyglot_storage
 -- Generado de diagram_54_polyglot_storage.puml — NO editar a mano.
 
 
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "polyglot_storage"."storage_backends" (
     "state" varchar NOT NULL,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_storage_backends" PRIMARY KEY ("id")
 );
 
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS "polyglot_storage"."dataset_definitions" (
     "lifecycle_state" varchar NOT NULL,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dataset_definitions" PRIMARY KEY ("id")
 );
 

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 50 · schema marketing
+-- SALUD v4.0.10 · módulo 50 · schema marketing
 -- Generado de diagram_50_marketing.puml — NO editar a mano.
 
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."segments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_segments" PRIMARY KEY ("id")
 );
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."segment_members" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_segment_members" PRIMARY KEY ("id")
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."marketing_campaigns" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "governance_scope_concept_id" uuid,
     "requires_explicit_publish" boolean,
     "published_version" integer,
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."campaign_members" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "source_segment_member_id" uuid,
     "first_dispatch_id" uuid,
     "last_dispatch_id" uuid,
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."content_templates" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_content_templates" PRIMARY KEY ("id")
 );
 
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."journeys" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_journeys" PRIMARY KEY ("id")
 );
 
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."journey_steps" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_journey_steps" PRIMARY KEY ("id")
 );
 
@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."journey_enrollments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_journey_enrollments" PRIMARY KEY ("id")
 );
 
@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."tracked_links" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tracked_links" PRIMARY KEY ("id")
 );
 
@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."attribution_touches" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_attribution_touches" PRIMARY KEY ("id")
 );
 
@@ -265,7 +265,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."campaign_dispatches" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid NOT NULL,
     "updated_by_user_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_campaign_dispatches" PRIMARY KEY ("id")
 );
 
@@ -295,7 +295,7 @@ CREATE TABLE IF NOT EXISTS "marketing"."campaign_dispatch_recipients" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid NOT NULL,
     "updated_by_user_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_campaign_dispatch_recipients" PRIMARY KEY ("id")
 );
 
@@ -330,6 +330,6 @@ CREATE TABLE IF NOT EXISTS "marketing"."campaign_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid NOT NULL,
     "updated_by_user_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_campaign_schedules" PRIMARY KEY ("id")
 );

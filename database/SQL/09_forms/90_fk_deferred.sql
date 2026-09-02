@@ -1,31 +1,9 @@
--- SALUD v4.0.1 · módulo 09 · schema forms
+-- SALUD v4.0.10 · módulo 09 · schema forms
 -- Generado de diagram_09_forms.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
---   dynamic_field_sections.parent_section_id
---   field_assignments.field_id
---   field_assignments.section_id
---   field_validation_rules.field_id
---   field_dependencies.target_field_id
---   field_dependencies.source_field_id
---   form_instances.tenant_context_id
---   field_values.field_id
---   field_values.assignment_id
---   field_values.supersedes_value_id
---   field_definition_set_versions.definition_set_id
---   field_set_members.definition_set_version_id
---   field_set_members.field_id
---   field_set_members.section_id
---   field_definition_localizations.field_id
 --   field_value_provenance.import_batch_id
---   field_value_provenance.author_profile_id
---   field_value_access_rules.field_id
---   field_value_access_rules.assignment_id
---   field_schema_migrations.definition_set_id
---   field_schema_migrations.from_version_id
---   field_schema_migrations.to_version_id
---   extension_target_policies.definition_set_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -238,6 +216,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: system_context.system_contexts (requiere schema system_context)
+DO $$ BEGIN
+    ALTER TABLE "forms"."form_instances"
+        ADD CONSTRAINT "fk_form_instances_tenant_context_id" FOREIGN KEY ("tenant_context_id")
+        REFERENCES "system_context"."system_contexts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "forms"."form_instances"
@@ -425,6 +410,13 @@ DO $$ BEGIN
     ALTER TABLE "forms"."field_definition_localizations"
         ADD CONSTRAINT "fk_field_definition_localizations_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "forms"."field_value_provenance"
+        ADD CONSTRAINT "fk_field_value_provenance_author_profile_id" FOREIGN KEY ("author_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 13 · schema geo
+-- SALUD v4.0.10 · módulo 13 · schema geo
 -- Generado de diagram_13_geo.puml — NO editar a mano.
 
 
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "geo"."tracked_subjects" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tracked_subjects" PRIMARY KEY ("id")
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS "geo"."tracking_sessions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tracking_sessions" PRIMARY KEY ("id")
 );
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS "geo"."geofences" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_geofences" PRIMARY KEY ("id")
 );
 
@@ -96,6 +96,6 @@ CREATE TABLE IF NOT EXISTS "geo"."trips" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_trips" PRIMARY KEY ("id")
 );

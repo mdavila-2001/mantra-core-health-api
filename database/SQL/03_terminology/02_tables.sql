@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 03 · schema terminology
+-- SALUD v4.0.10 · módulo 03 · schema terminology
 -- Generado de diagram_03_terminology.puml — NO editar a mano.
 
 
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."terminology_sources" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_terminology_sources" PRIMARY KEY ("id")
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."code_systems" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_code_systems" PRIMARY KEY ("id")
 );
 
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."code_system_versions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_code_system_versions" PRIMARY KEY ("id")
 );
 
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."catalog_concepts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_catalog_concepts" PRIMARY KEY ("id")
 );
 
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."concept_designations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_concept_designations" PRIMARY KEY ("id")
 );
 
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."concept_properties" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_concept_properties" PRIMARY KEY ("id")
 );
 
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."concept_relationships" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_concept_relationships" PRIMARY KEY ("id")
 );
 
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."value_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_value_sets" PRIMARY KEY ("id")
 );
 
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."value_set_versions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_value_set_versions" PRIMARY KEY ("id")
 );
 
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."value_set_members" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_value_set_members" PRIMARY KEY ("id")
 );
 
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."value_set_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_value_set_rules" PRIMARY KEY ("id")
 );
 
@@ -194,7 +194,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."concept_maps" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_concept_maps" PRIMARY KEY ("id")
 );
 
@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS "terminology"."tenant_catalog_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tenant_catalog_policies" PRIMARY KEY ("id")
 );
 
@@ -245,6 +245,6 @@ CREATE TABLE IF NOT EXISTS "terminology"."tenant_concept_config" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tenant_concept_config" PRIMARY KEY ("id")
 );

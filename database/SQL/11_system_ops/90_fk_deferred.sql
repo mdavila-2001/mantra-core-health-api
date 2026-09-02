@@ -1,12 +1,8 @@
--- SALUD v4.0.1 · módulo 11 · schema system_ops
+-- SALUD v4.0.10 · módulo 11 · schema system_ops
 -- Generado de diagram_11_system_ops.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
---   entity_registry.domain_id
---   entity_registry.classification_id
---   field_registry.classification_id
---   operational_framework_controls.parent_control_id
 --   assessment_control_results.accepted_risk_id
 
 
@@ -307,14 +303,14 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.value_sets (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "system_ops"."data_residency_policies"
-        ADD CONSTRAINT "fk_data_residency_policies_allowed_processing_region_value_set_id" FOREIGN KEY ("allowed_processing_region_value_set_id")
+        ADD CONSTRAINT "fk_data_residency_policies_allowed_processing_region_v_a1fd58dd" FOREIGN KEY ("allowed_processing_region_value_set_id")
         REFERENCES "terminology"."value_sets" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "system_ops"."data_residency_policies"
-        ADD CONSTRAINT "fk_data_residency_policies_cross_border_transfer_basis_concept_id" FOREIGN KEY ("cross_border_transfer_basis_concept_id")
+        ADD CONSTRAINT "fk_data_residency_policies_cross_border_transfer_basis_0c78b8b0" FOREIGN KEY ("cross_border_transfer_basis_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -363,7 +359,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "system_ops"."tenant_residency_bindings"
-        ADD CONSTRAINT "fk_tenant_residency_bindings_disaster_recovery_region_concept_id" FOREIGN KEY ("disaster_recovery_region_concept_id")
+        ADD CONSTRAINT "fk_tenant_residency_bindings_disaster_recovery_region__6263dcd1" FOREIGN KEY ("disaster_recovery_region_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -791,5 +787,208 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "system_ops"."remediation_actions"
         ADD CONSTRAINT "fk_remediation_actions_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."partition_specs"
+        ADD CONSTRAINT "fk_partition_specs_partition_strategy_concept_id" FOREIGN KEY ("partition_strategy_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."partition_specs"
+        ADD CONSTRAINT "fk_partition_specs_partition_interval_concept_id" FOREIGN KEY ("partition_interval_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."partition_specs"
+        ADD CONSTRAINT "fk_partition_specs_archive_target_concept_id" FOREIGN KEY ("archive_target_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."partition_specs"
+        ADD CONSTRAINT "fk_partition_specs_state_concept_id" FOREIGN KEY ("state_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."partition_specs"
+        ADD CONSTRAINT "fk_partition_specs_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."partition_specs"
+        ADD CONSTRAINT "fk_partition_specs_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."encryption_keys"
+        ADD CONSTRAINT "fk_encryption_keys_key_purpose_concept_id" FOREIGN KEY ("key_purpose_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."encryption_keys"
+        ADD CONSTRAINT "fk_encryption_keys_algorithm_concept_id" FOREIGN KEY ("algorithm_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."encryption_keys"
+        ADD CONSTRAINT "fk_encryption_keys_provider_concept_id" FOREIGN KEY ("provider_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."encryption_keys"
+        ADD CONSTRAINT "fk_encryption_keys_state_concept_id" FOREIGN KEY ("state_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."encryption_keys"
+        ADD CONSTRAINT "fk_encryption_keys_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."encryption_keys"
+        ADD CONSTRAINT "fk_encryption_keys_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."key_rotation_events"
+        ADD CONSTRAINT "fk_key_rotation_events_event_type_concept_id" FOREIGN KEY ("event_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."key_rotation_events"
+        ADD CONSTRAINT "fk_key_rotation_events_performed_by_user_id" FOREIGN KEY ("performed_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."security_incidents"
+        ADD CONSTRAINT "fk_security_incidents_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."security_incidents"
+        ADD CONSTRAINT "fk_security_incidents_severity_concept_id" FOREIGN KEY ("severity_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."security_incidents"
+        ADD CONSTRAINT "fk_security_incidents_category_concept_id" FOREIGN KEY ("category_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."security_incidents"
+        ADD CONSTRAINT "fk_security_incidents_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."security_incidents"
+        ADD CONSTRAINT "fk_security_incidents_vector_concept_id" FOREIGN KEY ("vector_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."security_incidents"
+        ADD CONSTRAINT "fk_security_incidents_assigned_to_user_id" FOREIGN KEY ("assigned_to_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."security_incidents"
+        ADD CONSTRAINT "fk_security_incidents_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."security_incidents"
+        ADD CONSTRAINT "fk_security_incidents_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."breach_notifications"
+        ADD CONSTRAINT "fk_breach_notifications_authority_concept_id" FOREIGN KEY ("authority_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."breach_notifications"
+        ADD CONSTRAINT "fk_breach_notifications_jurisdiction_concept_id" FOREIGN KEY ("jurisdiction_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."breach_notifications"
+        ADD CONSTRAINT "fk_breach_notifications_regulation_concept_id" FOREIGN KEY ("regulation_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."breach_notifications"
+        ADD CONSTRAINT "fk_breach_notifications_notification_channel_concept_id" FOREIGN KEY ("notification_channel_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."breach_notifications"
+        ADD CONSTRAINT "fk_breach_notifications_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."breach_notifications"
+        ADD CONSTRAINT "fk_breach_notifications_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "system_ops"."breach_notifications"
+        ADD CONSTRAINT "fk_breach_notifications_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

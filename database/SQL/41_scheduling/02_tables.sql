@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 41 · schema scheduling
+-- SALUD v4.0.10 · módulo 41 · schema scheduling
 -- Generado de diagram_41_scheduling.puml — NO editar a mano.
 
 
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."practitioner_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practitioner_schedules" PRIMARY KEY ("id")
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."availability_slots" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_availability_slots" PRIMARY KEY ("id")
 );
 
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedulable_resources" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_schedulable_resources" PRIMARY KEY ("id")
 );
 
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedule_templates" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_schedule_templates" PRIMARY KEY ("id")
 );
 
@@ -85,13 +85,14 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedule_rules" (
     "end_time" time NOT NULL,
     "slot_minutes" integer,
     "capacity_per_slot" integer,
+    "gap_minutes" integer,
     "valid_from" date,
     "valid_to" date,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_schedule_rules" PRIMARY KEY ("id")
 );
 
@@ -107,7 +108,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."availability_exceptions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_availability_exceptions" PRIMARY KEY ("id")
 );
 
@@ -125,7 +126,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."bookable_slots" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_bookable_slots" PRIMARY KEY ("id")
 );
 
@@ -142,7 +143,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."slot_holds" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_slot_holds" PRIMARY KEY ("id")
 );
 
@@ -165,7 +166,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."booking_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_booking_policies" PRIMARY KEY ("id")
 );
 
@@ -188,8 +189,29 @@ CREATE TABLE IF NOT EXISTS "scheduling"."appointment_bookings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
+    "cancellation_policy_snapshot" jsonb,
     CONSTRAINT "pk_appointment_bookings" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "scheduling"."booking_confirmation_rules" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "scope_type_concept_id" uuid NOT NULL,
+    "scope_id" uuid,
+    "priority" integer NOT NULL,
+    "effective_from" timestamptz NOT NULL,
+    "effective_to" timestamptz,
+    "condition_json" jsonb NOT NULL,
+    "decision_concept_id" uuid NOT NULL,
+    "enabled" boolean NOT NULL,
+    "version" integer NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_booking_confirmation_rules" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "scheduling"."booking_reschedules" (
@@ -220,7 +242,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."booking_cancellations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_booking_cancellations" PRIMARY KEY ("id")
 );
 
@@ -239,7 +261,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."waitlist_entries" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_waitlist_entries" PRIMARY KEY ("id")
 );
 
@@ -256,6 +278,34 @@ CREATE TABLE IF NOT EXISTS "scheduling"."appointment_reminders" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_appointment_reminders" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "scheduling"."calendar_absences" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "practice_id" uuid,
+    "subject_type_concept_id" uuid NOT NULL,
+    "subject_ref_id" uuid NOT NULL,
+    "person_id" uuid,
+    "user_id" uuid,
+    "resource_id" uuid,
+    "absence_type_concept_id" uuid NOT NULL,
+    "start_at" timestamptz NOT NULL,
+    "end_at" timestamptz NOT NULL,
+    "all_day" boolean,
+    "reason" varchar,
+    "approval_status_concept_id" uuid NOT NULL,
+    "approved_by_user_id" uuid,
+    "approved_at" timestamptz,
+    "time_off_request_id" uuid,
+    "blocks_scheduling" boolean,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_calendar_absences" PRIMARY KEY ("id")
 );

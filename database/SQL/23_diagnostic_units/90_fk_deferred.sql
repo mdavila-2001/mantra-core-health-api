@@ -1,11 +1,5 @@
--- SALUD v4.0.1 · módulo 23 · schema diagnostic_units
+-- SALUD v4.0.10 · módulo 23 · schema diagnostic_units
 -- Generado de diagram_23_diagnostic_units.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   diagnostic_study_components.parent_offering_id
---   diagnostic_study_components.component_offering_id
---   diagnostic_study_prices.price_schedule_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -13,7 +7,7 @@ DO $$ BEGIN
     ALTER TABLE "diagnostic_units"."diagnostic_units"
         ADD CONSTRAINT "fk_diagnostic_units_tenant_id" FOREIGN KEY ("tenant_id")
         REFERENCES "directory"."tenants" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: practice.practices (requiere schema practice)
 DO $$ BEGIN
@@ -144,21 +138,21 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: practice.practitioner_role_assignments (requiere schema practice)
 DO $$ BEGIN
     ALTER TABLE "diagnostic_units"."diagnostic_unit_practitioner_assignments"
-        ADD CONSTRAINT "fk_diagnostic_unit_practitioner_assignments_practitioner_role_assignment_id" FOREIGN KEY ("practitioner_role_assignment_id")
+        ADD CONSTRAINT "fk_diagnostic_unit_practitioner_assignments_practition_d05600aa" FOREIGN KEY ("practitioner_role_assignment_id")
         REFERENCES "practice"."practitioner_role_assignments" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostic_units"."diagnostic_unit_practitioner_assignments"
-        ADD CONSTRAINT "fk_diagnostic_unit_practitioner_assignments_specialty_concept_id" FOREIGN KEY ("specialty_concept_id")
+        ADD CONSTRAINT "fk_diagnostic_unit_practitioner_assignments_specialty__f8946881" FOREIGN KEY ("specialty_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostic_units"."diagnostic_unit_practitioner_assignments"
-        ADD CONSTRAINT "fk_diagnostic_unit_practitioner_assignments_assignment_role_concept_id" FOREIGN KEY ("assignment_role_concept_id")
+        ADD CONSTRAINT "fk_diagnostic_unit_practitioner_assignments_assignment_e7e914be" FOREIGN KEY ("assignment_role_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -368,7 +362,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostic_units"."diagnostic_unit_accreditations"
-        ADD CONSTRAINT "fk_diagnostic_unit_accreditations_verification_status_concept_id" FOREIGN KEY ("verification_status_concept_id")
+        ADD CONSTRAINT "fk_diagnostic_unit_accreditations_verification_status__ca2f963c" FOREIGN KEY ("verification_status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

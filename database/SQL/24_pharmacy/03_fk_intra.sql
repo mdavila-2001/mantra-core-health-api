@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 24 · schema pharmacy
+-- SALUD v4.0.10 · módulo 24 · schema pharmacy
 -- Generado de diagram_24_pharmacy.puml — NO editar a mano.
 
 
@@ -69,8 +69,14 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_integration_connections"
+        ADD CONSTRAINT "fk_pharmacy_integration_connections_connection_id" FOREIGN KEY ("connection_id")
+        REFERENCES "pharmacy"."pharmacy_integration_connections" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_external_product_mappings"
-        ADD CONSTRAINT "fk_pharmacy_external_product_mappings_pharmacy_integration_connection_id" FOREIGN KEY ("pharmacy_integration_connection_id")
+        ADD CONSTRAINT "fk_pharmacy_external_product_mappings_pharmacy_integra_79e91ab7" FOREIGN KEY ("pharmacy_integration_connection_id")
         REFERENCES "pharmacy"."pharmacy_integration_connections" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

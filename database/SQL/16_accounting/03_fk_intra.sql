@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 16 · schema accounting
+-- SALUD v4.0.10 · módulo 16 · schema accounting
 -- Generado de diagram_16_accounting.puml — NO editar a mano.
 
 
@@ -40,6 +40,12 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "accounting"."ledger_entries"
+        ADD CONSTRAINT "fk_ledger_entries_transaction_id" FOREIGN KEY ("transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "accounting"."ledger_entries"
         ADD CONSTRAINT "fk_ledger_entries_account_id" FOREIGN KEY ("account_id")
         REFERENCES "accounting"."accounts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -48,6 +54,24 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."ledger_entries"
         ADD CONSTRAINT "fk_ledger_entries_cost_center_id" FOREIGN KEY ("cost_center_id")
         REFERENCES "accounting"."cost_centers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "accounting"."transaction_files"
+        ADD CONSTRAINT "fk_transaction_files_transaction_id" FOREIGN KEY ("transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "accounting"."sales"
+        ADD CONSTRAINT "fk_sales_transaction_id" FOREIGN KEY ("transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "accounting"."purchases"
+        ADD CONSTRAINT "fk_purchases_transaction_id" FOREIGN KEY ("transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -69,6 +93,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "accounting"."asset_depreciations"
+        ADD CONSTRAINT "fk_asset_depreciations_transaction_id" FOREIGN KEY ("transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "accounting"."liabilities"
         ADD CONSTRAINT "fk_liabilities_account_id" FOREIGN KEY ("account_id")
         REFERENCES "accounting"."accounts" ("id");
@@ -81,6 +111,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "accounting"."liability_payments"
+        ADD CONSTRAINT "fk_liability_payments_transaction_id" FOREIGN KEY ("transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "accounting"."infrastructure_items"
         ADD CONSTRAINT "fk_infrastructure_items_asset_id" FOREIGN KEY ("asset_id")
         REFERENCES "accounting"."assets" ("id");
@@ -90,6 +126,12 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."employee_payments"
         ADD CONSTRAINT "fk_employee_payments_fiscal_period_id" FOREIGN KEY ("fiscal_period_id")
         REFERENCES "accounting"."fiscal_periods" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "accounting"."employee_payments"
+        ADD CONSTRAINT "fk_employee_payments_transaction_id" FOREIGN KEY ("transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -225,6 +267,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "accounting"."journal_entry_assignments"
+        ADD CONSTRAINT "fk_journal_entry_assignments_derived_by_rule_id" FOREIGN KEY ("derived_by_rule_id")
+        REFERENCES "accounting"."account_determination_rules" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "accounting"."account_determination_rules"
         ADD CONSTRAINT "fk_account_determination_rules_asset_class_id" FOREIGN KEY ("asset_class_id")
         REFERENCES "accounting"."asset_classes" ("id");
@@ -237,6 +285,30 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "accounting"."accounting_document_links"
+        ADD CONSTRAINT "fk_accounting_document_links_source_transaction_id" FOREIGN KEY ("source_transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "accounting"."accounting_document_links"
+        ADD CONSTRAINT "fk_accounting_document_links_target_transaction_id" FOREIGN KEY ("target_transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "accounting"."accounting_document_links"
+        ADD CONSTRAINT "fk_accounting_document_links_source_line_id" FOREIGN KEY ("source_line_id")
+        REFERENCES "accounting"."accrual_schedule_lines" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "accounting"."accounting_document_links"
+        ADD CONSTRAINT "fk_accounting_document_links_target_line_id" FOREIGN KEY ("target_line_id")
+        REFERENCES "accounting"."accrual_schedule_lines" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "accounting"."open_items"
         ADD CONSTRAINT "fk_open_items_subledger_account_id" FOREIGN KEY ("subledger_account_id")
         REFERENCES "accounting"."subledger_accounts" ("id");
@@ -246,6 +318,12 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."open_items"
         ADD CONSTRAINT "fk_open_items_ledger_entry_id" FOREIGN KEY ("ledger_entry_id")
         REFERENCES "accounting"."ledger_entries" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "accounting"."clearing_documents"
+        ADD CONSTRAINT "fk_clearing_documents_transaction_id" FOREIGN KEY ("transaction_id")
+        REFERENCES "accounting"."journal_transactions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

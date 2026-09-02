@@ -1,10 +1,5 @@
--- SALUD v4.0.1 · módulo 45 · schema system_context
+-- SALUD v4.0.10 · módulo 45 · schema system_context
 -- Generado de diagram_45_system_context.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   system_contexts.current_version_id
---   system_context_versions.refresh_run_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 48 · schema automation
+-- SALUD v4.0.10 · módulo 48 · schema automation
 -- Generado de diagram_48_automation.puml — NO editar a mano.
 
 
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "automation"."agents" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_agents" PRIMARY KEY ("id")
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS "automation"."agent_versions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_agent_versions" PRIMARY KEY ("id")
 );
 
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS "automation"."agent_tools" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_agent_tools" PRIMARY KEY ("id")
 );
 
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS "automation"."agent_tool_bindings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_agent_tool_bindings" PRIMARY KEY ("id")
 );
 
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS "automation"."guardrail_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_guardrail_policies" PRIMARY KEY ("id")
 );
 
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS "automation"."agent_guardrails" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_agent_guardrails" PRIMARY KEY ("id")
 );
 
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS "automation"."workflows" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_workflows" PRIMARY KEY ("id")
 );
 
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS "automation"."workflow_steps" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_workflow_steps" PRIMARY KEY ("id")
 );
 
@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS "automation"."automation_triggers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "campaign_schedule_id" uuid,
     "schedule_source_concept_id" uuid NOT NULL,
     CONSTRAINT "pk_automation_triggers" PRIMARY KEY ("id")
@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS "automation"."record_automations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_record_automations" PRIMARY KEY ("id")
 );
 
@@ -210,7 +210,7 @@ CREATE TABLE IF NOT EXISTS "automation"."workflow_runs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_workflow_runs" PRIMARY KEY ("id")
 );
 
@@ -233,7 +233,7 @@ CREATE TABLE IF NOT EXISTS "automation"."agent_runs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_agent_runs" PRIMARY KEY ("id")
 );
 
@@ -270,7 +270,7 @@ CREATE TABLE IF NOT EXISTS "automation"."automation_approvals" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_automation_approvals" PRIMARY KEY ("id")
 );
 
@@ -289,7 +289,7 @@ CREATE TABLE IF NOT EXISTS "automation"."agent_memory" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_agent_memory" PRIMARY KEY ("id")
 );
 
@@ -307,6 +307,6 @@ CREATE TABLE IF NOT EXISTS "automation"."knowledge_sources" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_knowledge_sources" PRIMARY KEY ("id")
 );

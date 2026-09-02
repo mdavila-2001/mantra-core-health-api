@@ -1,48 +1,9 @@
--- SALUD v4.0.1 · módulo 20 · schema diagnostics
+-- SALUD v4.0.10 · módulo 20 · schema diagnostics
 -- Generado de diagram_20_diagnostics.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
---   specimens.collector_profile_id
---   specimen_processing_steps.performer_profile_id
---   diagnostic_report_versions.author_profile_id
---   diagnostic_report_versions.supersedes_version_id
---   diagnostic_report_versions.source_system_id
---   diagnostic_report_versions.provenance_record_id
---   imaging_endpoints.connection_id
---   imaging_studies.referring_practitioner_profile_id
---   clinical_media.captured_by_profile_id
---   media_annotations.author_profile_id
 --   specimen_identifiers.assigning_organization_id
---   specimen_collection_events.collector_profile_id
---   specimen_collection_events.collection_site_id
---   specimen_containers.parent_container_id
---   specimen_container_events.source_location_id
---   specimen_container_events.destination_location_id
---   specimen_container_events.actor_profile_id
---   specimen_chain_of_custody_events.location_id
---   specimen_rejection_events.rejected_by_profile_id
---   laboratory_accessions.receiving_site_id
---   laboratory_accessions.laboratory_unit_id
---   laboratory_accessions.source_system_id
---   laboratory_work_orders.assigned_laboratory_unit_id
---   laboratory_work_orders.assigned_profile_id
---   analyzer_runs.reagent_lot_id
---   analyzer_runs.quality_control_run_id
---   analyzer_runs.operator_profile_id
---   result_verifications.verified_by_profile_id
---   result_verifications.previous_verification_id
---   result_verifications.signature_id
---   critical_result_notifications.detected_by_profile_id
---   critical_result_notifications.notified_profile_id
---   critical_result_notifications.acknowledged_by_profile_id
---   critical_result_notifications.communication_evidence_id
---   imaging_procedure_steps.performed_by_profile_id
---   imaging_selections.author_profile_id
---   dicom_object_locations.retention_policy_id
---   dicom_structured_reports.verified_by_profile_id
---   diagnostic_provenance_links.agent_profile_id
---   diagnostic_provenance_links.source_system_id
 
 
 -- destino: profiles.patient_profiles (requiere schema profiles)
@@ -85,6 +46,13 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."specimens"
         ADD CONSTRAINT "fk_specimens_collection_method_concept_id" FOREIGN KEY ("collection_method_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimens"
+        ADD CONSTRAINT "fk_specimens_collector_profile_id" FOREIGN KEY ("collector_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -143,6 +111,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimen_processing_steps"
+        ADD CONSTRAINT "fk_specimen_processing_steps_performer_profile_id" FOREIGN KEY ("performer_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."specimen_processing_steps"
@@ -185,6 +160,13 @@ DO $$ BEGIN
         REFERENCES "directory"."tenants" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."diagnostic_report_versions"
+        ADD CONSTRAINT "fk_diagnostic_report_versions_author_profile_id" FOREIGN KEY ("author_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."diagnostic_report_versions"
@@ -211,6 +193,20 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."diagnostic_report_versions"
         ADD CONSTRAINT "fk_diagnostic_report_versions_custodian_tenant_id" FOREIGN KEY ("custodian_tenant_id")
         REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: health_data.health_source_systems (requiere schema health_data)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."diagnostic_report_versions"
+        ADD CONSTRAINT "fk_diagnostic_report_versions_source_system_id" FOREIGN KEY ("source_system_id")
+        REFERENCES "health_data"."health_source_systems" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: health_data.health_provenance_records (requiere schema health_data)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."diagnostic_report_versions"
+        ADD CONSTRAINT "fk_diagnostic_report_versions_provenance_record_id" FOREIGN KEY ("provenance_record_id")
+        REFERENCES "health_data"."health_provenance_records" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: clinical.observations (requiere schema clinical)
@@ -267,6 +263,13 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."imaging_endpoints"
         ADD CONSTRAINT "fk_imaging_endpoints_endpoint_type_concept_id" FOREIGN KEY ("endpoint_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: integrations.provider_connections (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."imaging_endpoints"
+        ADD CONSTRAINT "fk_imaging_endpoints_connection_id" FOREIGN KEY ("connection_id")
+        REFERENCES "integrations"."provider_connections" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -351,6 +354,13 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."imaging_studies"
         ADD CONSTRAINT "fk_imaging_studies_status_concept_id" FOREIGN KEY ("status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."imaging_studies"
+        ADD CONSTRAINT "fk_imaging_studies_referring_practitioner_profile_id" FOREIGN KEY ("referring_practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: directory.tenants (requiere schema directory)
@@ -451,6 +461,13 @@ DO $$ BEGIN
         REFERENCES "common"."files" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."clinical_media"
+        ADD CONSTRAINT "fk_clinical_media_captured_by_profile_id" FOREIGN KEY ("captured_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: iam.devices (requiere schema iam)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."clinical_media"
@@ -505,6 +522,13 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."media_annotations"
         ADD CONSTRAINT "fk_media_annotations_label_concept_id" FOREIGN KEY ("label_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."media_annotations"
+        ADD CONSTRAINT "fk_media_annotations_author_profile_id" FOREIGN KEY ("author_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -598,6 +622,20 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimen_collection_events"
+        ADD CONSTRAINT "fk_specimen_collection_events_collector_profile_id" FOREIGN KEY ("collector_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practice_sites (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimen_collection_events"
+        ADD CONSTRAINT "fk_specimen_collection_events_collection_site_id" FOREIGN KEY ("collection_site_id")
+        REFERENCES "practice"."practice_sites" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."specimen_collection_events"
@@ -675,10 +713,24 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimen_container_events"
+        ADD CONSTRAINT "fk_specimen_container_events_destination_location_id" FOREIGN KEY ("destination_location_id")
+        REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimen_container_events"
+        ADD CONSTRAINT "fk_specimen_container_events_actor_profile_id" FOREIGN KEY ("actor_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."specimen_chain_of_custody_events"
-        ADD CONSTRAINT "fk_specimen_chain_of_custody_events_custody_event_type_concept_id" FOREIGN KEY ("custody_event_type_concept_id")
+        ADD CONSTRAINT "fk_specimen_chain_of_custody_events_custody_event_type_464b802a" FOREIGN KEY ("custody_event_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -708,6 +760,13 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."specimen_rejection_events"
         ADD CONSTRAINT "fk_specimen_rejection_events_rejection_reason_concept_id" FOREIGN KEY ("rejection_reason_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimen_rejection_events"
+        ADD CONSTRAINT "fk_specimen_rejection_events_rejected_by_profile_id" FOREIGN KEY ("rejected_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: clinical.service_requests (requiere schema clinical)
@@ -745,6 +804,20 @@ DO $$ BEGIN
         REFERENCES "clinical"."service_requests" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: diagnostic_units.diagnostic_unit_sites (requiere schema diagnostic_units)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."laboratory_accessions"
+        ADD CONSTRAINT "fk_laboratory_accessions_receiving_site_id" FOREIGN KEY ("receiving_site_id")
+        REFERENCES "diagnostic_units"."diagnostic_unit_sites" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: diagnostic_units.diagnostic_units (requiere schema diagnostic_units)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."laboratory_accessions"
+        ADD CONSTRAINT "fk_laboratory_accessions_laboratory_unit_id" FOREIGN KEY ("laboratory_unit_id")
+        REFERENCES "diagnostic_units"."diagnostic_units" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."laboratory_accessions"
@@ -757,6 +830,13 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."laboratory_accessions"
         ADD CONSTRAINT "fk_laboratory_accessions_status_concept_id" FOREIGN KEY ("status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: health_data.health_source_systems (requiere schema health_data)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."laboratory_accessions"
+        ADD CONSTRAINT "fk_laboratory_accessions_source_system_id" FOREIGN KEY ("source_system_id")
+        REFERENCES "health_data"."health_source_systems" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
@@ -785,6 +865,20 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."laboratory_work_orders"
         ADD CONSTRAINT "fk_laboratory_work_orders_custodian_tenant_id" FOREIGN KEY ("custodian_tenant_id")
         REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: diagnostic_units.diagnostic_units (requiere schema diagnostic_units)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."laboratory_work_orders"
+        ADD CONSTRAINT "fk_laboratory_work_orders_assigned_laboratory_unit_id" FOREIGN KEY ("assigned_laboratory_unit_id")
+        REFERENCES "diagnostic_units"."diagnostic_units" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."laboratory_work_orders"
+        ADD CONSTRAINT "fk_laboratory_work_orders_assigned_profile_id" FOREIGN KEY ("assigned_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -892,11 +986,25 @@ DO $$ BEGIN
         REFERENCES "iam"."devices" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: pharmacy_inventory.inventory_lots (requiere schema pharmacy_inventory)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."analyzer_runs"
+        ADD CONSTRAINT "fk_analyzer_runs_reagent_lot_id" FOREIGN KEY ("reagent_lot_id")
+        REFERENCES "pharmacy_inventory"."inventory_lots" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."analyzer_runs"
         ADD CONSTRAINT "fk_analyzer_runs_status_concept_id" FOREIGN KEY ("status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.provider_operator_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."analyzer_runs"
+        ADD CONSTRAINT "fk_analyzer_runs_operator_profile_id" FOREIGN KEY ("operator_profile_id")
+        REFERENCES "profiles"."provider_operator_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -955,6 +1063,20 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."result_verifications"
+        ADD CONSTRAINT "fk_result_verifications_verified_by_profile_id" FOREIGN KEY ("verified_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: chart.clinical_note_signatures (requiere schema chart)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."result_verifications"
+        ADD CONSTRAINT "fk_result_verifications_signature_id" FOREIGN KEY ("signature_id")
+        REFERENCES "chart"."clinical_note_signatures" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: directory.tenants (requiere schema directory)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."critical_result_notifications"
@@ -990,6 +1112,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."critical_result_notifications"
+        ADD CONSTRAINT "fk_critical_result_notifications_detected_by_profile_id" FOREIGN KEY ("detected_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."critical_result_notifications"
@@ -997,11 +1126,32 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."critical_result_notifications"
+        ADD CONSTRAINT "fk_critical_result_notifications_notified_profile_id" FOREIGN KEY ("notified_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."critical_result_notifications"
+        ADD CONSTRAINT "fk_critical_result_notifications_acknowledged_by_profile_id" FOREIGN KEY ("acknowledged_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: platform_ops.escalation_policies (requiere schema platform_ops)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."critical_result_notifications"
         ADD CONSTRAINT "fk_critical_result_notifications_escalation_policy_id" FOREIGN KEY ("escalation_policy_id")
         REFERENCES "platform_ops"."escalation_policies" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: messaging.notification_deliveries (requiere schema messaging)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."critical_result_notifications"
+        ADD CONSTRAINT "fk_critical_result_notifications_communication_evidence_id" FOREIGN KEY ("communication_evidence_id")
+        REFERENCES "messaging"."notification_deliveries" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
@@ -1046,6 +1196,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."imaging_procedure_steps"
+        ADD CONSTRAINT "fk_imaging_procedure_steps_performed_by_profile_id" FOREIGN KEY ("performed_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "diagnostics"."imaging_procedure_steps"
@@ -1072,6 +1229,13 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."imaging_selections"
         ADD CONSTRAINT "fk_imaging_selections_custodian_tenant_id" FOREIGN KEY ("custodian_tenant_id")
         REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."imaging_selections"
+        ADD CONSTRAINT "fk_imaging_selections_author_profile_id" FOREIGN KEY ("author_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -1107,6 +1271,13 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."dicom_object_locations"
         ADD CONSTRAINT "fk_dicom_object_locations_encryption_profile_id" FOREIGN KEY ("encryption_profile_id")
         REFERENCES "polyglot_storage"."encryption_profiles" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: system_ops.retention_policies (requiere schema system_ops)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."dicom_object_locations"
+        ADD CONSTRAINT "fk_dicom_object_locations_retention_policy_id" FOREIGN KEY ("retention_policy_id")
+        REFERENCES "system_ops"."retention_policies" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: system_ops.legal_holds (requiere schema system_ops)
@@ -1163,6 +1334,13 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."dicom_structured_reports"
         ADD CONSTRAINT "fk_dicom_structured_reports_status_concept_id" FOREIGN KEY ("status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."dicom_structured_reports"
+        ADD CONSTRAINT "fk_dicom_structured_reports_verified_by_profile_id" FOREIGN KEY ("verified_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
@@ -1268,4 +1446,18 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."diagnostic_provenance_links"
         ADD CONSTRAINT "fk_diagnostic_provenance_links_activity_concept_id" FOREIGN KEY ("activity_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."diagnostic_provenance_links"
+        ADD CONSTRAINT "fk_diagnostic_provenance_links_agent_profile_id" FOREIGN KEY ("agent_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: health_data.health_source_systems (requiere schema health_data)
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."diagnostic_provenance_links"
+        ADD CONSTRAINT "fk_diagnostic_provenance_links_source_system_id" FOREIGN KEY ("source_system_id")
+        REFERENCES "health_data"."health_source_systems" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

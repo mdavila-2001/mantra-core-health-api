@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 25 · schema pharmacy_inventory
+-- SALUD v4.0.10 · módulo 25 · schema pharmacy_inventory
 -- Generado de diagram_25_pharmacy_inventory.puml — NO editar a mano.
 
 
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_locations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inventory_locations" PRIMARY KEY ("id")
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_lots" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inventory_lots" PRIMARY KEY ("id")
 );
 
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_serials" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inventory_serials" PRIMARY KEY ("id")
 );
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_stock_positions" (
     "available_quantity" numeric NOT NULL,
     "last_ledger_sequence" bigint NOT NULL,
     "updated_at" timestamptz NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inventory_stock_positions" PRIMARY KEY ("id")
 );
 
@@ -108,11 +108,17 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_reservations" (
     "confirmed_at" timestamptz,
     "released_at" timestamptz,
     "idempotency_key" varchar,
+    "delivery_mode_concept_id" uuid,
+    "delivery_address_id" uuid,
+    "total_amount" numeric,
+    "currency_concept_id" uuid,
+    "pickup_code" varchar,
+    "rejection_reason_text" varchar,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inventory_reservations" PRIMARY KEY ("id")
 );
 
@@ -126,12 +132,33 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_reservation_lines" (
     "reserved_quantity" numeric NOT NULL,
     "fulfilled_quantity" numeric,
     "status_concept_id" uuid NOT NULL,
+    "unit_price_amount" numeric,
+    "currency_concept_id" uuid,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inventory_reservation_lines" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."pharmacy_order_substitutions" (
+    "id" uuid NOT NULL,
+    "inventory_reservation_id" uuid NOT NULL,
+    "inventory_reservation_line_id" uuid NOT NULL,
+    "original_pharmacy_product_id" uuid NOT NULL,
+    "proposed_pharmacy_product_id" uuid NOT NULL,
+    "original_unit_price_amount" numeric,
+    "proposed_unit_price_amount" numeric,
+    "currency_concept_id" uuid,
+    "status_concept_id" uuid NOT NULL,
+    "decided_at" timestamptz,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_pharmacy_order_substitutions" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_count_sessions" (
@@ -149,7 +176,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_count_sessions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inventory_count_sessions" PRIMARY KEY ("id")
 );
 
@@ -182,7 +209,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_recall_holds" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inventory_recall_holds" PRIMARY KEY ("id")
 );
 
@@ -198,7 +225,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."pharmacy_suppliers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_suppliers" PRIMARY KEY ("id")
 );
 
@@ -218,7 +245,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."pharmacy_purchase_orders" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_purchase_orders" PRIMARY KEY ("id")
 );
 
@@ -235,7 +262,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."pharmacy_purchase_order_lines" 
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_purchase_order_lines" PRIMARY KEY ("id")
 );
 
@@ -254,7 +281,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."pharmacy_goods_receipts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_goods_receipts" PRIMARY KEY ("id")
 );
 
@@ -293,7 +320,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."medication_dispensations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_medication_dispensations" PRIMARY KEY ("id")
 );
 
@@ -328,7 +355,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."pharmacy_inventory_sync_batches
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_inventory_sync_batches" PRIMARY KEY ("id")
 );
 

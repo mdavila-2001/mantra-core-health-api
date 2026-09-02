@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 38 · schema erp
+-- SALUD v4.0.10 · módulo 38 · schema erp
 -- Generado de diagram_38_erp.puml — NO editar a mano.
 
 
@@ -90,6 +90,12 @@ DO $$ BEGIN
     ALTER TABLE "erp"."contracts"
         ADD CONSTRAINT "fk_contracts_primary_business_partner_id" FOREIGN KEY ("primary_business_partner_id")
         REFERENCES "erp"."business_partners" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "erp"."contracts"
+        ADD CONSTRAINT "fk_contracts_current_version_id" FOREIGN KEY ("current_version_id")
+        REFERENCES "erp"."contract_versions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -438,6 +444,18 @@ DO $$ BEGIN
     ALTER TABLE "erp"."contract_amendments"
         ADD CONSTRAINT "fk_contract_amendments_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "erp"."contract_amendments"
+        ADD CONSTRAINT "fk_contract_amendments_base_version_id" FOREIGN KEY ("base_version_id")
+        REFERENCES "erp"."contract_versions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "erp"."contract_amendments"
+        ADD CONSTRAINT "fk_contract_amendments_resulting_version_id" FOREIGN KEY ("resulting_version_id")
+        REFERENCES "erp"."contract_versions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 31 · schema integration_contracts
+-- SALUD v4.0.10 · módulo 31 · schema integration_contracts
 -- Generado de diagram_31_integration_contracts.puml — NO editar a mano.
 
 
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "integration_contracts"."integration_contracts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_integration_contracts" PRIMARY KEY ("id")
 );
 
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "integration_contracts"."integration_auth_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_integration_auth_profiles" PRIMARY KEY ("id")
 );
 
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS "integration_contracts"."integration_sync_cursors" (
     "status_concept_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_integration_sync_cursors" PRIMARY KEY ("id")
 );
 
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS "integration_contracts"."contract_webhook_subscriptio
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contract_webhook_subscriptions" PRIMARY KEY ("id")
 );
 

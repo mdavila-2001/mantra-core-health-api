@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 05 · schema profiles
+-- SALUD v4.0.10 · módulo 05 · schema profiles
 -- Generado de diagram_05_profiles.puml — NO editar a mano.
 
 
@@ -16,7 +16,11 @@ CREATE INDEX IF NOT EXISTS "ix_persons_nationality_concept_id" ON "profiles"."pe
 
 CREATE INDEX IF NOT EXISTS "ix_persons_preferred_language_concept_id" ON "profiles"."persons" ("preferred_language_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_persons_occupation_concept_id" ON "profiles"."persons" ("occupation_concept_id");
+
 CREATE INDEX IF NOT EXISTS "ix_persons_merge_survivor_person_id" ON "profiles"."persons" ("merge_survivor_person_id");
+
+CREATE INDEX IF NOT EXISTS "ix_persons_photo_file_id" ON "profiles"."persons" ("photo_file_id");
 
 CREATE INDEX IF NOT EXISTS "ix_persons_created_by_user_id" ON "profiles"."persons" ("created_by_user_id");
 
@@ -179,6 +183,24 @@ CREATE INDEX IF NOT EXISTS "ix_jurisdiction_authorizations_created_by_user_id" O
 CREATE INDEX IF NOT EXISTS "ix_jurisdiction_authorizations_updated_by_user_id" ON "profiles"."jurisdiction_authorizations" ("updated_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "gist_jurisdiction_authorizations_effective_period" ON "profiles"."jurisdiction_authorizations" USING gist (daterange(valid_from, valid_to, '[)'));
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_affiliations_practitioner_profile_id" ON "profiles"."practitioner_affiliations" ("practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_affiliations_practice_site_id" ON "profiles"."practitioner_affiliations" ("practice_site_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_affiliations_health_facility_concept_id" ON "profiles"."practitioner_affiliations" ("health_facility_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_affiliations_affiliation_type_concept_id" ON "profiles"."practitioner_affiliations" ("affiliation_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_affiliations_status_concept_id" ON "profiles"."practitioner_affiliations" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_affiliations_created_by_user_id" ON "profiles"."practitioner_affiliations" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_affiliations_updated_by_user_id" ON "profiles"."practitioner_affiliations" ("updated_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_practitioner_affiliations_same_health_facility" ON "profiles"."practitioner_affiliations" ("practitioner_profile_id", "health_facility_concept_id", "role_title", "start_date") WHERE health_facility_concept_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_practitioner_affiliations_same_organization_name" ON "profiles"."practitioner_affiliations" ("practitioner_profile_id", "organization_name", "role_title", "start_date") WHERE health_facility_concept_id IS NULL;
 
 CREATE INDEX IF NOT EXISTS "ix_related_persons_patient_profile_id" ON "profiles"."related_persons" ("patient_profile_id");
 

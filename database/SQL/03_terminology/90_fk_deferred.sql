@@ -1,10 +1,5 @@
--- SALUD v4.0.1 · módulo 03 · schema terminology
+-- SALUD v4.0.10 · módulo 03 · schema terminology
 -- Generado de diagram_03_terminology.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   code_systems.source_id
---   catalog_import_batches.source_id
 
 
 -- destino: iam.users (requiere schema iam)

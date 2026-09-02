@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 01 · schema iam
+-- SALUD v4.0.10 · módulo 01 · schema iam
 -- Generado de diagram_01_iam.puml — NO editar a mano.
 
 
@@ -22,8 +22,60 @@ CREATE TABLE IF NOT EXISTS "iam"."users" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
+    "must_change_password" boolean,
     CONSTRAINT "pk_users" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "iam"."account_activations" (
+    "id" uuid NOT NULL,
+    "user_id" uuid NOT NULL,
+    "token_hash" varchar NOT NULL,
+    "state_concept_id" uuid NOT NULL,
+    "reason" varchar,
+    "legal_representation_id" uuid,
+    "legal_representative_user_id" uuid,
+    "expires_at" timestamptz NOT NULL,
+    "consumed_at" timestamptz,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_account_activations" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "iam"."email_verifications" (
+    "id" uuid NOT NULL,
+    "user_id" uuid NOT NULL,
+    "email" varchar NOT NULL,
+    "token_hash" varchar NOT NULL,
+    "state_concept_id" uuid NOT NULL,
+    "expires_at" timestamptz NOT NULL,
+    "consumed_at" timestamptz,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_email_verifications" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "iam"."password_resets" (
+    "id" uuid NOT NULL,
+    "user_id" uuid NOT NULL,
+    "external_subject" varchar NOT NULL,
+    "token_hash" varchar NOT NULL,
+    "state_concept_id" uuid NOT NULL,
+    "expires_at" timestamptz NOT NULL,
+    "consumed_at" timestamptz,
+    "requested_ip" varchar,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_password_resets" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "iam"."authentication_credentials" (
@@ -42,7 +94,7 @@ CREATE TABLE IF NOT EXISTS "iam"."authentication_credentials" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_authentication_credentials" PRIMARY KEY ("id")
 );
 
@@ -58,7 +110,7 @@ CREATE TABLE IF NOT EXISTS "iam"."mfa_factors" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_mfa_factors" PRIMARY KEY ("id")
 );
 
@@ -75,7 +127,7 @@ CREATE TABLE IF NOT EXISTS "iam"."devices" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_devices" PRIMARY KEY ("id")
 );
 
@@ -92,7 +144,7 @@ CREATE TABLE IF NOT EXISTS "iam"."sessions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_sessions" PRIMARY KEY ("id")
 );
 
@@ -107,7 +159,7 @@ CREATE TABLE IF NOT EXISTS "iam"."refresh_tokens" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_refresh_tokens" PRIMARY KEY ("id")
 );
 
@@ -120,7 +172,7 @@ CREATE TABLE IF NOT EXISTS "iam"."user_global_roles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_user_global_roles" PRIMARY KEY ("id")
 );
 
@@ -134,4 +186,60 @@ CREATE TABLE IF NOT EXISTS "iam"."security_events" (
     "recorded_at" timestamptz NOT NULL,
     "recorded_by_user_id" uuid,
     CONSTRAINT "pk_security_events" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "iam"."api_keys" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "name" varchar NOT NULL,
+    "key_prefix" varchar NOT NULL,
+    "key_hash" varchar NOT NULL,
+    "hash_algorithm_concept_id" uuid NOT NULL,
+    "owner_user_id" uuid,
+    "service_principal_id" uuid,
+    "expires_at" timestamptz,
+    "last_used_at" timestamptz,
+    "last_used_ip" varchar,
+    "rate_limit_per_min" integer,
+    "ip_access_rule_id" uuid,
+    "revoked_at" timestamptz,
+    "revoked_by_user_id" uuid,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_api_keys" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "iam"."api_key_scopes" (
+    "id" uuid NOT NULL,
+    "api_key_id" uuid NOT NULL,
+    "scope_concept_id" uuid NOT NULL,
+    "resource" varchar,
+    "created_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_api_key_scopes" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "iam"."account_lockouts" (
+    "id" uuid NOT NULL,
+    "user_id" uuid NOT NULL,
+    "tenant_id" uuid,
+    "reason_concept_id" uuid NOT NULL,
+    "failed_attempts" integer,
+    "locked_at" timestamptz,
+    "locked_until" timestamptz,
+    "unlocked_at" timestamptz,
+    "unlocked_by_user_id" uuid,
+    "source_ip" varchar,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_account_lockouts" PRIMARY KEY ("id")
 );

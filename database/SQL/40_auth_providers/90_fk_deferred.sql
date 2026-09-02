@@ -1,16 +1,5 @@
--- SALUD v4.0.1 · módulo 40 · schema auth_providers
+-- SALUD v4.0.10 · módulo 40 · schema auth_providers
 -- Generado de diagram_40_auth_providers.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   provider_protocol_configs.provider_id
---   provider_signing_keys.provider_id
---   provider_tenant_bindings.provider_id
---   provider_attribute_mappings.provider_id
---   provisioning_rules.provider_id
---   federated_identities.provider_id
---   account_link_requests.provider_id
---   federated_login_attempts.provider_id
 
 
 -- destino: directory.tenants (requiere schema directory)

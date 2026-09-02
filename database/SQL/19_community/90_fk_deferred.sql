@@ -1,35 +1,5 @@
--- SALUD v4.0.1 · módulo 19 · schema community
+-- SALUD v4.0.10 · módulo 19 · schema community
 -- Generado de diagram_19_community.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   post_media.post_id
---   review_dimension_scores.review_id
---   review_responses.review_id
---   comments.author_profile_id
---   reactions.actor_profile_id
---   mentions.mentioned_profile_id
---   groups.owner_profile_id
---   group_members.member_profile_id
---   group_members.invited_by_profile_id
---   post_shares.post_id
---   post_shares.sharer_profile_id
---   bookmarks.profile_id
---   feed_items.owner_profile_id
---   polls.post_id
---   poll_votes.voter_profile_id
---   conversation_participants.participant_profile_id
---   conversation_participants.last_read_message_id
---   direct_messages.sender_profile_id
---   direct_messages.reply_to_message_id
---   message_receipts.recipient_profile_id
---   social_notifications.recipient_profile_id
---   social_notifications.actor_profile_id
---   user_blocks.blocker_profile_id
---   user_blocks.blocked_profile_id
---   moderation_strikes.subject_profile_id
---   moderation_appeals.appellant_profile_id
---   social_follows.follower_profile_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -1072,5 +1042,215 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "community"."social_follows"
         ADD CONSTRAINT "fk_social_follows_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_scores"
+        ADD CONSTRAINT "fk_prestige_scores_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_scores"
+        ADD CONSTRAINT "fk_prestige_scores_subject_type_concept_id" FOREIGN KEY ("subject_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_scores"
+        ADD CONSTRAINT "fk_prestige_scores_level_concept_id" FOREIGN KEY ("level_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_scores"
+        ADD CONSTRAINT "fk_prestige_scores_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_scores"
+        ADD CONSTRAINT "fk_prestige_scores_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_scores"
+        ADD CONSTRAINT "fk_prestige_scores_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_awards"
+        ADD CONSTRAINT "fk_prestige_awards_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_awards"
+        ADD CONSTRAINT "fk_prestige_awards_subject_type_concept_id" FOREIGN KEY ("subject_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_awards"
+        ADD CONSTRAINT "fk_prestige_awards_direction_concept_id" FOREIGN KEY ("direction_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_awards"
+        ADD CONSTRAINT "fk_prestige_awards_reason_concept_id" FOREIGN KEY ("reason_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_awards"
+        ADD CONSTRAINT "fk_prestige_awards_awarded_by_user_id" FOREIGN KEY ("awarded_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."prestige_awards"
+        ADD CONSTRAINT "fk_prestige_awards_recorded_by_user_id" FOREIGN KEY ("recorded_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_reporter_user_id" FOREIGN KEY ("reporter_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_reporter_type_concept_id" FOREIGN KEY ("reporter_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_category_concept_id" FOREIGN KEY ("category_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_severity_concept_id" FOREIGN KEY ("severity_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_channel_concept_id" FOREIGN KEY ("channel_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_assigned_to_user_id" FOREIGN KEY ("assigned_to_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_tickets"
+        ADD CONSTRAINT "fk_feedback_tickets_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_ticket_comments"
+        ADD CONSTRAINT "fk_feedback_ticket_comments_author_user_id" FOREIGN KEY ("author_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_ticket_comments"
+        ADD CONSTRAINT "fk_feedback_ticket_comments_visibility_concept_id" FOREIGN KEY ("visibility_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_ticket_comments"
+        ADD CONSTRAINT "fk_feedback_ticket_comments_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_ticket_comments"
+        ADD CONSTRAINT "fk_feedback_ticket_comments_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_ticket_events"
+        ADD CONSTRAINT "fk_feedback_ticket_events_from_status_concept_id" FOREIGN KEY ("from_status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_ticket_events"
+        ADD CONSTRAINT "fk_feedback_ticket_events_to_status_concept_id" FOREIGN KEY ("to_status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_ticket_events"
+        ADD CONSTRAINT "fk_feedback_ticket_events_event_type_concept_id" FOREIGN KEY ("event_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."feedback_ticket_events"
+        ADD CONSTRAINT "fk_feedback_ticket_events_changed_by_user_id" FOREIGN KEY ("changed_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

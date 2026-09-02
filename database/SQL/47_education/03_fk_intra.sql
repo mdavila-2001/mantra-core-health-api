@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 47 · schema education
+-- SALUD v4.0.10 · módulo 47 · schema education
 -- Generado de diagram_47_education.puml — NO editar a mano.
 
 
@@ -42,6 +42,12 @@ DO $$ BEGIN
     ALTER TABLE "education"."enrollments"
         ADD CONSTRAINT "fk_enrollments_course_id" FOREIGN KEY ("course_id")
         REFERENCES "education"."courses" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "education"."enrollments"
+        ADD CONSTRAINT "fk_enrollments_cohort_id" FOREIGN KEY ("cohort_id")
+        REFERENCES "education"."course_cohorts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

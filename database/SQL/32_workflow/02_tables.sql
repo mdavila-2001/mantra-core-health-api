@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 32 · schema workflow
+-- SALUD v4.0.10 · módulo 32 · schema workflow
 -- Generado de diagram_32_workflow.puml — NO editar a mano.
 
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "workflow"."state_machine_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_state_machine_definitions" PRIMARY KEY ("id")
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "workflow"."state_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_state_definitions" PRIMARY KEY ("id")
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS "workflow"."state_transition_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_state_transition_definitions" PRIMARY KEY ("id")
 );
 
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS "workflow"."transition_guards" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_transition_guards" PRIMARY KEY ("id")
 );
 
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS "workflow"."transition_side_effects" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_transition_side_effects" PRIMARY KEY ("id")
 );
 
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS "workflow"."workflow_instances" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_workflow_instances" PRIMARY KEY ("id")
 );
 
@@ -151,6 +151,6 @@ CREATE TABLE IF NOT EXISTS "workflow"."workflow_tasks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_workflow_tasks" PRIMARY KEY ("id")
 );

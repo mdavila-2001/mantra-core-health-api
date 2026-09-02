@@ -1,23 +1,13 @@
--- SALUD v4.0.1 · módulo 41 · schema scheduling
+-- SALUD v4.0.10 · módulo 41 · schema scheduling
 -- Generado de diagram_41_scheduling.puml — NO editar a mano.
 
 
--- FK sin destino canónico (no forzadas, temperatura-0):
---   practitioner_schedules.practitioner_profile_id
---   availability_slots.schedule_id
---   availability_slots.practitioner_profile_id
---   schedule_templates.resource_id
---   availability_exceptions.resource_id
---   bookable_slots.resource_id
---   appointment_bookings.resource_id
---   booking_reschedules.booking_id
---   booking_reschedules.from_slot_id
---   booking_reschedules.to_slot_id
---   booking_cancellations.booking_id
---   waitlist_entries.resource_id
---   waitlist_entries.fulfilled_booking_id
---   appointment_reminders.booking_id
-
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."practitioner_schedules"
+        ADD CONSTRAINT "fk_practitioner_schedules_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: practice.practices (requiere schema practice)
 DO $$ BEGIN
@@ -54,6 +44,13 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."availability_slots"
+        ADD CONSTRAINT "fk_availability_slots_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: practice.care_spaces (requiere schema practice)
 DO $$ BEGIN
     ALTER TABLE "scheduling"."availability_slots"
@@ -73,7 +70,7 @@ DO $$ BEGIN
     ALTER TABLE "scheduling"."availability_slots"
         ADD CONSTRAINT "fk_availability_slots_appointment_id" FOREIGN KEY ("appointment_id")
         REFERENCES "clinical"."appointments" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
@@ -318,7 +315,7 @@ DO $$ BEGIN
     ALTER TABLE "scheduling"."appointment_bookings"
         ADD CONSTRAINT "fk_appointment_bookings_appointment_id" FOREIGN KEY ("appointment_id")
         REFERENCES "clinical"."appointments" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -361,6 +358,41 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_appointment_bookings_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."booking_confirmation_rules"
+        ADD CONSTRAINT "fk_booking_confirmation_rules_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."booking_confirmation_rules"
+        ADD CONSTRAINT "fk_booking_confirmation_rules_scope_type_concept_id" FOREIGN KEY ("scope_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."booking_confirmation_rules"
+        ADD CONSTRAINT "fk_booking_confirmation_rules_decision_concept_id" FOREIGN KEY ("decision_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."booking_confirmation_rules"
+        ADD CONSTRAINT "fk_booking_confirmation_rules_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."booking_confirmation_rules"
+        ADD CONSTRAINT "fk_booking_confirmation_rules_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -506,5 +538,89 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "scheduling"."appointment_reminders"
         ADD CONSTRAINT "fk_appointment_reminders_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practices (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_practice_id" FOREIGN KEY ("practice_id")
+        REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_subject_type_concept_id" FOREIGN KEY ("subject_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.persons (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_person_id" FOREIGN KEY ("person_id")
+        REFERENCES "profiles"."persons" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_user_id" FOREIGN KEY ("user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_absence_type_concept_id" FOREIGN KEY ("absence_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_approval_status_concept_id" FOREIGN KEY ("approval_status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_approved_by_user_id" FOREIGN KEY ("approved_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: erp.time_off_requests (requiere schema erp)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_time_off_request_id" FOREIGN KEY ("time_off_request_id")
+        REFERENCES "erp"."time_off_requests" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."calendar_absences"
+        ADD CONSTRAINT "fk_calendar_absences_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

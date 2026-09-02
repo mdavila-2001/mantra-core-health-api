@@ -1,19 +1,5 @@
--- SALUD v4.0.1 · módulo 15 · schema chart
+-- SALUD v4.0.10 · módulo 15 · schema chart
 -- Generado de diagram_15_chart.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   clinical_note_headers.current_version_id
---   clinical_note_headers.current_released_version_id
---   clinical_note_versions.clinical_note_id
---   clinical_note_versions.author_profile_id
---   clinical_note_versions.supersedes_version_id
---   clinical_note_versions.signed_by_profile_id
---   clinical_note_signatures.signer_profile_id
---   care_plans.author_profile_id
---   specialty_chart_templates.section_id
---   chart_template_assignments.template_id
---   chart_template_assignments.practitioner_profile_id
 
 
 -- destino: profiles.patient_profiles (requiere schema profiles)
@@ -72,6 +58,13 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "chart"."clinical_note_versions"
+        ADD CONSTRAINT "fk_clinical_note_versions_author_profile_id" FOREIGN KEY ("author_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "chart"."clinical_note_versions"
@@ -86,6 +79,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "chart"."clinical_note_versions"
+        ADD CONSTRAINT "fk_clinical_note_versions_signed_by_profile_id" FOREIGN KEY ("signed_by_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "chart"."clinical_note_versions"
@@ -98,6 +98,13 @@ DO $$ BEGIN
     ALTER TABLE "chart"."clinical_note_versions"
         ADD CONSTRAINT "fk_clinical_note_versions_recorded_by_user_id" FOREIGN KEY ("recorded_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "chart"."clinical_note_signatures"
+        ADD CONSTRAINT "fk_clinical_note_signatures_signer_profile_id" FOREIGN KEY ("signer_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -196,6 +203,13 @@ DO $$ BEGIN
     ALTER TABLE "chart"."care_plans"
         ADD CONSTRAINT "fk_care_plans_intent_concept_id" FOREIGN KEY ("intent_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "chart"."care_plans"
+        ADD CONSTRAINT "fk_care_plans_author_profile_id" FOREIGN KEY ("author_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
@@ -345,6 +359,13 @@ DO $$ BEGIN
         REFERENCES "directory"."tenants" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: forms.dynamic_field_sections (requiere schema forms)
+DO $$ BEGIN
+    ALTER TABLE "chart"."specialty_chart_templates"
+        ADD CONSTRAINT "fk_specialty_chart_templates_section_id" FOREIGN KEY ("section_id")
+        REFERENCES "forms"."dynamic_field_sections" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "chart"."specialty_chart_templates"
@@ -371,6 +392,13 @@ DO $$ BEGIN
     ALTER TABLE "chart"."chart_template_assignments"
         ADD CONSTRAINT "fk_chart_template_assignments_practice_id" FOREIGN KEY ("practice_id")
         REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "chart"."chart_template_assignments"
+        ADD CONSTRAINT "fk_chart_template_assignments_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

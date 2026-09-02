@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 39 · schema reporting
+-- SALUD v4.0.10 · módulo 39 · schema reporting
 -- Generado de diagram_39_reporting.puml — NO editar a mano.
 
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_data_sources" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_data_sources" PRIMARY KEY ("id")
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_definitions" PRIMARY KEY ("id")
 );
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_versions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_versions" PRIMARY KEY ("id")
 );
 
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_parameters" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_parameters" PRIMARY KEY ("id")
 );
 
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_columns" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_columns" PRIMARY KEY ("id")
 );
 
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_schedules" PRIMARY KEY ("id")
 );
 
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_executions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_executions" PRIMARY KEY ("id")
 );
 
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_snapshots" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_snapshots" PRIMARY KEY ("id")
 );
 
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_distributions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_distributions" PRIMARY KEY ("id")
 );
 
@@ -185,7 +185,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."report_subscriptions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_report_subscriptions" PRIMARY KEY ("id")
 );
 
@@ -202,7 +202,7 @@ CREATE TABLE IF NOT EXISTS "reporting"."dashboards" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dashboards" PRIMARY KEY ("id")
 );
 
@@ -220,6 +220,6 @@ CREATE TABLE IF NOT EXISTS "reporting"."dashboard_widgets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dashboard_widgets" PRIMARY KEY ("id")
 );

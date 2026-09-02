@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 27 · schema identity_assurance
+-- SALUD v4.0.10 · módulo 27 · schema identity_assurance
 -- Generado de diagram_27_identity_assurance.puml — NO editar a mano.
 
 
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "identity_assurance"."identity_authorities" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_identity_authorities" PRIMARY KEY ("id")
 );
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "identity_assurance"."identity_authority_endpoints" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_identity_authority_endpoints" PRIMARY KEY ("id")
 );
 
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS "identity_assurance"."identity_verification_cases" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_identity_verification_cases" PRIMARY KEY ("id")
 );
 
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS "identity_assurance"."identity_checks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_identity_checks" PRIMARY KEY ("id")
 );
 
@@ -189,6 +189,6 @@ CREATE TABLE IF NOT EXISTS "identity_assurance"."identity_manual_review_cases" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_identity_manual_review_cases" PRIMARY KEY ("id")
 );

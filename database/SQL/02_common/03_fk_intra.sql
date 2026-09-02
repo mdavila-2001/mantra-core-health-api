@@ -1,6 +1,12 @@
--- SALUD v4.0.1 · módulo 02 · schema common
+-- SALUD v4.0.10 · módulo 02 · schema common
 -- Generado de diagram_02_common.puml — NO editar a mano.
 
+
+DO $$ BEGIN
+    ALTER TABLE "common"."files"
+        ADD CONSTRAINT "fk_files_current_version_id" FOREIGN KEY ("current_version_id")
+        REFERENCES "common"."file_versions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "common"."file_versions"

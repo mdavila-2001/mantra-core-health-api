@@ -256,7 +256,3 @@ CREATE INDEX IF NOT EXISTS "order_audit_metric" ON "time_series"."audit_access_m
 -- RETENTION retain_sli_raw en service_sli_series: raw short, aggregates long
 -- ROLLUP continuous_audit_daily en audit_access_metric_series: daily counts
 -- POLICY no_raw_audit_replacement en audit_access_metric_series: metrics do not replace audit events
-
--- Avisos:
---   UK uq_device_sequence en device_raw_reading_series: se añadió ['time'] por requisito de partición de hypertable (TimescaleDB)
---   UK uq_ads_event en ads_delivery_event_series: se añadió ['time'] por requisito de partición de hypertable (TimescaleDB)

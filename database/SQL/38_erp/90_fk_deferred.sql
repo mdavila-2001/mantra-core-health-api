@@ -1,12 +1,5 @@
--- SALUD v4.0.1 · módulo 38 · schema erp
+-- SALUD v4.0.10 · módulo 38 · schema erp
 -- Generado de diagram_38_erp.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   contracts.current_version_id
---   contracts.master_agreement_id
---   contract_amendments.base_version_id
---   contract_amendments.resulting_version_id
 
 
 -- destino: practice.practices (requiere schema practice)
@@ -336,6 +329,13 @@ DO $$ BEGIN
     ALTER TABLE "erp"."contracts"
         ADD CONSTRAINT "fk_contracts_owner_user_id" FOREIGN KEY ("owner_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: crm.partnership_agreements (requiere schema crm)
+DO $$ BEGIN
+    ALTER TABLE "erp"."contracts"
+        ADD CONSTRAINT "fk_contracts_master_agreement_id" FOREIGN KEY ("master_agreement_id")
+        REFERENCES "crm"."partnership_agreements" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: accounting.cost_centers (requiere schema accounting)
@@ -677,7 +677,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "erp"."business_partner_bank_accounts"
-        ADD CONSTRAINT "fk_business_partner_bank_accounts_verification_status_concept_id" FOREIGN KEY ("verification_status_concept_id")
+        ADD CONSTRAINT "fk_business_partner_bank_accounts_verification_status__769cb0dc" FOREIGN KEY ("verification_status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -1974,7 +1974,7 @@ DO $$ BEGIN
     ALTER TABLE "erp"."contract_payment_schedules"
         ADD CONSTRAINT "fk_contract_payment_schedules_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: billing.bills (requiere schema billing)
 DO $$ BEGIN
@@ -2163,7 +2163,7 @@ DO $$ BEGIN
     ALTER TABLE "erp"."lease_valuations"
         ADD CONSTRAINT "fk_lease_valuations_journal_transaction_id" FOREIGN KEY ("journal_transaction_id")
         REFERENCES "accounting"."journal_transactions" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN

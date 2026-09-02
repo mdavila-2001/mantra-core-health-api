@@ -6,6 +6,18 @@
 
 \echo >>> 00_shared/00_types.sql
 \ir 00_shared/00_types.sql
+\echo >>> _integrity/00_integrity_functions.sql
+\ir _integrity/00_integrity_functions.sql
+
+-- ═══ módulo 00_platform ═══
+\echo >>> 00_platform/01_schema.sql
+\ir 00_platform/01_schema.sql
+\echo >>> 00_platform/02_tables.sql
+\ir 00_platform/02_tables.sql
+\echo >>> 00_platform/03_fk_intra.sql
+\ir 00_platform/03_fk_intra.sql
+\echo >>> 00_platform/04_indexes.sql
+\ir 00_platform/04_indexes.sql
 
 -- ═══ módulo 01_iam ═══
 \echo >>> 01_iam/01_schema.sql
@@ -86,6 +98,8 @@
 \ir 08_clinical/03_fk_intra.sql
 \echo >>> 08_clinical/04_indexes.sql
 \ir 08_clinical/04_indexes.sql
+\echo >>> 08_clinical/05_constraints.sql
+\ir 08_clinical/05_constraints.sql
 
 -- ═══ módulo 09_forms ═══
 \echo >>> 09_forms/01_schema.sql
@@ -106,6 +120,8 @@
 \ir 10_audit/03_fk_intra.sql
 \echo >>> 10_audit/04_indexes.sql
 \ir 10_audit/04_indexes.sql
+\echo >>> 10_audit/05_constraints.sql
+\ir 10_audit/05_constraints.sql
 
 -- ═══ módulo 11_system_ops ═══
 \echo >>> 11_system_ops/01_schema.sql
@@ -226,6 +242,8 @@
 \ir 23_diagnostic_units/03_fk_intra.sql
 \echo >>> 23_diagnostic_units/04_indexes.sql
 \ir 23_diagnostic_units/04_indexes.sql
+\echo >>> 23_diagnostic_units/05_constraints.sql
+\ir 23_diagnostic_units/05_constraints.sql
 
 -- ═══ módulo 24_pharmacy ═══
 \echo >>> 24_pharmacy/01_schema.sql
@@ -246,6 +264,8 @@
 \ir 25_pharmacy_inventory/03_fk_intra.sql
 \echo >>> 25_pharmacy_inventory/04_indexes.sql
 \ir 25_pharmacy_inventory/04_indexes.sql
+\echo >>> 25_pharmacy_inventory/05_constraints.sql
+\ir 25_pharmacy_inventory/05_constraints.sql
 
 -- ═══ módulo 26_insurance ═══
 \echo >>> 26_insurance/01_schema.sql
@@ -256,6 +276,8 @@
 \ir 26_insurance/03_fk_intra.sql
 \echo >>> 26_insurance/04_indexes.sql
 \ir 26_insurance/04_indexes.sql
+\echo >>> 26_insurance/05_constraints.sql
+\ir 26_insurance/05_constraints.sql
 
 -- ═══ módulo 27_identity_assurance ═══
 \echo >>> 27_identity_assurance/01_schema.sql
@@ -266,6 +288,8 @@
 \ir 27_identity_assurance/03_fk_intra.sql
 \echo >>> 27_identity_assurance/04_indexes.sql
 \ir 27_identity_assurance/04_indexes.sql
+\echo >>> 27_identity_assurance/05_constraints.sql
+\ir 27_identity_assurance/05_constraints.sql
 
 -- ═══ módulo 28_telemetry ═══
 \echo >>> 28_telemetry/01_schema.sql
@@ -276,6 +300,8 @@
 \ir 28_telemetry/03_fk_intra.sql
 \echo >>> 28_telemetry/04_indexes.sql
 \ir 28_telemetry/04_indexes.sql
+\echo >>> 28_telemetry/05_constraints.sql
+\ir 28_telemetry/05_constraints.sql
 
 -- ═══ módulo 29_delegated_access ═══
 \echo >>> 29_delegated_access/01_schema.sql
@@ -286,6 +312,8 @@
 \ir 29_delegated_access/03_fk_intra.sql
 \echo >>> 29_delegated_access/04_indexes.sql
 \ir 29_delegated_access/04_indexes.sql
+\echo >>> 29_delegated_access/05_constraints.sql
+\ir 29_delegated_access/05_constraints.sql
 
 -- ═══ módulo 30_read_models ═══
 \echo >>> 30_read_models/01_schema.sql
@@ -556,6 +584,26 @@
 \ir 63_lakehouse/03_fk_intra.sql
 \echo >>> 63_lakehouse/04_indexes.sql
 \ir 63_lakehouse/04_indexes.sql
+
+-- ═══ módulo 64_audio_assets ═══
+\echo >>> 64_audio_assets/01_schema.sql
+\ir 64_audio_assets/01_schema.sql
+\echo >>> 64_audio_assets/02_tables.sql
+\ir 64_audio_assets/02_tables.sql
+\echo >>> 64_audio_assets/03_fk_intra.sql
+\ir 64_audio_assets/03_fk_intra.sql
+\echo >>> 64_audio_assets/04_indexes.sql
+\ir 64_audio_assets/04_indexes.sql
+
+-- ═══ módulo 65_surveys ═══
+\echo >>> 65_surveys/01_schema.sql
+\ir 65_surveys/01_schema.sql
+\echo >>> 65_surveys/02_tables.sql
+\ir 65_surveys/02_tables.sql
+\echo >>> 65_surveys/03_fk_intra.sql
+\ir 65_surveys/03_fk_intra.sql
+\echo >>> 65_surveys/04_indexes.sql
+\ir 65_surveys/04_indexes.sql
 
 -- 90_fk_deferred.sql OMITIDOS a propósito.
 \echo === apply_all completado (sin 90_fk_deferred) ===

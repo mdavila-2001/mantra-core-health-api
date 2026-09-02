@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 47 · schema education
+-- SALUD v4.0.10 · módulo 47 · schema education
 -- Generado de diagram_47_education.puml — NO editar a mano.
 
 
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS "education"."courses" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_courses" PRIMARY KEY ("id")
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS "education"."course_versions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_course_versions" PRIMARY KEY ("id")
 );
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS "education"."course_modules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_course_modules" PRIMARY KEY ("id")
 );
 
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS "education"."lessons" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_lessons" PRIMARY KEY ("id")
 );
 
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS "education"."instructors" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_instructors" PRIMARY KEY ("id")
 );
 
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS "education"."course_instructors" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_course_instructors" PRIMARY KEY ("id")
 );
 
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS "education"."course_cohorts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_course_cohorts" PRIMARY KEY ("id")
 );
 
@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS "education"."enrollments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_enrollments" PRIMARY KEY ("id")
 );
 
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS "education"."assessments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_assessments" PRIMARY KEY ("id")
 );
 
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS "education"."assessment_questions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_assessment_questions" PRIMARY KEY ("id")
 );
 
@@ -216,7 +216,7 @@ CREATE TABLE IF NOT EXISTS "education"."assessment_attempts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_assessment_attempts" PRIMARY KEY ("id")
 );
 
@@ -236,7 +236,7 @@ CREATE TABLE IF NOT EXISTS "education"."certificates" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_certificates" PRIMARY KEY ("id")
 );
 
@@ -255,7 +255,7 @@ CREATE TABLE IF NOT EXISTS "education"."cme_credit_records" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_cme_credit_records" PRIMARY KEY ("id")
 );
 
@@ -270,6 +270,6 @@ CREATE TABLE IF NOT EXISTS "education"."course_reviews" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_course_reviews" PRIMARY KEY ("id")
 );

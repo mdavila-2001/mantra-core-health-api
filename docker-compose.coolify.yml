@@ -7,25 +7,30 @@
 # servidor. Las diferencias no son cosméticas y cada una viene de un modo de
 # fallo concreto que se comprobó antes de escribirlas:
 #
-#  1. EL DDL SE MONTA DESDE `./database`, NO DESDE `../SQL`.
-#     Coolify clona ESTE repositorio y nada más. `../SQL` es una carpeta
-#     hermana que en el servidor no existe: el contenedor de inicialización
-#     arrancaba con `/init/SQL` vacío, la base quedaba sin una sola tabla y la
-#     aplicación devolvía 500 en la primera escritura. `database/` es la copia
-#     versionada; se refresca con `yarn db:vendor` y CI la verifica con
-#     `yarn db:vendor:check`.
+#  1. EL DDL SE MONTA DESDE `./database`, NO DESDE EL REPOSITORIO DEL MODELO.
+#     Coolify clona ESTE repositorio y nada más.
+#     `../mantra-core-health-model/SQL` es un repositorio HERMANO que en el
+#     servidor no existe: el contenedor de inicialización arrancaba con
+#     `/init/SQL` vacío, la base quedaba sin una sola tabla y la aplicación
+#     devolvía 500 en la primera escritura. Que el modelo tenga repositorio
+#     propio (B-2, commit 19ef5a17) arregla el versionado, no el despliegue.
+#     `database/` es la copia versionada AQUÍ; se refresca con `yarn db:vendor`
+#     y CI la verifica con `yarn db:vendor:check`.
 #
 #  2. HAY UN PASO DE MIGRACIÓN EXPLÍCITO (`api-migrate`) ANTES DE LA API.
-#     Medido contra una base recién construida desde `database/SQL`: **130
-#     diferencias** entre el modelo y la base (82 tablas ausentes —`pharma_lab`,
-#     `surveys`, `audio_assets` enteros—, 22 columnas ausentes y 26
-#     divergencias de obligatoriedad). Las lecturas no se enteran, porque
-#     MikroORM proyecta `select "p0".*`; **las altas sí**, porque un INSERT
-#     nombra cada columna. Es exactamente el fallo que se arrastraba: «alta de
-#     paciente → 500, column "…" of relation "…" does not exist».
+#     Medido contra una base recién construida desde `database/SQL` (modelo del
+#     02/09/2026): **71 diferencias** entre el modelo y la base —45 tablas
+#     ausentes, `pharma_lab` entero entre ellas (B-8, todavía abierto); 2
+#     columnas; y 24 divergencias de obligatoriedad, columnas que la base exige
+#     NOT NULL y la entidad declara opcionales—.
+#     Las lecturas no se enteran, porque MikroORM proyecta `select "p0".*`;
+#     **las altas sí**, porque un INSERT nombra cada columna. Es exactamente el
+#     fallo que se arrastraba: «alta de paciente → 500, column "…" of relation
+#     "…" does not exist».
 #     `api-migrate` corre `seed-cli` con `ORM_SCHEMA_SYNC=safe` (aditivo, nunca
-#     destructivo, con cerrojo de aviso) y deja la base en «1238 entidades
-#     coinciden», y de paso siembra el catálogo. La API arranca después, con
+#     destructivo, con cerrojo de aviso) y deja la base en «1239 entidades
+#     coinciden» —las 71 diferencias en cero, obligatoriedad incluida—, y de
+#     paso siembra el catálogo. La API arranca después, con
 #     `ORM_SCHEMA_SYNC=off`: en un servidor, quien toca la estructura es un paso
 #     de despliegue con código de salida, no el proceso que sirve tráfico.
 #

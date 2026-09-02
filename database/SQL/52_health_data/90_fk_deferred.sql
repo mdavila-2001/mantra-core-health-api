@@ -1,34 +1,14 @@
--- SALUD v4.0.1 · módulo 52 · schema health_data
+-- SALUD v4.0.10 · módulo 52 · schema health_data
 -- Generado de diagram_52_health_data_platform.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
 --   health_source_systems.organization_id
---   health_source_connections.credential_id
 --   health_source_connections.network_policy_id
---   health_ingestion_records.canonical_resource_id
---   canonical_health_resources.source_system_id
---   canonical_health_resources.current_version_id
---   canonical_health_resources.retention_policy_id
---   canonical_health_resource_versions.provenance_record_id
---   canonical_health_resource_versions.supersedes_version_id
---   canonical_resource_relationships.source_resource_id
---   canonical_resource_relationships.target_resource_id
---   canonical_resource_bindings.mapping_version_id
 --   patient_timeline_entries.organization_id
---   patient_identity_members.source_system_id
---   patient_match_decisions.resulting_cluster_id
---   health_data_quality_runs.canonical_resource_id
---   health_data_quality_issues.canonical_resource_version_id
---   health_provenance_records.source_system_id
 --   health_provenance_records.on_behalf_of_organization_id
---   health_provenance_records.signature_id
---   health_deidentification_profiles.reidentification_key_secret_id
 --   health_deidentification_runs.consent_directive_id
 --   health_export_jobs.consent_directive_id
---   health_export_jobs.deidentification_run_id
---   health_export_manifests.retention_policy_id
---   omop_mapping_rules.vocabulary_mapping_set_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -78,6 +58,13 @@ DO $$ BEGIN
     ALTER TABLE "health_data"."health_source_connections"
         ADD CONSTRAINT "fk_health_source_connections_connection_type_concept_id" FOREIGN KEY ("connection_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: integrations.provider_credentials (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "health_data"."health_source_connections"
+        ADD CONSTRAINT "fk_health_source_connections_credential_id" FOREIGN KEY ("credential_id")
+        REFERENCES "integrations"."provider_credentials" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -206,6 +193,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: system_ops.retention_policies (requiere schema system_ops)
+DO $$ BEGIN
+    ALTER TABLE "health_data"."canonical_health_resources"
+        ADD CONSTRAINT "fk_canonical_health_resources_retention_policy_id" FOREIGN KEY ("retention_policy_id")
+        REFERENCES "system_ops"."retention_policies" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "health_data"."canonical_health_resource_versions"
@@ -237,14 +231,14 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "health_data"."canonical_resource_relationships"
-        ADD CONSTRAINT "fk_canonical_resource_relationships_relationship_type_concept_id" FOREIGN KEY ("relationship_type_concept_id")
+        ADD CONSTRAINT "fk_canonical_resource_relationships_relationship_type__919725f6" FOREIGN KEY ("relationship_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "health_data"."canonical_resource_relationships"
-        ADD CONSTRAINT "fk_canonical_resource_relationships_relationship_role_concept_id" FOREIGN KEY ("relationship_role_concept_id")
+        ADD CONSTRAINT "fk_canonical_resource_relationships_relationship_role__a1ad800f" FOREIGN KEY ("relationship_role_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -633,6 +627,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: chart.clinical_note_signatures (requiere schema chart)
+DO $$ BEGIN
+    ALTER TABLE "health_data"."health_provenance_records"
+        ADD CONSTRAINT "fk_health_provenance_records_signature_id" FOREIGN KEY ("signature_id")
+        REFERENCES "chart"."clinical_note_signatures" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "health_data"."health_provenance_targets"
@@ -766,6 +767,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: system_ops.encryption_keys (requiere schema system_ops)
+DO $$ BEGIN
+    ALTER TABLE "health_data"."health_deidentification_profiles"
+        ADD CONSTRAINT "fk_health_deidentification_profiles_reidentification_k_76ae9fd3" FOREIGN KEY ("reidentification_key_secret_id")
+        REFERENCES "system_ops"."encryption_keys" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "health_data"."health_deidentification_profiles"
@@ -883,6 +891,13 @@ DO $$ BEGIN
     ALTER TABLE "health_data"."health_export_manifests"
         ADD CONSTRAINT "fk_health_export_manifests_encryption_profile_id" FOREIGN KEY ("encryption_profile_id")
         REFERENCES "polyglot_storage"."encryption_profiles" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: system_ops.retention_policies (requiere schema system_ops)
+DO $$ BEGIN
+    ALTER TABLE "health_data"."health_export_manifests"
+        ADD CONSTRAINT "fk_health_export_manifests_retention_policy_id" FOREIGN KEY ("retention_policy_id")
+        REFERENCES "system_ops"."retention_policies" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: directory.tenants (requiere schema directory)

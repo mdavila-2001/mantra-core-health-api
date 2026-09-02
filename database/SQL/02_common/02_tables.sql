@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 02 · schema common
+-- SALUD v4.0.10 · módulo 02 · schema common
 -- Generado de diagram_02_common.puml — NO editar a mano.
 
 
@@ -11,7 +11,9 @@ CREATE TABLE IF NOT EXISTS "common"."identifiers" (
     "system" text,
     "value" varchar NOT NULL,
     "issuer_country_concept_id" uuid,
+    "issuer_administrative_area_concept_id" uuid,
     "assigner_tenant_id" uuid,
+    "holder_name" varchar,
     "valid_from" date,
     "valid_to" date,
     "state_concept_id" uuid NOT NULL,
@@ -19,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "common"."identifiers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_identifiers" PRIMARY KEY ("id")
 );
 
@@ -38,7 +40,7 @@ CREATE TABLE IF NOT EXISTS "common"."contact_points" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contact_points" PRIMARY KEY ("id")
 );
 
@@ -51,6 +53,7 @@ CREATE TABLE IF NOT EXISTS "common"."addresses" (
     "lines" varchar,
     "city" varchar,
     "administrative_area_concept_id" uuid,
+    "municipality_concept_id" uuid,
     "postal_code" varchar,
     "country_concept_id" uuid NOT NULL,
     "latitude" numeric,
@@ -61,7 +64,7 @@ CREATE TABLE IF NOT EXISTS "common"."addresses" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_addresses" PRIMARY KEY ("id")
 );
 
@@ -80,7 +83,7 @@ CREATE TABLE IF NOT EXISTS "common"."files" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_files" PRIMARY KEY ("id")
 );
 
@@ -123,7 +126,7 @@ CREATE TABLE IF NOT EXISTS "common"."file_links" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_file_links" PRIMARY KEY ("id")
 );
 

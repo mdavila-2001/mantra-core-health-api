@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 45 · schema system_context
+-- SALUD v4.0.10 · módulo 45 · schema system_context
 -- Generado de diagram_45_system_context.puml — NO editar a mano.
 
 
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "system_context"."system_contexts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_system_contexts" PRIMARY KEY ("id")
 );
 
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS "system_context"."system_context_bindings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_system_context_bindings" PRIMARY KEY ("id")
 );
 
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS "system_context"."dynamic_enum_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dynamic_enum_definitions" PRIMARY KEY ("id")
 );
 
@@ -160,6 +160,6 @@ CREATE TABLE IF NOT EXISTS "system_context"."dynamic_enum_bindings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dynamic_enum_bindings" PRIMARY KEY ("id")
 );

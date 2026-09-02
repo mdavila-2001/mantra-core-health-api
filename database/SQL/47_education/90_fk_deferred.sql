@@ -1,11 +1,5 @@
--- SALUD v4.0.1 · módulo 47 · schema education
+-- SALUD v4.0.10 · módulo 47 · schema education
 -- Generado de diagram_47_education.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   instructors.practitioner_profile_id
---   enrollments.cohort_id
---   cme_credit_records.practitioner_profile_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -167,6 +161,13 @@ DO $$ BEGIN
     ALTER TABLE "education"."instructors"
         ADD CONSTRAINT "fk_instructors_tenant_id" FOREIGN KEY ("tenant_id")
         REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "education"."instructors"
+        ADD CONSTRAINT "fk_instructors_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
@@ -412,6 +413,13 @@ DO $$ BEGIN
     ALTER TABLE "education"."certificates"
         ADD CONSTRAINT "fk_certificates_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "education"."cme_credit_records"
+        ADD CONSTRAINT "fk_cme_credit_records_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

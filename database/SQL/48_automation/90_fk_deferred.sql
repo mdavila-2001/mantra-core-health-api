@@ -1,11 +1,5 @@
--- SALUD v4.0.1 · módulo 48 · schema automation
+-- SALUD v4.0.10 · módulo 48 · schema automation
 -- Generado de diagram_48_automation.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   workflow_steps.on_success_step_id
---   workflow_steps.on_failure_step_id
---   workflow_runs.trigger_id
 
 
 -- destino: directory.tenants (requiere schema directory)

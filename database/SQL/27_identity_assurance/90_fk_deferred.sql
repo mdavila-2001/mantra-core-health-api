@@ -1,13 +1,5 @@
--- SALUD v4.0.1 · módulo 27 · schema identity_assurance
+-- SALUD v4.0.10 · módulo 27 · schema identity_assurance
 -- Generado de diagram_27_identity_assurance.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   identity_evidence_records.issuer_authority_id
---   identity_verification_attempts.request_message_id
---   identity_verification_attempts.response_message_id
---   identity_checks.authority_id
---   identity_check_results.supersedes_result_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -125,21 +117,21 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "identity_assurance"."identity_verification_policies"
-        ADD CONSTRAINT "fk_identity_verification_policies_required_identity_assurance_level_concept_id" FOREIGN KEY ("required_identity_assurance_level_concept_id")
+        ADD CONSTRAINT "fk_identity_verification_policies_required_identity_as_75460293" FOREIGN KEY ("required_identity_assurance_level_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "identity_assurance"."identity_verification_policies"
-        ADD CONSTRAINT "fk_identity_verification_policies_required_authenticator_assurance_level_concept_id" FOREIGN KEY ("required_authenticator_assurance_level_concept_id")
+        ADD CONSTRAINT "fk_identity_verification_policies_required_authenticat_3b11417d" FOREIGN KEY ("required_authenticator_assurance_level_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "identity_assurance"."identity_verification_policies"
-        ADD CONSTRAINT "fk_identity_verification_policies_required_federation_assurance_level_concept_id" FOREIGN KEY ("required_federation_assurance_level_concept_id")
+        ADD CONSTRAINT "fk_identity_verification_policies_required_federation__a77e7044" FOREIGN KEY ("required_federation_assurance_level_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -167,7 +159,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "identity_assurance"."identity_verification_cases"
-        ADD CONSTRAINT "fk_identity_verification_cases_requested_assurance_level_concept_id" FOREIGN KEY ("requested_assurance_level_concept_id")
+        ADD CONSTRAINT "fk_identity_verification_cases_requested_assurance_lev_ee8e6b18" FOREIGN KEY ("requested_assurance_level_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -232,6 +224,20 @@ DO $$ BEGIN
     ALTER TABLE "identity_assurance"."identity_evidence_records"
         ADD CONSTRAINT "fk_identity_evidence_records_created_by_user_id" FOREIGN KEY ("created_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: integrations.outbound_messages (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "identity_assurance"."identity_verification_attempts"
+        ADD CONSTRAINT "fk_identity_verification_attempts_request_message_id" FOREIGN KEY ("request_message_id")
+        REFERENCES "integrations"."outbound_messages" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: integrations.inbound_messages (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "identity_assurance"."identity_verification_attempts"
+        ADD CONSTRAINT "fk_identity_verification_attempts_response_message_id" FOREIGN KEY ("response_message_id")
+        REFERENCES "integrations"."inbound_messages" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

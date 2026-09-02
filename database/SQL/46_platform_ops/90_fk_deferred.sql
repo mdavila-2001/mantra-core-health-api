@@ -1,13 +1,5 @@
--- SALUD v4.0.1 · módulo 46 · schema platform_ops
+-- SALUD v4.0.10 · módulo 46 · schema platform_ops
 -- Generado de diagram_46_platform_ops.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   component_tools.tool_id
---   artifacts.produced_by_tool_id
---   health_incidents.detected_by_run_id
---   runbooks.current_version_id
---   runbooks.owner_team_id
 
 
 -- destino: directory.tenants (requiere schema directory)

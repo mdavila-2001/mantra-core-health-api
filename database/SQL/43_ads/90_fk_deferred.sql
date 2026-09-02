@@ -1,32 +1,10 @@
--- SALUD v4.0.1 · módulo 43 · schema ads
+-- SALUD v4.0.10 · módulo 43 · schema ads
 -- Generado de diagram_43_ads.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
---   partner_relationships.partner_id
---   ad_account_users.partner_id
---   ads.creative_id
---   custom_audiences.lookalike_source_audience_id
---   custom_audiences.data_source_pixel_id
---   pixel_events.pixel_id
---   dynamic_ad_templates.creative_id
---   collection_ads.hero_creative_id
---   lookalike_specs.source_audience_id
---   lookalike_specs.generated_audience_id
---   ad_experiments.winner_variant_id
---   custom_conversions.pixel_id
---   ad_platform_connections.credential_id
---   ad_platform_connections.webhook_verification_secret_id
---   ad_identity_assets.platform_connection_id
---   dataset_connections.platform_connection_id
---   dataset_connections.test_event_code_secret_id
 --   server_conversion_events.consent_directive_id
---   conversion_event_delivery_attempts.platform_connection_id
 --   lead_submissions.consent_directive_id
---   insight_query_runs.platform_connection_id
---   external_ad_object_snapshots.platform_connection_id
---   ad_sync_runs.platform_connection_id
---   ad_sync_checkpoints.platform_connection_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -1359,6 +1337,20 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: integrations.provider_credentials (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "ads"."ad_platform_connections"
+        ADD CONSTRAINT "fk_ad_platform_connections_credential_id" FOREIGN KEY ("credential_id")
+        REFERENCES "integrations"."provider_credentials" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: system_ops.encryption_keys (requiere schema system_ops)
+DO $$ BEGIN
+    ALTER TABLE "ads"."ad_platform_connections"
+        ADD CONSTRAINT "fk_ad_platform_connections_webhook_verification_secret_id" FOREIGN KEY ("webhook_verification_secret_id")
+        REFERENCES "system_ops"."encryption_keys" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "ads"."ad_platform_connections"
@@ -1490,6 +1482,13 @@ DO $$ BEGIN
     ALTER TABLE "ads"."dataset_connections"
         ADD CONSTRAINT "fk_dataset_connections_connection_type_concept_id" FOREIGN KEY ("connection_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: system_ops.encryption_keys (requiere schema system_ops)
+DO $$ BEGIN
+    ALTER TABLE "ads"."dataset_connections"
+        ADD CONSTRAINT "fk_dataset_connections_test_event_code_secret_id" FOREIGN KEY ("test_event_code_secret_id")
+        REFERENCES "system_ops"."encryption_keys" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 11 · schema system_ops
+-- SALUD v4.0.10 · módulo 11 · schema system_ops
 -- Generado de diagram_11_system_ops.puml — NO editar a mano.
 
 
@@ -319,3 +319,41 @@ CREATE INDEX IF NOT EXISTS "ix_remediation_actions_created_by_user_id" ON "syste
 CREATE INDEX IF NOT EXISTS "ix_remediation_actions_updated_by_user_id" ON "system_ops"."remediation_actions" ("updated_by_user_id");
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uk_remediation_actions_plan_code" ON "system_ops"."remediation_actions" ("remediation_plan_id", "action_code");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_partition_specs_code" ON "system_ops"."partition_specs" ("code");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_partition_specs_table" ON "system_ops"."partition_specs" ("schema_name", "table_name");
+
+CREATE INDEX IF NOT EXISTS "ix_partition_specs_entity_registry_id" ON "system_ops"."partition_specs" ("entity_registry_id");
+
+CREATE INDEX IF NOT EXISTS "ix_partition_specs_strategy_concept_id" ON "system_ops"."partition_specs" ("partition_strategy_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_partition_specs_retention_policy_id" ON "system_ops"."partition_specs" ("retention_policy_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_encryption_keys_key_alias" ON "system_ops"."encryption_keys" ("key_alias");
+
+CREATE INDEX IF NOT EXISTS "ix_encryption_keys_purpose_concept_id" ON "system_ops"."encryption_keys" ("key_purpose_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_encryption_keys_next_rotation_at" ON "system_ops"."encryption_keys" ("next_rotation_at");
+
+CREATE INDEX IF NOT EXISTS "ix_encryption_keys_state_concept_id" ON "system_ops"."encryption_keys" ("state_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_key_rotation_events_encryption_key_id" ON "system_ops"."key_rotation_events" ("encryption_key_id");
+
+CREATE INDEX IF NOT EXISTS "ix_key_rotation_events_occurred_at" ON "system_ops"."key_rotation_events" ("occurred_at");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_security_incidents_code" ON "system_ops"."security_incidents" ("code");
+
+CREATE INDEX IF NOT EXISTS "ix_security_incidents_severity_concept_id" ON "system_ops"."security_incidents" ("severity_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_security_incidents_status_concept_id" ON "system_ops"."security_incidents" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_security_incidents_detected_at" ON "system_ops"."security_incidents" ("detected_at");
+
+CREATE INDEX IF NOT EXISTS "ix_breach_notifications_security_incident_id" ON "system_ops"."breach_notifications" ("security_incident_id");
+
+CREATE INDEX IF NOT EXISTS "ix_breach_notifications_authority_concept_id" ON "system_ops"."breach_notifications" ("authority_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_breach_notifications_deadline_at" ON "system_ops"."breach_notifications" ("deadline_at");
+
+CREATE INDEX IF NOT EXISTS "ix_breach_notifications_status_concept_id" ON "system_ops"."breach_notifications" ("status_concept_id");

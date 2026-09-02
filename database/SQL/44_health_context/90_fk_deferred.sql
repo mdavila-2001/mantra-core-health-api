@@ -1,16 +1,5 @@
--- SALUD v4.0.1 · módulo 44 · schema health_context
+-- SALUD v4.0.10 · módulo 44 · schema health_context
 -- Generado de diagram_44_health_context.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   context_agents.provider_id
---   context_collection_runs.schedule_id
---   context_source_observations.collection_run_id
---   context_source_observations.source_id
---   country_health_contexts.current_version_id
---   country_health_context_versions.collection_run_id
---   health_context_facts.context_version_id
---   context_quality_reviews.context_version_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -18,6 +7,13 @@ DO $$ BEGIN
     ALTER TABLE "health_context"."context_agents"
         ADD CONSTRAINT "fk_context_agents_agent_type_concept_id" FOREIGN KEY ("agent_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: integrations.external_providers (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "health_context"."context_agents"
+        ADD CONSTRAINT "fk_context_agents_provider_id" FOREIGN KEY ("provider_id")
+        REFERENCES "integrations"."external_providers" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: directory.tenants (requiere schema directory)

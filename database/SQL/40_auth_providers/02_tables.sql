@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 40 · schema auth_providers
+-- SALUD v4.0.10 · módulo 40 · schema auth_providers
 -- Generado de diagram_40_auth_providers.puml — NO editar a mano.
 
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "auth_providers"."identity_providers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_identity_providers" PRIMARY KEY ("id")
 );
 
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS "auth_providers"."provider_protocol_configs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_protocol_configs" PRIMARY KEY ("id")
 );
 
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS "auth_providers"."provider_signing_keys" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_signing_keys" PRIMARY KEY ("id")
 );
 
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS "auth_providers"."provider_tenant_bindings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_tenant_bindings" PRIMARY KEY ("id")
 );
 
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS "auth_providers"."provider_attribute_mappings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_attribute_mappings" PRIMARY KEY ("id")
 );
 
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS "auth_providers"."provisioning_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provisioning_rules" PRIMARY KEY ("id")
 );
 
@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS "auth_providers"."federated_identities" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_federated_identities" PRIMARY KEY ("id")
 );
 
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS "auth_providers"."account_link_requests" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_account_link_requests" PRIMARY KEY ("id")
 );
 

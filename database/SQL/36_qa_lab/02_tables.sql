@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 36 · schema qa_lab
+-- SALUD v4.0.10 · módulo 36 · schema qa_lab
 -- Generado de diagram_36_qa_lab.puml — NO editar a mano.
 
 
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."test_environments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_test_environments" PRIMARY KEY ("id")
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."test_suites" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_test_suites" PRIMARY KEY ("id")
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."test_cases" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_test_cases" PRIMARY KEY ("id")
 );
 
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."test_assertions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_test_assertions" PRIMARY KEY ("id")
 );
 
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."test_fixtures" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_test_fixtures" PRIMARY KEY ("id")
 );
 
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."test_runs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_test_runs" PRIMARY KEY ("id")
 );
 
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."test_case_results" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_test_case_results" PRIMARY KEY ("id")
 );
 
@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."run_artifacts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_run_artifacts" PRIMARY KEY ("id")
 );
 
@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."test_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_test_schedules" PRIMARY KEY ("id")
 );
 
@@ -251,6 +251,6 @@ CREATE TABLE IF NOT EXISTS "qa_lab"."test_defects" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_test_defects" PRIMARY KEY ("id")
 );

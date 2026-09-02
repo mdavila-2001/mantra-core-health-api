@@ -1,15 +1,5 @@
--- SALUD v4.0.1 · módulo 10 · schema audit
+-- SALUD v4.0.10 · módulo 10 · schema audit
 -- Generado de diagram_10_audit.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   insurance_decision_access_log.claim_id
---   insurance_decision_access_log.authorization_request_id
---   identity_verification_access_log.verification_case_id
---   delegated_access_audit_log.delegating_practitioner_profile_id
---   delegated_access_audit_log.delegated_assignment_id
---   analytics_governance_log.purpose_definition_id
---   segments_history.segments_id
 
 
 -- destino: iam.users (requiere schema iam)
@@ -232,7 +222,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: profiles.health_practitioner_profiles (requiere schema profiles)
 DO $$ BEGIN
     ALTER TABLE "audit"."health_practitioner_profiles_history"
-        ADD CONSTRAINT "fk_health_practitioner_profiles_history_health_practitioner_profile_id" FOREIGN KEY ("health_practitioner_profile_id")
+        ADD CONSTRAINT "fk_health_practitioner_profiles_history_health_practit_b2903f37" FOREIGN KEY ("health_practitioner_profile_id")
         REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -253,7 +243,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "audit"."health_practitioner_profiles_history"
-        ADD CONSTRAINT "fk_health_practitioner_profiles_history_change_reason_concept_id" FOREIGN KEY ("change_reason_concept_id")
+        ADD CONSTRAINT "fk_health_practitioner_profiles_history_change_reason__8785974d" FOREIGN KEY ("change_reason_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -288,7 +278,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: profiles.jurisdiction_authorizations (requiere schema profiles)
 DO $$ BEGIN
     ALTER TABLE "audit"."jurisdiction_authorizations_history"
-        ADD CONSTRAINT "fk_jurisdiction_authorizations_history_jurisdiction_authorization_id" FOREIGN KEY ("jurisdiction_authorization_id")
+        ADD CONSTRAINT "fk_jurisdiction_authorizations_history_jurisdiction_au_5b12cb5b" FOREIGN KEY ("jurisdiction_authorization_id")
         REFERENCES "profiles"."jurisdiction_authorizations" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -372,7 +362,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: practice.practitioner_role_assignments (requiere schema practice)
 DO $$ BEGIN
     ALTER TABLE "audit"."practitioner_role_assignments_history"
-        ADD CONSTRAINT "fk_practitioner_role_assignments_history_practitioner_role_assignment_id" FOREIGN KEY ("practitioner_role_assignment_id")
+        ADD CONSTRAINT "fk_practitioner_role_assignments_history_practitioner__baff3e62" FOREIGN KEY ("practitioner_role_assignment_id")
         REFERENCES "practice"."practitioner_role_assignments" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -393,7 +383,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "audit"."practitioner_role_assignments_history"
-        ADD CONSTRAINT "fk_practitioner_role_assignments_history_change_reason_concept_id" FOREIGN KEY ("change_reason_concept_id")
+        ADD CONSTRAINT "fk_practitioner_role_assignments_history_change_reason_a26f251f" FOREIGN KEY ("change_reason_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -694,7 +684,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: organization_extensions.organization_affiliations (requiere schema organization_extensions)
 DO $$ BEGIN
     ALTER TABLE "audit"."organization_affiliations_history"
-        ADD CONSTRAINT "fk_organization_affiliations_history_organization_affiliation_id" FOREIGN KEY ("organization_affiliation_id")
+        ADD CONSTRAINT "fk_organization_affiliations_history_organization_affi_000fda2f" FOREIGN KEY ("organization_affiliation_id")
         REFERENCES "organization_extensions"."organization_affiliations" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -838,6 +828,20 @@ DO $$ BEGIN
         REFERENCES "profiles"."patient_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: insurance.insurance_claims (requiere schema insurance)
+DO $$ BEGIN
+    ALTER TABLE "audit"."insurance_decision_access_log"
+        ADD CONSTRAINT "fk_insurance_decision_access_log_claim_id" FOREIGN KEY ("claim_id")
+        REFERENCES "insurance"."insurance_claims" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: insurance.prior_authorization_requests (requiere schema insurance)
+DO $$ BEGIN
+    ALTER TABLE "audit"."insurance_decision_access_log"
+        ADD CONSTRAINT "fk_insurance_decision_access_log_authorization_request_id" FOREIGN KEY ("authorization_request_id")
+        REFERENCES "insurance"."prior_authorization_requests" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "audit"."insurance_decision_access_log"
@@ -857,6 +861,13 @@ DO $$ BEGIN
     ALTER TABLE "audit"."insurance_decision_access_log"
         ADD CONSTRAINT "fk_insurance_decision_access_log_outcome_concept_id" FOREIGN KEY ("outcome_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: identity_assurance.identity_verification_cases (requiere schema identity_assurance)
+DO $$ BEGIN
+    ALTER TABLE "audit"."identity_verification_access_log"
+        ADD CONSTRAINT "fk_identity_verification_access_log_verification_case_id" FOREIGN KEY ("verification_case_id")
+        REFERENCES "identity_assurance"."identity_verification_cases" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
@@ -908,6 +919,20 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "audit"."delegated_access_audit_log"
+        ADD CONSTRAINT "fk_delegated_access_audit_log_delegating_practitioner__652b7b85" FOREIGN KEY ("delegating_practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: delegated_access.practitioner_delegate_assignments (requiere schema delegated_access)
+DO $$ BEGIN
+    ALTER TABLE "audit"."delegated_access_audit_log"
+        ADD CONSTRAINT "fk_delegated_access_audit_log_delegated_assignment_id" FOREIGN KEY ("delegated_assignment_id")
+        REFERENCES "delegated_access"."practitioner_delegate_assignments" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: profiles.patient_profiles (requiere schema profiles)
 DO $$ BEGIN
     ALTER TABLE "audit"."delegated_access_audit_log"
@@ -948,6 +973,13 @@ DO $$ BEGIN
     ALTER TABLE "audit"."analytics_governance_log"
         ADD CONSTRAINT "fk_analytics_governance_log_action_concept_id" FOREIGN KEY ("action_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: telemetry.tracking_purpose_definitions (requiere schema telemetry)
+DO $$ BEGIN
+    ALTER TABLE "audit"."analytics_governance_log"
+        ADD CONSTRAINT "fk_analytics_governance_log_purpose_definition_id" FOREIGN KEY ("purpose_definition_id")
+        REFERENCES "telemetry"."tracking_purpose_definitions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -1466,7 +1498,7 @@ DO $$ BEGIN
     ALTER TABLE "audit"."journal_transactions_history"
         ADD CONSTRAINT "fk_journal_transactions_history_journal_transaction_id" FOREIGN KEY ("journal_transaction_id")
         REFERENCES "accounting"."journal_transactions" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -1550,7 +1582,7 @@ DO $$ BEGIN
     ALTER TABLE "audit"."invoices_history"
         ADD CONSTRAINT "fk_invoices_history_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -1606,7 +1638,7 @@ DO $$ BEGIN
     ALTER TABLE "audit"."insurance_claims_history"
         ADD CONSTRAINT "fk_insurance_claims_history_insurance_claim_id" FOREIGN KEY ("insurance_claim_id")
         REFERENCES "insurance"."insurance_claims" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -1830,7 +1862,7 @@ DO $$ BEGIN
     ALTER TABLE "audit"."contracts_history"
         ADD CONSTRAINT "fk_contracts_history_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -2024,7 +2056,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: auth_providers.provider_protocol_configs (requiere schema auth_providers)
 DO $$ BEGIN
     ALTER TABLE "audit"."provider_protocol_configs_history"
-        ADD CONSTRAINT "fk_provider_protocol_configs_history_provider_protocol_config_id" FOREIGN KEY ("provider_protocol_config_id")
+        ADD CONSTRAINT "fk_provider_protocol_configs_history_provider_protocol_e11b566a" FOREIGN KEY ("provider_protocol_config_id")
         REFERENCES "auth_providers"."provider_protocol_configs" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -3335,6 +3367,13 @@ DO $$ BEGIN
     ALTER TABLE "audit"."partnership_agreements_history"
         ADD CONSTRAINT "fk_partnership_agreements_history_change_reason_concept_id" FOREIGN KEY ("change_reason_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: accounting.segments (requiere schema accounting)
+DO $$ BEGIN
+    ALTER TABLE "audit"."segments_history"
+        ADD CONSTRAINT "fk_segments_history_segments_id" FOREIGN KEY ("segments_id")
+        REFERENCES "accounting"."segments" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

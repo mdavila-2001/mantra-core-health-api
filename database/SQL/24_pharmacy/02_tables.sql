@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 24 · schema pharmacy
+-- SALUD v4.0.10 · módulo 24 · schema pharmacy
 -- Generado de diagram_24_pharmacy.puml — NO editar a mano.
 
 
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy"."pharmacies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacies" PRIMARY KEY ("id")
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy"."pharmacy_sites" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_sites" PRIMARY KEY ("id")
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy"."pharmacy_licenses" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_licenses" PRIMARY KEY ("id")
 );
 
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy"."pharmacy_products" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_products" PRIMARY KEY ("id")
 );
 
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy"."pharmacy_price_lists" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_price_lists" PRIMARY KEY ("id")
 );
 
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS "pharmacy"."pharmacy_integration_connections" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_integration_connections" PRIMARY KEY ("id")
 );
 
@@ -170,6 +170,6 @@ CREATE TABLE IF NOT EXISTS "pharmacy"."pharmacy_external_product_mappings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pharmacy_external_product_mappings" PRIMARY KEY ("id")
 );

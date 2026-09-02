@@ -1,9 +1,5 @@
--- SALUD v4.0.1 · módulo 32 · schema workflow
+-- SALUD v4.0.10 · módulo 32 · schema workflow
 -- Generado de diagram_32_workflow.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   state_transition_events.transition_definition_id
 
 
 -- destino: terminology.value_sets (requiere schema terminology)

@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "vector_rag"."vector_embeddings" (
     "id" uuid NOT NULL,
     "vector_chunk_id" uuid NOT NULL,
     "embedding_model_version_id" uuid NOT NULL,
-    "embedding" vector NOT NULL,
+    "embedding" vector(1536) NOT NULL,
     "embedding_hash" varchar NOT NULL,
     "generated_at" timestamptz NOT NULL,
     "lifecycle_state" varchar NOT NULL,
@@ -70,8 +70,8 @@ CREATE TABLE IF NOT EXISTS "vector_rag"."embedding_model_versions" (
     "distance_metric" varchar NOT NULL,
     "tokenizer_version" varchar NOT NULL,
     "approved_for_phi" boolean NOT NULL,
-    "approved_at" timestamptz NOT NULL,
-    "retired_at" timestamptz NOT NULL,
+    "approved_at" timestamptz,
+    "retired_at" timestamptz,
     CONSTRAINT "pk_embedding_model_versions" PRIMARY KEY ("id")
 );
 
@@ -207,9 +207,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS "uq_vector_chunk_number" ON "vector_rag"."vect
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_vector_chunk_hash" ON "vector_rag"."vector_chunks" ("vector_document_id", "chunk_hash");
 CREATE INDEX IF NOT EXISTS "gin_vector_chunk_metadata" ON "vector_rag"."vector_chunks" USING gin ("metadata");
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_vector_embedding_chunk_model" ON "vector_rag"."vector_embeddings" ("vector_chunk_id", "embedding_model_version_id");
--- HNSW hnsw_vector_embedding: columna vector_embeddings."embedding" es 'vector' sin dimensión (embeddings multi-modelo). pgvector exige vector(N) para indexar.
--- Materializar por-modelo (índice parcial WHERE dimension=N) o fijar la dimensión antes de crear el índice:
--- CREATE INDEX IF NOT EXISTS "hnsw_vector_embedding" ON "vector_rag"."vector_embeddings" USING hnsw ("embedding" vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS "hnsw_vector_embedding" ON "vector_rag"."vector_embeddings" USING hnsw ("embedding" vector_cosine_ops);  -- ajustar ops según distance_metric
 CREATE INDEX IF NOT EXISTS "ix_vector_embedding_state" ON "vector_rag"."vector_embeddings" ("lifecycle_state", "generated_at");
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_embedding_model_version" ON "vector_rag"."embedding_model_versions" ("provider_code", "model_id", "model_version");
 CREATE INDEX IF NOT EXISTS "ix_embedding_model_approval" ON "vector_rag"."embedding_model_versions" ("approved_for_phi", "retired_at");
@@ -234,6 +232,3 @@ CREATE INDEX IF NOT EXISTS "ix_vector_delete_tenant_status" ON "vector_rag"."vec
 CREATE INDEX IF NOT EXISTS "ix_vector_delete_patient" ON "vector_rag"."vector_deletion_jobs" ("tenant_id", "patient_profile_id");
 CREATE INDEX IF NOT EXISTS "ix_vector_reconcile_collection_time" ON "vector_rag"."vector_reconciliation_runs" ("vector_collection_id", "started_at");
 CREATE INDEX IF NOT EXISTS "ix_vector_reconcile_status" ON "vector_rag"."vector_reconciliation_runs" ("tenant_id", "status", "started_at");
-
--- Avisos:
---   HNSW hnsw_vector_embedding en vector_embeddings: columna 'embedding' es vector sin dimensión — índice documentado, no ejecutado

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 19 · schema community
+-- SALUD v4.0.10 · módulo 19 · schema community
 -- Generado de diagram_19_community.puml — NO editar a mano.
 
 
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS "community"."public_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_public_profiles" PRIMARY KEY ("id")
 );
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS "community"."social_posts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_social_posts" PRIMARY KEY ("id")
 );
 
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS "community"."service_reviews" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_service_reviews" PRIMARY KEY ("id")
 );
 
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS "community"."review_responses" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_review_responses" PRIMARY KEY ("id")
 );
 
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS "community"."comments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_comments" PRIMARY KEY ("id")
 );
 
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS "community"."reactions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_reactions" PRIMARY KEY ("id")
 );
 
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS "community"."mentions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_mentions" PRIMARY KEY ("id")
 );
 
@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS "community"."hashtags" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_hashtags" PRIMARY KEY ("id")
 );
 
@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS "community"."topics" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_topics" PRIMARY KEY ("id")
 );
 
@@ -212,7 +212,7 @@ CREATE TABLE IF NOT EXISTS "community"."content_hashtags" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_content_hashtags" PRIMARY KEY ("id")
 );
 
@@ -234,7 +234,7 @@ CREATE TABLE IF NOT EXISTS "community"."groups" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_groups" PRIMARY KEY ("id")
 );
 
@@ -250,7 +250,7 @@ CREATE TABLE IF NOT EXISTS "community"."group_members" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_group_members" PRIMARY KEY ("id")
 );
 
@@ -265,7 +265,7 @@ CREATE TABLE IF NOT EXISTS "community"."post_shares" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_post_shares" PRIMARY KEY ("id")
 );
 
@@ -279,7 +279,7 @@ CREATE TABLE IF NOT EXISTS "community"."bookmarks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_bookmarks" PRIMARY KEY ("id")
 );
 
@@ -298,7 +298,7 @@ CREATE TABLE IF NOT EXISTS "community"."feed_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_feed_items" PRIMARY KEY ("id")
 );
 
@@ -314,7 +314,7 @@ CREATE TABLE IF NOT EXISTS "community"."polls" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_polls" PRIMARY KEY ("id")
 );
 
@@ -328,7 +328,7 @@ CREATE TABLE IF NOT EXISTS "community"."poll_options" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_poll_options" PRIMARY KEY ("id")
 );
 
@@ -341,7 +341,7 @@ CREATE TABLE IF NOT EXISTS "community"."poll_votes" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_poll_votes" PRIMARY KEY ("id")
 );
 
@@ -357,7 +357,7 @@ CREATE TABLE IF NOT EXISTS "community"."conversations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_conversations" PRIMARY KEY ("id")
 );
 
@@ -374,7 +374,7 @@ CREATE TABLE IF NOT EXISTS "community"."conversation_participants" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_conversation_participants" PRIMARY KEY ("id")
 );
 
@@ -394,7 +394,7 @@ CREATE TABLE IF NOT EXISTS "community"."direct_messages" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_direct_messages" PRIMARY KEY ("id")
 );
 
@@ -425,7 +425,7 @@ CREATE TABLE IF NOT EXISTS "community"."social_notifications" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_social_notifications" PRIMARY KEY ("id")
 );
 
@@ -444,7 +444,7 @@ CREATE TABLE IF NOT EXISTS "community"."verified_badges" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_verified_badges" PRIMARY KEY ("id")
 );
 
@@ -458,7 +458,7 @@ CREATE TABLE IF NOT EXISTS "community"."user_blocks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_user_blocks" PRIMARY KEY ("id")
 );
 
@@ -478,7 +478,7 @@ CREATE TABLE IF NOT EXISTS "community"."moderation_queue" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_moderation_queue" PRIMARY KEY ("id")
 );
 
@@ -495,7 +495,7 @@ CREATE TABLE IF NOT EXISTS "community"."moderation_decisions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_moderation_decisions" PRIMARY KEY ("id")
 );
 
@@ -511,7 +511,7 @@ CREATE TABLE IF NOT EXISTS "community"."moderation_strikes" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_moderation_strikes" PRIMARY KEY ("id")
 );
 
@@ -528,7 +528,7 @@ CREATE TABLE IF NOT EXISTS "community"."moderation_appeals" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_moderation_appeals" PRIMARY KEY ("id")
 );
 
@@ -543,6 +543,102 @@ CREATE TABLE IF NOT EXISTS "community"."social_follows" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_social_follows" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."prestige_scores" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "subject_type_concept_id" uuid NOT NULL,
+    "subject_ref_id" uuid NOT NULL,
+    "public_profile_id" uuid,
+    "total_points" numeric NOT NULL,
+    "level_concept_id" uuid,
+    "rank_position" integer,
+    "last_award_id" uuid,
+    "calculated_at" timestamptz,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_prestige_scores" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."prestige_awards" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "subject_type_concept_id" uuid NOT NULL,
+    "subject_ref_id" uuid NOT NULL,
+    "public_profile_id" uuid,
+    "direction_concept_id" uuid NOT NULL,
+    "points" numeric NOT NULL,
+    "reason_concept_id" uuid NOT NULL,
+    "note" varchar,
+    "awarded_by_user_id" uuid NOT NULL,
+    "source_type" varchar,
+    "source_ref_id" uuid,
+    "balance_after" numeric,
+    "idempotency_key" varchar NOT NULL,
+    "occurred_at" timestamptz,
+    "recorded_at" timestamptz NOT NULL,
+    "recorded_by_user_id" uuid,
+    CONSTRAINT "pk_prestige_awards" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."feedback_tickets" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "ticket_number" varchar NOT NULL,
+    "reporter_user_id" uuid NOT NULL,
+    "reporter_type_concept_id" uuid,
+    "category_concept_id" uuid NOT NULL,
+    "subject" varchar NOT NULL,
+    "description" text,
+    "severity_concept_id" uuid,
+    "channel_concept_id" uuid,
+    "related_ref_type" varchar,
+    "related_ref_id" uuid,
+    "assigned_to_user_id" uuid,
+    "resolution" text,
+    "opened_at" timestamptz,
+    "resolved_at" timestamptz,
+    "closed_at" timestamptz,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_feedback_tickets" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."feedback_ticket_comments" (
+    "id" uuid NOT NULL,
+    "feedback_ticket_id" uuid NOT NULL,
+    "author_user_id" uuid NOT NULL,
+    "body" text NOT NULL,
+    "is_internal" boolean,
+    "visibility_concept_id" uuid,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_feedback_ticket_comments" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."feedback_ticket_events" (
+    "history_id" uuid NOT NULL,
+    "feedback_ticket_id" uuid NOT NULL,
+    "revision_no" integer NOT NULL,
+    "from_status_concept_id" uuid,
+    "to_status_concept_id" uuid NOT NULL,
+    "event_type_concept_id" uuid NOT NULL,
+    "note" varchar,
+    "changed_by_user_id" uuid,
+    "recorded_at" timestamptz NOT NULL,
+    CONSTRAINT "pk_feedback_ticket_events" PRIMARY KEY ("history_id")
 );

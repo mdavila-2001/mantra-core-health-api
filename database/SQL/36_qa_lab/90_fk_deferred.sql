@@ -1,16 +1,5 @@
--- SALUD v4.0.1 · módulo 36 · schema qa_lab
+-- SALUD v4.0.10 · módulo 36 · schema qa_lab
 -- Generado de diagram_36_qa_lab.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   test_cases.suite_id
---   test_cases.endpoint_id
---   test_fixtures.suite_id
---   test_runs.suite_id
---   test_runs.environment_id
---   test_schedules.suite_id
---   test_schedules.environment_id
---   test_schedules.last_run_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -95,6 +84,13 @@ DO $$ BEGIN
     ALTER TABLE "qa_lab"."test_cases"
         ADD CONSTRAINT "fk_test_cases_case_type_concept_id" FOREIGN KEY ("case_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: integrations.integration_endpoints (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "qa_lab"."test_cases"
+        ADD CONSTRAINT "fk_test_cases_endpoint_id" FOREIGN KEY ("endpoint_id")
+        REFERENCES "integrations"."integration_endpoints" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

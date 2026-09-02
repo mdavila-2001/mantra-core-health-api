@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 12 · schema integrations
+-- SALUD v4.0.10 · módulo 12 · schema integrations
 -- Generado de diagram_12_integrations.puml — NO editar a mano.
 
 
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "integrations"."external_providers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_external_providers" PRIMARY KEY ("id")
 );
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "integrations"."provider_connections" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_connections" PRIMARY KEY ("id")
 );
 
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS "integrations"."provider_credentials" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_credentials" PRIMARY KEY ("id")
 );
 
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS "integrations"."integration_endpoints" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_integration_endpoints" PRIMARY KEY ("id")
 );
 
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS "integrations"."outbound_messages" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_outbound_messages" PRIMARY KEY ("id")
 );
 
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS "integrations"."inbound_messages" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inbound_messages" PRIMARY KEY ("id")
 );
 
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS "integrations"."message_responses" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_message_responses" PRIMARY KEY ("id")
 );
 
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS "integrations"."message_retries" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_message_retries" PRIMARY KEY ("id")
 );
 
@@ -160,7 +160,7 @@ CREATE TABLE IF NOT EXISTS "integrations"."webhook_subscriptions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_webhook_subscriptions" PRIMARY KEY ("id")
 );
 
@@ -176,6 +176,6 @@ CREATE TABLE IF NOT EXISTS "integrations"."integration_field_mappings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_integration_field_mappings" PRIMARY KEY ("id")
 );

@@ -1,6 +1,8 @@
--- SALUD v4.0.1 · módulo 08 · schema clinical
+-- SALUD v4.0.10 · módulo 08 · schema clinical
 -- Generado de diagram_08_clinical.puml — NO editar a mano.
 
+
+CREATE INDEX IF NOT EXISTS "ix_prescription_signature_policies_tenant_id" ON "clinical"."prescription_signature_policies" ("tenant_id");
 
 CREATE INDEX IF NOT EXISTS "ix_family_member_history_custodian_tenant_id" ON "clinical"."family_member_history" ("custodian_tenant_id");
 
@@ -180,6 +182,8 @@ CREATE INDEX IF NOT EXISTS "ix_conditions_severity_concept_id" ON "clinical"."co
 
 CREATE INDEX IF NOT EXISTS "ix_conditions_laterality_concept_id" ON "clinical"."conditions" ("laterality_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_conditions_clinical_course_concept_id" ON "clinical"."conditions" ("clinical_course_concept_id");
+
 CREATE INDEX IF NOT EXISTS "ix_conditions_recorded_by_user_id" ON "clinical"."conditions" ("recorded_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_conditions_created_by_user_id" ON "clinical"."conditions" ("created_by_user_id");
@@ -306,6 +310,8 @@ CREATE INDEX IF NOT EXISTS "ix_medication_requests_route_concept_id" ON "clinica
 
 CREATE INDEX IF NOT EXISTS "ix_medication_requests_unit_concept_id" ON "clinical"."medication_requests" ("unit_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_medication_requests_indication_condition_id" ON "clinical"."medication_requests" ("indication_condition_id");
+
 CREATE INDEX IF NOT EXISTS "ix_medication_requests_created_by_user_id" ON "clinical"."medication_requests" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_medication_requests_updated_by_user_id" ON "clinical"."medication_requests" ("updated_by_user_id");
@@ -313,6 +319,8 @@ CREATE INDEX IF NOT EXISTS "ix_medication_requests_updated_by_user_id" ON "clini
 CREATE INDEX IF NOT EXISTS "ix_medication_requests_custodian_tenant_id_status_concept_id" ON "clinical"."medication_requests" ("custodian_tenant_id", "status_concept_id", "updated_at" DESC);
 
 CREATE INDEX IF NOT EXISTS "ix_medication_requests_patient_profile_id_updated_at" ON "clinical"."medication_requests" ("custodian_tenant_id", "patient_profile_id", "updated_at" DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_medication_requests_issue_idempotency_key" ON "clinical"."medication_requests" ("issue_idempotency_key") WHERE issue_idempotency_key IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS "ix_medication_records_custodian_tenant_id" ON "clinical"."medication_records" ("custodian_tenant_id");
 

@@ -1,27 +1,9 @@
--- SALUD v4.0.1 · módulo 42 · schema payments
+-- SALUD v4.0.10 · módulo 42 · schema payments
 -- Generado de diagram_42_payments.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
---   gateway_connections.gateway_id
---   gateway_connections.credential_id
---   payment_methods.gateway_id
---   payment_intents.gateway_id
---   payment_transactions.gateway_id
---   payouts.gateway_id
---   gateway_settlements.gateway_id
---   settlement_lines.settlement_id
---   payment_webhook_events.gateway_id
---   payment_webhook_events.related_intent_id
---   connected_accounts.gateway_id
---   subscriptions.plan_id
---   subscriptions.mandate_id
---   reconciliation_runs.gateway_id
---   payment_checkout_sessions.callback_endpoint_id
---   provider_callback_endpoints.verification_secret_id
---   provider_callback_events.duplicate_of_event_id
 --   cashier_payment_contexts.cash_register_id
---   cashier_payment_contexts.site_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -78,6 +60,13 @@ DO $$ BEGIN
     ALTER TABLE "payments"."gateway_connections"
         ADD CONSTRAINT "fk_gateway_connections_environment_concept_id" FOREIGN KEY ("environment_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: integrations.provider_credentials (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "payments"."gateway_connections"
+        ADD CONSTRAINT "fk_gateway_connections_credential_id" FOREIGN KEY ("credential_id")
+        REFERENCES "integrations"."provider_credentials" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -176,7 +165,7 @@ DO $$ BEGIN
     ALTER TABLE "payments"."payment_intents"
         ADD CONSTRAINT "fk_payment_intents_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -239,7 +228,7 @@ DO $$ BEGIN
     ALTER TABLE "payments"."payment_transactions"
         ADD CONSTRAINT "fk_payment_transactions_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: accounting.company_bank_accounts (requiere schema accounting)
 DO $$ BEGIN
@@ -274,7 +263,7 @@ DO $$ BEGIN
     ALTER TABLE "payments"."payment_transactions"
         ADD CONSTRAINT "fk_payment_transactions_journal_transaction_id" FOREIGN KEY ("journal_transaction_id")
         REFERENCES "accounting"."journal_transactions" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
@@ -316,7 +305,7 @@ DO $$ BEGIN
     ALTER TABLE "payments"."refunds"
         ADD CONSTRAINT "fk_refunds_journal_transaction_id" FOREIGN KEY ("journal_transaction_id")
         REFERENCES "accounting"."journal_transactions" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
@@ -421,7 +410,7 @@ DO $$ BEGIN
     ALTER TABLE "payments"."payouts"
         ADD CONSTRAINT "fk_payouts_journal_transaction_id" FOREIGN KEY ("journal_transaction_id")
         REFERENCES "accounting"."journal_transactions" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
@@ -477,7 +466,7 @@ DO $$ BEGIN
     ALTER TABLE "payments"."gateway_settlements"
         ADD CONSTRAINT "fk_gateway_settlements_journal_transaction_id" FOREIGN KEY ("journal_transaction_id")
         REFERENCES "accounting"."journal_transactions" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
@@ -596,7 +585,7 @@ DO $$ BEGIN
     ALTER TABLE "payments"."wallet_ledger_entries"
         ADD CONSTRAINT "fk_wallet_ledger_entries_journal_transaction_id" FOREIGN KEY ("journal_transaction_id")
         REFERENCES "accounting"."journal_transactions" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
@@ -883,6 +872,13 @@ DO $$ BEGIN
     ALTER TABLE "payments"."subscription_plans"
         ADD CONSTRAINT "fk_subscription_plans_practice_id" FOREIGN KEY ("practice_id")
         REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."subscription_plans"
+        ADD CONSTRAINT "fk_subscription_plans_tier_concept_id" FOREIGN KEY ("tier_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -1275,14 +1271,14 @@ DO $$ BEGIN
     ALTER TABLE "payments"."payment_debts"
         ADD CONSTRAINT "fk_payment_debts_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: billing.invoices (requiere schema billing)
 DO $$ BEGIN
     ALTER TABLE "payments"."payment_debts"
         ADD CONSTRAINT "fk_payment_debts_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -1410,6 +1406,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: system_ops.encryption_keys (requiere schema system_ops)
+DO $$ BEGIN
+    ALTER TABLE "payments"."provider_callback_endpoints"
+        ADD CONSTRAINT "fk_provider_callback_endpoints_verification_secret_id" FOREIGN KEY ("verification_secret_id")
+        REFERENCES "system_ops"."encryption_keys" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "payments"."provider_callback_endpoints"
@@ -1485,6 +1488,13 @@ DO $$ BEGIN
     ALTER TABLE "payments"."cashier_payment_contexts"
         ADD CONSTRAINT "fk_cashier_payment_contexts_cashier_user_id" FOREIGN KEY ("cashier_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practice_sites (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "payments"."cashier_payment_contexts"
+        ADD CONSTRAINT "fk_cashier_payment_contexts_site_id" FOREIGN KEY ("site_id")
+        REFERENCES "practice"."practice_sites" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: directory.tenants (requiere schema directory)
@@ -1646,4 +1656,172 @@ DO $$ BEGIN
     ALTER TABLE "payments"."provider_reconciliation_records"
         ADD CONSTRAINT "fk_provider_reconciliation_records_mismatch_reason_concept_id" FOREIGN KEY ("mismatch_reason_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_prices"
+        ADD CONSTRAINT "fk_plan_prices_currency_concept_id" FOREIGN KEY ("currency_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_prices"
+        ADD CONSTRAINT "fk_plan_prices_billing_interval_concept_id" FOREIGN KEY ("billing_interval_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_prices"
+        ADD CONSTRAINT "fk_plan_prices_region_concept_id" FOREIGN KEY ("region_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_prices"
+        ADD CONSTRAINT "fk_plan_prices_state_concept_id" FOREIGN KEY ("state_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_prices"
+        ADD CONSTRAINT "fk_plan_prices_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_prices"
+        ADD CONSTRAINT "fk_plan_prices_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_features"
+        ADD CONSTRAINT "fk_plan_features_feature_concept_id" FOREIGN KEY ("feature_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_features"
+        ADD CONSTRAINT "fk_plan_features_state_concept_id" FOREIGN KEY ("state_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_features"
+        ADD CONSTRAINT "fk_plan_features_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_features"
+        ADD CONSTRAINT "fk_plan_features_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_quotas"
+        ADD CONSTRAINT "fk_plan_quotas_metric_concept_id" FOREIGN KEY ("metric_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_quotas"
+        ADD CONSTRAINT "fk_plan_quotas_quota_period_concept_id" FOREIGN KEY ("quota_period_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_quotas"
+        ADD CONSTRAINT "fk_plan_quotas_overage_policy_concept_id" FOREIGN KEY ("overage_policy_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_quotas"
+        ADD CONSTRAINT "fk_plan_quotas_state_concept_id" FOREIGN KEY ("state_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_quotas"
+        ADD CONSTRAINT "fk_plan_quotas_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_quotas"
+        ADD CONSTRAINT "fk_plan_quotas_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_eligibility_rules"
+        ADD CONSTRAINT "fk_plan_eligibility_rules_eligible_practice_type_concept_id" FOREIGN KEY ("eligible_practice_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_eligibility_rules"
+        ADD CONSTRAINT "fk_plan_eligibility_rules_state_concept_id" FOREIGN KEY ("state_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_eligibility_rules"
+        ADD CONSTRAINT "fk_plan_eligibility_rules_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_eligibility_rules"
+        ADD CONSTRAINT "fk_plan_eligibility_rules_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."subscription_usage_counters"
+        ADD CONSTRAINT "fk_subscription_usage_counters_metric_concept_id" FOREIGN KEY ("metric_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "payments"."subscription_usage_counters"
+        ADD CONSTRAINT "fk_subscription_usage_counters_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."subscription_usage_counters"
+        ADD CONSTRAINT "fk_subscription_usage_counters_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "payments"."subscription_usage_counters"
+        ADD CONSTRAINT "fk_subscription_usage_counters_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

@@ -1,9 +1,5 @@
--- SALUD v4.0.1 · módulo 24 · schema pharmacy
+-- SALUD v4.0.10 · módulo 24 · schema pharmacy
 -- Generado de diagram_24_pharmacy.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   pharmacy_integration_connections.connection_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -11,7 +7,7 @@ DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacies"
         ADD CONSTRAINT "fk_pharmacies_tenant_id" FOREIGN KEY ("tenant_id")
         REFERENCES "directory"."tenants" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -310,7 +306,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_integration_connections"
-        ADD CONSTRAINT "fk_pharmacy_integration_connections_inventory_authority_concept_id" FOREIGN KEY ("inventory_authority_concept_id")
+        ADD CONSTRAINT "fk_pharmacy_integration_connections_inventory_authorit_3c66cc96" FOREIGN KEY ("inventory_authority_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -338,7 +334,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_external_product_mappings"
-        ADD CONSTRAINT "fk_pharmacy_external_product_mappings_verification_status_concept_id" FOREIGN KEY ("verification_status_concept_id")
+        ADD CONSTRAINT "fk_pharmacy_external_product_mappings_verification_sta_0e29f411" FOREIGN KEY ("verification_status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

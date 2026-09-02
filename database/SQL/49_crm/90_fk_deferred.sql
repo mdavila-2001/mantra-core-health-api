@@ -1,16 +1,5 @@
--- SALUD v4.0.1 · módulo 49 · schema crm
+-- SALUD v4.0.10 · módulo 49 · schema crm
 -- Generado de diagram_49_crm.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   opportunities.stage_id
---   opportunity_stage_history.from_stage_id
---   opportunity_stage_history.to_stage_id
---   crm_activity_relations.case_id
---   crm_tasks.recurrence_rule_id
---   crm_events.recurrence_rule_id
---   crm_events.parent_event_id
---   crm_cases.parent_case_id
 
 
 -- destino: directory.tenants (requiere schema directory)
@@ -312,7 +301,7 @@ DO $$ BEGIN
     ALTER TABLE "crm"."opportunities"
         ADD CONSTRAINT "fk_opportunities_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: erp.sales_orders (requiere schema erp)
 DO $$ BEGIN
@@ -431,14 +420,14 @@ DO $$ BEGIN
     ALTER TABLE "crm"."partnerships"
         ADD CONSTRAINT "fk_partnerships_ad_partner_id" FOREIGN KEY ("ad_partner_id")
         REFERENCES "ads"."ad_partners" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: erp.contracts (requiere schema erp)
 DO $$ BEGIN
     ALTER TABLE "crm"."partnerships"
         ADD CONSTRAINT "fk_partnerships_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -487,7 +476,7 @@ DO $$ BEGIN
     ALTER TABLE "crm"."partnership_agreements"
         ADD CONSTRAINT "fk_partnership_agreements_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -683,7 +672,7 @@ DO $$ BEGIN
     ALTER TABLE "crm"."crm_activity_relations"
         ADD CONSTRAINT "fk_crm_activity_relations_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: iam.users (requiere schema iam)
 DO $$ BEGIN
@@ -977,14 +966,14 @@ DO $$ BEGIN
     ALTER TABLE "crm"."crm_cases"
         ADD CONSTRAINT "fk_crm_cases_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: billing.invoices (requiere schema billing)
 DO $$ BEGIN
     ALTER TABLE "crm"."crm_cases"
         ADD CONSTRAINT "fk_crm_cases_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -1103,7 +1092,7 @@ DO $$ BEGIN
     ALTER TABLE "crm"."crm_entitlements"
         ADD CONSTRAINT "fk_crm_entitlements_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN

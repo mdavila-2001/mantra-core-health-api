@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 17 · schema billing
+-- SALUD v4.0.10 · módulo 17 · schema billing
 -- Generado de diagram_17_billing.puml — NO editar a mano.
 
 
@@ -58,8 +58,20 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "billing"."receivable_payment_allocations"
+        ADD CONSTRAINT "fk_receivable_payment_allocations_payment_received_id" FOREIGN KEY ("payment_received_id")
+        REFERENCES "billing"."payments_received" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "billing"."receivable_payment_allocations"
         ADD CONSTRAINT "fk_receivable_payment_allocations_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "billing"."payable_payment_allocations"
+        ADD CONSTRAINT "fk_payable_payment_allocations_payment_made_id" FOREIGN KEY ("payment_made_id")
+        REFERENCES "billing"."payments_made" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 52 · schema health_data
+-- SALUD v4.0.10 · módulo 52 · schema health_data
 -- Generado de diagram_52_health_data_platform.puml — NO editar a mano.
 
 
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."health_source_systems" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_source_systems" PRIMARY KEY ("id")
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."health_source_connections" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_source_connections" PRIMARY KEY ("id")
 );
 
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."canonical_health_resources" (
     "retention_policy_id" uuid,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_canonical_health_resources" PRIMARY KEY ("id")
 );
 
@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."fhir_profile_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_fhir_profile_definitions" PRIMARY KEY ("id")
 );
 
@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."fhir_profile_versions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_fhir_profile_versions" PRIMARY KEY ("id")
 );
 
@@ -252,7 +252,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."patient_identity_clusters" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_patient_identity_clusters" PRIMARY KEY ("id")
 );
 
@@ -312,7 +312,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."health_data_quality_rule_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_data_quality_rule_sets" PRIMARY KEY ("id")
 );
 
@@ -331,7 +331,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."health_data_quality_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_data_quality_rules" PRIMARY KEY ("id")
 );
 
@@ -424,7 +424,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."health_terminology_mapping_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_terminology_mapping_sets" PRIMARY KEY ("id")
 );
 
@@ -442,7 +442,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."health_terminology_mapping_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_terminology_mapping_rules" PRIMARY KEY ("id")
 );
 
@@ -463,7 +463,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."health_deidentification_profiles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_health_deidentification_profiles" PRIMARY KEY ("id")
 );
 
@@ -530,7 +530,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."omop_mapping_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_omop_mapping_sets" PRIMARY KEY ("id")
 );
 
@@ -548,7 +548,7 @@ CREATE TABLE IF NOT EXISTS "health_data"."omop_mapping_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_omop_mapping_rules" PRIMARY KEY ("id")
 );
 

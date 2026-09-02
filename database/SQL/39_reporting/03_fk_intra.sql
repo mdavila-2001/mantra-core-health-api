@@ -1,6 +1,12 @@
--- SALUD v4.0.1 · módulo 39 · schema reporting
+-- SALUD v4.0.10 · módulo 39 · schema reporting
 -- Generado de diagram_39_reporting.puml — NO editar a mano.
 
+
+DO $$ BEGIN
+    ALTER TABLE "reporting"."report_definitions"
+        ADD CONSTRAINT "fk_report_definitions_data_source_id" FOREIGN KEY ("data_source_id")
+        REFERENCES "reporting"."report_data_sources" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "reporting"."report_versions"
@@ -39,9 +45,21 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "reporting"."report_executions"
+        ADD CONSTRAINT "fk_report_executions_schedule_id" FOREIGN KEY ("schedule_id")
+        REFERENCES "reporting"."report_schedules" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "reporting"."report_snapshots"
         ADD CONSTRAINT "fk_report_snapshots_report_execution_id" FOREIGN KEY ("report_execution_id")
         REFERENCES "reporting"."report_executions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "reporting"."report_distributions"
+        ADD CONSTRAINT "fk_report_distributions_schedule_id" FOREIGN KEY ("schedule_id")
+        REFERENCES "reporting"."report_schedules" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

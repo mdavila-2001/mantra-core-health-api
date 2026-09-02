@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 29 · schema delegated_access
+-- SALUD v4.0.10 · módulo 29 · schema delegated_access
 -- Generado de diagram_29_delegated_access.puml — NO editar a mano.
 
 
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "delegated_access"."organization_user_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_organization_user_assignments" PRIMARY KEY ("id")
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "delegated_access"."delegated_permission_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_delegated_permission_sets" PRIMARY KEY ("id")
 );
 
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS "delegated_access"."practitioner_delegate_assignments
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practitioner_delegate_assignments" PRIMARY KEY ("id")
 );
 
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS "delegated_access"."delegated_access_grants" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_delegated_access_grants" PRIMARY KEY ("id")
 );
 

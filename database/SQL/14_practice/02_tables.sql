@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 14 · schema practice
+-- SALUD v4.0.10 · módulo 14 · schema practice
 -- Generado de diagram_14_practice.puml — NO editar a mano.
 
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "practice"."inventory_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_inventory_items" PRIMARY KEY ("id")
 );
 
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS "practice"."practices" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practices" PRIMARY KEY ("id")
 );
 
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS "practice"."practice_sites" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practice_sites" PRIMARY KEY ("id")
 );
 
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS "practice"."clinical_units" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_clinical_units" PRIMARY KEY ("id")
 );
 
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS "practice"."care_spaces" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_care_spaces" PRIMARY KEY ("id")
 );
 
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS "practice"."healthcare_services" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_healthcare_services" PRIMARY KEY ("id")
 );
 
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS "practice"."practitioner_role_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practitioner_role_assignments" PRIMARY KEY ("id")
 );
 
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS "practice"."practitioner_support_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practitioner_support_assignments" PRIMARY KEY ("id")
 );
 
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS "practice"."practice_accreditations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practice_accreditations" PRIMARY KEY ("id")
 );
 
@@ -200,6 +200,6 @@ CREATE TABLE IF NOT EXISTS "practice"."practice_settings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_practice_settings" PRIMARY KEY ("id")
 );

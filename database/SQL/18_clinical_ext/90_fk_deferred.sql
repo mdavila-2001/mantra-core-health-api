@@ -1,13 +1,5 @@
--- SALUD v4.0.1 · módulo 18 · schema clinical_ext
+-- SALUD v4.0.10 · módulo 18 · schema clinical_ext
 -- Generado de diagram_18_clinical_ext.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   care_teams.episode_id
---   care_team_members.practitioner_profile_id
---   referrals.referring_profile_id
---   referrals.target_profile_id
---   clinical_alerts.rule_id
 
 
 -- destino: profiles.patient_profiles (requiere schema profiles)
@@ -15,6 +7,13 @@ DO $$ BEGIN
     ALTER TABLE "clinical_ext"."care_teams"
         ADD CONSTRAINT "fk_care_teams_patient_profile_id" FOREIGN KEY ("patient_profile_id")
         REFERENCES "profiles"."patient_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: clinical.care_episodes (requiere schema clinical)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."care_teams"
+        ADD CONSTRAINT "fk_care_teams_episode_id" FOREIGN KEY ("episode_id")
+        REFERENCES "clinical"."care_episodes" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: directory.tenants (requiere schema directory)
@@ -50,6 +49,13 @@ DO $$ BEGIN
     ALTER TABLE "clinical_ext"."care_teams"
         ADD CONSTRAINT "fk_care_teams_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."care_team_members"
+        ADD CONSTRAINT "fk_care_team_members_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: profiles.related_persons (requiere schema profiles)
@@ -99,6 +105,20 @@ DO $$ BEGIN
     ALTER TABLE "clinical_ext"."referrals"
         ADD CONSTRAINT "fk_referrals_source_encounter_id" FOREIGN KEY ("source_encounter_id")
         REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."referrals"
+        ADD CONSTRAINT "fk_referrals_referring_profile_id" FOREIGN KEY ("referring_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."referrals"
+        ADD CONSTRAINT "fk_referrals_target_profile_id" FOREIGN KEY ("target_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: directory.tenants (requiere schema directory)
@@ -462,6 +482,55 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "clinical_ext"."order_set_items"
         ADD CONSTRAINT "fk_order_set_items_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."prescription_favorites"
+        ADD CONSTRAINT "fk_prescription_favorites_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."prescription_favorites"
+        ADD CONSTRAINT "fk_prescription_favorites_medication_concept_id" FOREIGN KEY ("medication_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."prescription_favorites"
+        ADD CONSTRAINT "fk_prescription_favorites_substance_atc_concept_id" FOREIGN KEY ("substance_atc_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."prescription_favorites"
+        ADD CONSTRAINT "fk_prescription_favorites_route_concept_id" FOREIGN KEY ("route_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."prescription_favorites"
+        ADD CONSTRAINT "fk_prescription_favorites_unit_concept_id" FOREIGN KEY ("unit_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."prescription_favorites"
+        ADD CONSTRAINT "fk_prescription_favorites_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "clinical_ext"."prescription_favorites"
+        ADD CONSTRAINT "fk_prescription_favorites_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

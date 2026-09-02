@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 43 · schema ads
+-- SALUD v4.0.10 · módulo 43 · schema ads
 -- Generado de diagram_43_ads.puml — NO editar a mano.
 
 
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "ads"."business_managers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_business_managers" PRIMARY KEY ("id")
 );
 
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_partners" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_partners" PRIMARY KEY ("id")
 );
 
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS "ads"."partner_relationships" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_partner_relationships" PRIMARY KEY ("id")
 );
 
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_accounts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_accounts" PRIMARY KEY ("id")
 );
 
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_account_users" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_account_users" PRIMARY KEY ("id")
 );
 
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS "ads"."campaigns" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_campaigns" PRIMARY KEY ("id")
 );
 
@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_sets" PRIMARY KEY ("id")
 );
 
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ads" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ads" PRIMARY KEY ("id")
 );
 
@@ -174,7 +174,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_creatives" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_creatives" PRIMARY KEY ("id")
 );
 
@@ -193,7 +193,7 @@ CREATE TABLE IF NOT EXISTS "ads"."creative_assets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_creative_assets" PRIMARY KEY ("id")
 );
 
@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS "ads"."custom_audiences" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_custom_audiences" PRIMARY KEY ("id")
 );
 
@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS "ads"."targeting_specs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_targeting_specs" PRIMARY KEY ("id")
 );
 
@@ -254,7 +254,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_placements" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_placements" PRIMARY KEY ("id")
 );
 
@@ -270,7 +270,7 @@ CREATE TABLE IF NOT EXISTS "ads"."tracking_pixels" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tracking_pixels" PRIMARY KEY ("id")
 );
 
@@ -325,7 +325,7 @@ CREATE TABLE IF NOT EXISTS "ads"."attribution_settings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_attribution_settings" PRIMARY KEY ("id")
 );
 
@@ -376,7 +376,7 @@ CREATE TABLE IF NOT EXISTS "ads"."budget_schedules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_budget_schedules" PRIMARY KEY ("id")
 );
 
@@ -412,7 +412,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_invoices" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_invoices" PRIMARY KEY ("id")
 );
 
@@ -428,7 +428,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_invoice_lines" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_invoice_lines" PRIMARY KEY ("id")
 );
 
@@ -445,7 +445,7 @@ CREATE TABLE IF NOT EXISTS "ads"."product_catalogs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_product_catalogs" PRIMARY KEY ("id")
 );
 
@@ -466,7 +466,7 @@ CREATE TABLE IF NOT EXISTS "ads"."catalog_feeds" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_catalog_feeds" PRIMARY KEY ("id")
 );
 
@@ -495,7 +495,7 @@ CREATE TABLE IF NOT EXISTS "ads"."catalog_products" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_catalog_products" PRIMARY KEY ("id")
 );
 
@@ -512,7 +512,7 @@ CREATE TABLE IF NOT EXISTS "ads"."product_localizations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_product_localizations" PRIMARY KEY ("id")
 );
 
@@ -529,7 +529,7 @@ CREATE TABLE IF NOT EXISTS "ads"."product_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_product_sets" PRIMARY KEY ("id")
 );
 
@@ -542,7 +542,7 @@ CREATE TABLE IF NOT EXISTS "ads"."product_set_members" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_product_set_members" PRIMARY KEY ("id")
 );
 
@@ -562,7 +562,7 @@ CREATE TABLE IF NOT EXISTS "ads"."dynamic_ad_templates" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dynamic_ad_templates" PRIMARY KEY ("id")
 );
 
@@ -579,7 +579,7 @@ CREATE TABLE IF NOT EXISTS "ads"."collection_ads" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_collection_ads" PRIMARY KEY ("id")
 );
 
@@ -609,7 +609,7 @@ CREATE TABLE IF NOT EXISTS "ads"."saved_audiences" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_saved_audiences" PRIMARY KEY ("id")
 );
 
@@ -626,7 +626,7 @@ CREATE TABLE IF NOT EXISTS "ads"."lookalike_specs" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_lookalike_specs" PRIMARY KEY ("id")
 );
 
@@ -647,7 +647,7 @@ CREATE TABLE IF NOT EXISTS "ads"."automated_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_automated_rules" PRIMARY KEY ("id")
 );
 
@@ -682,7 +682,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_experiments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_experiments" PRIMARY KEY ("id")
 );
 
@@ -699,7 +699,7 @@ CREATE TABLE IF NOT EXISTS "ads"."experiment_variants" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_experiment_variants" PRIMARY KEY ("id")
 );
 
@@ -717,7 +717,7 @@ CREATE TABLE IF NOT EXISTS "ads"."custom_conversions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_custom_conversions" PRIMARY KEY ("id")
 );
 
@@ -737,7 +737,7 @@ CREATE TABLE IF NOT EXISTS "ads"."offline_conversion_sets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_offline_conversion_sets" PRIMARY KEY ("id")
 );
 
@@ -768,7 +768,7 @@ CREATE TABLE IF NOT EXISTS "ads"."frequency_caps" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_frequency_caps" PRIMARY KEY ("id")
 );
 
@@ -788,7 +788,7 @@ CREATE TABLE IF NOT EXISTS "ads"."brand_lift_studies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_brand_lift_studies" PRIMARY KEY ("id")
 );
 
@@ -811,7 +811,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_platform_connections" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_platform_connections" PRIMARY KEY ("id")
 );
 
@@ -830,7 +830,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_identity_assets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_identity_assets" PRIMARY KEY ("id")
 );
 
@@ -846,7 +846,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_identity_asset_assignments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_identity_asset_assignments" PRIMARY KEY ("id")
 );
 
@@ -865,7 +865,7 @@ CREATE TABLE IF NOT EXISTS "ads"."conversion_datasets" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_conversion_datasets" PRIMARY KEY ("id")
 );
 
@@ -882,7 +882,7 @@ CREATE TABLE IF NOT EXISTS "ads"."dataset_connections" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_dataset_connections" PRIMARY KEY ("id")
 );
 
@@ -1003,7 +1003,7 @@ CREATE TABLE IF NOT EXISTS "ads"."lead_forms" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_lead_forms" PRIMARY KEY ("id")
 );
 
@@ -1021,7 +1021,7 @@ CREATE TABLE IF NOT EXISTS "ads"."lead_form_questions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_lead_form_questions" PRIMARY KEY ("id")
 );
 
@@ -1082,7 +1082,7 @@ CREATE TABLE IF NOT EXISTS "ads"."insight_metric_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insight_metric_definitions" PRIMARY KEY ("id")
 );
 
@@ -1098,7 +1098,7 @@ CREATE TABLE IF NOT EXISTS "ads"."insight_breakdown_definitions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insight_breakdown_definitions" PRIMARY KEY ("id")
 );
 
@@ -1165,7 +1165,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_policy_violations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_policy_violations" PRIMARY KEY ("id")
 );
 
@@ -1184,7 +1184,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_policy_appeals" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_policy_appeals" PRIMARY KEY ("id")
 );
 
@@ -1217,7 +1217,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_event_data_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_event_data_policies" PRIMARY KEY ("id")
 );
 
@@ -1234,7 +1234,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_event_field_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_ad_event_field_rules" PRIMARY KEY ("id")
 );
 
@@ -1289,7 +1289,7 @@ CREATE TABLE IF NOT EXISTS "ads"."ad_sync_checkpoints" (
     "checkpoint_key" varchar NOT NULL,
     "checkpoint_value_encrypted" text,
     "checkpoint_at" timestamptz NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "updated_at" timestamptz NOT NULL,
     CONSTRAINT "pk_ad_sync_checkpoints" PRIMARY KEY ("id")
 );

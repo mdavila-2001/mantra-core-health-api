@@ -1,6 +1,24 @@
--- SALUD v4.0.1 · módulo 42 · schema payments
+-- SALUD v4.0.10 · módulo 42 · schema payments
 -- Generado de diagram_42_payments.puml — NO editar a mano.
 
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."gateway_connections"
+        ADD CONSTRAINT "fk_gateway_connections_gateway_id" FOREIGN KEY ("gateway_id")
+        REFERENCES "payments"."payment_gateways" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."payment_methods"
+        ADD CONSTRAINT "fk_payment_methods_gateway_id" FOREIGN KEY ("gateway_id")
+        REFERENCES "payments"."payment_gateways" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."payment_intents"
+        ADD CONSTRAINT "fk_payment_intents_gateway_id" FOREIGN KEY ("gateway_id")
+        REFERENCES "payments"."payment_gateways" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "payments"."payment_intents"
@@ -21,6 +39,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "payments"."payment_transactions"
+        ADD CONSTRAINT "fk_payment_transactions_gateway_id" FOREIGN KEY ("gateway_id")
+        REFERENCES "payments"."payment_gateways" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "payments"."refunds"
         ADD CONSTRAINT "fk_refunds_payment_transaction_id" FOREIGN KEY ("payment_transaction_id")
         REFERENCES "payments"."payment_transactions" ("id");
@@ -33,9 +57,27 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "payments"."payouts"
+        ADD CONSTRAINT "fk_payouts_gateway_id" FOREIGN KEY ("gateway_id")
+        REFERENCES "payments"."payment_gateways" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "payments"."payout_items"
         ADD CONSTRAINT "fk_payout_items_payout_id" FOREIGN KEY ("payout_id")
         REFERENCES "payments"."payouts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."gateway_settlements"
+        ADD CONSTRAINT "fk_gateway_settlements_gateway_id" FOREIGN KEY ("gateway_id")
+        REFERENCES "payments"."payment_gateways" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."settlement_lines"
+        ADD CONSTRAINT "fk_settlement_lines_settlement_id" FOREIGN KEY ("settlement_id")
+        REFERENCES "payments"."gateway_settlements" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -52,8 +94,20 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "payments"."payment_webhook_events"
+        ADD CONSTRAINT "fk_payment_webhook_events_gateway_id" FOREIGN KEY ("gateway_id")
+        REFERENCES "payments"."payment_gateways" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."payment_webhook_events"
         ADD CONSTRAINT "fk_payment_webhook_events_gateway_connection_id" FOREIGN KEY ("gateway_connection_id")
         REFERENCES "payments"."gateway_connections" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."payment_webhook_events"
+        ADD CONSTRAINT "fk_payment_webhook_events_related_intent_id" FOREIGN KEY ("related_intent_id")
+        REFERENCES "payments"."payment_intents" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -66,6 +120,12 @@ DO $$ BEGIN
     ALTER TABLE "payments"."wallet_ledger_entries"
         ADD CONSTRAINT "fk_wallet_ledger_entries_payment_transaction_id" FOREIGN KEY ("payment_transaction_id")
         REFERENCES "payments"."payment_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."connected_accounts"
+        ADD CONSTRAINT "fk_connected_accounts_gateway_id" FOREIGN KEY ("gateway_id")
+        REFERENCES "payments"."payment_gateways" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -124,8 +184,20 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "payments"."subscriptions"
+        ADD CONSTRAINT "fk_subscriptions_plan_id" FOREIGN KEY ("plan_id")
+        REFERENCES "payments"."subscription_plans" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."subscriptions"
         ADD CONSTRAINT "fk_subscriptions_payment_method_id" FOREIGN KEY ("payment_method_id")
         REFERENCES "payments"."payment_methods" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."subscriptions"
+        ADD CONSTRAINT "fk_subscriptions_mandate_id" FOREIGN KEY ("mandate_id")
+        REFERENCES "payments"."payment_mandates" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -162,6 +234,12 @@ DO $$ BEGIN
     ALTER TABLE "payments"."risk_assessments"
         ADD CONSTRAINT "fk_risk_assessments_payment_intent_id" FOREIGN KEY ("payment_intent_id")
         REFERENCES "payments"."payment_intents" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."reconciliation_runs"
+        ADD CONSTRAINT "fk_reconciliation_runs_gateway_id" FOREIGN KEY ("gateway_id")
+        REFERENCES "payments"."payment_gateways" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -231,6 +309,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "payments"."payment_checkout_sessions"
+        ADD CONSTRAINT "fk_payment_checkout_sessions_callback_endpoint_id" FOREIGN KEY ("callback_endpoint_id")
+        REFERENCES "payments"."provider_callback_endpoints" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "payments"."provider_api_operations"
         ADD CONSTRAINT "fk_provider_api_operations_gateway_connection_id" FOREIGN KEY ("gateway_connection_id")
         REFERENCES "payments"."gateway_connections" ("id");
@@ -282,6 +366,12 @@ DO $$ BEGIN
     ALTER TABLE "payments"."provider_callback_events"
         ADD CONSTRAINT "fk_provider_callback_events_payment_transaction_id" FOREIGN KEY ("payment_transaction_id")
         REFERENCES "payments"."payment_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."provider_callback_events"
+        ADD CONSTRAINT "fk_provider_callback_events_duplicate_of_event_id" FOREIGN KEY ("duplicate_of_event_id")
+        REFERENCES "payments"."provider_callback_events" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -414,4 +504,34 @@ DO $$ BEGIN
     ALTER TABLE "payments"."provider_reconciliation_records"
         ADD CONSTRAINT "fk_provider_reconciliation_records_payment_transaction_id" FOREIGN KEY ("payment_transaction_id")
         REFERENCES "payments"."payment_transactions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_prices"
+        ADD CONSTRAINT "fk_plan_prices_plan_id" FOREIGN KEY ("plan_id")
+        REFERENCES "payments"."subscription_plans" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_features"
+        ADD CONSTRAINT "fk_plan_features_plan_id" FOREIGN KEY ("plan_id")
+        REFERENCES "payments"."subscription_plans" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_quotas"
+        ADD CONSTRAINT "fk_plan_quotas_plan_id" FOREIGN KEY ("plan_id")
+        REFERENCES "payments"."subscription_plans" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."plan_eligibility_rules"
+        ADD CONSTRAINT "fk_plan_eligibility_rules_plan_id" FOREIGN KEY ("plan_id")
+        REFERENCES "payments"."subscription_plans" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "payments"."subscription_usage_counters"
+        ADD CONSTRAINT "fk_subscription_usage_counters_subscription_id" FOREIGN KEY ("subscription_id")
+        REFERENCES "payments"."subscriptions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

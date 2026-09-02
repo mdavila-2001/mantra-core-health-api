@@ -1,18 +1,5 @@
--- SALUD v4.0.1 · módulo 12 · schema integrations
+-- SALUD v4.0.10 · módulo 12 · schema integrations
 -- Generado de diagram_12_integrations.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   provider_connections.provider_id
---   provider_connections.credential_id
---   provider_credentials.connection_id
---   integration_endpoints.provider_id
---   outbound_messages.connection_id
---   outbound_messages.endpoint_id
---   inbound_messages.connection_id
---   inbound_messages.endpoint_id
---   webhook_subscriptions.provider_id
---   integration_field_mappings.endpoint_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

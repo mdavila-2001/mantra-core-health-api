@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 53 · schema procedures_perioperative
+-- SALUD v4.0.10 · módulo 53 · schema procedures_perioperative
 -- Generado de diagram_53_procedures_perioperative.puml — NO editar a mano.
 
 
@@ -191,6 +191,12 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "procedures_perioperative"."procedure_cancellations"
         ADD CONSTRAINT "fk_procedure_cancellations_procedure_case_id" FOREIGN KEY ("procedure_case_id")
+        REFERENCES "procedures_perioperative"."procedure_cases" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "procedures_perioperative"."procedure_cancellations"
+        ADD CONSTRAINT "fk_procedure_cancellations_replacement_case_id" FOREIGN KEY ("replacement_case_id")
         REFERENCES "procedures_perioperative"."procedure_cases" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

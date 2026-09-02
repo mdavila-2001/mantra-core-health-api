@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 26 · schema insurance
+-- SALUD v4.0.10 · módulo 26 · schema insurance
 -- Generado de diagram_26_insurance.puml — NO editar a mano.
 
 
@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_carriers" (
     "tenant_id" uuid NOT NULL,
     "carrier_code" varchar NOT NULL,
     "legal_name" varchar NOT NULL,
+    "sigla" varchar,
+    "address" varchar,
     "regulator_identifier" varchar,
     "jurisdiction_concept_id" uuid,
     "public_profile_id" uuid,
@@ -16,7 +18,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_carriers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insurance_carriers" PRIMARY KEY ("id")
 );
 
@@ -34,7 +36,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_brokers" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insurance_brokers" PRIMARY KEY ("id")
 );
 
@@ -52,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."broker_carrier_agreements" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_broker_carrier_agreements" PRIMARY KEY ("id")
 );
 
@@ -67,7 +69,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."employer_groups" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_employer_groups" PRIMARY KEY ("id")
 );
 
@@ -84,7 +86,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_products" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insurance_products" PRIMARY KEY ("id")
 );
 
@@ -103,7 +105,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_plans" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insurance_plans" PRIMARY KEY ("id")
 );
 
@@ -125,7 +127,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_plan_benefits" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insurance_plan_benefits" PRIMARY KEY ("id")
 );
 
@@ -142,7 +144,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."provider_networks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_provider_networks" PRIMARY KEY ("id")
 );
 
@@ -166,7 +168,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."network_provider_memberships" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_network_provider_memberships" PRIMARY KEY ("id")
 );
 
@@ -188,7 +190,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."patient_coverages" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_patient_coverages" PRIMARY KEY ("id")
 );
 
@@ -204,7 +206,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."coverage_dependents" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_coverage_dependents" PRIMARY KEY ("id")
 );
 
@@ -222,7 +224,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."broker_clients" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_broker_clients" PRIMARY KEY ("id")
 );
 
@@ -270,7 +272,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."prior_authorization_requests" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_prior_authorization_requests" PRIMARY KEY ("id")
 );
 
@@ -323,7 +325,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_claims" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insurance_claims" PRIMARY KEY ("id")
 );
 
@@ -399,7 +401,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_reconciliation_batches" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insurance_reconciliation_batches" PRIMARY KEY ("id")
 );
 
@@ -417,7 +419,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_reconciliation_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_insurance_reconciliation_items" PRIMARY KEY ("id")
 );
 
@@ -435,7 +437,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."broker_commission_statements" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_broker_commission_statements" PRIMARY KEY ("id")
 );
 
@@ -472,7 +474,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."claim_disputes" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_claim_disputes" PRIMARY KEY ("id")
 );
 

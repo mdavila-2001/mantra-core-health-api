@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 32 · schema workflow
+-- SALUD v4.0.10 · módulo 32 · schema workflow
 -- Generado de diagram_32_workflow.puml — NO editar a mano.
 
 
@@ -30,6 +30,12 @@ DO $$ BEGIN
     ALTER TABLE "workflow"."state_transition_events"
         ADD CONSTRAINT "fk_state_transition_events_state_machine_definition_id" FOREIGN KEY ("state_machine_definition_id")
         REFERENCES "workflow"."state_machine_definitions" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "workflow"."state_transition_events"
+        ADD CONSTRAINT "fk_state_transition_events_transition_definition_id" FOREIGN KEY ("transition_definition_id")
+        REFERENCES "workflow"."state_transition_definitions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

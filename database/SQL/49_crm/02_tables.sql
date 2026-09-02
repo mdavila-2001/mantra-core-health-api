@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 49 · schema crm
+-- SALUD v4.0.10 · módulo 49 · schema crm
 -- Generado de diagram_49_crm.puml — NO editar a mano.
 
 
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS "crm"."crm_accounts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_crm_accounts" PRIMARY KEY ("id")
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS "crm"."contacts" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contacts" PRIMARY KEY ("id")
 );
 
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS "crm"."contact_channels" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contact_channels" PRIMARY KEY ("id")
 );
 
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS "crm"."leads" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_leads" PRIMARY KEY ("id")
 );
 
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS "crm"."pipelines" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pipelines" PRIMARY KEY ("id")
 );
 
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS "crm"."pipeline_stages" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_pipeline_stages" PRIMARY KEY ("id")
 );
 
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS "crm"."opportunities" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_opportunities" PRIMARY KEY ("id")
 );
 
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS "crm"."crm_activities" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_crm_activities" PRIMARY KEY ("id")
 );
 
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS "crm"."partnerships" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_partnerships" PRIMARY KEY ("id")
 );
 
@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS "crm"."partnership_agreements" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_partnership_agreements" PRIMARY KEY ("id")
 );
 
@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS "crm"."account_contact_relations" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_account_contact_relations" PRIMARY KEY ("id")
 );
 
@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS "crm"."opportunity_contact_roles" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_opportunity_contact_roles" PRIMARY KEY ("id")
 );
 
@@ -283,7 +283,7 @@ CREATE TABLE IF NOT EXISTS "crm"."opportunity_line_items" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_opportunity_line_items" PRIMARY KEY ("id")
 );
 
@@ -353,7 +353,7 @@ CREATE TABLE IF NOT EXISTS "crm"."crm_tasks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_crm_tasks" PRIMARY KEY ("id")
 );
 
@@ -375,7 +375,7 @@ CREATE TABLE IF NOT EXISTS "crm"."crm_events" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_crm_events" PRIMARY KEY ("id")
 );
 
@@ -391,7 +391,7 @@ CREATE TABLE IF NOT EXISTS "crm"."crm_recurrence_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_crm_recurrence_rules" PRIMARY KEY ("id")
 );
 
@@ -469,7 +469,7 @@ CREATE TABLE IF NOT EXISTS "crm"."crm_notes" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_crm_notes" PRIMARY KEY ("id")
 );
 
@@ -496,7 +496,7 @@ CREATE TABLE IF NOT EXISTS "crm"."crm_cases" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_crm_cases" PRIMARY KEY ("id")
 );
 
@@ -551,7 +551,7 @@ CREATE TABLE IF NOT EXISTS "crm"."crm_entitlements" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_crm_entitlements" PRIMARY KEY ("id")
 );
 
@@ -568,7 +568,7 @@ CREATE TABLE IF NOT EXISTS "crm"."crm_case_milestones" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_crm_case_milestones" PRIMARY KEY ("id")
 );
 
@@ -596,6 +596,6 @@ CREATE TABLE IF NOT EXISTS "crm"."contact_channel_endpoints" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid NOT NULL,
     "updated_by_user_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_contact_channel_endpoints" PRIMARY KEY ("id")
 );

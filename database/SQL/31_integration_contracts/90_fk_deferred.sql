@@ -1,13 +1,9 @@
--- SALUD v4.0.1 · módulo 31 · schema integration_contracts
+-- SALUD v4.0.10 · módulo 31 · schema integration_contracts
 -- Generado de diagram_31_integration_contracts.puml — NO editar a mano.
 
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
 --   integration_contracts.data_use_agreement_id
---   integration_contract_versions.mapping_profile_id
---   integration_exchange_attempts.endpoint_id
---   integration_idempotency_records.first_exchange_record_id
---   integration_sync_cursors.last_successful_exchange_id
 
 
 -- destino: integrations.external_providers (requiere schema integrations)
@@ -171,6 +167,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: integrations.integration_endpoints (requiere schema integrations)
+DO $$ BEGIN
+    ALTER TABLE "integration_contracts"."integration_exchange_attempts"
+        ADD CONSTRAINT "fk_integration_exchange_attempts_endpoint_id" FOREIGN KEY ("endpoint_id")
+        REFERENCES "integrations"."integration_endpoints" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "integration_contracts"."integration_exchange_attempts"
@@ -234,11 +237,11 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- destino: integration_contracts.contract_webhook_subscriptions
+-- destino: integrations.webhook_subscriptions (requiere schema integrations)
 DO $$ BEGIN
     ALTER TABLE "integration_contracts"."webhook_delivery_evidence"
         ADD CONSTRAINT "fk_webhook_delivery_evidence_webhook_subscription_id" FOREIGN KEY ("webhook_subscription_id")
-        REFERENCES "integration_contracts"."contract_webhook_subscriptions" ("id");
+        REFERENCES "integrations"."webhook_subscriptions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

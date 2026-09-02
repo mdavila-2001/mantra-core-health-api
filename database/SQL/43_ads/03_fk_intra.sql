@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 43 · schema ads
+-- SALUD v4.0.10 · módulo 43 · schema ads
 -- Generado de diagram_43_ads.puml — NO editar a mano.
 
 
@@ -6,6 +6,12 @@ DO $$ BEGIN
     ALTER TABLE "ads"."partner_relationships"
         ADD CONSTRAINT "fk_partner_relationships_business_manager_id" FOREIGN KEY ("business_manager_id")
         REFERENCES "ads"."business_managers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."partner_relationships"
+        ADD CONSTRAINT "fk_partner_relationships_partner_id" FOREIGN KEY ("partner_id")
+        REFERENCES "ads"."ad_partners" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -18,6 +24,12 @@ DO $$ BEGIN
     ALTER TABLE "ads"."ad_account_users"
         ADD CONSTRAINT "fk_ad_account_users_ad_account_id" FOREIGN KEY ("ad_account_id")
         REFERENCES "ads"."ad_accounts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."ad_account_users"
+        ADD CONSTRAINT "fk_ad_account_users_partner_id" FOREIGN KEY ("partner_id")
+        REFERENCES "ads"."ad_partners" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -45,6 +57,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "ads"."ads"
+        ADD CONSTRAINT "fk_ads_creative_id" FOREIGN KEY ("creative_id")
+        REFERENCES "ads"."ad_creatives" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "ads"."ad_creatives"
         ADD CONSTRAINT "fk_ad_creatives_ad_account_id" FOREIGN KEY ("ad_account_id")
         REFERENCES "ads"."ad_accounts" ("id");
@@ -60,6 +78,18 @@ DO $$ BEGIN
     ALTER TABLE "ads"."custom_audiences"
         ADD CONSTRAINT "fk_custom_audiences_ad_account_id" FOREIGN KEY ("ad_account_id")
         REFERENCES "ads"."ad_accounts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."custom_audiences"
+        ADD CONSTRAINT "fk_custom_audiences_lookalike_source_audience_id" FOREIGN KEY ("lookalike_source_audience_id")
+        REFERENCES "ads"."custom_audiences" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."custom_audiences"
+        ADD CONSTRAINT "fk_custom_audiences_data_source_pixel_id" FOREIGN KEY ("data_source_pixel_id")
+        REFERENCES "ads"."tracking_pixels" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -102,6 +132,12 @@ DO $$ BEGIN
     ALTER TABLE "ads"."attribution_settings"
         ADD CONSTRAINT "fk_attribution_settings_ad_account_id" FOREIGN KEY ("ad_account_id")
         REFERENCES "ads"."ad_accounts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."pixel_events"
+        ADD CONSTRAINT "fk_pixel_events_pixel_id" FOREIGN KEY ("pixel_id")
+        REFERENCES "ads"."tracking_pixels" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -183,9 +219,21 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "ads"."dynamic_ad_templates"
+        ADD CONSTRAINT "fk_dynamic_ad_templates_creative_id" FOREIGN KEY ("creative_id")
+        REFERENCES "ads"."ad_creatives" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "ads"."collection_ads"
         ADD CONSTRAINT "fk_collection_ads_ad_account_id" FOREIGN KEY ("ad_account_id")
         REFERENCES "ads"."ad_accounts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."collection_ads"
+        ADD CONSTRAINT "fk_collection_ads_hero_creative_id" FOREIGN KEY ("hero_creative_id")
+        REFERENCES "ads"."ad_creatives" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -213,6 +261,18 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "ads"."lookalike_specs"
+        ADD CONSTRAINT "fk_lookalike_specs_source_audience_id" FOREIGN KEY ("source_audience_id")
+        REFERENCES "ads"."custom_audiences" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."lookalike_specs"
+        ADD CONSTRAINT "fk_lookalike_specs_generated_audience_id" FOREIGN KEY ("generated_audience_id")
+        REFERENCES "ads"."custom_audiences" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "ads"."automated_rules"
         ADD CONSTRAINT "fk_automated_rules_ad_account_id" FOREIGN KEY ("ad_account_id")
         REFERENCES "ads"."ad_accounts" ("id");
@@ -231,6 +291,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "ads"."ad_experiments"
+        ADD CONSTRAINT "fk_ad_experiments_winner_variant_id" FOREIGN KEY ("winner_variant_id")
+        REFERENCES "ads"."experiment_variants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "ads"."experiment_variants"
         ADD CONSTRAINT "fk_experiment_variants_ad_experiment_id" FOREIGN KEY ("ad_experiment_id")
         REFERENCES "ads"."ad_experiments" ("id");
@@ -240,6 +306,12 @@ DO $$ BEGIN
     ALTER TABLE "ads"."custom_conversions"
         ADD CONSTRAINT "fk_custom_conversions_ad_account_id" FOREIGN KEY ("ad_account_id")
         REFERENCES "ads"."ad_accounts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."custom_conversions"
+        ADD CONSTRAINT "fk_custom_conversions_pixel_id" FOREIGN KEY ("pixel_id")
+        REFERENCES "ads"."tracking_pixels" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -279,6 +351,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "ads"."ad_identity_assets"
+        ADD CONSTRAINT "fk_ad_identity_assets_platform_connection_id" FOREIGN KEY ("platform_connection_id")
+        REFERENCES "ads"."ad_platform_connections" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "ads"."ad_identity_asset_assignments"
         ADD CONSTRAINT "fk_ad_identity_asset_assignments_ad_identity_asset_id" FOREIGN KEY ("ad_identity_asset_id")
         REFERENCES "ads"."ad_identity_assets" ("id");
@@ -300,6 +378,12 @@ DO $$ BEGIN
     ALTER TABLE "ads"."dataset_connections"
         ADD CONSTRAINT "fk_dataset_connections_conversion_dataset_id" FOREIGN KEY ("conversion_dataset_id")
         REFERENCES "ads"."conversion_datasets" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."dataset_connections"
+        ADD CONSTRAINT "fk_dataset_connections_platform_connection_id" FOREIGN KEY ("platform_connection_id")
+        REFERENCES "ads"."ad_platform_connections" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -328,8 +412,14 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "ads"."conversion_event_delivery_attempts"
-        ADD CONSTRAINT "fk_conversion_event_delivery_attempts_server_conversion_event_id" FOREIGN KEY ("server_conversion_event_id")
+        ADD CONSTRAINT "fk_conversion_event_delivery_attempts_server_conversio_0b5ca799" FOREIGN KEY ("server_conversion_event_id")
         REFERENCES "ads"."server_conversion_events" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."conversion_event_delivery_attempts"
+        ADD CONSTRAINT "fk_conversion_event_delivery_attempts_platform_connection_id" FOREIGN KEY ("platform_connection_id")
+        REFERENCES "ads"."ad_platform_connections" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -417,6 +507,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "ads"."insight_query_runs"
+        ADD CONSTRAINT "fk_insight_query_runs_platform_connection_id" FOREIGN KEY ("platform_connection_id")
+        REFERENCES "ads"."ad_platform_connections" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "ads"."insight_fact_rows"
         ADD CONSTRAINT "fk_insight_fact_rows_insight_query_run_id" FOREIGN KEY ("insight_query_run_id")
         REFERENCES "ads"."insight_query_runs" ("id");
@@ -480,4 +576,22 @@ DO $$ BEGIN
     ALTER TABLE "ads"."blocked_ad_events"
         ADD CONSTRAINT "fk_blocked_ad_events_ad_event_data_policy_id" FOREIGN KEY ("ad_event_data_policy_id")
         REFERENCES "ads"."ad_event_data_policies" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."external_ad_object_snapshots"
+        ADD CONSTRAINT "fk_external_ad_object_snapshots_platform_connection_id" FOREIGN KEY ("platform_connection_id")
+        REFERENCES "ads"."ad_platform_connections" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."ad_sync_runs"
+        ADD CONSTRAINT "fk_ad_sync_runs_platform_connection_id" FOREIGN KEY ("platform_connection_id")
+        REFERENCES "ads"."ad_platform_connections" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "ads"."ad_sync_checkpoints"
+        ADD CONSTRAINT "fk_ad_sync_checkpoints_platform_connection_id" FOREIGN KEY ("platform_connection_id")
+        REFERENCES "ads"."ad_platform_connections" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

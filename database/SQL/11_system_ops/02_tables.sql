@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 11 · schema system_ops
+-- SALUD v4.0.10 · módulo 11 · schema system_ops
 -- Generado de diagram_11_system_ops.puml — NO editar a mano.
 
 
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."data_classifications" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_data_classifications" PRIMARY KEY ("id")
 );
 
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."data_domains" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_data_domains" PRIMARY KEY ("id")
 );
 
@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."entity_registry" (
     "has_history" boolean NOT NULL,
     "history_table" varchar,
     "retention_policy_id" uuid,
+    "partition_spec_id" uuid,
     "write_policy_id" uuid,
     "owner_team" varchar,
     "contains_pii" boolean,
@@ -53,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."entity_registry" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_entity_registry" PRIMARY KEY ("id")
 );
 
@@ -71,7 +72,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."field_registry" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_field_registry" PRIMARY KEY ("id")
 );
 
@@ -91,7 +92,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."write_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_write_policies" PRIMARY KEY ("id")
 );
 
@@ -108,7 +109,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."retention_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_retention_policies" PRIMARY KEY ("id")
 );
 
@@ -122,7 +123,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."anonymization_rules" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_anonymization_rules" PRIMARY KEY ("id")
 );
 
@@ -162,7 +163,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."record_revisions" (
     "schema_name" varchar NOT NULL,
     "table_name" varchar NOT NULL,
     "record_id" uuid NOT NULL,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     "operation_concept_id" uuid NOT NULL,
     "data_snapshot" jsonb NOT NULL,
     "changed_by_user_id" uuid,
@@ -189,7 +190,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."draft_records" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_draft_records" PRIMARY KEY ("id")
 );
 
@@ -210,7 +211,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."data_residency_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_data_residency_policies" PRIMARY KEY ("id")
 );
 
@@ -227,7 +228,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."tenant_residency_bindings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_tenant_residency_bindings" PRIMARY KEY ("id")
 );
 
@@ -245,7 +246,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."legal_holds" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_legal_holds" PRIMARY KEY ("id")
 );
 
@@ -265,7 +266,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."backup_policies" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_backup_policies" PRIMARY KEY ("id")
 );
 
@@ -311,7 +312,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."operational_frameworks" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_operational_frameworks" PRIMARY KEY ("id")
 );
 
@@ -330,7 +331,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."operational_framework_controls" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_operational_framework_controls" PRIMARY KEY ("id")
 );
 
@@ -353,7 +354,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."workload_assessments" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_workload_assessments" PRIMARY KEY ("id")
 );
 
@@ -373,7 +374,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."assessment_control_results" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_assessment_control_results" PRIMARY KEY ("id")
 );
 
@@ -394,7 +395,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."assessment_findings" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_assessment_findings" PRIMARY KEY ("id")
 );
 
@@ -414,7 +415,7 @@ CREATE TABLE IF NOT EXISTS "system_ops"."remediation_plans" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_remediation_plans" PRIMARY KEY ("id")
 );
 
@@ -436,6 +437,112 @@ CREATE TABLE IF NOT EXISTS "system_ops"."remediation_actions" (
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
-    "row_version" integer NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_remediation_actions" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "system_ops"."partition_specs" (
+    "id" uuid NOT NULL,
+    "code" varchar NOT NULL,
+    "schema_name" varchar NOT NULL,
+    "table_name" varchar NOT NULL,
+    "entity_registry_id" uuid,
+    "partition_strategy_concept_id" uuid NOT NULL,
+    "partition_key" varchar,
+    "partition_interval_concept_id" uuid,
+    "subpartition_key" varchar,
+    "hot_tier_days" integer,
+    "warm_tier_days" integer,
+    "cold_tier_days" integer,
+    "archive_target_concept_id" uuid,
+    "retention_policy_id" uuid,
+    "is_time_series" boolean,
+    "enforces_tenant_isolation" boolean,
+    "state_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_partition_specs" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "system_ops"."encryption_keys" (
+    "id" uuid NOT NULL,
+    "key_alias" varchar NOT NULL,
+    "key_purpose_concept_id" uuid NOT NULL,
+    "algorithm_concept_id" uuid NOT NULL,
+    "provider_concept_id" uuid,
+    "external_key_ref" varchar,
+    "key_version" integer,
+    "is_primary" boolean,
+    "rotation_period_days" integer,
+    "last_rotated_at" timestamptz,
+    "next_rotation_at" timestamptz,
+    "retention_policy_id" uuid,
+    "state_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_encryption_keys" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "system_ops"."key_rotation_events" (
+    "id" uuid NOT NULL,
+    "encryption_key_id" uuid NOT NULL,
+    "event_type_concept_id" uuid NOT NULL,
+    "from_version" integer,
+    "to_version" integer,
+    "reason" varchar,
+    "performed_by_user_id" uuid,
+    "occurred_at" timestamptz NOT NULL,
+    "recorded_at" timestamptz NOT NULL,
+    CONSTRAINT "pk_key_rotation_events" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "system_ops"."security_incidents" (
+    "id" uuid NOT NULL,
+    "code" varchar NOT NULL,
+    "tenant_id" uuid,
+    "severity_concept_id" uuid NOT NULL,
+    "category_concept_id" uuid NOT NULL,
+    "status_concept_id" uuid NOT NULL,
+    "vector_concept_id" uuid,
+    "detected_at" timestamptz,
+    "contained_at" timestamptz,
+    "resolved_at" timestamptz,
+    "affected_records_estimate" bigint,
+    "is_reportable" boolean,
+    "assigned_to_user_id" uuid,
+    "data_classification_id" uuid,
+    "summary" varchar,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_security_incidents" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "system_ops"."breach_notifications" (
+    "id" uuid NOT NULL,
+    "security_incident_id" uuid NOT NULL,
+    "authority_concept_id" uuid NOT NULL,
+    "jurisdiction_concept_id" uuid,
+    "regulation_concept_id" uuid,
+    "deadline_at" timestamptz,
+    "notified_at" timestamptz,
+    "affected_subjects" integer,
+    "notification_channel_concept_id" uuid,
+    "reference_number" varchar,
+    "subjects_notified" boolean,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_breach_notifications" PRIMARY KEY ("id")
 );

@@ -1,22 +1,5 @@
--- SALUD v4.0.1 · módulo 16 · schema accounting
+-- SALUD v4.0.10 · módulo 16 · schema accounting
 -- Generado de diagram_16_accounting.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   cost_centers.practitioner_profile_id
---   ledger_entries.transaction_id
---   transaction_files.transaction_id
---   sales.transaction_id
---   purchases.transaction_id
---   asset_depreciations.transaction_id
---   liability_payments.transaction_id
---   employee_payments.transaction_id
---   journal_entry_assignments.derived_by_rule_id
---   accounting_document_links.source_transaction_id
---   accounting_document_links.target_transaction_id
---   accounting_document_links.source_line_id
---   accounting_document_links.target_line_id
---   clearing_documents.transaction_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -187,6 +170,13 @@ DO $$ BEGIN
         REFERENCES "practice"."practices" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "accounting"."cost_centers"
+        ADD CONSTRAINT "fk_cost_centers_practitioner_profile_id" FOREIGN KEY ("practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "accounting"."cost_centers"
@@ -285,6 +275,13 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "accounting"."journal_transactions"
+        ADD CONSTRAINT "fk_journal_transactions_approved_by_user_id" FOREIGN KEY ("approved_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "accounting"."ledger_entries"
@@ -360,7 +357,7 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."sales"
         ADD CONSTRAINT "fk_sales_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -395,7 +392,7 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."purchases"
         ADD CONSTRAINT "fk_purchases_vendor_id" FOREIGN KEY ("vendor_id")
         REFERENCES "billing"."vendors" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: billing.bills (requiere schema billing)
 DO $$ BEGIN
@@ -927,14 +924,14 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."journal_entry_assignments"
         ADD CONSTRAINT "fk_journal_entry_assignments_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: billing.invoices (requiere schema billing)
 DO $$ BEGIN
     ALTER TABLE "accounting"."journal_entry_assignments"
         ADD CONSTRAINT "fk_journal_entry_assignments_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: billing.bills (requiere schema billing)
 DO $$ BEGIN
@@ -1102,7 +1099,7 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."open_items"
         ADD CONSTRAINT "fk_open_items_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: billing.bills (requiere schema billing)
 DO $$ BEGIN
@@ -1116,7 +1113,7 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."open_items"
         ADD CONSTRAINT "fk_open_items_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
@@ -1445,7 +1442,7 @@ DO $$ BEGIN
     ALTER TABLE "accounting"."accrual_objects"
         ADD CONSTRAINT "fk_accrual_objects_contract_id" FOREIGN KEY ("contract_id")
         REFERENCES "erp"."contracts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: erp.business_partners (requiere schema erp)
 DO $$ BEGIN

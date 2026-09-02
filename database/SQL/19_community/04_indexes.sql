@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 19 · schema community
+-- SALUD v4.0.10 · módulo 19 · schema community
 -- Generado de diagram_19_community.puml — NO editar a mano.
 
 
@@ -441,3 +441,51 @@ CREATE INDEX IF NOT EXISTS "ix_social_follows_created_by_user_id" ON "community"
 CREATE INDEX IF NOT EXISTS "ix_social_follows_updated_by_user_id" ON "community"."social_follows" ("updated_by_user_id");
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_social_follows_actor_target" ON "community"."social_follows" ("follower_profile_id", "followable_type_concept_id", "followable_ref_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_prestige_scores_subject" ON "community"."prestige_scores" ("tenant_id", "subject_type_concept_id", "subject_ref_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prestige_scores_public_profile_id" ON "community"."prestige_scores" ("public_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prestige_scores_level_concept_id" ON "community"."prestige_scores" ("level_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prestige_scores_total_points" ON "community"."prestige_scores" ("tenant_id", "total_points");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_prestige_awards_idempotency_key" ON "community"."prestige_awards" ("idempotency_key");
+
+CREATE INDEX IF NOT EXISTS "ix_prestige_awards_subject" ON "community"."prestige_awards" ("tenant_id", "subject_type_concept_id", "subject_ref_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prestige_awards_public_profile_id" ON "community"."prestige_awards" ("public_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prestige_awards_awarded_by_user_id" ON "community"."prestige_awards" ("awarded_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prestige_awards_reason_concept_id" ON "community"."prestige_awards" ("reason_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_prestige_awards_recorded_at" ON "community"."prestige_awards" ("recorded_at");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_feedback_tickets_ticket_number" ON "community"."feedback_tickets" ("tenant_id", "ticket_number");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_tickets_reporter_user_id" ON "community"."feedback_tickets" ("reporter_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_tickets_category_concept_id" ON "community"."feedback_tickets" ("category_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_tickets_status_concept_id" ON "community"."feedback_tickets" ("tenant_id", "status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_tickets_severity_concept_id" ON "community"."feedback_tickets" ("severity_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_tickets_assigned_to_user_id" ON "community"."feedback_tickets" ("assigned_to_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_tickets_opened_at" ON "community"."feedback_tickets" ("opened_at");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_ticket_comments_feedback_ticket_id" ON "community"."feedback_ticket_comments" ("feedback_ticket_id");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_ticket_comments_author_user_id" ON "community"."feedback_ticket_comments" ("author_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_ticket_comments_created_at" ON "community"."feedback_ticket_comments" ("created_at");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_ticket_events_feedback_ticket_id" ON "community"."feedback_ticket_events" ("feedback_ticket_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_feedback_ticket_events_revision" ON "community"."feedback_ticket_events" ("feedback_ticket_id", "revision_no");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_ticket_events_to_status_concept_id" ON "community"."feedback_ticket_events" ("to_status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_feedback_ticket_events_recorded_at" ON "community"."feedback_ticket_events" ("recorded_at");

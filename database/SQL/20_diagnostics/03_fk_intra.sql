@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 20 · schema diagnostics
+-- SALUD v4.0.10 · módulo 20 · schema diagnostics
 -- Generado de diagram_20_diagnostics.puml — NO editar a mano.
 
 
@@ -12,6 +12,12 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."observation_specimens"
         ADD CONSTRAINT "fk_observation_specimens_specimen_id" FOREIGN KEY ("specimen_id")
         REFERENCES "diagnostics"."specimens" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."diagnostic_report_versions"
+        ADD CONSTRAINT "fk_diagnostic_report_versions_supersedes_version_id" FOREIGN KEY ("supersedes_version_id")
+        REFERENCES "diagnostics"."diagnostic_report_versions" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -99,9 +105,21 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimen_containers"
+        ADD CONSTRAINT "fk_specimen_containers_parent_container_id" FOREIGN KEY ("parent_container_id")
+        REFERENCES "diagnostics"."specimen_containers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "diagnostics"."specimen_container_events"
         ADD CONSTRAINT "fk_specimen_container_events_specimen_container_id" FOREIGN KEY ("specimen_container_id")
         REFERENCES "diagnostics"."specimen_containers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimen_container_events"
+        ADD CONSTRAINT "fk_specimen_container_events_source_location_id" FOREIGN KEY ("source_location_id")
+        REFERENCES "diagnostics"."dicom_object_locations" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -114,6 +132,12 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."specimen_chain_of_custody_events"
         ADD CONSTRAINT "fk_specimen_chain_of_custody_events_specimen_container_id" FOREIGN KEY ("specimen_container_id")
         REFERENCES "diagnostics"."specimen_containers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."specimen_chain_of_custody_events"
+        ADD CONSTRAINT "fk_specimen_chain_of_custody_events_location_id" FOREIGN KEY ("location_id")
+        REFERENCES "diagnostics"."dicom_object_locations" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -153,6 +177,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "diagnostics"."analyzer_runs"
+        ADD CONSTRAINT "fk_analyzer_runs_quality_control_run_id" FOREIGN KEY ("quality_control_run_id")
+        REFERENCES "diagnostics"."analyzer_runs" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "diagnostics"."analyzer_result_messages"
         ADD CONSTRAINT "fk_analyzer_result_messages_analyzer_run_id" FOREIGN KEY ("analyzer_run_id")
         REFERENCES "diagnostics"."analyzer_runs" ("id");
@@ -162,6 +192,12 @@ DO $$ BEGIN
     ALTER TABLE "diagnostics"."analyzer_result_messages"
         ADD CONSTRAINT "fk_analyzer_result_messages_laboratory_work_order_test_id" FOREIGN KEY ("laboratory_work_order_test_id")
         REFERENCES "diagnostics"."laboratory_work_order_tests" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "diagnostics"."result_verifications"
+        ADD CONSTRAINT "fk_result_verifications_previous_verification_id" FOREIGN KEY ("previous_verification_id")
+        REFERENCES "diagnostics"."result_verifications" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

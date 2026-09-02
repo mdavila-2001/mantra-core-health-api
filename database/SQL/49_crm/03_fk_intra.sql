@@ -1,4 +1,4 @@
--- SALUD v4.0.1 · módulo 49 · schema crm
+-- SALUD v4.0.10 · módulo 49 · schema crm
 -- Generado de diagram_49_crm.puml — NO editar a mano.
 
 
@@ -42,6 +42,12 @@ DO $$ BEGIN
     ALTER TABLE "crm"."opportunities"
         ADD CONSTRAINT "fk_opportunities_pipeline_id" FOREIGN KEY ("pipeline_id")
         REFERENCES "crm"."pipelines" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "crm"."opportunities"
+        ADD CONSTRAINT "fk_opportunities_stage_id" FOREIGN KEY ("stage_id")
+        REFERENCES "crm"."pipeline_stages" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -123,6 +129,18 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "crm"."opportunity_stage_history"
+        ADD CONSTRAINT "fk_opportunity_stage_history_from_stage_id" FOREIGN KEY ("from_stage_id")
+        REFERENCES "crm"."pipeline_stages" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "crm"."opportunity_stage_history"
+        ADD CONSTRAINT "fk_opportunity_stage_history_to_stage_id" FOREIGN KEY ("to_stage_id")
+        REFERENCES "crm"."pipeline_stages" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "crm"."crm_activity_relations"
         ADD CONSTRAINT "fk_crm_activity_relations_crm_activity_id" FOREIGN KEY ("crm_activity_id")
         REFERENCES "crm"."crm_activities" ("id");
@@ -159,6 +177,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "crm"."crm_activity_relations"
+        ADD CONSTRAINT "fk_crm_activity_relations_case_id" FOREIGN KEY ("case_id")
+        REFERENCES "crm"."crm_cases" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "crm"."crm_activity_assignments"
         ADD CONSTRAINT "fk_crm_activity_assignments_crm_activity_id" FOREIGN KEY ("crm_activity_id")
         REFERENCES "crm"."crm_activities" ("id");
@@ -171,9 +195,27 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "crm"."crm_tasks"
+        ADD CONSTRAINT "fk_crm_tasks_recurrence_rule_id" FOREIGN KEY ("recurrence_rule_id")
+        REFERENCES "crm"."crm_recurrence_rules" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "crm"."crm_events"
         ADD CONSTRAINT "fk_crm_events_crm_activity_id" FOREIGN KEY ("crm_activity_id")
         REFERENCES "crm"."crm_activities" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "crm"."crm_events"
+        ADD CONSTRAINT "fk_crm_events_recurrence_rule_id" FOREIGN KEY ("recurrence_rule_id")
+        REFERENCES "crm"."crm_recurrence_rules" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "crm"."crm_events"
+        ADD CONSTRAINT "fk_crm_events_parent_event_id" FOREIGN KEY ("parent_event_id")
+        REFERENCES "crm"."crm_events" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -228,6 +270,12 @@ DO $$ BEGIN
     ALTER TABLE "crm"."crm_cases"
         ADD CONSTRAINT "fk_crm_cases_primary_contact_id" FOREIGN KEY ("primary_contact_id")
         REFERENCES "crm"."contacts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "crm"."crm_cases"
+        ADD CONSTRAINT "fk_crm_cases_parent_case_id" FOREIGN KEY ("parent_case_id")
+        REFERENCES "crm"."crm_cases" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

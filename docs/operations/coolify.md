@@ -137,12 +137,18 @@ El DDL canónico de `database/SQL` **no cubre todo el modelo**. Medido contra
 una base recién construida desde él:
 
 ```text
-Deriva detectada entre el modelo y la base: 130 diferencias
-  (tabla-ausente=82, columna-ausente=22, obligatoriedad-divergente=26)
+Deriva detectada entre el modelo y la base: 71 diferencias
+  (tabla-ausente=45, columna-ausente=2, obligatoriedad-divergente=24)
 ```
 
-Los 82 ausentes incluyen los schemas `pharma_lab`, `surveys` y `audio_assets`
-enteros (ver `REGISTRO-DEFECTOS.md`, B-7 y B-8).
+Las 45 tablas ausentes incluyen el schema `pharma_lab` entero —B-8 de
+`REGISTRO-DEFECTOS.md`, todavía abierto— y sus tablas de historia en `audit`.
+Las 24 divergencias de obligatoriedad son columnas que la base exige NOT NULL y
+la entidad declara opcionales: un INSERT que no las escriba falla.
+
+(La cifra baja sola a medida que el repositorio del modelo se pone al día. Era
+130 con el modelo suelto en la raíz del workspace; con el repositorio propio son
+71. No llega a cero por sí sola.)
 
 **El falso negativo que esto produce, y que costó una sesión entera:** las
 lecturas no se enteran, porque MikroORM proyecta `select "p0".*` y una columna
@@ -163,8 +169,8 @@ esquema —aditiva, nunca destructiva, bajo cerrojo de aviso— y después la
 siembra del catálogo. Deja la base en:
 
 ```text
-Fidelidad verificada: 1238 entidades coinciden con la base
-Seeds: 17/17 ok · 38096 filas
+Fidelidad verificada: 1239 entidades coinciden con la base
+Seeds: 18/18 ok · 39603 filas
 ```
 
 La API arranca **después**, con `ORM_SCHEMA_SYNC=off`: en un servidor, quien
@@ -182,21 +188,30 @@ una base a medio construir.
 
 ## 4 · El DDL viaja en el repositorio
 
-Coolify clona **un** repositorio. El esquema se edita en `~/…/alovida/SQL`, una
-carpeta hermana que en el servidor no existe: montar `../SQL` deja
-`/init/SQL` vacío, la base sin una sola tabla y la aplicación devolviendo 500
-en la primera escritura.
+Coolify clona **un** repositorio. El esquema vive en otro —
+`mantra-core-health-model`, que se clona como hermano de éste— así que montar
+`../mantra-core-health-model/SQL` en el servidor deja `/init/SQL` vacío, la
+base sin una sola tabla y la aplicación devolviendo 500 en la primera
+escritura. Que el modelo tenga repositorio propio (B-2) arregla el versionado;
+el despliegue sigue viendo un solo `git clone`.
 
 Por eso `docker-compose.coolify.yml` monta `./database/SQL`, que es la copia
-versionada. **Después de tocar el DDL:**
+versionada dentro de este repositorio. **Después de tocar el DDL:**
 
 ```bash
-yarn db:vendor         # copia ../SQL y ../NoSQL a database/
+yarn db:vendor         # copia el modelo a database/
 yarn db:vendor:check   # falla si difieren — correr antes de desplegar
 ```
 
-El compose de desarrollo (`docker-compose.yml`) sigue montando `../SQL`, para
-que quien edita el DDL vea el efecto sin copiar nada.
+Hace falta el modelo clonado al lado:
+
+```bash
+gh repo clone mantra-core-technologies/mantra-core-health-model
+# o, si está en otro sitio:  MODEL_REPO=/ruta/al/modelo yarn db:vendor
+```
+
+El compose de desarrollo (`docker-compose.yml`) sigue montando el repositorio
+del modelo, para que quien edita el DDL vea el efecto sin copiar nada.
 
 ---
 

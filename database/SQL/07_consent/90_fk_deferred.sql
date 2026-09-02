@@ -1,10 +1,5 @@
--- SALUD v4.0.1 · módulo 07 · schema consent
+-- SALUD v4.0.10 · módulo 07 · schema consent
 -- Generado de diagram_07_consent.puml — NO editar a mano.
-
-
--- FK sin destino canónico (no forzadas, temperatura-0):
---   consents.processing_legal_basis_id
---   consent_evidence.signature_id
 
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -467,6 +462,13 @@ DO $$ BEGIN
     ALTER TABLE "consent"."consent_evidence"
         ADD CONSTRAINT "fk_consent_evidence_document_file_id" FOREIGN KEY ("document_file_id")
         REFERENCES "common"."files" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: chart.clinical_note_signatures (requiere schema chart)
+DO $$ BEGIN
+    ALTER TABLE "consent"."consent_evidence"
+        ADD CONSTRAINT "fk_consent_evidence_signature_id" FOREIGN KEY ("signature_id")
+        REFERENCES "chart"."clinical_note_signatures" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

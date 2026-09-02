@@ -1,6 +1,10 @@
--- SALUD v4.0.1 · módulo 41 · schema scheduling
+-- SALUD v4.0.10 · módulo 41 · schema scheduling
 -- Generado de diagram_41_scheduling.puml — NO editar a mano.
 
+
+CREATE INDEX IF NOT EXISTS "ix_booking_confirmation_rules_tenant_id" ON "scheduling"."booking_confirmation_rules" ("tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_booking_confirmation_rules_scope" ON "scheduling"."booking_confirmation_rules" ("scope_type_concept_id", "scope_id");
 
 CREATE INDEX IF NOT EXISTS "ix_practitioner_schedules_practitioner_profile_id" ON "scheduling"."practitioner_schedules" ("practitioner_profile_id");
 
@@ -211,3 +215,17 @@ CREATE INDEX IF NOT EXISTS "ix_appointment_reminders_status_concept_id" ON "sche
 CREATE INDEX IF NOT EXISTS "ix_appointment_reminders_created_by_user_id" ON "scheduling"."appointment_reminders" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_appointment_reminders_updated_by_user_id" ON "scheduling"."appointment_reminders" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_calendar_absences_subject" ON "scheduling"."calendar_absences" ("tenant_id", "subject_type_concept_id", "subject_ref_id");
+
+CREATE INDEX IF NOT EXISTS "ix_calendar_absences_resource_id" ON "scheduling"."calendar_absences" ("resource_id");
+
+CREATE INDEX IF NOT EXISTS "ix_calendar_absences_person_id" ON "scheduling"."calendar_absences" ("person_id");
+
+CREATE INDEX IF NOT EXISTS "ix_calendar_absences_user_id" ON "scheduling"."calendar_absences" ("user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_calendar_absences_range" ON "scheduling"."calendar_absences" ("tenant_id", "start_at", "end_at");
+
+CREATE INDEX IF NOT EXISTS "ix_calendar_absences_approval_status_concept_id" ON "scheduling"."calendar_absences" ("approval_status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_calendar_absences_time_off_request_id" ON "scheduling"."calendar_absences" ("time_off_request_id");
