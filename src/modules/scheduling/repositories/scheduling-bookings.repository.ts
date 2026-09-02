@@ -336,6 +336,34 @@ export class SchedulingBookingsRepository {
     );
   }
 
+  /**
+   * Los estados de pago de VARIAS citas, en una sola consulta.
+   *
+   * Existe para que la columna de pago de la tabla de citas sea posible. La
+   * alternativa —pedir el estado de cada fila— no es una ineficiencia sino una
+   * columna que no se puede construir: es el mismo defecto que Itzan levantó
+   * como B-1 en la TAREA-22, y no vale la pena volver a cometerlo sabiendo.
+   *
+   * Las citas sin marca simplemente no aparecen en el mapa. Ausencia y
+   * «pendiente de pago» son cosas distintas, y esa diferencia tiene que
+   * sobrevivir hasta la pantalla.
+   */
+  async findPaymentStatesForBookings(
+    em: EntityManager,
+    bookingIds: readonly string[],
+  ): Promise<Map<string, AppointmentPaymentStates>> {
+    const porCita = new Map<string, AppointmentPaymentStates>();
+    if (bookingIds.length === 0) return porCita;
+
+    const filas = await em.find(AppointmentPaymentStates, {
+      appointmentBookingId: { $in: [...bookingIds] },
+    });
+    for (const fila of filas) {
+      porCita.set(fila.appointmentBookingId, fila);
+    }
+    return porCita;
+  }
+
   /** El estado de pago, sin bloquear: es la cara de lectura. */
   findPaymentState(
     em: EntityManager,

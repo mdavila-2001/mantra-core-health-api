@@ -61,6 +61,7 @@ function build() {
     // ninguno, que es el caso de toda cita que nadie marcó todavía.
     findPaymentStateForUpdate: mockFn().mockResolvedValue(null),
     findPaymentState: mockFn().mockResolvedValue(null),
+    findPaymentStatesForBookings: mockFn().mockResolvedValue(new Map()),
     // Las dos lecturas (UC-41-15): el detalle y el listado.
     findBookingById: mockFn(),
     // TJ-2: la lectura del origen de una reprogramación. Sin filas, ninguna
@@ -2154,6 +2155,49 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(res.items[0].patientName).toBe('Marisol Quispe');
+    });
+
+    it('el estado de pago viaja en la página, en UNA sola consulta', async () => {
+      // El punto entero de la lectura en lote. Si esto se resolviera cita por
+      // cita, la columna de pago no sería una ineficiencia: sería una columna
+      // que no se puede construir. Es el mismo defecto que Itzan levantó como
+      // B-1 en la TAREA-22.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina(['b1', 'b2']));
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.bookingsRepo.findPaymentStatesForBookings.mockResolvedValue(
+        new Map([
+          [
+            'b1',
+            {
+              appointmentBookingId: 'b1',
+              statusConceptId: SCHED.PAYMENT_PAID,
+              insuranceUsed: true,
+              markedByUserId: 'u-9',
+              markedAt: new Date('2026-09-01T10:00:00Z'),
+            },
+          ],
+        ]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      // Una llamada para las dos citas, no una por cita.
+      expect(d.bookingsRepo.findPaymentStatesForBookings).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(res.items[0].paymentState?.state).toBe('PAID');
+      expect(res.items[0].paymentState?.insuranceUsed).toBe(true);
+      // Y la que nadie marcó se OMITE: `undefined` y no «pendiente». La
+      // diferencia tiene que sobrevivir hasta la pantalla.
+      expect(res.items[1].paymentState).toBeUndefined();
     });
 
     it('MAC-6 · un profesional ajeno NO ve el nombre', async () => {

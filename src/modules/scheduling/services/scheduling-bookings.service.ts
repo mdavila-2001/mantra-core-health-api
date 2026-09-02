@@ -2491,6 +2491,13 @@ export class SchedulingBookingsService {
           ])
         : new Map<string, string>();
 
+    // El estado de pago de la página, en lote (TAREA-13 punto 5). Una consulta
+    // para toda la página, no una por fila.
+    const pagos = await this.bookingsRepo.findPaymentStatesForBookings(
+      em,
+      page.map(({ booking }) => booking.id),
+    );
+
     return {
       items: page.map(({ booking, slot }) =>
         this.aBookingItem(
@@ -2507,6 +2514,7 @@ export class SchedulingBookingsService {
           booking.appointmentId == null
             ? undefined
             : tipos.get(booking.appointmentId),
+          pagos.get(booking.id),
         ),
       ),
       count: page.length,
@@ -2639,6 +2647,7 @@ export class SchedulingBookingsService {
     reprogramadaDesde?: Date,
     nombreDelPaciente?: string,
     tipoDeLaCita?: string,
+    estadoDePago?: AppointmentPaymentStates,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -2650,6 +2659,12 @@ export class SchedulingBookingsService {
       // contrato lo declara nullable y omitirlo obligaría a distinguir «no
       // hay cita» de «no me lo dijeron», que acá son lo mismo.
       appointmentId: booking.appointmentId ?? null,
+      // Se OMITE cuando nadie lo marcó, y no viaja como «pendiente»: pendiente
+      // de pago es una afirmación que alguien firmó, y la ausencia es que del
+      // pago todavía no se dijo nada. Comprobalo con `if (item.paymentState)`.
+      ...(estadoDePago
+        ? { paymentState: proyectarEstadoDePago(estadoDePago) }
+        : {}),
       startAt: slot?.startAt ?? null,
       endAt: slot?.endAt ?? null,
       statusConceptId: booking.statusConceptId,
