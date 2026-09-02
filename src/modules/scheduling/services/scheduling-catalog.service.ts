@@ -1257,7 +1257,24 @@ export class SchedulingCatalogService {
         resourceId,
       });
     }
-    this.assertRecursoDelActor(resource, actor);
+    // Quién puede leer, y CUÁNTO ve, son dos preguntas distintas.
+    //
+    // El profesional y quien administra el catálogo ven todo, incluido el texto
+    // libre. Un paciente ve el motivo catalogado y NUNCA el texto libre, y sólo
+    // de un médico con el que tiene cita — la misma regla con la que se
+    // resuelve qué historial ve.
+    const esDelActor = this.puedeAdministrarRecurso(resource, actor);
+    let puedeLeer = esDelActor;
+    if (!puedeLeer && actor.patientProfileId !== undefined) {
+      puedeLeer = await this.catalogRepo.patientHasBookingWithResource(
+        em,
+        resourceId,
+        actor.patientProfileId,
+      );
+    }
+    if (!puedeLeer) {
+      throw new ForbiddenException('No podés ver los bloqueos de esta agenda');
+    }
 
     const filas = await this.catalogRepo.findExceptionsByResourceInRange(
       em,
@@ -1271,13 +1288,53 @@ export class SchedulingCatalogService {
       exceptionTypeConceptId: fila.exceptionTypeConceptId,
       startAt: fila.startAt.toISOString(),
       endAt: fila.endAt.toISOString(),
+      // El motivo catalogado viaja para todos: es una etiqueta de una lista
+      // cerrada —«Vacaciones», «Congreso»— y no puede contener nada que el
+      // profesional no haya elegido a propósito.
+      reasonLabel: this.etiquetaDeMotivo(fila.exceptionTypeConceptId),
+      // El texto libre, en cambio, SÓLO para quien administra la agenda. Es lo
+      // que el médico escribe cuando elige «Otro», y ahí puede aparecer
+      // cualquier cosa: «cirugía de la Sra. Pérez» son datos clínicos de un
+      // tercero. Se omite, no se vacía.
+      //
       // `== null` y no `=== undefined`: una columna anulable sin completar
       // vuelve como `null`, y la guarda estricta la dejaría pasar (#174).
-      ...(fila.reason == null ? {} : { reason: fila.reason }),
+      ...(esDelActor && fila.reason != null ? { reason: fila.reason } : {}),
       ...(fila.isAvailable == null ? {} : { isAvailable: fila.isAvailable }),
     }));
 
     return { items, count: items.length };
+  }
+
+  /**
+   * Cómo se llama un motivo, desde su concepto.
+   *
+   * El mapa va en la otra dirección que {@link EXCEPTION_TYPE_CONCEPT}: la fila
+   * guarda el uuid y la pantalla necesita la palabra.
+   */
+  private etiquetaDeMotivo(conceptId: string): string {
+    const tipo = EXCEPTION_TYPES.find(
+      (t) => EXCEPTION_TYPE_CONCEPT[t] === conceptId,
+    );
+    // Un concepto que no está en el catálogo es un dato viejo o sembrado por
+    // fuera. Se dice «Bloqueado» en vez de mostrar un uuid o romper la lectura.
+    return tipo === undefined ? 'Bloqueado' : EXCEPTION_TYPE_LABEL[tipo];
+  }
+
+  /**
+   * Si el actor administra este recurso. Es {@link assertRecursoDelActor} sin
+   * lanzar, para los casos en que «no» no es un error sino menos detalle.
+   */
+  private puedeAdministrarRecurso(
+    resource: { resourceRefType: string; resourceRefId: string },
+    actor: AuthenticatedUser,
+  ): boolean {
+    try {
+      this.assertRecursoDelActor(resource, actor);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private assertRecursoDelActor(

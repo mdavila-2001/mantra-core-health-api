@@ -64,6 +64,7 @@ function buildCatalog() {
     findOpenSlotsInWindow: mockFn(),
     findExceptionById: mockFn(),
     removeException: mockFn(),
+    patientHasBookingWithResource: mockFn().mockResolvedValue(false),
     findBookingsOfTemplate: mockFn().mockResolvedValue({
       total: 0,
       live: 0,
@@ -730,6 +731,10 @@ describe('SchedulingCatalogService', () => {
           exceptionTypeConceptId: 'tipo-1',
           startAt: '2026-09-10T13:00:00.000Z',
           endAt: '2026-09-10T21:00:00.000Z',
+          // Siempre presente: es una etiqueta derivada del concepto, no una
+          // columna anulable. `tipo-1` no está en el catálogo, así que cae en
+          // el respaldo en vez de mostrar el identificador.
+          reasonLabel: 'Bloqueado',
         });
       });
 
@@ -1083,6 +1088,146 @@ describe('SchedulingCatalogService', () => {
         expect(datos.exceptionTypeConceptId).toBe(
           CONCEPTS.EXCEPTION_CONFERENCE,
         );
+      });
+    });
+
+    /* --------------------------------------------------------------------
+       9c · el paciente ve el motivo catalogado, nunca el texto libre
+       -------------------------------------------------------------------- */
+
+    describe('quién ve el motivo de un bloqueo', () => {
+      const DESDE = new Date('2026-07-01T00:00:00.000Z');
+      const HASTA = new Date('2026-07-31T00:00:00.000Z');
+
+      const bloqueo = {
+        id: 'exc-1',
+        exceptionTypeConceptId: CONCEPTS.EXCEPTION_VACATION,
+        startAt: new Date('2026-07-01T12:00:00Z'),
+        endAt: new Date('2026-07-15T12:00:00Z'),
+        reason: 'Viaje a ver a mi madre en Cochabamba',
+        isAvailable: false,
+      };
+
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+      const paciente = {
+        id: 'u-2',
+        roles: ['PATIENT'],
+        patientProfileId: 'pp-ana',
+        tenants: [TENANT],
+      };
+
+      function conBloqueo(d: ReturnType<typeof buildCatalog>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        d.catalogRepo.findExceptionsByResourceInRange.mockResolvedValue([
+          bloqueo,
+        ]);
+      }
+
+      it('el profesional ve el texto libre, que es suyo', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        const res = await d.service.listExceptions(
+          RESOURCE,
+          DESDE,
+          HASTA,
+          duenio as never,
+        );
+
+        expect(res.items[0].reasonLabel).toBe('Vacaciones');
+        expect(res.items[0].reason).toBe(bloqueo.reason);
+      });
+
+      it('un paciente CON cita ve la etiqueta y NUNCA el texto libre', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+        d.catalogRepo.patientHasBookingWithResource.mockResolvedValue(true);
+
+        const res = await d.service.listExceptions(
+          RESOURCE,
+          DESDE,
+          HASTA,
+          paciente as never,
+        );
+
+        // Le sirve para no viajar en vano.
+        expect(res.items[0].reasonLabel).toBe('Vacaciones');
+        // Y no se entera de dónde fue ni a ver a quién. El texto libre puede
+        // contener cualquier cosa, incluidos datos de terceros.
+        expect(res.items[0].reason).toBeUndefined();
+        expect(JSON.stringify(res)).not.toContain('Cochabamba');
+      });
+
+      it('un paciente SIN cita con ese médico no lee nada', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+        d.catalogRepo.patientHasBookingWithResource.mockResolvedValue(false);
+
+        // Es la misma regla que decide qué historial ve: sólo del médico con
+        // el que tiene cita. Sin vínculo, cuándo se toma vacaciones un doctor
+        // no es información suya.
+        await expect(
+          d.service.listExceptions(RESOURCE, DESDE, HASTA, paciente as never),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      });
+
+      it('un motivo «Otro» le dice al paciente que está bloqueado, y nada más', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        d.catalogRepo.findExceptionsByResourceInRange.mockResolvedValue([
+          {
+            ...bloqueo,
+            exceptionTypeConceptId: CONCEPTS.EXCEPTION_OTHER,
+            reason: 'Junta médica por el caso de la Sra. Pérez',
+          },
+        ]);
+        d.catalogRepo.patientHasBookingWithResource.mockResolvedValue(true);
+
+        const res = await d.service.listExceptions(
+          RESOURCE,
+          DESDE,
+          HASTA,
+          paciente as never,
+        );
+
+        // «Otro» es honesto: dice que hay un bloqueo sin decir cuál. Es
+        // exactamente el caso que hacía peligroso mostrar el texto.
+        expect(res.items[0].reasonLabel).toBe('Otro');
+        expect(JSON.stringify(res)).not.toContain('Pérez');
+      });
+
+      it('un concepto fuera del catálogo no muestra un uuid ni rompe', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        d.catalogRepo.findExceptionsByResourceInRange.mockResolvedValue([
+          { ...bloqueo, exceptionTypeConceptId: 'concepto-viejo' },
+        ]);
+
+        const res = await d.service.listExceptions(
+          RESOURCE,
+          DESDE,
+          HASTA,
+          duenio as never,
+        );
+
+        expect(res.items[0].reasonLabel).toBe('Bloqueado');
       });
     });
 
