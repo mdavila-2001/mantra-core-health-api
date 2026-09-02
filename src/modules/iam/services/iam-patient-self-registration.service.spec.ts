@@ -14,12 +14,29 @@ import {
   BOLIVIA_PUBLIC_INSURERS,
   carrierPlanId,
 } from '../../../common/seed/bolivia-insurance.catalog';
+import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
 import type { RegisterPatientDto } from '../dto';
 
+/**
+ * El alta mínima que el contrato acepta.
+ *
+ * Los cinco campos de abajo del documento y la contraseña entraron con la
+ * TAREA 03 (AC-03-3): correo, fecha de nacimiento, teléfono, sexo y municipio
+ * de residencia dejaron de ser opcionales. Sin ellos el DTO ya no valida, así
+ * que este literal no es decoración: es lo que hoy define «un alta mínima».
+ */
 const dto: RegisterPatientDto = {
   nationalId: '1234567',
   password: 'password123',
   displayName: 'Ana Pérez',
+  email: 'ana@example.test',
+  birthDate: '1990-05-17',
+  phone: '+591 70012345',
+  sexAtBirth: 'FEMALE',
+  // Un municipio REAL del catálogo: `writeAddress` lo comprueba contra
+  // `VS_BO_MUNICIPALITY` y rechaza con 400 el que no pertenece
+  // (`common/services/residence-address.ts`). 030301 es Sacaba, Cochabamba.
+  residenceMunicipalityConceptId: boMunicipalityConceptId('030301'),
 };
 
 describe('IamPatientSelfRegistrationService', () => {
@@ -143,7 +160,9 @@ describe('IamPatientSelfRegistrationService', () => {
         userId: 'user-1',
         personId: 'person-1',
         patientProfileId: 'person-1',
-        emailVerificationSent: false,
+        // El correo es obligatorio desde AC-03-3, así que el alta mínima ya
+        // trae uno y el token de verificación sale siempre.
+        emailVerificationSent: true,
       });
       expect(result.patientCode).toMatch(/^PAT-/);
     });
@@ -271,10 +290,22 @@ describe('IamPatientSelfRegistrationService', () => {
       );
     });
 
+    /**
+     * El servicio sigue sabiendo no escribir dirección cuando no le dan
+     * ninguna: una fila con país y nada más no es un dato, es una fila.
+     *
+     * Que el DTO ya **no permita** llegar así —el municipio de residencia es
+     * obligatorio desde AC-03-3— no vuelve muerta a esta rama: la validación
+     * vive en el pipe, y el servicio es llamado también por el registro
+     * asistido y por las pruebas de contrato. Por eso el municipio se quita a
+     * propósito acá, en vez de borrar la prueba.
+     */
     it('writes no address at all when nothing about it was given', async () => {
       const d = build();
+      const { residenceMunicipalityConceptId: _sinMunicipio, ...sinDireccion } =
+        dto;
 
-      await d.service.registerPatient(dto);
+      await d.service.registerPatient(sinDireccion as typeof dto);
 
       expect(d.addressesRepo.create).not.toHaveBeenCalled();
     });
@@ -375,10 +406,17 @@ describe('IamPatientSelfRegistrationService', () => {
       expect(d.coverageRepo.createCoverage).not.toHaveBeenCalled();
     });
 
+    /**
+     * Misma razón que la dirección: el DTO ya no deja llegar sin correo
+     * (AC-03-3), pero la rama del servicio sigue viva para el registro asistido
+     * y no se borra. Se quitan también el teléfono, que cuelga del mismo
+     * repositorio de puntos de contacto.
+     */
     it('skips every email side effect when no email is given', async () => {
       const d = build();
+      const { email: _sinCorreo, phone: _sinTelefono, ...sinContacto } = dto;
 
-      await d.service.registerPatient(dto);
+      await d.service.registerPatient(sinContacto as typeof dto);
 
       expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
       expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();

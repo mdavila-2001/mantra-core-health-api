@@ -113,16 +113,18 @@ export class RegisterPatientDto {
    * departamento de otro— y no habría forma de saber cuál de los dos es el que
    * la persona quiso decir.
    *
-   * Es opcional, como el resto del domicilio: nadie queda fuera del alta por no
-   * decir dónde vive.
+   * **Obligatorio desde la TAREA 03 (AC-03-3)**, y es la única parte del
+   * domicilio que lo es: la calle, la zona y las coordenadas siguen siendo
+   * opcionales. La localidad es lo que decide qué farmacias, laboratorios y
+   * consultorios se le muestran a la persona, y sin ella el producto no puede
+   * hacer lo que promete.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     format: 'uuid',
     description: 'Municipio de residencia (catálogo VS_BO_MUNICIPALITY)',
   })
-  @IsOptional()
   @IsUUID()
-  residenceMunicipalityConceptId?: string;
+  residenceMunicipalityConceptId!: string;
 
   /**
    * Valor de password mantenido por la instancia.
@@ -206,27 +208,49 @@ export class RegisterPatientDto {
   displayName?: string;
 
   /**
-   * Correo opcional. Si viene, se emite un token de verificación.
+   * Correo de la persona. **Obligatorio desde la TAREA 03 (AC-03-3).**
+   *
+   * ## Qué decisión invierte, y por qué se deja escrito
+   *
+   * Era opcional **a propósito**: el paciente entra con su documento —ése es su
+   * `username`— y el alta se diseñó para no dejar afuera a quien no tiene
+   * correo. El propietario lo pidió obligatorio y esa razón deja de valer, pero
+   * no deja de ser cierta: quien se registre sin correo ya no puede.
+   *
+   * Lo que **no** cambia es quién es el identificador de acceso: sigue siendo
+   * el documento. El correo es por dónde se recupera la cuenta y por dónde
+   * llegan los avisos, y sin él una contraseña perdida no tiene camino de
+   * vuelta. Sigue emitiéndose el token de verificación cuando llega.
+   *
+   * Queda abierta P-03-2 de la ficha —la contraseña no aparece en la lista de
+   * obligatorios del propietario, ni como opcional—: acá sigue siendo
+   * obligatoria porque es con lo que se entra.
    */
-  @ApiPropertyOptional({ format: 'email', maxLength: 320 })
-  @IsOptional()
+  @ApiProperty({ format: 'email', maxLength: 320 })
   @IsEmail()
   @MaxLength(320)
-  email?: string;
+  email!: string;
 
   /**
-   * Valor de birth date mantenido por la instancia.
+   * Fecha de nacimiento. **Obligatoria desde la TAREA 03 (AC-03-3).**
+   *
+   * No es un dato administrativo: de la edad salen las dosis, los valores de
+   * referencia del laboratorio y qué tamizajes corresponden. Un alta sin ella
+   * crea una historia clínica que no se puede interpretar.
    */
-  @ApiPropertyOptional({ format: 'date' })
-  @IsOptional()
+  @ApiProperty({ format: 'date' })
   @IsISO8601()
-  birthDate?: string;
+  birthDate!: string;
 
   /**
-   * Teléfono de contacto. Se guarda como punto de contacto de la persona; que
-   * esté verificado o no es independiente (`iam.users.phone_verified`).
+   * Teléfono de contacto. **Obligatorio desde la TAREA 03 (AC-03-3).**
+   *
+   * Se guarda como punto de contacto de la persona; que esté verificado o no es
+   * independiente (`iam.users.phone_verified`). Es por donde se avisa de un
+   * turno o de un resultado, que es lo que el correo no resuelve para quien
+   * mira poco el correo — que en Bolivia es la mayoría.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     // La forma admitida se repite en la descripción a propósito: el validador la
     // toma de `PHONE_PATTERN`, y una constante compartida no se puede leer desde
     // el contrato publicado, que es lo único que tiene delante quien integra.
@@ -234,11 +258,10 @@ export class RegisterPatientDto {
       'Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres',
     maxLength: PHONE_MAX_LENGTH,
   })
-  @IsOptional()
   @IsString()
   @MaxLength(PHONE_MAX_LENGTH)
   @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
-  phone?: string;
+  phone!: string;
 
   /**
    * Ocupación, miembro de `VS_BO_OCCUPATION`.
@@ -322,13 +345,19 @@ export class RegisterPatientDto {
    * Sexo asignado al nacer por código legible. Es un dato clínico distinto del
    * género: condiciona rangos de referencia y tamizajes.
    */
-  @ApiPropertyOptional({
+  /**
+   * Sexo asignado al nacer. **Obligatorio desde la TAREA 03 (AC-03-3).**
+   *
+   * Es dato clínico, no cortesía: cambia dosis, valores de referencia y
+   * tamizajes. `gender` —el administrativo— sigue siendo opcional y son cosas
+   * distintas: el alta pública manda éste y no aquél.
+   */
+  @ApiProperty({
     enum: BIRTH_SEX_CODES,
     description: 'Sexo asignado al nacer',
   })
-  @IsOptional()
   @IsIn(BIRTH_SEX_CODES)
-  sexAtBirth?: BirthSexCode;
+  sexAtBirth!: BirthSexCode;
 
   /**
    * Escape hatch para clientes que ya conocen el catálogo de terminología. Si
