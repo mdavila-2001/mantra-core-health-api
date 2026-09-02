@@ -67,12 +67,13 @@ describe('createResidenceAddress', () => {
     const { repo, rows } = buildRepo();
 
     // Forma de uuid válida —pasa el `@IsUUID` del DTO— pero es un departamento.
-    expect(() =>
-      createResidenceAddress(repo, tx, {
-        personId: 'person-1',
-        municipalityConceptId: boDepartmentConceptId('SC'),
-        actorUserId: 'user-1',
-      }),
+    expect(
+      () =>
+        createResidenceAddress(repo, tx, {
+          personId: 'person-1',
+          municipalityConceptId: boDepartmentConceptId('SC'),
+          actorUserId: 'user-1',
+        }),
       // Sin esta comprobación el `INSERT` reventaría por integridad referencial,
       // con un error que no le dice nada a quien se está registrando.
     ).toThrow(/no pertenece al catálogo/);

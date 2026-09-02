@@ -14,7 +14,7 @@ Cuando cambia el modelo de datos (los `.puml` del modelo canónico → `SQL/` (v
 
 ```bash
 yarn orm:catalog                    # regenera índices/FK desde la bóveda de diseño
-python ../salud-db/gen_entities.py all  # regenera entidades desde los .puml (ADR-0022)
+python ../mantra-core-health-model/salud-db/gen_entities.py all  # regenera entidades desde los .puml (ADR-0022)
 yarn format                         # prettier sobre lo generado
 yarn docs:tsdoc                     # rellena el JSDoc respetando la prosa escrita a mano
 yarn orm:audit                      # verifica fidelidad bóveda ↔ entidades ↔ catálogo

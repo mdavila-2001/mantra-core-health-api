@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BIRTH_SEX_CODES, type BirthSexCode } from '../profiles.concepts';
 
 /**
  * Fila del listado de pacientes (UC-05-13).
@@ -267,4 +268,294 @@ export class PatientDetailResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   updatedAt!: Date;
+}
+
+/** Una dirección del paciente, con su ubicación si la declaró. */
+export class OwnAddressDto {
+  @ApiPropertyOptional({ description: 'Calle y número, tal como la escribió' })
+  lines?: string;
+
+  @ApiPropertyOptional({ description: 'Ciudad, derivada del municipio' })
+  city?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Municipio (VS_BO_MUNICIPALITY)',
+  })
+  municipalityConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Latitud, si marcó el punto en el mapa' })
+  latitude?: number;
+
+  @ApiPropertyOptional({
+    description: 'Longitud; viaja siempre junto a la latitud',
+  })
+  longitude?: number;
+}
+
+/**
+ * Un seguro declarado por el paciente.
+ *
+ * Se devuelve el NOMBRE de la aseguradora y del plan, no sus identificadores:
+ * quien lee su propio perfil necesita ver «Alianza · Salud Flexible», y pedirle
+ * a la pantalla que resuelva dos catálogos más para pintar una línea sería
+ * mover trabajo sin motivo.
+ */
+export class OwnCoverageDto {
+  @ApiProperty({ description: 'Aseguradora, en palabras' })
+  carrierName!: string;
+
+  @ApiPropertyOptional({ description: 'Plan contratado, en palabras' })
+  planName?: string;
+
+  @ApiProperty({
+    description:
+      'Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador.',
+  })
+  isPublic!: boolean;
+
+  @ApiPropertyOptional({ description: 'Con qué documento figura afiliado' })
+  memberIdentifier?: string;
+
+  @ApiProperty({
+    description:
+      'Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar.',
+  })
+  verified!: boolean;
+}
+
+/**
+ * Un tutor o persona autorizada.
+ *
+ * El teléfono viaja acá y no en una lectura aparte porque es el dato por el que
+ * existe el registro: el proceso del stakeholder pide «número celular persona
+ * tutor o autorizada», y un tutor sin forma de contacto no cumple su función.
+ */
+export class OwnGuardianDto {
+  @ApiPropertyOptional({ description: 'Cómo se llama' })
+  displayName?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Parentesco (concept id)',
+  })
+  relationshipConceptId?: string;
+
+  @ApiProperty({ description: 'Es a quien llamar en una urgencia' })
+  isEmergencyContact!: boolean;
+
+  @ApiProperty({ description: 'Es su representante legal' })
+  isLegalGuardian!: boolean;
+
+  @ApiPropertyOptional({ description: 'Su teléfono' })
+  phone?: string;
+}
+
+/**
+ * El propio perfil del paciente: exactamente lo que declaró al registrarse, tal
+ * como lo ve —y lo edita— el titular de la cuenta.
+ *
+ * Es un contrato distinto de {@link PatientSummaryResponseDto}, que es el
+ * resumen mínimo con el que el portal se identifica. Éste trae las **partes** del
+ * nombre y no sólo el compuesto, porque un formulario de edición necesita saber
+ * cuál es el apellido materno para poder cambiarlo, y `displayName` no es
+ * separable. Tampoco trae nada clínico: es filiación.
+ *
+ * Los opcionales viajan **ausentes, no `null`**, igual que el resumen: un campo
+ * que la persona nunca declaró y un campo que declaró vacío no son lo mismo, y
+ * `null` los confunde.
+ */
+export class OwnPatientProfileResponseDto {
+  /**
+   * Identificador asociado a person.
+   */
+  @ApiProperty({ format: 'uuid' })
+  personId!: string;
+
+  /**
+   * Identificador asociado a patient profile.
+   */
+  @ApiProperty({ format: 'uuid' })
+  patientProfileId!: string;
+
+  /**
+   * Nombre de pila.
+   */
+  @ApiPropertyOptional({ description: 'Nombre de pila' })
+  name?: string;
+
+  /**
+   * Segundo nombre.
+   */
+  @ApiPropertyOptional({ description: 'Segundo nombre' })
+  middleName?: string;
+
+  /**
+   * Apellido paterno.
+   */
+  @ApiPropertyOptional({ description: 'Apellido paterno' })
+  lastName?: string;
+
+  /**
+   * Apellido materno.
+   */
+  @ApiPropertyOptional({ description: 'Apellido materno' })
+  motherLastName?: string;
+
+  /**
+   * Valor de display name mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Nombre compuesto por el servidor a partir de las partes. No se edita directamente.',
+  })
+  displayName?: string;
+
+  /**
+   * Valor de birth date mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date',
+    description:
+      'Fecha sin hora: serializarla como instante la desplazaría un día',
+  })
+  birthDate?: Date;
+
+  /**
+   * Sexo asignado al nacer, por código legible.
+   */
+  @ApiPropertyOptional({
+    enum: BIRTH_SEX_CODES,
+    description:
+      'Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología.',
+  })
+  sexAtBirth?: BirthSexCode;
+
+  /**
+   * Ocupación del catálogo.
+   *
+   * Va el uuid y no un código, al revés que el sexo al nacer: aquél sale de una
+   * lista corta y fija que el contrato enumera, y las ocupaciones son un catálogo
+   * abierto que el formulario ya tiene que pedir para pintar el desplegable
+   * (`GET /terminology/value-sets?code=VS_BO_OCCUPATION` y su expansión). Con la
+   * lista en la mano, el uuid es lo que le sirve para marcar la opción elegida.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Ocupación elegida del catálogo (VS_BO_OCCUPATION)',
+  })
+  occupationConceptId?: string;
+
+  /**
+   * Ocupación en texto libre.
+   *
+   * Nunca viaja junto a {@link OwnPatientProfileResponseDto.occupationConceptId}:
+   * es la salida para lo que no está en el catálogo, y la escritura deja sólo una
+   * de las dos.
+   */
+  @ApiPropertyOptional({ description: 'Ocupación declarada en texto libre' })
+  occupationFreeText?: string;
+
+  /**
+   * Teléfono de contacto vigente.
+   */
+  @ApiPropertyOptional({
+    description: 'Teléfono de contacto vigente (`common.contact_points`)',
+  })
+  phone?: string;
+
+  /**
+   * Identificador asociado a residence municipality concept.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor.',
+  })
+  residenceMunicipalityConceptId?: string;
+
+  /**
+   * Si el titular tiene una aserción de identidad vigente.
+   */
+  @ApiProperty({
+    description:
+      'Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`.',
+  })
+  identityVerified!: boolean;
+
+  /**
+   * Valor de patient code mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`.',
+  })
+  patientCode?: string;
+
+  /* --- lo que el alta captura y hasta ahora no volvía ----------------------
+     El registro del stakeholder pide que el paciente vea SUS datos, y la
+     pantalla mostraba tres campos de quince. Todo esto ya estaba en la base
+     —lo escribe el alta— y sólo faltaba devolverlo. */
+
+  @ApiPropertyOptional({
+    description:
+      'Documento de identidad. Es su usuario de acceso, así que no se edita desde acá.',
+  })
+  nationalId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Departamento que emitió el documento (VS_BO_DEPARTMENT)',
+  })
+  issuerAdministrativeAreaConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'NIT para facturación' })
+  taxId?: string;
+
+  /** A nombre de quién sale el comprobante. Acompaña al NIT. */
+  @ApiPropertyOptional()
+  taxHolderName?: string;
+
+  @ApiPropertyOptional({ description: 'Correo de contacto vigente' })
+  email?: string;
+
+  /**
+   * Foto de perfil de la persona (`profiles.persons.photo_file_id`).
+   *
+   * Es la foto de la persona, no de un perfil en particular —la misma
+   * columna que ya usaba `education.instructors`—: identifica a quien entra
+   * por la puerta cualquiera sea su rol. Viaja como id de archivo, igual que
+   * el resto de las referencias a `common.files`; quien la pinta la resuelve
+   * con `POST /common/files/:id/download-url`.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Foto de perfil (id de archivo en `common.files`)',
+  })
+  photoFileId?: string;
+
+  @ApiPropertyOptional({
+    type: OwnAddressDto,
+    description: 'Domicilio, con calle y punto en el mapa si los declaró',
+  })
+  homeAddress?: OwnAddressDto;
+
+  @ApiPropertyOptional({
+    type: OwnAddressDto,
+    description: 'Dirección de trabajo',
+  })
+  workAddress?: OwnAddressDto;
+
+  @ApiProperty({
+    type: [OwnCoverageDto],
+    description: 'Seguros declarados. Vacío si no declaró ninguno.',
+  })
+  coverages!: OwnCoverageDto[];
+
+  @ApiProperty({
+    type: [OwnGuardianDto],
+    description: 'Tutores y personas autorizadas, con su teléfono.',
+  })
+  guardians!: OwnGuardianDto[];
 }

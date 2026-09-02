@@ -229,6 +229,40 @@ export class PractitionerProfileSummaryDto {
   @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
   phone?: string;
 
+  /* --- los datos personales que el alta captura y el resumen no devolvía ----
+     La ficha del profesional mostraba su nombre y su matrícula, pero no el
+     documento con el que se registró, su fecha de nacimiento ni dónde vive.
+     Todo eso ya estaba en la base: lo escribe el alta. */
+
+  /** Las cuatro partes, para poder corregir el nombre sin adivinar dónde cortarlo. */
+  @ApiPropertyOptional()
+  name?: string;
+
+  @ApiPropertyOptional()
+  middleName?: string;
+
+  @ApiPropertyOptional()
+  lastName?: string;
+
+  @ApiPropertyOptional()
+  motherLastName?: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  birthDate?: Date;
+
+  /**
+   * Documento de identidad. **No editable desde el perfil**: es un identificador
+   * oficial y tiene su propio circuito de verificación.
+   */
+  @ApiPropertyOptional()
+  nationalId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Departamento emisor (VS_BO_DEPARTMENT)' })
+  issuerAdministrativeAreaConceptId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Municipio de residencia (VS_BO_MUNICIPALITY)' })
+  residenceMunicipalityConceptId?: string;
+
   @ApiProperty({ format: 'uuid' })
   practitionerCategoryConceptId!: string;
 

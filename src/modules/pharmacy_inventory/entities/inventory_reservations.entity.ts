@@ -88,6 +88,36 @@ export class InventoryReservations {
   })
   idempotencyKey?: string;
 
+  @Property({
+    fieldName: 'delivery_mode_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  deliveryModeConceptId?: string;
+
+  @Property({ fieldName: 'delivery_address_id', type: 'uuid', nullable: true }) // FK → common.addresses
+  deliveryAddressId?: string;
+
+  @Property({
+    fieldName: 'total_amount',
+    columnType: 'numeric',
+    nullable: true,
+  })
+  totalAmount?: string;
+
+  @Property({ fieldName: 'currency_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  currencyConceptId?: string;
+
+  @Property({ fieldName: 'pickup_code', columnType: 'varchar', nullable: true })
+  pickupCode?: string;
+
+  @Property({
+    fieldName: 'rejection_reason_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  rejectionReasonText?: string;
+
   /**
    * Fecha y hora en que se creó el registro.
    */

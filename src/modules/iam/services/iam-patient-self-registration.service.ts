@@ -27,6 +27,7 @@ import {
   PersonAccountLinksRepository,
   PersonProfilesRepository,
   PersonsRepository,
+  RelatedPersonsRepository,
 } from '../../profiles/repositories';
 import { composeAccountDisplayName } from '../../profiles/person-name';
 import {
@@ -50,7 +51,16 @@ import {
   VerifyEmailDto,
   VerifyEmailResponseDto,
 } from '../dto';
-import { createResidenceAddress } from './residence-address';
+import {
+  createResidenceAddress,
+  createWorkAddress,
+} from '../../common/services/residence-address';
+import { createGuardianRelatedPerson } from '../../profiles/services/guardian-related-person';
+import { createDeclaredCoverage } from '../../insurance/services/declared-coverage';
+import {
+  CatalogRepository,
+  CoverageRepository,
+} from '../../insurance/repositories';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
@@ -112,6 +122,9 @@ export class IamPatientSelfRegistrationService {
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly relatedPersonsRepo: RelatedPersonsRepository,
+    private readonly insuranceCatalogRepo: CatalogRepository,
+    private readonly coverageRepo: CoverageRepository,
     private readonly notificationsService: NotificationsService,
     private readonly tenantMembershipsRepo: TenantMembershipsRepository,
     private readonly logger: PinoLogger,
@@ -248,6 +261,13 @@ export class IamPatientSelfRegistrationService {
         occupationFreeText: dto.occupationConceptId
           ? undefined
           : dto.occupationFreeText,
+        // La empresa sigue exactamente la misma regla, y por el mismo motivo:
+        // el texto libre sólo tenía sentido para quien no encontró la suya en
+        // el catálogo, así que con el concepto elegido sobra.
+        workEmployerConceptId: dto.workEmployerConceptId,
+        workEmployerFreeText: dto.workEmployerConceptId
+          ? undefined
+          : dto.workEmployerFreeText,
         actorUserId: user.id,
       });
       await tx.flush();
@@ -297,6 +317,23 @@ export class IamPatientSelfRegistrationService {
         actorUserId: user.id,
       });
 
+      // El NIT con el que quiere que le facturen. Va como identificador y no
+      // como columna del perfil porque es eso: un número que la administración
+      // tributaria le asignó. La razón social no se pide: el modelo todavía no
+      // tiene dónde guardarla y pedir un dato que se pierde es peor que no
+      // pedirlo.
+      if (dto.billingTaxId) {
+        this.identifiersRepo.create(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+          ownerId: person.id,
+          typeConceptId: CONCEPTS.ID_TYPE_TAX,
+          value: dto.billingTaxId,
+          useConceptId: CONCEPTS.USE_OFFICIAL,
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+          actorUserId: user.id,
+        });
+      }
+
       // 5) Membresía en el tenant por defecto (`SEED.tenantId`): sin esta fila
       // en `directory.tenant_memberships`, `TenantContextInterceptor` —global,
       // corre en TODA ruta autenticada no `@Public()`— rechaza con 403 "no
@@ -327,8 +364,65 @@ export class IamPatientSelfRegistrationService {
       createResidenceAddress(this.addressesRepo, tx, {
         personId: person.id,
         municipalityConceptId: dto.residenceMunicipalityConceptId,
+        lines: dto.homeAddressLines,
+        latitude: dto.homeLatitude,
+        longitude: dto.homeLongitude,
         actorUserId: user.id,
       });
+
+      // El trabajo es una segunda dirección de la misma persona, distinguida
+      // por su uso: quien lleva un medicamento necesita saber a cuál ir.
+      createWorkAddress(this.addressesRepo, tx, {
+        personId: person.id,
+        municipalityConceptId: dto.workMunicipalityConceptId,
+        lines: dto.workAddressLines,
+        latitude: dto.workLatitude,
+        longitude: dto.workLongitude,
+        actorUserId: user.id,
+      });
+
+      // El tutor o persona autorizada, si lo declaró.
+      await createGuardianRelatedPerson(
+        {
+          persons: this.personsRepo,
+          relatedPersons: this.relatedPersonsRepo,
+          contactPoints: this.contactPointsRepo,
+        },
+        tx,
+        {
+          patientProfileId: patient.profileId,
+          name: dto.guardianName,
+          phone: dto.guardianPhone,
+          actorUserId: user.id,
+        },
+      );
+
+      // Los seguros declarados. Privado y público conviven: una persona puede
+      // estar afiliada a la Caja y tener además una póliza.
+      const coverageRepos = {
+        catalog: this.insuranceCatalogRepo,
+        coverage: this.coverageRepo,
+      };
+      if (dto.privateInsurancePlanId) {
+        await createDeclaredCoverage(coverageRepos, tx, {
+          patientProfileId: patient.profileId,
+          insurancePlanId: dto.privateInsurancePlanId,
+          expectedSector: 'private',
+          coverageOrder: 1,
+          memberIdentifier: dto.nationalId,
+          actorUserId: user.id,
+        });
+      }
+      if (dto.publicInsurancePlanId) {
+        await createDeclaredCoverage(coverageRepos, tx, {
+          patientProfileId: patient.profileId,
+          insurancePlanId: dto.publicInsurancePlanId,
+          expectedSector: 'public',
+          coverageOrder: 2,
+          memberIdentifier: dto.nationalId,
+          actorUserId: user.id,
+        });
+      }
 
       // El teléfono es independiente del correo: se guarda aunque no haya email.
       if (dto.phone) {

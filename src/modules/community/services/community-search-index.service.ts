@@ -64,6 +64,10 @@ export interface PublicProfileDocument {
   city: string | null;
   /** Ruta servida por la API, nunca el id del archivo. */
   avatarUrl: string | null;
+  /** Portada, como ruta servida por la API. Misma regla que el avatar. */
+  coverUrl: string | null;
+  /** Calle legible de la dirección vigente, o `null`. */
+  address: string | null;
   /** Si el sello de verificado está vigente. Resumen de `verifiedBadgeStatus`. */
   verified: boolean;
   /** Estado del sello: `VERIFIED`, `EXPIRED` o `NONE`. */
@@ -363,6 +367,10 @@ export class CommunitySearchIndexService {
       avatarUrl: profile.avatarFileId
         ? `/public/media/${profile.avatarFileId}`
         : null,
+      coverUrl: profile.coverFileId
+        ? `/public/media/${profile.coverFileId}`
+        : null,
+      address: location?.address ?? null,
       verified: badge.status === 'VERIFIED',
       verifiedBadgeStatus: badge.status,
       badgeTypeConceptId: badge.badgeTypeConceptId,

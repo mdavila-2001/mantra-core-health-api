@@ -26,6 +26,11 @@ export interface CreateIdentifierData {
    */
   value: string;
   /**
+   * Razón social del titular. `em.create` sólo escribe lo que este objeto
+   * nombra, así que omitirlo acá dejaría la columna en `NULL` sin fallar.
+   */
+  holderName?: string;
+  /**
    * Identificador asociado a use concept.
    */
   useConceptId?: string;
@@ -90,6 +95,7 @@ export class IdentifiersRepository {
         typeConceptId: data.typeConceptId,
         system: data.system,
         value: data.value,
+        holderName: data.holderName,
         useConceptId: data.useConceptId,
         stateConceptId: data.stateConceptId,
         issuerAdministrativeAreaConceptId:

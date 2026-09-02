@@ -72,6 +72,8 @@ function build() {
     findTemplateById: mockFn(),
     findPolicyById: mockFn(),
     findResourceById: mockFn(),
+    findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
+    createSlot: mockFn().mockReturnValue({ id: 'slot-directo' }),
   };
   // C-10: la historia de transición se versiona vía el HistoryRepository de audit.
   // `latestBySource` es la lectura del motivo (corrección #14): por defecto no
@@ -85,6 +87,9 @@ function build() {
   const appointmentsRepo = {
     create: mockFn(() => ({ id: 'appt-1' })),
     findById: mockFn(),
+    // Por omisión ninguna cita declara tipología: las pruebas que la comprueban
+    // devuelven el mapa a propósito.
+    findTypesByIds: mockFn().mockResolvedValue(new Map()),
   };
   const logger = {
     setContext: mockFn(),
@@ -100,6 +105,7 @@ function build() {
     describeSlot: mockFn().mockResolvedValue(null),
     findResourceAccount: mockFn().mockResolvedValue(null),
     findAccountForProfile: mockFn().mockResolvedValue(null),
+    findDisplayNameForProfile: mockFn().mockResolvedValue(null),
   };
   const notices = {
     emit: mockFn().mockResolvedValue({ delivered: true }),
@@ -952,6 +958,119 @@ describe('SchedulingBookingsService', () => {
 
       expect(d.bookingsRepo.createBooking).toHaveBeenCalled();
     });
+
+    /* ----------------------------------------------------------------------
+       AC-15-1 y AC-15-2 · la solicitud se avisa a las DOS partes
+       ---------------------------------------------------------------------- */
+
+    /** La cita como la describe el repositorio de avisos. */
+    const solicitada = {
+      bookingId: 'booking-1',
+      tenantId: '33333333-3333-3333-3333-333333333333',
+      patientProfileId: PATIENT,
+      resourceId: 'res-1',
+      slotId: SLOT_ID,
+      startAt: new Date('2026-08-20T14:00:00.000Z'),
+      resourceLabel: 'Dra. Rivas',
+    };
+
+    it('avisa al profesional que hay una solicitud que responder', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+      d.noticeRepo.findDisplayNameForProfile.mockResolvedValue('Ana Flores');
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const alPro = avisos.find(
+        (a: any) => a.recipient.userId === 'user-medico',
+      );
+      expect(alPro).toBeDefined();
+      expect(alPro.payload.change).toBe('REQUESTED');
+      expect(alPro.bodyText).toContain('Ana Flores');
+      // La acción va en el cuerpo: avisar sin decir qué se espera es ruido.
+      expect(alPro.bodyText).toMatch(/acept/i);
+    });
+
+    it('acusa recibo al paciente, y dice que todavía falta la respuesta', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const alPaciente = avisos.find(
+        (a: any) => a.recipient.patientProfileId === PATIENT,
+      );
+      expect(alPaciente).toBeDefined();
+      expect(alPaciente.bodyText).toContain('Dra. Rivas');
+      // Un acuse que se lee como confirmación manda a alguien al consultorio
+      // con un turno que nadie tomó.
+      expect(alPaciente.bodyText).toMatch(/falta que lo confirmen/i);
+      expect(avisos).toHaveLength(2);
+    });
+
+    it('sin nombre de paciente el aviso del profesional sigue saliendo', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+      d.noticeRepo.findDisplayNameForProfile.mockResolvedValue(null);
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const alPro = avisos.find(
+        (a: any) => a.recipient.userId === 'user-medico',
+      );
+      expect(alPro.bodyText).toMatch(/^Un paciente pidió turno/);
+    });
+
+    it('una sala no tiene a quién avisarle, pero el paciente igual recibe su acuse', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue(null);
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      expect(avisos).toHaveLength(1);
+      expect(avisos[0].recipient).toEqual({ patientProfileId: PATIENT });
+    });
+
+    it('los dos avisos rebotan por separado: uno por destinatario', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const claves = avisos.map((a: any) => a.debounceKey);
+      expect(new Set(claves).size).toBe(2);
+      expect(claves.every((k: string) => k.includes('booking-1'))).toBe(true);
+    });
+
+    it('que la cita no se describa no rompe la solicitud', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(null);
+
+      const res = await d.service.requestBooking(
+        'hold-token',
+        solicitud,
+        actor,
+      );
+
+      expect(res.id).toBe('booking-1');
+      expect(d.notices.emitMany).not.toHaveBeenCalled();
+    });
   });
 
   describe('motivo obligatorio y visible (corrección #14)', () => {
@@ -1071,6 +1190,216 @@ describe('SchedulingBookingsService', () => {
         resourceName: 'Consultorio del Dr. Paz',
       };
     }
+
+    describe('la cita puntual — AG-2', () => {
+      const medico = {
+        id: 'user-med',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-1',
+      } as never;
+
+      const dto = {
+        patientProfileId: 'pp-ana',
+        resourceId: 'res-1',
+        startAt: '2026-09-10T14:00:00Z',
+        durationMinutes: 180,
+        reasonText: 'Cirugía de implante',
+      };
+
+      /** Deja la agenda del médico lista para asignar. */
+      function listoParaAsignar(d: ReturnType<typeof build>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          tenantId: 'ten-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+          timeZone: 'America/La_Paz',
+        });
+        d.bookingsRepo.findPatientNames.mockResolvedValue(
+          new Map([['pp-ana', 'Ana Quispe']]),
+        );
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.bookingsRepo.createBooking.mockReturnValue({ id: 'bk-directa' });
+        return d;
+      }
+
+      it('crea cupo único + reserva CONFIRMADA en una transacción', async () => {
+        const d = listoParaAsignar(build());
+
+        const res = await d.service.createDirectAppointment(
+          dto as never,
+          medico,
+        );
+
+        expect(res.bookingId).toBe('bk-directa');
+        expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+        // el cupo nace ya tomado y sin plantilla: nunca estuvo ofrecido.
+        const slotArgs = d.catalogRepo.createSlot.mock.calls[0][1];
+        expect(slotArgs.capacity).toBe(1);
+        expect(slotArgs.remainingCapacity).toBe(0);
+        expect(slotArgs.scheduleTemplateId).toBeUndefined();
+      });
+
+      /**
+       * La modalidad de la atención — teleconsulta.
+       *
+       * `clinical.appointments.channel_concept_id` existía desde el modelo y
+       * estaba sin conjunto y sin usar; por eso la teleconsulta no se podía
+       * declarar aunque el modelo ya la admitiera. Estas pruebas fijan las dos
+       * mitades: que el valor elegido llega a la cita CLÍNICA (no a la
+       * reserva, que es otro eje), y que omitirlo no inventa nada.
+       */
+      describe('el canal de la atención', () => {
+        it('escribe la teleconsulta en la cita clínica, no en la reserva', async () => {
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(
+            { ...dto, channel: 'TELECONSULTA' } as never,
+            medico,
+          );
+
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.channelConceptId).toBe(
+            CLIN.APPOINTMENT_CHANNEL_TELEHEALTH,
+          );
+
+          // El canal de la RESERVA es otro eje y no se contagia: la asignó
+          // alguien desde el mostrador, y eso sigue siendo cierto.
+          const reserva = d.bookingsRepo.createBooking.mock.calls[0][1];
+          expect(reserva.bookingChannelConceptId).toBe(CONCEPTS.CHANNEL_DESK);
+        });
+
+        it('sin canal no escribe ninguno: ausente ≠ presencial explícito', async () => {
+          // «Nadie lo dijo» y «dijeron que es presencial» son cosas distintas.
+          // Sólo la primera puede cambiar de significado si mañana el valor por
+          // defecto cambia, y por eso la columna queda en NULL.
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(dto as never, medico);
+
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.channelConceptId).toBeUndefined();
+        });
+
+        it('la visita a domicilio también es un canal, no un tipo de cita', async () => {
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(
+            { ...dto, channel: 'DOMICILIO' } as never,
+            medico,
+          );
+
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.channelConceptId).toBe(
+            CLIN.APPOINTMENT_CHANNEL_HOME_VISIT,
+          );
+          // `type_concept_id` responde otra pregunta —qué clase de atención
+          // es— y no lo toca nadie acá.
+          expect(cita.typeConceptId).toBeUndefined();
+        });
+      });
+
+      it('la duración es libre: la cirugía de 3 horas es el caso entero', async () => {
+        const d = listoParaAsignar(build());
+
+        await d.service.createDirectAppointment(dto as never, medico);
+
+        const slotArgs = d.catalogRepo.createSlot.mock.calls[0][1];
+        const durMs = slotArgs.endAt.getTime() - slotArgs.startAt.getTime();
+        expect(durMs).toBe(180 * 60_000);
+      });
+
+      it('la regla madre corre ANTES de crear nada', async () => {
+        const d = listoParaAsignar(build());
+        d.tiempoProfesional.assertRangoLibre.mockRejectedValue(
+          new PreconditionFailedException('El profesional ya tiene a Beto…'),
+        );
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/ya tiene a Beto/);
+        expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+        expect(d.bookingsRepo.createBooking).not.toHaveBeenCalled();
+      });
+
+      it('el tiempo del PACIENTE también se protege', async () => {
+        // La regla 1 vale igual cuando quien agenda es el doctor: el paciente
+        // tampoco puede estar en dos lugares.
+        const d = listoParaAsignar(build());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([
+          {
+            id: 'bk-otra',
+            resourceName: 'Otro consultorio',
+            startAt: new Date(),
+          },
+        ]);
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/paciente ya tiene un turno/);
+      });
+
+      it('retira los cupos libres que pisa y lo INFORMA', async () => {
+        // Decisión 8: informar, no pedir permiso.
+        const d = listoParaAsignar(build());
+        const libre1 = {
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          capacity: 1,
+          remainingCapacity: 1,
+        };
+        const libre2 = {
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          capacity: 1,
+          remainingCapacity: 1,
+        };
+        d.catalogRepo.findOpenSlotsOfProfessionalInWindow.mockResolvedValue([
+          libre1,
+          libre2,
+        ]);
+
+        const res = await d.service.createDirectAppointment(
+          dto as never,
+          medico,
+        );
+
+        expect(res.retractedSlots).toBe(2);
+        expect(libre1.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+        expect(libre2.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      });
+
+      it('un profesional NO asigna en la agenda de otro', async () => {
+        const d = listoParaAsignar(build());
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          tenantId: 'ten-1',
+          resourceRefId: 'hp-OTRO',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/su propia agenda/);
+      });
+
+      it('un paciente que no existe rebota con 404, no crea nada', async () => {
+        const d = listoParaAsignar(build());
+        d.bookingsRepo.findPatientNames.mockResolvedValue(new Map());
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/Paciente no encontrado/);
+        expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+      });
+
+      it('hereda el gating del vínculo: revocado no asigna', async () => {
+        const d = listoParaAsignar(build());
+        d.vinculos.evaluar.mockResolvedValue('no-vigente' as never);
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/no está vigente/);
+      });
+    });
 
     describe('la regla madre — AG-1', () => {
       it('aceptar consulta el tiempo del profesional EXCLUYENDO la propia cita', async () => {
@@ -1856,6 +2185,119 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(d.bookingsRepo.findPatientNames).toHaveBeenCalledTimes(1);
+    });
+
+    /* ------------------------------------------------------------------
+       TAREA-12 §3.2 · la tipología viaja para que la agenda pueda pintarla
+       ------------------------------------------------------------------ */
+
+    it('la tipología de la cita llega en el listado', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: 'appt-1',
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+      d.appointmentsRepo.findTypesByIds.mockResolvedValue(
+        new Map([['appt-1', 'tipo-operacion']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(res.items[0].typeConceptId).toBe('tipo-operacion');
+    });
+
+    it('se pide UNA vez para toda la página, no una por cita', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: ['b1', 'b2', 'b3'].map((id, i) => ({
+          booking: {
+            ...guardada,
+            id,
+            resourceId: 'res-1',
+            appointmentId: `appt-${i}`,
+          },
+          slot: null,
+        })),
+        fetchCapReached: false,
+      });
+
+      await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(d.appointmentsRepo.findTypesByIds).toHaveBeenCalledTimes(1);
+      const [, ids] = d.appointmentsRepo.findTypesByIds.mock.calls[0];
+      expect(ids).toHaveLength(3);
+    });
+
+    it('una reserva sin cita clínica no pide tipología ni la inventa', async () => {
+      // Una reserva que nunca se confirmó no crea `clinical.appointments`: su
+      // id no entra en la consulta y el campo se omite.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: null,
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(res.items[0].typeConceptId).toBeUndefined();
+      const [, ids] = d.appointmentsRepo.findTypesByIds.mock.calls[0];
+      expect(ids).toHaveLength(0);
+    });
+
+    it('una cita clínica sin tipo declarado omite el campo, no lo vacía', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: 'appt-1',
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+      // El repositorio no la incluye: «no declaró tipo» no es «tipo nulo».
+      d.appointmentsRepo.findTypesByIds.mockResolvedValue(new Map());
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect('typeConceptId' in res.items[0]).toBe(false);
     });
 
     it('el listado por omisión incluye las pendientes y las completadas', async () => {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { ContactPoints } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, touch } from '../../../common';
 
 /** Datos mínimos para dar de alta un punto de contacto. */
 export interface CreateContactPointData {
@@ -73,6 +73,61 @@ export class ContactPointsRepository {
       { ownerId, $or: [{ validTo: null }, { validTo: { $gt: ahora } }] },
       { orderBy: { rank: 'asc nulls last', createdAt: 'asc' } },
     );
+  }
+
+  /**
+   * El punto de contacto vigente y preferente de un dueño para un sistema
+   * (teléfono, correo).
+   *
+   * Es {@link findVigentesByOwner} acotado a un sistema y quedándose con el
+   * primero: el mismo criterio de vigencia y el mismo orden por `rank`, para que
+   * «el teléfono de esta persona» signifique lo mismo al leerlo que al
+   * reemplazarlo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ownerId - El dueño (para un paciente, su `personId`).
+   * @param systemConceptId - Sistema del contacto (`CONCEPTS.CONTACT_PHONE`…).
+   * @returns El contacto vigente preferente, o `null` si no tiene ninguno.
+   */
+  async findVigenteByOwnerAndSystem(
+    em: EntityManager,
+    ownerId: string,
+    systemConceptId: string,
+  ): Promise<ContactPoints | null> {
+    const ahora = new Date();
+    return em.findOne(
+      ContactPoints,
+      {
+        ownerId,
+        systemConceptId,
+        $or: [{ validTo: null }, { validTo: { $gt: ahora } }],
+      },
+      { orderBy: { rank: 'asc nulls last', createdAt: 'asc' } },
+    );
+  }
+
+  /**
+   * Da de baja un punto de contacto poniéndole fin de vigencia.
+   *
+   * No lo borra ni lo pisa: el teléfono anterior es historia —por ahí se llamó a
+   * esta persona— y sobrescribirlo dejaría al expediente afirmando que nunca
+   * existió. Quien cambia de número cierra el vigente y crea el nuevo.
+   *
+   * `valid_to` es una columna `date`: con la fecha de hoy el contacto deja de
+   * ser vigente para {@link findVigentesByOwner} en la misma petición.
+   *
+   * @param punto - El contacto a cerrar.
+   * @param validTo - Fecha de fin de vigencia (normalmente hoy).
+   * @param actorUserId - Quién lo cierra, para la auditoría.
+   * @returns El mismo contacto, ya cerrado.
+   */
+  closeVigente(
+    punto: ContactPoints,
+    validTo: Date,
+    actorUserId?: string,
+  ): ContactPoints {
+    punto.validTo = validTo;
+    return touch(punto, actorUserId);
   }
 
   /** Construye la entidad en la unidad de trabajo (sin flush). Nace no verificado. */

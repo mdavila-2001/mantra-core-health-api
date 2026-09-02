@@ -9,7 +9,7 @@
 # Módulo `directory`
 
 **Fuente:** [`src/modules/directory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/directory/README.md)
-· 2 controllers · 6 services · 5 repositories · 7 entidades · 16 DTO
+· 2 controllers · 6 services · 5 repositories · 7 entidades · 17 DTO
 
 ---
 
@@ -21,18 +21,18 @@ membresías de usuarios a tenant y a branch.
 
 ## Endpoints (UC-04-01..10)
 
-| UC | Método y ruta | Rol | Descripción |
-|----|---------------|-----|-------------|
-| 04-01 | `POST /admin/tenants` | `SUPERADMIN` | Aprovisiona un tenant raíz (`pending`/`unverified`) y su membership owner. |
-| 04-02 | `POST /admin/tenants/{tenantId}/verification` | `SECURITY_ADMIN` | Verifica y activa el tenant (`pending→active`, `unverified→verified`). |
-| 04-03 | `POST /tenants/{tenantId}/child-tenants` | `SECURITY_ADMIN` | Crea un sub-tenant hijo (`parent_tenant_id`) con membership admin inicial. |
-| 04-04 | `POST /tenants/{tenantId}/branches` | `SECURITY_ADMIN` | Crea una branch/sede activa con geolocalización opcional. |
-| 04-05 | `POST /tenants/{tenantId}/memberships` | `SECURITY_ADMIN` | Incorpora un usuario al tenant (evita duplicado activo). |
+| UC    | Método y ruta                                                            | Rol              | Descripción                                                                   |
+| ----- | ------------------------------------------------------------------------ | ---------------- | ----------------------------------------------------------------------------- |
+| 04-01 | `POST /admin/tenants`                                                    | `SUPERADMIN`     | Aprovisiona un tenant raíz (`pending`/`unverified`) y su membership owner.    |
+| 04-02 | `POST /admin/tenants/{tenantId}/verification`                            | `SECURITY_ADMIN` | Verifica y activa el tenant (`pending→active`, `unverified→verified`).        |
+| 04-03 | `POST /tenants/{tenantId}/child-tenants`                                 | `SECURITY_ADMIN` | Crea un sub-tenant hijo (`parent_tenant_id`) con membership admin inicial.    |
+| 04-04 | `POST /tenants/{tenantId}/branches`                                      | `SECURITY_ADMIN` | Crea una branch/sede activa con geolocalización opcional.                     |
+| 04-05 | `POST /tenants/{tenantId}/memberships`                                   | `SECURITY_ADMIN` | Incorpora un usuario al tenant (evita duplicado activo).                      |
 | 04-06 | `POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments` | `SECURITY_ADMIN` | Asigna la membresía a una branch del tenant; fija `primary` si es la primera. |
-| 04-07 | `POST /tenants/{tenantId}/memberships/{membershipId}/transfer` | `SECURITY_ADMIN` | Transfiere entre branches (cierra origen, abre destino, mueve `primary`). |
-| 04-08 | `PATCH /tenants/{tenantId}/memberships/{membershipId}/role` | `SECURITY_ADMIN` | Cambia rol y/o scope de la membresía. |
-| 04-09 | `POST /tenants/{tenantId}/memberships/{membershipId}/offboard` | `SECURITY_ADMIN` | Da de baja la membresía y cierra en cascada sus asignaciones a branch. |
-| 04-10 | `POST /admin/tenants/{tenantId}/suspend` | `SUPERADMIN` | Suspende el tenant y cascadea a branches y memberships activos. |
+| 04-07 | `POST /tenants/{tenantId}/memberships/{membershipId}/transfer`           | `SECURITY_ADMIN` | Transfiere entre branches (cierra origen, abre destino, mueve `primary`).     |
+| 04-08 | `PATCH /tenants/{tenantId}/memberships/{membershipId}/role`              | `SECURITY_ADMIN` | Cambia rol y/o scope de la membresía.                                         |
+| 04-09 | `POST /tenants/{tenantId}/memberships/{membershipId}/offboard`           | `SECURITY_ADMIN` | Da de baja la membresía y cierra en cascada sus asignaciones a branch.        |
+| 04-10 | `POST /admin/tenants/{tenantId}/suspend`                                 | `SUPERADMIN`     | Suspende el tenant y cascadea a branches y memberships activos.               |
 
 ## Entidades
 

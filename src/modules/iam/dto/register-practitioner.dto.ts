@@ -175,6 +175,32 @@ export class RegisterPractitionerDto {
   professionalTitle?: string;
 
   /**
+   * Las especialidades que declara, elegidas EN el alta.
+   *
+   * El registro del cliente lo pide así (módulo Médico §1.4.2: «3 espacios
+   * adicionales a la profesión»), y hasta acá el alta no las aceptaba: la
+   * pantalla decía «se elige después, desde el perfil» y la mayoría no volvía —
+   * la Guía mostraba profesionales sin especialidad. La primera de la lista
+   * queda como principal, igual que en el alta administrativa.
+   *
+   * Cada uuid se valida contra `VS_MEDICAL_SPECIALTY` dentro de la transacción:
+   * la FK acepta cualquier concepto del catálogo, y quién decide cuáles son
+   * especialidades es el value set, no el formato.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Especialidades declaradas (hasta 3). La primera queda como principal.',
+    type: [String],
+    format: 'uuid',
+    maxItems: 3,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  @IsUUID(undefined, { each: true })
+  specialtyConceptIds?: string[];
+
+  /**
    * Documento de identidad. Opcional: se guarda como identificador oficial de
    * la persona, no como credencial de login.
    */

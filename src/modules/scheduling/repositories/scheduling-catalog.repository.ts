@@ -186,6 +186,10 @@ export interface CreateRuleData {
    */
   capacityPerSlot?: number;
   /**
+   * Minutos de respiro entre un turno y el siguiente. Anulable: ausente ≡ 0.
+   */
+  gapMinutes?: number;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -470,6 +474,7 @@ export class SchedulingCatalogRepository {
         endTime: data.endTime,
         slotMinutes: data.slotMinutes,
         capacityPerSlot: data.capacityPerSlot,
+        gapMinutes: data.gapMinutes,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -569,6 +574,68 @@ export class SchedulingCatalogRepository {
   }
 
   /**
+   * Los cupos ABIERTOS y sin tomar del profesional que pisan un rango,
+   * cruzando todas sus sedes.
+   *
+   * Es la retracción de AG-2/AG-3: la cita que el doctor se pone encima de
+   * horarios que él mismo ofreció los retira — con aviso, sin preguntar. Sólo
+   * los intactos: un cupo con una reserva adentro no se toca desde acá (eso lo
+   * gobierna la política de choques).
+   *
+   * Se materializa vía entidades y no SQL crudo porque el llamador los MUTA:
+   * las filas crudas no pasan por la unidad de trabajo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceRefId - El perfil profesional dueño de los recursos.
+   * @param desde - Inicio del rango.
+   * @param hasta - Fin del rango.
+   * @param openStatusConceptId - El concepto de cupo abierto.
+   * @returns Los cupos abiertos e intactos que se cruzan.
+   */
+  async findOpenSlotsOfProfessionalInWindow(
+    em: EntityManager,
+    resourceRefId: string,
+    desde: Date,
+    hasta: Date,
+    openStatusConceptId: string,
+  ): Promise<BookableSlots[]> {
+    const recursos = await em.find(SchedulableResources, { resourceRefId });
+    if (recursos.length === 0) return [];
+
+    const slots = await em.find(BookableSlots, {
+      resourceId: { $in: recursos.map((recurso) => recurso.id) },
+      statusConceptId: openStatusConceptId,
+      startAt: { $lt: hasta },
+      endAt: { $gt: desde },
+    });
+    return slots.filter((slot) => slot.remainingCapacity === slot.capacity);
+  }
+
+  /**
+   * Una excepción por su id, o `null` si no existe.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - La excepción buscada.
+   * @returns La fila, o `null`.
+   */
+  findExceptionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<AvailabilityExceptions | null> {
+    return em.findOne(AvailabilityExceptions, { id });
+  }
+
+  /**
+   * Elimina una excepción.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param exception - La fila a eliminar.
+   */
+  removeException(em: EntityManager, exception: AvailabilityExceptions): void {
+    em.remove(exception);
+  }
+
+  /**
    * Crea create exception.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -642,11 +709,24 @@ export class SchedulingCatalogRepository {
    * slots se generaban pero no se podían listar, así que el único modo de
    * conseguir un `slotId` para tomar un hold era mirar la base de datos.
    *
-   * `onlyAvailable` filtra por capacidad restante y no por estado: un slot puede
-   * seguir marcado como abierto y tener el cupo tomado por un hold vivo, y
-   * ofrecerlo llevaría al paciente a un 409 al intentar reservarlo. Con `ahora`
-   * descarta además los que ya empezaron —un turno de ayer no se puede pedir—;
-   * ver {@link inicioDeLoReservable}.
+   * `onlyAvailable` descarta lo que no se puede pedir, por **dos** motivos
+   * distintos y ambos necesarios:
+   *
+   * - **Sin capacidad restante**: el slot sigue marcado como abierto pero un
+   *   hold vivo ya se llevó el cupo; ofrecerlo lleva a un 409 al reservar.
+   * - **Sin estado abierto**: desde AG-2 y AG-3 un slot puede quedar
+   *   `SLOT_BLOCKED` conservando su capacidad —lo bloquea una excepción de
+   *   disponibilidad, o lo retira una cita puntual que lo pisa—. Su
+   *   `remaining_capacity` sigue en 1, así que el filtro de capacidad no lo ve.
+   *
+   * El segundo faltaba, y el journey de AG-6 lo midió: sobre el mismo día, esta
+   * ruta ofrecía **10** horarios y la hermana del portal —`GET
+   * /scheduling/slots`, que sí compara el estado— ofrecía **2**. Los ocho de
+   * diferencia eran la reunión del médico y las tres horas de una cirugía: si
+   * un cliente los mostraba, el paciente elegía un horario que iba a fallar.
+   *
+   * Con `ahora` descarta además los que ya empezaron —un turno de ayer no se
+   * puede pedir—; ver {@link inicioDeLoReservable}.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param resourceId - Recurso cuya agenda se consulta.
@@ -660,7 +740,13 @@ export class SchedulingCatalogRepository {
     resourceId: string,
     from: Date,
     to: Date,
-    options: { onlyAvailable: boolean; limit: number; ahora?: Date },
+    options: {
+      onlyAvailable: boolean;
+      limit: number;
+      ahora?: Date;
+      /** El concepto de «cupo abierto», cuando `onlyAvailable`. */
+      openStatusConceptId?: string;
+    },
   ): Promise<BookableSlots[]> {
     const desde =
       options.onlyAvailable && options.ahora
@@ -673,6 +759,11 @@ export class SchedulingCatalogRepository {
     };
     if (options.onlyAvailable) {
       where.remainingCapacity = { $gt: 0 };
+      // El concepto lo aporta el servicio, igual que en la ruta hermana: la
+      // consulta no depende de una constante del catálogo.
+      if (options.openStatusConceptId) {
+        where.statusConceptId = options.openStatusConceptId;
+      }
     }
     return em.find(BookableSlots, where, {
       orderBy: { startAt: 'ASC' },

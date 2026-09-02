@@ -275,6 +275,26 @@ export class BookingItemDto {
   bookingChannelConceptId?: string;
 
   /**
+   * Qué clase de actividad es: consulta, procedimiento, control…
+   *
+   * Vive en `clinical.appointments.type_concept_id` y viaja acá porque la
+   * agenda del día pinta cada bloque según su tipología —el pedido del
+   * propietario habla de «TURNOS, OPERACIONES, ETC.»— y colorear por algo que
+   * la respuesta no trae es imposible.
+   *
+   * **Es un identificador de concepto, no un enum.** El catálogo de tipologías
+   * lo define el propietario (P-12-2) y todavía no está publicado: quien lo
+   * consuma hoy puede agrupar por id, no traducirlo a un nombre.
+   *
+   * Se omite cuando la cita no tiene contraparte clínica —una reserva que
+   * nunca llegó a confirmarse no crea `clinical.appointments`— o cuando la
+   * tiene y no declara tipo. Omitido, no vacío: `null` diría «no tiene tipo»,
+   * que es una afirmación distinta.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  typeConceptId?: string;
+
+  /**
    * Valor de confirmed at mantenido por la instancia.
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })

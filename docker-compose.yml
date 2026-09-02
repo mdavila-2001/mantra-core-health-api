@@ -328,10 +328,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      # DDL canónico de la raíz del workspace (SQL/ y NoSQL/ generados desde los
-      # .puml). El database/ interno del repo NO es fuente de esquema.
-      - ../SQL:/init/SQL:ro
-      - ../NoSQL:/init/NoSQL:ro
+      # DDL canónico del repositorio del modelo, que se clona como hermano de
+      # este (SQL/ y NoSQL/ generados desde los .puml). El database/ interno del
+      # repo NO es fuente de esquema.
+      - ../mantra-core-health-model/SQL:/init/SQL:ro
+      - ../mantra-core-health-model/NoSQL:/init/NoSQL:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
@@ -379,7 +380,7 @@ services:
     environment:
       MONGO_DB: ${MONGO_DB:-salud_document_store}
     volumes:
-      - ../NoSQL/55_document_store_mongodb:/init/mongo:ro
+      - ../mantra-core-health-model/NoSQL/55_document_store_mongodb:/init/mongo:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       mongodb:
@@ -441,7 +442,7 @@ services:
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:
-      - ../NoSQL/57_search_platform_opensearch:/init/os:ro
+      - ../mantra-core-health-model/NoSQL/57_search_platform_opensearch:/init/os:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       opensearch:
@@ -593,7 +594,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 120s
     depends_on:
       # No basta con que Postgres esté healthy: `TerminologySeedService`
       # corre en `onApplicationBootstrap` y necesita el esquema ya aplicado

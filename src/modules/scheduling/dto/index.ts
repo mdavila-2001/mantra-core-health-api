@@ -51,12 +51,18 @@ export {
   WaitlistEntryItemDto,
   ListWaitlistResponseDto,
   BOOKING_CHANNELS,
+  APPOINTMENT_CHANNELS,
   MIN_DELAY_MINUTES,
   MAX_DELAY_MINUTES,
   MAX_DELAY_MESSAGE_LENGTH,
+  CreateDirectAppointmentDto,
+  DirectAppointmentResponseDto,
 } from './scheduling-bookings.dto';
 export type { BookingInfoRequest } from './scheduling-bookings.dto';
-export type { BookingChannel } from './scheduling-bookings.dto';
+export type {
+  BookingChannel,
+  AppointmentChannel,
+} from './scheduling-bookings.dto';
 
 export {
   CreateConfirmationRuleDto,

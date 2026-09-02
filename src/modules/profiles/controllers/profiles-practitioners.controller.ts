@@ -34,6 +34,8 @@ import {
   VerifyCredentialDto,
   CredentialResponseDto,
   AddSpecialtyDto,
+  AddOwnCredentialDto,
+  OwnCredentialResponseDto,
   SpecialtyResponseDto,
   CreateAffiliationDto,
   AffiliationResponseDto,
@@ -364,6 +366,53 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AffiliationResponseDto> {
     return this.practitionersService.addOwnAffiliation(dto, actor);
+  }
+
+  /**
+   * Los títulos propios, uno por llamada.
+   *
+   * Va bajo `practitioners/me` y no bajo `practitioners/:profileId` porque el
+   * sujeto sale de la sesión: así no existe la forma de escribir la formación
+   * de otro profesional, ni siquiera equivocándose de id.
+   */
+  @Post('practitioners/me/credentials')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Agregar un título propio (diplomado, maestría, doctorado…)',
+    description:
+      'Cada llamada agrega uno: el registro de procesos pide poder cargar varios de cada clase. Nace pendiente de verificación y admite el PDF o la foto del diploma, ya subido por POST /common/files/upload.',
+  })
+  addOwnCredential(
+    @Body() dto: AddOwnCredentialDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OwnCredentialResponseDto> {
+    return this.practitionersService.addOwnCredential(dto, actor);
+  }
+
+  /**
+   * Un consultorio de OTRO profesional — las fichas de directorio.
+   *
+   * Los profesionales que publican las redes de las aseguradoras no tienen
+   * cuenta —no traen correo— y por eso no pueden declarar dónde atienden. Sin
+   * esta ruta, un médico con tres consultorios se veía sin ninguno.
+   *
+   * Pide rol administrativo: escribir el historial laboral de alguien que no
+   * está mirando es otra cosa que escribir el propio.
+   */
+  @Post('practitioners/:profileId/affiliations')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrar un consultorio de un profesional sin cuenta',
+    description:
+      'Mismas reglas que el alta propia: no repite un vínculo ya declarado y respeta el estado inicial según la sede.',
+  })
+  addAffiliationFor(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: CreateAffiliationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    return this.practitionersService.addAffiliationFor(profileId, dto, actor);
   }
 
   /** UC-05-06. */

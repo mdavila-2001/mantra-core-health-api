@@ -140,16 +140,27 @@ export class CreatePractitionerDto {
   telehealthAvailable?: boolean;
 
   /**
-   * Valor de license number mantenido por la instancia.
+   * Nº de matrícula, **si se conoce**.
+   *
+   * Era obligatorio, y el modelo nunca lo pidió: `health_practitioner_profiles`
+   * no tiene ninguna columna ni FK que exija una autorización jurisdiccional.
+   * La obligatoriedad vivía sólo acá, y forzaba a **inventar una matrícula**
+   * para dar de alta a alguien que no la trae — que es justo el caso de una
+   * ficha de directorio: el padrón de una aseguradora dice quién atiende, dónde
+   * y de qué, pero no publica el número de su matrícula.
+   *
+   * Sin este valor no se crea la fila de autorización. Es la diferencia entre
+   * «no sabemos su matrícula» y «su matrícula es la cadena vacía».
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Nº de licencia de la autorización jurisdiccional inicial',
     maxLength: 100,
   })
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(100)
-  licenseNumber!: string;
+  licenseNumber?: string;
 
   /**
    * Identificador asociado a jurisdiction concept.
@@ -175,16 +186,18 @@ export class CreatePractitionerDto {
   regulatoryAuthority?: string;
 
   /**
-   * Valor de credential number mantenido por la instancia.
+   * Nº del título de soporte, **si se conoce**. Mismo criterio que la matrícula:
+   * sin valor no se crea la credencial, en vez de crear una con número inventado.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Nº de la credencial de soporte',
     maxLength: 100,
   })
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(100)
-  credentialNumber!: string;
+  credentialNumber?: string;
 
   /**
    * Identificador asociado a credential type concept.
@@ -281,16 +294,15 @@ export class PractitionerResponseDto {
   practiceStatus!: string;
 
   /**
-   * Identificador asociado a license.
+   * La autorización creada — **ausente** si el alta no trajo matrícula, que es
+   * el caso de una ficha de directorio.
    */
-  @ApiProperty({ format: 'uuid' })
-  licenseId!: string;
+  @ApiPropertyOptional({ format: 'uuid' })
+  licenseId?: string;
 
-  /**
-   * Identificador asociado a credential.
-   */
-  @ApiProperty({ format: 'uuid' })
-  credentialId!: string;
+  /** La credencial creada. Ausente por el mismo motivo que `licenseId`. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  credentialId?: string;
 
   /**
    * Fecha y hora en que se creó el registro.

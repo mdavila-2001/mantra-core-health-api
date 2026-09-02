@@ -150,6 +150,17 @@ function build() {
   // El contacto del profesional (`common.contact_points`). Vacío por defecto.
   const contactPointsRepo = {
     findVigentesByOwner: mockFn(() => Promise.resolve([])),
+    findVigenteByOwnerAndSystem: mockFn(() => Promise.resolve(null)),
+    closeVigente: mockFn(),
+    create: mockFn(),
+  };
+
+  // El domicilio del profesional. Sin dirección por defecto: es el caso de casi
+  // todo perfil sembrado, y quien la afirme la declara en su prueba.
+  const addressesRepo = {
+    findVigenteByOwnerAndUse: mockFn(() => Promise.resolve(null)),
+    closeVigente: mockFn(),
+    create: mockFn(),
   };
 
   const service = new ProfilesPractitionersService(
@@ -171,6 +182,7 @@ function build() {
     // Sin contactos por defecto: es el caso de casi todo perfil sembrado, y
     // las pruebas que hablan del correo lo declaran ellas.
     contactPointsRepo as any,
+    addressesRepo as any,
     accountLinksRepo as any,
     effectiveRoles as any,
     verificationBypass as any,
@@ -1096,6 +1108,41 @@ describe('ProfilesPractitionersService', () => {
       expect(practitioner.professionalBio).toBe('');
     });
 
+    /**
+     * Lo encontró una prueba de punta a punta contra la base: mandar
+     * `birthDate: null` para borrar la fecha la guardaba como **1/1/1970**,
+     * porque `new Date(null)` es la época Unix y no «sin fecha». El médico
+     * quedaba nacido en 1970 sin haber escrito eso en ningún lado.
+     */
+    it('borrar la fecha de nacimiento la deja sin valor, no en 1970', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+      const person = { id: 'per-1', displayName: 'Dr. Uno', birthDate: new Date(1979, 10, 5) };
+      d.personsRepo.findById.mockResolvedValue(person);
+
+      await d.service.updateOwnPractitionerProfile({ birthDate: null }, {
+        id: 'u-1',
+      } as any);
+
+      expect(person.birthDate).toBeUndefined();
+    });
+
+    it('y una fecha de verdad sí se guarda', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+      const person: any = { id: 'per-1', displayName: 'Dr. Uno' };
+      d.personsRepo.findById.mockResolvedValue(person);
+
+      await d.service.updateOwnPractitionerProfile({ birthDate: '1979-11-05' }, {
+        id: 'u-1',
+      } as any);
+
+      expect(person.birthDate).toBeInstanceOf(Date);
+      expect((person.birthDate as Date).getUTCFullYear()).toBe(1979);
+    });
+
     /** Igual que la lectura: sin persona vinculada no hay nada que editar. */
     it('sin persona vinculada falla con precondición', async () => {
       const d = build();
@@ -1706,4 +1753,273 @@ describe('ProfilesPractitionersService', () => {
       expect(d.em.count).not.toHaveBeenCalled();
     });
   });
+
+  /**
+   * **Los títulos propios, varios y con diploma adjunto.**
+   *
+   * El registro de procesos (MÓDULO MÉDICO §1.17 a §1.20) pide «espacio para
+   * poder subir varios diplomados», y lo mismo para maestrías, doctorados y
+   * especialidades. Hasta acá el alta creaba UNA credencial y no existía forma
+   * de agregar la segunda.
+   */
+  /**
+   * **La ficha de directorio: un profesional sin matrícula conocida.**
+   *
+   * El padrón de una aseguradora dice quién atiende, de qué y dónde, pero no
+   * publica el número de matrícula de nadie. El alta exigía los dos números, y
+   * el modelo nunca: `health_practitioner_profiles` no tiene columna ni FK que
+   * pida una autorización. Esa obligatoriedad vivía sólo en el DTO, y forzaba a
+   * inventar una credencial para 961 médicos reales.
+   */
+  describe('alta sin matrícula ni credencial', () => {
+    function prepararAlta(d: ReturnType<typeof build>) {
+      d.practitionersRepo.findByCode.mockResolvedValue(null);
+      d.personsRepo.create.mockReturnValue({ id: 'per-9' });
+      d.personProfilesRepo.create.mockReturnValue({ id: 'per-9' });
+      d.practitionersRepo.create.mockReturnValue({
+        profileId: 'per-9',
+        practitionerCode: 'DIR-1',
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+    }
+
+    const fichaDeDirectorio = {
+      practitionerCode: 'DIR-1',
+      displayName: 'ABASTO VEGA, ROSEMARY',
+    } as any;
+
+    it('da de alta la ficha sin crear matrícula ni credencial', async () => {
+      const d = build();
+      prepararAlta(d);
+
+      const creada = await d.service.onboardPractitioner(fichaDeDirectorio, actor);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+      expect(creada.licenseId).toBeUndefined();
+      expect(creada.credentialId).toBeUndefined();
+    });
+
+    /**
+     * Lo contrario también importa: quien SÍ trae los números sigue teniendo sus
+     * dos filas. Sin esta prueba, «hacerlo opcional» podría haber sido «dejar de
+     * crearlo nunca».
+     */
+    it('y las crea igual cuando el alta sí trae los números', async () => {
+      const d = build();
+      prepararAlta(d);
+      d.authorizationsRepo.create.mockReturnValue({ id: 'lic-1' });
+      d.credentialsRepo.create.mockReturnValue({ id: 'cred-1' });
+
+      const creada = await d.service.onboardPractitioner(
+        { ...fichaDeDirectorio, licenseNumber: 'MP-77', credentialNumber: 'TIT-9' },
+        actor,
+      );
+
+      expect(creada.licenseId).toBe('lic-1');
+      expect(creada.credentialId).toBe('cred-1');
+    });
+  });
+
+  describe('addOwnCredential', () => {
+    const cuerpo = {
+      credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+      number: 'DIP-2024-17',
+      issuingInstitutionText: 'Universidad Gabriel René Moreno',
+      issueDate: '2024-03-15',
+    };
+
+    it('agrega el título y lo deja PENDIENTE de verificación', async () => {
+      const d = build();
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+        number: 'DIP-2024-17',
+        stateConceptId: PROF.CRED_PENDING,
+        createdAt: new Date(),
+      });
+
+      const creada = await d.service.addOwnCredential(cuerpo as any, {
+        id: 'u-1',
+      } as any);
+
+      expect(creada.stateConceptId).toBe(PROF.CRED_PENDING);
+      const escrito = d.credentialsRepo.create.mock.calls[0][1];
+      expect(escrito.practitionerProfileId).toBe('pp1');
+      expect(escrito.credentialTypeConceptId).toBe(PROF.CREDENTIAL_TYPE_DIPLOMA);
+    });
+
+    /**
+     * La trampa del repositorio: `em.create` sólo escribe lo que el objeto
+     * NOMBRA, así que un campo que el repo no lista se descarta en silencio —
+     * compila, pasa los tests de servicio, y la columna queda en NULL. Ya pasó
+     * con el canal de teleconsulta. Esta prueba mira el borde.
+     */
+    it('el archivo del diploma llega hasta el repositorio, no se pierde', async () => {
+      const d = build();
+      // El archivo lo subió el mismo que declara el título. Decirlo explícito:
+      // el doble por defecto lo pone a nombre de otro usuario.
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'u-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        stateConceptId: PROF.CRED_PENDING,
+        fileId: 'file-1',
+        createdAt: new Date(),
+      });
+
+      await d.service.addOwnCredential({ ...cuerpo, fileId: 'file-1' } as any, {
+        id: 'u-1',
+      } as any);
+
+      expect(d.credentialsRepo.create.mock.calls[0][1].fileId).toBe('file-1');
+    });
+
+    /**
+     * La FK acepta cualquier concepto del catálogo, así que sin la lista
+     * cerrada un profesional podría declarar como «título» el concepto de un
+     * idioma o de un estado de cita.
+     */
+    it('un concepto que no es tipo de credencial se rechaza', async () => {
+      const d = build();
+
+      await expect(
+        d.service.addOwnCredential(
+          { ...cuerpo, credentialTypeConceptId: PROF.LANGUAGE_SPANISH } as any,
+          { id: 'u-1' } as any,
+        ),
+      ).rejects.toThrow(PreconditionFailedException);
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+    });
+
+    /** Un diploma en PDF: el tipo va contra la lista de DOCUMENTO, no la de imagen. */
+    it('acepta un PDF como diploma', async () => {
+      const d = build();
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'u-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        mimeType: 'application/pdf',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      });
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        stateConceptId: PROF.CRED_PENDING,
+        createdAt: new Date(),
+      });
+
+      await expect(
+        d.service.addOwnCredential({ ...cuerpo, fileId: 'file-1' } as any, {
+          id: 'u-1',
+        } as any),
+      ).resolves.toBeDefined();
+    });
+
+    /**
+     * Apareció al escribir las pruebas de arriba: el doble por defecto pone el
+     * archivo a nombre de otro usuario y el alta se cortó sola. Vale fijarlo —
+     * sin esto, cualquiera podría colgar su título del archivo de otro
+     * conociendo el id.
+     */
+    it('no se puede colgar el título del archivo de otro', async () => {
+      const d = build();
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'OTRO-USUARIO',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        d.service.addOwnCredential({ ...cuerpo, fileId: 'file-1' } as any, {
+          id: 'u-1',
+        } as any),
+      ).rejects.toThrow();
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+
+  /**
+   * **Las fichas de directorio no pueden declarar dónde atienden.**
+   *
+   * Los profesionales que publican las redes de las aseguradoras no tienen
+   * cuenta —no traen correo—, así que `addOwnAffiliation` no les sirve: resuelve
+   * el sujeto desde la sesión. Sin una ruta administrativa, un médico con tres
+   * consultorios se veía sin ninguno, o había que cargarlo tres veces para que
+   * se notara — que es justo el duplicado que las redes ya traen y que hubo que
+   * deshacer.
+   */
+  describe('addAffiliationFor', () => {
+    const admin = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+    const cuerpo = {
+      organizationName: 'AV. IRALA 737 – CLINICA FOIANINI',
+      roleTitle: 'Consultorio de atención',
+      startDate: '2020-01-01',
+    } as any;
+
+    it('escribe la afiliación del perfil indicado, no del actor', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({ profileId: 'otro-1' });
+      d.affiliationsRepo.findSame.mockResolvedValue(null);
+      d.affiliationsRepo.create.mockReturnValue({
+        id: 'af-1',
+        practitionerProfileId: 'otro-1',
+        organizationName: cuerpo.organizationName,
+        roleTitle: cuerpo.roleTitle,
+        startDate: new Date('2020-01-01'),
+        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await d.service.addAffiliationFor('otro-1', cuerpo, admin);
+
+      const [, data] = d.affiliationsRepo.create.mock.calls[0];
+      expect(data.practitionerProfileId).toBe('otro-1');
+      // No se consultó la sesión: el sujeto vino en la ruta.
+      expect(d.ownership.requireOwnPractitionerProfileId).not.toHaveBeenCalled();
+    });
+
+    /** Un id que no existe no puede crear un vínculo colgando de la nada. */
+    it('un perfil inexistente responde no encontrado', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.addAffiliationFor('fantasma', cuerpo, admin),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.affiliationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    /** El alta propia no cambió: sigue resolviendo el sujeto desde la sesión. */
+    it('el alta propia sigue tomando el perfil de la sesión', async () => {
+      const d = build();
+      d.affiliationsRepo.findSame.mockResolvedValue(null);
+      d.affiliationsRepo.create.mockReturnValue({
+        id: 'af-2',
+        practitionerProfileId: 'pp1',
+        organizationName: cuerpo.organizationName,
+        roleTitle: cuerpo.roleTitle,
+        startDate: new Date('2020-01-01'),
+        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await d.service.addOwnAffiliation(cuerpo, { id: 'u-1' } as any);
+
+      expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalled();
+      expect(d.affiliationsRepo.create.mock.calls[0][1].practitionerProfileId).toBe('pp1');
+    });
+  });
+
 });

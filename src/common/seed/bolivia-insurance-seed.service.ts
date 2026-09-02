@@ -304,20 +304,19 @@ export class BoliviaInsuranceSeedService {
     return creados;
   }
 
-  /** Los planes: los que la red nombra, y uno base para el resto. */
+  /** Los planes: los que la red nombra, y uno base para todas. */
   private async seedPlans(em: EntityManager, now: Date): Promise<number> {
-    const conPlanPropio = new Set(
-      BOLIVIA_HEALTH_PLANS.map((p) => p.carrierCode),
-    );
+    // El plan BASE lo tienen **todas** las aseguradoras, también las que
+    // publican planes con nombre: es la opción «no sé cuál tengo» del alta.
+    // Quien está afiliado a BISA pero no recuerda si es Advance o Red Max
+    // igual puede declarar su cobertura en vez de quedarse sin declararla.
     const declarados = [
       ...BOLIVIA_HEALTH_PLANS,
-      ...this.allCarriers()
-        .filter((c) => !conPlanPropio.has(c.code))
-        .map((c) => ({
-          carrierCode: c.code,
-          code: 'BASE',
-          name: `Plan de salud — ${c.sigla || c.legalName}`,
-        })),
+      ...this.allCarriers().map((c) => ({
+        carrierCode: c.code,
+        code: 'BASE',
+        name: `Plan de salud — ${c.sigla || c.legalName}`,
+      })),
     ];
 
     const existentes = await this.existingIds(

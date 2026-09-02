@@ -135,6 +135,22 @@ export class UpsertOwnPublicProfileDto {
   @IsOptional()
   @IsUUID()
   avatarFileId?: string | null;
+
+  /**
+   * La portada de la vitrina, ya subida.
+   *
+   * Misma regla que `avatarFileId`, mismo archivo ya subido por
+   * `POST /common/files/upload`: `null` explícito la quita, omitirlo conserva
+   * la que ya tenga.
+   */
+  @ApiPropertyOptional({
+    description: 'Archivo ya subido que será la portada; null la quita',
+    format: 'uuid',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsUUID()
+  coverFileId?: string | null;
 }
 
 /**
@@ -196,6 +212,10 @@ export class OwnPublicProfileDto {
    */
   @ApiProperty({ format: 'uuid', nullable: true })
   avatarFileId!: string | null;
+
+  /** La portada de la vitrina, o `null` si todavía no subió ninguna. */
+  @ApiProperty({ format: 'uuid', nullable: true })
+  coverFileId!: string | null;
 
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;

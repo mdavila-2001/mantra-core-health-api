@@ -1,5 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsISO8601,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 
 /**
  * Cuerpo de `PATCH /profiles/practitioners/me`.
@@ -58,4 +66,72 @@ export class UpdateOwnPractitionerProfileDto {
   @IsOptional()
   @IsBoolean()
   telehealthAvailable?: boolean;
+
+  /* --- los datos personales, ahora editables ------------------------------
+     El profesional podía corregir su título, su biografía y dos interruptores;
+     su nombre, su fecha de nacimiento, su teléfono y su domicilio los declaró
+     al registrarse y después no había forma de tocarlos. Mismo alcance que ya
+     tiene el paciente en `PATCH /profiles/patients/me`.
+
+     Lo que NO entra: el documento de identidad y el correo. El primero es un
+     identificador oficial con su circuito de verificación; el segundo es su
+     credencial de acceso y se cambia por el flujo de la cuenta. */
+
+  /**
+   * Las cuatro partes del nombre.
+   *
+   * Una cadena vacía **borra** el dato: es lo que hace falta cuando alguien
+   * descubre que no lleva segundo nombre. `displayName` no se edita — lo
+   * compone el backend con estas cuatro.
+   */
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  name?: string;
+
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  middleName?: string;
+
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  lastName?: string;
+
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  motherLastName?: string;
+
+  /**
+   * `null` la BORRA, igual que la cadena vacía borra un apellido opcional.
+   * `@IsOptional()` deja pasar `null` además de `undefined`, así que el tipo
+   * lo dice explícito en vez de dejarlo como un efecto lateral del validador.
+   */
+  @ApiPropertyOptional({ format: 'date', nullable: true })
+  @IsOptional()
+  @IsISO8601()
+  birthDate?: string | null;
+
+  @ApiPropertyOptional({ maxLength: 40, description: 'Teléfono de contacto' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(/^[+]?[0-9 ()-]{6,}$/, {
+    message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
+  })
+  phone?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Municipio de residencia (VS_BO_MUNICIPALITY)',
+  })
+  @IsOptional()
+  @IsUUID()
+  residenceMunicipalityConceptId?: string;
 }

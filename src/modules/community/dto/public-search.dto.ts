@@ -130,6 +130,43 @@ export class PublicSearchResultDto {
       'propósito: la hora exacta cambia entre que se pinta y se toca.',
   })
   nextAvailableDate!: string | null;
+
+  /**
+   * La portada, resuelta a URL igual que `avatarUrl`.
+   *
+   * Sale a la fila del buscador —y no sólo a la ficha— porque un directorio de
+   * centros de salud se recorre mirando: una grilla de tarjetas sin foto no es
+   * una versión más sobria de la misma pantalla, es otra pantalla, en la que
+   * todas las clínicas se ven igual y la única forma de distinguirlas es leer
+   * cuarenta nombres seguidos. `null` significa sin portada, y la tarjeta
+   * degrada a un fondo del tema — nunca a un hueco gris.
+   */
+  @ApiProperty({ nullable: true, description: 'URL absoluta de la portada' })
+  coverUrl!: string | null;
+
+  /**
+   * La calle, ya legible. Sale de la misma dirección de la que sale `city`.
+   *
+   * No cuesta una consulta más: `locationsByOwner` ya trae `lines` para
+   * resolver la ciudad, y hasta ahora se descartaba a la salida.
+   */
+  @ApiProperty({ nullable: true, description: 'Dirección visible' })
+  address!: string | null;
+
+  /**
+   * El punto, cuando la dirección lo tiene.
+   *
+   * Ya estaba en el índice (`geo_point`) y en `nearby`; faltaba en la fila
+   * común, que es la que dibuja el mapa del listado. `null` cuando la
+   * dirección es sólo texto: media clínica ubicada es peor que ninguna, porque
+   * el mapa se lee como el mapa de todas.
+   */
+  @ApiProperty({
+    type: PublicLocationDto,
+    nullable: true,
+    description: 'Punto de la dirección, o null si no tiene coordenadas',
+  })
+  location!: PublicLocationDto | null;
 }
 
 /** Profesional de la salud en el directorio público. */
@@ -195,13 +232,16 @@ export class PublicInsurerSummaryDto extends PublicSearchResultDto {
   planKinds!: string[];
 }
 
-/** Farmacia. */
+/**
+ * Farmacia.
+ *
+ * `address` ya no se declara acá: subió a `PublicSearchResultDto`, que es de
+ * donde sale para todos los verticales. Repetirlo dejaba dos declaraciones del
+ * mismo campo y la ilusión de que la dirección era un dato de farmacia.
+ */
 export class PublicPharmacySummaryDto extends PublicSearchResultDto {
   @ApiProperty({ nullable: true, description: 'Si está abierta ahora' })
   openNow!: boolean | null;
-
-  @ApiProperty({ nullable: true, description: 'Dirección visible' })
-  address!: string | null;
 }
 
 /**
@@ -215,8 +255,17 @@ export class PublicNearbyResultDto extends PublicSearchResultDto {
   @ApiProperty({ description: 'Distancia en línea recta, una decimal' })
   distanceKm!: number;
 
+  /**
+   * Acá el punto **no** es opcional, y por eso se redeclara estrechando el de
+   * la clase base: un resultado de «lo más cercano» sin coordenadas no existe
+   * —se ordenó por distancia a algo—, y dejarlo `| null` obligaría a cada
+   * pantalla a comprobar un caso imposible.
+   *
+   * `declare` y no una segunda propiedad: sólo afina el tipo, el valor lo
+   * sigue escribiendo el constructor de la respuesta.
+   */
   @ApiProperty({ type: PublicLocationDto })
-  location!: PublicLocationDto;
+  declare location: PublicLocationDto;
 }
 
 /** Publicación pública en la ficha de un perfil. */
@@ -238,6 +287,33 @@ export class PublicPostSummaryDto {
 
   @ApiProperty()
   commentCount!: number;
+}
+
+/**
+ * Una publicación del feed de la portada, con su autor adentro.
+ *
+ * Extiende la de la ficha porque **es la misma publicación**; lo que agrega es
+ * de quién es. En la ficha el autor es la página entera y repetirlo en cada
+ * post sería ruido; en un feed mezclado es el dato que permite saber a quién se
+ * está leyendo, y sin él las tarjetas son indistinguibles entre sí.
+ */
+export class PublicFeedPostDto extends PublicPostSummaryDto {
+  @ApiProperty({ description: 'Slug del autor; el que va en /p/:slug' })
+  authorSlug!: string;
+
+  @ApiProperty()
+  authorDisplayName!: string;
+
+  @ApiProperty({ nullable: true })
+  authorHeadline!: string | null;
+
+  @ApiProperty({ nullable: true, description: 'URL del avatar, o null' })
+  authorAvatarUrl!: string | null;
+
+  @ApiProperty({
+    description: 'Vertical del autor, para el prefijo de su ficha',
+  })
+  authorKind!: PublicResultKind;
 }
 
 /** Ficha pública completa servida por `/p/:slug` y sus cuatro hermanas. */
@@ -392,5 +468,7 @@ export class PublicDiagnosticUnitPageDto extends PublicPageDto<PublicDiagnosticU
 export class PublicInsurerPageDto extends PublicPageDto<PublicInsurerSummaryDto> {}
 /** Página de farmacias. */
 export class PublicPharmacyPageDto extends PublicPageDto<PublicPharmacySummaryDto> {}
+/** Página del feed público: lo último de todas las vitrinas, mezclado. */
+export class PublicFeedPageDto extends PublicPageDto<PublicFeedPostDto> {}
 /** Página de resultados cercanos. */
 export class PublicNearbyPageDto extends PublicPageDto<PublicNearbyResultDto> {}

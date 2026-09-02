@@ -259,6 +259,10 @@ export class SchedulingCatalogService {
           slotMinutes:
             rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
           capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
+          // Sin `?? 0`: la columna es anulable a propósito y ausente se lee
+          // como cero al generar. Escribir un cero que nadie declaró borraría
+          // la diferencia entre «no lo dijeron» y «dijeron que no hay respiro».
+          gapMinutes: rule.gapMinutes,
           actorUserId: actor.id,
         });
       }
@@ -357,6 +361,15 @@ export class SchedulingCatalogService {
         const slotMinutes =
           rule.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
         const capacity = rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY;
+        // El respiro entre consultas. Ausente ≡ 0: la columna es anulable y
+        // nadie está obligado a declararlo.
+        //
+        // El PASO del generador es `slot + gap`; la DURACIÓN de cada turno
+        // sigue siendo `slot`. Confundirlos alargaría la consulta en vez de
+        // separarla de la siguiente, que es justo lo contrario de lo que el
+        // respiro existe para hacer.
+        const gapMinutes = rule.gapMinutes ?? 0;
+        const pasoMinutes = slotMinutes + gapMinutes;
 
         for (const day of diasLocalesQueCoinciden(
           from,
@@ -370,7 +383,7 @@ export class SchedulingCatalogService {
           for (
             let cursor = dayStart;
             cursor < dayEnd;
-            cursor = new Date(cursor.getTime() + slotMinutes * 60_000)
+            cursor = new Date(cursor.getTime() + pasoMinutes * 60_000)
           ) {
             const end = new Date(cursor.getTime() + slotMinutes * 60_000);
             if (end > dayEnd) break;
@@ -465,6 +478,39 @@ export class SchedulingCatalogService {
       }
 
       const isAvailable = dto.isAvailable ?? false;
+
+      // AG-3: el tiempo ocupado no desplaza pacientes en silencio. Si el rango
+      // pisa una cita CONFIRMADA del profesional —en esta sede o en otra—, el
+      // doctor recibe el conflicto y decide: reprograma a la persona o elige
+      // otro rato. Lo pendiente no bloquea la creación: nunca va a poder
+      // aceptarse encima (la regla madre lo rechaza), que es la misma
+      // protección sin congelar el calendario por preguntas sin responder.
+      // Una reunión que pisa OTRA reunión es inofensiva y no se valida.
+      if (
+        !isAvailable &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
+      ) {
+        const confirmadas = await this.tiempoProfesional.citasConfirmadas(
+          tx,
+          resource.resourceRefId,
+          startAt,
+          endAt,
+        );
+        if (confirmadas.length > 0) {
+          const primera = confirmadas[0];
+          throw new PreconditionFailedException(
+            `Tenés una cita confirmada en ese rato${
+              primera.resourceName ? ` en «${primera.resourceName}»` : ''
+            }. Reprogramala primero o elegí otro horario.`,
+            {
+              bookingId: primera.id,
+              startAt: primera.startAt,
+              endAt: primera.endAt,
+            },
+          );
+        }
+      }
+
       const exception = this.catalogRepo.createException(tx, {
         resourceId,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
@@ -553,6 +599,12 @@ export class SchedulingCatalogService {
         onlyAvailable: options.onlyAvailable,
         ahora: new Date(),
         limit: options.limit + 1,
+        // Lo que se ofrece tiene que poder pedirse: un cupo bloqueado por una
+        // excepción (AG-3) o retirado por una cita puntual (AG-2) conserva su
+        // capacidad, así que el filtro de capacidad no lo ve y se colaba entre
+        // los disponibles. El concepto lo aporta el servicio, como en la ruta
+        // hermana del portal.
+        openStatusConceptId: CONCEPTS.SLOT_OPEN,
       },
     );
     const truncated = rows.length > options.limit;
@@ -782,6 +834,48 @@ export class SchedulingCatalogService {
    * @param tenantId - La organización donde se quiere publicar.
    * @param actor - Quien publica.
    */
+
+  /**
+   * Elimina un tiempo ocupado (o cualquier excepción) del calendario.
+   *
+   * ## Borrar NO resucita los cupos retirados
+   *
+   * Es la semántica menos sorprendente, y queda declarada: los cupos que la
+   * excepción bloqueó siguen bloqueados, y se regeneran con la plantilla si
+   * corresponde. Resucitarlos automáticamente ofrecería horarios que el doctor
+   * quizá bloqueó por otro motivo mientras tanto.
+   *
+   * @param exceptionId - La excepción a eliminar.
+   * @param actor - Quien la elimina; tiene que poder operar el recurso.
+   */
+  async removeException(
+    exceptionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const exception = await this.catalogRepo.findExceptionById(
+        tx,
+        exceptionId,
+      );
+      if (!exception) {
+        throw new ResourceNotFoundException('Excepción no encontrada', {
+          exceptionId,
+        });
+      }
+      const resource = await this.catalogRepo.findResourceById(
+        tx,
+        exception.resourceId,
+      );
+      if (resource) this.assertRecursoDelActor(resource, actor);
+
+      this.logger.info(
+        { operation: 'scheduling.exception.remove', exceptionId },
+        'Removing availability exception',
+      );
+      this.catalogRepo.removeException(tx, exception);
+    });
+  }
+
   private async assertVinculoConLaOrganizacion(
     tenantId: string,
     actor: AuthenticatedUser,
@@ -881,6 +975,7 @@ export class SchedulingCatalogService {
         ...(franja.capacityPerSlot == null
           ? {}
           : { capacityPerSlot: franja.capacityPerSlot }),
+        ...(franja.gapMinutes == null ? {} : { gapMinutes: franja.gapMinutes }),
       });
       porPlantilla.set(franja.scheduleTemplateId, lista);
     }

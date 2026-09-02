@@ -187,6 +187,61 @@ export const { seeds: PHARMACY_INVENTORY_CONCEPT_SEEDS, ids: PINV } =
       display: 'Order cancelled',
     },
 
+    // --- Modalidad de entrega (v4.2.1) ---
+    // `inventory_reservations.delivery_mode_concept_id`: cómo llega el pedido a la
+    // persona. Los dos envíos sólo son elegibles si tiene esa dirección cargada
+    // (`delivery_address_id`), y el courier real es FAR-E4: hasta entonces la farmacia
+    // coordina la entrega a mano.
+    //
+    // La columna es nullable porque la tabla la comparten las reservas de mostrador,
+    // que no tienen modalidad; que todo pedido de paciente la lleve —y que la sede
+    // pueda con ella (`pharmacy_sites.pickup_available`/`home_delivery_available`)— lo
+    // hace cumplir el servicio, no el esquema.
+    DELIVERY_RETIRO: {
+      code: 'PINV_DELIVERY_RETIRO',
+      display: 'Pickup at pharmacy site',
+    },
+    DELIVERY_DOMICILIO: {
+      code: 'PINV_DELIVERY_DOMICILIO',
+      display: 'Delivery to home address',
+    },
+    DELIVERY_TRABAJO: {
+      code: 'PINV_DELIVERY_TRABAJO',
+      display: 'Delivery to work address',
+    },
+
+    // --- Propuestas de sustitución (v4.2.1) ---
+    // `pharmacy_order_substitutions.status_concept_id`. La farmacia propone el genérico
+    // al revisar el pedido y la decisión es SIEMPRE del paciente. Es estado de la
+    // PROPUESTA, no del pedido: el pedido entero está `ACEPTACION_PENDIENTE` mientras
+    // quede una sin decidir, pero cada una se resuelve por separado.
+    //
+    // Aceptar mueve el pedido a `ACEPTADO` y aplica el genérico a la línea; preferir el
+    // original lo devuelve a `CONFIRMADO` —la farmacia ya lo había revisado—, y en los
+    // dos casos la fila SOBREVIVE como historia: la tabla es una bitácora de propuestas,
+    // no un campo mutable, y por eso no hay único por línea.
+    //
+    // Se acuña el conjunto completo de una, como los diez `ORDER_*`: la máquina de
+    // estados es un dato completo desde el día uno aunque el carril no la recorra entera.
+    SUBSTITUTION_PROPUESTA: {
+      code: 'PINV_SUBSTITUTION_PROPUESTA',
+      display: 'Substitution proposed',
+    },
+    SUBSTITUTION_ACEPTADA: {
+      code: 'PINV_SUBSTITUTION_ACEPTADA',
+      display: 'Substitution accepted by patient',
+    },
+    SUBSTITUTION_RECHAZADA: {
+      code: 'PINV_SUBSTITUTION_RECHAZADA',
+      display: 'Substitution rejected, original kept',
+    },
+    // El pedido murió —venció o se canceló— con la propuesta todavía en pie. Sin este
+    // estado quedaría `PROPUESTA` para siempre sobre un pedido que ya no existe.
+    SUBSTITUTION_RETIRADA: {
+      code: 'PINV_SUBSTITUTION_RETIRADA',
+      display: 'Substitution withdrawn, order no longer live',
+    },
+
     // --- Dispensación (medication_dispensations.dispensation_status_concept_id) ---
     DISPENSE_DISPENSED: {
       code: 'PINV_DISPENSE_DISPENSED',

@@ -84,7 +84,10 @@ desplegar() {
     log "no pude crear el worktree en $corto"; return 1; }
 
   log "construyendo $IMAGEN:$corto"
-  if ! docker build -q -f "$TRABAJO/Dockerfile" -t "$IMAGEN:$corto" \
+  # `--network=host`: el DNS que Docker copia a los contenedores (192.168.0.1) no
+  # responde desde los puentes, así que `apt-get` y `yarn` mueren por timeout. Con la
+  # red del anfitrión la construcción resuelve por systemd-resolved y sí sale a internet.
+  if ! docker build -q --network=host -f "$TRABAJO/Dockerfile" -t "$IMAGEN:$corto" \
         --build-arg GIT_COMMIT="$sha" \
         --build-arg BUILD_TIME="$(date -Is)" \
         "$TRABAJO" >>"$LOG" 2>&1; then

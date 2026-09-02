@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  Max,
   IsISO8601,
   IsOptional,
   IsString,
@@ -23,6 +24,22 @@ export const BOOKING_CHANNELS: readonly BookingChannel[] = [
   'PORTAL',
   'DESK',
   'PHONE',
+];
+
+/**
+ * Por qué medio ocurre la ATENCIÓN — la modalidad de la cita.
+ *
+ * Distinto de {@link BookingChannel}, que dice cómo se **pidió** el turno. Un
+ * turno pedido por teléfono puede atenderse en persona, y uno pedido por el
+ * portal puede ser una teleconsulta: son dos ejes y viven en dos columnas
+ * (`appointment_bookings.booking_channel_concept_id` y
+ * `clinical.appointments.channel_concept_id`).
+ */
+export type AppointmentChannel = 'PRESENCIAL' | 'TELECONSULTA' | 'DOMICILIO';
+export const APPOINTMENT_CHANNELS: readonly AppointmentChannel[] = [
+  'PRESENCIAL',
+  'TELECONSULTA',
+  'DOMICILIO',
 ];
 
 /** Cuerpo de `POST /scheduling/slots/{id}/holds` (UC-41-05). */
@@ -867,4 +884,97 @@ export class WaitlistEntryItemDto {
 export class ListWaitlistResponseDto {
   @ApiProperty({ type: [WaitlistEntryItemDto] })
   items!: WaitlistEntryItemDto[];
+}
+
+/**
+ * Cuerpo de `POST /scheduling/appointments/direct` — la cita puntual (AG-2).
+ *
+ * El doctor asigna: «volvé el jueves a las 10». La cita ya se acordó en el
+ * consultorio, así que nace CONFIRMADA y el paciente SE ENTERA (campana con
+ * salida de «pedir cambio»), no confirma.
+ */
+export class CreateDirectAppointmentDto {
+  /** El paciente al que se le asigna la cita. */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  patientProfileId!: string;
+
+  /**
+   * La agenda del doctor donde ocurre — su consultorio o su sede de
+   * organización. Elegir el recurso ES elegir la sede, y el gating del vínculo
+   * ya gobernó quién puede tener agenda dónde.
+   */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  resourceId!: string;
+
+  /** Cuándo empieza. */
+  @ApiProperty({ format: 'date-time' })
+  @IsISO8601()
+  startAt!: string;
+
+  /**
+   * Cuánto dura, en minutos. Libre a propósito: la cirugía de 3 horas y la
+   * consulta de 45 son el punto entero del caso.
+   */
+  @ApiProperty({ minimum: 5, maximum: 480 })
+  @IsInt()
+  @Min(5)
+  @Max(480)
+  durationMinutes!: number;
+
+  /** El motivo, que el paciente ve en su turno. */
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reasonText?: string;
+
+  /**
+   * Por qué medio ocurre la atención.
+   *
+   * Se escribe en `clinical.appointments.channel_concept_id`, que es donde el
+   * modelo declara la modalidad. **Omitirlo significa presencial**: es lo que
+   * fueron todas las citas hasta hoy, así que el valor por defecto no afirma
+   * nada que nadie haya registrado.
+   *
+   * No confundir con el canal de la RESERVA (`booking_channel_concept_id`),
+   * que dice cómo se pidió el turno —portal, mostrador, teléfono—, no cómo se
+   * atiende. Un turno pedido por teléfono puede ser presencial, y uno pedido
+   * por el portal puede ser teleconsulta.
+   */
+  @ApiPropertyOptional({
+    enum: APPOINTMENT_CHANNELS,
+    description:
+      'Modalidad de la atención. Ausente = PRESENCIAL. No es el canal de la reserva.',
+  })
+  @IsOptional()
+  @IsIn(APPOINTMENT_CHANNELS as readonly string[])
+  channel?: AppointmentChannel;
+}
+
+/** Respuesta de la cita puntual. */
+export class DirectAppointmentResponseDto {
+  /** La reserva creada, ya confirmada. */
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  /** El cupo único que la respalda. */
+  @ApiProperty({ format: 'uuid' })
+  bookableSlotId!: string;
+
+  /** Estado con el que nace: confirmada. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /**
+   * Cupos ofrecidos que esta cita retiró.
+   *
+   * Si el rato pisaba horarios libres que el doctor mismo ofrecía —en
+   * cualquiera de sus sedes—, se retiran en la misma transacción y acá se
+   * informa cuántos: el front lo muestra como AVISO («esto quitó N horarios
+   * disponibles»), no como pregunta.
+   */
+  @ApiProperty()
+  retractedSlots!: number;
 }

@@ -1,4 +1,5 @@
 import {
+  Delete,
   Body,
   Controller,
   Get,
@@ -54,6 +55,8 @@ import {
   ListWaitlistResponseDto,
   DelayResourceDto,
   DelayNoticeResponseDto,
+  CreateDirectAppointmentDto,
+  DirectAppointmentResponseDto,
 } from '../dto';
 
 /**
@@ -285,6 +288,55 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ExceptionResponseDto> {
     return this.catalogService.createException(id, dto, actor);
+  }
+
+  /**
+   * Elimina una excepción de disponibilidad (el tiempo ocupado de AG-3).
+   *
+   * Borrar NO resucita los cupos que la excepción bloqueó: se regeneran con la
+   * plantilla si corresponde. Es la semántica menos sorprendente y está
+   * documentada en el servicio.
+   */
+  @Delete('exceptions/:id')
+  // Mismo alcance que el POST hermano: el servicio verifica que el recurso de
+  // la excepción sea del actor (`assertRecursoDelActor`).
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Eliminar una excepción de disponibilidad',
+    description:
+      'Los cupos que la excepción bloqueó siguen bloqueados; se regeneran con la plantilla.',
+  })
+  removeException(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.catalogService.removeException(id, actor);
+  }
+
+  /**
+   * AG-2 · La cita puntual: el doctor asigna, el paciente se entera.
+   *
+   * «Volvé el jueves a las 10» — lo que los consultorios hacen todos los días y
+   * el sistema no permitía: toda cita nacía de un cupo publicado que el
+   * paciente tomaba. Ésta nace CONFIRMADA (ya se acordó en persona), con
+   * campana al paciente y la salida de «pedir cambio».
+   */
+  @Post('appointments/direct')
+  // El profesional sólo en SU agenda (el servicio lo verifica); quien
+  // administra agendas, en cualquiera.
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Asignar una cita puntual a un paciente (nace confirmada)',
+    description:
+      'Cupo único + reserva en una transacción. Retira los horarios libres que pise y lo informa; la regla madre rechaza si el profesional ya está comprometido.',
+  })
+  createDirectAppointment(
+    @Body() dto: CreateDirectAppointmentDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DirectAppointmentResponseDto> {
+    return this.bookingsService.createDirectAppointment(dto, actor);
   }
 
   /** UC-41-05. */

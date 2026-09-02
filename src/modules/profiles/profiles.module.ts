@@ -118,6 +118,15 @@ import { MessagingModule } from '../messaging/messaging.module';
     // perfil, licencia, título e idioma en la misma transacción que la cuenta.
     ProfessionalCredentialsRepository,
     PractitionerLanguagesRepository,
+    // Y desde que la especialidad se elige EN el alta (registro del cliente,
+    // módulo Médico §1.4.2), también estas dos: la fila y su validación de
+    // dominio — la base acepta cualquier concepto, el catálogo decide cuáles
+    // son especialidades.
+    PractitionerSpecialtiesRepository,
+    MedicalSpecialtyCatalogService,
+    // Y desde que el alta de paciente registra al tutor o persona autorizada
+    // que lo acompaña, también la de personas relacionadas.
+    RelatedPersonsRepository,
   ],
 })
 export class ProfilesModule {}

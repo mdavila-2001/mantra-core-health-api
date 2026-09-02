@@ -83,6 +83,13 @@ export interface AgendaNotice {
 
 /** Qué pasó con un aviso. Nunca una excepción: emitir no rompe la agenda. */
 export interface AgendaNoticeResult {
+  /**
+   * Si el aviso llegó a la bandeja in-app.
+   *
+   * Sigue siendo **sólo** el in-app y no un «llegó por algún canal»: es lo que
+   * los cuatro puntos de emisión ya interpretan así, y lo que las pruebas
+   * existentes fijan. El correo se informa aparte, en {@link emailRequestId}.
+   */
   readonly delivered: boolean;
   /** Fila de la bandeja in-app, cuando se entregó. */
   readonly inAppNotificationId?: string;
@@ -90,6 +97,16 @@ export interface AgendaNoticeResult {
   readonly notificationRequestId?: string;
   /** Por qué no se entregó: sin cuenta, preferencia en contra, canal caído. */
   readonly skippedReason?: string;
+  /**
+   * Solicitud del canal correo, cuando se encoló.
+   *
+   * El envío lo hace el worker de mensajería contra el proveedor real, así que
+   * acá no hay «entregado»: hay «encolado». La evidencia de que salió es la
+   * fila de `messaging.notification_deliveries` con su `provider_message_ref`.
+   */
+  readonly emailRequestId?: string;
+  /** Por qué no se encoló el correo: sin dirección, preferencia en contra. */
+  readonly emailSkippedReason?: string;
 }
 
 /** Emisor de avisos de agenda. */

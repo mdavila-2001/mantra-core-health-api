@@ -52,6 +52,7 @@ function build() {
   };
   const noticeRepo = {
     findAccountForProfile: mockFn().mockResolvedValue('user-paciente'),
+    findEmailForUser: mockFn().mockResolvedValue('paciente@example.test'),
   };
   const logger = {
     setContext: mockFn(),
@@ -92,7 +93,126 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
       delivered: true,
       notificationRequestId: 'request-1',
       inAppNotificationId: 'inapp-1',
+      emailRequestId: 'request-1',
     });
+  });
+
+  it('encola además el correo, contra el canal EMAIL y con la dirección de la cuenta', async () => {
+    const d = build();
+
+    const resultado = await d.adapter.emit(aviso);
+
+    expect(d.notifications.createRequest).toHaveBeenCalledTimes(2);
+    const [correo] = d.notifications.createRequest.mock.calls[1];
+    expect(correo.channelId).toBe(MESSAGING_SEED.emailChannelId);
+    expect(correo.recipientAddress).toBe('paciente@example.test');
+    expect(correo.recipientUserId).toBe('user-paciente');
+    expect(correo.categoryConceptId).toBe(SCHED.NOTICE_PRACTITIONER_DELAY);
+    expect(correo.payloadJson.subject).toBe(aviso.subject);
+    expect(correo.payloadJson.bodyText).toBe(aviso.bodyText);
+    expect(resultado.emailRequestId).toBe('request-1');
+
+    // El correo lo manda el worker contra el proveedor real: acá sólo se
+    // encola. Entregarlo desde el backend sería inventar un envío que nadie
+    // hizo.
+    expect(d.notifications.deliverNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it('la clave de rebote del correo lleva su propio espacio de nombres', async () => {
+    const d = build();
+
+    await d.adapter.emit({ ...aviso, debounceKey: 'demora:booking-1' });
+
+    const [inApp] = d.notifications.createRequest.mock.calls[0];
+    const [correo] = d.notifications.createRequest.mock.calls[1];
+    expect(inApp.debounceKey).toBe('demora:booking-1');
+    // Sin sufijo, `findLiveRequestByDebounceKey` —que no filtra por canal—
+    // rebotaría el correo contra la solicitud in-app y el correo no saldría
+    // nunca.
+    expect(correo.debounceKey).toBe('demora:booking-1:email');
+  });
+
+  it('una cuenta sin correo declarado recibe la campana igual', async () => {
+    const d = build();
+    d.noticeRepo.findEmailForUser.mockResolvedValue(null);
+
+    const resultado = await d.adapter.emit(aviso);
+
+    expect(resultado.delivered).toBe(true);
+    expect(resultado.inAppNotificationId).toBe('inapp-1');
+    expect(resultado.emailRequestId).toBeUndefined();
+    expect(resultado.emailSkippedReason).toMatch(/no declaró correo/i);
+    expect(d.notifications.createRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('si el correo falla, el in-app sigue entregado y la agenda no se entera', async () => {
+    const d = build();
+    d.noticeRepo.findEmailForUser.mockRejectedValue(
+      new Error('mensajería caída'),
+    );
+
+    const resultado = await d.adapter.emit(aviso);
+
+    expect(resultado.delivered).toBe(true);
+    expect(resultado.inAppNotificationId).toBe('inapp-1');
+    expect(resultado.emailSkippedReason).toMatch(/no se pudo encolar/i);
+    // Un fallo del correo es un aviso, no un error de la operación: se avisa
+    // en `warn` y no en `error`, que es el que reserva el camino de `emit`.
+    expect(d.logger.warn).toHaveBeenCalled();
+    expect(d.logger.error).not.toHaveBeenCalled();
+  });
+
+  it('la campana silenciada no silencia el correo: la preferencia es por canal', async () => {
+    const d = build();
+    d.notifications.createRequest
+      .mockResolvedValueOnce({
+        id: 'request-inapp',
+        statusConceptId: 'suppressed',
+        suppressed: true,
+        suppressionReason: 'El destinatario no acepta este canal',
+        debounced: false,
+      })
+      .mockResolvedValue({
+        id: 'request-email',
+        statusConceptId: 'pending',
+        suppressed: false,
+        debounced: false,
+      });
+
+    const resultado = await d.adapter.emit(aviso);
+
+    expect(resultado.delivered).toBe(false);
+    expect(resultado.skippedReason).toBe(
+      'El destinatario no acepta este canal',
+    );
+    expect(resultado.emailRequestId).toBe('request-email');
+    expect(d.notifications.createRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('el correo suprimido por preferencia queda registrado, no desaparece', async () => {
+    const d = build();
+    d.notifications.createRequest
+      .mockResolvedValueOnce({
+        id: 'request-inapp',
+        statusConceptId: 'pending',
+        suppressed: false,
+        debounced: false,
+      })
+      .mockResolvedValue({
+        id: 'request-email',
+        statusConceptId: 'suppressed',
+        suppressed: true,
+        suppressionReason: 'Silenció la categoría SCHEDULING por correo',
+        debounced: false,
+      });
+
+    const resultado = await d.adapter.emit(aviso);
+
+    expect(resultado.delivered).toBe(true);
+    // Queda el id: la fila existe y es la prueba de que se respetó la
+    // preferencia. Dejar de escribirla haría imposible demostrarlo después.
+    expect(resultado.emailRequestId).toBe('request-email');
+    expect(resultado.emailSkippedReason).toMatch(/SCHEDULING/);
   });
 
   it('un paciente sin cuenta de portal no es un error: es un aviso que no se entrega', async () => {

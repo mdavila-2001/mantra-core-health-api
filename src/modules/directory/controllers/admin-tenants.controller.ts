@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -28,6 +29,7 @@ import {
   StatusResultDto,
   SuspendTenantDto,
   TenantResponseDto,
+  UpdateTenantPublicProfileDto,
   VerifyTenantDto,
 } from '../dto';
 
@@ -129,6 +131,32 @@ export class AdminTenantsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TenantResponseDto> {
     return this.tenantsService.verify(tenantId, dto, actor);
+  }
+
+  /**
+   * Llena la vitrina pública de la organización.
+   *
+   * `PUT` y no `PATCH` porque es idempotente y la pantalla que la edita no
+   * necesita saber si ya había algo escrito; los campos omitidos se conservan,
+   * que es la misma regla que `PUT /community/profiles/me`.
+   *
+   * @param tenantId - La organización.
+   * @param dto - Titular, presentación, logo y portada.
+   * @param actor - Quién lo hace.
+   * @returns La organización.
+   */
+  @Put(':tenantId/public-profile')
+  @Roles('SUPERADMIN', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Completar la ficha pública de una organización verificada',
+  })
+  updatePublicProfile(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Body() dto: UpdateTenantPublicProfileDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TenantResponseDto> {
+    return this.tenantsService.updatePublicProfile(tenantId, dto, actor);
   }
 
   /** UC-04-10. */
