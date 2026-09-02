@@ -259,6 +259,10 @@ export class SchedulingCatalogService {
           slotMinutes:
             rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
           capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
+          // Sin `?? 0`: la columna es anulable a propósito y ausente se lee
+          // como cero al generar. Escribir un cero que nadie declaró borraría
+          // la diferencia entre «no lo dijeron» y «dijeron que no hay respiro».
+          gapMinutes: rule.gapMinutes,
           actorUserId: actor.id,
         });
       }
@@ -357,6 +361,15 @@ export class SchedulingCatalogService {
         const slotMinutes =
           rule.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
         const capacity = rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY;
+        // El respiro entre consultas. Ausente ≡ 0: la columna es anulable y
+        // nadie está obligado a declararlo.
+        //
+        // El PASO del generador es `slot + gap`; la DURACIÓN de cada turno
+        // sigue siendo `slot`. Confundirlos alargaría la consulta en vez de
+        // separarla de la siguiente, que es justo lo contrario de lo que el
+        // respiro existe para hacer.
+        const gapMinutes = rule.gapMinutes ?? 0;
+        const pasoMinutes = slotMinutes + gapMinutes;
 
         for (const day of diasLocalesQueCoinciden(
           from,
@@ -370,7 +383,7 @@ export class SchedulingCatalogService {
           for (
             let cursor = dayStart;
             cursor < dayEnd;
-            cursor = new Date(cursor.getTime() + slotMinutes * 60_000)
+            cursor = new Date(cursor.getTime() + pasoMinutes * 60_000)
           ) {
             const end = new Date(cursor.getTime() + slotMinutes * 60_000);
             if (end > dayEnd) break;
@@ -962,6 +975,7 @@ export class SchedulingCatalogService {
         ...(franja.capacityPerSlot == null
           ? {}
           : { capacityPerSlot: franja.capacityPerSlot }),
+        ...(franja.gapMinutes == null ? {} : { gapMinutes: franja.gapMinutes }),
       });
       porPlantilla.set(franja.scheduleTemplateId, lista);
     }

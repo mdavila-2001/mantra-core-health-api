@@ -186,6 +186,10 @@ export interface CreateRuleData {
    */
   capacityPerSlot?: number;
   /**
+   * Minutos de respiro entre un turno y el siguiente. Anulable: ausente ≡ 0.
+   */
+  gapMinutes?: number;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -470,6 +474,7 @@ export class SchedulingCatalogRepository {
         endTime: data.endTime,
         slotMinutes: data.slotMinutes,
         capacityPerSlot: data.capacityPerSlot,
+        gapMinutes: data.gapMinutes,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
