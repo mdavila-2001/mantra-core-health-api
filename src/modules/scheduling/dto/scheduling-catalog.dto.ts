@@ -690,3 +690,37 @@ export class ExceptionResponseDto {
   })
   blockedSlots!: number;
 }
+
+/**
+ * Lo que deja retirar un horario (TAREA-10, punto 6).
+ *
+ * Dice qué se soltó y qué se conservó, y no sólo «listo»: retirar suelta los
+ * cupos que nadie tocó y **conserva** los que tienen historia. Quien lo hace
+ * tiene derecho a ver esa diferencia sin ir a mirar la base.
+ */
+export class RetireTemplateResponseDto {
+  /** La plantilla retirada. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** El estado con el que queda: `TPL_RETIRED`. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /** Cupos que nadie reservó y dejaron de publicarse. */
+  @ApiProperty({
+    description: 'Cupos libres que se soltaron al retirar el horario',
+  })
+  releasedSlots!: number;
+
+  /**
+   * Cupos que se conservaron por tener una cita detrás, viva o histórica.
+   *
+   * Un número distinto de cero no es un error: es el historial que el retiro
+   * respeta a propósito.
+   */
+  @ApiProperty({
+    description: 'Cupos conservados porque tienen una cita detrás',
+  })
+  keptSlots!: number;
+}
