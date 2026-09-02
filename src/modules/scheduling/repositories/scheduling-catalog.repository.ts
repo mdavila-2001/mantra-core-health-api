@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  AppointmentBookings,
+  SlotHolds,
   SchedulableResources,
   BookingPolicies,
   ScheduleTemplates,
@@ -8,7 +10,7 @@ import {
   AvailabilityExceptions,
   BookableSlots,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, touch } from '../../../common';
 import { inicioDeLoReservable } from '../scheduling-time';
 
 /**
@@ -690,6 +692,141 @@ export class SchedulingCatalogRepository {
    * Slots ya generados para la plantilla en la ventana pedida. La regeneración es
    * idempotente: los que ya existen no se vuelven a crear.
    */
+  /**
+   * Las citas que cuelgan de los cupos de una plantilla, vivas e históricas.
+   *
+   * Devuelve las dos cifras a propósito, porque son dos conversaciones
+   * distintas con quien quiere borrar el horario:
+   *
+   * - **`live`** son compromisos: gente que va a presentarse. Se resuelven
+   *   cancelando o moviendo, y entonces el número baja.
+   * - **`total`** incluye además las canceladas y las cumplidas, que **no se
+   *   pueden resolver**: `appointment_bookings.bookable_slot_id` es `NOT NULL`,
+   *   así que una cita histórica fija su cupo para siempre. Borrar ese cupo
+   *   sería borrar el registro de que esa persona tuvo un turno.
+   *
+   * Por eso cancelar **no** libera un horario para ser borrado. Es lo que hace
+   * que «borrar definitivamente» tenga un techo real, y no un techo que se
+   * pueda esquivar cancelando todo primero.
+   *
+   * @param em - Contexto de persistencia.
+   * @param scheduleTemplateId - Plantilla que se quiere borrar.
+   * @param activeStates - Estados en los que una cita todavía compromete.
+   * @param limit - Tope de la lista que se devuelve al cliente.
+   */
+  async findBookingsOfTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+    activeStates: readonly string[],
+    limit: number,
+  ): Promise<{
+    total: number;
+    live: number;
+    sample: AppointmentBookings[];
+  }> {
+    const slots = await em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { fields: ['id'] },
+    );
+    if (slots.length === 0) return { total: 0, live: 0, sample: [] };
+
+    const enSusCupos = { bookableSlotId: { $in: slots.map((s) => s.id) } };
+    const total = await em.count(AppointmentBookings, enSusCupos);
+    if (total === 0) return { total: 0, live: 0, sample: [] };
+
+    const conEstadoVivo = {
+      ...enSusCupos,
+      statusConceptId: { $in: [...activeStates] },
+    };
+    const live = await em.count(AppointmentBookings, conEstadoVivo);
+
+    // La muestra prioriza las vivas: son las accionables, y son las que el
+    // médico necesita ver nombradas para ir a resolverlas.
+    const sample = await em.find(
+      AppointmentBookings,
+      live > 0 ? conEstadoVivo : enSusCupos,
+      { limit },
+    );
+    return { total, live, sample };
+  }
+
+  /**
+   * Retira un horario: deja de publicarse y suelta lo que nadie usó.
+   *
+   * **No borra la plantilla.** No es una preferencia: es lo único posible.
+   * `audit.schedule_templates_history` referencia toda plantilla publicada —una
+   * fila por plantilla, escrita al publicar— así que ninguna se puede borrar
+   * nunca. Se descubrió ejecutándolo, no leyéndolo (P-10-2).
+   *
+   * Lo que sí se va son los **cupos que nadie tocó**: no tienen cita ni la
+   * tuvieron, son derivados puros de la plantilla, y dejarlos publicados
+   * después de retirar el horario sería seguir ofreciendo turnos de una agenda
+   * que ya no existe.
+   *
+   * Los cupos **con historia se quedan**, aunque la cita esté cancelada:
+   * `appointment_bookings.bookable_slot_id` es `NOT NULL`, así que borrar ese
+   * cupo sería borrar el registro de que alguien tuvo un turno.
+   *
+   * Las retenciones de los cupos que se van se borran con ellos: son efímeras
+   * —tienen TTL y no comprometen a nadie— y su FK bloquearía el borrado. Es la
+   * primera de las tres barreras que apareció corriendo esto contra la base.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param scheduleTemplateId - Plantilla a retirar.
+   * @param retiredStatusConceptId - Estado con el que queda.
+   * @param actorUserId - Quién la retira.
+   * @returns Cuántos cupos libres se soltaron y cuántos quedaron por tener historia.
+   */
+  async retireTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+    retiredStatusConceptId: string,
+    actorUserId: string,
+  ): Promise<{ releasedSlots: number; keptSlots: number }> {
+    const cupos = await em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { fields: ['id'] },
+    );
+
+    let releasedSlots = 0;
+    let keptSlots = 0;
+
+    if (cupos.length > 0) {
+      const ids = cupos.map((cupo) => cupo.id);
+      const conHistoria = await em.find(
+        AppointmentBookings,
+        { bookableSlotId: { $in: ids } },
+        { fields: ['bookableSlotId'] },
+      );
+      const intocables = new Set(
+        conHistoria.map((booking) => booking.bookableSlotId),
+      );
+      const libres = ids.filter((id) => !intocables.has(id));
+      keptSlots = ids.length - libres.length;
+
+      if (libres.length > 0) {
+        await em.nativeDelete(SlotHolds, {
+          bookableSlotId: { $in: libres },
+        });
+        releasedSlots = await em.nativeDelete(BookableSlots, {
+          id: { $in: libres },
+        });
+      }
+    }
+
+    const plantilla = await em.findOne(ScheduleTemplates, {
+      id: scheduleTemplateId,
+    });
+    if (plantilla) {
+      plantilla.statusConceptId = retiredStatusConceptId;
+      touch(plantilla, actorUserId);
+    }
+
+    return { releasedSlots, keptSlots };
+  }
+
   findSlotsByTemplateInRange(
     em: EntityManager,
     scheduleTemplateId: string,

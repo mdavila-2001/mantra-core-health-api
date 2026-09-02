@@ -37,6 +37,7 @@ import {
   BookingPolicyResponseDto,
   CreateTemplateDto,
   AvailabilityExceptionListDto,
+  RetireTemplateResponseDto,
   TemplateListDto,
   TemplateResponseDto,
   GenerateSlotsDto,
@@ -212,6 +213,33 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TemplateListDto> {
     return this.catalogService.listTemplates(id, actor);
+  }
+
+  /**
+   * Retirar un horario publicado (TAREA-10, punto 6).
+   *
+   * `DELETE` y no `PATCH` porque para quien lo usa **es** el botón de dar de
+   * baja el horario; lo que cambia es qué significa dar de baja acá, y eso lo
+   * dice el cuerpo de la respuesta. No es `@HttpCode(NO_CONTENT)` como el
+   * borrado de una excepción: éste devuelve cuánto soltó y cuánto conservó.
+   *
+   * Responde **409 con la lista** cuando el horario tiene citas comprometidas:
+   * no lo retira y nombra lo que hay que resolver primero.
+   */
+  @Delete('templates/:id')
+  // Mismo alcance que publicar y generar: el servicio comprueba que el recurso
+  // sea del actor con `assertRecursoDelActor`.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Retirar una plantilla de agenda y soltar sus cupos libres',
+    description:
+      'La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Rechaza con 409 si tiene citas confirmadas o presentadas.',
+  })
+  retireTemplate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<RetireTemplateResponseDto> {
+    return this.catalogService.retireTemplate(id, actor);
   }
 
   /** UC-41-03. */

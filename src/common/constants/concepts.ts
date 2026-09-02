@@ -1064,6 +1064,15 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'TPL_PUBLISHED',
     'Template published',
   ),
+  // Un horario que dejó de publicarse. NO es un borrado: la plantilla, sus
+  // franjas y sus cupos con historia siguen ahí. Existe porque el borrado duro
+  // es imposible — `audit.schedule_templates_history` referencia toda plantilla
+  // publicada, así que ninguna se puede borrar nunca (P-10-2).
+  TEMPLATE_RETIRED: def(
+    'scheduling:template-status:retired',
+    'TPL_RETIRED',
+    'Template retired',
+  ),
 
   // --- Scheduling: estado del slot (bookable_slots) ---
   SLOT_OPEN: def('scheduling:slot-status:open', 'SLOT_OPEN', 'Slot open'),

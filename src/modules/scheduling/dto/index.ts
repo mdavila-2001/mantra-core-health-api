@@ -9,6 +9,7 @@ export {
   TemplateRuleDto,
   TemplateDetailDto,
   TemplateListDto,
+  RetireTemplateResponseDto,
   AvailabilityExceptionDto,
   AvailabilityExceptionListDto,
   GenerateSlotsDto,
