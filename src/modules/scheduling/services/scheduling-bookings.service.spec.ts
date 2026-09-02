@@ -102,6 +102,7 @@ function build() {
     describeSlot: mockFn().mockResolvedValue(null),
     findResourceAccount: mockFn().mockResolvedValue(null),
     findAccountForProfile: mockFn().mockResolvedValue(null),
+    findDisplayNameForProfile: mockFn().mockResolvedValue(null),
   };
   const notices = {
     emit: mockFn().mockResolvedValue({ delivered: true }),
@@ -953,6 +954,119 @@ describe('SchedulingBookingsService', () => {
       await d.service.requestBooking('hold-token', solicitud, actor);
 
       expect(d.bookingsRepo.createBooking).toHaveBeenCalled();
+    });
+
+    /* ----------------------------------------------------------------------
+       AC-15-1 y AC-15-2 · la solicitud se avisa a las DOS partes
+       ---------------------------------------------------------------------- */
+
+    /** La cita como la describe el repositorio de avisos. */
+    const solicitada = {
+      bookingId: 'booking-1',
+      tenantId: '33333333-3333-3333-3333-333333333333',
+      patientProfileId: PATIENT,
+      resourceId: 'res-1',
+      slotId: SLOT_ID,
+      startAt: new Date('2026-08-20T14:00:00.000Z'),
+      resourceLabel: 'Dra. Rivas',
+    };
+
+    it('avisa al profesional que hay una solicitud que responder', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+      d.noticeRepo.findDisplayNameForProfile.mockResolvedValue('Ana Flores');
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const alPro = avisos.find(
+        (a: any) => a.recipient.userId === 'user-medico',
+      );
+      expect(alPro).toBeDefined();
+      expect(alPro.payload.change).toBe('REQUESTED');
+      expect(alPro.bodyText).toContain('Ana Flores');
+      // La acción va en el cuerpo: avisar sin decir qué se espera es ruido.
+      expect(alPro.bodyText).toMatch(/acept/i);
+    });
+
+    it('acusa recibo al paciente, y dice que todavía falta la respuesta', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const alPaciente = avisos.find(
+        (a: any) => a.recipient.patientProfileId === PATIENT,
+      );
+      expect(alPaciente).toBeDefined();
+      expect(alPaciente.bodyText).toContain('Dra. Rivas');
+      // Un acuse que se lee como confirmación manda a alguien al consultorio
+      // con un turno que nadie tomó.
+      expect(alPaciente.bodyText).toMatch(/falta que lo confirmen/i);
+      expect(avisos).toHaveLength(2);
+    });
+
+    it('sin nombre de paciente el aviso del profesional sigue saliendo', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+      d.noticeRepo.findDisplayNameForProfile.mockResolvedValue(null);
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const alPro = avisos.find(
+        (a: any) => a.recipient.userId === 'user-medico',
+      );
+      expect(alPro.bodyText).toMatch(/^Un paciente pidió turno/);
+    });
+
+    it('una sala no tiene a quién avisarle, pero el paciente igual recibe su acuse', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue(null);
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      expect(avisos).toHaveLength(1);
+      expect(avisos[0].recipient).toEqual({ patientProfileId: PATIENT });
+    });
+
+    it('los dos avisos rebotan por separado: uno por destinatario', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const claves = avisos.map((a: any) => a.debounceKey);
+      expect(new Set(claves).size).toBe(2);
+      expect(claves.every((k: string) => k.includes('booking-1'))).toBe(true);
+    });
+
+    it('que la cita no se describa no rompe la solicitud', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(null);
+
+      const res = await d.service.requestBooking(
+        'hold-token',
+        solicitud,
+        actor,
+      );
+
+      expect(res.id).toBe('booking-1');
+      expect(d.notices.emitMany).not.toHaveBeenCalled();
     });
   });
 

@@ -35,10 +35,13 @@ import { SCHED } from '../scheduling.concepts';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
 import {
   AGENDA_NOTICE_PORT,
+  type AgendaNotice,
   type AgendaNoticePort,
 } from '../ports/agenda-notice.port';
 import {
   avisoDeCambioDeCita,
+  avisoDeSolicitudAlPaciente,
+  avisoDeSolicitudAlProfesional,
   type CambioDeCita,
 } from '../notices/agenda-notices';
 import { isValidBookingTransition } from '../state/booking-state-machine';
@@ -431,7 +434,7 @@ export class SchedulingBookingsService {
       'Requesting booking from hold',
     );
 
-    return this.materializarReserva(
+    const resultado = await this.materializarReserva(
       holdToken,
       {
         tenantId: dto.tenantId,
@@ -444,6 +447,71 @@ export class SchedulingBookingsService {
       },
       actor,
     );
+
+    // Fuera de la transacción, como todos los avisos: que no salga la campana
+    // no puede deshacer una solicitud que ya existe.
+    await this.avisarSolicitud(resultado.id);
+    return resultado;
+  }
+
+  /**
+   * Avisa que entró una solicitud de turno, **a las dos partes**.
+   *
+   * ## Por qué a las dos y no a la contraparte
+   *
+   * {@link avisarCambio} avisa a quien **no** actuó, y para aceptar, mover o
+   * cancelar eso es correcto: quien lo hizo ya lo sabe. Pero pedir un turno no
+   * es un cambio de estado que le ocurre a alguien: es el comienzo de una
+   * espera. El profesional necesita enterarse de que hay algo que responder, y
+   * el paciente necesita saber que su pedido entró — sin eso, pedir un turno se
+   * siente como escribir a un buzón sin fondo, y vuelve a pedirlo.
+   *
+   * Es el punto 2 del pedido (AC-15-1 y AC-15-2), que pide explícitamente los
+   * **dos** destinatarios.
+   *
+   * ## Por qué no lanza
+   *
+   * Igual que {@link avisarCambio}: corre después de que la transacción cerró.
+   * Un fallo del canal se registra y se descarta; la reserva ya existe.
+   *
+   * @param bookingId - La cita recién solicitada.
+   */
+  private async avisarSolicitud(bookingId: string): Promise<void> {
+    const em = this.em.fork();
+    const booking = await this.noticeRepo.describeBooking(em, bookingId);
+    if (!booking) return;
+
+    // El del paciente sale siempre: su perfil es el dueño de la reserva, así
+    // que siempre hay a quién dirigirlo.
+    const avisos: AgendaNotice[] = [avisoDeSolicitudAlPaciente(booking)];
+
+    const profesional = await this.noticeRepo.findResourceAccount(
+      em,
+      booking.resourceId,
+    );
+    if (profesional === null) {
+      // Un recurso que no es de un profesional —una sala, un equipo— no tiene a
+      // quién avisarle. No es un fallo: es que no hay segundo destinatario, y
+      // el acuse del paciente sale igual.
+      this.logger.info(
+        { operation: 'scheduling.notice.requested', bookingId },
+        'El recurso de la solicitud no tiene profesional al que avisar',
+      );
+    } else {
+      const paciente = await this.noticeRepo.findDisplayNameForProfile(
+        em,
+        booking.patientProfileId,
+      );
+      avisos.push(
+        avisoDeSolicitudAlProfesional(
+          booking,
+          paciente ?? undefined,
+          profesional,
+        ),
+      );
+    }
+
+    await this.notices.emitMany(avisos);
   }
 
   /**
