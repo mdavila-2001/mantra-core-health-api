@@ -295,6 +295,21 @@ describe('FX-4 · retirar un horario publicado', () => {
     expect(Number(cupos[0].n)).toBe(1);
   });
 
+  it('el listado dice cuál está retirado, para que la pantalla no lo confunda', async () => {
+    // El listado devuelve TODAS las plantillas del recurso, ordenadas por
+    // creación. Sin este campo la pantalla tomaría la más reciente —la
+    // retirada— y la mostraría como el horario vigente.
+    const lista = await http()
+      .get(`/scheduling/resources/${resourceId}/templates`)
+      .set(bearer(medico.token))
+      .expect(200);
+
+    const retirada = lista.body.items.find(
+      (i: { id: string }) => i.id === templateId,
+    );
+    expect(retirada.retired).toBe(true);
+  });
+
   it('un horario retirado deja de publicarse: ya no choca con otro nuevo', async () => {
     // La comprobación de solape entre agendas propias filtra por
     // TPL_PUBLISHED. Si retirar no cambiara el estado, el horario retirado
