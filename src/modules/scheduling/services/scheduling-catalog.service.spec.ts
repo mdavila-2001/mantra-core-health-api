@@ -953,6 +953,137 @@ describe('SchedulingCatalogService', () => {
       });
     });
 
+    /* --------------------------------------------------------------------
+       TAREA-11 punto 4 · el motivo de bloqueo, catalogado
+       -------------------------------------------------------------------- */
+
+    describe('motivos de bloqueo (TAREA-11, punto 4)', () => {
+      it('publica los siete motivos con etiqueta en castellano', async () => {
+        const d = buildCatalog();
+
+        const { items } = d.service.listExceptionTypes();
+
+        expect(items).toHaveLength(7);
+        const claves = items.map((i: any) => i.type);
+        // Los tres que ya existían y los cuatro que pidió el propietario.
+        expect(claves).toEqual([
+          'ABSENCE',
+          'HOLIDAY',
+          'VACATION',
+          'CONFERENCE',
+          'ERRAND',
+          'EXTRA',
+          'OTHER',
+        ]);
+        for (const item of items) {
+          expect(item.label).toBeTruthy();
+          expect(item.conceptId).toMatch(/^[0-9a-f-]{36}$/);
+        }
+      });
+
+      it('sólo «Otro» exige texto libre', async () => {
+        const d = buildCatalog();
+
+        const { items } = d.service.listExceptionTypes();
+
+        const exigen = items.filter((i: any) => i.requiresText);
+        expect(exigen).toHaveLength(1);
+        expect(exigen[0].type).toBe('OTHER');
+      });
+
+      it('la atención extraordinaria no bloquea, y el catálogo lo dice', async () => {
+        const d = buildCatalog();
+
+        const { items } = d.service.listExceptionTypes();
+
+        // `EXTRA` abre horario en vez de cerrarlo. Viaja en la misma lista
+        // porque es una excepción más, pero la pantalla necesita distinguirlo.
+        const noBloquean = items.filter((i: any) => !i.blocks);
+        expect(noBloquean).toHaveLength(1);
+        expect(noBloquean[0].type).toBe('EXTRA');
+      });
+
+      it('elegir «Otro» sin escribir el motivo se rechaza en el servidor', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+
+        await expect(
+          d.service.createException(
+            RESOURCE,
+            {
+              exceptionType: 'OTHER',
+              startAt: '2026-06-01T08:00:00Z',
+              endAt: '2026-06-01T12:00:00Z',
+            } as never,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        // Se corta antes de tocar nada: la regla es del catálogo, no del
+        // formulario, y un formulario no es una barrera.
+        expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+      });
+
+      it('un texto en blanco tampoco cuenta como motivo', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+
+        await expect(
+          d.service.createException(
+            RESOURCE,
+            {
+              exceptionType: 'OTHER',
+              reason: '   ',
+              startAt: '2026-06-01T08:00:00Z',
+              endAt: '2026-06-01T12:00:00Z',
+            } as never,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('los otros seis motivos no exigen texto', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+
+        const res = await d.service.createException(
+          RESOURCE,
+          {
+            exceptionType: 'VACATION',
+            startAt: '2026-06-01T08:00:00Z',
+            endAt: '2026-06-01T12:00:00Z',
+          } as never,
+          actor,
+        );
+
+        expect(res.id).toBe('exc-1');
+      });
+
+      it('el motivo elegido llega a la columna como concepto, no como texto', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+
+        await d.service.createException(
+          RESOURCE,
+          {
+            exceptionType: 'CONFERENCE',
+            startAt: '2026-06-01T08:00:00Z',
+            endAt: '2026-06-01T12:00:00Z',
+          } as never,
+          actor,
+        );
+
+        const [, datos] = d.catalogRepo.createException.mock.calls[0];
+        expect(datos.exceptionTypeConceptId).toBe(
+          CONCEPTS.EXCEPTION_CONFERENCE,
+        );
+      });
+    });
+
     describe('generateSlots (UC-41-03)', () => {
       it('materialises one slot per interval of the rule', async () => {
         const d = buildCatalog();

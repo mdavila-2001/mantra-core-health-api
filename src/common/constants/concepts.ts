@@ -1169,6 +1169,32 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'EXC_EXTRA',
     'Extra availability',
   ),
+  // Los tres de arriba nacieron con el módulo y describen la MECÁNICA (falta,
+  // feriado, disponibilidad extra). Los cuatro de acá describen el MOTIVO que
+  // el profesional elige, que es lo que el propietario pidió catalogar.
+  EXCEPTION_VACATION: def(
+    'scheduling:exception-type:vacation',
+    'EXC_VACATION',
+    'Vacation',
+  ),
+  EXCEPTION_CONFERENCE: def(
+    'scheduling:exception-type:conference',
+    'EXC_CONFERENCE',
+    'Conference or training',
+  ),
+  EXCEPTION_ERRAND: def(
+    'scheduling:exception-type:errand',
+    'EXC_ERRAND',
+    'Personal errand',
+  ),
+  // «Otro» existe para que la lista pueda quedarse corta sin bloquear a nadie.
+  // Exige el texto libre: un motivo «Otro» sin explicación no dice nada, y lo
+  // que la gente escriba ahí es la mejor fuente para la lista definitiva.
+  EXCEPTION_OTHER: def(
+    'scheduling:exception-type:other',
+    'EXC_OTHER',
+    'Other reason',
+  ),
 
   // --- Scheduling: lista de espera ---
   WAITLIST_ACTIVE: def(

@@ -16,6 +16,9 @@ export {
   GenerateSlotsResponseDto,
   CreateExceptionDto,
   ExceptionResponseDto,
+  ExceptionTypeDto,
+  ExceptionTypeListDto,
+  EXCEPTION_TYPES,
   RESOURCE_TYPES,
 } from './scheduling-catalog.dto';
 export type { ResourceType, ExceptionType } from './scheduling-catalog.dto';

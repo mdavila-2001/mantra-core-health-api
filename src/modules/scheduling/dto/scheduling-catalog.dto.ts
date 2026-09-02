@@ -621,8 +621,36 @@ export class GenerateSlotsResponseDto {
   omittedByCommitments!: number;
 }
 
-/** Tipo de excepción de disponibilidad. */
-export type ExceptionType = 'ABSENCE' | 'HOLIDAY' | 'EXTRA';
+/**
+ * Motivo de una excepción de disponibilidad.
+ *
+ * Los tres primeros nacieron con el módulo y describen la **mecánica**; los
+ * cuatro siguientes son los motivos que el profesional elige, catalogados a
+ * pedido del propietario.
+ *
+ * `OTHER` **exige** el texto libre de `reason`: es lo que permite que la lista
+ * se quede corta sin bloquear a nadie, y lo que la gente escriba ahí es la
+ * mejor fuente para ampliarla después.
+ */
+export type ExceptionType =
+  | 'ABSENCE'
+  | 'HOLIDAY'
+  | 'EXTRA'
+  | 'VACATION'
+  | 'CONFERENCE'
+  | 'ERRAND'
+  | 'OTHER';
+
+/** Los motivos que la pantalla ofrece, en el orden en que se muestran. */
+export const EXCEPTION_TYPES: readonly ExceptionType[] = [
+  'ABSENCE',
+  'HOLIDAY',
+  'VACATION',
+  'CONFERENCE',
+  'ERRAND',
+  'EXTRA',
+  'OTHER',
+];
 
 /** Cuerpo de `POST /scheduling/resources/{id}/exceptions` (UC-41-04). */
 export class CreateExceptionDto {
@@ -630,10 +658,10 @@ export class CreateExceptionDto {
    * Valor de exception type mantenido por la instancia.
    */
   @ApiProperty({
-    description: 'Tipo de excepción',
-    enum: ['ABSENCE', 'HOLIDAY', 'EXTRA'],
+    description: 'Motivo de la excepción',
+    enum: EXCEPTION_TYPES,
   })
-  @IsIn(['ABSENCE', 'HOLIDAY', 'EXTRA'])
+  @IsIn(EXCEPTION_TYPES)
   exceptionType!: ExceptionType;
 
   /**
@@ -653,7 +681,10 @@ export class CreateExceptionDto {
   /**
    * Valor de reason mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Motivo visible en agenda' })
+  @ApiPropertyOptional({
+    description:
+      'Texto libre del motivo. OBLIGATORIO cuando el tipo es OTHER; lo lee el profesional',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)
@@ -723,4 +754,45 @@ export class RetireTemplateResponseDto {
     description: 'Cupos conservados porque tienen una cita detrás',
   })
   keptSlots!: number;
+}
+
+/** Un motivo de bloqueo tal como lo ofrece la pantalla. */
+export class ExceptionTypeDto {
+  /** Clave estable con la que se envía al crear la excepción. */
+  @ApiProperty({ enum: EXCEPTION_TYPES })
+  type!: ExceptionType;
+
+  /** El concepto real detrás, por si el cliente lo necesita. */
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  /** Cómo se llama en pantalla, en castellano. */
+  @ApiProperty({ example: 'Congreso o capacitación' })
+  label!: string;
+
+  /**
+   * Si elegirlo obliga a escribir el motivo.
+   *
+   * Viaja con el catálogo para que el formulario pueda pedir la explicación sin
+   * saber de antemano cuál de los motivos la exige.
+   */
+  @ApiProperty({ description: 'true en «Otro»: exige texto libre' })
+  requiresText!: boolean;
+
+  /**
+   * Si cierra horario o lo abre.
+   *
+   * `EXTRA` **añade** disponibilidad fuera del patrón: viaja en la misma lista
+   * porque es una excepción más, pero la pantalla necesita distinguirlo para no
+   * ofrecerlo donde se espera un bloqueo.
+   */
+  @ApiProperty({ description: 'false en la atención extraordinaria' })
+  blocks!: boolean;
+}
+
+/** Respuesta de `GET /scheduling/exception-types`. */
+export class ExceptionTypeListDto {
+  /** Los motivos, en el orden en que se muestran. */
+  @ApiProperty({ type: [ExceptionTypeDto] })
+  items!: ExceptionTypeDto[];
 }

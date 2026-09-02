@@ -28,6 +28,8 @@ import {
   GenerateSlotsResponseDto,
   CreateExceptionDto,
   ExceptionResponseDto,
+  ExceptionTypeListDto,
+  EXCEPTION_TYPES,
   ResourceAgendaResponseDto,
   type ResourceType,
   type ExceptionType,
@@ -77,7 +79,37 @@ const EXCEPTION_TYPE_CONCEPT: Readonly<Record<ExceptionType, string>> = {
   ABSENCE: CONCEPTS.EXCEPTION_ABSENCE,
   HOLIDAY: CONCEPTS.EXCEPTION_HOLIDAY,
   EXTRA: CONCEPTS.EXCEPTION_EXTRA,
+  VACATION: CONCEPTS.EXCEPTION_VACATION,
+  CONFERENCE: CONCEPTS.EXCEPTION_CONFERENCE,
+  ERRAND: CONCEPTS.EXCEPTION_ERRAND,
+  OTHER: CONCEPTS.EXCEPTION_OTHER,
 };
+
+/**
+ * Cómo se llama cada motivo en pantalla.
+ *
+ * En castellano porque es prosa que ve el usuario, y acá y no en el front
+ * porque el catálogo es del servidor: una lista que crece no puede exigir un
+ * despliegue del front para mostrarse.
+ */
+const EXCEPTION_TYPE_LABEL: Readonly<Record<ExceptionType, string>> = {
+  ABSENCE: 'Ausencia',
+  HOLIDAY: 'Feriado',
+  VACATION: 'Vacaciones',
+  CONFERENCE: 'Congreso o capacitación',
+  ERRAND: 'Trámite personal',
+  EXTRA: 'Atención extraordinaria',
+  OTHER: 'Otro',
+};
+
+/**
+ * El motivo que exige explicación.
+ *
+ * «Otro» sin texto no dice nada: es la única opción de la lista que no se
+ * explica sola, y dejarla pasar vacía convertiría el catálogo en una casilla
+ * de escape silenciosa.
+ */
+const MOTIVO_QUE_EXIGE_TEXTO: ExceptionType = 'OTHER';
 
 const DEFAULT_SLOT_MINUTES = 30;
 const DEFAULT_SLOT_CAPACITY = 1;
@@ -588,11 +620,54 @@ export class SchedulingCatalogService {
    * a `blocked`. Los que ya tienen reservas **no se tocan**: cancelar citas ya
    * confirmadas es una decisión clínica, no un efecto colateral de marcar una ausencia.
    */
+  /**
+   * Los motivos de bloqueo que la pantalla puede ofrecer.
+   *
+   * Existe porque el catálogo estaba en la base y **no lo publicaba nadie**: la
+   * columna `exception_type_concept_id` es obligatoria y el formulario no tenía
+   * de dónde sacar las opciones, así que en la práctica todo bloqueo nacía con
+   * el mismo valor.
+   *
+   * Devuelve la etiqueta ya en castellano y el `conceptId` real, para que el
+   * front no tenga que mapear códigos ni mantener su propia copia de la lista.
+   * Cuando el catálogo crezca, la pantalla se entera sola.
+   *
+   * `requiresText` es la única regla que viaja con el catálogo: es lo que
+   * permite al formulario pedir la explicación en el momento, sin conocer de
+   * antemano cuál de los motivos la exige.
+   */
+  listExceptionTypes(): ExceptionTypeListDto {
+    return {
+      items: EXCEPTION_TYPES.map((type) => ({
+        type,
+        conceptId: EXCEPTION_TYPE_CONCEPT[type],
+        label: EXCEPTION_TYPE_LABEL[type],
+        requiresText: type === MOTIVO_QUE_EXIGE_TEXTO,
+        // `EXTRA` no bloquea: abre disponibilidad fuera del patrón. Viaja en la
+        // misma lista porque es una excepción más, pero la pantalla necesita
+        // distinguirlo para no ofrecerlo donde se espera un bloqueo.
+        blocks: type !== 'EXTRA',
+      })),
+    };
+  }
+
   async createException(
     resourceId: string,
     dto: CreateExceptionDto,
     actor: AuthenticatedUser,
   ): Promise<ExceptionResponseDto> {
+    // «Otro» sin explicación no dice nada. Se comprueba en el servidor y no
+    // sólo en el formulario: la regla es del catálogo, no de la pantalla.
+    if (
+      dto.exceptionType === MOTIVO_QUE_EXIGE_TEXTO &&
+      (dto.reason === undefined || dto.reason.trim() === '')
+    ) {
+      throw new PreconditionFailedException(
+        'Elegiste «Otro» como motivo: escribí cuál es',
+        { resourceId, exceptionType: dto.exceptionType },
+      );
+    }
+
     const startAt = new Date(dto.startAt);
     const endAt = new Date(dto.endAt);
     if (startAt >= endAt) {
