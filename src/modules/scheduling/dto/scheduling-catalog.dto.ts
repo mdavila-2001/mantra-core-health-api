@@ -457,6 +457,22 @@ export class TemplateDetailDto {
   @ApiProperty({ type: [TemplateRuleDto] })
   rules!: TemplateRuleDto[];
 
+  /**
+   * Si el horario fue retirado y ya no se publica.
+   *
+   * Viaja como booleano y no como `statusConceptId` a secas porque quien lo
+   * consume es una pantalla, y comparar contra un UUID de concepto la obligaría
+   * a conocerlo — que es exactamente lo que el proyecto evita. Mismo criterio
+   * que `requiresText` en el catálogo de motivos.
+   *
+   * Importa para la lectura, no sólo para la etiqueta: el listado devuelve
+   * **todas** las plantillas del recurso, retiradas incluidas, y sin esto la
+   * pantalla mostraría un horario retirado como si fuera el vigente —basta con
+   * que sea el más reciente—.
+   */
+  @ApiProperty({ description: 'true cuando el horario está retirado' })
+  retired!: boolean;
+
   /** Duración por defecto de la plantilla, si la declara. */
   @ApiProperty({ required: false })
   slotMinutes?: number;

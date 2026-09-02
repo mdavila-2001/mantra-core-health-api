@@ -611,8 +611,10 @@ describe('SchedulingCatalogService', () => {
 
         const res = await d.service.listTemplates(RESOURCE, actor);
 
-        // Ni presentes en null ni reventando: simplemente ausentes.
+        // Ni presentes en null ni reventando: simplemente ausentes. `retired`
+        // sí viaja siempre: es un booleano derivado, no una columna anulable.
         expect(res.items[0]).toEqual({
+          retired: false,
           id: 'tpl-1',
           name: 'Horario',
           statusConceptId: 'c',

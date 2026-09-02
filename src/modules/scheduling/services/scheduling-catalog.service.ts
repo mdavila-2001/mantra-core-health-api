@@ -1141,6 +1141,7 @@ export class SchedulingCatalogService {
         ? {}
         : { bookingPolicyId: plantilla.bookingPolicyId }),
       statusConceptId: plantilla.statusConceptId,
+      retired: plantilla.statusConceptId === CONCEPTS.TEMPLATE_RETIRED,
     }));
 
     return { items, count: items.length };
