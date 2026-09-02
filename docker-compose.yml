@@ -93,6 +93,15 @@ x-app-env: &app-env
   AUDIO_TTS_MAX_CONCURRENCY: ${AUDIO_TTS_MAX_CONCURRENCY:-2}
   AUDIO_TTS_MAX_REQUESTS_PER_SECOND: ${AUDIO_TTS_MAX_REQUESTS_PER_SECOND:-2}
   AUDIO_TTS_CROSS_TEMPLATE_DEDUP: ${AUDIO_TTS_CROSS_TEMPLATE_DEDUP:-true}
+  # Estas cuatro las lee el código y no las declaraba NINGÚN compose, así que
+  # dentro de un contenedor corrían con su valor compilado y no había forma de
+  # ajustarlas. La primera es la que más pesa: es el tope de generaciones de
+  # pago por actor y día, o sea el freno que impide que una sola cuenta agote
+  # el presupuesto del mes.
+  AUDIO_TTS_RUNTIME_GENERATIONS_PER_ACTOR_DAY: ${AUDIO_TTS_RUNTIME_GENERATIONS_PER_ACTOR_DAY:-0}
+  AUDIO_TTS_HTTP_MAX_RETRIES: ${AUDIO_TTS_HTTP_MAX_RETRIES:-0}
+  AUDIO_TTS_GLOBAL_FALLBACK_TEMPLATE: ${AUDIO_TTS_GLOBAL_FALLBACK_TEMPLATE:-onboarding.fallback.generic}
+  AUDIO_TTS_GC_RETENTION_DAYS: ${AUDIO_TTS_GC_RETENTION_DAYS:-90}
   ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
   ELEVENLABS_BASE_URL: ${ELEVENLABS_BASE_URL:-https://api.elevenlabs.io}
   ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-}

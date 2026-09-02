@@ -207,11 +207,61 @@ x-app-env: &app-env
   GOOGLE_OAUTH_REFRESH_TOKEN: ${GOOGLE_OAUTH_REFRESH_TOKEN:-}
   GOOGLE_SENDER_EMAIL: ${GOOGLE_SENDER_EMAIL:-}
 
-  # --- Audio / TTS: apagado; encenderlo cuesta dinero por petición --------
+  # --- Audio / TTS --------------------------------------------------------
+  # El único subsistema que puede COSTAR DINERO por ejecución, y por eso lleva
+  # tres interruptores en serie en vez de uno: `AUDIO_TTS_ENABLED` monta el
+  # módulo, `AUDIO_TTS_ALLOW_RUNTIME_GENERATION` permite generar audio nuevo
+  # durante la operación (apagado, solo se sirve lo ya cacheado), y
+  # `AUDIO_TTS_PROD_LICENSE_CONFIRMED` exige que alguien haya mirado la
+  # licencia de la voz antes de locutar en producción. Con cualquiera de los
+  # tres en falso, `AudioBudgetPolicy` deniega y lo dice por su nombre
+  # (`TTS_DISABLED`, `RUNTIME_GENERATION_DISABLED`,
+  # `PRODUCTION_LICENSE_NOT_CONFIRMED`) — no revienta nada.
+  #
+  # La lista es larga a propósito. Compose NO inyecta el `.env` dentro de los
+  # contenedores: una variable que no figure en este bloque no existe ahí
+  # dentro por más que esté puesta en Coolify. Faltaban las veintidós de abajo
+  # —`ELEVENLABS_VOICE_ID` entre ellas—, así que elegir la voz no tenía ningún
+  # efecto y el proveedor recibía una referencia vacía.
   AUDIO_TTS_ENABLED: ${AUDIO_TTS_ENABLED:-false}
   AUDIO_TTS_PROVIDER: ${AUDIO_TTS_PROVIDER:-disabled}
   AUDIO_TTS_ALLOW_RUNTIME_GENERATION: ${AUDIO_TTS_ALLOW_RUNTIME_GENERATION:-false}
+  AUDIO_TTS_PROD_LICENSE_CONFIRMED: ${AUDIO_TTS_PROD_LICENSE_CONFIRMED:-false}
+  # Identidad de la voz. Los cinco entran en la clave de la caché: tocar
+  # cualquiera invalida lo ya locutado y hay que volver a pagarlo.
+  AUDIO_TTS_DEFAULT_LANGUAGE: ${AUDIO_TTS_DEFAULT_LANGUAGE:-es-419}
+  AUDIO_TTS_DEFAULT_FORMAT: ${AUDIO_TTS_DEFAULT_FORMAT:-mp3_44100_128}
+  AUDIO_TTS_SAMPLE_RATE: ${AUDIO_TTS_SAMPLE_RATE:-44100}
+  AUDIO_TTS_VOICE_PROFILE: ${AUDIO_TTS_VOICE_PROFILE:-brand_es_latam_v1}
+  AUDIO_TTS_VOICE_VERSION: ${AUDIO_TTS_VOICE_VERSION:-1}
+  AUDIO_TTS_MODEL: ${AUDIO_TTS_MODEL:-eleven_v3}
+  # Presupuesto. La reserva de seguridad por encima del techo mensual bloquea
+  # la generación entera: es el freno de mano. El tope por actor y día impide
+  # que una sola cuenta —o un botón pulsado en bucle— se coma el mes; `0` lo
+  # deja SIN tope por actor, no en cero.
+  AUDIO_TTS_MONTHLY_BUDGET_UNITS: ${AUDIO_TTS_MONTHLY_BUDGET_UNITS:-10000}
+  AUDIO_TTS_SAFETY_RESERVE_UNITS: ${AUDIO_TTS_SAFETY_RESERVE_UNITS:-1000}
+  AUDIO_TTS_RUNTIME_GENERATIONS_PER_ACTOR_DAY: ${AUDIO_TTS_RUNTIME_GENERATIONS_PER_ACTOR_DAY:-3}
+  # Plazos, reintentos y cortacircuitos del proveedor.
+  AUDIO_TTS_REQUEST_TIMEOUT_MS: ${AUDIO_TTS_REQUEST_TIMEOUT_MS:-10000}
+  AUDIO_TTS_MAX_RETRIES: ${AUDIO_TTS_MAX_RETRIES:-3}
+  AUDIO_TTS_HTTP_MAX_RETRIES: ${AUDIO_TTS_HTTP_MAX_RETRIES:-0}
+  AUDIO_TTS_RETRY_BASE_MS: ${AUDIO_TTS_RETRY_BASE_MS:-500}
+  AUDIO_TTS_MAX_CONCURRENCY: ${AUDIO_TTS_MAX_CONCURRENCY:-2}
+  AUDIO_TTS_MAX_REQUESTS_PER_SECOND: ${AUDIO_TTS_MAX_REQUESTS_PER_SECOND:-2}
+  AUDIO_TTS_CB_FAILURE_THRESHOLD: ${AUDIO_TTS_CB_FAILURE_THRESHOLD:-5}
+  AUDIO_TTS_CB_OPEN_MS: ${AUDIO_TTS_CB_OPEN_MS:-30000}
+  AUDIO_TTS_CB_HALF_OPEN_MAX_CALLS: ${AUDIO_TTS_CB_HALF_OPEN_MAX_CALLS:-1}
+  AUDIO_TTS_CROSS_TEMPLATE_DEDUP: ${AUDIO_TTS_CROSS_TEMPLATE_DEDUP:-true}
+  AUDIO_TTS_GLOBAL_FALLBACK_TEMPLATE: ${AUDIO_TTS_GLOBAL_FALLBACK_TEMPLATE:-onboarding.fallback.generic}
+  AUDIO_TTS_GC_RETENTION_DAYS: ${AUDIO_TTS_GC_RETENTION_DAYS:-90}
+  # Proveedor. `ELEVENLABS_VOICE_ID` no tiene valor por omisión a propósito:
+  # elegir la voz es una decisión de marca, no algo que se hereda.
   ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+  ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-}
+  ELEVENLABS_MODEL_ID: ${ELEVENLABS_MODEL_ID:-eleven_v3}
+  ELEVENLABS_OUTPUT_FORMAT: ${ELEVENLABS_OUTPUT_FORMAT:-mp3_44100_128}
+  ELEVENLABS_BASE_URL: ${ELEVENLABS_BASE_URL:-https://api.elevenlabs.io}
 
   # --- Trazas -------------------------------------------------------------
   OTEL_ENABLED: ${OTEL_ENABLED:-false}
