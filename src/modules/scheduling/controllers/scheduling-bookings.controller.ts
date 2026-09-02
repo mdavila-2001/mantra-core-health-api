@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -30,6 +31,8 @@ import {
 import {
   AcceptBookingDto,
   RejectBookingDto,
+  SetPaymentStateDto,
+  PaymentStateDto,
   RequestBookingInfoDto,
   ProposeScheduleDto,
   ProposeScheduleResponseDto,
@@ -214,6 +217,54 @@ export class SchedulingBookingsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CancelBookingResponseDto> {
     return this.bookingsService.reject(id, dto, actor);
+  }
+
+  /**
+   * Marca el estado de pago de la cita — TAREA-13, punto 5.
+   *
+   * `PUT` y no `POST` porque es **idempotente**: hay una fila por cita y volver
+   * a mandar el mismo estado deja exactamente el mismo resultado. Las otras
+   * operaciones de este controlador son `POST` porque cada una es un acto
+   * distinto —aceptar dos veces no es aceptar—; marcar un pago dos veces sí.
+   *
+   * Quién puede: los mismos que responden la solicitud. **El paciente no**:
+   * decir que una cita está pagada es una afirmación del prestador, y dejársela
+   * hacer a quien debe el dinero sería confiar en el campo equivocado.
+   */
+  @Put(':id/payment-state')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Marcar el estado de pago de una cita',
+    description:
+      'Pendiente de pago, parcialmente pagada o pagada, más la marca separada de uso de seguro. Una cita cancelada o rechazada responde 422.',
+  })
+  setPaymentState(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SetPaymentStateDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PaymentStateDto> {
+    return this.bookingsService.setPaymentState(id, dto, actor);
+  }
+
+  /**
+   * Lee el estado de pago de la cita.
+   *
+   * Devuelve `null` cuando nadie lo marcó todavía, que **no** es lo mismo que
+   * «pendiente de pago»: pendiente es algo que alguien firmó.
+   */
+  @Get(':id/payment-state')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Leer el estado de pago de una cita',
+    description:
+      'Devuelve null si todavía nadie lo marcó: la ausencia de estado no es «pendiente».',
+  })
+  getPaymentState(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PaymentStateDto | null> {
+    return this.bookingsService.getPaymentState(id, actor);
   }
 
   /**

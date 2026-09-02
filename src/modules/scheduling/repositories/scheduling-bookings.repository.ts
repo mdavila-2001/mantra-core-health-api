@@ -5,6 +5,7 @@ import {
   BookableSlots,
   SlotHolds,
   AppointmentBookings,
+  AppointmentPaymentStates,
   BookingReschedules,
   BookingCancellations,
   WaitlistEntries,
@@ -314,6 +315,35 @@ export class SchedulingBookingsRepository {
       { id },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * El estado de pago de una cita, bloqueado para escribir (TAREA-13 punto 5).
+   *
+   * Se bloquea porque marcar el pago es leer-decidir-escribir: sin el lock, dos
+   * peticiones simultáneas leerían las dos «no hay fila» y la segunda moriría
+   * contra `ux_appointment_payment_states_booking` con un 500 en vez de
+   * serializarse.
+   */
+  findPaymentStateForUpdate(
+    em: EntityManager,
+    bookingId: string,
+  ): Promise<AppointmentPaymentStates | null> {
+    return em.findOne(
+      AppointmentPaymentStates,
+      { appointmentBookingId: bookingId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /** El estado de pago, sin bloquear: es la cara de lectura. */
+  findPaymentState(
+    em: EntityManager,
+    bookingId: string,
+  ): Promise<AppointmentPaymentStates | null> {
+    return em.findOne(AppointmentPaymentStates, {
+      appointmentBookingId: bookingId,
+    });
   }
 
   /** Cita concreta, sin bloquear: es la cara de lectura de UC-41-15. */

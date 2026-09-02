@@ -7,6 +7,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  createdBy,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -31,6 +32,8 @@ import type {
   AppointmentBookings,
   CancellationPolicySnapshot,
 } from '../entities';
+// Va en un import de valor y no de tipo: `tx.create()` necesita la clase, no su forma.
+import { AppointmentPaymentStates } from '../entities';
 import { SCHED } from '../scheduling.concepts';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
 import {
@@ -57,6 +60,9 @@ import {
   RequestBookingDto,
   AcceptBookingDto,
   RejectBookingDto,
+  SetPaymentStateDto,
+  PaymentStateDto,
+  type PaymentState,
   RequestBookingInfoDto,
   ProposeScheduleDto,
   ProposeScheduleResponseDto,
@@ -230,6 +236,77 @@ const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
  * Flujo de reserva: holds anti-double-booking, confirmación, reprogramación,
  * cancelación, check-in y el worker de expiración (UC-41-05 … 10).
  */
+/* -- El estado de pago de una cita (TAREA-13 punto 5) ----------------------- */
+
+/** La clave estable de cada estado de pago, a su concepto. */
+const PAYMENT_STATE_CONCEPT: Readonly<Record<PaymentState, string>> = {
+  PENDING: SCHED.PAYMENT_PENDING,
+  PARTIALLY_PAID: SCHED.PAYMENT_PARTIALLY_PAID,
+  PAID: SCHED.PAYMENT_PAID,
+};
+
+/** El camino de vuelta, para proyectar lo que está guardado. */
+const PAYMENT_CONCEPT_STATE: Readonly<Record<string, PaymentState>> = {
+  [SCHED.PAYMENT_PENDING]: 'PENDING',
+  [SCHED.PAYMENT_PARTIALLY_PAID]: 'PARTIALLY_PAID',
+  [SCHED.PAYMENT_PAID]: 'PAID',
+};
+
+/**
+ * Cómo se llama cada estado en pantalla.
+ *
+ * En castellano y acá —no en el front— por lo mismo que las etiquetas de los
+ * motivos de bloqueo: el catálogo es del servidor, y una lista que crece no
+ * puede exigir un despliegue del front para mostrarse.
+ */
+const PAYMENT_STATE_LABEL: Readonly<Record<PaymentState, string>> = {
+  PENDING: 'Pendiente de pago',
+  PARTIALLY_PAID: 'Parcialmente pagada',
+  PAID: 'Pagada',
+};
+
+/**
+ * Los estados de cita que **no** admiten estado de pago.
+ *
+ * Es la mitad excluyente de la regla que dio el propietario: «no es excluyente
+ * con pendiente, aceptada y realizada; **sí** lo es con rechazada y cancelada».
+ *
+ * Rechazar no es un estado propio en esta máquina —`reject()` cancela con el
+ * motivo `CANCEL_REJECTED`—, así que las dos mitades del pedido caen en el
+ * mismo concepto y la lista tiene un solo elemento. No es una simplificación:
+ * es que el modelo ya las trataba como lo mismo.
+ *
+ * **`NO_SHOW` queda deliberadamente afuera de esta lista**, o sea que sí admite
+ * pago. El propietario no lo nombró —enumeró tres que permiten y dos que
+ * prohíben, y el ausente no está en ninguna—; se resolvió permitirlo porque el
+ * modelo ya prevé que una inasistencia pueda deber dinero
+ * (`booking_cancellations.fee_amount`), y prohibirlo impediría registrar un
+ * cobro legítimo. Está anotado como pregunta abierta: si el propietario dice
+ * que no, se agrega acá y las pruebas lo dicen enseguida.
+ */
+const ESTADOS_SIN_PAGO: readonly string[] = [CONCEPTS.BOOKING_CANCELLED];
+
+/**
+ * De la fila guardada a lo que ve el cliente.
+ *
+ * Traduce el concepto a su clave estable y le pone la etiqueta: el cliente no
+ * tiene por qué conocer los uuid de terminología, y si los conociera acabaría
+ * comparándolos a mano en el front.
+ */
+function proyectarEstadoDePago(
+  fila: AppointmentPaymentStates,
+): PaymentStateDto {
+  const state = PAYMENT_CONCEPT_STATE[fila.statusConceptId];
+  return {
+    state,
+    label: PAYMENT_STATE_LABEL[state],
+    conceptId: fila.statusConceptId,
+    insuranceUsed: fila.insuranceUsed,
+    markedByUserId: fila.markedByUserId,
+    markedAt: fila.markedAt.toISOString(),
+  };
+}
+
 @Injectable()
 export class SchedulingBookingsService {
   /**
@@ -1324,6 +1401,138 @@ export class SchedulingBookingsService {
 
     await this.avisarCambio(bookingId, cambio, motivo, dto.cancelledBy);
     return resultado;
+  }
+
+  /**
+   * Marca el estado de pago de una cita — TAREA-13, punto 5.
+   *
+   * ## La regla de los dos ejes, que es lo que hace esto interesante
+   *
+   * El propietario la dio textual: el estado de pago **no es excluyente** con
+   * pendiente, aceptada y realizada, pero **sí** lo es con rechazada y
+   * cancelada. O sea que no es un estado más de la máquina de citas sino un
+   * segundo eje que corre en paralelo, y por eso vive en su propia tabla.
+   *
+   * La mitad prohibitiva se comprueba **acá, en el servidor**, y responde 422.
+   * Esconder el botón en la pantalla no es una regla: es una sugerencia que
+   * cualquiera saltea con `curl`.
+   *
+   * ## Por qué es idempotente por reserva y no un registro por marca
+   *
+   * Hay **una fila por cita**, garantizada por el único de la base. Volver a
+   * marcar la misma cita actualiza esa fila en vez de agregar otra: si hubiera
+   * dos, no habría forma de decir cuál vale.
+   *
+   * Lo que **no** se pierde es la cadena de cambios: cada marca agrega una
+   * revisión a `audit.appointment_bookings_history`, que es append-only. Pasar
+   * de «pagada» a «pendiente» sobrescribe la fila pero deja la huella, y eso es
+   * exactamente el «nada se pisa en silencio» de AC-13-10.
+   *
+   * ## El bloqueo
+   *
+   * La fila se carga con `FOR UPDATE`. Sin eso, dos peticiones simultáneas
+   * leerían las dos «no hay fila», las dos intentarían insertar y la segunda
+   * moriría contra el índice único con un 500 en vez de esperar su turno.
+   *
+   * @param bookingId - La cita que se marca.
+   * @param dto - En qué estado queda y si se usó seguro.
+   * @param actor - Quien marca; queda firmado en la fila.
+   * @returns El estado de pago tal como quedó.
+   * @throws PreconditionFailedException (422) si la cita está cancelada o rechazada.
+   */
+  async setPaymentState(
+    bookingId: string,
+    dto: SetPaymentStateDto,
+    actor: AuthenticatedUser,
+  ): Promise<PaymentStateDto> {
+    this.logger.info(
+      {
+        operation: 'scheduling.booking.set-payment-state',
+        bookingId,
+        state: dto.state,
+      },
+      'Marking booking payment state',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+
+      if (ESTADOS_SIN_PAGO.includes(booking.statusConceptId)) {
+        // El mensaje dice POR QUÉ y no sólo que no se puede: quien lo lee está
+        // mirando una cita que alguien canceló y necesita entender que el
+        // problema no es su permiso.
+        throw new PreconditionFailedException(
+          'Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar.',
+          { bookingId, statusConceptId: booking.statusConceptId },
+        );
+      }
+
+      const conceptoNuevo = PAYMENT_STATE_CONCEPT[dto.state];
+      const usoSeguro = dto.insuranceUsed ?? false;
+      const ahora = new Date();
+
+      const existente = await this.bookingsRepo.findPaymentStateForUpdate(
+        tx,
+        bookingId,
+      );
+      const conceptoAnterior = existente?.statusConceptId ?? null;
+
+      let fila: AppointmentPaymentStates;
+      if (existente) {
+        existente.statusConceptId = conceptoNuevo;
+        existente.insuranceUsed = usoSeguro;
+        existente.markedByUserId = actor.id;
+        existente.markedAt = ahora;
+        touch(existente, actor.id);
+        fila = existente;
+      } else {
+        fila = tx.create(AppointmentPaymentStates, {
+          id: randomUUID(),
+          tenantId: booking.tenantId,
+          appointmentBookingId: booking.id,
+          statusConceptId: conceptoNuevo,
+          insuranceUsed: usoSeguro,
+          markedByUserId: actor.id,
+          markedAt: ahora,
+          // `createdBy` ya pone createdAt y updatedAt con el mismo instante.
+          ...createdBy(actor.id, ahora),
+          rowVersion: 1,
+        });
+        tx.persist(fila);
+      }
+
+      // La huella. Sin esto, volver a «pendiente» borraría que alguna vez
+      // estuvo pagada, y marcar un pago es una afirmación sobre el dinero de
+      // alguien.
+      await this.historyRepo.append(tx, 'appointment_bookings', booking.id, {
+        operationConceptId: SCHED.HISTORY_OP_PAYMENT_MARKED,
+        dataSnapshot: {
+          bookingId: booking.id,
+          fromPaymentConceptId: conceptoAnterior,
+          toPaymentConceptId: conceptoNuevo,
+          insuranceUsed: usoSeguro,
+        },
+        changedByUserId: actor.id,
+      });
+
+      return proyectarEstadoDePago(fila);
+    });
+  }
+
+  /**
+   * El estado de pago de una cita, para leerlo.
+   *
+   * Devuelve `null` cuando **nadie lo marcó todavía**, que no es lo mismo que
+   * «pendiente de pago»: pendiente es una afirmación que alguien firmó, y la
+   * ausencia de fila es que del pago aún no se dijo nada.
+   */
+  async getPaymentState(
+    bookingId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PaymentStateDto | null> {
+    const booking = await this.cargarParaOperar(this.em, bookingId, actor);
+    const fila = await this.bookingsRepo.findPaymentState(this.em, booking.id);
+    return fila ? proyectarEstadoDePago(fila) : null;
   }
 
   /**

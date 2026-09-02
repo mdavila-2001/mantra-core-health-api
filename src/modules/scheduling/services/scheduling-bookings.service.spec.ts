@@ -38,7 +38,13 @@ const MOTIVO = 'El paciente viaja esa semana';
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
+  // `create` devuelve el objeto tal cual: el servicio lo usa como la fila que
+  // acaba de nacer, así que la prueba puede mirar exactamente lo que se guardó.
+  const tx = {
+    flush: mockFn(),
+    create: mockFn((_clase: any, datos: any) => datos),
+    persist: mockFn(),
+  };
   // Las lecturas trabajan sobre un fork del EntityManager; el doble se devuelve
   // a sí mismo para que la prueba pueda seguir mirando las mismas llamadas.
   const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -51,6 +57,10 @@ function build() {
     findExpiredHolds: mockFn(),
     createBooking: mockFn(),
     findBookingByIdForUpdate: mockFn(),
+    // TAREA-13 punto 5: el estado de pago. Por omisión la cita no tiene
+    // ninguno, que es el caso de toda cita que nadie marcó todavía.
+    findPaymentStateForUpdate: mockFn().mockResolvedValue(null),
+    findPaymentState: mockFn().mockResolvedValue(null),
     // Las dos lecturas (UC-41-15): el detalle y el listado.
     findBookingById: mockFn(),
     // TJ-2: la lectura del origen de una reprogramación. Sin filas, ninguna
@@ -2541,5 +2551,233 @@ describe('SchedulingBookingsService', () => {
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
+  });
+});
+
+/**
+ * EL ESTADO DE PAGO DE UNA CITA — TAREA-13, punto 5.
+ *
+ * Lo que fijan estas pruebas es la regla que dio el propietario y que es fácil
+ * de romper sin darse cuenta, porque no es una máquina de estados sino **dos
+ * ejes que corren en paralelo**: «el estado del pago no es excluyente con
+ * pendiente, aceptada y realizada; pero sí lo es con rechazada y cancelada».
+ *
+ * Y una segunda cosa que no se ve leyendo: marcar un pago **sobrescribe** la
+ * fila, así que sin la revisión en el historial, volver a «pendiente» borraría
+ * que la cita alguna vez estuvo pagada.
+ */
+describe('SchedulingBookingsService · el estado de pago', () => {
+  const BOOKING = '33333333-3333-3333-3333-333333333333';
+  const TENANT = '44444444-4444-4444-4444-444444444444';
+
+  /** Una cita en el estado que se le pida, lista para operar. */
+  function citaEn(statusConceptId: string) {
+    return {
+      id: BOOKING,
+      tenantId: TENANT,
+      statusConceptId,
+      resourceId: null,
+    };
+  }
+
+  it('marca una cita confirmada y la firma con quién y cuándo', async () => {
+    const { service, bookingsRepo, tx } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    const antes = Date.now();
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PAID' },
+      actor as any,
+    );
+
+    expect(res.state).toBe('PAID');
+    expect(res.label).toBe('Pagada');
+    expect(res.conceptId).toBe(SCHED.PAYMENT_PAID);
+    // AC-13-10: la firma. Sin esto, marcar una cita como pagada sería una
+    // afirmación sobre el dinero de alguien que nadie hizo.
+    expect(res.markedByUserId).toBe(actor.id);
+    expect(new Date(res.markedAt).getTime()).toBeGreaterThanOrEqual(antes);
+    expect(tx.persist).toHaveBeenCalled();
+  });
+
+  it('los tres estados existen y ninguno es un booleano', async () => {
+    // El pedido original decía «pagada o pendiente de pago». El propietario
+    // agregó el intermedio, y es exactamente el que un booleano no puede
+    // expresar.
+    for (const [state, label, concepto] of [
+      ['PENDING', 'Pendiente de pago', SCHED.PAYMENT_PENDING],
+      ['PARTIALLY_PAID', 'Parcialmente pagada', SCHED.PAYMENT_PARTIALLY_PAID],
+      ['PAID', 'Pagada', SCHED.PAYMENT_PAID],
+    ] as const) {
+      const { service, bookingsRepo } = build();
+      bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        citaEn(CONCEPTS.BOOKING_CONFIRMED),
+      );
+      const res = await service.setPaymentState(
+        BOOKING,
+        { state },
+        actor as any,
+      );
+      expect(res.label).toBe(label);
+      expect(res.conceptId).toBe(concepto);
+    }
+  });
+
+  it('el seguro es una marca SEPARADA, no un cuarto estado', async () => {
+    // Es la decisión del propietario: una cita puede estar parcialmente pagada
+    // con seguro o sin él. Si el seguro viviera dentro del estado, este caso
+    // necesitaría un valor propio y serían seis.
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PARTIALLY_PAID', insuranceUsed: true },
+      actor as any,
+    );
+
+    expect(res.state).toBe('PARTIALLY_PAID');
+    expect(res.insuranceUsed).toBe(true);
+  });
+
+  it('sin decir nada del seguro, queda en false y no en indefinido', async () => {
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PENDING' },
+      actor as any,
+    );
+
+    expect(res.insuranceUsed).toBe(false);
+  });
+
+  it('una cita cancelada o rechazada NO admite estado de pago (422)', async () => {
+    // La mitad excluyente de la regla. Rechazar cancela con motivo
+    // `CANCEL_REJECTED`, así que las dos palabras del propietario caen en el
+    // mismo concepto.
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CANCELLED),
+    );
+
+    await expect(
+      service.setPaymentState(BOOKING, { state: 'PAID' }, actor as any),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('la exclusión es del servidor: no se guarda NADA cuando rechaza', async () => {
+    // Esconder el botón en la pantalla no es una regla. Lo que importa es que
+    // el 422 ocurra ANTES de tocar la base.
+    const { service, bookingsRepo, tx, historyRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CANCELLED),
+    );
+
+    await expect(
+      service.setPaymentState(BOOKING, { state: 'PAID' }, actor as any),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+    expect(tx.persist).not.toHaveBeenCalled();
+    expect(historyRepo.append).not.toHaveBeenCalled();
+  });
+
+  it('los estados que el propietario SÍ permite, pasan los tres', async () => {
+    // «pendiente, aceptada y realizada» — la mitad permisiva, falsable.
+    for (const estado of [
+      SCHED.BOOKING_REQUESTED,
+      CONCEPTS.BOOKING_CONFIRMED,
+      SCHED.BOOKING_COMPLETED,
+    ]) {
+      const { service, bookingsRepo } = build();
+      bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaEn(estado));
+      await expect(
+        service.setPaymentState(BOOKING, { state: 'PAID' }, actor as any),
+      ).resolves.toMatchObject({ state: 'PAID' });
+    }
+  });
+
+  it('volver a marcar ACTUALIZA la fila, no crea una segunda', async () => {
+    // Hay una fila por cita, y el único de la base lo garantiza. Si el servicio
+    // insertara otra, moriría con un 500 contra ese índice.
+    const filaVieja = {
+      id: 'pago-1',
+      statusConceptId: SCHED.PAYMENT_PENDING,
+      insuranceUsed: false,
+      markedByUserId: 'otro-usuario',
+      markedAt: new Date('2026-01-01T00:00:00Z'),
+      updatedAt: new Date('2026-01-01T00:00:00Z'),
+    };
+    const { service, bookingsRepo, tx } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+    bookingsRepo.findPaymentStateForUpdate.mockResolvedValue(filaVieja);
+
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PAID' },
+      actor as any,
+    );
+
+    expect(tx.persist).not.toHaveBeenCalled();
+    expect(filaVieja.statusConceptId).toBe(SCHED.PAYMENT_PAID);
+    // La firma se renueva: quien marcó AHORA es quien responde por el dato.
+    expect(res.markedByUserId).toBe(actor.id);
+  });
+
+  it('cada marca deja huella en el historial, con de dónde a dónde', async () => {
+    // Es lo que hace falsable el «nada se pisa en silencio» de AC-13-10: la
+    // fila se sobrescribe, la revisión no.
+    const { service, bookingsRepo, historyRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+    bookingsRepo.findPaymentStateForUpdate.mockResolvedValue({
+      id: 'pago-1',
+      statusConceptId: SCHED.PAYMENT_PAID,
+      insuranceUsed: false,
+      markedByUserId: 'otro',
+      markedAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await service.setPaymentState(BOOKING, { state: 'PENDING' }, actor as any);
+
+    expect(historyRepo.append).toHaveBeenCalledWith(
+      expect.anything(),
+      'appointment_bookings',
+      BOOKING,
+      expect.objectContaining({
+        operationConceptId: SCHED.HISTORY_OP_PAYMENT_MARKED,
+        changedByUserId: actor.id,
+        dataSnapshot: expect.objectContaining({
+          // El paso completo: sin el «de», la huella no dice qué se perdió.
+          fromPaymentConceptId: SCHED.PAYMENT_PAID,
+          toPaymentConceptId: SCHED.PAYMENT_PENDING,
+        }),
+      }),
+    );
+  });
+
+  it('sin marca previa, la lectura devuelve null y no «pendiente»', async () => {
+    // No son lo mismo: «pendiente de pago» es una afirmación que alguien firmó;
+    // la ausencia de fila es que del pago todavía no se dijo nada.
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    await expect(
+      service.getPaymentState(BOOKING, actor as any),
+    ).resolves.toBeNull();
   });
 });

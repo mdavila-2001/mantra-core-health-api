@@ -1,4 +1,5 @@
 export * from './appointment_bookings.entity';
+export * from './appointment_payment_states.entity';
 export * from './appointment_bookings.types';
 export * from './appointment_reminders.entity';
 export * from './availability_exceptions.entity';
