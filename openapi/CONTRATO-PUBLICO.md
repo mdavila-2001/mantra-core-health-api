@@ -64,6 +64,17 @@ mira).
 | 7 | `GET /public/search/pharmacies` | `PublicPharmacyPageDto` |
 | 8 | `GET /p/:slug` · `/o/:slug` · `/f/:slug` · `/l/:slug` · `/s/:slug` | `PublicProfileDetailDto` |
 | 9 | `GET /public/nearby` | `PublicNearbyPageDto` |
+| 10 | `GET /public/posts/:postId/reactions` | `PublicPostReactionPageDto` |
+| 11 | `GET /public/posts/:postId/comments` | `PublicCommentPageDto` |
+| 12 | `GET /public/comments/:commentId/replies` | `PublicCommentPageDto` |
+
+Las tres últimas se agregaron para TAREA 01 §5.1 (AC-01-9, AC-01-11, AC-01-12) y no son variantes
+con menos campos de las lecturas con sesión: `GET /community/posts/:postId/reactions` devuelve
+**recuentos por tipo**, no personas, y `GET /community/posts/:postId/comments` exige `@CurrentUser`.
+
+`:postId` y `:commentId` pasan por `ParseUUIDPipe`: lo que no es un uuid da **400** antes de tocar la
+base, igual que en `/public/media/:id`. Todo lo demás —no existe, es un borrador, está moderado, su
+autor se despublicó, el comentario cuelga de algo que no es una publicación— da el **mismo 404**.
 
 La 8 son cinco rutas físicas sobre un mismo servicio; el prefijo fija el tipo esperado y un slug del
 tipo equivocado da 404, no una redirección (`/p/` profesional · `/o/` organización · `/f/` farmacia
@@ -94,7 +105,7 @@ tipo equivocado da 404, no una redirección (`/p/` profesional · `/o/` organiza
 | Ruta | Parámetro | Tipo | Estado | Nota |
 |---|---|---|---|---|
 | `/search/practitioners` | `verified` | `boolean` | **implementado** | `true` = sólo verificados. Omitido = todos, verificados primero (D7) |
-| | `specialty` | `string` | *previsto* | Código de especialidad o su etiqueta |
+| | `specialty` | `uuid` | **implementado** | `concept_id` de `VS_MEDICAL_SPECIALTY` (36 conceptos, patch v4.0.11). **No** es el nombre de la especialidad. Uno ajeno al conjunto da **422** |
 | `/search/medications` | `form` | `string` | *previsto* | Forma farmacéutica |
 | | `inStock` | `boolean` | *previsto* | Sólo con existencia positiva |
 | `/search/organizations` | `kind` | `string` | *previsto* | Tipo de organización |
@@ -243,6 +254,46 @@ proyección de P3 falla — que es exactamente para lo que existe.
 `distanceKm` es **distancia en línea recta**, no de recorrido. La ficha V65-12 exige ese rótulo
 literal en pantalla; el nombre del campo lo dice para que nadie lo confunda al conectarlo.
 
+### `PublicPostReactionDto` (10) y `PublicCommentDto` (11, 12)
+
+```ts
+// 10 · quién reaccionó
+{
+  slug: string;
+  displayName: string;
+  headline: string | null;
+  avatarUrl: string | null;
+  kind: PublicResultKind;
+  reactionType: 'LIKE' | 'LOVE' | 'INSIGHTFUL' | 'CELEBRATE' | 'SUPPORT' | null;
+}
+
+// 11 y 12 · el hilo y sus respuestas
+{
+  id: string;
+  bodyText: string;
+  createdAt: string;                 // ISO-8601 en UTC
+  replyCount: number;                // 0, nunca null
+  author: {                          // los mismos 5 campos de arriba
+    slug, displayName, headline, avatarUrl, kind
+  };
+}
+```
+
+Los cinco campos de la persona son **exactamente** los que la lectura 1 (`GET /public/posts`) ya
+sirve para el autor de una publicación (`authorSlug`, `authorDisplayName`, `authorHeadline`,
+`authorAvatarUrl`, `authorKind`). Reaccionar o comentar no publica de nadie nada que publicar no
+publicara ya: ni `actor_profile_id`, ni `author_profile_id`, ni `user_id`, ni correo, ni teléfono, ni
+`reaction_type_concept_id` — el tipo de reacción viaja por su **código**.
+
+**Sólo salen perfiles públicos y activos.** Quien reaccionó o comentó sin vitrina publicada no
+aparece, ni siquiera anonimizado ni contado aparte; lo resuelve el `JOIN` de la consulta, no un
+filtro en memoria. La consecuencia visible es que el `commentCount` de la lectura 1 puede ser mayor
+que la cantidad de comentarios servidos por la 11.
+
+Las respuestas **no** vienen anidadas dentro del hilo: cada comentario trae su `replyCount` y las
+suyas se piden por la lectura 12 cuando alguien las abre. Es lo que evita que un hilo de doscientas
+respuestas llegue entero dentro de una tarjeta.
+
 ---
 
 ## 4 · Cabeceras, cachés y errores
@@ -254,9 +305,11 @@ literal en pantalla; el nombre del campo lo dice para que nadie lo confunda al c
 | `304` | Si el `If-None-Match` coincide. El cuerpo va vacío |
 | `429` | Rate limit por IP (P3). Incluye `Retry-After` en segundos |
 
-**Códigos.** `200` · `304` · `400` sólo en `nearby` sin coordenadas válidas · `404` en un slug que
-no existe **o** que no es público · `429` · `503` si el índice no está disponible. **No hay `401` ni
-`403` en esta superficie.**
+**Códigos.** `200` · `304` · `400` en `nearby` sin coordenadas válidas y en un `:postId`/`:commentId`
+que no es un uuid · `404` en un slug, una publicación o un comentario que no existe **o** que no es
+público · `422` en `/search/practitioners?specialty=` con un uuid que no pertenece a
+`VS_MEDICAL_SPECIALTY` (o cuando ese catálogo no está sembrado) · `429` · `503` si el índice no está
+disponible. **No hay `401` ni `403` en esta superficie.**
 
 Un `404` devuelve siempre el mismo cuerpo, sin distinguir el motivo. El cuerpo lo arma el filtro de
 excepciones del proyecto, no esta superficie, así que tiene la forma de todos los errores de la API

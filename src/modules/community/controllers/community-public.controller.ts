@@ -16,9 +16,11 @@ import {
   TARGET_CONCEPT_BY_SLUG_PREFIX,
 } from '../services';
 import type {
+  PublicCommentPageDto,
   PublicDirectoryProfileDto,
   PublicFeedPageDto,
   PublicNearbyPageDto,
+  PublicPostReactionPageDto,
   PublicSearchPageDto,
 } from '../dto';
 
@@ -83,6 +85,69 @@ export class CommunityPublicController {
     return this.service.feedPublico({ cursor, limit: this.toInt(limit) });
   }
 
+  /**
+   * Quién reaccionó a una publicación (AC-01-9).
+   *
+   * Va inmediatamente detrás de `public/posts` y comparte todo lo suyo: es
+   * `@Public()`, cae bajo el mismo límite de 60 por minuto por IP que declara la
+   * clase, se envuelve en `items`/`nextCursor`/`totalHint`/`generatedAt` y gana
+   * su `ETag` y su `Cache-Control` de `PublicCacheInterceptor`, que actúa sobre
+   * todo `GET` marcado `@Public()`.
+   *
+   * `ParseUUIDPipe` rechaza con 400 lo que no es un uuid antes de tocar la base
+   * —igual que en `public/media/:id`—; el resto de los «no» son un 404
+   * indistinguible del «no existe».
+   */
+  @Public()
+  @Get('public/posts/:postId/reactions')
+  @ApiOperation({ summary: 'Quiénes reaccionaron a una publicación pública' })
+  postReactions(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicPostReactionPageDto> {
+    return this.service.postReactions(postId, {
+      cursor,
+      limit: this.toInt(limit),
+    });
+  }
+
+  /** El hilo de comentarios raíz de una publicación (AC-01-11, AC-01-12). */
+  @Public()
+  @Get('public/posts/:postId/comments')
+  @ApiOperation({ summary: 'Comentarios raíz de una publicación pública' })
+  postComments(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicCommentPageDto> {
+    return this.service.postComments(postId, {
+      cursor,
+      limit: this.toInt(limit),
+    });
+  }
+
+  /**
+   * Las respuestas de un comentario (AC-01-12, «Ver N respuestas»).
+   *
+   * Ruta propia y no un parámetro de la anterior: son dos recursos paginados
+   * distintos y el desplegable abre varios hilos a la vez. La justificación
+   * larga está en `CommunityPublicService.commentReplies`.
+   */
+  @Public()
+  @Get('public/comments/:commentId/replies')
+  @ApiOperation({ summary: 'Respuestas de un comentario público' })
+  commentReplies(
+    @Param('commentId', ParseUUIDPipe) commentId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicCommentPageDto> {
+    return this.service.commentReplies(commentId, {
+      cursor,
+      limit: this.toInt(limit),
+    });
+  }
+
   /** Búsqueda unificada sobre todos los verticales. */
   @Public()
   @Get('public/search')
@@ -95,13 +160,34 @@ export class CommunityPublicController {
     return this.service.search({ q, cursor, limit: this.toInt(limit) });
   }
 
-  /** Profesionales de la salud. */
+  /**
+   * Profesionales de la salud.
+   *
+   * `specialty` es el `concept_id` de una especialidad de `VS_MEDICAL_SPECIALTY`
+   * —las 36 del patch v4.0.11—, **no** el nombre de la especialidad: el
+   * directorio agrupa por catálogo, no por texto libre. El cliente ya lo
+   * mandaba (`public-directory.client.ts`, `searchPractitioners`) y el
+   * controlador no lo declaraba, así que hasta hoy se perdía entre los dos: la
+   * pantalla dibujaba un filtro que no filtraba, que es peor que no dibujarlo.
+   *
+   * Un uuid que no pertenece al conjunto se rechaza con **422** —el mismo
+   * `PreconditionFailedException` y el mismo `MedicalSpecialtyCatalogService`
+   * que usa el alta de profesional—, nunca se ignora en silencio (AC-02-8).
+   */
   @Public()
   @Get('public/search/practitioners')
   @ApiOperation({ summary: 'Profesionales en el directorio público' })
+  @ApiQuery({
+    name: 'specialty',
+    required: false,
+    description:
+      'concept_id de VS_MEDICAL_SPECIALTY al que acotar; uno ajeno al ' +
+      'conjunto da 422',
+  })
   searchPractitioners(
     @Query('q') q?: string,
     @Query('verified') verified?: string,
+    @Query('specialty') specialty?: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
   ): Promise<PublicSearchPageDto> {
@@ -109,6 +195,7 @@ export class CommunityPublicController {
       q,
       kind: 'PRACTITIONER',
       verified: this.toBool(verified),
+      specialtyConceptId: specialty,
       cursor,
       limit: this.toInt(limit),
     });
@@ -305,7 +392,9 @@ export class CommunityPublicController {
   // que deja de costar es mirarlo.
   @Throttle({ default: { limit: 600, ttl: 60_000 } })
   @Header('Cache-Control', 'public, max-age=3600')
-  @ApiOperation({ summary: 'Servir una imagen pública (avatar, portada o post)' })
+  @ApiOperation({
+    summary: 'Servir una imagen pública (avatar, portada o post)',
+  })
   async getPublicMedia(
     @Param('id', ParseUUIDPipe) id: string,
     @Res() res: Response,
