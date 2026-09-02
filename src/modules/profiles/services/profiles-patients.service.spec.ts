@@ -11,7 +11,7 @@ import { ForbiddenException } from '@nestjs/common';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ProfilesPatientsService } from './profiles-patients.service';
 import { PROF } from '../profiles.concepts';
-import { CONCEPTS } from '../../../common';
+import { CONCEPTS, runWithTenant } from '../../../common';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -131,6 +131,12 @@ function build() {
   const ownership = {
     assertOwnsPatientProfile: mockFn().mockResolvedValue(undefined),
   };
+  // El catálogo de departamentos se prueba en
+  // `administrative-area-catalog.service.spec.ts`; acá el doble deja pasar
+  // para no mezclar la validación de dominio con la lógica del servicio.
+  const administrativeAreas = {
+    assertIsAdministrativeArea: mockFn().mockResolvedValue(undefined),
+  };
   // Por defecto el archivo de la foto existe, es del actor, está vivo y es una
   // imagen: así las pruebas que no hablan de la foto no tienen que montarlo.
   // Mismo doble que `profiles-practitioners.service.spec.ts`.
@@ -177,6 +183,7 @@ function build() {
     identifiersRepo as never,
     ownership as never,
     attachableFiles,
+    administrativeAreas as never,
     logger as any,
   );
   return {
@@ -193,6 +200,7 @@ function build() {
     contactPointsRepo,
     addressesRepo,
     identifiersRepo,
+    administrativeAreas,
     filesRepo,
     fileVersionsRepo,
   };
@@ -437,6 +445,100 @@ describe('ProfilesPatientsService', () => {
       const res = await d.service.listMergeEvents({});
 
       expect(res.items[0]).not.toHaveProperty('reversalOfEventId');
+    });
+  });
+
+  describe('searchPatients (UC-05-13)', () => {
+    /**
+     * TAREA-07: hasta acá el listado era exclusivo de `SECURITY_ADMIN`. Este
+     * bloque prueba que la apertura al rol clínico llega **acotada**, no que
+     * el rol clínico ve lo mismo que administración.
+     */
+    it('SECURITY_ADMIN busca sin acotar por tenant (scope unrestricted)', async () => {
+      const d = build();
+
+      await d.service.searchPatients({ query: 'ana', limit: 50 }, {
+        id: 'admin-1',
+        roles: ['SECURITY_ADMIN'],
+      } as any);
+
+      expect(d.patientProfilesRepo.searchPage).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          query: 'ana',
+          scope: { kind: 'unrestricted' },
+        }),
+        51,
+      );
+    });
+
+    it('PRACTITIONER busca acotado a su tenant (scope tenant-activity)', async () => {
+      const d = build();
+      const actor = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
+
+      await runWithTenant('tenant-1', () =>
+        d.service.searchPatients({ query: 'ana', limit: 50 }, actor),
+      );
+
+      expect(d.patientProfilesRepo.searchPage).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          scope: { kind: 'tenant-activity', tenantId: 'tenant-1' },
+        }),
+        51,
+      );
+    });
+
+    /**
+     * Sin tenant en contexto, `resolvePatientSearchScope()` no deja pasar un
+     * alcance sin acotar por omisión: falla explícito. Es la barrera que
+     * evita que un `PRACTITIONER` sin `X-Tenant-Id` vea el padrón entero por
+     * un descuido de infraestructura.
+     */
+    it('PRACTITIONER sin tenant en contexto: 422, no un scope sin acotar', async () => {
+      const d = build();
+      const actor = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
+
+      await expect(
+        d.service.searchPatients({ query: 'ana', limit: 50 }, actor),
+      ).rejects.toThrow(PreconditionFailedException);
+    });
+
+    /** El documento se valida por departamento ANTES de tocar la base. */
+    it('valida el departamento contra el catálogo antes de buscar', async () => {
+      const d = build();
+      d.administrativeAreas.assertIsAdministrativeArea.mockRejectedValueOnce(
+        new PreconditionFailedException('no es un departamento', {}),
+      );
+      const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+
+      await expect(
+        d.service.searchPatients(
+          {
+            nationalId: '1234567',
+            issuerAdministrativeAreaConceptId: 'no-departamento',
+            limit: 50,
+          },
+          actor,
+        ),
+      ).rejects.toThrow(PreconditionFailedException);
+
+      expect(d.patientProfilesRepo.searchPage).not.toHaveBeenCalled();
+    });
+
+    /** Sin departamento, no hay nada que validar: la búsqueda sigue de largo. */
+    it('sin departamento no llama al catálogo de departamentos', async () => {
+      const d = build();
+      const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+
+      await d.service.searchPatients(
+        { nationalId: '1234567', limit: 50 },
+        actor,
+      );
+
+      expect(
+        d.administrativeAreas.assertIsAdministrativeArea,
+      ).not.toHaveBeenCalled();
     });
   });
 

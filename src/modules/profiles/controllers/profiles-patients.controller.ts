@@ -19,12 +19,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  CurrentUser,
-  ParseOptionalLimitPipe,
-  Roles,
-  type AuthenticatedUser,
-} from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ProfilesPatientsService } from '../services';
 import {
   CreatePatientDto,
@@ -38,6 +33,7 @@ import {
   MergeEventResponseDto,
   ListMergeEventsQueryDto,
   ListMergeEventsResponseDto,
+  SearchPatientsQueryDto,
   AddRelatedPersonDto,
   RelatedPersonResponseDto,
   GrantPortalProxyDto,
@@ -181,24 +177,53 @@ export class ProfilesPatientsController {
   }
 
   /**
-   * UC-05-13: listado de pacientes para el personal administrativo.
+   * UC-05-13: listado de pacientes.
    *
    * Va declarado **después** de `patients/me/summary` a propósito: Nest resuelve
    * las rutas por orden de declaración y `patients/:profileId` capturaría
    * `patients/me` si fuera antes.
    *
+   * ## Quién puede buscar, y qué ve (TAREA-07, decisión del 2026-09-02)
+   *
+   * Hasta acá el listado era exclusivo de `SECURITY_ADMIN`, con esta nota:
+   * «la lista de todas las historias de una organización es exactamente el
+   * dato que no debe existir como pantalla». El propietario pidió que quien
+   * atiende (`CLINICIAN`, `PRACTITIONER`) también pueda buscar a su paciente
+   * por nombre o por documento — con una condición: no ve el padrón entero, ve
+   * a quien tiene actividad **en su organización**
+   * (`resolvePatientSearchScope()`, en `patient-search-scope.ts`, documenta
+   * por qué el alcance se deriva de la agenda y de las relaciones
+   * asistenciales, y no de una columna de tenant — la identidad no tiene una).
+   * `SECURITY_ADMIN`/`SUPERADMIN` conservan el padrón sin acotar, igual que
+   * hoy.
+   *
    * @param query - Texto libre sobre código de paciente y nombre.
+   * @param nationalId - Documento de identidad exacto (AC-07-1).
+   * @param issuerAdministrativeAreaConceptId - Departamento que lo expidió,
+   *   para desempatar un mismo número en dos departamentos (AC-07-2).
    * @param cursor - Cursor opaco de la página anterior.
    * @param limit - Tope de filas (por defecto 50).
+   * @param actor - Quien pregunta; decide el alcance de la búsqueda.
    * @returns Página de pacientes.
    */
   @Get('patients')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'SUPERADMIN', 'CLINICIAN', 'PRACTITIONER')
   @ApiOperation({ summary: 'UC-05-13: listado paginado de pacientes' })
   @ApiQuery({
     name: 'q',
     required: false,
     description: 'Texto a buscar en el código de paciente o el nombre',
+  })
+  @ApiQuery({
+    name: 'nationalId',
+    required: false,
+    description: 'Documento de identidad exacto (`common.identifiers.value`)',
+  })
+  @ApiQuery({
+    name: 'issuerAdministrativeAreaConceptId',
+    required: false,
+    description:
+      'Departamento que expidió el documento (VS_BO_DEPARTMENT); sólo tiene efecto junto a nationalId',
   })
   @ApiQuery({
     name: 'cursor',
@@ -211,15 +236,20 @@ export class ProfilesPatientsController {
     description: 'Tope de resultados (por defecto 50)',
   })
   searchPatients(
-    @Query('q') query?: string,
-    @Query('cursor') cursor?: string,
-    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query() query: SearchPatientsQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SearchPatientsResponseDto> {
-    return this.patientsService.searchPatients({
-      query,
-      cursor,
-      limit: limit ?? 50,
-    });
+    return this.patientsService.searchPatients(
+      {
+        query: query.q,
+        nationalId: query.nationalId,
+        issuerAdministrativeAreaConceptId:
+          query.issuerAdministrativeAreaConceptId,
+        cursor: query.cursor,
+        limit: query.limit ?? 50,
+      },
+      actor,
+    );
   }
 
   /**
