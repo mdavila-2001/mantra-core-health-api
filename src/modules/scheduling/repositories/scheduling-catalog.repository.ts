@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  AppointmentBookings,
+  SlotHolds,
   SchedulableResources,
   BookingPolicies,
   ScheduleTemplates,
@@ -690,6 +692,108 @@ export class SchedulingCatalogRepository {
    * Slots ya generados para la plantilla en la ventana pedida. La regeneración es
    * idempotente: los que ya existen no se vuelven a crear.
    */
+  /**
+   * Las citas que cuelgan de los cupos de una plantilla, vivas e históricas.
+   *
+   * Devuelve las dos cifras a propósito, porque son dos conversaciones
+   * distintas con quien quiere borrar el horario:
+   *
+   * - **`live`** son compromisos: gente que va a presentarse. Se resuelven
+   *   cancelando o moviendo, y entonces el número baja.
+   * - **`total`** incluye además las canceladas y las cumplidas, que **no se
+   *   pueden resolver**: `appointment_bookings.bookable_slot_id` es `NOT NULL`,
+   *   así que una cita histórica fija su cupo para siempre. Borrar ese cupo
+   *   sería borrar el registro de que esa persona tuvo un turno.
+   *
+   * Por eso cancelar **no** libera un horario para ser borrado. Es lo que hace
+   * que «borrar definitivamente» tenga un techo real, y no un techo que se
+   * pueda esquivar cancelando todo primero.
+   *
+   * @param em - Contexto de persistencia.
+   * @param scheduleTemplateId - Plantilla que se quiere borrar.
+   * @param activeStates - Estados en los que una cita todavía compromete.
+   * @param limit - Tope de la lista que se devuelve al cliente.
+   */
+  async findBookingsOfTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+    activeStates: readonly string[],
+    limit: number,
+  ): Promise<{
+    total: number;
+    live: number;
+    sample: AppointmentBookings[];
+  }> {
+    const slots = await em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { fields: ['id'] },
+    );
+    if (slots.length === 0) return { total: 0, live: 0, sample: [] };
+
+    const enSusCupos = { bookableSlotId: { $in: slots.map((s) => s.id) } };
+    const total = await em.count(AppointmentBookings, enSusCupos);
+    if (total === 0) return { total: 0, live: 0, sample: [] };
+
+    const conEstadoVivo = {
+      ...enSusCupos,
+      statusConceptId: { $in: [...activeStates] },
+    };
+    const live = await em.count(AppointmentBookings, conEstadoVivo);
+
+    // La muestra prioriza las vivas: son las accionables, y son las que el
+    // médico necesita ver nombradas para ir a resolverlas.
+    const sample = await em.find(
+      AppointmentBookings,
+      live > 0 ? conEstadoVivo : enSusCupos,
+      { limit },
+    );
+    return { total, live, sample };
+  }
+
+  /**
+   * Borra una plantilla con lo que cuelga de ella: sus franjas y sus cupos.
+   *
+   * Sólo se invoca cuando {@link findBookingsOfTemplate} devolvió `total: 0`:
+   * el servicio decide, el repositorio ejecuta. Acá no hay regla de negocio, y
+   * por eso no vuelve a comprobarla — hacerlo dos veces en dos capas termina en
+   * dos respuestas distintas a la misma pregunta.
+   *
+   * **Las retenciones se van primero.** `slot_holds` referencia los cupos con
+   * FK, así que borrar el cupo con una retención viva o vencida encima falla
+   * con `fk_slot_holds_bookable_slot_id` — se descubrió exactamente así,
+   * corriendo el borrado contra la base. Una retención es efímera por
+   * definición (tiene TTL y no compromete a nadie), así que se borra con el
+   * cupo; una cita **no**, y por eso el servicio ni siquiera llega hasta acá si
+   * hay alguna.
+   *
+   * El orden importa: retenciones → cupos → franjas → plantilla. Es el inverso
+   * exacto del orden en que se crean.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param scheduleTemplateId - Plantilla a borrar.
+   * @returns Cuántos cupos y franjas se llevó consigo.
+   */
+  async deleteTemplateCascade(
+    em: EntityManager,
+    scheduleTemplateId: string,
+  ): Promise<{ slots: number; rules: number }> {
+    const cupos = await em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { fields: ['id'] },
+    );
+    if (cupos.length > 0) {
+      await em.nativeDelete(SlotHolds, {
+        bookableSlotId: { $in: cupos.map((cupo) => cupo.id) },
+      });
+    }
+    const slots = await em.nativeDelete(BookableSlots, { scheduleTemplateId });
+    const rules = await em.nativeDelete(ScheduleRules, { scheduleTemplateId });
+    await em.nativeDelete(ScheduleTemplates, { id: scheduleTemplateId });
+    return { slots, rules };
+  }
+
   findSlotsByTemplateInRange(
     em: EntityManager,
     scheduleTemplateId: string,

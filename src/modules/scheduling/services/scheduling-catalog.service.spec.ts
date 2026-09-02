@@ -64,6 +64,12 @@ function buildCatalog() {
     findOpenSlotsInWindow: mockFn(),
     findExceptionById: mockFn(),
     removeException: mockFn(),
+    findBookingsOfTemplate: mockFn().mockResolvedValue({
+      total: 0,
+      live: 0,
+      sample: [],
+    }),
+    deleteTemplateCascade: mockFn().mockResolvedValue({ slots: 0, rules: 0 }),
     findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -789,6 +795,156 @@ describe('SchedulingCatalogService', () => {
 
         await expect(
           d.service.createTemplate(RESOURCE, dto, actor as any),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      });
+    });
+
+    /* --------------------------------------------------------------------
+       TAREA-10 punto 6 · borrar un horario avisa antes de romper nada
+       -------------------------------------------------------------------- */
+
+    describe('deleteTemplate (TAREA-10, punto 6)', () => {
+      /** Deja la plantilla y su recurso al alcance del actor. */
+      function conPlantillaPropia(d: ReturnType<typeof buildCatalog>) {
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+      }
+
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      it('con citas comprometidas NO borra: avisa y nombra cuáles', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+        d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+          total: 3,
+          live: 3,
+          sample: [{ id: 'b1' }, { id: 'b2' }, { id: 'b3' }],
+        });
+
+        await expect(
+          d.service.deleteTemplate('tpl-1', duenio as never),
+        ).rejects.toBeInstanceOf(ConflictException);
+
+        // Lo que importa no es el error: es que la plantilla siga viva.
+        expect(d.catalogRepo.deleteTemplateCascade).not.toHaveBeenCalled();
+      });
+
+      it('el aviso trae el total y los ids, no los nombres de los pacientes', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+        d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+          total: 12,
+          live: 12,
+          sample: [{ id: 'b1' }, { id: 'b2' }],
+        });
+
+        try {
+          await d.service.deleteTemplate('tpl-1', duenio as never);
+          throw new Error('tendría que haber fallado');
+        } catch (error: any) {
+          const detalle = error.details ?? error.response?.details ?? {};
+          expect(detalle.liveBookings).toBe(12);
+          expect(detalle.bookingIds).toEqual(['b1', 'b2']);
+          // Mandar nombres acá filtraría pacientes a cualquiera que administre
+          // agendas: la pantalla ya sabe pedir cada cita con su permiso.
+          expect(JSON.stringify(detalle)).not.toMatch(/name|nombre/i);
+          expect(detalle.truncated).toBe(true);
+        }
+      });
+
+      it('sin citas comprometidas borra, y dice qué se llevó', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+        d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+          total: 0,
+          live: 0,
+          sample: [],
+        });
+        d.catalogRepo.deleteTemplateCascade.mockResolvedValue({
+          slots: 24,
+          rules: 2,
+        });
+
+        const res = await d.service.deleteTemplate('tpl-1', duenio as never);
+
+        expect(res).toEqual({ id: 'tpl-1', deletedSlots: 24, deletedRules: 2 });
+      });
+
+      it('cancelar no libera el horario: el historial también frena', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+        // Ninguna viva, pero dos históricas. `bookable_slot_id` es NOT NULL, así
+        // que esas dos citas fijan sus cupos para siempre: borrarlos sería
+        // borrar el registro de que esas personas tuvieron un turno.
+        d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+          total: 2,
+          live: 0,
+          sample: [{ id: 'b1' }, { id: 'b2' }],
+        });
+
+        try {
+          await d.service.deleteTemplate('tpl-1', duenio as never);
+          throw new Error('tendría que haber fallado');
+        } catch (error: any) {
+          expect(error).toBeInstanceOf(ConflictException);
+          // El mensaje distingue: acá no hay nada que resolver cancelando.
+          expect(error.message).toMatch(/historial/i);
+          const detalle = error.details ?? error.response?.details ?? {};
+          expect(detalle.liveBookings).toBe(0);
+          expect(detalle.totalBookings).toBe(2);
+        }
+        expect(d.catalogRepo.deleteTemplateCascade).not.toHaveBeenCalled();
+      });
+
+      it('pide los estados vivos correctos para distinguir los dos casos', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+
+        await d.service.deleteTemplate('tpl-1', duenio as never);
+
+        const [, , estados] =
+          d.catalogRepo.findBookingsOfTemplate.mock.calls[0];
+        expect(estados).toHaveLength(2);
+        expect(estados).toContain(CONCEPTS.BOOKING_CONFIRMED);
+        expect(estados).toContain(CONCEPTS.BOOKING_CHECKED_IN);
+      });
+
+      it('borrar una agenda ajena es 403, aunque esté vacía', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-ajeno',
+        });
+
+        await expect(
+          d.service.deleteTemplate('tpl-1', duenio as never),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.catalogRepo.findBookingsOfTemplate).not.toHaveBeenCalled();
+      });
+
+      it('una plantilla que no existe es 404, no un borrado silencioso', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue(null);
+
+        await expect(
+          d.service.deleteTemplate('tpl-inexistente', duenio as never),
         ).rejects.toBeInstanceOf(ResourceNotFoundException);
       });
     });

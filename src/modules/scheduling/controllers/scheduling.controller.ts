@@ -37,6 +37,7 @@ import {
   BookingPolicyResponseDto,
   CreateTemplateDto,
   AvailabilityExceptionListDto,
+  DeleteTemplateResponseDto,
   TemplateListDto,
   TemplateResponseDto,
   GenerateSlotsDto,
@@ -212,6 +213,32 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TemplateListDto> {
     return this.catalogService.listTemplates(id, actor);
+  }
+
+  /**
+   * Borrar un horario publicado (TAREA-10, punto 6).
+   *
+   * No es `@HttpCode(NO_CONTENT)` como el borrado de una excepción: éste
+   * devuelve cuerpo. Un borrado que arrastra franjas y cupos tiene que decir
+   * cuántos se llevó — «listo» a secas obliga a ir a mirar qué pasó.
+   *
+   * Responde **409 con la lista** cuando el horario tiene citas comprometidas:
+   * el servicio no borra y nombra lo que hay que resolver primero.
+   */
+  @Delete('templates/:id')
+  // Mismo alcance que publicar y generar: el servicio comprueba que el recurso
+  // sea del actor con `assertRecursoDelActor`.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Borrar una plantilla de agenda y sus cupos libres',
+    description:
+      'Rechaza con 409 si la plantilla tiene citas confirmadas o presentadas: hay que resolverlas antes.',
+  })
+  deleteTemplate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DeleteTemplateResponseDto> {
+    return this.catalogService.deleteTemplate(id, actor);
   }
 
   /** UC-41-03. */

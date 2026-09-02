@@ -20,6 +20,7 @@ import {
   BookingPolicyResponseDto,
   CreateTemplateDto,
   AvailabilityExceptionListDto,
+  DeleteTemplateResponseDto,
   TemplateListDto,
   TemplateResponseDto,
   TemplateRuleDto,
@@ -80,6 +81,27 @@ const EXCEPTION_TYPE_CONCEPT: Readonly<Record<ExceptionType, string>> = {
 
 const DEFAULT_SLOT_MINUTES = 30;
 const DEFAULT_SLOT_CAPACITY = 1;
+
+/**
+ * Estados en los que una cita todavía compromete al profesional.
+ *
+ * Los mismos dos que usa `SchedulingBookingsService` y que ahora hace cumplir
+ * la restricción `ex_appointments_practitioner_time` en la base. Una solicitud
+ * pendiente no entra: nadie se comprometió todavía.
+ */
+const ACTIVE_BOOKING_STATES: readonly string[] = [
+  CONCEPTS.BOOKING_CONFIRMED,
+  CONCEPTS.BOOKING_CHECKED_IN,
+];
+
+/**
+ * Cuántas citas comprometidas se nombran en el aviso de borrado.
+ *
+ * Un tope y no todas: el aviso existe para que el médico sepa qué resolver, y
+ * una lista de doscientos ids no ayuda a nadie. El total viaja aparte, así que
+ * la pantalla puede decir «y 190 más».
+ */
+const TOPE_DE_CITAS_EN_EL_AVISO = 10;
 /** Tope de slots por ejecución: evita que una ventana enorme genere un lote inmanejable. */
 const MAX_SLOTS_PER_RUN = 2000;
 
@@ -283,6 +305,117 @@ export class SchedulingCatalogService {
    * `skipped` en vez de duplicarse, de modo que el worker puede reejecutarse sin
    * ensuciar la agenda.
    */
+  /**
+   * Borra un horario publicado — **avisando primero si tiene gente citada**.
+   *
+   * ## Por qué no borra y avisa después
+   *
+   * El propietario pidió «borrar definitivamente», y definitivamente no se
+   * deshace. Una plantilla con pacientes citados no es una fila: son personas
+   * que van a presentarse un día a una hora. Borrarla en silencio las deja sin
+   * turno **y sin enterarse**, porque el borrado de la plantilla no dispara
+   * ningún aviso de cancelación — cancelar es otra operación, con su motivo
+   * obligatorio y su aviso a la contraparte.
+   *
+   * Así que si hay compromisos vivos esto **no borra**: responde 409 con la
+   * lista de citas que hay que resolver primero. El médico va, las cancela o
+   * las mueve —con motivo, avisando, como corresponde— y recién entonces el
+   * horario se puede borrar.
+   *
+   * ## Cancelar no libera el horario
+   *
+   * Esto frena con **cualquier** cita, viva o histórica, y la distinción está
+   * en el mensaje, no en la decisión. El motivo es de esquema:
+   * `appointment_bookings.bookable_slot_id` es `NOT NULL`, así que una cita
+   * cancelada **fija su cupo para siempre**. Borrar ese cupo sería borrar el
+   * registro de que esa persona tuvo un turno.
+   *
+   * Por eso el techo es real y no se puede esquivar cancelando todo primero.
+   * Un horario que ya tuvo pacientes no se borra: se retira. Esa otra salida
+   * —borrado lógico por estado— es P-10-2 y sigue sin decidir.
+   *
+   * ## Qué se lleva consigo cuando sí borra
+   *
+   * Las franjas y los cupos libres de la plantilla. Los cupos son derivados —se
+   * regeneran desde la plantilla— así que conservarlos sin ella dejaría horarios
+   * ofertándose que ya nadie publica.
+   *
+   * @param templateId - Plantilla a borrar.
+   * @param actor - Quién lo pide; tiene que ser su agenda o administrarla.
+   * @returns Qué se borró, con el tamaño de lo que arrastró.
+   */
+  async deleteTemplate(
+    templateId: string,
+    actor: AuthenticatedUser,
+  ): Promise<DeleteTemplateResponseDto> {
+    this.logger.info(
+      { operation: 'scheduling.template.delete', templateId },
+      'Deleting schedule template',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const template = await this.catalogRepo.findTemplateById(tx, templateId);
+      if (!template) {
+        throw new ResourceNotFoundException('Plantilla no encontrada', {
+          templateId,
+        });
+      }
+
+      const resource = await this.catalogRepo.findResourceById(
+        tx,
+        template.resourceId,
+      );
+      if (!resource) {
+        throw new ResourceNotFoundException(
+          'Recurso de la plantilla no encontrado',
+          {
+            resourceId: template.resourceId,
+          },
+        );
+      }
+      this.assertRecursoDelActor(resource, actor);
+
+      const citas = await this.catalogRepo.findBookingsOfTemplate(
+        tx,
+        templateId,
+        ACTIVE_BOOKING_STATES,
+        TOPE_DE_CITAS_EN_EL_AVISO,
+      );
+
+      if (citas.total > 0) {
+        throw new ConflictException(
+          citas.live > 0
+            ? 'El horario tiene citas comprometidas: resolvelas antes de borrarlo'
+            : 'El horario tiene historial de citas y no se puede borrar',
+          {
+            templateId,
+            // Las dos cifras, porque son dos situaciones distintas: las vivas
+            // se resuelven cancelando o moviendo; las históricas no se
+            // resuelven con nada.
+            liveBookings: citas.live,
+            totalBookings: citas.total,
+            // Los ids y no los nombres: quien recibe esto es la pantalla, que
+            // ya sabe pedir cada cita con su permiso. Mandar nombres acá
+            // filtraría pacientes a cualquiera que administre agendas.
+            bookingIds: citas.sample.map((booking) => booking.id),
+            truncated: citas.total > citas.sample.length,
+          },
+        );
+      }
+
+      const borrado = await this.catalogRepo.deleteTemplateCascade(
+        tx,
+        templateId,
+      );
+
+      return {
+        id: templateId,
+        deletedSlots: borrado.slots,
+        deletedRules: borrado.rules,
+      };
+    });
+  }
+
   async generateSlots(
     templateId: string,
     dto: GenerateSlotsDto,

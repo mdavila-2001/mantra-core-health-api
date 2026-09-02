@@ -690,3 +690,24 @@ export class ExceptionResponseDto {
   })
   blockedSlots!: number;
 }
+
+/**
+ * Lo que deja un borrado de plantilla (TAREA-10, punto 6).
+ *
+ * Dice qué se llevó consigo y no sólo «listo»: borrar un horario arrastra sus
+ * franjas y sus cupos libres, y quien lo hace tiene derecho a ver el tamaño de
+ * lo que acaba de deshacer.
+ */
+export class DeleteTemplateResponseDto {
+  /** La plantilla borrada. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Cupos libres que se fueron con ella. */
+  @ApiProperty({ description: 'Cupos que se borraron junto con la plantilla' })
+  deletedSlots!: number;
+
+  /** Franjas semanales que se fueron con ella. */
+  @ApiProperty({ description: 'Franjas de la plantilla que se borraron' })
+  deletedRules!: number;
+}
