@@ -95,6 +95,97 @@ export function avisoDeCupoLiberado(
 }
 
 /**
+ * (1b) Entró una solicitud de turno — el aviso para **el profesional**.
+ *
+ * Hasta acá pedir un turno era un hecho silencioso: `requestBooking` dejaba la
+ * cita en `PENDING_CONFIRMATION` y no avisaba a nadie. El profesional se
+ * enteraba sólo si abría la agenda, y el paciente no tenía forma de saber si su
+ * pedido había entrado.
+ *
+ * Lleva la acción en el cuerpo —aceptar o rechazar— porque una solicitud que
+ * avisa sin decir qué se espera de quien la recibe es sólo ruido.
+ *
+ * ## Lo que este aviso todavía no dice
+ *
+ * El propietario lo pide «en tal horario **en tal lugar**». El horario está; el
+ * lugar **no viaja en el snapshot de la cita**. Resolverlo es cruzar a
+ * `practice` (`PractitionerSitesService`) y exponer la sede en la lectura de
+ * agenda, que es alcance de TAREA-12 §3.2 y toca la regla 00.4. No se inventa
+ * acá: cuando esa lectura exista, este texto gana una frase.
+ *
+ * @param booking - La cita recién solicitada.
+ * @param paciente - Cómo se llama quien la pidió; `undefined` si no se resolvió.
+ * @param destinatarioUserId - Cuenta del profesional.
+ */
+export function avisoDeSolicitudAlProfesional(
+  booking: BookingNoticeSnapshot,
+  paciente: string | undefined,
+  destinatarioUserId: string,
+): AgendaNotice {
+  const quien = paciente ?? 'Un paciente';
+  return {
+    kind: 'BOOKING_STATE_CHANGED',
+    recipient: { userId: destinatarioUserId },
+    tenantId: booking.tenantId,
+    subject: 'Tenés una nueva solicitud de consulta',
+    bodyText:
+      `${quien} pidió turno para el ${cuando(booking.startAt)}. ` +
+      'Aceptala o rechazala desde tu agenda.',
+    relatedResourceType: RECURSO_CITA,
+    relatedResourceId: booking.bookingId,
+    payload: {
+      route: rutaDelTurno(booking.bookingId),
+      bookingId: booking.bookingId,
+      change: 'REQUESTED',
+      ...(booking.startAt === undefined
+        ? {}
+        : { startAt: booking.startAt.toISOString() }),
+    },
+    // Reintentar la materialización de la misma reserva no puede llenarle la
+    // campana al profesional con la misma solicitud.
+    debounceKey: `p8:booking-requested:pro:${booking.bookingId}`,
+  };
+}
+
+/**
+ * (1c) Entró una solicitud de turno — el acuse para **el paciente**.
+ *
+ * Es el punto 2 del pedido y el AC-15-2: los dos destinatarios, no uno. Sin
+ * este acuse, pedir un turno se siente como escribir a un buzón sin fondo —el
+ * paciente no sabe si el pedido entró, y vuelve a pedirlo.
+ *
+ * Dice explícitamente que **falta la respuesta**: un acuse que se lee como
+ * confirmación es peor que ningún acuse, porque manda a alguien al consultorio
+ * con un turno que nadie tomó.
+ *
+ * @param booking - La cita recién solicitada.
+ */
+export function avisoDeSolicitudAlPaciente(
+  booking: BookingNoticeSnapshot,
+): AgendaNotice {
+  return {
+    kind: 'BOOKING_STATE_CHANGED',
+    recipient: { patientProfileId: booking.patientProfileId },
+    tenantId: booking.tenantId,
+    subject: 'Enviamos tu solicitud de turno',
+    bodyText:
+      `Pediste turno con ${booking.resourceLabel} para el ${cuando(booking.startAt)}. ` +
+      'Todavía falta que lo confirmen: te avisamos apenas respondan.',
+    relatedResourceType: RECURSO_CITA,
+    relatedResourceId: booking.bookingId,
+    payload: {
+      route: rutaDelTurno(booking.bookingId),
+      bookingId: booking.bookingId,
+      change: 'REQUESTED',
+      ...(booking.startAt === undefined
+        ? {}
+        : { startAt: booking.startAt.toISOString() }),
+    },
+    debounceKey: `p8:booking-requested:pac:${booking.bookingId}`,
+  };
+}
+
+/**
  * (2) El profesional se demora.
  *
  * Dice los minutos y, si lo hay, lo que el profesional escribió. Sin los
