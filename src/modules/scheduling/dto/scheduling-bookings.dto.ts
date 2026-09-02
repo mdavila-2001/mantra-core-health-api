@@ -978,3 +978,80 @@ export class DirectAppointmentResponseDto {
   @ApiProperty()
   retractedSlots!: number;
 }
+
+/* -- El estado de pago de una cita (TAREA-13 punto 5) ------------------------ */
+
+/**
+ * Los tres estados de pago, en el orden en que se muestran.
+ *
+ * Son los que pidió el propietario, y sólo esos: **«reembolsada» quedó
+ * expresamente fuera**. Viajan como claves estables y no como uuid porque el
+ * cliente no tiene por qué conocer los conceptos; el servidor los traduce.
+ */
+export type PaymentState = 'PENDING' | 'PARTIALLY_PAID' | 'PAID';
+export const PAYMENT_STATES: readonly PaymentState[] = [
+  'PENDING',
+  'PARTIALLY_PAID',
+  'PAID',
+];
+
+/** Cuerpo de `PUT /scheduling/bookings/{id}/payment-state` (TAREA-13 punto 5). */
+export class SetPaymentStateDto {
+  /**
+   * En qué estado de pago queda la cita.
+   */
+  @ApiProperty({
+    description: 'Estado de pago de la cita',
+    enum: PAYMENT_STATES,
+  })
+  @IsIn(PAYMENT_STATES)
+  state!: PaymentState;
+
+  /**
+   * Si se usó un seguro.
+   *
+   * Va **separado** del estado por pedido expreso del propietario: una cita
+   * puede estar parcialmente pagada con seguro o sin él. Es opcional en el
+   * cuerpo y se guarda como `false` si no viene, que es lo mismo que decir
+   * «no se registró uso de seguro».
+   */
+  @ApiPropertyOptional({
+    description: 'Marca de que la cita se cubrió con seguro',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  insuranceUsed?: boolean;
+}
+
+/**
+ * El estado de pago tal como se lee.
+ *
+ * Lleva **quién y cuándo** porque es lo que pide AC-13-10: marcar una cita como
+ * pagada es una afirmación sobre el dinero de alguien y no puede quedar sin
+ * firma.
+ */
+export class PaymentStateDto {
+  /** Clave estable del estado. */
+  @ApiProperty({ enum: PAYMENT_STATES })
+  state!: PaymentState;
+
+  /** Cómo se llama en pantalla, en castellano. */
+  @ApiProperty({ example: 'Parcialmente pagada' })
+  label!: string;
+
+  /** El concepto real detrás, por si el cliente lo necesita. */
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  @ApiProperty()
+  insuranceUsed!: boolean;
+
+  /** Quién la dejó en este estado. */
+  @ApiProperty({ format: 'uuid' })
+  markedByUserId!: string;
+
+  /** Cuándo. */
+  @ApiProperty({ format: 'date-time' })
+  markedAt!: string;
+}

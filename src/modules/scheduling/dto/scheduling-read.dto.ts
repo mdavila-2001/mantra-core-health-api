@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PaymentStateDto } from './scheduling-bookings.dto';
 
 /**
  * Un hueco de la agenda tal como lo ve quien va a reservar (UC-41-14).
@@ -192,6 +193,18 @@ export class BookingDelayNoticeDto {
 
 /** Una cita, tal como la devuelven el listado y el detalle (UC-41-15). */
 export class BookingItemDto {
+  /**
+   * El estado de pago, si alguien lo marcó (TAREA-13 punto 5).
+   *
+   * **Se omite cuando no hay marca**, y no viaja como «pendiente de pago»:
+   * pendiente es una afirmación que alguien firmó, la ausencia es que del pago
+   * todavía no se dijo nada. Comprobalo con `if (item.paymentState)`.
+   *
+   * Viene en la misma consulta que la página, no una por fila.
+   */
+  @ApiPropertyOptional({ type: () => PaymentStateDto })
+  paymentState?: PaymentStateDto;
+
   /**
    * Identificador único de la instancia.
    */
