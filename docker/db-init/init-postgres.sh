@@ -55,12 +55,41 @@ for migration in /init/SQL/99_migrations/*.sql; do
 done
 shopt -u nullglob
 
-# 58/59 son extensiones PG en esta misma instancia y 100% idempotentes
-# (CREATE ... IF NOT EXISTS, create_hypertable if_not_exists) — se aplican siempre.
+# 58/59 son extensiones PG en esta misma instancia — se aplican siempre.
 echo ">>> NoSQL 58: time_series (TimescaleDB)"
 "${PSQL[@]}" -f /init/NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql
 
+# El 59 tiene una línea que NO es idempotente, y decir que sí lo era costó el
+# arranque entero: el DDL declara la columna como `vector(1536)`, pero si la
+# tabla ya existe —la crea el ORM, que la declara como `vector` a secas, y
+# `CREATE TABLE IF NOT EXISTS` no corrige una tabla existente— el índice HNSW
+# muere con `ERROR: column does not have dimensions`. `IF NOT EXISTS` no salva
+# nada ahí: el índice no existe y **nunca va a poder existir**, así que el error
+# se repite en cada arranque, y con `ON_ERROR_STOP=1` `postgres-init` sale con 3
+# y se lleva puesta a la API, que espera su `service_completed_successfully`.
+#
+# La dimensión no se fija acá: es una decisión del modelo, es irreversible sin
+# recrear la tabla, y el código ya la tomó — `src/orm/catalog/physical.catalog.ts`
+# omite este mismo índice con una condición previa explícita. Esto hace lo mismo
+# con la misma condición (`atttypmod > 0`), y lo dice en voz alta en vez de
+# tragarse un error genérico: lo demás del archivo sigue bajo ON_ERROR_STOP.
 echo ">>> NoSQL 59: vector_rag (pgvector)"
-"${PSQL[@]}" -f /init/NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql
+DDL_59=/init/NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql
+# Si la tabla todavía no existe, `to_regclass` da NULL y aquí se responde que sí:
+# el DDL la creará con dimensión y el índice entra sin problema.
+if pg_true "SELECT COALESCE(
+              (SELECT atttypmod > 0
+                 FROM pg_attribute
+                WHERE attrelid = to_regclass('vector_rag.vector_embeddings')
+                  AND attname  = 'embedding'), true)"; then
+    "${PSQL[@]}" -f "$DDL_59"
+else
+    echo "!!! vector_rag.vector_embeddings.embedding existe SIN dimensión (la creó el ORM,"
+    echo "!!! que la declara como 'vector' a secas). Se omite el índice HNSW: la búsqueda"
+    echo "!!! por similitud funciona pero recorre el corpus entero — aceptable en"
+    echo "!!! desarrollo, NO en producción. Para arreglarlo hay que recrear la tabla con"
+    echo "!!! 'vector(N)', que es una decisión del modelo."
+    grep -v 'USING hnsw' "$DDL_59" | "${PSQL[@]}" -f -
+fi
 
 echo "=== postgres-init completado"
