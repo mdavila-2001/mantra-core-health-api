@@ -86,7 +86,14 @@ function build() {
     { startAt: Date; timeZone: string | null }[]
   >();
   const clave = (pro: string, pac: string) => `${pro}→${pac}`;
+  /** Consultas en curso, por par profesional→paciente. */
+  const enCurso = new Set<string>();
   const bookingsRepo = {
+    // Sin ventana de fechas a propósito: una consulta en curso no se pregunta
+    // por el calendario.
+    tieneConsultaEnCurso: mockFn((_em: unknown, pro: string, pac: string) =>
+      Promise.resolve(enCurso.has(clave(pro, pac))),
+    ),
     findConfirmadasConPacienteEntre: mockFn(
       (
         _em: unknown,
@@ -111,6 +118,11 @@ function build() {
   ) => {
     const previas = reservas.get(clave(pro, pac)) ?? [];
     reservas.set(clave(pro, pac), [...previas, { startAt, timeZone }]);
+  };
+
+  /** Marca que ese profesional YA empezó la consulta con ese paciente. */
+  const iniciarConsulta = (pro: string, pac: string): void => {
+    enCurso.add(clave(pro, pac));
   };
 
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -139,6 +151,7 @@ function build() {
     darDeAltaPaciente,
     darDeAltaProfesional,
     agendar,
+    iniciarConsulta,
     logger,
   };
 }
@@ -377,6 +390,71 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     await expect(
       c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
     ).resolves.toBeUndefined();
+  });
+
+  /**
+   * LA CONSULTA YA EMPEZADA ABRE EL EXPEDIENTE, SIN MIRAR EL CALENDARIO.
+   *
+   * Las dos reglas del producto se contradecían y se midió en un recorrido
+   * real: la agenda deja **empezar una cita confirmada cuando el profesional
+   * decide, no cuando el reloj lo permite** (corrección #15, pedido del
+   * propietario), y el expediente exigía que el cupo fuera de hoy. Se podía
+   * iniciar la consulta y no leer la historia de quien estaba enfrente.
+   */
+  it('una consulta EN CURSO abre el expediente aunque el turno sea de otro día', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    // Sin turno hoy: la agenda de este profesional con este paciente está vacía
+    // en la ventana que mira `atiendeHoy`.
+    c.iniciarConsulta(MEDICO, PACIENTE);
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).resolves.toBeUndefined();
+  });
+
+  it('sin consulta en curso Y sin turno hoy, sigue sin poder', async () => {
+    // La cita con ese paciente sigue siendo el filtro: esto es lo que impide
+    // que «en curso» se lea como «cualquiera puede».
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('la consulta en curso es de ESE par, no de cualquiera', async () => {
+    // Iniciar con un paciente no abre el expediente de otro. Es el error fácil
+    // de cometer si la consulta se escribiera sin el par completo.
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.iniciarConsulta(MEDICO, 'otro-paciente-cualquiera');
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('el camino barato va primero: con consulta en curso no se consulta la agenda', async () => {
+    // No es cosmético: `findConfirmadasConPacienteEntre` trae una ventana de 96
+    // horas y compara zona por zona. Si la respuesta ya se sabe, no se paga.
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.iniciarConsulta(MEDICO, PACIENTE);
+
+    await c.service.assertPuedeLeerHistoria(
+      PACIENTE,
+      actorCon('u', 'CLINICIAN'),
+    );
+
+    expect(
+      c.bookingsRepo.findConfirmadasConPacienteEntre,
+    ).not.toHaveBeenCalled();
   });
 
   it('SUPERADMIN pasa sin turno y sin perfil: el guard ya lo trata como comodín', async () => {

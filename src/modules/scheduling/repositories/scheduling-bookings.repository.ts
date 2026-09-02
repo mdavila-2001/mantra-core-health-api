@@ -862,6 +862,45 @@ export class SchedulingBookingsRepository {
    * @param estados - Estados de reserva que cuentan como turno vivo.
    * @returns Las reservas del par, con la zona de su sede, de la más próxima en adelante.
    */
+  /**
+   * ¿Hay una consulta **ya iniciada** entre ese profesional y ese paciente?
+   *
+   * Sin ventana de fechas, y ésa es toda la diferencia con
+   * {@link findConfirmadasConPacienteEntre}. Una consulta en curso no se
+   * pregunta por el calendario: el estado dice que **está pasando ahora**, y el
+   * cupo sólo dice cuándo se pensaba que iba a pasar.
+   *
+   * Existe porque las dos reglas del producto se contradecían. La agenda deja
+   * empezar una cita confirmada **cuando el profesional decide, no cuando el
+   * reloj lo permite** (corrección #15, instrucción del propietario), y el
+   * expediente exigía que el cupo fuera de hoy. Resultado medido en un
+   * recorrido real: el profesional inicia la consulta y no puede abrir la
+   * historia de la persona que tiene enfrente.
+   *
+   * @param practitionerProfileId - El profesional que pide.
+   * @param patientProfileId - El paciente cuya historia se pide.
+   * @returns `true` si hay al menos una consulta en curso entre los dos.
+   */
+  async tieneConsultaEnCurso(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+    estadoEnCurso: string,
+  ): Promise<boolean> {
+    const filas: { existe: number }[] = await em.getConnection().execute(
+      `SELECT 1 AS "existe"
+         FROM scheduling.appointment_bookings b
+         JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
+        WHERE r.resource_ref_id = ?
+          AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
+          AND b.patient_profile_id = ?
+          AND b.status_concept_id = ?
+        LIMIT 1`,
+      [practitionerProfileId, patientProfileId, estadoEnCurso],
+    );
+    return filas.length > 0;
+  }
+
   async findConfirmadasConPacienteEntre(
     em: EntityManager,
     practitionerProfileId: string,
