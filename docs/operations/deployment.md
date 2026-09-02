@@ -3,6 +3,12 @@
 > Fase 14. Ver [ADR-0014](../adr/ADR-0014-despliegue-docker-compose.md) para la decisión
 > arquitectónica. Esta página es el procedimiento real, derivado de `docker-compose.yml` y
 > `Dockerfile`.
+>
+> **Para desplegar en un VPS con Coolify, la página es [otra](coolify.md).** Aquélla parte
+> de `docker-compose.coolify.yml`, que se diferencia de éste en cosas que no son
+> cosméticas: el DDL se monta desde `database/` en vez de `../SQL`, hay un paso de
+> migración explícito antes de que la API acepte tráfico, no se publica ningún puerto en
+> el host y hacen falta cinco secretos que en desarrollo tienen valor por defecto.
 
 ## Imagen — una sola para 18 procesos
 
