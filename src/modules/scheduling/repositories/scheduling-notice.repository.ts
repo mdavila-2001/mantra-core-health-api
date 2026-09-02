@@ -12,6 +12,10 @@ import {
   PersonProfiles,
   Persons,
 } from '../../profiles/entities';
+import {
+  AuthenticationCredentials,
+  EmailVerifications,
+} from '../../iam/entities';
 import { PROF } from '../../profiles/profiles.concepts';
 
 /**
@@ -127,6 +131,52 @@ export class SchedulingNoticeRepository {
     if (person) return person.id;
     const profile = await em.findOne(PersonProfiles, { id: profileId });
     return profile?.personId ?? null;
+  }
+
+  /**
+   * A qué dirección se le puede escribir a una cuenta.
+   *
+   * El correo de agenda necesita una dirección concreta: el canal `EMAIL` de
+   * mensajería exige `recipientAddress` porque el proveedor externo no sabe
+   * resolver un `userId`. Este proyecto guarda esa dirección en dos lugares y
+   * ninguno se llama «email»:
+   *
+   * 1. `iam.authentication_credentials.external_subject`, cuando la persona
+   *    entra con su correo. Quien entra con su cédula **no** tiene correo ahí,
+   *    y por eso no alcanza con mirar sólo esta tabla.
+   * 2. `iam.email_verifications.email`, que es el que declaró en el alta.
+   *
+   * Es el mismo orden que ya usa `IamEmailVerificationService` para decidir a
+   * dónde reenviar la verificación; se replica acá en vez de exportarlo para no
+   * acoplar `scheduling` a un servicio de `iam`, que arrastraría su módulo
+   * entero.
+   *
+   * Devuelve `null` cuando la cuenta no declaró correo en ninguno de los dos:
+   * no es un error, es un aviso que sale sólo por la campana.
+   *
+   * @param em - Contexto de persistencia.
+   * @param userId - Cuenta destinataria del aviso.
+   */
+  async findEmailForUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string | null> {
+    const credentials = await em.find(AuthenticationCredentials, { userId });
+    const porCredencial = credentials
+      .map((credential) => credential.externalSubject)
+      .find(
+        (subject): subject is string =>
+          typeof subject === 'string' && subject.includes('@'),
+      );
+    if (porCredencial !== undefined) return porCredencial.trim();
+
+    const verification = await em.findOne(
+      EmailVerifications,
+      { userId },
+      { orderBy: { createdAt: 'desc' } },
+    );
+    const declarado = verification?.email?.trim();
+    return declarado === undefined || declarado === '' ? null : declarado;
   }
 
   /** Cómo se llama la persona de un perfil, para nombrarla en el aviso. */
