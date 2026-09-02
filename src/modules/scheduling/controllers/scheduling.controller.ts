@@ -44,6 +44,7 @@ import {
   GenerateSlotsResponseDto,
   CreateExceptionDto,
   ExceptionResponseDto,
+  ExceptionTypeListDto,
   CreateHoldDto,
   HoldResponseDto,
   ConfirmBookingDto,
@@ -299,6 +300,28 @@ export class SchedulingController {
       new Date(to),
       actor,
     );
+  }
+
+  /**
+   * Los motivos de bloqueo que el formulario puede ofrecer (TAREA-11, punto 4).
+   *
+   * Existe porque el catálogo estaba en la base y **no lo publicaba nadie**:
+   * `exception_type_concept_id` es obligatoria y la pantalla no tenía de dónde
+   * sacar las opciones, así que en la práctica todo bloqueo nacía con el mismo
+   * valor.
+   *
+   * Es una lectura de catálogo, no de datos de nadie: sin filtro por tenant y
+   * abierta a cualquiera que pueda crear una excepción.
+   */
+  @Get('exception-types')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Listar los motivos de bloqueo de agenda',
+    description:
+      'Catálogo para el formulario: clave, concepto, etiqueta en castellano, si exige texto libre y si bloquea u abre horario.',
+  })
+  listExceptionTypes(): ExceptionTypeListDto {
+    return this.catalogService.listExceptionTypes();
   }
 
   /** UC-41-04. */
