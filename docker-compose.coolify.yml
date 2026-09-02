@@ -52,18 +52,22 @@
 #     que se instancia con el módulo (`loadAudioEnv`), no el proveedor.
 #     Ver `.env.coolify.example`.
 #
-#  5. LA RED `alovida` ES EXTERNA Y COMPARTIDA CON EL FRONTEND.
+#  5. LA RED `alovida` LA CREA ESTE STACK, Y LA COMPARTE CON EL FRONTEND.
 #     El frontend (`mantra-core-health`) sirve la API bajo el MISMO dominio a
 #     través de su nginx —es la decisión de arquitectura del proyecto, y es lo
 #     que permite que `PUBLIC_API_BASE_URL` quede vacía y que la API mantenga
 #     `CORS` denegado por defecto (`main.ts`: `enableCors({ origin: false })`)—.
 #     Para que aquel nginx alcance a este contenedor, los dos stacks comparten
-#     una red creada UNA VEZ en el servidor:
+#     una red con nombre fijo. La declara ESTE stack (abajo, sin `external`) y
+#     el del frontend la toma como `external`. Así no hace falta ningún paso a
+#     mano en el servidor, que es lo que se buscaba: con la API de Coolify se
+#     crean recursos, no se ejecutan comandos.
 #
-#         docker network create alovida
-#
-#     Se declara externa en los dos lados a propósito: si un stack la creara,
-#     el otro fallaría con «network alovida was found but has incorrect label».
+#     ⚠️  Si alguien ya corrió `docker network create alovida`, este stack NO
+#     arranca: «network alovida was found but has incorrect label
+#     com.docker.compose.network set to ""». Se resuelve borrando la red a mano
+#     (`docker network rm alovida`) y volviendo a desplegar — compose la crea
+#     sola. El orden importa: este stack primero, el frontend después.
 #
 #  6. EL EMULADOR DE PROVEEDORES NO EXISTE AQUÍ.
 #     `mock-provider-server` acepta TODA verificación de identidad y de
@@ -653,14 +657,17 @@ volumes:
   api_storage:
 
 # -------------------------------------------------------------------------
-# Red compartida con el stack del frontend. Crear UNA VEZ en el servidor:
+# Red compartida con el stack del frontend.
 #
-#     docker network create alovida
+# La crea ESTE stack —sin `external`— con un nombre fijo, y el frontend la toma
+# como `external`. Es la única combinación que funciona sin tocar el servidor a
+# mano: dos `external` exigen crearla antes por SSH, y dos no-`external`
+# chocan por el nombre.
 #
-# Externa en los dos lados: si uno la creara, el otro fallaría al arrancar con
-# «network alovida was found but has incorrect label».
+# La contrapartida, que hay que saber: si este stack se destruye, la red se va
+# con él y el nginx del frontend deja de resolver `api` hasta el siguiente
+# despliegue de este lado.
 # -------------------------------------------------------------------------
 networks:
   alovida:
-    external: true
     name: ${ALOVIDA_NETWORK:-alovida}
