@@ -823,6 +823,180 @@ describe('SchedulingCatalogService', () => {
         expect(res.skipped).toBe(0);
       });
 
+      /* --------------------------------------------------------------------
+         AG-4 · el respiro entre consultas
+         -------------------------------------------------------------------- */
+
+      it('publicar persiste el respiro tal como vino, sin completarlo', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+        d.catalogRepo.createRule.mockReturnValue({ id: 'rule-1' });
+
+        await d.service.createTemplate(
+          RESOURCE,
+          {
+            name: 'Consultorio',
+            rules: [
+              {
+                dayOfWeek: 1,
+                startTime: '08:00:00',
+                endTime: '10:00:00',
+                slotMinutes: 30,
+                gapMinutes: 10,
+              },
+              // La segunda no lo declara: tiene que quedar `undefined`, no 0.
+              // «No lo dijeron» y «dijeron que no hay respiro» no son lo mismo.
+              {
+                dayOfWeek: 2,
+                startTime: '08:00:00',
+                endTime: '10:00:00',
+                slotMinutes: 30,
+              },
+            ],
+          } as never,
+          actor,
+        );
+
+        const franjas = d.catalogRepo.createRule.mock.calls.map(
+          (c: any) => c[1],
+        );
+        expect(franjas[0].gapMinutes).toBe(10);
+        expect(franjas[1].gapMinutes).toBeUndefined();
+      });
+
+      it('el respiro separa los turnos: el paso es slot + gap', async () => {
+        const d = buildCatalog();
+        // 08:00–10:00 con turnos de 30' y respiro de 10' => paso de 40':
+        // 08:00, 08:40, 09:20 caben; el de 10:00 se pasa del fin.
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 30,
+        });
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 30,
+            capacityPerSlot: 1,
+            gapMinutes: 10,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        const res = await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        // Sin respiro serían 4. Con 10' de respiro, 3.
+        expect(res.created).toBe(3);
+      });
+
+      it('el turno sigue durando slotMinutes: el respiro no alarga la consulta', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 30,
+        });
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 30,
+            capacityPerSlot: 1,
+            gapMinutes: 10,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        const creados = d.catalogRepo.createSlot.mock.calls.map(
+          (c: any) => c[1],
+        );
+        expect(creados).toHaveLength(3);
+        // Arranques cada 40 minutos…
+        expect(creados[0].startAt.toISOString()).toBe(
+          '2026-06-01T08:00:00.000Z',
+        );
+        expect(creados[1].startAt.toISOString()).toBe(
+          '2026-06-01T08:40:00.000Z',
+        );
+        // …pero cada turno dura 30, no 40. Confundirlos alargaría la consulta
+        // en vez de separarla de la siguiente.
+        for (const slot of creados) {
+          const duracion =
+            (slot.endAt.getTime() - slot.startAt.getTime()) / 60_000;
+          expect(duracion).toBe(30);
+        }
+      });
+
+      it('sin respiro declarado el generador se comporta como antes', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 30,
+        });
+        // `gapMinutes` ausente: la columna es anulable y ausente ≡ 0.
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 30,
+            capacityPerSlot: 1,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        const res = await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        expect(res.created).toBe(4);
+      });
+
+      it('un respiro nulo se lee como cero, no rompe la corrida', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 30,
+        });
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 30,
+            capacityPerSlot: 1,
+            gapMinutes: null,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        const res = await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        expect(res.created).toBe(4);
+      });
+
       it('is idempotent: existing slots are skipped, not duplicated', async () => {
         const d = buildCatalog();
         d.catalogRepo.findTemplateById.mockResolvedValue({
@@ -1460,9 +1634,13 @@ describe('SchedulingCatalogService', () => {
       d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
       d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
 
-      await d.service.getResourceAgenda(RESOURCE, { ...VENTANA, onlyAvailable: true });
+      await d.service.getResourceAgenda(RESOURCE, {
+        ...VENTANA,
+        onlyAvailable: true,
+      });
 
-      const [, , , , opciones] = d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
+      const [, , , , opciones] =
+        d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
       expect(opciones.onlyAvailable).toBe(true);
       // La capacidad no alcanza: un cupo bloqueado la conserva.
       expect(opciones.openStatusConceptId).toBe(CONCEPTS.SLOT_OPEN);
@@ -1475,11 +1653,14 @@ describe('SchedulingCatalogService', () => {
       d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
       d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
 
-      await d.service.getResourceAgenda(RESOURCE, { ...VENTANA, onlyAvailable: false });
+      await d.service.getResourceAgenda(RESOURCE, {
+        ...VENTANA,
+        onlyAvailable: false,
+      });
 
-      const [, , , , opciones] = d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
+      const [, , , , opciones] =
+        d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
       expect(opciones.onlyAvailable).toBe(false);
     });
   });
-
 });

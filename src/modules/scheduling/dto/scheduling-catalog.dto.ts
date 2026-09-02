@@ -300,6 +300,30 @@ export class ScheduleRuleDto {
   @IsInt()
   @Min(1)
   capacityPerSlot?: number;
+
+  /**
+   * El respiro entre consultas, en minutos.
+   *
+   * El paso del generador pasa a ser `slotMinutes + gapMinutes`, pero **cada
+   * turno sigue durando `slotMinutes`**: el respiro separa un turno del
+   * siguiente, no alarga la consulta. Sin él, una agenda de 08:00 a 12:00 con
+   * turnos de 30 minutos ofrece ocho seguidos y el profesional no tiene un
+   * minuto entre paciente y paciente.
+   *
+   * **Anulable y sin valor por defecto**, igual que `slotMinutes`, que está en
+   * la misma tabla y describe lo mismo. Ausente se lee como cero: «nadie lo
+   * declaró» y «declararon cero» significan lo mismo para el generador, y un
+   * `NOT NULL DEFAULT 0` obligaría a escribir un dato que nadie dio.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0',
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  gapMinutes?: number;
 }
 
 /**
@@ -400,6 +424,16 @@ export class TemplateRuleDto {
   /** Pacientes por turno, si la franja lo declara. */
   @ApiProperty({ required: false })
   capacityPerSlot?: number;
+
+  /**
+   * Minutos de respiro entre turnos, si la franja lo declara.
+   *
+   * Ausente ≡ 0: el front ya lo fija así (PR #234). No se emite cuando la
+   * columna está nula, para que «no declarado» y «cero» sigan siendo
+   * distinguibles por quien lee el contrato.
+   */
+  @ApiProperty({ required: false })
+  gapMinutes?: number;
 }
 
 /**
