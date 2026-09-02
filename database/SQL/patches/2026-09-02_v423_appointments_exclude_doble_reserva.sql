@@ -49,6 +49,8 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;  -- requerido por EXCLUDE
 -- Antes de crear la restricción: si la base ya tiene solapes, esto FALLA y hay
 -- que limpiarlos primero. Falla ruidosamente a propósito — crear la restricción
 -- «como se pueda» dejaría datos que la violan y nadie se enteraría.
+BEGIN;
+
 ALTER TABLE "clinical"."appointments"
     DROP CONSTRAINT IF EXISTS "ex_appointments_practitioner_time";
 
@@ -65,3 +67,5 @@ ALTER TABLE "clinical"."appointments"
             '37dded87-7a7a-5a24-86f6-0ef48cccb482'
         )
     );
+
+COMMIT;
