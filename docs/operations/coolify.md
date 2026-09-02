@@ -53,17 +53,31 @@ que se detiene es el procesamiento en segundo plano.
 
 ---
 
-## 1 · La red compartida (una sola vez)
+## 1 · La red compartida — no hay que hacer nada
 
-Por SSH en el servidor, **antes del primer despliegue**:
+Los dos stacks se hablan por una red de Docker con nombre fijo, `alovida`. **La
+crea el stack del backend** al desplegarse, y el del frontend la toma como
+`external`. No hace falta entrar por SSH.
 
-```bash
-docker network create alovida
-```
+Es la única combinación que funciona sin tocar el servidor: si los dos la
+declararan `external` habría que crearla antes a mano, y si los dos la crearan
+chocarían por el nombre.
 
-Los dos stacks la declaran como `external`. Es a propósito: si uno de los dos
-la creara, el otro fallaría al arrancar con `network alovida was found but has
-incorrect label`.
+> ⚠️  **Si ya corriste `docker network create alovida`** —por ejemplo siguiendo
+> una versión anterior de esta página— el backend no arranca:
+>
+> ```text
+> network alovida was found but has incorrect label
+> com.docker.compose.network set to ""
+> ```
+>
+> Se arregla borrando la red (`docker network rm alovida`) y volviendo a
+> desplegar: compose la crea sola, con sus etiquetas.
+
+Lo que sí importa es el **orden**: backend primero, frontend después. El nginx
+del frontend resuelve el upstream `api` al arrancar, y si la red o el
+contenedor de la API todavía no existen, nginx no llega a levantar
+(`host not found in upstream "api"`).
 
 ---
 
@@ -95,7 +109,8 @@ openssl rand -hex 32
   voz esté apagada**, porque quien la lee es el cifrador que se instancia con
   el módulo de audio, no el proveedor de voz.
 
-- `ALOVIDA_NETWORK=alovida` y `TRUST_PROXY_HOPS=2`.
+- `TRUST_PROXY_HOPS=2`. (`ALOVIDA_NETWORK` solo si querés que la red se llame
+  distinto de `alovida`; hay que ponerle el mismo valor a los dos recursos.)
 
 Para el arranque en frío, además:
 
@@ -224,7 +239,7 @@ del modelo, para que quien edita el DDL vea el efecto sin copiar nada.
 | Rama | `dev` |
 | Compose file | `deploy/docker-compose.coolify.yml` |
 | Dominio | asignarlo al servicio **`proxy`**, puerto 80 |
-| Variables | `APP_DOMAIN=tu-dominio.bo` y `ALOVIDA_NETWORK=alovida` |
+| Variables | `APP_DOMAIN=tu-dominio.bo` (y `ALOVIDA_NETWORK` solo si le cambiaste el nombre a la red) |
 
 `APP_DOMAIN` **no es opcional**. El servidor de renderizado compara el `Host`
 de cada petición con su lista de hosts permitidos y responde 400 a lo que no
@@ -233,9 +248,10 @@ el nombre del servicio en compose. Sin esta variable el despliegue queda en
 verde —el healthcheck pide `localhost`— y devuelve 400 en cada página al primer
 visitante real. Ver `deploy/.env.coolify.example`, en el repositorio del frontend.
 
-Desplegarlo **después** del backend: su nginx resuelve el upstream `api` al
-arrancar, y si el contenedor de la API todavía no existe en la red, nginx no
-arranca (`host not found in upstream "api"`).
+Desplegarlo **después** del backend, que es quien crea la red: su nginx
+resuelve el upstream `api` al arrancar, y si la red o el contenedor de la API
+todavía no existen, nginx no llega a levantar
+(`host not found in upstream "api"`).
 
 `PUBLIC_API_BASE_URL` queda vacía, y está fijada en el compose: es una variable
 de **build** que se compila dentro del paquete que descarga el navegador, así
@@ -291,7 +307,8 @@ que ninguna otra cosa.
 | `MOCK_PROVIDER_BASE_URL está configurada en producción` | Alguien heredó la variable de un `.env` de desarrollo. El emulador da por verificado a cualquiera; el arranque se niega a propósito |
 | `column "…" of relation "…" does not exist` en un alta | `api-migrate` no corrió o falló |
 | `relation "pharma_lab.…" does not exist` | Lo mismo |
-| `host not found in upstream "api"` | El frontend se desplegó antes que el backend, o falta `docker network create alovida` |
+| `host not found in upstream "api"` | El frontend se desplegó antes que el backend, que es quien crea la red `alovida`. Desplegar el backend y volver a lanzar éste |
+| `network alovida … has incorrect label … set to ""` | La red se creó a mano alguna vez. `docker network rm alovida` y redesplegar el backend |
 | El chat en tiempo real no conecta | El proxy no está enrutando `/socket.io/`; comprobar que `deploy/api-locations.conf` está montado |
 | **400 en todas las páginas**, «Header "host" with value "…" is not allowed» | Falta `APP_DOMAIN` en el recurso del frontend. El stack arranca en verde porque el healthcheck pide `localhost`, que sí está permitido |
 | 429 con poca gente usando el sistema | Falta `TRUST_PROXY_HOPS=2`: sin él todos los clientes comparten el mismo cubo del limitador |
