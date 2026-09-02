@@ -1,4 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 import { BIRTH_SEX_CODES, type BirthSexCode } from '../profiles.concepts';
 
 /**
@@ -57,6 +59,56 @@ export class PatientListItemDto {
       'Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología',
   })
   deceased!: boolean;
+}
+
+/**
+ * Filtros de `GET /profiles/patients` (UC-05-13).
+ *
+ * `nationalId` e `issuerAdministrativeAreaConceptId` son el camino nuevo de la
+ * TAREA-07: encontrar a alguien por su documento aunque su nombre y su código
+ * de paciente no contengan el texto buscado. El departamento sólo tiene efecto
+ * junto al documento — un carnet sin departamento no es único en Bolivia.
+ */
+export class SearchPatientsQueryDto {
+  /** Texto a buscar en el código de paciente o el nombre. */
+  @ApiPropertyOptional({
+    description: 'Texto a buscar en el código de paciente o el nombre',
+  })
+  @IsOptional()
+  q?: string;
+
+  /** Documento de identidad exacto. */
+  @ApiPropertyOptional({
+    description: 'Documento de identidad exacto (`common.identifiers.value`)',
+  })
+  @IsOptional()
+  nationalId?: string;
+
+  /** Departamento que expidió el documento (`VS_BO_DEPARTMENT`). */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Departamento que expidió el documento; sólo tiene efecto junto a nationalId',
+  })
+  @IsOptional()
+  @IsUUID()
+  issuerAdministrativeAreaConceptId?: string;
+
+  /** Cursor opaco devuelto por la página anterior. */
+  @ApiPropertyOptional({
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @IsOptional()
+  cursor?: string;
+
+  /** Tope de resultados de la página (por defecto 50). */
+  @ApiPropertyOptional({ default: 50, maximum: 500 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(500)
+  limit?: number;
 }
 
 /** Página del listado de pacientes. */

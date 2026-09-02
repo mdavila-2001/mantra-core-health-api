@@ -13,6 +13,8 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { AttachableFileService } from '../../common/services';
+import { AdministrativeAreaCatalogService } from './administrative-area-catalog.service';
+import { resolvePatientSearchScope } from './patient-search-scope';
 import { findCurrentIdentityAssertionForPerson } from '../../identity_assurance/repositories/identity-assertions.repository';
 import {
   AddressesRepository,
@@ -304,6 +306,9 @@ export class ProfilesPatientsService {
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly ownership: ProfileOwnershipService,
     private readonly attachableFiles: AttachableFileService,
+    // Quién decide si un uuid es un departamento boliviano. La FK acepta
+    // cualquier concepto del catálogo, así que la regla es de dominio.
+    private readonly administrativeAreas: AdministrativeAreaCatalogService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPatientsService.name);
@@ -1164,15 +1169,34 @@ export class ProfilesPatientsService {
    * @param options - Texto de búsqueda, cursor de continuación y tope de página.
    * @returns Página de pacientes con el cursor de la siguiente.
    */
-  async searchPatients(options: {
-    /** Texto libre sobre código de paciente y nombre. */
-    query?: string;
-    /** Cursor opaco devuelto por la página anterior. */
-    cursor?: string;
-    /** Tope de filas de la página. */
-    limit: number;
-  }): Promise<SearchPatientsResponseDto> {
+  async searchPatients(
+    options: {
+      /** Texto libre sobre código de paciente y nombre. */
+      query?: string;
+      /**
+       * Documento de identidad exacto. Junto con
+       * {@link issuerAdministrativeAreaConceptId} es el camino que abre
+       * AC-07-1/AC-07-2: encontrar a alguien aunque su código o su nombre no
+       * contengan el texto buscado.
+       */
+      nationalId?: string;
+      /** Departamento que expidió el documento (`VS_BO_DEPARTMENT`). */
+      issuerAdministrativeAreaConceptId?: string;
+      /** Cursor opaco devuelto por la página anterior. */
+      cursor?: string;
+      /** Tope de filas de la página. */
+      limit: number;
+    },
+    actor: AuthenticatedUser,
+  ): Promise<SearchPatientsResponseDto> {
     const em = this.em.fork();
+
+    if (options.issuerAdministrativeAreaConceptId) {
+      await this.administrativeAreas.assertIsAdministrativeArea(
+        em,
+        options.issuerAdministrativeAreaConceptId,
+      );
+    }
 
     const after = options.cursor
       ? decodeKeysetCursor(options.cursor)
@@ -1184,7 +1208,14 @@ export class ProfilesPatientsService {
     // COUNT sobre toda la tabla en cada página.
     const rows = await this.patientProfilesRepo.searchPage(
       em,
-      { query: options.query, afterPatientCode },
+      {
+        query: options.query,
+        nationalId: options.nationalId,
+        issuerAdministrativeAreaConceptId:
+          options.issuerAdministrativeAreaConceptId,
+        scope: resolvePatientSearchScope(actor),
+        afterPatientCode,
+      },
       options.limit + 1,
     );
     const hasMore = rows.length > options.limit;

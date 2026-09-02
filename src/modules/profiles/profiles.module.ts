@@ -12,6 +12,7 @@ import { TerminologyModule } from '../terminology/terminology.module';
 import { DirectoryModule } from '../directory/directory.module';
 import * as entities from './entities';
 import { MedicalSpecialtyCatalogService } from './services/medical-specialty-catalog.service';
+import { AdministrativeAreaCatalogService } from './services/administrative-area-catalog.service';
 import {
   ProfilesPatientsController,
   ProfilesPractitionersController,
@@ -73,6 +74,7 @@ import { MessagingModule } from '../messaging/messaging.module';
   providers: [
     ProfileOwnershipService,
     MedicalSpecialtyCatalogService,
+    AdministrativeAreaCatalogService,
     ProfilesAffiliationsService,
     LinkableOrganizationsService,
     // El emisor de avisos del vínculo entra por su puerto: el servicio que
@@ -124,6 +126,7 @@ import { MessagingModule } from '../messaging/messaging.module';
     // son especialidades.
     PractitionerSpecialtiesRepository,
     MedicalSpecialtyCatalogService,
+    AdministrativeAreaCatalogService,
     // Y desde que el alta de paciente registra al tutor o persona autorizada
     // que lo acompaña, también la de personas relacionadas.
     RelatedPersonsRepository,
