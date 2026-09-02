@@ -2192,6 +2192,17 @@ export class SchedulingBookingsService {
       }
     }
 
+    // La tipología de la página, en lote. Sólo las citas que llegaron a tener
+    // contraparte clínica la tienen: una reserva sin confirmar no crea
+    // `clinical.appointments`, así que su id no entra en la consulta.
+    const tipos = await this.appointmentsRepo.findTypesByIds(em, [
+      ...new Set(
+        page
+          .map(({ booking }) => booking.appointmentId)
+          .filter((id): id is string => id != null),
+      ),
+    ]);
+
     // Los nombres, en lote y sólo cuando alguien va a poder verlos: si el actor
     // no es profesional ni titular, la proyección los descartaría igual y la
     // consulta sería trabajo tirado.
@@ -2216,6 +2227,9 @@ export class SchedulingBookingsService {
             : undefined,
           origenes.get(booking.id),
           nombres.get(booking.patientProfileId),
+          booking.appointmentId == null
+            ? undefined
+            : tipos.get(booking.appointmentId),
         ),
       ),
       count: page.length,
@@ -2267,6 +2281,16 @@ export class SchedulingBookingsService {
         ? await this.catalogRepo.findResourceById(em, booking.resourceId)
         : null;
 
+    // El detalle tiene que decir exactamente lo mismo que el listado, así que
+    // la tipología también se resuelve acá. Una sola cita: el lote de uno es la
+    // misma consulta.
+    const tipos =
+      booking.appointmentId == null
+        ? new Map<string, string>()
+        : await this.appointmentsRepo.findTypesByIds(em, [
+            booking.appointmentId,
+          ]);
+
     return this.aBookingItem(
       booking,
       slot,
@@ -2275,6 +2299,10 @@ export class SchedulingBookingsService {
       actor,
       recurso?.resourceRefId,
       origenes.get(booking.id),
+      undefined,
+      booking.appointmentId == null
+        ? undefined
+        : tipos.get(booking.appointmentId),
     );
   }
 
@@ -2333,6 +2361,7 @@ export class SchedulingBookingsService {
     profesionalDeLaAgenda?: string,
     reprogramadaDesde?: Date,
     nombreDelPaciente?: string,
+    tipoDeLaCita?: string,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -2365,6 +2394,12 @@ export class SchedulingBookingsService {
       this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
         ? { patientName: nombreDelPaciente }
         : {}),
+      // La tipología viaja siempre que exista: no es dato clínico —es qué
+      // clase de actividad ocupa el rato, lo mismo que ya dice la duración del
+      // bloque— y sin ella la agenda del día no puede pintar una operación
+      // distinto de una consulta. El motivo de consulta, que sí lo es, sigue
+      // con su regla de arriba.
+      ...(tipoDeLaCita === undefined ? {} : { typeConceptId: tipoDeLaCita }),
       ...(reprogramadaDesde ? { rescheduledFrom: reprogramadaDesde } : {}),
       statusReason: aStatusReason(motivo),
       delayNotice: aDelayNotice(demora),

@@ -87,6 +87,9 @@ function build() {
   const appointmentsRepo = {
     create: mockFn(() => ({ id: 'appt-1' })),
     findById: mockFn(),
+    // Por omisión ninguna cita declara tipología: las pruebas que la comprueban
+    // devuelven el mapa a propósito.
+    findTypesByIds: mockFn().mockResolvedValue(new Map()),
   };
   const logger = {
     setContext: mockFn(),
@@ -2068,6 +2071,119 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(d.bookingsRepo.findPatientNames).toHaveBeenCalledTimes(1);
+    });
+
+    /* ------------------------------------------------------------------
+       TAREA-12 §3.2 · la tipología viaja para que la agenda pueda pintarla
+       ------------------------------------------------------------------ */
+
+    it('la tipología de la cita llega en el listado', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: 'appt-1',
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+      d.appointmentsRepo.findTypesByIds.mockResolvedValue(
+        new Map([['appt-1', 'tipo-operacion']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(res.items[0].typeConceptId).toBe('tipo-operacion');
+    });
+
+    it('se pide UNA vez para toda la página, no una por cita', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: ['b1', 'b2', 'b3'].map((id, i) => ({
+          booking: {
+            ...guardada,
+            id,
+            resourceId: 'res-1',
+            appointmentId: `appt-${i}`,
+          },
+          slot: null,
+        })),
+        fetchCapReached: false,
+      });
+
+      await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(d.appointmentsRepo.findTypesByIds).toHaveBeenCalledTimes(1);
+      const [, ids] = d.appointmentsRepo.findTypesByIds.mock.calls[0];
+      expect(ids).toHaveLength(3);
+    });
+
+    it('una reserva sin cita clínica no pide tipología ni la inventa', async () => {
+      // Una reserva que nunca se confirmó no crea `clinical.appointments`: su
+      // id no entra en la consulta y el campo se omite.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: null,
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(res.items[0].typeConceptId).toBeUndefined();
+      const [, ids] = d.appointmentsRepo.findTypesByIds.mock.calls[0];
+      expect(ids).toHaveLength(0);
+    });
+
+    it('una cita clínica sin tipo declarado omite el campo, no lo vacía', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: 'appt-1',
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+      // El repositorio no la incluye: «no declaró tipo» no es «tipo nulo».
+      d.appointmentsRepo.findTypesByIds.mockResolvedValue(new Map());
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect('typeConceptId' in res.items[0]).toBe(false);
     });
 
     it('el listado por omisión incluye las pendientes y las completadas', async () => {
