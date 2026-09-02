@@ -37,16 +37,54 @@ const PRIORIDAD: Readonly<Record<AgendaNoticeKind, number>> = {
 };
 
 /**
- * Emisor de avisos de agenda contra el canal in-app de mensajería (M35).
+ * Sufijo de la clave de rebote del canal correo.
+ *
+ * **Sin esto el correo no sale nunca.** `createRequest` colapsa las repetidas
+ * buscando por `debounceKey` **a secas** —`findLiveRequestByDebounceKey` no
+ * filtra por canal—, así que la solicitud de correo con la misma clave que la
+ * in-app se rebota contra ella y devuelve `debounced: true` sin crear fila.
+ *
+ * Namespacear por canal conserva las dos propiedades que se quieren a la vez:
+ * dos avisos iguales siguen colapsando dentro de su canal, y el correo deja de
+ * competir con la campana por la misma clave.
+ */
+const REBOTE_CORREO = ':email';
+
+/**
+ * Emisor de avisos de agenda contra los canales de mensajería (M35).
  *
  * ## Qué hace exactamente
  *
- * Por cada aviso: resuelve la cuenta del destinatario, crea la
- * `notification_request` —que es donde se evalúan consentimiento, preferencia
- * por categoría y horas de silencio— y registra la entrega, que para el canal
- * in-app **es** escribir la fila de la bandeja. No hay proveedor externo ni
- * stub: la evidencia de que el aviso llegó es una fila real en
- * `messaging.in_app_notifications`, no un log.
+ * Por cada aviso: resuelve la cuenta del destinatario y emite por **cada canal
+ * habilitado** para esa persona y esa categoría.
+ *
+ * - **In-app**: crea la `notification_request` —que es donde se evalúan
+ *   consentimiento, preferencia por categoría y horas de silencio— y registra
+ *   la entrega, que para este canal **es** escribir la fila de la bandeja. No
+ *   hay proveedor externo ni stub: la evidencia de que el aviso llegó es una
+ *   fila real en `messaging.in_app_notifications`, no un log.
+ * - **Correo**: crea la solicitud contra `CHANNEL_TYPE_EMAIL` con la dirección
+ *   del destinatario y **no** la entrega acá. El envío lo hace el worker de
+ *   mensajería (`notification-delivery.job`) contra el proveedor real —Gmail
+ *   API— fuera de toda transacción. Es el mismo camino que ya usa el correo de
+ *   verificación de `iam`.
+ *
+ * ## Por qué el correo va después y en su propio `try`
+ *
+ * Porque el in-app es el canal que la agenda ya daba por cierto. Un fallo del
+ * correo —sin dirección declarada, preferencia en contra, mensajería caída— no
+ * puede cambiar lo que `emit` devuelve en `delivered`, que es lo que los cuatro
+ * puntos de emisión leen. El correo se informa aparte (`emailRequestId`,
+ * `emailSkippedReason`) y nunca degrada el resultado del in-app.
+ *
+ * ## Qué NO viaja por correo
+ *
+ * El cuerpo del correo es el mismo texto que la campana, y ese texto **no lleva
+ * datos clínicos**: los cuatro redactores de `notices/agenda-notices.ts` sólo
+ * componen quién, cuándo, cuánto se demora y el motivo administrativo de un
+ * cambio —el `reasonText` obligatorio de mover y cancelar—. El motivo de
+ * **consulta** no aparece en ninguno de los cuatro, y no debe agregarse: un
+ * correo es un canal que el destinatario no controla.
  *
  * ## Por qué no lanza nunca
  *
@@ -159,6 +197,9 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
       actor,
     );
 
+    // La preferencia se guarda por (usuario, canal, categoría): que la campana
+    // esté silenciada no dice nada del correo. Por eso estos dos caminos
+    // igualmente intentan el correo en vez de cortar la emisión entera.
     if (request.suppressed) {
       return {
         delivered: false,
@@ -166,6 +207,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
         skippedReason:
           request.suppressionReason ??
           'El destinatario no acepta este aviso por el canal in-app',
+        ...(await this.encolarCorreo(notice, recipientUserId, actor)),
       };
     }
 
@@ -177,6 +219,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
         delivered: false,
         notificationRequestId: request.id,
         skippedReason: 'Ya había un aviso igual sin entregar',
+        ...(await this.encolarCorreo(notice, recipientUserId, actor)),
       };
     }
 
@@ -191,6 +234,8 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
       actor,
     );
 
+    const correo = await this.encolarCorreo(notice, recipientUserId, actor);
+
     return {
       delivered: delivery.inAppNotificationId !== undefined,
       notificationRequestId: request.id,
@@ -200,7 +245,95 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
       ...(delivery.inAppNotificationId === undefined
         ? { skippedReason: 'La entrega no produjo bandeja in-app' }
         : {}),
+      ...correo,
     };
+  }
+
+  /**
+   * Encola el mismo aviso por correo, si el destinatario tiene dirección.
+   *
+   * No entrega: sólo crea la solicitud. Quien la despacha es el worker de
+   * mensajería contra el proveedor real, fuera de esta transacción y de
+   * cualquier ventana de lock —que es justamente lo que el puerto exige y lo
+   * que el correo de verificación de `iam` ya hace—.
+   *
+   * Atrapa todo por su cuenta: el in-app ya se entregó cuando esto corre, y un
+   * fallo de acá no puede volverlo atrás ni cambiar lo que `emit` devuelve.
+   *
+   * @param notice - El aviso, con el texto ya redactado.
+   * @param recipientUserId - Cuenta destinataria, ya resuelta para el in-app.
+   * @param actor - Con quién se firma la solicitud.
+   */
+  private async encolarCorreo(
+    notice: AgendaNotice,
+    recipientUserId: string,
+    actor: AuthenticatedUser,
+  ): Promise<
+    Pick<AgendaNoticeResult, 'emailRequestId' | 'emailSkippedReason'>
+  > {
+    try {
+      const direccion = await this.noticeRepo.findEmailForUser(
+        this.em.fork(),
+        recipientUserId,
+      );
+      if (direccion === null) {
+        return { emailSkippedReason: 'La cuenta no declaró correo' };
+      }
+
+      const request = await this.notifications.createRequest(
+        {
+          channelId: MESSAGING_SEED.emailChannelId,
+          recipientUserId,
+          recipientAddress: direccion,
+          ...(notice.tenantId === undefined
+            ? {}
+            : { tenantId: notice.tenantId }),
+          categoryConceptId: CATEGORIA[notice.kind],
+          priority: PRIORIDAD[notice.kind],
+          payloadJson: {
+            kind: notice.kind,
+            subject: notice.subject,
+            bodyText: notice.bodyText,
+            ...(notice.payload ?? {}),
+          },
+          ...(notice.debounceKey === undefined
+            ? {}
+            : { debounceKey: `${notice.debounceKey}${REBOTE_CORREO}` }),
+          relatedResourceType: notice.relatedResourceType,
+          ...(notice.relatedResourceId === undefined
+            ? {}
+            : { relatedResourceId: notice.relatedResourceId }),
+        },
+        actor,
+      );
+
+      if (request.suppressed) {
+        return {
+          emailRequestId: request.id,
+          emailSkippedReason:
+            request.suppressionReason ??
+            'El destinatario no acepta este aviso por correo',
+        };
+      }
+      if (request.debounced) {
+        return {
+          emailRequestId: request.id,
+          emailSkippedReason: 'Ya había un correo igual sin enviar',
+        };
+      }
+      return { emailRequestId: request.id };
+    } catch (error: unknown) {
+      this.logger.warn(
+        {
+          operation: 'scheduling.notice.email',
+          kind: notice.kind,
+          relatedResourceId: notice.relatedResourceId,
+          err: error,
+        },
+        'No se pudo encolar el correo del aviso; el in-app ya se entregó',
+      );
+      return { emailSkippedReason: 'No se pudo encolar el correo' };
+    }
   }
 
   /** La cuenta a la que va el aviso, venga dada o haya que deducirla del perfil. */
