@@ -6,6 +6,33 @@ Cada script es idempotente (`ON CONFLICT DO NOTHING` sobre UUIDs
 deterministas `md5('mantra:<fuente>:...')::uuid`) y puede re-ejecutarse sin
 duplicar datos.
 
+> [!aviso] «Ya importados» describe los SCRIPTS, no cualquier base concreta
+> (TAREA-25, 2026-09-02) La tabla de abajo dice qué ETL existe, está
+> validado y produjo esos conteos **en algún entorno donde se corrió** —
+> no que la base que tenés adelante los tenga cargados. Verificado contra
+> `mantra_redesa_health` (stack `mantra-redesa`, 2026-09-02):
+>
+> ```sql
+> SELECT cs.internal_code, count(*)
+>   FROM terminology.catalog_concepts cc
+>   JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
+>   JOIN terminology.code_systems cs ON cs.id = csv.code_system_id
+>  GROUP BY 1 ORDER BY 2 DESC;
+> --  mantra-core-internal | 8934
+> --  SALUD_CORE           | 1365
+> --  vademecum            |   17
+> --  CODE_SYSTEMS_01      |   12
+> -- (10 328 conceptos en total; NINGUNA fila de icd10cm/loinc/rxterms/
+> --  rxnorm_full/ndc/hcpcs/nucc_taxonomy — los siete `code_system` de la
+> --  tabla de abajo)
+> ```
+>
+> Los siete importadores existen, corren y son idempotentes — eso es lo que
+> certifica esta tabla —, pero **ninguno se ejecutó contra este stack**.
+> Antes de escribir «el eje de terminología ya tiene 458 mil conceptos» o
+> planificar una tarea asumiendo esos datos, corré la consulta de arriba
+> contra la base que vas a usar.
+
 ## Fuentes ya importadas (públicas, sin cuenta necesaria)
 
 | Script | Fuente | code_system | Conceptos reales |
