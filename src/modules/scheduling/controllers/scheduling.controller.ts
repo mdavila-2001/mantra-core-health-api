@@ -274,9 +274,14 @@ export class SchedulingController {
    * es justamente la diferencia que hay que mostrarle.
    */
   @Get('resources/:id/exceptions')
-  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  // `PATIENT` entra acotado por el servicio: sólo lee los bloqueos de un médico
+  // con el que TIENE cita, y sólo ve el motivo catalogado — nunca el texto
+  // libre que el profesional escribe al elegir «Otro».
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({
     summary: 'Listar las excepciones de disponibilidad de un recurso',
+    description:
+      'El profesional ve el texto libre del motivo; un paciente con cita ve sólo la etiqueta catalogada.',
   })
   @ApiQuery({
     name: 'from',

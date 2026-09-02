@@ -827,6 +827,34 @@ export class SchedulingCatalogRepository {
     return { releasedSlots, keptSlots };
   }
 
+  /**
+   * Si un paciente tiene alguna cita con este recurso.
+   *
+   * Es la regla que decide si puede ver por qué el profesional bloqueó un rato:
+   * **sólo del médico con el que tiene cita**, que es el mismo criterio con el
+   * que ya se resuelve qué historial ve. Sin cita no hay vínculo, y el motivo
+   * de un bloqueo es información del consultorio, no del público.
+   *
+   * Mira TODAS las citas, incluidas las canceladas y las cumplidas: alguien que
+   * se atendió el mes pasado y quiere volver sigue siendo su paciente, y
+   * enterarse de que su médico está de vacaciones le ahorra el viaje.
+   *
+   * @param em - Contexto de persistencia.
+   * @param resourceId - La agenda que se quiere leer.
+   * @param patientProfileId - Quién pregunta.
+   */
+  async patientHasBookingWithResource(
+    em: EntityManager,
+    resourceId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    const cuantas = await em.count(AppointmentBookings, {
+      resourceId,
+      patientProfileId,
+    });
+    return cuantas > 0;
+  }
+
   findSlotsByTemplateInRange(
     em: EntityManager,
     scheduleTemplateId: string,

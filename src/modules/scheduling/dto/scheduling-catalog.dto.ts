@@ -521,6 +521,19 @@ export class AvailabilityExceptionDto {
   @ApiProperty({ format: 'uuid' })
   exceptionTypeConceptId!: string;
 
+  /**
+   * El motivo catalogado, en palabras.
+   *
+   * **Viaja para todos**, incluido el paciente: es una etiqueta de una lista
+   * cerrada —«Vacaciones», «Congreso o capacitación»— y no puede contener nada
+   * que el profesional no haya elegido a propósito.
+   *
+   * Es la mitad segura del motivo. La otra —`reason`, el texto libre— sólo la
+   * ve quien administra la agenda.
+   */
+  @ApiProperty({ example: 'Vacaciones' })
+  reasonLabel!: string;
+
   /** Comienzo del bloqueo. */
   @ApiProperty({ format: 'date-time' })
   startAt!: string;
