@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `common`.
- * 51 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 52 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const commonIndexes: readonly IndexTuple[] = [
@@ -52,6 +52,7 @@ export const commonIndexes: readonly IndexTuple[] = [
   ['identifiers', 'ix_identifiers_owner_type_concept_id', ['owner_type_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_use_concept_id', ['use_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_type_concept_id', ['type_concept_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_type_concept_id_value', ['type_concept_id', 'value'], false, 'btree'],
   ['identifiers', 'ix_identifiers_issuer_country_concept_id', ['issuer_country_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_issuer_administrative_area_concept_id', ['issuer_administrative_area_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_assigner_tenant_id', ['assigner_tenant_id'], false, 'btree'],
