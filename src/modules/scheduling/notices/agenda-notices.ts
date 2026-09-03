@@ -105,18 +105,31 @@ export function avisoDeCupoLiberado(
  * Lleva la acción en el cuerpo —aceptar o rechazar— porque una solicitud que
  * avisa sin decir qué se espera de quien la recibe es sólo ruido.
  *
- * ## Lo que este aviso todavía no dice
+ * ## El lugar, que faltaba
  *
- * El propietario lo pide «en tal horario **en tal lugar**». El horario está; el
- * lugar **no viaja en el snapshot de la cita**. Resolverlo es cruzar a
- * `practice` (`PractitionerSitesService`) y exponer la sede en la lectura de
- * agenda, que es alcance de TAREA-12 §3.2 y toca la regla 00.4. No se inventa
- * acá: cuando esa lectura exista, este texto gana una frase.
+ * El propietario lo pide «en tal horario **en tal lugar**», y hasta acá el
+ * horario estaba y el lugar no. Este comentario decía que faltaba exponer la
+ * sede en la lectura de agenda; **ya estaba expuesta** —`ResourceSiteDto` en el
+ * listado de recursos— y lo único que faltaba era traerla al snapshot del
+ * aviso. Ahora la frase la lleva, y se omite entera cuando el recurso no
+ * declara sede: un aviso con un hueco («para el jueves en ») se lee peor que
+ * uno sin el dato.
  *
  * @param booking - La cita recién solicitada.
  * @param paciente - Cómo se llama quien la pidió; `undefined` si no se resolvió.
  * @param destinatarioUserId - Cuenta del profesional.
  */
+/**
+ * «, en el Consultorio del Sur» — o nada, si el recurso no declara sede.
+ *
+ * Se arma como sufijo y no como campo aparte porque el aviso es una frase, y
+ * una frase con un hueco («pidió turno para el jueves en ») se lee peor que sin
+ * el dato.
+ */
+function enTalLugar(booking: BookingNoticeSnapshot): string {
+  return booking.siteLabel === undefined ? '' : `, en ${booking.siteLabel}`;
+}
+
 export function avisoDeSolicitudAlProfesional(
   booking: BookingNoticeSnapshot,
   paciente: string | undefined,
@@ -129,7 +142,7 @@ export function avisoDeSolicitudAlProfesional(
     tenantId: booking.tenantId,
     subject: 'Tenés una nueva solicitud de consulta',
     bodyText:
-      `${quien} pidió turno para el ${cuando(booking.startAt)}. ` +
+      `${quien} pidió turno para el ${cuando(booking.startAt)}${enTalLugar(booking)}. ` +
       'Aceptala o rechazala desde tu agenda.',
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
@@ -169,7 +182,8 @@ export function avisoDeSolicitudAlPaciente(
     tenantId: booking.tenantId,
     subject: 'Enviamos tu solicitud de turno',
     bodyText:
-      `Pediste turno con ${booking.resourceLabel} para el ${cuando(booking.startAt)}. ` +
+      `Pediste turno con ${booking.resourceLabel} para el ${cuando(booking.startAt)}` +
+      `${enTalLugar(booking)}. ` +
       'Todavía falta que lo confirmen: te avisamos apenas respondan.',
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
