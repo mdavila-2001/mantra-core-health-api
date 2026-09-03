@@ -158,6 +158,31 @@ export class PractitionerSpecialtiesRepository {
     return [...new Set(rows.map((row) => row.practitionerProfileId))];
   }
 
+  /**
+   * Los pares perfil↔especialidad **vigentes**, para contar por especialidad.
+   *
+   * Devuelve los pares y no el conteo ya hecho porque quién es visible lo
+   * decide el otro repositorio: contar acá obligaría a esta capa a conocer la
+   * regla de verificación de la guía, que no es suya.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @returns Un par por fila vigente; un profesional con tres especialidades
+   * aparece tres veces.
+   */
+  async findCurrentSpecialtyPairs(
+    em: EntityManager,
+  ): Promise<{ practitionerProfileId: string; specialtyConceptId: string }[]> {
+    const rows = await em.find(
+      PractitionerSpecialties,
+      { validTo: null },
+      { fields: ['practitionerProfileId', 'specialtyConceptId'] },
+    );
+    return rows.map((row) => ({
+      practitionerProfileId: row.practitionerProfileId,
+      specialtyConceptId: row.specialtyConceptId,
+    }));
+  }
+
   /** Desmarca como primaria la especialidad primaria vigente previa. */
   demotePrimary(
     em: EntityManager,

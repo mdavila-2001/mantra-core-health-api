@@ -117,3 +117,47 @@ export class ListPractitionersResponseDto {
   })
   nextCursor!: string | null;
 }
+
+/**
+ * Cuántos profesionales visibles ejercen una especialidad.
+ */
+export class SpecialtyPractitionerCountDto {
+  /**
+   * La especialidad, como concepto de `VS_MEDICAL_SPECIALTY`.
+   */
+  @ApiProperty({ description: 'Concepto de la especialidad' })
+  specialtyConceptId!: string;
+
+  /**
+   * Profesionales distintos que la ejercen hoy y que la guía muestra.
+   */
+  @ApiProperty({ description: 'Profesionales visibles que la ejercen' })
+  practitionerCount!: number;
+}
+
+/**
+ * El recuento de la guía por especialidad.
+ *
+ * Existe para que una portada de especialidades pueda decir cuántos hay en cada
+ * una **sin traerse la guía entera**, que es lo que hacía el front: paginaba
+ * hasta agotar el cursor sólo para contar. Sale de los mismos filtros que
+ * `listPractitioners` —especialidad vigente y perfil visible—, así que el
+ * número de una tarjeta es exactamente el largo de la lista que abre.
+ */
+export class ListSpecialtyCountsResponseDto {
+  /**
+   * Una fila por especialidad con al menos un profesional. Las que no tienen a
+   * nadie **no viajan**: una tarjeta que promete y abre vacía es peor que no
+   * estar.
+   */
+  @ApiProperty({ type: [SpecialtyPractitionerCountDto] })
+  items!: SpecialtyPractitionerCountDto[];
+
+  /**
+   * Profesionales visibles en total, sin repetir a quien tiene varias
+   * especialidades. No es la suma de `items`: esa cuenta a cada uno tantas
+   * veces como especialidades ejerza.
+   */
+  @ApiProperty({ description: 'Profesionales visibles, sin repetir' })
+  practitionerTotal!: number;
+}
