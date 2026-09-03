@@ -190,6 +190,31 @@ búsqueda) pasan limpio; sólo este falla.
 
 ---
 
+**B-15 · El CSP del front bloquea su propio script anti-parpadeo de tema — sólo se ve al
+navegar a la ficha de un término.** *(Encontrado por Marcelo el 02/09 corriendo Playwright para
+verificar el fix del bug de búsqueda del glosario; repo `mantra-core-health`, no la API.)*
+
+`src/index.html:9-33` tiene un `<script>` en línea deliberado (anti-FOUC del tema, documentado
+en el propio archivo) que `src/server/security-headers.ts` debería autorizar calculando su hash
+`sha256` en tiempo de respuesta (`security-headers.ts:47,76,172`). En la práctica el navegador
+bloquea la ejecución con `Content-Security-Policy: script-src 'self'` y reporta un hash
+`sha256-…` distinto al que el CSP declaró — el mecanismo de autorización no está calculando (o
+no está sirviendo) el hash correcto para lo que realmente llega al navegador.
+
+**Reproducido**: `playwright/lane-25-glossary.spec.ts` — `cero errores de consola…` (ahora en
+`test.fixme`, ver comentario ahí) entra a `/glossary`, busca y abre la ficha de un término;
+`page.on('console')` capturó 4 violaciones de CSP (2 hashes distintos, cada uno repetido). Los
+otros 5 casos del mismo archivo pasan limpio contra la misma sesión de navegador — no es un
+problema de la búsqueda ni de esta sesión de Playwright en particular, es del CSP en cualquier
+página que renderice ese script.
+
+**No se investigó más** (fuera de alcance del carril que lo destapó): no se determinó si el
+hash se calcula mal, si SSR y CSR sirven contenidos ligeramente distintos del mismo script, o si
+el header se genera antes de que el script final esté armado. Sin diagnosticar cuál de los tres
+es, cualquier arreglo sería una conjetura.
+
+---
+
 **B-2 · `.puml`, `SQL/` y `salud-db/` no están bajo control de versiones.**
 Ningún cambio de esquema puede viajar en un PR: se distribuye por zip. Es la causa raíz de
 B-3 y de que el ajuste de `rebuild_stack.py` del PR #107 no pueda revisarse.
