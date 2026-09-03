@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
@@ -14,6 +14,7 @@ import {
   PreconditionFailedException,
   SEED,
   TokenService,
+  sniffMimeType,
   type AuthenticatedUser,
 } from '../../../common';
 // El alta administrativa deja al profesional operativo: los roles asistenciales
@@ -60,7 +61,35 @@ import {
   RegisterPractitionerResponseDto,
 } from '../dto';
 import { createResidenceAddress } from '../../common/services/residence-address';
+import { FileUploadService } from '../../common/services/file-upload.service';
+import { FileCategory, FileSensitivity } from '../../common/dto';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+
+/** Decodifica una imagen en base64 (Data URI o base64 plano). */
+function parseBase64Image(
+  dataUri: string,
+): { buffer: Buffer; mimeType: string } | null {
+  const match = dataUri.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+  if (match) {
+    try {
+      const buffer = Buffer.from(match[2], 'base64');
+      if (buffer.length > 0) {
+        return { mimeType: match[1], buffer };
+      }
+    } catch {
+      return null;
+    }
+  }
+  try {
+    const buffer = Buffer.from(dataUri, 'base64');
+    if (buffer.length > 0) {
+      return { mimeType: 'image/jpeg', buffer };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
 
 /** Vida útil del token de verificación de correo (24 h). */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
@@ -147,6 +176,8 @@ export class IamPractitionerSelfRegistrationService {
     private readonly notificationsService: NotificationsService,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
+    @Optional()
+    private readonly fileUploadService?: FileUploadService,
   ) {
     this.logger.setContext(IamPractitionerSelfRegistrationService.name);
   }
@@ -333,6 +364,43 @@ export class IamPractitionerSelfRegistrationService {
         actorUserId: user.id,
       });
 
+      // 1.5) Foto de perfil (si viene en el payload y el servicio de archivos está disponible).
+      let photoFileId: string | undefined;
+      if (dto.profilePhotoBase64 && this.fileUploadService) {
+        const parsed = parseBase64Image(dto.profilePhotoBase64);
+        if (parsed && parsed.buffer.length > 0) {
+          const detectedMimeType = sniffMimeType(parsed.buffer) ?? parsed.mimeType;
+          const ext = detectedMimeType.split('/')[1] ?? 'jpg';
+          try {
+            const uploaded = await this.fileUploadService.upload(
+              {
+                originalname: `practitioner-photo-${user.id}.${ext}`,
+                mimetype: detectedMimeType,
+                buffer: parsed.buffer,
+              },
+              {
+                category: FileCategory.IMAGE,
+                sensitivity: FileSensitivity.NORMAL,
+              },
+              {
+                id: user.id,
+                roles: ['PRACTITIONER'],
+                tenantIds: [SEED.tenantId],
+              },
+            );
+            photoFileId = uploaded.id;
+          } catch (err) {
+            this.logger.warn(
+              {
+                operation: 'iam.auth.register-practitioner',
+                error: (err as Error).message,
+              },
+              'Could not process practitioner profile photo; continuing registration without photo',
+            );
+          }
+        }
+      }
+
       // 2) Persona con sus datos demográficos. El código legible del DTO se
       // traduce aquí al concepto de terminología que persiste la columna.
       const person = this.personsRepo.create(tx, {
@@ -350,6 +418,7 @@ export class IamPractitionerSelfRegistrationService {
         sexAtBirthConceptId: dto.sexAtBirth
           ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
           : undefined,
+        photoFileId,
         actorUserId: user.id,
       });
       await tx.flush();
@@ -370,6 +439,7 @@ export class IamPractitionerSelfRegistrationService {
         practitionerCategoryConceptId:
           dto.practitionerCategoryConceptId ?? PROF.PRACT_CATEGORY_GENERAL,
         professionalTitle: dto.professionalTitle,
+        photoFileId,
         // PENDIENTE de verificación: el alta declara la matrícula, no la prueba.
         verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
         practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
@@ -584,6 +654,7 @@ export class IamPractitionerSelfRegistrationService {
         practitionerCode,
         licenseId: license.id,
         credentialId: credential.id,
+        photoFileId,
         emailVerificationToken: raw,
         activacion,
         clinicalRoles: rolesConcedidos,
@@ -616,6 +687,7 @@ export class IamPractitionerSelfRegistrationService {
       credentialId: created.credentialId,
       verificationStatus: 'PENDING',
       emailVerificationSent,
+      ...(created.photoFileId ? { photoFileId: created.photoFileId } : {}),
       ...(created.clinicalRoles.length > 0
         ? { clinicalRoles: created.clinicalRoles }
         : {}),

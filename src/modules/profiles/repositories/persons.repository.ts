@@ -67,6 +67,10 @@ export interface CreatePersonData {
    */
   workEmployerFreeText?: string;
   /**
+   * Identificador de foto de perfil (FK → common.files).
+   */
+  photoFileId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -131,6 +135,7 @@ export class PersonsRepository {
         occupationFreeText: data.occupationFreeText,
         workEmployerConceptId: data.workEmployerConceptId,
         workEmployerFreeText: data.workEmployerFreeText,
+        photoFileId: data.photoFileId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

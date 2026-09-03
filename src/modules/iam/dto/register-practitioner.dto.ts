@@ -355,6 +355,16 @@ export class RegisterPractitionerDto {
   @IsString()
   @MaxLength(100)
   timeZone?: string;
+
+  /**
+   * Foto de perfil en formato Base64 (Data URI o base64 plano).
+   */
+  @ApiPropertyOptional({
+    description: 'Foto de perfil en formato Base64 (Data URI o base64 plano)',
+  })
+  @IsOptional()
+  @IsString()
+  profilePhotoBase64?: string;
 }
 
 /** Resultado del auto-registro de un profesional de salud. */
@@ -413,6 +423,12 @@ export class RegisterPractitionerResponseDto {
    */
   @ApiProperty()
   emailVerificationSent!: boolean;
+
+  /**
+   * Identificador del archivo de foto de perfil (FK → common.files), si se subió.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  photoFileId?: string;
 }
 
 /**
