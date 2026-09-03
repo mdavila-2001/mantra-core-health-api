@@ -33,6 +33,20 @@ export const RECURSO_CUPO = 'scheduling.bookable_slots';
  */
 export const RUTA_MIS_TURNOS = '/my-account/appointments';
 
+/**
+ * Ruta de la agenda donde el profesional acepta o rechaza lo que le piden.
+ *
+ * Existe porque {@link RUTA_MIS_TURNOS} es del **paciente** —lo dice su propio
+ * nombre— y los avisos dirigidos al profesional la estaban reusando: el aviso
+ * de una solicitud nueva decía «aceptala o rechazala desde tu agenda» y llevaba
+ * al portal del paciente, una pantalla a la que el profesional ni siquiera
+ * llega (su sección es `/schedule`, y el guard de roles lo devolvería).
+ *
+ * El sufijo `?vista=citas` selecciona la pestaña donde viven aceptar y
+ * rechazar; sin él caería en la pestaña por defecto, que es otra.
+ */
+export const RUTA_AGENDA_PROFESIONAL = '/schedule?vista=citas';
+
 /** El destino navegable de un aviso sobre una cita concreta. */
 export function rutaDelTurno(bookingId: string): string {
   return `${RUTA_MIS_TURNOS}?turno=${bookingId}`;
@@ -147,7 +161,9 @@ export function avisoDeSolicitudAlProfesional(
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
     payload: {
-      route: rutaDelTurno(booking.bookingId),
+      // La agenda del profesional, no el portal del paciente: es donde está el
+      // «aceptala o rechazala» que promete el cuerpo de arriba.
+      route: RUTA_AGENDA_PROFESIONAL,
       bookingId: booking.bookingId,
       change: 'REQUESTED',
       ...(booking.startAt === undefined
@@ -333,7 +349,13 @@ export function avisoDeCambioDeCita(
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
     payload: {
-      route: rutaDelTurno(booking.bookingId),
+      // El destino lo decide el destinatario, que es lo que este aviso ya
+      // distingue: cuando el paciente cancela, quien recibe es el profesional
+      // —llega su `userId`— y su turno no vive en el portal del paciente.
+      route:
+        destinatario.userId === undefined
+          ? rutaDelTurno(booking.bookingId)
+          : RUTA_AGENDA_PROFESIONAL,
       bookingId: booking.bookingId,
       change: cambio,
       ...(motivo === undefined ? {} : { reasonText: motivo }),
