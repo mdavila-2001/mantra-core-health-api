@@ -139,6 +139,7 @@ export class InsuranceBackboneService {
         insuranceProductId: productId,
         planCode: dto.planCode,
         name: dto.name,
+        currencyConceptId: dto.currencyConceptId,
         effectiveFrom: dto.effectiveFrom
           ? new Date(dto.effectiveFrom)
           : undefined,

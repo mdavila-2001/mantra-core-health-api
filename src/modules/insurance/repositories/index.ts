@@ -5,3 +5,4 @@ export * from './claim.repository';
 export * from './dispute.repository';
 export * from './settlement.repository';
 export * from './read.repository';
+export * from './claim-read.repository';
