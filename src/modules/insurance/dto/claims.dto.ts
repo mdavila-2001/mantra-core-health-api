@@ -51,6 +51,25 @@ export class ClaimLineDto {
   billedAmount!: string;
 
   /**
+   * Documento clínico que respalda el ítem, como texto.
+   *
+   * `insurance_claim_lines.supporting_clinical_reference` existe en el modelo
+   * y **ningún endpoint podía escribirla**: la columna quedaba siempre nula,
+   * así que el ítem no tenía forma de decir de qué atención sale. Es la única
+   * referencia disponible para la solicitud de imagen, la receta y «otro
+   * procedimiento», que no tienen clave foránea propia.
+   *
+   * Es un `varchar` **sin integridad referencial**: la lectura lo devuelve con
+   * el tipo de documento sin declarar, y la pantalla dice que no está
+   * registrado en vez de adivinarlo.
+   */
+  @ApiPropertyOptional({ maxLength: 200, example: 'ENC-2026-00412' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  supportingClinicalReference?: string;
+
+  /**
    * Valor de patient responsibility amount mantenido por la instancia.
    */
   @ApiPropertyOptional({

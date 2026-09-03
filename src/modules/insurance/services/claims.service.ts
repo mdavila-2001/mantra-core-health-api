@@ -134,6 +134,7 @@ export class ClaimsService {
           quantity: line.quantity,
           billedAmount: line.billedAmount,
           patientResponsibilityAmount: line.patientResponsibilityAmount,
+          supportingClinicalReference: line.supportingClinicalReference,
         });
       }
 

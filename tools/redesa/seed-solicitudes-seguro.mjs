@@ -460,6 +460,10 @@ async function main() {
           lines: receta.lineas.map((linea, orden) => ({
             lineSequence: orden + 1,
             quantity: '1',
+            // La referencia clínica de origen. Va como texto porque es lo
+            // único que el modelo ofrece para una atención: la clave foránea
+            // sólo existe para estudios y dispensaciones.
+            supportingClinicalReference: `ENC-${TANDA}-${indice + 1}-${orden + 1}`,
             ...linea,
           })),
         },
@@ -497,8 +501,10 @@ async function main() {
       return {
         insuranceClaimLineId: linea.id,
         decision,
-        approvedAmount: decision === 'APPROVED' ? facturado : '0',
-        deniedAmount: decision === 'APPROVED' ? '0' : facturado,
+        // Con la misma escala que el facturado: un «0» junto a un «2100.00»
+        // en la misma columna se lee como un dato de otra clase.
+        approvedAmount: decision === 'APPROVED' ? facturado : ceroComo(facturado),
+        deniedAmount: decision === 'APPROVED' ? ceroComo(facturado) : facturado,
         patientAmount: linea.patientResponsibilityAmount?.amount ?? '0',
       };
     });
@@ -544,6 +550,17 @@ async function main() {
   console.log(`  ${coberturas.length} coberturas · ${presentadas} solicitudes · ${dictaminadas} dictaminadas · ${reclamadas} reclamadas`);
   console.log(`  Pantalla: /administration/insurance-claims`);
   console.log(`  Entrá como ${ADMIN_EMAIL}\n`);
+}
+
+/**
+ * Un cero con la misma cantidad de decimales que el importe de referencia.
+ *
+ * @param referencia - Importe del que se copia la escala.
+ * @returns `'0.00'`, `'0.000'`… según corresponda.
+ */
+function ceroComo(referencia) {
+  const decimales = String(referencia).split('.')[1]?.length ?? 0;
+  return decimales === 0 ? '0' : `0.${'0'.repeat(decimales)}`;
 }
 
 /**
