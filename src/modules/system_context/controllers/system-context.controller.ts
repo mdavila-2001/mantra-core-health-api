@@ -16,7 +16,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Public,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DynamicEnumsService, SystemContextsService } from '../services';
 import {
   CreateEnumDefinitionDto,
@@ -116,10 +121,15 @@ export class SystemContextController {
    * constantes del código fuente; ninguno es un uuid sembrado por entorno, que es
    * lo que impedía poblar un selector.
    *
+   * Es `@Public()` por la misma razón por la que `listEnumBindings` no exige
+   * rol: quien más necesita estas opciones es el alta anónima de paciente,
+   * que todavía no tiene sesión con la que pedirlas.
+   *
    * @param target - Campo `esquema.tabla.columna` cuyo catálogo se pide.
    * @param code - Código estable de la enumeración.
    * @returns Enumeración publicada con sus opciones habilitadas.
    */
+  @Public()
   @Get('dynamic-enums')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

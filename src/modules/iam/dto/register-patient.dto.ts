@@ -512,6 +512,30 @@ export class RegisterPatientDto {
   guardianPhone?: string;
 
   /**
+   * Qué es esa persona del paciente: madre, cónyuge, amistad…
+   *
+   * Es un miembro del conjunto `related-person-relationship`, que gobierna
+   * `profiles.related_persons.relationship_concept_id`. Se pide por uuid del
+   * concepto —y no por un código legible como el sexo al nacer— porque el
+   * conjunto es una enumeración dinámica publicada: el cliente ya la lee para
+   * poblar su desplegable, así que devuelve el identificador que esa misma
+   * lectura le dio.
+   *
+   * **Opcional, y su ausencia no es un vacío**: sin parentesco declarado el alta
+   * escribe `RELATIONSHIP_GUARDIAN`, que es lo que escribía siempre antes de que
+   * este campo existiera. Así, un cliente que no lo mande sigue produciendo
+   * exactamente la misma fila que producía.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Parentesco del contacto de emergencia (conjunto related-person-relationship)',
+  })
+  @IsOptional()
+  @IsUUID()
+  guardianRelationshipConceptId?: string;
+
+  /**
    * Plan de salud privado que la persona declara tener.
    *
    * Viaja el **plan**, no la aseguradora: `insurance.patient_coverages` apunta a
