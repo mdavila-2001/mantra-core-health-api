@@ -8,10 +8,21 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { IS_PUBLIC_KEY } from '../../../common/auth/public.decorator';
 import { SystemContextController } from './system-context.controller';
 
 const actor = { id: 'user-1', roles: ['PLATFORM_ADMIN'] };
 const ID = '11111111-1111-1111-1111-111111111111';
+
+/** ¿El handler lleva la marca `@Public()` que honra `JwtAuthGuard`? */
+function esPublica(metodo: string): boolean | undefined {
+  return Reflect.getMetadata(
+    IS_PUBLIC_KEY,
+    (SystemContextController.prototype as never as Record<string, object>)[
+      metodo
+    ],
+  );
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -226,5 +237,29 @@ describe('SystemContextController — lectura del catálogo', () => {
       schemaName: 'profiles',
       entityName: 'persons',
     });
+  });
+});
+
+describe('SystemContextController — quién puede leer el catálogo', () => {
+  it('readEnum es pública: el alta anónima de paciente la consume sin sesión', () => {
+    // Sin la marca el guard global responde 401 y el desplegable del registro
+    // nace vacío. No se afloja el guard: se declara la excepción en el handler.
+    expect(esPublica('readEnum')).toBe(true);
+  });
+
+  it('listEnumBindings sigue exigiendo sesión', () => {
+    // Descubrir qué columnas son de catálogo no lo necesita ningún anónimo.
+    expect(esPublica('listEnumBindings')).toBeUndefined();
+  });
+
+  it.each([
+    'createEnumDefinition',
+    'draftEnumVersion',
+    'publishEnumVersion',
+    'createEnumBinding',
+    'resolveEnumValue',
+    'retireEnumDefinition',
+  ])('la escritura %s no es pública', (metodo) => {
+    expect(esPublica(metodo)).toBeUndefined();
   });
 });
