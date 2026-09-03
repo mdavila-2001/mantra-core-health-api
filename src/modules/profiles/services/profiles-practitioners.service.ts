@@ -411,6 +411,19 @@ export class ProfilesPractitionersService {
       porEspecialidad.set(par.specialtyConceptId, gente);
     }
 
+    // Los que no declaran ninguna especialidad vigente. Sin este número la
+    // portada no puede ofrecerlos, y quien entra por especialidad no llega
+    // jamás a un profesional que no tiene ninguna —que es como nace todo el
+    // que se registra solo, médicos con cuenta incluidos—.
+    const conEspecialidad = new Set(
+      pairs
+        .filter((par) => visibles.has(par.practitionerProfileId))
+        .map((par) => par.practitionerProfileId),
+    );
+    const withoutSpecialtyCount = [...visibles].filter(
+      (id) => !conEspecialidad.has(id),
+    ).length;
+
     const items = [...porEspecialidad.entries()]
       .map(([specialtyConceptId, gente]) => ({
         specialtyConceptId,
@@ -425,12 +438,20 @@ export class ProfilesPractitionersService {
           a.specialtyConceptId.localeCompare(b.specialtyConceptId),
       );
 
-    return { items, practitionerTotal: visibles.size };
+    return { items, practitionerTotal: visibles.size, withoutSpecialtyCount };
   }
 
   async listPractitioners(options: {
     /** Sólo perfiles que ejercen esta especialidad hoy. */
     specialtyConceptId?: string;
+    /**
+     * Sólo los que **no** declaran ninguna especialidad vigente.
+     *
+     * Es el complemento de `specialtyConceptId`, no un filtro más: sin él, un
+     * profesional sin especialidad no es alcanzable desde una guía que se
+     * recorre por especialidad — y así nace todo el que se registra solo.
+     */
+    withoutSpecialty?: boolean;
     /** Cursor opaco devuelto por la página anterior. */
     cursor?: string;
     /** Tope de filas de la página. */
@@ -447,7 +468,19 @@ export class ProfilesPractitionersService {
         : undefined;
 
     let profileIds: readonly string[] | undefined;
-    if (options.specialtyConceptId !== undefined) {
+    if (options.withoutSpecialty === true) {
+      const [visibles, pares] = await Promise.all([
+        this.practitionersRepo.findVisibleProfileIds(em, undefined),
+        this.specialtiesRepo.findCurrentSpecialtyPairs(em),
+      ]);
+      const conEspecialidad = new Set(
+        pares.map((par) => par.practitionerProfileId),
+      );
+      profileIds = visibles.filter((id) => !conEspecialidad.has(id));
+      if (profileIds.length === 0) {
+        return { items: [], count: 0, limit: options.limit, nextCursor: null };
+      }
+    } else if (options.specialtyConceptId !== undefined) {
       profileIds = await this.specialtiesRepo.findProfileIdsBySpecialty(
         em,
         options.specialtyConceptId,
