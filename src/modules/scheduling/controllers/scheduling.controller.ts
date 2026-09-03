@@ -46,6 +46,7 @@ import {
   CreateExceptionDto,
   ExceptionResponseDto,
   ExceptionTypeListDto,
+  ActivityTypeListDto,
   CreateHoldDto,
   HoldResponseDto,
   ConfirmBookingDto,
@@ -328,6 +329,28 @@ export class SchedulingController {
       new Date(to),
       actor,
     );
+  }
+
+  /**
+   * Las tipologías de actividad que la agenda sabe pintar (carril 12).
+   *
+   * El propietario lo pidió así: «con otros colores los otros procedimientos
+   * (TURNOS, OPERACIONES, ETC.) catalogado por tipología raíz». La columna
+   * existía y no había un solo concepto que ponerle.
+   *
+   * Manda `tone` y no un color: el color concreto es del sistema de diseño. Un
+   * `#RRGGBB` desde el servidor obligaría a redesplegarlo para cambiar la
+   * paleta y rompería el tema oscuro.
+   */
+  @Get('activity-types')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Listar las tipologías de actividad de la agenda',
+    description:
+      'Catálogo para pintar el día: clave, concepto, etiqueta en castellano y tono del sistema de diseño.',
+  })
+  listActivityTypes(): ActivityTypeListDto {
+    return this.catalogService.listActivityTypes();
   }
 
   /**

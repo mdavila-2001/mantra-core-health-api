@@ -821,6 +821,56 @@ describe('SchedulingCatalogService', () => {
      * y dejar el viejo en la lista para siempre. El caso lo dijo el dueño del
      * carril con sus palabras, y es el uso corriente de un consultorio.
      */
+    /**
+     * LA TIPOLOGÍA RAÍZ — carril 12, y estaba bloqueado.
+     *
+     * El propietario lo pidió con ejemplos y sin lista: «con otros colores los
+     * otros procedimientos (TURNOS, OPERACIONES, ETC.) catalogado por tipología
+     * raíz». La columna `appointments.type_concept_id` existía desde siempre y
+     * **no había un solo concepto que ponerle**, así que toda actividad era
+     * indistinguible de las demás en la agenda del día.
+     */
+    describe('listActivityTypes', () => {
+      it('publica las cinco, con su concepto y su etiqueta', () => {
+        const d = buildCatalog();
+        const res = d.service.listActivityTypes();
+
+        expect(res.items.map((i) => i.type)).toEqual([
+          'APPOINTMENT',
+          'PROCEDURE',
+          'FOLLOW_UP',
+          'TELEHEALTH',
+          'OTHER',
+        ]);
+        expect(res.items.every((i) => i.conceptId.length > 0)).toBe(true);
+        expect(res.items.find((i) => i.type === 'PROCEDURE')?.label).toBe(
+          'Operación o procedimiento',
+        );
+      });
+
+      it('NINGUNA usa el tono de error: ése es el de los bloqueos', () => {
+        // El propietario pidió los bloqueos «con rojo». Una actividad pintada
+        // igual diría que el rato está cerrado cuando no lo está — y eso hace
+        // que alguien no ofrezca un turno que sí tiene.
+        const d = buildCatalog();
+        const tonos = d.service.listActivityTypes().items.map((i) => i.tone);
+
+        expect(tonos).not.toContain('error');
+        // Y ninguna se repite: dos tipologías del mismo color no se distinguen,
+        // que es justamente lo que el pedido quiere evitar.
+        expect(new Set(tonos).size).toBe(tonos.length);
+      });
+
+      it('manda tono y NO un color: la paleta es del front', () => {
+        // Un `#RRGGBB` desde el servidor obligaría a redesplegarlo para cambiar
+        // la paleta, y rompería el tema oscuro.
+        const d = buildCatalog();
+        for (const item of d.service.listActivityTypes().items) {
+          expect(item.tone).not.toMatch(/^#/);
+        }
+      });
+    });
+
     describe('reactivateTemplate', () => {
       function conPlantilla(
         d: ReturnType<typeof buildCatalog>,

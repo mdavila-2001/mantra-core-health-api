@@ -31,10 +31,14 @@ import {
   ExceptionResponseDto,
   ExceptionTypeListDto,
   EXCEPTION_TYPES,
+  ACTIVITY_TYPES,
+  type ActivityType,
+  type ActivityTypeListDto,
   ResourceAgendaResponseDto,
   type ResourceType,
   type ExceptionType,
 } from '../dto';
+import { CLIN } from '../../clinical/clinical.concepts';
 import { diasLocalesQueCoinciden, horaLocalAUtc } from '../scheduling-time';
 import type { DiaLocal } from '../scheduling-time';
 
@@ -74,6 +78,39 @@ const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
   ROOM: CONCEPTS.RESOURCE_ROOM,
   EQUIPMENT: CONCEPTS.RESOURCE_EQUIPMENT,
+};
+
+/** La tipología raíz de una actividad, a su concepto de `clinical`. */
+const ACTIVITY_TYPE_CONCEPT: Readonly<Record<ActivityType, string>> = {
+  APPOINTMENT: CLIN.ACTIVITY_APPOINTMENT,
+  PROCEDURE: CLIN.ACTIVITY_PROCEDURE,
+  FOLLOW_UP: CLIN.ACTIVITY_FOLLOW_UP,
+  TELEHEALTH: CLIN.ACTIVITY_TELEHEALTH,
+  OTHER: CLIN.ACTIVITY_OTHER,
+};
+
+/** Cómo se llama cada tipología en pantalla. */
+const ACTIVITY_TYPE_LABEL: Readonly<Record<ActivityType, string>> = {
+  APPOINTMENT: 'Consulta',
+  PROCEDURE: 'Operación o procedimiento',
+  FOLLOW_UP: 'Control',
+  TELEHEALTH: 'Teleconsulta',
+  OTHER: 'Otra actividad',
+};
+
+/**
+ * El tono de cada tipología.
+ *
+ * `error` NO se usa: está reservado para los bloqueos, que el propietario pidió
+ * «con rojo». Una actividad pintada como un bloqueo diría que el rato está
+ * cerrado cuando no lo está.
+ */
+const ACTIVITY_TYPE_TONE: Readonly<Record<ActivityType, string>> = {
+  APPOINTMENT: 'primary',
+  PROCEDURE: 'warning',
+  FOLLOW_UP: 'info',
+  TELEHEALTH: 'secondary',
+  OTHER: 'success',
 };
 
 const EXCEPTION_TYPE_CONCEPT: Readonly<Record<ExceptionType, string>> = {
@@ -716,6 +753,28 @@ export class SchedulingCatalogService {
    * permite al formulario pedir la explicación en el momento, sin conocer de
    * antemano cuál de los motivos la exige.
    */
+  /**
+   * Las tipologías de actividad que la agenda sabe pintar (carril 12).
+   *
+   * El propietario lo pidió así: «con otros colores los otros procedimientos
+   * (TURNOS, OPERACIONES, ETC.) catalogado por tipología raíz». La columna
+   * `appointments.type_concept_id` existía desde siempre y **no había un solo
+   * concepto que ponerle**: toda actividad era indistinguible de las demás.
+   *
+   * Es lectura de catálogo, sin tenant y sin datos de nadie — el mismo criterio
+   * que el catálogo de motivos de bloqueo.
+   */
+  listActivityTypes(): ActivityTypeListDto {
+    return {
+      items: ACTIVITY_TYPES.map((type: ActivityType) => ({
+        type,
+        conceptId: ACTIVITY_TYPE_CONCEPT[type],
+        label: ACTIVITY_TYPE_LABEL[type],
+        tone: ACTIVITY_TYPE_TONE[type],
+      })),
+    };
+  }
+
   listExceptionTypes(): ExceptionTypeListDto {
     return {
       items: EXCEPTION_TYPES.map((type) => ({
