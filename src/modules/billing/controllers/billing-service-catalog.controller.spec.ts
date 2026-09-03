@@ -17,10 +17,12 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const serviceCatalogService = { search: mockFn(), create: mockFn() };
+  const nomenclature = { listSpecialties: mockFn(), search: mockFn() };
   const controller = new BillingServiceCatalogController(
     serviceCatalogService as any,
+    nomenclature as any,
   );
-  return { controller, serviceCatalogService };
+  return { controller, serviceCatalogService, nomenclature };
 }
 
 describe('BillingServiceCatalogController', () => {
@@ -75,5 +77,30 @@ describe('BillingServiceCatalogController', () => {
       ...dto,
     });
     expect(d.serviceCatalogService.create).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delega el nomenclador con la especialidad y el cursor tal cual', async () => {
+    const d = build();
+    d.nomenclature.search.mockResolvedValue({ items: [], nextCursor: null });
+
+    await d.controller.searchProcedures('Cardiología', 'eco', 'c1', 10);
+
+    // El cursor es opaco: se reenvía sin interpretarlo, que es lo único que el
+    // controlador tiene que garantizar.
+    expect(d.nomenclature.search).toHaveBeenCalledWith({
+      specialty: 'Cardiología',
+      query: 'eco',
+      cursor: 'c1',
+      limit: 10,
+    });
+  });
+
+  it('delega las especialidades sin argumentos', async () => {
+    const d = build();
+    d.nomenclature.listSpecialties.mockResolvedValue({ items: [] });
+
+    await d.controller.listProcedureSpecialties();
+
+    expect(d.nomenclature.listSpecialties).toHaveBeenCalledTimes(1);
   });
 });

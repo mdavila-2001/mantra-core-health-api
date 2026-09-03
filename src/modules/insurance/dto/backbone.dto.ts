@@ -99,6 +99,23 @@ export class CreatePlanDto {
   @IsOptional()
   @IsString()
   effectiveFrom?: string;
+
+  /**
+   * Moneda del plan.
+   *
+   * `insurance_plans.currency_concept_id` existe en el modelo y el alta no lo
+   * escribía: los planes nacían sin moneda, y con ellos todo lo que se factura
+   * bajo el plan. Un importe sin moneda obliga a la pantalla a elegir entre
+   * inventarle un símbolo o mostrar un número pelado — y en un producto
+   * boliviano que también maneja dólares, ninguna de las dos es aceptable.
+   *
+   * Opcional y sin valor por defecto **a propósito**: poner `BOB` de oficio
+   * afirmaría la moneda de un plan que nadie declaró.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  currencyConceptId?: string;
 }
 
 /** Alta de beneficio de plan. */

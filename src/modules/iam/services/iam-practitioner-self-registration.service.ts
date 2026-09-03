@@ -69,7 +69,9 @@ import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 function parseBase64Image(
   dataUri: string,
 ): { buffer: Buffer; mimeType: string } | null {
-  const match = dataUri.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+  const match = dataUri.match(
+    /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/,
+  );
   if (match) {
     try {
       const buffer = Buffer.from(match[2], 'base64');
@@ -369,7 +371,8 @@ export class IamPractitionerSelfRegistrationService {
       if (dto.profilePhotoBase64 && this.fileUploadService) {
         const parsed = parseBase64Image(dto.profilePhotoBase64);
         if (parsed && parsed.buffer.length > 0) {
-          const detectedMimeType = sniffMimeType(parsed.buffer) ?? parsed.mimeType;
+          const detectedMimeType =
+            sniffMimeType(parsed.buffer) ?? parsed.mimeType;
           const ext = detectedMimeType.split('/')[1] ?? 'jpg';
           try {
             const uploaded = await this.fileUploadService.upload(
@@ -419,6 +422,10 @@ export class IamPractitionerSelfRegistrationService {
           ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
           : undefined,
         photoFileId,
+        occupationConceptId: dto.occupationConceptId,
+        occupationFreeText: dto.occupationConceptId
+          ? undefined
+          : dto.occupationFreeText,
         actorUserId: user.id,
       });
       await tx.flush();

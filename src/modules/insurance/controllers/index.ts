@@ -7,3 +7,4 @@ export * from './reconciliation.controller';
 export * from './broker-commission.controller';
 export * from './insurance-read.controller';
 export * from './insurance-catalog.controller';
+export * from './claims-read.controller';

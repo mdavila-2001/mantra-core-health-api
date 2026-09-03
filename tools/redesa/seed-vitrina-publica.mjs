@@ -744,10 +744,74 @@ function primerEjercicio(medico) {
  * pública de vecino aparecería en el buscador como si fuera médico. Ver la
  * cabecera de `datos/comunidad.mjs`.
  */
+/**
+ * Municipios ya resueltos, indexados por nombre de ciudad.
+ *
+ * `RegisterPatientDto.residenceMunicipalityConceptId` es **obligatorio** desde
+ * que el alta de paciente cerró su contrato, y es un `uuid` de
+ * `VS_BO_MUNICIPALITY`: no se puede mandar el nombre de la ciudad.
+ *
+ * Se cachea porque el alta corre en bucle: dieciséis vecinos sobre seis
+ * ciudades son dieciséis consultas por un dato que no cambia durante la
+ * corrida.
+ */
+const municipiosPorNombre = new Map();
+
+/**
+ * Prefijo del código de concepto de un municipio boliviano.
+ *
+ * Se filtra por él porque el buscador de conceptos busca en **todo** el
+ * catálogo: «Tarija» también nombra un departamento, y el alta espera el
+ * municipio. Sin este filtro se mandaría el concepto equivocado y la FK lo
+ * aceptaría igual — es un uuid válido de `catalog_concepts`.
+ */
+const PREFIJO_MUNICIPIO = 'geo:bo:municipality:';
+
+/**
+ * Devuelve el concepto de municipio de una ciudad, buscándolo por su nombre.
+ *
+ * Se resuelve por **nombre del catálogo**, no por un código escrito acá: un
+ * código copiado a mano deja de existir en cuanto alguien reconstruye la base,
+ * y el dataset de vecinos ya declara la ciudad por su nombre.
+ *
+ * @param ciudad - Nombre del municipio, tal cual lo publica el catálogo.
+ * @returns El `conceptId`, o `null` si el catálogo no lo tiene.
+ */
+async function municipioDe(ciudad) {
+  if (municipiosPorNombre.has(ciudad)) return municipiosPorNombre.get(ciudad);
+
+  const pagina = await call(
+    'vecinos',
+    `municipio ${ciudad}`,
+    'GET',
+    `/terminology/concepts?q=${encodeURIComponent(ciudad)}&limit=100`,
+    {},
+  );
+  const encontrado = pagina.ok
+    ? (pagina.body?.items ?? []).find(
+        (c) => c.code?.startsWith(PREFIJO_MUNICIPIO) && c.display === ciudad,
+      )
+    : null;
+  // La búsqueda devuelve `conceptId`, no `id`.
+  const id = encontrado?.conceptId ?? null;
+  municipiosPorNombre.set(ciudad, id);
+  return id;
+}
+
 async function sembrarCiudadano(persona, indice, tenantId) {
   const ci = `${persona.ci}${TANDA.slice(-2)}`;
   const quien = `${persona.nombre} ${persona.apellido}`;
   const correo = `${slugificar(persona.nombre)}.${slugificar(persona.apellido)}.${TANDA}${indice}@alovida.test`;
+
+  // El alta de paciente exige municipio, teléfono y sexo al nacer desde que
+  // cerró su contrato. Sin ellos devolvía 400 y los dieciséis vecinos se
+  // perdían en silencio: la corrida terminaba diciendo «0 comentarios» sin
+  // explicar por qué.
+  const municipio = await municipioDe(persona.ciudad);
+  if (municipio === null) {
+    console.log(`    ✗ ${quien}: el catálogo no tiene el municipio «${persona.ciudad}»`);
+    return null;
+  }
 
   const alta = await call('vecinos', `alta de ${quien}`, 'POST', '/iam/auth/register-patient', {
     auth: false,
@@ -759,6 +823,13 @@ async function sembrarCiudadano(persona, indice, tenantId) {
       motherLastName: persona.segundoApellido,
       email: correo,
       birthDate: persona.nacimiento,
+      residenceMunicipalityConceptId: municipio,
+      // Determinístico a partir del índice, igual que el de los médicos: la
+      // corrida tiene que ser repetible.
+      phone: `+591 6${String(20_000_000 + indice * 211).slice(0, 7)}`,
+      // Declarado en el dataset, no deducido del nombre. Ver la cabecera de
+      // `datos/comunidad.mjs`.
+      sexAtBirth: persona.sexo,
     },
     expect: 201,
   });
