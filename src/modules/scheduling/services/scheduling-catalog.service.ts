@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -32,6 +32,8 @@ import {
   ExceptionTypeListDto,
   EXCEPTION_TYPES,
   ACTIVITY_TYPES,
+  type ShiftSlotsDto,
+  type ShiftSlotsResponseDto,
   type ActivityType,
   type ActivityTypeListDto,
   ResourceAgendaResponseDto,
@@ -39,6 +41,12 @@ import {
   type ExceptionType,
 } from '../dto';
 import { CLIN } from '../../clinical/clinical.concepts';
+import { avisoDeHorarioMovido } from '../notices/agenda-notices';
+import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
+import {
+  AGENDA_NOTICE_PORT,
+  type AgendaNoticePort,
+} from '../ports/agenda-notice.port';
 import { diasLocalesQueCoinciden, horaLocalAUtc } from '../scheduling-time';
 import type { DiaLocal } from '../scheduling-time';
 
@@ -194,6 +202,9 @@ export class SchedulingCatalogService {
     private readonly logger: PinoLogger,
     private readonly vinculos: PractitionerAffiliationGateService,
     private readonly tiempoProfesional: SchedulingProfessionalTimeService,
+    private readonly noticeRepo: SchedulingNoticeRepository,
+    @Inject(AGENDA_NOTICE_PORT)
+    private readonly notices: AgendaNoticePort,
   ) {
     this.logger.setContext(SchedulingCatalogService.name);
   }
@@ -444,6 +455,169 @@ export class SchedulingCatalogService {
    * Por eso la respuesta lo dice explícito en `slotsPendientes`: quien reactiva
    * tiene que generar, y la pantalla se lo tiene que pedir.
    */
+  /**
+   * Corre los cupos de una agenda N minutos — «mover horario» del carril 12.
+   *
+   * *«Un botón que se llame mover horario, que desplace los slots N minutos
+   * después y envíe mensajes automáticos por la app de mover horarios y sea
+   * seleccionable a todos o ciertos slots en específico.»*
+   *
+   * ## Qué lo distingue de «avisar demora»
+   *
+   * La demora **sólo avisa**: deja el rastro en el historial y manda la
+   * notificación, y los cupos quedan donde estaban. Es lo correcto cuando el
+   * profesional se atrasa y va a recuperar. Mover el horario **escribe**: los
+   * cupos cambian de hora y el turno de la persona pasa a ser otro.
+   *
+   * Son dos actos distintos y por eso son dos operaciones, no un parámetro.
+   *
+   * ## Todo o nada, y por qué importa acá
+   *
+   * Una sola transacción. Si un cupo no puede moverse —porque el horario nuevo
+   * pisa otra cita del mismo profesional— **no se mueve ninguno**: una agenda
+   * medio corrida es peor que una sin tocar, porque nadie sabría cuáles turnos
+   * cambiaron y cuáles no.
+   *
+   * La colisión la detecta la base, no este código:
+   * `ex_appointments_practitioner_time` es un `EXCLUDE` sobre (profesional,
+   * rango) y rechaza el solapamiento con `23P01`. Eso es lo que hace seguro
+   * mover cupos, y es la mitad de la P-12-1 que quedó resuelta al construirlo.
+   *
+   * ## El aviso va DESPUÉS de cerrar
+   *
+   * Como el resto de los avisos del módulo: si la transacción falla, nadie
+   * recibe un mensaje diciendo que su turno se movió cuando no se movió.
+   */
+  async shiftSlots(
+    resourceId: string,
+    dto: ShiftSlotsDto,
+    actor: AuthenticatedUser,
+  ): Promise<ShiftSlotsResponseDto> {
+    const from = new Date(dto.from);
+    const to = new Date(dto.to);
+    if (from >= to) {
+      throw new PreconditionFailedException(
+        'La ventana termina antes de empezar',
+        { from: dto.from, to: dto.to },
+      );
+    }
+    if (dto.shiftMinutes === 0) {
+      throw new PreconditionFailedException(
+        'Mover cero minutos no cambia nada: elegí cuánto correr la agenda',
+        { shiftMinutes: 0 },
+      );
+    }
+
+    this.logger.info(
+      {
+        operation: 'scheduling.slots.shift',
+        resourceId,
+        shiftMinutes: dto.shiftMinutes,
+      },
+      'Shifting slots',
+    );
+
+    const movidos = await this.em.transactional(async (tx) => {
+      const resource = await this.catalogRepo.findResourceById(tx, resourceId);
+      if (!resource) {
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId,
+        });
+      }
+      this.assertRecursoDelActor(resource, actor);
+
+      const cupos = await this.catalogRepo.findSlotsOfResourceForUpdate(
+        tx,
+        resourceId,
+        from,
+        to,
+        dto.slotIds,
+      );
+      if (cupos.length === 0) {
+        return { ids: [] as string[], desplazados: 0 };
+      }
+
+      const ms = dto.shiftMinutes * 60_000;
+      for (const cupo of cupos) {
+        cupo.startAt = new Date(cupo.startAt.getTime() + ms);
+        if (cupo.endAt !== undefined && cupo.endAt !== null) {
+          cupo.endAt = new Date(cupo.endAt.getTime() + ms);
+        }
+        touch(cupo, actor.id);
+      }
+
+      // El `flush` explícito acá y no al cerrar: si el horario nuevo pisa otra
+      // cita, queremos el `23P01` DENTRO de la transacción para que la reversión
+      // sea de todos los cupos y no de algunos.
+      await tx.flush();
+
+      return { ids: cupos.map((c) => c.id), desplazados: cupos.length };
+    });
+
+    const avisados = await this.avisarDelMovimiento(
+      movidos.ids,
+      dto.shiftMinutes,
+    );
+
+    return {
+      movedSlots: movidos.desplazados,
+      notified: avisados,
+      shiftMinutes: dto.shiftMinutes,
+    };
+  }
+
+  /**
+   * Avisa a quien tenía turno en un cupo movido.
+   *
+   * **Fuera de la transacción**, como el resto de los avisos del módulo: la
+   * agenda ya quedó corrida y un fallo del canal no puede deshacerla. Y si
+   * fallara la escritura, nadie recibiría un aviso sobre algo que no pasó.
+   *
+   * Un fallo al avisar no rompe la operación: se registra y sigue. La persona
+   * ve el horario nuevo al entrar aunque el mensaje se haya perdido.
+   */
+  private async avisarDelMovimiento(
+    slotIds: readonly string[],
+    minutos: number,
+  ): Promise<number> {
+    if (slotIds.length === 0) return 0;
+
+    const em = this.em.fork();
+    const citas = await this.catalogRepo.findBookingsOfSlots(
+      em,
+      slotIds,
+      ACTIVE_BOOKING_STATES,
+    );
+
+    let avisados = 0;
+    for (const cita of citas) {
+      try {
+        const snapshot = await this.noticeRepo.describeBooking(em, cita.id);
+        if (snapshot === null) continue;
+        const cuenta = await this.noticeRepo.findAccountForProfile(
+          em,
+          cita.patientProfileId,
+        );
+        if (cuenta === null) continue;
+
+        await this.notices.emit(
+          avisoDeHorarioMovido(snapshot, minutos, cuenta),
+        );
+        avisados += 1;
+      } catch (error: unknown) {
+        this.logger.warn(
+          {
+            operation: 'scheduling.slots.shift.notice',
+            bookingId: cita.id,
+            error,
+          },
+          'No se pudo avisar del movimiento de horario',
+        );
+      }
+    }
+    return avisados;
+  }
+
   async reactivateTemplate(
     templateId: string,
     actor: AuthenticatedUser,

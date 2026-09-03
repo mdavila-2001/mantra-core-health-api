@@ -181,7 +181,7 @@ describe('el lugar en los avisos de solicitud', () => {
   });
 
   it('el aviso al paciente dice dónde', () => {
-    const aviso = avisoDeSolicitudAlPaciente(conSede, USUARIO);
+    const aviso = avisoDeSolicitudAlPaciente(conSede);
     expect(aviso.bodyText).toContain('en Consultorio del Sur');
   });
 

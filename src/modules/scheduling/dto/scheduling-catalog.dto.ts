@@ -902,3 +902,80 @@ export class ActivityTypeListDto {
   @ApiProperty({ type: [ActivityTypeDto] })
   items!: ActivityTypeDto[];
 }
+
+/* -- Mover el horario N minutos (carril 12) --------------------------------- */
+
+/** Cuánto se puede correr una agenda de una vez, en minutos. */
+export const MIN_SHIFT_MINUTES = -240;
+export const MAX_SHIFT_MINUTES = 240;
+
+/**
+ * Cuerpo de `POST /scheduling/resources/{id}/shift-slots`.
+ *
+ * El pedido original: *«un botón que se llame mover horario, que desplace los
+ * slots N minutos después y envíe mensajes automáticos por la app de mover
+ * horarios y sea seleccionable a todos o ciertos slots en específico»*.
+ */
+export class ShiftSlotsDto {
+  /**
+   * Cuántos minutos se corre. Negativo adelanta.
+   *
+   * Se admite adelantar además de atrasar porque la situación real es
+   * simétrica: el profesional que termina antes quiere adelantar a los que
+   * esperan, y negarlo lo obligaría a cancelar y volver a crear.
+   */
+  @ApiProperty({
+    description: 'Minutos a correr. Negativo adelanta.',
+    minimum: MIN_SHIFT_MINUTES,
+    maximum: MAX_SHIFT_MINUTES,
+    example: 20,
+  })
+  @IsInt()
+  @Min(MIN_SHIFT_MINUTES)
+  @Max(MAX_SHIFT_MINUTES)
+  shiftMinutes!: number;
+
+  /** Desde cuándo se mira la agenda. */
+  @ApiProperty({ format: 'date-time' })
+  @IsISO8601()
+  from!: string;
+
+  /** Hasta cuándo. */
+  @ApiProperty({ format: 'date-time' })
+  @IsISO8601()
+  to!: string;
+
+  /**
+   * Qué cupos mover. **Ausente = todos los de la ventana.**
+   *
+   * Es el «seleccionable a todos o ciertos slots en específico» del pedido. Se
+   * distingue ausente de lista vacía: una lista vacía no mueve nada, y es una
+   * petición que alguien armó mal — mejor que no haga nada a que mueva la
+   * agenda entera.
+   */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  slotIds?: string[];
+}
+
+/** Lo que responde mover el horario. */
+export class ShiftSlotsResponseDto {
+  /** Cuántos cupos se corrieron. */
+  @ApiProperty()
+  movedSlots!: number;
+
+  /**
+   * A cuántas personas se les avisó.
+   *
+   * Menor que `movedSlots` es lo corriente: los cupos libres se mueven y no
+   * hay a quién avisarle.
+   */
+  @ApiProperty()
+  notified!: number;
+
+  /** Los minutos que se aplicaron, para que el cliente confirme lo que pidió. */
+  @ApiProperty()
+  shiftMinutes!: number;
+}

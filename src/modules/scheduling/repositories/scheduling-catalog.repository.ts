@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   AppointmentBookings,
@@ -788,6 +789,44 @@ export class SchedulingCatalogRepository {
    *
    * El servicio se encarga de decirlo; acá sólo se cambia el estado.
    */
+  /**
+   * Los cupos de un recurso en una ventana, bloqueados para escribir.
+   *
+   * `FOR UPDATE` porque mover el horario es leer-decidir-escribir: sin el lock,
+   * alguien podría reservar uno de estos cupos entre la lectura y la escritura
+   * y terminar con un turno en un horario que su paciente nunca aceptó.
+   */
+  findSlotsOfResourceForUpdate(
+    em: EntityManager,
+    resourceId: string,
+    desde: Date,
+    hasta: Date,
+    slotIds?: readonly string[],
+  ): Promise<BookableSlots[]> {
+    return em.find(
+      BookableSlots,
+      {
+        resourceId,
+        startAt: { $gte: desde, $lt: hasta },
+        ...(slotIds === undefined ? {} : { id: { $in: [...slotIds] } }),
+      },
+      { lockMode: LockMode.PESSIMISTIC_WRITE, orderBy: { startAt: 'ASC' } },
+    );
+  }
+
+  /** Las citas vivas que cuelgan de esos cupos, con su paciente. */
+  async findBookingsOfSlots(
+    em: EntityManager,
+    slotIds: readonly string[],
+    estados: readonly string[],
+  ): Promise<AppointmentBookings[]> {
+    if (slotIds.length === 0) return [];
+    return em.find(AppointmentBookings, {
+      bookableSlotId: { $in: [...slotIds] },
+      statusConceptId: { $in: [...estados] },
+    });
+  }
+
   async reactivateTemplate(
     em: EntityManager,
     scheduleTemplateId: string,

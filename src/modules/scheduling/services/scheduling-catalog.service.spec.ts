@@ -71,6 +71,8 @@ function buildCatalog() {
       sample: [],
     }),
     reactivateTemplate: mockFn(),
+    findSlotsOfResourceForUpdate: mockFn().mockResolvedValue([]),
+    findBookingsOfSlots: mockFn().mockResolvedValue([]),
     retireTemplate: mockFn().mockResolvedValue({
       releasedSlots: 0,
       keptSlots: 0,
@@ -86,14 +88,33 @@ function buildCatalog() {
     compromisos: mockFn(async () => []),
     citasConfirmadas: mockFn(async () => []),
   };
+  // Mover el horario avisa a quien tenía turno. Por omisión nadie tiene cuenta
+  // resoluble: así el camino feliz de las demás pruebas no emite nada.
+  const noticeRepo = {
+    describeBooking: mockFn().mockResolvedValue(null),
+    findAccountForProfile: mockFn().mockResolvedValue(null),
+  };
+  const notices = { emit: mockFn().mockResolvedValue({ delivered: true }) };
+
   const service = new SchedulingCatalogService(
     em as any,
     catalogRepo,
     logger as any,
     vinculos as any,
     tiempoProfesional as any,
+    noticeRepo as any,
+    notices as any,
   );
-  return { service, tx, catalogRepo, em, vinculos, tiempoProfesional };
+  return {
+    service,
+    tx,
+    catalogRepo,
+    em,
+    vinculos,
+    tiempoProfesional,
+    noticeRepo,
+    notices,
+  };
 }
 
 describe('SchedulingCatalogService', () => {
@@ -830,6 +851,163 @@ describe('SchedulingCatalogService', () => {
      * **no había un solo concepto que ponerle**, así que toda actividad era
      * indistinguible de las demás en la agenda del día.
      */
+    /**
+     * MOVER EL HORARIO N MINUTOS — carril 12.
+     *
+     * *«Un botón que se llame mover horario, que desplace los slots N minutos
+     * después y envíe mensajes automáticos por la app de mover horarios y sea
+     * seleccionable a todos o ciertos slots en específico.»*
+     *
+     * Distinto de «avisar demora», que sólo avisa: acá el turno de la persona
+     * pasa a ser otro.
+     */
+    describe('shiftSlots', () => {
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      function conRecursoPropio(d: ReturnType<typeof buildCatalog>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+      }
+
+      function cupo(hora: number) {
+        return {
+          id: `s-${hora}`,
+          startAt: new Date(2026, 8, 10, hora, 0),
+          endAt: new Date(2026, 8, 10, hora, 30),
+        };
+      }
+
+      const ventana = {
+        from: new Date(2026, 8, 10, 0, 0).toISOString(),
+        to: new Date(2026, 8, 11, 0, 0).toISOString(),
+      };
+
+      it('corre cada cupo los minutos pedidos, arranque Y fin', () => {
+        // Mover sólo el arranque alargaría la consulta en silencio: veinte
+        // minutos más tarde con el mismo fin es veinte minutos menos de
+        // atención.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        const cupos = [cupo(9), cupo(10)];
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue(cupos);
+
+        return d.service
+          .shiftSlots(
+            RESOURCE,
+            { shiftMinutes: 20, ...ventana },
+            duenio as never,
+          )
+          .then((res) => {
+            expect(res.movedSlots).toBe(2);
+            expect(cupos[0].startAt.getHours()).toBe(9);
+            expect(cupos[0].startAt.getMinutes()).toBe(20);
+            expect(cupos[0].endAt.getMinutes()).toBe(50);
+          });
+      });
+
+      it('acepta minutos negativos: adelantar es simétrico de atrasar', async () => {
+        // El profesional que termina antes quiere adelantar a los que esperan.
+        // Negarlo lo obligaría a cancelar y volver a crear.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        const cupos = [cupo(10)];
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue(cupos);
+
+        await d.service.shiftSlots(
+          RESOURCE,
+          { shiftMinutes: -30, ...ventana },
+          duenio as never,
+        );
+
+        expect(cupos[0].startAt.getHours()).toBe(9);
+        expect(cupos[0].startAt.getMinutes()).toBe(30);
+      });
+
+      it('mover CERO minutos se rechaza en vez de no hacer nada', async () => {
+        // Una operación que no cambia nada y responde «listo» hace creer que la
+        // agenda se movió.
+        const d = buildCatalog();
+
+        await expect(
+          d.service.shiftSlots(
+            RESOURCE,
+            { shiftMinutes: 0, ...ventana },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('una ventana al revés se rechaza', async () => {
+        const d = buildCatalog();
+
+        await expect(
+          d.service.shiftSlots(
+            RESOURCE,
+            { shiftMinutes: 10, from: ventana.to, to: ventana.from },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('sólo mueve los cupos que se nombran, si se nombran', async () => {
+        // «Seleccionable a todos o ciertos slots en específico»: la lista viaja
+        // al repositorio, que es donde se acota la consulta.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([cupo(9)]);
+
+        await d.service.shiftSlots(
+          RESOURCE,
+          { shiftMinutes: 15, ...ventana, slotIds: ['s-9'] },
+          duenio as never,
+        );
+
+        expect(d.catalogRepo.findSlotsOfResourceForUpdate).toHaveBeenCalledWith(
+          expect.anything(),
+          RESOURCE,
+          expect.any(Date),
+          expect.any(Date),
+          ['s-9'],
+        );
+      });
+
+      it('sin cupos en la ventana no avisa a nadie', async () => {
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([]);
+
+        const res = await d.service.shiftSlots(
+          RESOURCE,
+          { shiftMinutes: 20, ...ventana },
+          duenio as never,
+        );
+
+        expect(res.movedSlots).toBe(0);
+        expect(res.notified).toBe(0);
+        expect(d.notices.emit).not.toHaveBeenCalled();
+      });
+
+      it('no se mueve la agenda de otro', async () => {
+        const d = buildCatalog();
+        conRecursoPropio(d);
+
+        await expect(
+          d.service.shiftSlots(RESOURCE, { shiftMinutes: 20, ...ventana }, {
+            ...duenio,
+            practitionerProfileId: 'hp-DE-OTRO',
+          } as never),
+        ).rejects.toBeDefined();
+      });
+    });
+
     describe('listActivityTypes', () => {
       it('publica las cinco, con su concepto y su etiqueta', () => {
         const d = buildCatalog();

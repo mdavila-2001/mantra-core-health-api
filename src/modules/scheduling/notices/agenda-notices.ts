@@ -343,3 +343,51 @@ export function avisoDeCambioDeCita(
     },
   };
 }
+
+/**
+ * «Tu turno se movió» — el aviso de mover horario (carril 12).
+ *
+ * El pedido lo llama «mensajes automáticos por la app de mover horarios».
+ *
+ * ## Por qué dice la hora nueva y no los minutos
+ *
+ * «Tu turno se movió 20 minutos» obliga a quien lo lee a hacer una cuenta con
+ * un dato que no tiene a mano: no se acuerda de a qué hora era. La hora nueva
+ * es la que va a necesitar, y es la que se dice primero.
+ *
+ * Los minutos van igual, pero después y como contexto — sirven para reconocer
+ * que es *su* turno el que se movió y no otro.
+ */
+export function avisoDeHorarioMovido(
+  booking: BookingNoticeSnapshot,
+  minutos: number,
+  destinatarioUserId: string,
+): AgendaNotice {
+  const direccion = minutos > 0 ? 'más tarde' : 'más temprano';
+  const cuantos = Math.abs(minutos);
+  return {
+    kind: 'BOOKING_STATE_CHANGED',
+    recipient: { userId: destinatarioUserId },
+    tenantId: booking.tenantId,
+    subject: 'Se movió el horario de tu turno',
+    bodyText:
+      `Tu turno con ${booking.resourceLabel} pasa a ser el ` +
+      `${cuando(booking.startAt)}${enTalLugar(booking)} — ` +
+      `${cuantos} ${cuantos === 1 ? 'minuto' : 'minutos'} ${direccion}. ` +
+      'Si no te sirve, podés pedir otro horario desde la app.',
+    relatedResourceType: RECURSO_CITA,
+    relatedResourceId: booking.bookingId,
+    payload: {
+      route: rutaDelTurno(booking.bookingId),
+      bookingId: booking.bookingId,
+      change: 'SHIFTED',
+      shiftMinutes: minutos,
+      ...(booking.startAt === undefined
+        ? {}
+        : { startAt: booking.startAt.toISOString() }),
+    },
+    // Correr la misma agenda dos veces son dos movimientos distintos y los dos
+    // hay que avisarlos: por eso la clave lleva los minutos, no sólo la cita.
+    debounceKey: `p8:booking-shifted:${booking.bookingId}:${minutos}`,
+  };
+}
