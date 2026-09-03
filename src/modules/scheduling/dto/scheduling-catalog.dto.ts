@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  ArrayNotEmpty,
   IsBoolean,
   IsIn,
   IsInt,
@@ -978,4 +979,69 @@ export class ShiftSlotsResponseDto {
   /** Los minutos que se aplicaron, para que el cliente confirme lo que pidió. */
   @ApiProperty()
   shiftMinutes!: number;
+}
+
+/* -- Cerrar cupos sueltos del día (carril 12) ------------------------------- */
+
+/**
+ * Cuerpo de `POST /scheduling/resources/{id}/close-slots`.
+ *
+ * El pedido original: *«otro botón para cancelar cita específica o slots
+ * específicos, esto implícitamente detona un bloqueo de horario para el día de
+ * hoy únicamente (para que no genere conflictos a la hora de generar los slots
+ * disponibles en los horarios del doctor)»*.
+ *
+ * Esa aclaración entre paréntesis es la razón de ser del endpoint: cerrar un
+ * cupo **sin** dejar la excepción sirve hasta que alguien regenera, y ahí el
+ * cupo vuelve como si nada.
+ */
+export class CloseSlotsDto {
+  /** Por qué se cierra. Del mismo catálogo que los bloqueos. */
+  @ApiProperty({ enum: EXCEPTION_TYPES })
+  @IsIn(EXCEPTION_TYPES)
+  exceptionType!: ExceptionType;
+
+  /** La explicación, obligatoria si el motivo la exige. */
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+
+  /**
+   * Los cupos a cerrar.
+   *
+   * **Al menos uno.** A diferencia de mover, acá no hay «todos los de la
+   * ventana»: cerrar la agenda entera de un día ya tiene su pantalla —bloquear—
+   * y ofrecerlo también acá haría que un clic distraído cierre el día.
+   */
+  @ApiProperty({ type: [String], format: 'uuid' })
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsUUID('4', { each: true })
+  slotIds!: string[];
+}
+
+/** Lo que responde cerrar cupos sueltos. */
+export class CloseSlotsResponseDto {
+  /** Cuántos cupos quedaron cerrados. */
+  @ApiProperty()
+  closedSlots!: number;
+
+  /**
+   * La excepción que se creó para que regenerar no los devuelva.
+   *
+   * Es la parte que el pedido pone entre paréntesis y que es su razón de ser:
+   * sin ella, cerrar un cupo dura hasta la próxima generación.
+   */
+  @ApiProperty({ format: 'uuid' })
+  exceptionId!: string;
+
+  /** Desde cuándo cubre la excepción. */
+  @ApiProperty({ format: 'date-time' })
+  from!: string;
+
+  /** Hasta cuándo. */
+  @ApiProperty({ format: 'date-time' })
+  to!: string;
 }
