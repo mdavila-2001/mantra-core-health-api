@@ -51,6 +51,12 @@ export interface OrmEnv {
      * Valor de name mantenido por la instancia.
      */
     readonly name: string;
+    /**
+     * Si la conexión va cifrada. Obligatorio contra un PostgreSQL gestionado
+     * —Neon, RDS, Supabase—, que rechaza el `startup` en claro; innecesario
+     * contra el contenedor del compose, que escucha en una red privada.
+     */
+    readonly ssl: boolean;
   };
   /**
    * Límites del pool de conexiones. Dimensionar esto importa: cada conexión de
@@ -99,6 +105,12 @@ export const ormEnvSchema = Joi.object({
   DB_PASSWORD: Joi.string().required(),
   DB_NAME: Joi.string().required(),
 
+  // Cifrado de la conexión. Por defecto `false`: el despliegue de referencia es
+  // el compose, donde la base vive en una red privada del propio host y exigir
+  // TLS ahí sólo añadiría un certificado que mantener. Contra un PostgreSQL
+  // gestionado hay que ponerlo en `true` o el servidor corta la conexión.
+  DB_SSL: Joi.boolean().truthy('true').falsy('false').default(false),
+
   // Pool: el mínimo mantiene conexiones calientes para evitar el coste de
   // handshake TCP + autenticación en cada pico; el máximo acota el consumo.
   DB_POOL_MIN: Joi.number().integer().min(0).default(2),
@@ -127,6 +139,10 @@ interface RawOrmEnv {
    * Valor de db host mantenido por la instancia.
    */
   DB_HOST: string;
+  /**
+   * Si la conexión a la base va cifrada.
+   */
+  DB_SSL: boolean;
   /**
    * Valor de db port mantenido por la instancia.
    */
@@ -208,6 +224,7 @@ export function loadOrmEnv(source: NodeJS.ProcessEnv = process.env): OrmEnv {
       user: v.DB_USER,
       password: v.DB_PASSWORD,
       name: v.DB_NAME,
+      ssl: v.DB_SSL,
     },
     pool: { min: v.DB_POOL_MIN, max: v.DB_POOL_MAX },
     schema: {

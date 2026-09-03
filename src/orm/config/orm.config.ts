@@ -95,7 +95,14 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
     // `application_name` es una opción de primer nivel. No anidarla bajo
     // `connection`: esa clave la reserva `pg` para inyectar un objeto Connection
     // propio y pasarle un literal rompe el establecimiento de la conexión.
-    driverOptions: { application_name: APPLICATION_NAME },
+    //
+    // `ssl` sólo se incluye cuando `DB_SSL` está activo: `pg` distingue entre
+    // la clave ausente y `ssl: false`, y contra el contenedor del compose —que
+    // no tiene certificado— pasar el objeto rompería la conexión.
+    driverOptions: {
+      application_name: APPLICATION_NAME,
+      ...(env.connection.ssl ? { ssl: { rejectUnauthorized: true } } : {}),
+    },
 
     // Todas las marcas temporales del modelo son `timestamptz`. Forzar UTC evita
     // que la zona horaria del contenedor se cuele en las conversiones y produzca
