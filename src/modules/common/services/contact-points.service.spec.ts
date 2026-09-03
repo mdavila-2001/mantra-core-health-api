@@ -32,7 +32,6 @@ describe('ContactPointsService', () => {
       create: fn(),
       findVigentesByOwner: fn(),
       findVigenteByOwnerAndSystem: fn(),
-      findVigenteByOwnerSystemAndUse: fn(),
       closeVigente: fn(),
     };
     const service = new ContactPointsService(

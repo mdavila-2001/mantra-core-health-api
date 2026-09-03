@@ -107,41 +107,6 @@ export class ContactPointsRepository {
   }
 
   /**
-   * El punto de contacto vigente de un dueño para un sistema **y un uso**.
-   *
-   * Es {@link findVigenteByOwnerAndSystem} con una condición más, y existe
-   * porque desde que el registro del profesional pide correo y celular
-   * personales además de los del trabajo, el sistema dejó de alcanzar para
-   * identificar un contacto: hay dos correos y dos celulares por persona, y lo
-   * único que los separa es el uso. Buscar sólo por sistema devolvería
-   * cualquiera de los dos y una edición del personal podría cerrar el laboral.
-   *
-   * @param em - Contexto de persistencia o transacción activa.
-   * @param ownerId - El dueño (para un paciente, su `personId`).
-   * @param systemConceptId - Sistema del contacto (`CONCEPTS.CONTACT_MOBILE`…).
-   * @param useConceptId - Uso del contacto (`CONCEPTS.CONTACT_USE_WORK`…).
-   * @returns El contacto vigente preferente de ese par, o `null`.
-   */
-  async findVigenteByOwnerSystemAndUse(
-    em: EntityManager,
-    ownerId: string,
-    systemConceptId: string,
-    useConceptId: string,
-  ): Promise<ContactPoints | null> {
-    const ahora = new Date();
-    return em.findOne(
-      ContactPoints,
-      {
-        ownerId,
-        systemConceptId,
-        useConceptId,
-        $or: [{ validTo: null }, { validTo: { $gt: ahora } }],
-      },
-      { orderBy: { rank: 'asc nulls last', createdAt: 'asc' } },
-    );
-  }
-
-  /**
    * Da de baja un punto de contacto poniéndole fin de vigencia.
    *
    * No lo borra ni lo pisa: el teléfono anterior es historia —por ahí se llamó a
