@@ -175,6 +175,28 @@ export class CreateAdjudicationDto {
   outcome!: 'APPROVED' | 'DENIED';
 
   /**
+   * Texto de la disposición, tal cual lo emitió la aseguradora.
+   *
+   * `claim_adjudication_versions.disposition_text` existe en el modelo y
+   * **ningún endpoint podía escribirlo**: la columna quedaba siempre nula, así
+   * que el único lugar donde una aseguradora explica su decisión no tenía
+   * entrada. Es el texto que la pantalla del reclamo muestra junto al
+   * dictamen; sin él, un rechazo llega con un concepto y sin motivo redactado.
+   *
+   * Es **de la versión entera**, no del ítem: el motivo particular de un ítem
+   * va en `claim_line_adjudications.reason_concept_id`, que es un concepto y no
+   * texto libre.
+   */
+  @ApiPropertyOptional({
+    maxLength: 4000,
+    example: 'Prestaciones cubiertas por el plan familiar.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  dispositionText?: string;
+
+  /**
    * Valor de total approved amount mantenido por la instancia.
    */
   @ApiPropertyOptional({ example: '80.00' })

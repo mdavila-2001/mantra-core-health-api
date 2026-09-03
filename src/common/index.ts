@@ -180,3 +180,7 @@ export {
   SALUD_UUID_NAMESPACE,
 } from './constants/concepts';
 export type { ConceptName } from './constants/concepts';
+
+// Dinero decimal exacto (ver el JSDoc del módulo: convive con las utilidades
+// de accounting y billing, no las reemplaza)
+export { sumarDecimales, mismosDecimales } from './money/decimal-money';

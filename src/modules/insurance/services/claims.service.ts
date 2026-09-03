@@ -5,6 +5,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  sumarDecimales,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -95,10 +96,20 @@ export class ClaimsService {
           });
       }
 
-      const total = dto.lines.reduce(
-        (acc, l) => acc + Number(l.billedAmount),
-        0,
-      );
+      // La moneda del reclamo la hereda del plan bajo el que se factura. No
+      // estaba: el reclamo se guardaba con `total_amount` y `currency_concept_id`
+      // nulo, y una pantalla que muestra un importe sin moneda tiene que
+      // elegir entre inventarle un símbolo o mostrar un número pelado. El plan
+      // sí la declara, así que hay de dónde tomarla sin inventar nada.
+      const plan = await this.catalog.findPlan(tx, coverage.insurancePlanId);
+
+      // Suma decimal exacta, no `Number(...)`. Con coma flotante, un reclamo de
+      // muchas líneas o con más de dos decimales guarda un total que no es la
+      // suma de sus líneas — y después no hay forma de distinguir ese céntimo
+      // de un descuadre real. Es justo lo que compara AC-16-6 de la TAREA-16,
+      // que exige igualdad **de cadena** entre el total declarado y la suma de
+      // los ítems.
+      const total = sumarDecimales(dto.lines.map((l) => l.billedAmount)) ?? '0';
       const claim = this.repo.createClaim(tx, {
         insuranceCarrierId: dto.insuranceCarrierId,
         patientCoverageId: dto.patientCoverageId,
@@ -108,7 +119,8 @@ export class ClaimsService {
         claimIdentifier: dto.claimIdentifier,
         statusConceptId: INS.CLAIM_SUBMITTED,
         submittedAt: new Date(),
-        totalAmount: total.toFixed(2),
+        totalAmount: total,
+        currencyConceptId: plan?.currencyConceptId,
         idempotencyKey: dto.idempotencyKey,
         actorUserId: actor.id,
       });
@@ -178,6 +190,7 @@ export class ClaimsService {
           dto.outcome === 'APPROVED'
             ? INS.ADJ_OUTCOME_APPROVED
             : INS.ADJ_OUTCOME_DENIED,
+        dispositionText: dto.dispositionText,
         totalApprovedAmount: dto.totalApprovedAmount,
         totalPatientAmount: dto.totalPatientAmount,
         totalDeniedAmount: dto.totalDeniedAmount,
@@ -323,6 +336,24 @@ export class ClaimsService {
         throw new ResourceNotFoundException('Reclamo no encontrado', {
           claimId,
         });
+
+      // Idempotencia sin columna nueva: si ya hay una disputa **abierta** sobre
+      // la misma versión del dictamen, se devuelve ésa. Reclamar dos veces con
+      // el mismo cuerpo tiene que dar el mismo reclamo, no dos — la
+      // aseguradora recibiría el caso duplicado y no hay forma de retirarlo.
+      const existente = await this.repo.findOpenDispute(
+        tx,
+        claimId,
+        dto.claimAdjudicationVersionId,
+        INS.DISPUTE_OPEN,
+      );
+      if (existente) {
+        return {
+          id: existente.id,
+          status: existente.statusConceptId,
+          createdAt: existente.createdAt,
+        };
+      }
 
       const dispute = this.repo.createDispute(tx, {
         insuranceClaimId: claimId,

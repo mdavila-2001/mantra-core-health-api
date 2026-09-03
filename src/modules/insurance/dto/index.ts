@@ -8,3 +8,4 @@ export * from './reconciliation.dto';
 export * from './broker-commission.dto';
 export * from './read.dto';
 export * from './carrier-catalog.dto';
+export * from './claims-read.dto';

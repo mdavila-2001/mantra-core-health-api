@@ -221,6 +221,34 @@ export class ClaimRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create dispute conforme al contrato `ClaimDisputes`.
    */
+  /**
+   * Una disputa **abierta** ya presentada sobre la misma versión del dictamen.
+   *
+   * Es lo que hace idempotente a «Reclamar»: sin esto, dos toques al botón
+   * —o un reintento de red— dejan dos disputas sobre el mismo dictamen, y la
+   * aseguradora recibe el reclamo dos veces. Se busca por versión disputada y
+   * no sólo por reclamo, porque reclamar el dictamen v1 y después el v2 son
+   * dos reclamos legítimos y distintos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param claimId - Reclamo sobre el que se reclama.
+   * @param adjudicationVersionId - Versión disputada, si se declaró.
+   * @param openStatusConceptId - Concepto de «disputa abierta».
+   * @returns La disputa vigente equivalente, o `null`.
+   */
+  findOpenDispute(
+    em: EntityManager,
+    claimId: string,
+    adjudicationVersionId: string | undefined,
+    openStatusConceptId: string,
+  ): Promise<ClaimDisputes | null> {
+    return em.findOne(ClaimDisputes, {
+      insuranceClaimId: claimId,
+      claimAdjudicationVersionId: adjudicationVersionId ?? null,
+      statusConceptId: openStatusConceptId,
+    });
+  }
+
   createDispute(
     em: EntityManager,
     data: Record<string, unknown>,
