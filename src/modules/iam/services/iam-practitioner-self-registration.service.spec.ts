@@ -454,6 +454,40 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
+  it('persists the occupation concept on the person', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      occupationConceptId: '49e29a9b-2651-5ca1-b0db-6e6b528a3014',
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        occupationConceptId: '49e29a9b-2651-5ca1-b0db-6e6b528a3014',
+        occupationFreeText: undefined,
+      }),
+    );
+  });
+
+  it('persists free text occupation when no catalog concept is provided', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      occupationFreeText: 'Médico Investigador Independiente',
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        occupationConceptId: undefined,
+        occupationFreeText: 'Médico Investigador Independiente',
+      }),
+    );
+  });
+
   it('stores the phone as a contact point and the document as an identifier', async () => {
     const d = build();
 

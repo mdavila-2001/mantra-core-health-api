@@ -20,6 +20,7 @@ import {
   type AdministrativeGenderCode,
   type BirthSexCode,
 } from '../../profiles/profiles.concepts';
+import { OCCUPATION_FREE_TEXT_MAX_LENGTH } from './register-patient.dto';
 
 /**
  * Cuerpo de `POST /iam/auth/register-practitioner`.
@@ -346,6 +347,30 @@ export class RegisterPractitionerDto {
   @IsOptional()
   @IsBoolean()
   acceptsNewPatients?: boolean;
+
+  /**
+   * Ocupación del catálogo (VS_BO_OCCUPATION).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Ocupación del catálogo (VS_BO_OCCUPATION)',
+  })
+  @IsOptional()
+  @IsUUID()
+  occupationConceptId?: string;
+
+  /**
+   * Ocupación en texto libre, para cuando no está en el catálogo. Se ignora
+   * si viene `occupationConceptId`.
+   */
+  @ApiPropertyOptional({
+    maxLength: OCCUPATION_FREE_TEXT_MAX_LENGTH,
+    description: 'Ocupación en texto libre, para cuando no está en el catálogo',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)
+  occupationFreeText?: string;
 
   /**
    * Zona horaria IANA.

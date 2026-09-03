@@ -350,6 +350,10 @@ export class IamPractitionerSelfRegistrationService {
         sexAtBirthConceptId: dto.sexAtBirth
           ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
           : undefined,
+        occupationConceptId: dto.occupationConceptId,
+        occupationFreeText: dto.occupationConceptId
+          ? undefined
+          : dto.occupationFreeText,
         actorUserId: user.id,
       });
       await tx.flush();
