@@ -22,6 +22,13 @@ import {
 } from '../../profiles/profiles.concepts';
 import { OCCUPATION_FREE_TEXT_MAX_LENGTH } from './register-patient.dto';
 
+/** Formato aceptado por los cuatro campos telefónicos del alta. */
+const PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;
+
+/** Mensaje único para los cuatro campos telefónicos del alta. */
+const PHONE_PATTERN_MESSAGE =
+  'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion';
+
 /**
  * Cuerpo de `POST /iam/auth/register-practitioner`.
  *
@@ -37,16 +44,34 @@ import { OCCUPATION_FREE_TEXT_MAX_LENGTH } from './register-patient.dto';
  */
 export class RegisterPractitionerDto {
   /**
-   * Correo con el que el profesional iniciará sesión.
+   * Correo de trabajo, con el que el profesional iniciará sesión.
+   *
+   * Es el **correo de trabajo** y a la vez la identidad de login: así se venía
+   * grabando ya (`CONTACT_USE_WORK`) y así lo confirmó el propietario al pedir
+   * los dos correos separados. El personal viaja en {@link personalEmail} y no
+   * sirve para entrar.
    */
   @ApiProperty({
-    description: 'Correo que actúa como identidad de login',
+    description: 'Correo de trabajo; es la identidad de login del profesional',
     format: 'email',
     maxLength: 320,
   })
   @IsEmail()
   @MaxLength(320)
   email!: string;
+
+  /**
+   * Correo personal, distinto del de trabajo con el que se entra.
+   */
+  @ApiPropertyOptional({
+    description: 'Correo personal; no sirve para iniciar sesión',
+    format: 'email',
+    maxLength: 320,
+  })
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(320)
+  personalEmail?: string;
 
   /**
    * Contraseña en claro; se persiste sólo su hash argon2id.
@@ -262,19 +287,65 @@ export class RegisterPractitionerDto {
   residenceMunicipalityConceptId?: string;
 
   /**
-   * Teléfono de contacto profesional.
+   * Forma anterior de declarar el teléfono del trabajo.
+   *
+   * Dejó de ser la única forma de declarar un teléfono —ahora son tres campos
+   * separados— pero sigue siendo opcional en vez de prohibido: quitarlo de golpe
+   * rompería a todo cliente que ya integró contra este endpoint. Se sigue
+   * guardando donde siempre (`PHONE` con uso de trabajo), que es el lugar de
+   * {@link workLandline}: reinterpretarlo como celular cambiaría el significado
+   * de las filas ya escritas. Si llegan los dos, manda el campo nuevo.
    */
   @ApiPropertyOptional({
-    description: 'Teléfono de contacto en formato E.164 o nacional',
+    description:
+      'Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone.',
+    maxLength: 40,
+    deprecated: true,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
+  phone?: string;
+
+  /**
+   * Celular personal o privado del profesional.
+   */
+  @ApiPropertyOptional({
+    description: 'Celular personal en formato E.164 o nacional',
     maxLength: 40,
   })
   @IsOptional()
   @IsString()
   @MaxLength(40)
-  @Matches(/^[+]?[0-9 ()-]{6,}$/, {
-    message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
+  mobilePhone?: string;
+
+  /**
+   * Celular del lugar de trabajo.
+   */
+  @ApiPropertyOptional({
+    description: 'Celular de trabajo en formato E.164 o nacional',
+    maxLength: 40,
   })
-  phone?: string;
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
+  workMobilePhone?: string;
+
+  /**
+   * Teléfono fijo del lugar de trabajo.
+   */
+  @ApiPropertyOptional({
+    description: 'Teléfono fijo del lugar de trabajo',
+    maxLength: 40,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
+  workLandline?: string;
 
   /**
    * Fecha de nacimiento en ISO-8601.
