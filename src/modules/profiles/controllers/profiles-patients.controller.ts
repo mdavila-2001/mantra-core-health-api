@@ -183,19 +183,26 @@ export class ProfilesPatientsController {
    * las rutas por orden de declaración y `patients/:profileId` capturaría
    * `patients/me` si fuera antes.
    *
-   * ## Quién puede buscar, y qué ve (TAREA-07, decisión del 2026-09-02)
+   * ## Quién puede buscar, y qué ve (TAREA-07, P-07-10 — 2026-09-02)
    *
    * Hasta acá el listado era exclusivo de `SECURITY_ADMIN`, con esta nota:
    * «la lista de todas las historias de una organización es exactamente el
    * dato que no debe existir como pantalla». El propietario pidió que quien
-   * atiende (`CLINICIAN`, `PRACTITIONER`) también pueda buscar a su paciente
-   * por nombre o por documento — con una condición: no ve el padrón entero, ve
-   * a quien tiene actividad **en su organización**
-   * (`resolvePatientSearchScope()`, en `patient-search-scope.ts`, documenta
-   * por qué el alcance se deriva de la agenda y de las relaciones
-   * asistenciales, y no de una columna de tenant — la identidad no tiene una).
-   * `SECURITY_ADMIN`/`SUPERADMIN` conservan el padrón sin acotar, igual que
-   * hoy.
+   * atiende (`CLINICIAN`, `PRACTITIONER`) también pueda buscar. Una primera
+   * versión acotó ese acceso a la gente con actividad en su organización;
+   * se revirtió el mismo día porque la búsqueda no es sólo para consultar a
+   * quien ya se atendió — es para **registrar** a quien nunca se atendió, y
+   * acotar por actividad le impide precisamente eso. Hoy los cuatro roles
+   * ven el **mismo padrón sin acotar** (`resolvePatientSearchScope()`, en
+   * `patient-search-scope.ts`).
+   *
+   * Lo que reemplaza al acotamiento: `CLINICIAN`/`PRACTITIONER` deben aportar
+   * `q` o `nationalId` — sin ninguno de los dos, `422`
+   * (`requiereCriterioDeBusqueda()`); sin este freno, listar sin criterio
+   * sería enumerar el padrón, no buscar. `SECURITY_ADMIN`/`SUPERADMIN` siguen
+   * listando libremente. Encontrar a alguien acá **no** abre su expediente
+   * clínico: esa puerta la decide `ClinicalReadService` aparte (turno
+   * confirmado hoy o relación asistencial aceptada vigente).
    *
    * @param query - Texto libre sobre código de paciente y nombre.
    * @param nationalId - Documento de identidad exacto (AC-07-1).
