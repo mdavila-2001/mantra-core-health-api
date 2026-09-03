@@ -872,6 +872,160 @@ describe('SchedulingCatalogService', () => {
      * Lo que está entre paréntesis es la razón de ser: cerrar un cupo SIN dejar
      * la excepción sirve hasta que alguien regenera.
      */
+    /**
+     * EDITAR UN BLOQUEO — AC-11-7, y resuelve la P-11-3.
+     *
+     * La pregunta era qué hace editar con los cupos. La respuesta: **agrandar
+     * cierra, achicar NO reabre**. No es una simetría rota por comodidad: las
+     * dos direcciones no tienen la misma consecuencia. Cerrar de más ofrece
+     * menos turnos y el profesional lo pidió; reabrir ofrecería turnos que
+     * nadie decidió ofrecer.
+     */
+    describe('updateException', () => {
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      function conBloqueo(
+        d: ReturnType<typeof buildCatalog>,
+        extra: Record<string, unknown> = {},
+      ) {
+        const exception = {
+          id: 'exc-1',
+          resourceId: RESOURCE,
+          startAt: new Date(2026, 8, 10, 9, 0),
+          endAt: new Date(2026, 8, 10, 13, 0),
+          reason: 'Trámite',
+          ...extra,
+        };
+        d.catalogRepo.findExceptionById.mockResolvedValue(exception);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        return exception;
+      }
+
+      it('conserva el MISMO id: editar no borra y recrea', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        const res = await d.service.updateException(
+          'exc-1',
+          { reason: 'Mudanza' },
+          duenio as never,
+        );
+
+        expect(res.id).toBe('exc-1');
+      });
+
+      it('agrandar el rango CIERRA los cupos nuevos', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([
+          {
+            statusConceptId: CONCEPTS.SLOT_OPEN,
+            remainingCapacity: 1,
+            capacity: 1,
+          },
+          {
+            statusConceptId: CONCEPTS.SLOT_OPEN,
+            remainingCapacity: 1,
+            capacity: 1,
+          },
+        ]);
+
+        const res = await d.service.updateException(
+          'exc-1',
+          { endAt: new Date(2026, 8, 10, 18, 0).toISOString() },
+          duenio as never,
+        );
+
+        expect(res.blockedSlots).toBe(2);
+      });
+
+      it('achicar el rango NO reabre ninguno', async () => {
+        // Reabrir ofrecería turnos que nadie decidió ofrecer. El módulo queda
+        // con una sola regla: los cupos sólo los crea publicar el horario.
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        const res = await d.service.updateException(
+          'exc-1',
+          { endAt: new Date(2026, 8, 10, 11, 0).toISOString() },
+          duenio as never,
+        );
+
+        expect(res.blockedSlots).toBe(0);
+        expect(d.catalogRepo.findOpenSlotsInWindow).not.toHaveBeenCalled();
+      });
+
+      it('un cupo con paciente no se cierra aunque el rango lo alcance', async () => {
+        // Misma regla que al crear: un bloqueo no cancela citas.
+        const d = buildCatalog();
+        conBloqueo(d);
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([
+          {
+            statusConceptId: CONCEPTS.SLOT_OPEN,
+            remainingCapacity: 0,
+            capacity: 1,
+          },
+        ]);
+
+        const res = await d.service.updateException(
+          'exc-1',
+          { endAt: new Date(2026, 8, 10, 18, 0).toISOString() },
+          duenio as never,
+        );
+
+        expect(res.blockedSlots).toBe(0);
+      });
+
+      it('pasar a «Otro» sin texto se rechaza, mirando lo que VA A QUEDAR', async () => {
+        // Cambiar el tipo sin tocar el texto dejaría un bloqueo sin explicar
+        // por la puerta de atrás.
+        const d = buildCatalog();
+        conBloqueo(d, { reason: undefined });
+
+        await expect(
+          d.service.updateException(
+            'exc-1',
+            { exceptionType: 'OTHER' },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('un rango al revés se rechaza', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        await expect(
+          d.service.updateException(
+            'exc-1',
+            { endAt: new Date(2026, 8, 10, 8, 0).toISOString() },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('no se edita el bloqueo de otro', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        await expect(
+          d.service.updateException('exc-1', { reason: 'x' }, {
+            ...duenio,
+            practitionerProfileId: 'hp-DE-OTRO',
+          } as never),
+        ).rejects.toBeDefined();
+      });
+    });
+
     describe('closeSlots', () => {
       const duenio = {
         id: 'u-1',

@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -49,6 +50,8 @@ import {
   ActivityTypeListDto,
   ShiftSlotsDto,
   CloseSlotsDto,
+  UpdateExceptionDto,
+  UpdateExceptionResponseDto,
   CloseSlotsResponseDto,
   ShiftSlotsResponseDto,
   CreateHoldDto,
@@ -448,6 +451,33 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ExceptionResponseDto> {
     return this.catalogService.createException(id, dto, actor);
+  }
+
+  /**
+   * Edita un bloqueo sin borrarlo (AC-11-7).
+   *
+   * **Agrandar el rango cierra los cupos nuevos; achicarlo no reabre ninguno.**
+   * Es la P-11-3, y se resuelve por la consecuencia: cerrar de más ofrece menos
+   * turnos y el profesional lo pidió; reabrir ofrecería turnos que nadie
+   * decidió ofrecer.
+   *
+   * El módulo queda con una sola regla: **los cupos sólo los crea publicar el
+   * horario.**
+   */
+  @Patch('exceptions/:id')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Editar una excepción de disponibilidad',
+    description:
+      'Cambia rango, motivo y descripción conservando el id. Agrandar cierra cupos; achicar no los reabre.',
+  })
+  updateException(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateExceptionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<UpdateExceptionResponseDto> {
+    return this.catalogService.updateException(id, dto, actor);
   }
 
   /**
