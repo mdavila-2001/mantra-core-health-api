@@ -65,13 +65,13 @@ import { FileUploadService } from '../../common/services/file-upload.service';
 import { FileCategory, FileSensitivity } from '../../common/dto';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
+const DATA_URI_REGEX = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/;
+
 /** Decodifica una imagen en base64 (Data URI o base64 plano). */
 function parseBase64Image(
   dataUri: string,
 ): { buffer: Buffer; mimeType: string } | null {
-  const match = dataUri.match(
-    /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/,
-  );
+  const match = DATA_URI_REGEX.exec(dataUri);
   if (match) {
     try {
       const buffer = Buffer.from(match[2], 'base64');
@@ -447,42 +447,10 @@ export class IamPractitionerSelfRegistrationService {
       });
 
       // 1.5) Foto de perfil (si viene en el payload y el servicio de archivos está disponible).
-      let photoFileId: string | undefined;
-      if (dto.profilePhotoBase64 && this.fileUploadService) {
-        const parsed = parseBase64Image(dto.profilePhotoBase64);
-        if (parsed && parsed.buffer.length > 0) {
-          const detectedMimeType =
-            sniffMimeType(parsed.buffer) ?? parsed.mimeType;
-          const ext = detectedMimeType.split('/')[1] ?? 'jpg';
-          try {
-            const uploaded = await this.fileUploadService.upload(
-              {
-                originalname: `practitioner-photo-${user.id}.${ext}`,
-                mimetype: detectedMimeType,
-                buffer: parsed.buffer,
-              },
-              {
-                category: FileCategory.IMAGE,
-                sensitivity: FileSensitivity.NORMAL,
-              },
-              {
-                id: user.id,
-                roles: ['PRACTITIONER'],
-                tenantIds: [SEED.tenantId],
-              },
-            );
-            photoFileId = uploaded.id;
-          } catch (err) {
-            this.logger.warn(
-              {
-                operation: 'iam.auth.register-practitioner',
-                error: (err as Error).message,
-              },
-              'Could not process practitioner profile photo; continuing registration without photo',
-            );
-          }
-        }
-      }
+      const photoFileId = await this.uploadProfilePhoto(
+        user.id,
+        dto.profilePhotoBase64,
+      );
 
       // 2) Persona con sus datos demográficos. El código legible del DTO se
       // traduce aquí al concepto de terminología que persiste la columna.
@@ -819,6 +787,49 @@ export class IamPractitionerSelfRegistrationService {
         'Could not enqueue the verification email; the practitioner is registered anyway',
       );
       return false;
+    }
+  }
+
+  private async uploadProfilePhoto(
+    userId: string,
+    profilePhotoBase64?: string,
+  ): Promise<string | undefined> {
+    if (!profilePhotoBase64 || !this.fileUploadService) {
+      return undefined;
+    }
+    const parsed = parseBase64Image(profilePhotoBase64);
+    if (!parsed || parsed.buffer.length === 0) {
+      return undefined;
+    }
+    const detectedMimeType = sniffMimeType(parsed.buffer) ?? parsed.mimeType;
+    const ext = detectedMimeType.split('/')[1] ?? 'jpg';
+    try {
+      const uploaded = await this.fileUploadService.upload(
+        {
+          originalname: `practitioner-photo-${userId}.${ext}`,
+          mimetype: detectedMimeType,
+          buffer: parsed.buffer,
+        },
+        {
+          category: FileCategory.IMAGE,
+          sensitivity: FileSensitivity.NORMAL,
+        },
+        {
+          id: userId,
+          roles: ['PRACTITIONER'],
+          tenantIds: [SEED.tenantId],
+        },
+      );
+      return uploaded.id;
+    } catch (err) {
+      this.logger.warn(
+        {
+          operation: 'iam.auth.register-practitioner',
+          error: (err as Error).message,
+        },
+        'Could not process practitioner profile photo; continuing registration without photo',
+      );
+      return undefined;
     }
   }
 }
