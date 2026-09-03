@@ -420,6 +420,42 @@ esas dos entidades usen `replace_rows` en vez de `upsert_rows`, midiendo antes e
 
 ---
 
+**B-14 · Todo paciente queda afiliado al tenant por defecto, y eso deja sin filtro a las
+pantallas que se filtraban por membresía — ABIERTO, decisión de producto.** *(Medido el
+03/09/2026 contra la API viva.)*
+
+El alta de paciente crea a propósito una fila en `directory.tenant_memberships` contra
+`SEED.tenantId` («Mantra Core Default Tenant»), con `ROLE_STAFF` y `SCOPE_ALL_TENANT`. El motivo
+está escrito en el propio servicio y es bueno: sin esa fila el `TenantContextInterceptor` —global,
+corre en toda ruta autenticada— responde **403 a cualquier petición posterior**, y la cuenta
+recién creada queda inservible más allá del login.
+
+```
+POST /iam/auth/register-patient  → 201
+POST /iam/auth/login             → roles: ['USER','PATIENT']
+                                   tenants: ['1befcfea-44c0-563a-81cd-337ec6acc840']
+```
+
+El efecto que nadie previó está en el front: `requiresTenant` se escribió creyendo que un paciente
+«no pertenece a organización ninguna», y con esa premisa filtraba «Tu organización», «Pedidos de
+farmacia» y «Promociones». Como la premisa es falsa, **el paciente las veía en «Tus accesos»**.
+Tapado en el front con `hiddenFor` (PR #291 del repo web), que dice a quién no se le ofrece — no
+se pudo usar `roles` porque quien atiende el mostrador de una farmacia no tiene rol propio en el
+token.
+
+No hay fuga de datos: el guard del servidor sigue respondiendo 403. Lo que hay es una interfaz que
+le ofrece a un paciente pantallas que no son suyas, y un claim (`tenants`) que dejó de significar
+lo que su nombre dice.
+
+**Lo que falta decidir, y es del propietario:** qué organización y qué rol le corresponden a un
+paciente directo al consumidor. El servicio lo declara textualmente pendiente
+(`iam-patient-self-registration.service.ts`, paso 5): el catálogo `DIR.ROLE_*` sólo modela personal
+de una clínica y no existe un rol «paciente». Mientras siga así, `requiresTenant` no filtra a nadie
+y cualquier pantalla nueva que se apoye en él nace con el mismo agujero.
+
+---
+
+
 ## Defectos funcionales, verificados ejecutando
 
 Todos de `INFORME-HALLAZGOS-M1-2026-08-12.md`, con evidencia medida.
