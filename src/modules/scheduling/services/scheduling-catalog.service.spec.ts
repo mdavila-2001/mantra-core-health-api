@@ -861,6 +861,133 @@ describe('SchedulingCatalogService', () => {
      * Distinto de «avisar demora», que sólo avisa: acá el turno de la persona
      * pasa a ser otro.
      */
+    /**
+     * CERRAR CUPOS SUELTOS — el último punto del carril 12.
+     *
+     * *«Otro botón para cancelar cita específica o slots específicos, esto
+     * implícitamente detona un bloqueo de horario para el día de hoy únicamente
+     * (para que no genere conflictos a la hora de generar los slots disponibles
+     * en los horarios del doctor).»*
+     *
+     * Lo que está entre paréntesis es la razón de ser: cerrar un cupo SIN dejar
+     * la excepción sirve hasta que alguien regenera.
+     */
+    describe('closeSlots', () => {
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      function conRecursoPropio(d: ReturnType<typeof buildCatalog>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+      }
+
+      function cupo(id: string, hora: number) {
+        return {
+          id,
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          startAt: new Date(2026, 8, 10, hora, 0),
+          endAt: new Date(2026, 8, 10, hora, 30),
+        };
+      }
+
+      it('cierra los cupos Y deja la excepción, en la misma operación', async () => {
+        // Una sin la otra es media operación: cerrar sin excepción dura hasta
+        // la próxima generación.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        const cupos = [cupo('s-1', 9), cupo('s-2', 10)];
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue(cupos);
+
+        const res = await d.service.closeSlots(
+          RESOURCE,
+          { exceptionType: 'ERRAND', slotIds: ['s-1', 's-2'] },
+          duenio as never,
+        );
+
+        expect(res.closedSlots).toBe(2);
+        expect(res.exceptionId).toBe('exc-1');
+        expect(cupos[0].statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+        expect(d.catalogRepo.createException).toHaveBeenCalled();
+      });
+
+      it('la excepción cubre lo cerrado, no el día entero', async () => {
+        // «Para el día de hoy únicamente» acota hacia arriba; no dice que haya
+        // que cerrar la jornada. Cerrar de más quitaría turnos que el
+        // profesional no tocó.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([
+          cupo('s-1', 9),
+          cupo('s-2', 11),
+        ]);
+
+        const res = await d.service.closeSlots(
+          RESOURCE,
+          { exceptionType: 'ERRAND', slotIds: ['s-1', 's-2'] },
+          duenio as never,
+        );
+
+        expect(new Date(res.from).getHours()).toBe(9);
+        expect(new Date(res.to).getHours()).toBe(11);
+        expect(new Date(res.to).getMinutes()).toBe(30);
+      });
+
+      it('con un paciente citado NO cierra nada y dice cuáles', async () => {
+        // Cancelar el turno de alguien exige motivo y le avisa. Hacerlo de
+        // arrastre sería decidir por quien está esperando.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([
+          cupo('s-1', 9),
+        ]);
+        d.catalogRepo.findBookingsOfSlots.mockResolvedValue([{ id: 'b-1' }]);
+
+        await expect(
+          d.service.closeSlots(
+            RESOURCE,
+            { exceptionType: 'ERRAND', slotIds: ['s-1'] },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(ConflictException);
+
+        expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+      });
+
+      it('«Otro» sin explicación se rechaza, igual que al bloquear', async () => {
+        const d = buildCatalog();
+
+        await expect(
+          d.service.closeSlots(
+            RESOURCE,
+            { exceptionType: 'OTHER', slotIds: ['s-1'] },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('cupos que no son de esa agenda: no encontrado', async () => {
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([]);
+
+        await expect(
+          d.service.closeSlots(
+            RESOURCE,
+            { exceptionType: 'ERRAND', slotIds: ['s-ajeno'] },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      });
+    });
+
     describe('shiftSlots', () => {
       const duenio = {
         id: 'u-1',

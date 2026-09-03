@@ -33,6 +33,8 @@ import {
   EXCEPTION_TYPES,
   ACTIVITY_TYPES,
   type ShiftSlotsDto,
+  type CloseSlotsDto,
+  type CloseSlotsResponseDto,
   type ShiftSlotsResponseDto,
   type ActivityType,
   type ActivityTypeListDto,
@@ -167,6 +169,15 @@ const DEFAULT_SLOT_CAPACITY = 1;
  * la restricción `ex_appointments_practitioner_time` en la base. Una solicitud
  * pendiente no entra: nadie se comprometió todavía.
  */
+/**
+ * El tope de la consulta cuando lo que acota son los ids y no la ventana.
+ *
+ * `findSlotsOfResourceForUpdate` pide un rango; cerrar cupos los nombra uno por
+ * uno, así que el rango tiene que dejar pasar cualquiera. Un año 9999 es más
+ * honesto que un `undefined` que obligaría a que la consulta tenga dos formas.
+ */
+const FIN_DE_LOS_TIEMPOS = new Date('9999-12-31T00:00:00.000Z');
+
 const ACTIVE_BOOKING_STATES: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
   CONCEPTS.BOOKING_CHECKED_IN,
@@ -488,6 +499,132 @@ export class SchedulingCatalogService {
    * Como el resto de los avisos del módulo: si la transacción falla, nadie
    * recibe un mensaje diciendo que su turno se movió cuando no se movió.
    */
+  /**
+   * Cierra cupos sueltos y deja el bloqueo que impide que vuelvan.
+   *
+   * *«Otro botón para cancelar cita específica o slots específicos, esto
+   * implícitamente detona un bloqueo de horario para el día de hoy únicamente
+   * (para que no genere conflictos a la hora de generar los slots disponibles
+   * en los horarios del doctor).»*
+   *
+   * ## Lo que está entre paréntesis es la razón de ser
+   *
+   * Cerrar un cupo **sin** dejar la excepción sirve hasta que alguien regenera:
+   * el cupo vuelve como si nada, y el rato que el profesional había cerrado se
+   * ofrece otra vez. Por eso las dos cosas van en la misma transacción — una
+   * sin la otra es media operación.
+   *
+   * ## Un cupo con paciente NO se cierra por acá
+   *
+   * Si alguno tiene cita viva, se rechaza **entera** y se nombran cuáles. No se
+   * cancela de arrastre: cancelar el turno de alguien es un acto que exige
+   * motivo y avisa a esa persona, y hacerlo como efecto secundario de «cerrá
+   * estos ratos» sería decidir por quien está esperando. Para eso está
+   * `cancel`, que ya existe y hace las dos cosas bien.
+   *
+   * ## La excepción cubre exactamente lo cerrado
+   *
+   * De la primera hora del primer cupo a la última del último, y no el día
+   * entero: el pedido dice «para el día de hoy únicamente», que acota hacia
+   * arriba, no que haya que cerrar la jornada. Cerrar de más sería quitar
+   * turnos que el profesional no tocó.
+   */
+  async closeSlots(
+    resourceId: string,
+    dto: CloseSlotsDto,
+    actor: AuthenticatedUser,
+  ): Promise<CloseSlotsResponseDto> {
+    if (
+      dto.exceptionType === MOTIVO_QUE_EXIGE_TEXTO &&
+      (dto.reason === undefined || dto.reason.trim() === '')
+    ) {
+      throw new PreconditionFailedException(
+        'Elegiste «Otro» como motivo: escribí cuál es',
+        { exceptionType: dto.exceptionType },
+      );
+    }
+
+    this.logger.info(
+      {
+        operation: 'scheduling.slots.close',
+        resourceId,
+        slots: dto.slotIds.length,
+      },
+      'Closing slots and blocking their range',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const resource = await this.catalogRepo.findResourceById(tx, resourceId);
+      if (!resource) {
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId,
+        });
+      }
+      this.assertRecursoDelActor(resource, actor);
+
+      const cupos = await this.catalogRepo.findSlotsOfResourceForUpdate(
+        tx,
+        resourceId,
+        new Date(0),
+        FIN_DE_LOS_TIEMPOS,
+        dto.slotIds,
+      );
+      if (cupos.length === 0) {
+        throw new ResourceNotFoundException(
+          'Ninguno de esos cupos es de esta agenda',
+          { resourceId, slotIds: dto.slotIds },
+        );
+      }
+
+      const conPaciente = await this.catalogRepo.findBookingsOfSlots(
+        tx,
+        cupos.map((c) => c.id),
+        ACTIVE_BOOKING_STATES,
+      );
+      if (conPaciente.length > 0) {
+        throw new ConflictException(
+          'Esos ratos tienen pacientes citados: cancelá cada turno antes de cerrarlos',
+          {
+            // Los ids y no los nombres: quien recibe esto es la pantalla, que
+            // ya sabe pedir cada cita con su permiso.
+            bookingIds: conPaciente.map((b) => b.id),
+          },
+        );
+      }
+
+      const desde = cupos.reduce(
+        (min, c) => (c.startAt < min ? c.startAt : min),
+        cupos[0].startAt,
+      );
+      const hasta = cupos.reduce((max, c) => {
+        const fin = c.endAt ?? c.startAt;
+        return fin > max ? fin : max;
+      }, cupos[0].endAt ?? cupos[0].startAt);
+
+      for (const cupo of cupos) {
+        cupo.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+        touch(cupo, actor.id);
+      }
+
+      const exception = this.catalogRepo.createException(tx, {
+        resourceId,
+        exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
+        startAt: desde,
+        endAt: hasta,
+        reason: dto.reason,
+        isAvailable: false,
+        actorUserId: actor.id,
+      });
+
+      return {
+        closedSlots: cupos.length,
+        exceptionId: exception.id,
+        from: desde.toISOString(),
+        to: hasta.toISOString(),
+      };
+    });
+  }
+
   async shiftSlots(
     resourceId: string,
     dto: ShiftSlotsDto,

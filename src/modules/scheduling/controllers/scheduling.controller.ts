@@ -48,6 +48,8 @@ import {
   ExceptionTypeListDto,
   ActivityTypeListDto,
   ShiftSlotsDto,
+  CloseSlotsDto,
+  CloseSlotsResponseDto,
   ShiftSlotsResponseDto,
   CreateHoldDto,
   HoldResponseDto,
@@ -331,6 +333,33 @@ export class SchedulingController {
       new Date(to),
       actor,
     );
+  }
+
+  /**
+   * Cierra cupos sueltos y deja el bloqueo que impide que vuelvan.
+   *
+   * Lo que el pedido pone entre paréntesis es su razón de ser: cerrar un cupo
+   * **sin** dejar la excepción sirve hasta que alguien regenera, y ahí el rato
+   * que el profesional había cerrado se ofrece otra vez.
+   *
+   * Un cupo con cita viva NO se cierra por acá: se rechaza entero y se nombran
+   * cuáles. Cancelar el turno de alguien exige motivo y avisa a esa persona;
+   * hacerlo de arrastre sería decidir por quien está esperando.
+   */
+  @Post('resources/:id/close-slots')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos',
+    description:
+      'Bloquea los cupos nombrados y crea la excepción que cubre su rango. Rechaza si alguno tiene cita viva.',
+  })
+  closeSlots(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CloseSlotsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CloseSlotsResponseDto> {
+    return this.catalogService.closeSlots(id, dto, actor);
   }
 
   /**

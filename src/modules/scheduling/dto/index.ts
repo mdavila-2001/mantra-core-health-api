@@ -22,6 +22,8 @@ export {
   EXCEPTION_TYPES,
   ACTIVITY_TYPES,
   ShiftSlotsDto,
+  CloseSlotsDto,
+  CloseSlotsResponseDto,
   ShiftSlotsResponseDto,
   MIN_SHIFT_MINUTES,
   MAX_SHIFT_MINUTES,
