@@ -98,8 +98,53 @@ ninguna de las dos. Es la pregunta **P-21-10** al propietario.
 ---
 
 **B-13 · Hay 17 medicamentos con contraindicaciones, efectos adversos e interacciones escritos a
-mano, sembrados en la base viva y legibles sin rol.** *(Levantado por Marcelo el 02/09 como
-P-25-10; ampliado acá con lo que él no midió.)*
+mano, sembrados en la base viva y legibles sin rol — CERRADO el 02/09.** *(Levantado por Marcelo
+el 02/09 como P-25-10; ampliado acá con lo que él no midió; retracción y gate decididos por
+Marcelo el mismo día.)*
+
+> [!important] Resuelto — sin fuentes falsas, sin contenido clínico, con gate de producción
+> Rama `marcelo/b13-vademecum-without-fake-sources`. Las tres acciones:
+>
+> 1. **`sources` pasó de 3 (RxNorm/SNOMED CT/WHO ATC) a 1** (`MANTRA_DEV_VADEMECUM`, licencia
+>    explícita «dato de desarrollo sin fuente autoritativa»); `codeSystem[0].source_id` repunta a
+>    ella. Efecto colateral aceptado y documentado: `tools/terminology-import/import-rxnorm-full.mjs`
+>    sigue exigiendo que exista un `code_system` `RXNORM` — lo crea `import-rxterms.mjs`, no este
+>    dataset; no hay acoplamiento real.
+> 2. **Las 68 filas clínicas (`contraindications`/`indications`/`adverse_effects`/`monitoring`,
+>    17 c/u) y los 18 códigos externos que citaban las fuentes falsas (`rxnorm_cui` ×17,
+>    `snomed_code` ×1) salieron del dataset.** Cero consumidores en `src/`: la receta sigue leyendo
+>    sólo `dose_forms`/`strengths` (`medication-block.ts:773-781`), verificado con una lectura real
+>    de `GET /terminology/concepts/:id` post-retracción (`200`, sin las cuatro claves clínicas,
+>    `dose_forms`/`strengths`/`routes` intactos). Las **5 interacciones no se tocaron** (CDS las
+>    consume; su fuente queda para P-25-1).
+> 3. **Gate de no-producción dentro de `VademecumSeedService.run()`**
+>    (`SEED_VADEMECUM_ALLOW_PRODUCTION`, documentado en `.env.example`), mismo patrón que
+>    `ProviderAccountsSeedService` — cubre también `POST /content-packs/VADEMECUM/apply`, que llama
+>    al mismo método.
+>
+> **Retractado hoy en la base viva** (`mantra_redesa_health`, transacción con conteo
+> antes/después):
+>
+> ```text
+> antes:   68 filas (adverse_effects/contraindications/indications/monitoring, 17 c/u)
+> DELETE 68
+> después:  0 filas
+> interacciones_intactas: 5
+> ```
+>
+> Alcance deliberado de la retracción viva: **sólo** esas 68 filas. `rxnorm_cui`/`snomed_code`
+> (18) y las filas de `terminology_sources`/`code_systems` de esta base **no** se tocaron — el
+> dataset corregido evita que una base **nueva** los traiga; sincronizar esta base con el dataset
+> byte a byte es trabajo de `rebuild_stack.py`, no de este patch.
+>
+> **Verificado**: `yarn typecheck` limpio · `yarn test src/common/seed src/modules/content_packs`
+> — 166/166 · nuevo `vademecum-seed.service.spec.ts` (8 casos: inserta sobre base vacía, gate de
+> producción activo/desactivado, idempotencia, y 4 aserciones negativas directas sobre el JSON
+> importado — ninguna propiedad clínica, ningún `rxnorm_cui`/`snomed_code`, una única fuente y
+> `codeSystem[0].source_id` apuntándole). `test/integration/vademecum.int-spec.ts` sigue **roto por
+> path** (preexistente, apunta a `SQL/patches/` de antes de que el modelo se mudara a
+> `mantra-core-health-model/`; es un artefacto de un seed SQL crudo distinto de
+> `VademecumSeedService`, no se tocó).
 
 `src/common/seed/data/vademecum/vademecum.dataset.json` siembra 17 conceptos con **155
 propiedades** y **5 interacciones**. El comentario del servicio lo dice sin eufemismo: «17
