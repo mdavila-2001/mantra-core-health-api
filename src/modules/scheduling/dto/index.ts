@@ -10,6 +10,7 @@ export {
   TemplateDetailDto,
   TemplateListDto,
   RetireTemplateResponseDto,
+  ReactivateTemplateResponseDto,
   AvailabilityExceptionDto,
   AvailabilityExceptionListDto,
   GenerateSlotsDto,

@@ -778,6 +778,31 @@ export class SchedulingCatalogRepository {
    * @param actorUserId - Quién la retira.
    * @returns Cuántos cupos libres se soltaron y cuántos quedaron por tener historia.
    */
+  /**
+   * Vuelve a poner en vigencia una plantilla retirada.
+   *
+   * **No regenera los cupos**, y es deliberado: retirar los borró, y volver a
+   * crearlos es `generate-slots` con la ventana que el profesional elija. Un
+   * horario que se reactiva solo con los cupos del mes pasado abriría turnos en
+   * fechas que ya pasaron.
+   *
+   * El servicio se encarga de decirlo; acá sólo se cambia el estado.
+   */
+  async reactivateTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+    activeStatusConceptId: string,
+    actorUserId: string,
+  ): Promise<void> {
+    const plantilla = await em.findOne(ScheduleTemplates, {
+      id: scheduleTemplateId,
+    });
+    if (plantilla) {
+      plantilla.statusConceptId = activeStatusConceptId;
+      touch(plantilla, actorUserId);
+    }
+  }
+
   async retireTemplate(
     em: EntityManager,
     scheduleTemplateId: string,

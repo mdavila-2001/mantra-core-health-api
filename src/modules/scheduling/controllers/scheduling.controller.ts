@@ -38,6 +38,7 @@ import {
   CreateTemplateDto,
   AvailabilityExceptionListDto,
   RetireTemplateResponseDto,
+  ReactivateTemplateResponseDto,
   TemplateListDto,
   TemplateResponseDto,
   GenerateSlotsDto,
@@ -214,6 +215,28 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TemplateListDto> {
     return this.catalogService.listTemplates(id, actor);
+  }
+
+  /**
+   * Vuelve a poner en vigencia un horario pausado — «me fui de viaje y volví».
+   *
+   * `POST` y no `PATCH` porque es un acto con nombre, no la edición de un
+   * campo: es la contraparte exacta de `retire`, y las dos se leen juntas en el
+   * mismo controlador.
+   */
+  @Post('templates/:id/reactivate')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reactivar un horario retirado',
+    description:
+      'Lo devuelve a vigente. No regenera los cupos: hay que llamar a generate-slots con la ventana que corresponda.',
+  })
+  reactivateTemplate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReactivateTemplateResponseDto> {
+    return this.catalogService.reactivateTemplate(id, actor);
   }
 
   /**
