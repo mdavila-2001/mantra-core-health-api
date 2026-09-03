@@ -46,6 +46,14 @@ describe('FX-7 · el motivo de un bloqueo, según quién mire', () => {
   const sinCita = { nationalId: `FX7B${sufijo}`, token: '', pid: '' };
 
   let resourceId = '';
+  /**
+   * Un municipio real del catálogo: el alta de paciente lo exige desde que el
+   * DTO se endureció, y esta suite se caía en el `register-patient` con un 400
+   * que nadie veía —CI sólo corre `postgres-privileges` de integración—. Se
+   * busca en vez de clavarse: los ids son deterministas, pero fijarlos acá
+   * haría caducar la suite el día que el namespace cambie.
+   */
+  let municipioId = '';
 
   function claims(token: string): Record<string, unknown> {
     const [, cuerpo] = token.split('.');
@@ -73,6 +81,10 @@ describe('FX-7 · el motivo de un bloqueo, según quién mire', () => {
         email: `${quien.nationalId.toLowerCase()}@example.test`,
         name: 'Ana',
         lastName: 'Quispe',
+        birthDate: '1990-01-01',
+        phone: '+591 70000000',
+        sexAtBirth: 'FEMALE',
+        residenceMunicipalityConceptId: municipioId,
       })
       .expect(201);
     quien.pid = alta.body.patientProfileId ?? alta.body.profileId;
@@ -86,6 +98,14 @@ describe('FX-7 · el motivo de un bloqueo, según quién mire', () => {
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+
+    const municipios = await ctx.orm.em
+      .getConnection()
+      .execute<{ id: string }[]>(
+        `select id from terminology.catalog_concepts
+          where code like 'geo:bo:municipality:%' order by code limit 1`,
+      );
+    municipioId = municipios[0]?.id ?? '';
 
     const alta = await http()
       .post('/iam/auth/register-practitioner')

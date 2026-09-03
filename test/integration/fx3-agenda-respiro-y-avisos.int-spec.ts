@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { bootstrapTestApp, bearer, type TestContext,
+  camposObligatoriosDePaciente,
+} from './harness';
 
 /**
  * FX-3 · el respiro entre consultas y los avisos de una solicitud, contra la
@@ -38,6 +40,8 @@ import { bootstrapTestApp, bearer, type TestContext } from './harness';
  */
 describe('FX-3 · el respiro y los avisos de la agenda, contra la base', () => {
   let ctx: TestContext;
+  /** Los campos que el alta de paciente exige; salen del arnés. */
+  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
   const http = () => request(ctx.app.getHttpServer());
 
   const sufijo = randomUUID().slice(0, 8);
@@ -84,6 +88,7 @@ describe('FX-3 · el respiro y los avisos de la agenda, contra la base', () => {
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
 
     const alta = await http()
       .post('/iam/auth/register-practitioner')
@@ -109,6 +114,7 @@ describe('FX-3 · el respiro y los avisos de la agenda, contra la base', () => {
     const altaPaciente = await http()
       .post('/iam/auth/register-patient')
       .send({
+        ...camposDePaciente,
         nationalId: paciente.nationalId,
         password: PASSWORD,
         email: paciente.email,

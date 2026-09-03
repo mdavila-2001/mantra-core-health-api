@@ -456,6 +456,37 @@ y cualquier pantalla nueva que se apoye en él nace con el mismo agujero.
 ---
 
 
+**B-15 · La suite de integración llevaba tiempo rota y CI no lo veía — 10 de 11 suites
+reparadas el 03/09/2026.**
+
+`yarn test:integration` daba **11 suites rojas** en `dev`. Ninguna rompía un check: el workflow
+de CI corre de este directorio **sólo `postgres-privileges`**, así que el resto puede estar en
+rojo indefinidamente sin que nadie se entere.
+
+La causa mayoritaria fue una sola: `POST /iam/auth/register-patient` sumó campos obligatorios
+—`birthDate`, `phone`, `sexAtBirth`, `residenceMunicipalityConceptId` y `email`— al implementar
+el orden de campos que pidió el propietario, y **cada suite escribía su propia alta**, así que
+todas se cayeron con un 400 a la vez. Ahora el arnés expone
+`camposObligatoriosDePaciente(ctx)`; el próximo campo obligatorio se agrega en un solo lugar.
+
+Las otras tres eran propias:
+
+| Suite | Qué pasaba |
+|---|---|
+| `tj1-onboarding-medico` | El paso «agenda» se completa con **cupos**, no con la plantilla, y la prueba sólo publicaba la plantilla. El producto tiene razón: un horario sin turnos no ofrece nada. |
+| `tj1-onboarding-medico` | El rechazo por superposición cambió de «se superpone» a «se cruza» y la prueba se aferraba a la palabra. Ahora comprueba los datos de `details`, que son los que el médico necesita para resolverlo. |
+| `tj2-reglas-cita` | Dos pruebas compartían la hora `0.5`; la primera deja su cita **confirmada a propósito** —su cancelación se rechaza— y la segunda chocaba con la regla de «un turno por paciente a esa hora». El resto de la suite ya usaba horas distintas (72, 96, 97, 98, 120, 140). |
+
+**Queda una abierta, y es una pregunta de semántica, no un arreglo:** en `glossary.int-spec.ts`,
+un concepto en `TERM_DRAFT` agregado a la categoría «Anatomía» **no aparece en la búsqueda pero
+sí abre su ficha** (`GET /terminology/concepts/:id` → 200). No es un descuido del detalle: su
+regla dice 404 sólo si el concepto pertenece al conjunto marcador `GLOSSARY_ALL_TERMS_CODE`, y
+la prueba no lo agrega ahí. O sea que **el buscador y la ficha deciden «esto es del glosario»
+con criterios distintos**. Hay que decidir cuál manda —módulo 03, tarea 25— antes de tocar
+ninguno de los dos.
+
+---
+
 ## Defectos funcionales, verificados ejecutando
 
 Todos de `INFORME-HALLAZGOS-M1-2026-08-12.md`, con evidencia medida.

@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { bootstrapTestApp, bearer, type TestContext,
+  camposObligatoriosDePaciente,
+} from './harness';
 
 /**
  * FX-4 · retirar un horario publicado avisa antes de romper nada.
@@ -34,6 +36,8 @@ import { bootstrapTestApp, bearer, type TestContext } from './harness';
  */
 describe('FX-4 · retirar un horario publicado', () => {
   let ctx: TestContext;
+  /** Los campos que el alta de paciente exige; salen del arnés. */
+  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
   const http = () => request(ctx.app.getHttpServer());
 
   const sufijo = randomUUID().slice(0, 8);
@@ -66,6 +70,7 @@ describe('FX-4 · retirar un horario publicado', () => {
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
 
     const alta = await http()
       .post('/iam/auth/register-practitioner')
@@ -90,6 +95,7 @@ describe('FX-4 · retirar un horario publicado', () => {
     const altaPaciente = await http()
       .post('/iam/auth/register-patient')
       .send({
+        ...camposDePaciente,
         nationalId: paciente.nationalId,
         password: PASSWORD,
         email: `fx4-pac-${sufijo}@example.test`,
