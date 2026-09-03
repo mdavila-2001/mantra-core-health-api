@@ -43,6 +43,7 @@ import {
   PractitionerProfileSummaryDto,
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
+  ListSpecialtyCountsResponseDto,
   SetPractitionerPhotoDto,
   PractitionerOnboardingDto,
   ListLinkableOrganizationsResponseDto,
@@ -161,6 +162,26 @@ export class ProfilesPractitionersController {
       cursor,
       limit: limit ?? 50,
     });
+  }
+
+  /**
+   * El recuento de la guía por especialidad (portada de especialidades).
+   *
+   * Sin `@Roles`, por lo mismo que el listado del que sale: es el dato con el
+   * que la guía del paciente dibuja «Cardiología · 12» sin traerse los 12.
+   *
+   * Va declarado ANTES de `practitioners/:profileId/summary` por la regla de
+   * este archivo: Nest resuelve por orden y el parámetro no debe capturar un
+   * literal.
+   *
+   * @returns Una fila por especialidad con al menos un profesional visible.
+   */
+  @Get('practitioners/specialty-counts')
+  @ApiOperation({
+    summary: 'Contar profesionales visibles por especialidad',
+  })
+  countPractitionersBySpecialty(): Promise<ListSpecialtyCountsResponseDto> {
+    return this.practitionersService.countPractitionersBySpecialty();
   }
 
   /**

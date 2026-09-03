@@ -67,6 +67,7 @@ import {
   PractitionerActivityDto,
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
+  ListSpecialtyCountsResponseDto,
   SetPractitionerPhotoDto,
   AddOwnCredentialDto,
   OwnCredentialResponseDto,
@@ -363,6 +364,65 @@ export class ProfilesPractitionersService {
    * @param options - Filtro por especialidad, cursor y tope de página.
    * @returns Página de la guía con el cursor de la siguiente.
    */
+  /**
+   * Cuántos profesionales visibles ejerce cada especialidad (portada de la guía).
+   *
+   * Se apoya en los MISMOS dos filtros que {@link listPractitioners} —perfil
+   * verificado, salvo bypass; especialidad vigente— y por eso el número de una
+   * tarjeta es exactamente el largo de la lista que abre. Cualquier atajo que
+   * los separe reintroduce el defecto de contar una cosa y mostrar otra.
+   *
+   * El cruce se hace en memoria y no en SQL a propósito: ningún repositorio del
+   * proyecto usa agregaciones, y las dos lecturas que esto reemplaza son
+   * **menos** trabajo que lo que hacía el front —paginar la guía entera sólo
+   * para contar—.
+   *
+   * @returns Una fila por especialidad con gente, más el total sin repetir.
+   */
+  async countPractitionersBySpecialty(): Promise<ListSpecialtyCountsResponseDto> {
+    const em = this.em.fork();
+
+    const verificationStatusConceptId = this.verificationBypass.isActive()
+      ? undefined
+      : PROF.PRACT_VERIF_VERIFIED;
+
+    const [visibleIds, pairs] = await Promise.all([
+      this.practitionersRepo.findVisibleProfileIds(
+        em,
+        verificationStatusConceptId,
+      ),
+      this.specialtiesRepo.findCurrentSpecialtyPairs(em),
+    ]);
+
+    const visibles = new Set(visibleIds);
+    // Por especialidad, los profesionales SIN repetir: una fila por cada
+    // vigencia haría contar dos veces a quien la recertificó.
+    const porEspecialidad = new Map<string, Set<string>>();
+    for (const par of pairs) {
+      if (!visibles.has(par.practitionerProfileId)) continue;
+      const gente =
+        porEspecialidad.get(par.specialtyConceptId) ?? new Set<string>();
+      gente.add(par.practitionerProfileId);
+      porEspecialidad.set(par.specialtyConceptId, gente);
+    }
+
+    const items = [...porEspecialidad.entries()]
+      .map(([specialtyConceptId, gente]) => ({
+        specialtyConceptId,
+        practitionerCount: gente.size,
+      }))
+      // De mayor a menor, y a igualdad por concepto para que el orden sea
+      // estable entre llamadas: quien dibuja decide cómo mostrarlo, pero no
+      // debería ver bailar las tarjetas.
+      .sort(
+        (a, b) =>
+          b.practitionerCount - a.practitionerCount ||
+          a.specialtyConceptId.localeCompare(b.specialtyConceptId),
+      );
+
+    return { items, practitionerTotal: visibles.size };
+  }
+
   async listPractitioners(options: {
     /** Sólo perfiles que ejercen esta especialidad hoy. */
     specialtyConceptId?: string;
