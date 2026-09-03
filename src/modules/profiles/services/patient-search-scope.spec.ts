@@ -1,45 +1,39 @@
-import { PreconditionFailedException, runWithTenant } from '../../../common';
-import { resolvePatientSearchScope } from './patient-search-scope';
+import {
+  requiereCriterioDeBusqueda,
+  resolvePatientSearchScope,
+} from './patient-search-scope';
 
 function actor(roles: readonly string[]) {
   return { id: 'u-1', roles: [...roles] } as any;
 }
 
 describe('resolvePatientSearchScope', () => {
-  it('SECURITY_ADMIN ve el padrón sin acotar', () => {
-    expect(resolvePatientSearchScope(actor(['SECURITY_ADMIN']))).toEqual({
-      kind: 'unrestricted',
-    });
-  });
+  // P-07-10 (2026-09-02): revierte el acotamiento por actividad del mismo
+  // día — los cuatro roles que llegan al endpoint ven el mismo padrón, sin
+  // acotar, porque la búsqueda también sirve para registrar a quien nunca se
+  // atendió.
+  it.each(['SECURITY_ADMIN', 'SUPERADMIN', 'PRACTITIONER', 'CLINICIAN'])(
+    '%s ve el padrón sin acotar',
+    (rol) => {
+      expect(resolvePatientSearchScope(actor([rol]))).toEqual({
+        kind: 'unrestricted',
+      });
+    },
+  );
+});
 
-  it('SUPERADMIN ve el padrón sin acotar', () => {
-    expect(resolvePatientSearchScope(actor(['SUPERADMIN']))).toEqual({
-      kind: 'unrestricted',
-    });
-  });
+describe('requiereCriterioDeBusqueda', () => {
+  it.each(['SECURITY_ADMIN', 'SUPERADMIN'])(
+    '%s administra el padrón: no necesita criterio',
+    (rol) => {
+      expect(requiereCriterioDeBusqueda(actor([rol]))).toBe(false);
+    },
+  );
 
-  it('PRACTITIONER queda acotado a la actividad de su tenant', () => {
-    const scope = runWithTenant('tenant-1', () =>
-      resolvePatientSearchScope(actor(['PRACTITIONER'])),
-    );
-    expect(scope).toEqual({ kind: 'tenant-activity', tenantId: 'tenant-1' });
-  });
-
-  it('CLINICIAN queda acotado a la actividad de su tenant', () => {
-    const scope = runWithTenant('tenant-2', () =>
-      resolvePatientSearchScope(actor(['CLINICIAN'])),
-    );
-    expect(scope).toEqual({ kind: 'tenant-activity', tenantId: 'tenant-2' });
-  });
-
-  /**
-   * Sin tenant en contexto no hay un alcance «por omisión» que devolver: eso
-   * sería exactamente el descuido —un padrón sin acotar— que esta política
-   * existe para evitar.
-   */
-  it('sin tenant en contexto, falla explícito en vez de no acotar', () => {
-    expect(() => resolvePatientSearchScope(actor(['PRACTITIONER']))).toThrow(
-      PreconditionFailedException,
-    );
-  });
+  it.each(['PRACTITIONER', 'CLINICIAN'])(
+    '%s es un rol clínico: necesita al menos un criterio',
+    (rol) => {
+      expect(requiereCriterioDeBusqueda(actor([rol]))).toBe(true);
+    },
+  );
 });

@@ -6,14 +6,15 @@ import { CONCEPTS, createdBy } from '../../../common';
 /**
  * Hasta dónde llega una búsqueda de pacientes.
  *
- * `unrestricted` es el padrón completo (lo que hace hoy el personal
- * administrativo); `tenant-activity` acota a las personas que tienen actividad
- * en esa organización. Quién recibe cuál lo decide
- * `resolvePatientSearchScope()`, que es donde vive la regla y su porqué.
+ * Es un *Strategy* de un solo miembro hoy a propósito: hasta el 2026-09-02
+ * existió una variante `tenant-activity` que acotaba a la gente con actividad
+ * en la organización de quien pregunta, revertida el mismo día por P-07-10
+ * (`resolvePatientSearchScope()` documenta el porqué). Se conserva el tipo
+ * como unión discriminada — no un valor suelto — porque volver a acotar la
+ * búsqueda es una decisión de producto que puede repetirse, y agregar una
+ * variante nueva es más barato que reinventar la forma.
  */
-export type PatientSearchScope =
-  | { readonly kind: 'unrestricted' }
-  | { readonly kind: 'tenant-activity'; readonly tenantId: string };
+export type PatientSearchScope = { readonly kind: 'unrestricted' };
 
 /**
  * Criterios del listado de pacientes (UC-05-13), como objeto de consulta.
@@ -174,23 +175,6 @@ export class PatientProfilesRepository {
         params.push(criteria.issuerAdministrativeAreaConceptId);
       }
       condiciones.push(`${documento})`);
-    }
-
-    if (criteria.scope.kind === 'tenant-activity') {
-      // «Paciente de mi organización» no es una columna —la identidad no tiene
-      // tenant— sino haber sido atendido ahí: una reserva de agenda o una
-      // relación asistencial. El porqué está en `resolvePatientSearchScope()`.
-      condiciones.push(
-        `(exists (select 1
-                    from scheduling.appointment_bookings b
-                   where b.patient_profile_id = pp.profile_id
-                     and b.tenant_id = ?)
-          or exists (select 1
-                       from authz.care_relationships cr
-                      where cr.patient_profile_id = pp.profile_id
-                        and cr.tenant_id = ?))`,
-      );
-      params.push(criteria.scope.tenantId, criteria.scope.tenantId);
     }
 
     // El separador es un salto real dentro de un template: las condiciones

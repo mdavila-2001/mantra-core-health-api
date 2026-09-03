@@ -105,18 +105,31 @@ export function avisoDeCupoLiberado(
  * Lleva la acción en el cuerpo —aceptar o rechazar— porque una solicitud que
  * avisa sin decir qué se espera de quien la recibe es sólo ruido.
  *
- * ## Lo que este aviso todavía no dice
+ * ## El lugar, que faltaba
  *
- * El propietario lo pide «en tal horario **en tal lugar**». El horario está; el
- * lugar **no viaja en el snapshot de la cita**. Resolverlo es cruzar a
- * `practice` (`PractitionerSitesService`) y exponer la sede en la lectura de
- * agenda, que es alcance de TAREA-12 §3.2 y toca la regla 00.4. No se inventa
- * acá: cuando esa lectura exista, este texto gana una frase.
+ * El propietario lo pide «en tal horario **en tal lugar**», y hasta acá el
+ * horario estaba y el lugar no. Este comentario decía que faltaba exponer la
+ * sede en la lectura de agenda; **ya estaba expuesta** —`ResourceSiteDto` en el
+ * listado de recursos— y lo único que faltaba era traerla al snapshot del
+ * aviso. Ahora la frase la lleva, y se omite entera cuando el recurso no
+ * declara sede: un aviso con un hueco («para el jueves en ») se lee peor que
+ * uno sin el dato.
  *
  * @param booking - La cita recién solicitada.
  * @param paciente - Cómo se llama quien la pidió; `undefined` si no se resolvió.
  * @param destinatarioUserId - Cuenta del profesional.
  */
+/**
+ * «, en el Consultorio del Sur» — o nada, si el recurso no declara sede.
+ *
+ * Se arma como sufijo y no como campo aparte porque el aviso es una frase, y
+ * una frase con un hueco («pidió turno para el jueves en ») se lee peor que sin
+ * el dato.
+ */
+function enTalLugar(booking: BookingNoticeSnapshot): string {
+  return booking.siteLabel === undefined ? '' : `, en ${booking.siteLabel}`;
+}
+
 export function avisoDeSolicitudAlProfesional(
   booking: BookingNoticeSnapshot,
   paciente: string | undefined,
@@ -129,7 +142,7 @@ export function avisoDeSolicitudAlProfesional(
     tenantId: booking.tenantId,
     subject: 'Tenés una nueva solicitud de consulta',
     bodyText:
-      `${quien} pidió turno para el ${cuando(booking.startAt)}. ` +
+      `${quien} pidió turno para el ${cuando(booking.startAt)}${enTalLugar(booking)}. ` +
       'Aceptala o rechazala desde tu agenda.',
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
@@ -169,7 +182,8 @@ export function avisoDeSolicitudAlPaciente(
     tenantId: booking.tenantId,
     subject: 'Enviamos tu solicitud de turno',
     bodyText:
-      `Pediste turno con ${booking.resourceLabel} para el ${cuando(booking.startAt)}. ` +
+      `Pediste turno con ${booking.resourceLabel} para el ${cuando(booking.startAt)}` +
+      `${enTalLugar(booking)}. ` +
       'Todavía falta que lo confirmen: te avisamos apenas respondan.',
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
@@ -327,5 +341,53 @@ export function avisoDeCambioDeCita(
         ? {}
         : { startAt: booking.startAt.toISOString() }),
     },
+  };
+}
+
+/**
+ * «Tu turno se movió» — el aviso de mover horario (carril 12).
+ *
+ * El pedido lo llama «mensajes automáticos por la app de mover horarios».
+ *
+ * ## Por qué dice la hora nueva y no los minutos
+ *
+ * «Tu turno se movió 20 minutos» obliga a quien lo lee a hacer una cuenta con
+ * un dato que no tiene a mano: no se acuerda de a qué hora era. La hora nueva
+ * es la que va a necesitar, y es la que se dice primero.
+ *
+ * Los minutos van igual, pero después y como contexto — sirven para reconocer
+ * que es *su* turno el que se movió y no otro.
+ */
+export function avisoDeHorarioMovido(
+  booking: BookingNoticeSnapshot,
+  minutos: number,
+  destinatarioUserId: string,
+): AgendaNotice {
+  const direccion = minutos > 0 ? 'más tarde' : 'más temprano';
+  const cuantos = Math.abs(minutos);
+  return {
+    kind: 'BOOKING_STATE_CHANGED',
+    recipient: { userId: destinatarioUserId },
+    tenantId: booking.tenantId,
+    subject: 'Se movió el horario de tu turno',
+    bodyText:
+      `Tu turno con ${booking.resourceLabel} pasa a ser el ` +
+      `${cuando(booking.startAt)}${enTalLugar(booking)} — ` +
+      `${cuantos} ${cuantos === 1 ? 'minuto' : 'minutos'} ${direccion}. ` +
+      'Si no te sirve, podés pedir otro horario desde la app.',
+    relatedResourceType: RECURSO_CITA,
+    relatedResourceId: booking.bookingId,
+    payload: {
+      route: rutaDelTurno(booking.bookingId),
+      bookingId: booking.bookingId,
+      change: 'SHIFTED',
+      shiftMinutes: minutos,
+      ...(booking.startAt === undefined
+        ? {}
+        : { startAt: booking.startAt.toISOString() }),
+    },
+    // Correr la misma agenda dos veces son dos movimientos distintos y los dos
+    // hay que avisarlos: por eso la clave lleva los minutos, no sólo la cita.
+    debounceKey: `p8:booking-shifted:${booking.bookingId}:${minutos}`,
   };
 }

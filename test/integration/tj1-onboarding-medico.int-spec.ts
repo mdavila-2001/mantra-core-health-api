@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { bootstrapTestApp, bearer, type TestContext,
+  camposObligatoriosDePaciente,
+} from './harness';
 
 /**
  * TJ-1 · el avance del alta del profesional, y el solape entre sus agendas.
@@ -22,6 +24,8 @@ import { bootstrapTestApp, bearer, type TestContext } from './harness';
  */
 describe('TJ-1 · alta del profesional (integración)', () => {
   let ctx: TestContext;
+  /** Los campos que el alta de paciente exige; salen del arnés. */
+  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
 
   let token: string;
   let hpid: string;
@@ -75,6 +79,7 @@ describe('TJ-1 · alta del profesional (integración)', () => {
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
 
     const sufijo = randomUUID().slice(0, 8);
     const email = `tj1-${sufijo}@example.test`;
@@ -139,9 +144,26 @@ describe('TJ-1 · alta del profesional (integración)', () => {
     const agendaAntes = antes.steps.find((paso) => paso.key === 'schedule');
     expect(agendaAntes?.complete).toBe(false);
 
-    await publicarAgenda('Consultorio Norte', [
+    const plantilla = await publicarAgenda('Consultorio Norte', [
       { dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' },
     ]);
+
+    // Publicar la plantilla no alcanza, y es a propósito: el paso se completa
+    // con **cupos**, no con reglas. Un horario declarado y sin turnos abiertos
+    // no le ofrece nada a nadie, y el propio `missing` del paso distingue los
+    // dos casos («published-schedule» contra «slots»). La pantalla de alta
+    // genera los cupos en el mismo gesto que publica; esta prueba se había
+    // quedado con el gesto a medias.
+    const desde = new Date();
+    desde.setUTCHours(0, 0, 0, 0);
+    await http()
+      .post(`/scheduling/templates/${plantilla.body.id}/generate-slots`)
+      .set(bearer(token))
+      .send({
+        from: desde.toISOString(),
+        to: new Date(desde.getTime() + 30 * 24 * 3600 * 1000).toISOString(),
+      })
+      .expect(201);
 
     const despues = await onboarding();
     expect(
@@ -163,7 +185,17 @@ describe('TJ-1 · alta del profesional (integración)', () => {
       422,
     );
 
-    expect(JSON.stringify(res.body)).toContain('superpone');
+    // Se comprueban los DATOS del rechazo, no una palabra del mensaje: el
+    // texto cambió de «se superpone» a «se cruza» y la prueba se cayó sin que
+    // nada del comportamiento hubiera cambiado. Lo que el médico necesita para
+    // resolverlo es con QUÉ agenda choca y en qué día y horas, y eso viaja en
+    // `details`.
+    expect(res.body.details).toMatchObject({
+      dayOfWeek: 1,
+      agenda: 'Consultorio Norte',
+      existente: expect.stringContaining('09:00:00'),
+      nueva: expect.stringContaining('10:00:00'),
+    });
   });
 
   it('acepta una franja pegada pero no superpuesta: 12–14 después de 9–12', async () => {
@@ -197,6 +229,7 @@ describe('TJ-1 · alta del profesional (integración)', () => {
     await http()
       .post('/iam/auth/register-patient')
       .send({
+        ...camposDePaciente,
         nationalId,
         password: 'S3cret-passw0rd',
         displayName: 'Paciente TJ1',

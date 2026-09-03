@@ -20,6 +20,18 @@ export {
   ExceptionTypeDto,
   ExceptionTypeListDto,
   EXCEPTION_TYPES,
+  ACTIVITY_TYPES,
+  ShiftSlotsDto,
+  CloseSlotsDto,
+  UpdateExceptionDto,
+  UpdateExceptionResponseDto,
+  CloseSlotsResponseDto,
+  ShiftSlotsResponseDto,
+  MIN_SHIFT_MINUTES,
+  MAX_SHIFT_MINUTES,
+  ActivityTypeDto,
+  ActivityTypeListDto,
+  type ActivityType,
   RESOURCE_TYPES,
 } from './scheduling-catalog.dto';
 export type { ResourceType, ExceptionType } from './scheduling-catalog.dto';

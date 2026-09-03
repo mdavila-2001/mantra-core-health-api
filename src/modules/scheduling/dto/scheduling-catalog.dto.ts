@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  ArrayNotEmpty,
   IsBoolean,
   IsIn,
   IsInt,
@@ -849,4 +850,252 @@ export class ExceptionTypeListDto {
   /** Los motivos, en el orden en que se muestran. */
   @ApiProperty({ type: [ExceptionTypeDto] })
   items!: ExceptionTypeDto[];
+}
+
+/* -- Tipología raíz de la actividad (carril 12) ----------------------------- */
+
+/** Las tipologías que la agenda sabe pintar, en el orden en que se muestran. */
+export type ActivityType =
+  'APPOINTMENT' | 'PROCEDURE' | 'FOLLOW_UP' | 'TELEHEALTH' | 'OTHER';
+
+export const ACTIVITY_TYPES: readonly ActivityType[] = [
+  'APPOINTMENT',
+  'PROCEDURE',
+  'FOLLOW_UP',
+  'TELEHEALTH',
+  'OTHER',
+];
+
+/**
+ * Una tipología de actividad, tal como la publica la API.
+ *
+ * Lleva `tone` y no un color: el pedido dice «con otros colores», pero **el
+ * color concreto es del sistema de diseño**, no de la API. Mandar un `#RRGGBB`
+ * desde el servidor obligaría a redesplegarlo para cambiar una paleta, y
+ * rompería el tema oscuro. El tono es semántico y cada pantalla lo resuelve con
+ * sus propios tokens.
+ */
+export class ActivityTypeDto {
+  /** Clave estable con la que se identifica la tipología. */
+  @ApiProperty({ enum: ACTIVITY_TYPES })
+  type!: ActivityType;
+
+  /** El concepto real detrás, que es lo que guarda `appointments`. */
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  /** Cómo se llama en pantalla, en castellano. */
+  @ApiProperty({ example: 'Operación o procedimiento' })
+  label!: string;
+
+  /**
+   * El tono con el que se pinta, del sistema de diseño.
+   *
+   * `error` queda reservado para los BLOQUEOS —el propietario los pidió «con
+   * rojo»— así que ninguna tipología lo usa: si una actividad se pintara igual
+   * que un bloqueo, la agenda diría que ese rato está cerrado cuando no lo está.
+   */
+  @ApiProperty({ enum: ['primary', 'secondary', 'info', 'warning', 'success'] })
+  tone!: string;
+}
+
+export class ActivityTypeListDto {
+  @ApiProperty({ type: [ActivityTypeDto] })
+  items!: ActivityTypeDto[];
+}
+
+/* -- Mover el horario N minutos (carril 12) --------------------------------- */
+
+/** Cuánto se puede correr una agenda de una vez, en minutos. */
+export const MIN_SHIFT_MINUTES = -240;
+export const MAX_SHIFT_MINUTES = 240;
+
+/**
+ * Cuerpo de `POST /scheduling/resources/{id}/shift-slots`.
+ *
+ * El pedido original: *«un botón que se llame mover horario, que desplace los
+ * slots N minutos después y envíe mensajes automáticos por la app de mover
+ * horarios y sea seleccionable a todos o ciertos slots en específico»*.
+ */
+export class ShiftSlotsDto {
+  /**
+   * Cuántos minutos se corre. Negativo adelanta.
+   *
+   * Se admite adelantar además de atrasar porque la situación real es
+   * simétrica: el profesional que termina antes quiere adelantar a los que
+   * esperan, y negarlo lo obligaría a cancelar y volver a crear.
+   */
+  @ApiProperty({
+    description: 'Minutos a correr. Negativo adelanta.',
+    minimum: MIN_SHIFT_MINUTES,
+    maximum: MAX_SHIFT_MINUTES,
+    example: 20,
+  })
+  @IsInt()
+  @Min(MIN_SHIFT_MINUTES)
+  @Max(MAX_SHIFT_MINUTES)
+  shiftMinutes!: number;
+
+  /** Desde cuándo se mira la agenda. */
+  @ApiProperty({ format: 'date-time' })
+  @IsISO8601()
+  from!: string;
+
+  /** Hasta cuándo. */
+  @ApiProperty({ format: 'date-time' })
+  @IsISO8601()
+  to!: string;
+
+  /**
+   * Qué cupos mover. **Ausente = todos los de la ventana.**
+   *
+   * Es el «seleccionable a todos o ciertos slots en específico» del pedido. Se
+   * distingue ausente de lista vacía: una lista vacía no mueve nada, y es una
+   * petición que alguien armó mal — mejor que no haga nada a que mueva la
+   * agenda entera.
+   */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  slotIds?: string[];
+}
+
+/** Lo que responde mover el horario. */
+export class ShiftSlotsResponseDto {
+  /** Cuántos cupos se corrieron. */
+  @ApiProperty()
+  movedSlots!: number;
+
+  /**
+   * A cuántas personas se les avisó.
+   *
+   * Menor que `movedSlots` es lo corriente: los cupos libres se mueven y no
+   * hay a quién avisarle.
+   */
+  @ApiProperty()
+  notified!: number;
+
+  /** Los minutos que se aplicaron, para que el cliente confirme lo que pidió. */
+  @ApiProperty()
+  shiftMinutes!: number;
+}
+
+/* -- Cerrar cupos sueltos del día (carril 12) ------------------------------- */
+
+/**
+ * Cuerpo de `POST /scheduling/resources/{id}/close-slots`.
+ *
+ * El pedido original: *«otro botón para cancelar cita específica o slots
+ * específicos, esto implícitamente detona un bloqueo de horario para el día de
+ * hoy únicamente (para que no genere conflictos a la hora de generar los slots
+ * disponibles en los horarios del doctor)»*.
+ *
+ * Esa aclaración entre paréntesis es la razón de ser del endpoint: cerrar un
+ * cupo **sin** dejar la excepción sirve hasta que alguien regenera, y ahí el
+ * cupo vuelve como si nada.
+ */
+export class CloseSlotsDto {
+  /** Por qué se cierra. Del mismo catálogo que los bloqueos. */
+  @ApiProperty({ enum: EXCEPTION_TYPES })
+  @IsIn(EXCEPTION_TYPES)
+  exceptionType!: ExceptionType;
+
+  /** La explicación, obligatoria si el motivo la exige. */
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+
+  /**
+   * Los cupos a cerrar.
+   *
+   * **Al menos uno.** A diferencia de mover, acá no hay «todos los de la
+   * ventana»: cerrar la agenda entera de un día ya tiene su pantalla —bloquear—
+   * y ofrecerlo también acá haría que un clic distraído cierre el día.
+   */
+  @ApiProperty({ type: [String], format: 'uuid' })
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsUUID('4', { each: true })
+  slotIds!: string[];
+}
+
+/** Lo que responde cerrar cupos sueltos. */
+export class CloseSlotsResponseDto {
+  /** Cuántos cupos quedaron cerrados. */
+  @ApiProperty()
+  closedSlots!: number;
+
+  /**
+   * La excepción que se creó para que regenerar no los devuelva.
+   *
+   * Es la parte que el pedido pone entre paréntesis y que es su razón de ser:
+   * sin ella, cerrar un cupo dura hasta la próxima generación.
+   */
+  @ApiProperty({ format: 'uuid' })
+  exceptionId!: string;
+
+  /** Desde cuándo cubre la excepción. */
+  @ApiProperty({ format: 'date-time' })
+  from!: string;
+
+  /** Hasta cuándo. */
+  @ApiProperty({ format: 'date-time' })
+  to!: string;
+}
+
+/* -- Editar un bloqueo (carril 11, P-11-3) ---------------------------------- */
+
+/**
+ * Cuerpo de `PATCH /scheduling/exceptions/{id}`.
+ *
+ * Todo opcional: editar un bloqueo suele ser corregir **una** cosa —la hora de
+ * fin, el motivo— y obligar a reenviar el resto haría que un cliente
+ * desactualizado pise campos que nadie quiso tocar.
+ */
+export class UpdateExceptionDto {
+  @ApiPropertyOptional({ enum: EXCEPTION_TYPES })
+  @IsOptional()
+  @IsIn(EXCEPTION_TYPES)
+  exceptionType?: ExceptionType;
+
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  startAt?: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  endAt?: string;
+}
+
+/** Lo que responde editar un bloqueo. */
+export class UpdateExceptionResponseDto {
+  /** El MISMO id que antes: editar no borra y recrea. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  startAt!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  endAt!: string;
+
+  /**
+   * Cupos que se cerraron porque el rango creció.
+   *
+   * Achicar el rango **no reabre ninguno**, y por eso no hay campo para eso:
+   * en este módulo los cupos sólo los crea publicar el horario.
+   */
+  @ApiProperty()
+  blockedSlots!: number;
 }

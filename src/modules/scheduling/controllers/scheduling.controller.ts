@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -46,6 +47,13 @@ import {
   CreateExceptionDto,
   ExceptionResponseDto,
   ExceptionTypeListDto,
+  ActivityTypeListDto,
+  ShiftSlotsDto,
+  CloseSlotsDto,
+  UpdateExceptionDto,
+  UpdateExceptionResponseDto,
+  CloseSlotsResponseDto,
+  ShiftSlotsResponseDto,
   CreateHoldDto,
   HoldResponseDto,
   ConfirmBookingDto,
@@ -331,6 +339,82 @@ export class SchedulingController {
   }
 
   /**
+   * Cierra cupos sueltos y deja el bloqueo que impide que vuelvan.
+   *
+   * Lo que el pedido pone entre paréntesis es su razón de ser: cerrar un cupo
+   * **sin** dejar la excepción sirve hasta que alguien regenera, y ahí el rato
+   * que el profesional había cerrado se ofrece otra vez.
+   *
+   * Un cupo con cita viva NO se cierra por acá: se rechaza entero y se nombran
+   * cuáles. Cancelar el turno de alguien exige motivo y avisa a esa persona;
+   * hacerlo de arrastre sería decidir por quien está esperando.
+   */
+  @Post('resources/:id/close-slots')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos',
+    description:
+      'Bloquea los cupos nombrados y crea la excepción que cubre su rango. Rechaza si alguno tiene cita viva.',
+  })
+  closeSlots(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CloseSlotsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CloseSlotsResponseDto> {
+    return this.catalogService.closeSlots(id, dto, actor);
+  }
+
+  /**
+   * Corre los cupos de una agenda N minutos — «mover horario» del carril 12.
+   *
+   * Distinto de «avisar demora», que **sólo avisa** y deja los cupos donde
+   * estaban. Acá el turno de la persona pasa a ser otro, así que se escribe y
+   * se avisa.
+   *
+   * Todo o nada: si un cupo no puede moverse porque su horario nuevo pisa otra
+   * cita del mismo profesional, no se mueve ninguno. La colisión la rechaza la
+   * base con `ex_appointments_practitioner_time`, no este código.
+   */
+  @Post('resources/:id/shift-slots')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Correr los cupos de una agenda N minutos',
+    description:
+      'Mueve todos los cupos de la ventana, o sólo los que se nombren, y avisa a quien tenía turno. Todo o nada.',
+  })
+  shiftSlots(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ShiftSlotsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ShiftSlotsResponseDto> {
+    return this.catalogService.shiftSlots(id, dto, actor);
+  }
+
+  /**
+   * Las tipologías de actividad que la agenda sabe pintar (carril 12).
+   *
+   * El propietario lo pidió así: «con otros colores los otros procedimientos
+   * (TURNOS, OPERACIONES, ETC.) catalogado por tipología raíz». La columna
+   * existía y no había un solo concepto que ponerle.
+   *
+   * Manda `tone` y no un color: el color concreto es del sistema de diseño. Un
+   * `#RRGGBB` desde el servidor obligaría a redesplegarlo para cambiar la
+   * paleta y rompería el tema oscuro.
+   */
+  @Get('activity-types')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Listar las tipologías de actividad de la agenda',
+    description:
+      'Catálogo para pintar el día: clave, concepto, etiqueta en castellano y tono del sistema de diseño.',
+  })
+  listActivityTypes(): ActivityTypeListDto {
+    return this.catalogService.listActivityTypes();
+  }
+
+  /**
    * Los motivos de bloqueo que el formulario puede ofrecer (TAREA-11, punto 4).
    *
    * Existe porque el catálogo estaba en la base y **no lo publicaba nadie**:
@@ -367,6 +451,33 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ExceptionResponseDto> {
     return this.catalogService.createException(id, dto, actor);
+  }
+
+  /**
+   * Edita un bloqueo sin borrarlo (AC-11-7).
+   *
+   * **Agrandar el rango cierra los cupos nuevos; achicarlo no reabre ninguno.**
+   * Es la P-11-3, y se resuelve por la consecuencia: cerrar de más ofrece menos
+   * turnos y el profesional lo pidió; reabrir ofrecería turnos que nadie
+   * decidió ofrecer.
+   *
+   * El módulo queda con una sola regla: **los cupos sólo los crea publicar el
+   * horario.**
+   */
+  @Patch('exceptions/:id')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Editar una excepción de disponibilidad',
+    description:
+      'Cambia rango, motivo y descripción conservando el id. Agrandar cierra cupos; achicar no los reabre.',
+  })
+  updateException(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateExceptionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<UpdateExceptionResponseDto> {
+    return this.catalogService.updateException(id, dto, actor);
   }
 
   /**

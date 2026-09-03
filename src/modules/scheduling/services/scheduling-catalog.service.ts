@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -31,10 +31,26 @@ import {
   ExceptionResponseDto,
   ExceptionTypeListDto,
   EXCEPTION_TYPES,
+  ACTIVITY_TYPES,
+  type ShiftSlotsDto,
+  type CloseSlotsDto,
+  type UpdateExceptionDto,
+  type UpdateExceptionResponseDto,
+  type CloseSlotsResponseDto,
+  type ShiftSlotsResponseDto,
+  type ActivityType,
+  type ActivityTypeListDto,
   ResourceAgendaResponseDto,
   type ResourceType,
   type ExceptionType,
 } from '../dto';
+import { CLIN } from '../../clinical/clinical.concepts';
+import { avisoDeHorarioMovido } from '../notices/agenda-notices';
+import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
+import {
+  AGENDA_NOTICE_PORT,
+  type AgendaNoticePort,
+} from '../ports/agenda-notice.port';
 import { diasLocalesQueCoinciden, horaLocalAUtc } from '../scheduling-time';
 import type { DiaLocal } from '../scheduling-time';
 
@@ -74,6 +90,39 @@ const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
   ROOM: CONCEPTS.RESOURCE_ROOM,
   EQUIPMENT: CONCEPTS.RESOURCE_EQUIPMENT,
+};
+
+/** La tipología raíz de una actividad, a su concepto de `clinical`. */
+const ACTIVITY_TYPE_CONCEPT: Readonly<Record<ActivityType, string>> = {
+  APPOINTMENT: CLIN.ACTIVITY_APPOINTMENT,
+  PROCEDURE: CLIN.ACTIVITY_PROCEDURE,
+  FOLLOW_UP: CLIN.ACTIVITY_FOLLOW_UP,
+  TELEHEALTH: CLIN.ACTIVITY_TELEHEALTH,
+  OTHER: CLIN.ACTIVITY_OTHER,
+};
+
+/** Cómo se llama cada tipología en pantalla. */
+const ACTIVITY_TYPE_LABEL: Readonly<Record<ActivityType, string>> = {
+  APPOINTMENT: 'Consulta',
+  PROCEDURE: 'Operación o procedimiento',
+  FOLLOW_UP: 'Control',
+  TELEHEALTH: 'Teleconsulta',
+  OTHER: 'Otra actividad',
+};
+
+/**
+ * El tono de cada tipología.
+ *
+ * `error` NO se usa: está reservado para los bloqueos, que el propietario pidió
+ * «con rojo». Una actividad pintada como un bloqueo diría que el rato está
+ * cerrado cuando no lo está.
+ */
+const ACTIVITY_TYPE_TONE: Readonly<Record<ActivityType, string>> = {
+  APPOINTMENT: 'primary',
+  PROCEDURE: 'warning',
+  FOLLOW_UP: 'info',
+  TELEHEALTH: 'secondary',
+  OTHER: 'success',
 };
 
 const EXCEPTION_TYPE_CONCEPT: Readonly<Record<ExceptionType, string>> = {
@@ -122,6 +171,15 @@ const DEFAULT_SLOT_CAPACITY = 1;
  * la restricción `ex_appointments_practitioner_time` en la base. Una solicitud
  * pendiente no entra: nadie se comprometió todavía.
  */
+/**
+ * El tope de la consulta cuando lo que acota son los ids y no la ventana.
+ *
+ * `findSlotsOfResourceForUpdate` pide un rango; cerrar cupos los nombra uno por
+ * uno, así que el rango tiene que dejar pasar cualquiera. Un año 9999 es más
+ * honesto que un `undefined` que obligaría a que la consulta tenga dos formas.
+ */
+const FIN_DE_LOS_TIEMPOS = new Date('9999-12-31T00:00:00.000Z');
+
 const ACTIVE_BOOKING_STATES: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
   CONCEPTS.BOOKING_CHECKED_IN,
@@ -157,6 +215,9 @@ export class SchedulingCatalogService {
     private readonly logger: PinoLogger,
     private readonly vinculos: PractitionerAffiliationGateService,
     private readonly tiempoProfesional: SchedulingProfessionalTimeService,
+    private readonly noticeRepo: SchedulingNoticeRepository,
+    @Inject(AGENDA_NOTICE_PORT)
+    private readonly notices: AgendaNoticePort,
   ) {
     this.logger.setContext(SchedulingCatalogService.name);
   }
@@ -407,6 +468,295 @@ export class SchedulingCatalogService {
    * Por eso la respuesta lo dice explícito en `slotsPendientes`: quien reactiva
    * tiene que generar, y la pantalla se lo tiene que pedir.
    */
+  /**
+   * Corre los cupos de una agenda N minutos — «mover horario» del carril 12.
+   *
+   * *«Un botón que se llame mover horario, que desplace los slots N minutos
+   * después y envíe mensajes automáticos por la app de mover horarios y sea
+   * seleccionable a todos o ciertos slots en específico.»*
+   *
+   * ## Qué lo distingue de «avisar demora»
+   *
+   * La demora **sólo avisa**: deja el rastro en el historial y manda la
+   * notificación, y los cupos quedan donde estaban. Es lo correcto cuando el
+   * profesional se atrasa y va a recuperar. Mover el horario **escribe**: los
+   * cupos cambian de hora y el turno de la persona pasa a ser otro.
+   *
+   * Son dos actos distintos y por eso son dos operaciones, no un parámetro.
+   *
+   * ## Todo o nada, y por qué importa acá
+   *
+   * Una sola transacción. Si un cupo no puede moverse —porque el horario nuevo
+   * pisa otra cita del mismo profesional— **no se mueve ninguno**: una agenda
+   * medio corrida es peor que una sin tocar, porque nadie sabría cuáles turnos
+   * cambiaron y cuáles no.
+   *
+   * La colisión la detecta la base, no este código:
+   * `ex_appointments_practitioner_time` es un `EXCLUDE` sobre (profesional,
+   * rango) y rechaza el solapamiento con `23P01`. Eso es lo que hace seguro
+   * mover cupos, y es la mitad de la P-12-1 que quedó resuelta al construirlo.
+   *
+   * ## El aviso va DESPUÉS de cerrar
+   *
+   * Como el resto de los avisos del módulo: si la transacción falla, nadie
+   * recibe un mensaje diciendo que su turno se movió cuando no se movió.
+   */
+  /**
+   * Cierra cupos sueltos y deja el bloqueo que impide que vuelvan.
+   *
+   * *«Otro botón para cancelar cita específica o slots específicos, esto
+   * implícitamente detona un bloqueo de horario para el día de hoy únicamente
+   * (para que no genere conflictos a la hora de generar los slots disponibles
+   * en los horarios del doctor).»*
+   *
+   * ## Lo que está entre paréntesis es la razón de ser
+   *
+   * Cerrar un cupo **sin** dejar la excepción sirve hasta que alguien regenera:
+   * el cupo vuelve como si nada, y el rato que el profesional había cerrado se
+   * ofrece otra vez. Por eso las dos cosas van en la misma transacción — una
+   * sin la otra es media operación.
+   *
+   * ## Un cupo con paciente NO se cierra por acá
+   *
+   * Si alguno tiene cita viva, se rechaza **entera** y se nombran cuáles. No se
+   * cancela de arrastre: cancelar el turno de alguien es un acto que exige
+   * motivo y avisa a esa persona, y hacerlo como efecto secundario de «cerrá
+   * estos ratos» sería decidir por quien está esperando. Para eso está
+   * `cancel`, que ya existe y hace las dos cosas bien.
+   *
+   * ## La excepción cubre exactamente lo cerrado
+   *
+   * De la primera hora del primer cupo a la última del último, y no el día
+   * entero: el pedido dice «para el día de hoy únicamente», que acota hacia
+   * arriba, no que haya que cerrar la jornada. Cerrar de más sería quitar
+   * turnos que el profesional no tocó.
+   */
+  async closeSlots(
+    resourceId: string,
+    dto: CloseSlotsDto,
+    actor: AuthenticatedUser,
+  ): Promise<CloseSlotsResponseDto> {
+    if (
+      dto.exceptionType === MOTIVO_QUE_EXIGE_TEXTO &&
+      (dto.reason === undefined || dto.reason.trim() === '')
+    ) {
+      throw new PreconditionFailedException(
+        'Elegiste «Otro» como motivo: escribí cuál es',
+        { exceptionType: dto.exceptionType },
+      );
+    }
+
+    this.logger.info(
+      {
+        operation: 'scheduling.slots.close',
+        resourceId,
+        slots: dto.slotIds.length,
+      },
+      'Closing slots and blocking their range',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const resource = await this.catalogRepo.findResourceById(tx, resourceId);
+      if (!resource) {
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId,
+        });
+      }
+      this.assertRecursoDelActor(resource, actor);
+
+      const cupos = await this.catalogRepo.findSlotsOfResourceForUpdate(
+        tx,
+        resourceId,
+        new Date(0),
+        FIN_DE_LOS_TIEMPOS,
+        dto.slotIds,
+      );
+      if (cupos.length === 0) {
+        throw new ResourceNotFoundException(
+          'Ninguno de esos cupos es de esta agenda',
+          { resourceId, slotIds: dto.slotIds },
+        );
+      }
+
+      const conPaciente = await this.catalogRepo.findBookingsOfSlots(
+        tx,
+        cupos.map((c) => c.id),
+        ACTIVE_BOOKING_STATES,
+      );
+      if (conPaciente.length > 0) {
+        throw new ConflictException(
+          'Esos ratos tienen pacientes citados: cancelá cada turno antes de cerrarlos',
+          {
+            // Los ids y no los nombres: quien recibe esto es la pantalla, que
+            // ya sabe pedir cada cita con su permiso.
+            bookingIds: conPaciente.map((b) => b.id),
+          },
+        );
+      }
+
+      const desde = cupos.reduce(
+        (min, c) => (c.startAt < min ? c.startAt : min),
+        cupos[0].startAt,
+      );
+      const hasta = cupos.reduce((max, c) => {
+        const fin = c.endAt ?? c.startAt;
+        return fin > max ? fin : max;
+      }, cupos[0].endAt ?? cupos[0].startAt);
+
+      for (const cupo of cupos) {
+        cupo.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+        touch(cupo, actor.id);
+      }
+
+      const exception = this.catalogRepo.createException(tx, {
+        resourceId,
+        exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
+        startAt: desde,
+        endAt: hasta,
+        reason: dto.reason,
+        isAvailable: false,
+        actorUserId: actor.id,
+      });
+
+      return {
+        closedSlots: cupos.length,
+        exceptionId: exception.id,
+        from: desde.toISOString(),
+        to: hasta.toISOString(),
+      };
+    });
+  }
+
+  async shiftSlots(
+    resourceId: string,
+    dto: ShiftSlotsDto,
+    actor: AuthenticatedUser,
+  ): Promise<ShiftSlotsResponseDto> {
+    const from = new Date(dto.from);
+    const to = new Date(dto.to);
+    if (from >= to) {
+      throw new PreconditionFailedException(
+        'La ventana termina antes de empezar',
+        { from: dto.from, to: dto.to },
+      );
+    }
+    if (dto.shiftMinutes === 0) {
+      throw new PreconditionFailedException(
+        'Mover cero minutos no cambia nada: elegí cuánto correr la agenda',
+        { shiftMinutes: 0 },
+      );
+    }
+
+    this.logger.info(
+      {
+        operation: 'scheduling.slots.shift',
+        resourceId,
+        shiftMinutes: dto.shiftMinutes,
+      },
+      'Shifting slots',
+    );
+
+    const movidos = await this.em.transactional(async (tx) => {
+      const resource = await this.catalogRepo.findResourceById(tx, resourceId);
+      if (!resource) {
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId,
+        });
+      }
+      this.assertRecursoDelActor(resource, actor);
+
+      const cupos = await this.catalogRepo.findSlotsOfResourceForUpdate(
+        tx,
+        resourceId,
+        from,
+        to,
+        dto.slotIds,
+      );
+      if (cupos.length === 0) {
+        return { ids: [] as string[], desplazados: 0 };
+      }
+
+      const ms = dto.shiftMinutes * 60_000;
+      for (const cupo of cupos) {
+        cupo.startAt = new Date(cupo.startAt.getTime() + ms);
+        if (cupo.endAt !== undefined && cupo.endAt !== null) {
+          cupo.endAt = new Date(cupo.endAt.getTime() + ms);
+        }
+        touch(cupo, actor.id);
+      }
+
+      // El `flush` explícito acá y no al cerrar: si el horario nuevo pisa otra
+      // cita, queremos el `23P01` DENTRO de la transacción para que la reversión
+      // sea de todos los cupos y no de algunos.
+      await tx.flush();
+
+      return { ids: cupos.map((c) => c.id), desplazados: cupos.length };
+    });
+
+    const avisados = await this.avisarDelMovimiento(
+      movidos.ids,
+      dto.shiftMinutes,
+    );
+
+    return {
+      movedSlots: movidos.desplazados,
+      notified: avisados,
+      shiftMinutes: dto.shiftMinutes,
+    };
+  }
+
+  /**
+   * Avisa a quien tenía turno en un cupo movido.
+   *
+   * **Fuera de la transacción**, como el resto de los avisos del módulo: la
+   * agenda ya quedó corrida y un fallo del canal no puede deshacerla. Y si
+   * fallara la escritura, nadie recibiría un aviso sobre algo que no pasó.
+   *
+   * Un fallo al avisar no rompe la operación: se registra y sigue. La persona
+   * ve el horario nuevo al entrar aunque el mensaje se haya perdido.
+   */
+  private async avisarDelMovimiento(
+    slotIds: readonly string[],
+    minutos: number,
+  ): Promise<number> {
+    if (slotIds.length === 0) return 0;
+
+    const em = this.em.fork();
+    const citas = await this.catalogRepo.findBookingsOfSlots(
+      em,
+      slotIds,
+      ACTIVE_BOOKING_STATES,
+    );
+
+    let avisados = 0;
+    for (const cita of citas) {
+      try {
+        const snapshot = await this.noticeRepo.describeBooking(em, cita.id);
+        if (snapshot === null) continue;
+        const cuenta = await this.noticeRepo.findAccountForProfile(
+          em,
+          cita.patientProfileId,
+        );
+        if (cuenta === null) continue;
+
+        await this.notices.emit(
+          avisoDeHorarioMovido(snapshot, minutos, cuenta),
+        );
+        avisados += 1;
+      } catch (error: unknown) {
+        this.logger.warn(
+          {
+            operation: 'scheduling.slots.shift.notice',
+            bookingId: cita.id,
+            error,
+          },
+          'No se pudo avisar del movimiento de horario',
+        );
+      }
+    }
+    return avisados;
+  }
+
   async reactivateTemplate(
     templateId: string,
     actor: AuthenticatedUser,
@@ -716,6 +1066,28 @@ export class SchedulingCatalogService {
    * permite al formulario pedir la explicación en el momento, sin conocer de
    * antemano cuál de los motivos la exige.
    */
+  /**
+   * Las tipologías de actividad que la agenda sabe pintar (carril 12).
+   *
+   * El propietario lo pidió así: «con otros colores los otros procedimientos
+   * (TURNOS, OPERACIONES, ETC.) catalogado por tipología raíz». La columna
+   * `appointments.type_concept_id` existía desde siempre y **no había un solo
+   * concepto que ponerle**: toda actividad era indistinguible de las demás.
+   *
+   * Es lectura de catálogo, sin tenant y sin datos de nadie — el mismo criterio
+   * que el catálogo de motivos de bloqueo.
+   */
+  listActivityTypes(): ActivityTypeListDto {
+    return {
+      items: ACTIVITY_TYPES.map((type: ActivityType) => ({
+        type,
+        conceptId: ACTIVITY_TYPE_CONCEPT[type],
+        label: ACTIVITY_TYPE_LABEL[type],
+        tone: ACTIVITY_TYPE_TONE[type],
+      })),
+    };
+  }
+
   listExceptionTypes(): ExceptionTypeListDto {
     return {
       items: EXCEPTION_TYPES.map((type) => ({
@@ -1147,6 +1519,132 @@ export class SchedulingCatalogService {
    * @param exceptionId - La excepción a eliminar.
    * @param actor - Quien la elimina; tiene que poder operar el recurso.
    */
+  /**
+   * Edita un bloqueo sin borrarlo — AC-11-7, y resuelve la P-11-3.
+   *
+   * ## La pregunta abierta, y por qué se responde así
+   *
+   * La P-11-3 preguntaba qué hace editar con los cupos: *«achicar el rango
+   * debería reabrir los que ya no están cubiertos; agrandarlo debería cerrar
+   * los nuevos. Pero borrar no reabre nada por decisión documentada, y hacer
+   * que editar sí reabra crea dos semánticas distintas para la misma tabla»*.
+   *
+   * **Agrandar cierra. Achicar NO reabre.** Y no es una simetría rota por
+   * comodidad: es que las dos direcciones no tienen la misma consecuencia.
+   *
+   * - Cerrar de más **ofrece menos turnos**, y el profesional lo pidió al
+   *   agrandar el bloqueo. Nada aparece que nadie haya decidido.
+   * - Reabrir **ofrece turnos que nadie decidió ofrecer**. Un cupo pudo
+   *   cerrarse por más de un motivo, y devolverlo en silencio pone en la agenda
+   *   un rato que el profesional creía cerrado.
+   *
+   * Con esto el módulo queda con **una sola regla, y es fácil de decir**: los
+   * cupos sólo los crea publicar el horario. Ni borrar un bloqueo, ni achicarlo,
+   * ni reactivar una plantilla reponen nada — las tres lo dicen con esas
+   * palabras en su respuesta o en su pantalla.
+   *
+   * ## Todo opcional
+   *
+   * Editar un bloqueo suele ser corregir **una** cosa. Obligar a reenviar el
+   * resto haría que un cliente desactualizado pise campos que nadie quiso
+   * tocar.
+   */
+  async updateException(
+    exceptionId: string,
+    dto: UpdateExceptionDto,
+    actor: AuthenticatedUser,
+  ): Promise<UpdateExceptionResponseDto> {
+    return this.em.transactional(async (tx) => {
+      const exception = await this.catalogRepo.findExceptionById(
+        tx,
+        exceptionId,
+      );
+      if (!exception) {
+        throw new ResourceNotFoundException('Excepción no encontrada', {
+          exceptionId,
+        });
+      }
+      const resource = await this.catalogRepo.findResourceById(
+        tx,
+        exception.resourceId,
+      );
+      if (resource) this.assertRecursoDelActor(resource, actor);
+
+      const startAt =
+        dto.startAt === undefined ? exception.startAt : new Date(dto.startAt);
+      const endAt =
+        dto.endAt === undefined ? exception.endAt : new Date(dto.endAt);
+      if (endAt !== undefined && endAt !== null && startAt >= endAt) {
+        throw new PreconditionFailedException(
+          'El bloqueo termina antes de empezar',
+          { startAt: startAt.toISOString(), endAt: endAt.toISOString() },
+        );
+      }
+
+      // «Otro» sigue exigiendo explicación, y se mira el motivo QUE VA A
+      // QUEDAR: cambiar el tipo a «Otro» sin tocar el texto dejaría un bloqueo
+      // sin explicar por la puerta de atrás.
+      const tipoFinal = dto.exceptionType;
+      const textoFinal = dto.reason ?? exception.reason;
+      if (
+        tipoFinal === MOTIVO_QUE_EXIGE_TEXTO &&
+        (textoFinal === undefined || textoFinal.trim() === '')
+      ) {
+        throw new PreconditionFailedException(
+          'Elegiste «Otro» como motivo: escribí cuál es',
+          { exceptionType: tipoFinal },
+        );
+      }
+
+      const creció =
+        startAt < exception.startAt ||
+        (endAt !== undefined &&
+          endAt !== null &&
+          exception.endAt !== undefined &&
+          exception.endAt !== null &&
+          endAt > exception.endAt);
+
+      if (tipoFinal !== undefined) {
+        exception.exceptionTypeConceptId = EXCEPTION_TYPE_CONCEPT[tipoFinal];
+      }
+      if (dto.reason !== undefined) exception.reason = dto.reason;
+      exception.startAt = startAt;
+      if (endAt !== undefined && endAt !== null) exception.endAt = endAt;
+      touch(exception, actor.id);
+
+      let blockedSlots = 0;
+      if (creció && exception.isAvailable !== true) {
+        const alcanzados = await this.catalogRepo.findOpenSlotsInWindow(
+          tx,
+          exception.resourceId,
+          startAt,
+          endAt ?? startAt,
+        );
+        for (const slot of alcanzados) {
+          const intacto = slot.remainingCapacity === slot.capacity;
+          if (slot.statusConceptId === CONCEPTS.SLOT_OPEN && intacto) {
+            slot.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+            touch(slot, actor.id);
+            blockedSlots += 1;
+          }
+        }
+      }
+
+      this.logger.info(
+        { operation: 'scheduling.exception.update', exceptionId, blockedSlots },
+        'Updating availability exception',
+      );
+
+      return {
+        // El MISMO id: editar no borra y recrea, que es lo que pide AC-11-7.
+        id: exception.id,
+        startAt: startAt.toISOString(),
+        endAt: (endAt ?? startAt).toISOString(),
+        blockedSlots,
+      };
+    });
+  }
+
   async removeException(
     exceptionId: string,
     actor: AuthenticatedUser,

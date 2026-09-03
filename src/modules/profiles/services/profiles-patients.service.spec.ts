@@ -11,7 +11,7 @@ import { ForbiddenException } from '@nestjs/common';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ProfilesPatientsService } from './profiles-patients.service';
 import { PROF } from '../profiles.concepts';
-import { CONCEPTS, runWithTenant } from '../../../common';
+import { CONCEPTS } from '../../../common';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -450,59 +450,77 @@ describe('ProfilesPatientsService', () => {
 
   describe('searchPatients (UC-05-13)', () => {
     /**
-     * TAREA-07: hasta acá el listado era exclusivo de `SECURITY_ADMIN`. Este
-     * bloque prueba que la apertura al rol clínico llega **acotada**, no que
-     * el rol clínico ve lo mismo que administración.
+     * P-07-10 (2026-09-02): el padrón ya no se acota por actividad — la
+     * búsqueda también sirve para registrar a quien nunca se atendió, y
+     * acotar por actividad se lo impedía. Los cuatro roles del `@Roles` del
+     * controlador ven el mismo padrón sin acotar.
      */
-    it('SECURITY_ADMIN busca sin acotar por tenant (scope unrestricted)', async () => {
-      const d = build();
+    it.each(['SECURITY_ADMIN', 'SUPERADMIN', 'PRACTITIONER', 'CLINICIAN'])(
+      '%s busca el padrón sin acotar (scope unrestricted)',
+      async (rol) => {
+        const d = build();
 
-      await d.service.searchPatients({ query: 'ana', limit: 50 }, {
-        id: 'admin-1',
-        roles: ['SECURITY_ADMIN'],
-      } as any);
+        await d.service.searchPatients({ query: 'ana', limit: 50 }, {
+          id: 'u-1',
+          roles: [rol],
+        } as any);
 
-      expect(d.patientProfilesRepo.searchPage).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          query: 'ana',
-          scope: { kind: 'unrestricted' },
-        }),
-        51,
-      );
-    });
-
-    it('PRACTITIONER busca acotado a su tenant (scope tenant-activity)', async () => {
-      const d = build();
-      const actor = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
-
-      await runWithTenant('tenant-1', () =>
-        d.service.searchPatients({ query: 'ana', limit: 50 }, actor),
-      );
-
-      expect(d.patientProfilesRepo.searchPage).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          scope: { kind: 'tenant-activity', tenantId: 'tenant-1' },
-        }),
-        51,
-      );
-    });
+        expect(d.patientProfilesRepo.searchPage).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            query: 'ana',
+            scope: { kind: 'unrestricted' },
+          }),
+          51,
+        );
+      },
+    );
 
     /**
-     * Sin tenant en contexto, `resolvePatientSearchScope()` no deja pasar un
-     * alcance sin acotar por omisión: falla explícito. Es la barrera que
-     * evita que un `PRACTITIONER` sin `X-Tenant-Id` vea el padrón entero por
-     * un descuido de infraestructura.
+     * Sin este freno, un rol clínico sin `q` ni `nationalId` recibiría la
+     * primera página del padrón entero: es enumeración, no búsqueda.
+     * `SECURITY_ADMIN`/`SUPERADMIN` administran el padrón y siguen listando
+     * sin criterio.
      */
-    it('PRACTITIONER sin tenant en contexto: 422, no un scope sin acotar', async () => {
-      const d = build();
-      const actor = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
+    it.each(['PRACTITIONER', 'CLINICIAN'])(
+      '%s sin texto ni documento: 422, no enumera el padrón',
+      async (rol) => {
+        const d = build();
+        const actor = { id: 'u-1', roles: [rol] } as any;
 
-      await expect(
-        d.service.searchPatients({ query: 'ana', limit: 50 }, actor),
-      ).rejects.toThrow(PreconditionFailedException);
-    });
+        await expect(
+          d.service.searchPatients({ limit: 50 }, actor),
+        ).rejects.toThrow(PreconditionFailedException);
+        expect(d.patientProfilesRepo.searchPage).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(['PRACTITIONER', 'CLINICIAN'])(
+      '%s con sólo nationalId (sin texto) sí puede buscar',
+      async (rol) => {
+        const d = build();
+        const actor = { id: 'u-1', roles: [rol] } as any;
+
+        await d.service.searchPatients(
+          { nationalId: '1234567', limit: 50 },
+          actor,
+        );
+
+        expect(d.patientProfilesRepo.searchPage).toHaveBeenCalled();
+      },
+    );
+
+    it.each(['SECURITY_ADMIN', 'SUPERADMIN'])(
+      '%s sin texto ni documento igual puede listar: administra el padrón',
+      async (rol) => {
+        const d = build();
+        const actor = { id: 'u-1', roles: [rol] } as any;
+
+        await d.service.searchPatients({ limit: 50 }, actor);
+
+        expect(d.patientProfilesRepo.searchPage).toHaveBeenCalled();
+      },
+    );
 
     /** El documento se valida por departamento ANTES de tocar la base. */
     it('valida el departamento contra el catálogo antes de buscar', async () => {

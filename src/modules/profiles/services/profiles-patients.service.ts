@@ -14,7 +14,10 @@ import {
 } from '../../../common';
 import { AttachableFileService } from '../../common/services';
 import { AdministrativeAreaCatalogService } from './administrative-area-catalog.service';
-import { resolvePatientSearchScope } from './patient-search-scope';
+import {
+  requiereCriterioDeBusqueda,
+  resolvePatientSearchScope,
+} from './patient-search-scope';
 import { findCurrentIdentityAssertionForPerson } from '../../identity_assurance/repositories/identity-assertions.repository';
 import {
   AddressesRepository,
@@ -1189,6 +1192,21 @@ export class ProfilesPatientsService {
     },
     actor: AuthenticatedUser,
   ): Promise<SearchPatientsResponseDto> {
+    // P-07-10: el padrón ya no está acotado por actividad (ver
+    // `patient-search-scope.ts`), así que sin este freno un rol clínico sin
+    // texto ni documento recibiría la primera página del padrón entero — es
+    // enumeración, no búsqueda. `SECURITY_ADMIN`/`SUPERADMIN` administran el
+    // padrón y siguen listando sin criterio, como siempre.
+    if (
+      requiereCriterioDeBusqueda(actor) &&
+      !options.query &&
+      !options.nationalId
+    ) {
+      throw new PreconditionFailedException(
+        'Buscá por nombre, código o documento: no se puede listar el padrón completo de pacientes',
+      );
+    }
+
     const em = this.em.fork();
 
     if (options.issuerAdministrativeAreaConceptId) {

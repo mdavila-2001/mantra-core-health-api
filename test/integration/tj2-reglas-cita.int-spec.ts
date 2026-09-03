@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { bootstrapTestApp, bearer, type TestContext,
+  camposObligatoriosDePaciente,
+} from './harness';
 import { SEED } from '../../src/common';
 
 /**
@@ -21,6 +23,8 @@ import { SEED } from '../../src/common';
  */
 describe('TJ-2 · reglas finas de la cita (integración)', () => {
   let ctx: TestContext;
+  /** Los campos que el alta de paciente exige; salen del arnés. */
+  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
   const u = Date.now();
 
   let tokenPaciente: string;
@@ -113,12 +117,14 @@ describe('TJ-2 · reglas finas de la cita (integración)', () => {
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
 
     const nationalId = `TJ2-${randomUUID().slice(0, 8)}`;
     const password = 'S3cret-passw0rd';
     await http()
       .post('/iam/auth/register-patient')
       .send({
+        ...camposDePaciente,
         nationalId,
         password,
         displayName: 'Paciente TJ2',
@@ -165,7 +171,11 @@ describe('TJ-2 · reglas finas de la cita (integración)', () => {
   });
 
   it('pero quien atiende cancela igual: una urgencia no espera a la ventana', async () => {
-    const { slotId } = await agendaDesde(0.5);
+    // Hora propia, como el resto de la suite (72, 96, 97, 98, 120, 140): la
+    // prueba de arriba deja su cita CONFIRMADA a propósito —su cancelación se
+    // rechaza— y el mismo paciente no puede tener dos turnos a la misma hora.
+    // Compartir el `0.5` hacía que ésta fallara por lo que hizo la anterior.
+    const { slotId } = await agendaDesde(1.5);
     const bookingId = await reservar(slotId, 'Control');
 
     await http()

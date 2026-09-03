@@ -236,10 +236,14 @@ describe('IamPatientSelfRegistrationService', () => {
       );
     });
 
-    it('records the NIT as a tax identifier of the person', async () => {
+    it('records the NIT as a tax identifier of the person with legal name', async () => {
       const d = build();
 
-      await d.service.registerPatient({ ...dto, billingTaxId: '1023456789' });
+      await d.service.registerPatient({
+        ...dto,
+        billingTaxId: '1023456789',
+        billingLegalName: 'Carlos Roca Aguilera',
+      });
 
       expect(d.identifiersRepo.create).toHaveBeenCalledWith(
         d.tx,
@@ -247,6 +251,7 @@ describe('IamPatientSelfRegistrationService', () => {
           ownerId: 'person-1',
           typeConceptId: CONCEPTS.ID_TYPE_TAX,
           value: '1023456789',
+          holderName: 'Carlos Roca Aguilera',
         }),
       );
     });

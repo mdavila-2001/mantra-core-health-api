@@ -42,6 +42,7 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
       .post('/iam/auth/register-patient')
       .send({
         nationalId,
+        email: `own-profile-${Date.now()}-${Math.random().toString(36).slice(2,8)}@example.test`,
         password,
         name: 'Ada',
         middleName: 'Augusta',
@@ -384,11 +385,13 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
         .post('/iam/auth/register-patient')
         .send({
           nationalId: otroDocumento,
+          email: `own-profile-${Date.now()}-${Math.random().toString(36).slice(2,8)}@example.test`,
           password,
           name: 'Otro',
           lastName: 'Paciente',
           birthDate: '1985-01-01',
           sexAtBirth: 'MALE',
+          phone: '+591 700 22222',
           residenceMunicipalityConceptId: municipioInicial,
         })
         .expect(201);
