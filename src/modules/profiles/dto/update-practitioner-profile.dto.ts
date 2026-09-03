@@ -31,6 +31,13 @@ import {
  * toca. Mandar `''` en un texto sí lo borra — es una decisión explícita de quien
  * edita, y distinta de omitirlo.
  */
+/** Formato aceptado por los cuatro campos telefónicos del perfil. */
+const PATRON_TELEFONO = /^[+]?[0-9 ()-]{6,}$/;
+
+/** Mensaje único para los cuatro campos telefónicos del perfil. */
+const MENSAJE_TELEFONO =
+  'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion';
+
 export class UpdateOwnPractitionerProfileDto {
   /** «Médica cardióloga», «Kinesiólogo». */
   @ApiPropertyOptional({ description: 'Título profesional', maxLength: 200 })
@@ -118,14 +125,54 @@ export class UpdateOwnPractitionerProfileDto {
   @IsISO8601()
   birthDate?: string | null;
 
-  @ApiPropertyOptional({ maxLength: 40, description: 'Teléfono de contacto' })
+  @ApiPropertyOptional({
+    maxLength: 40,
+    description:
+      'Forma anterior de declarar el teléfono. Preferí workMobilePhone.',
+    deprecated: true,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(40)
-  @Matches(/^[+]?[0-9 ()-]{6,}$/, {
-    message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
-  })
+  @Matches(PATRON_TELEFONO, { message: MENSAJE_TELEFONO })
   phone?: string;
+
+  /* --- los cuatro contactos que el alta captura por separado ----------------
+     Se editan igual que se declararon: cada uno es su propio par sistema × uso
+     en `common.contact_points`. Una cadena vacía lo borra, como en el resto del
+     PATCH. El correo de trabajo NO está acá: es la identidad de login y
+     cambiarlo es otro trámite. */
+
+  /** Correo personal; el de trabajo, que es el de login, se cambia aparte. */
+  @ApiPropertyOptional({ format: 'email', maxLength: 320 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(320)
+  personalEmail?: string;
+
+  /** Celular personal o privado. */
+  @ApiPropertyOptional({ maxLength: 40 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PATRON_TELEFONO, { message: MENSAJE_TELEFONO })
+  mobilePhone?: string;
+
+  /** Celular del lugar de trabajo. */
+  @ApiPropertyOptional({ maxLength: 40 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PATRON_TELEFONO, { message: MENSAJE_TELEFONO })
+  workMobilePhone?: string;
+
+  /** Teléfono fijo del lugar de trabajo. */
+  @ApiPropertyOptional({ maxLength: 40 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PATRON_TELEFONO, { message: MENSAJE_TELEFONO })
+  workLandline?: string;
 
   @ApiPropertyOptional({
     format: 'uuid',

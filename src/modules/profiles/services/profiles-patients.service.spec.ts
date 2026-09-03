@@ -116,6 +116,7 @@ function build() {
     findById: mockFn(),
     findVigentesByOwner: mockFn().mockResolvedValue([]),
     findVigenteByOwnerAndSystem: mockFn().mockResolvedValue(null),
+    findVigenteByOwnerSystemAndUse: mockFn().mockResolvedValue(null),
     closeVigente: mockFn(),
     create: mockFn(),
   };

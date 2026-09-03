@@ -305,6 +305,11 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // --- Common: sistemas de identificador y tipos de contacto ---
   CONTACT_EMAIL: def('common:contact-system:email', 'EMAIL', 'Email'),
   CONTACT_PHONE: def('common:contact-system:phone', 'PHONE', 'Phone'),
+  // El fijo y el celular son dos cosas distintas para quien atiende: el registro
+  // del médico pide «celular de trabajo» y «fijo de trabajo» por separado, y con
+  // un único PHONE no había forma de distinguirlos. `CONTACT_PHONE` queda como
+  // el fijo (es lo que significa en HL7 `phone`) y éste marca el móvil.
+  CONTACT_MOBILE: def('common:contact-system:mobile', 'MOBILE', 'Mobile phone'),
   CONTACT_UNVERIFIED: def(
     'common:contact-state:unverified',
     'CP_UNVERIFIED',

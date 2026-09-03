@@ -229,6 +229,33 @@ export class PractitionerProfileSummaryDto {
   @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
   phone?: string;
 
+  /* --- los cinco contactos que el alta captura por separado ----------------
+     El registro del médico pide correo y celular personales además de los del
+     trabajo, y un fijo de trabajo. Cada uno es una fila de
+     `common.contact_points` distinguida por su par sistema × uso; acá vuelven
+     nombrados para que la pantalla no tenga que adivinar cuál es cuál. Mismo
+     cuidado que {@link email}: sólo en la lectura propia. */
+
+  /** Correo de trabajo; es además la identidad de login. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  workEmail?: string;
+
+  /** Correo personal, el que no sirve para entrar. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  personalEmail?: string;
+
+  /** Celular personal o privado. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  mobilePhone?: string;
+
+  /** Celular del lugar de trabajo. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  workMobilePhone?: string;
+
+  /** Teléfono fijo del lugar de trabajo. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  workLandline?: string;
+
   /* --- los datos personales que el alta captura y el resumen no devolvía ----
      La ficha del profesional mostraba su nombre y su matrícula, pero no el
      documento con el que se registró, su fecha de nacimiento ni dónde vive.
@@ -257,10 +284,16 @@ export class PractitionerProfileSummaryDto {
   @ApiPropertyOptional()
   nationalId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Departamento emisor (VS_BO_DEPARTMENT)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Departamento emisor (VS_BO_DEPARTMENT)',
+  })
   issuerAdministrativeAreaConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Municipio de residencia (VS_BO_MUNICIPALITY)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Municipio de residencia (VS_BO_MUNICIPALITY)',
+  })
   residenceMunicipalityConceptId?: string;
 
   @ApiProperty({ format: 'uuid' })
