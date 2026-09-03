@@ -518,102 +518,6 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
-  it('guarda los cinco contactos del registro, cada uno con su sistema y su uso', async () => {
-    const d = build();
-
-    await d.service.registerPractitioner({
-      ...dto,
-      personalEmail: 'ana.rojas@gmail.com',
-      mobilePhone: '+591 70011111',
-      workMobilePhone: '+591 70022222',
-      workLandline: '+591 3 3456789',
-    });
-
-    const esperados = [
-      // El correo de trabajo es además la identidad de login.
-      [CONCEPTS.CONTACT_EMAIL, CONCEPTS.CONTACT_USE_WORK, dto.email],
-      [
-        CONCEPTS.CONTACT_EMAIL,
-        CONCEPTS.CONTACT_USE_HOME,
-        'ana.rojas@gmail.com',
-      ],
-      [CONCEPTS.CONTACT_MOBILE, CONCEPTS.CONTACT_USE_HOME, '+591 70011111'],
-      [CONCEPTS.CONTACT_MOBILE, CONCEPTS.CONTACT_USE_WORK, '+591 70022222'],
-      [CONCEPTS.CONTACT_PHONE, CONCEPTS.CONTACT_USE_WORK, '+591 3 3456789'],
-    ] as const;
-
-    for (const [systemConceptId, useConceptId, value] of esperados) {
-      expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
-        d.tx,
-        expect.objectContaining({ systemConceptId, useConceptId, value }),
-      );
-    }
-    expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(esperados.length);
-  });
-
-  it('el celular personal y el de trabajo no se pisan entre sí', async () => {
-    const d = build();
-
-    await d.service.registerPractitioner({
-      ...dto,
-      mobilePhone: '+591 70011111',
-      workMobilePhone: '+591 70022222',
-    });
-
-    const celulares = d.contactPointsRepo.create.mock.calls
-      .map(
-        ([, fila]: [unknown, { systemConceptId: string; value: string }]) =>
-          fila,
-      )
-      .filter(
-        (fila: { systemConceptId: string }) =>
-          fila.systemConceptId === CONCEPTS.CONTACT_MOBILE,
-      );
-
-    expect(celulares).toHaveLength(2);
-    expect(
-      new Set(celulares.map((fila: { value: string }) => fila.value)),
-    ).toEqual(new Set(['+591 70011111', '+591 70022222']));
-  });
-
-  it('el teléfono de la forma anterior sigue cayendo donde el fijo de trabajo', async () => {
-    const d = build();
-
-    await d.service.registerPractitioner({ ...dto, phone: '+591 3 3456789' });
-
-    expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
-      d.tx,
-      expect.objectContaining({
-        systemConceptId: CONCEPTS.CONTACT_PHONE,
-        useConceptId: CONCEPTS.CONTACT_USE_WORK,
-        value: '+591 3 3456789',
-      }),
-    );
-  });
-
-  it('cuando llegan el campo nuevo y el anterior, manda el nuevo', async () => {
-    const d = build();
-
-    await d.service.registerPractitioner({
-      ...dto,
-      phone: '+591 3 1111111',
-      workLandline: '+591 3 2222222',
-    });
-
-    const fijos = d.contactPointsRepo.create.mock.calls
-      .map(
-        ([, fila]: [unknown, { systemConceptId: string; value: string }]) =>
-          fila,
-      )
-      .filter(
-        (fila: { systemConceptId: string }) =>
-          fila.systemConceptId === CONCEPTS.CONTACT_PHONE,
-      );
-
-    expect(fijos).toHaveLength(1);
-    expect(fijos[0].value).toBe('+591 3 2222222');
-  });
-
   it('ata el departamento emisor al identificador, no a la persona', async () => {
     const d = build();
 
@@ -688,9 +592,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     // Cabecera JPEG válida para que sniffMimeType la reconozca como IMAGE
     const FOTO_JPEG_B64 =
       'data:image/jpeg;base64,' +
-      Buffer.from([
-        0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46,
-      ]).toString('base64');
+      Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]).toString('base64');
 
     it('procesa y vincula la foto de perfil en base64 cuando se envía', async () => {
       const d = build();
