@@ -93,6 +93,15 @@ x-app-env: &app-env
   AUDIO_TTS_MAX_CONCURRENCY: ${AUDIO_TTS_MAX_CONCURRENCY:-2}
   AUDIO_TTS_MAX_REQUESTS_PER_SECOND: ${AUDIO_TTS_MAX_REQUESTS_PER_SECOND:-2}
   AUDIO_TTS_CROSS_TEMPLATE_DEDUP: ${AUDIO_TTS_CROSS_TEMPLATE_DEDUP:-true}
+  # Estas cuatro las lee el código y no las declaraba NINGÚN compose, así que
+  # dentro de un contenedor corrían con su valor compilado y no había forma de
+  # ajustarlas. La primera es la que más pesa: es el tope de generaciones de
+  # pago por actor y día, o sea el freno que impide que una sola cuenta agote
+  # el presupuesto del mes.
+  AUDIO_TTS_RUNTIME_GENERATIONS_PER_ACTOR_DAY: ${AUDIO_TTS_RUNTIME_GENERATIONS_PER_ACTOR_DAY:-0}
+  AUDIO_TTS_HTTP_MAX_RETRIES: ${AUDIO_TTS_HTTP_MAX_RETRIES:-0}
+  AUDIO_TTS_GLOBAL_FALLBACK_TEMPLATE: ${AUDIO_TTS_GLOBAL_FALLBACK_TEMPLATE:-onboarding.fallback.generic}
+  AUDIO_TTS_GC_RETENTION_DAYS: ${AUDIO_TTS_GC_RETENTION_DAYS:-90}
   ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
   ELEVENLABS_BASE_URL: ${ELEVENLABS_BASE_URL:-https://api.elevenlabs.io}
   ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-}
@@ -103,6 +112,20 @@ x-app-env: &app-env
   JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
   ACCOUNT_LOCK_THRESHOLD: ${ACCOUNT_LOCK_THRESHOLD:-5}
   MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY}
+  # Los otros dos secretos que `appSecurityEnvSchema` exige. Faltaban en esta
+  # lista, y el hueco solo se ve en un despliegue real: fuera de producción los
+  # tres caen a su valor de desarrollo y nadie los echa de menos, pero con
+  # `NODE_ENV=production` el esquema los declara `required()` y el contenedor
+  # muere en el arranque con «"WEBHOOK_SIGNING_KEY" is required» — sin ninguna
+  # pista de por qué en la máquina de al lado sí arrancaba. Declararlos aquí
+  # también hace que el compose de desarrollo y el de despliegue
+  # (`docker-compose.coolify.yml`) enumeren el mismo entorno.
+  WEBHOOK_SIGNING_KEY: ${WEBHOOK_SIGNING_KEY:-}
+  DOWNLOAD_URL_SECRET: ${DOWNLOAD_URL_SECRET:-}
+  # Saltos de proxy de confianza para `req.ip`. En local no hay ninguno; en un
+  # despliegue detrás de balanceador es lo que evita que el limitador de tasa
+  # meta a todos los clientes en el mismo cubo. Ver `main.ts`.
+  TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-0}
   # Primer administrador del arranque en frío. Mismo caso que `ORM_SCHEMA_SYNC`
   # más abajo: Compose usa el `.env` para sustituir `${VARIABLE}` en este YAML,
   # pero NO lo inyecta dentro de los contenedores. Mientras estas tres no
@@ -314,10 +337,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      # DDL canónico de la raíz del workspace (SQL/ y NoSQL/ generados desde los
-      # .puml). El database/ interno del repo NO es fuente de esquema.
-      - ../SQL:/init/SQL:ro
-      - ../NoSQL:/init/NoSQL:ro
+      # DDL canónico del repositorio del modelo, que se clona como hermano de
+      # este (SQL/ y NoSQL/ generados desde los .puml). El database/ interno del
+      # repo NO es fuente de esquema.
+      - ../mantra-core-health-model/SQL:/init/SQL:ro
+      - ../mantra-core-health-model/NoSQL:/init/NoSQL:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
@@ -365,7 +389,7 @@ services:
     environment:
       MONGO_DB: ${MONGO_DB:-salud_document_store}
     volumes:
-      - ../NoSQL/55_document_store_mongodb:/init/mongo:ro
+      - ../mantra-core-health-model/NoSQL/55_document_store_mongodb:/init/mongo:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       mongodb:
@@ -427,7 +451,7 @@ services:
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:
-      - ../NoSQL/57_search_platform_opensearch:/init/os:ro
+      - ../mantra-core-health-model/NoSQL/57_search_platform_opensearch:/init/os:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       opensearch:
@@ -579,7 +603,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 120s
     depends_on:
       # No basta con que Postgres esté healthy: `TerminologySeedService`
       # corre en `onApplicationBootstrap` y necesita el esquema ya aplicado

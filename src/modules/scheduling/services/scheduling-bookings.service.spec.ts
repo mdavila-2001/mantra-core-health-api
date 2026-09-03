@@ -38,7 +38,13 @@ const MOTIVO = 'El paciente viaja esa semana';
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
+  // `create` devuelve el objeto tal cual: el servicio lo usa como la fila que
+  // acaba de nacer, así que la prueba puede mirar exactamente lo que se guardó.
+  const tx = {
+    flush: mockFn(),
+    create: mockFn((_clase: any, datos: any) => datos),
+    persist: mockFn(),
+  };
   // Las lecturas trabajan sobre un fork del EntityManager; el doble se devuelve
   // a sí mismo para que la prueba pueda seguir mirando las mismas llamadas.
   const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -51,6 +57,11 @@ function build() {
     findExpiredHolds: mockFn(),
     createBooking: mockFn(),
     findBookingByIdForUpdate: mockFn(),
+    // TAREA-13 punto 5: el estado de pago. Por omisión la cita no tiene
+    // ninguno, que es el caso de toda cita que nadie marcó todavía.
+    findPaymentStateForUpdate: mockFn().mockResolvedValue(null),
+    findPaymentState: mockFn().mockResolvedValue(null),
+    findPaymentStatesForBookings: mockFn().mockResolvedValue(new Map()),
     // Las dos lecturas (UC-41-15): el detalle y el listado.
     findBookingById: mockFn(),
     // TJ-2: la lectura del origen de una reprogramación. Sin filas, ninguna
@@ -72,6 +83,8 @@ function build() {
     findTemplateById: mockFn(),
     findPolicyById: mockFn(),
     findResourceById: mockFn(),
+    findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
+    createSlot: mockFn().mockReturnValue({ id: 'slot-directo' }),
   };
   // C-10: la historia de transición se versiona vía el HistoryRepository de audit.
   // `latestBySource` es la lectura del motivo (corrección #14): por defecto no
@@ -85,6 +98,9 @@ function build() {
   const appointmentsRepo = {
     create: mockFn(() => ({ id: 'appt-1' })),
     findById: mockFn(),
+    // Por omisión ninguna cita declara tipología: las pruebas que la comprueban
+    // devuelven el mapa a propósito.
+    findTypesByIds: mockFn().mockResolvedValue(new Map()),
   };
   const logger = {
     setContext: mockFn(),
@@ -100,6 +116,7 @@ function build() {
     describeSlot: mockFn().mockResolvedValue(null),
     findResourceAccount: mockFn().mockResolvedValue(null),
     findAccountForProfile: mockFn().mockResolvedValue(null),
+    findDisplayNameForProfile: mockFn().mockResolvedValue(null),
   };
   const notices = {
     emit: mockFn().mockResolvedValue({ delivered: true }),
@@ -110,6 +127,12 @@ function build() {
   // por defecto no hay vínculos que mirar, que es el caso del consultorio
   // propio y el de la gran mayoría de las reservas de estas pruebas.
   const vinculos = { evaluar: mockFn(async () => 'sin-vinculos') };
+  // La regla madre tiene specs propios; acá interesa QUÉ hace cada flujo con su
+  // veredicto. Por defecto el rango está libre.
+  const tiempoProfesional = {
+    assertRangoLibre: mockFn(async () => undefined),
+    compromisos: mockFn(async () => []),
+  };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -120,11 +143,13 @@ function build() {
     notices as any,
     logger as any,
     vinculos as any,
+    tiempoProfesional as any,
   );
   return {
     service,
     tx,
     vinculos,
+    tiempoProfesional,
     bookingsRepo,
     catalogRepo,
     historyRepo,
@@ -944,6 +969,119 @@ describe('SchedulingBookingsService', () => {
 
       expect(d.bookingsRepo.createBooking).toHaveBeenCalled();
     });
+
+    /* ----------------------------------------------------------------------
+       AC-15-1 y AC-15-2 · la solicitud se avisa a las DOS partes
+       ---------------------------------------------------------------------- */
+
+    /** La cita como la describe el repositorio de avisos. */
+    const solicitada = {
+      bookingId: 'booking-1',
+      tenantId: '33333333-3333-3333-3333-333333333333',
+      patientProfileId: PATIENT,
+      resourceId: 'res-1',
+      slotId: SLOT_ID,
+      startAt: new Date('2026-08-20T14:00:00.000Z'),
+      resourceLabel: 'Dra. Rivas',
+    };
+
+    it('avisa al profesional que hay una solicitud que responder', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+      d.noticeRepo.findDisplayNameForProfile.mockResolvedValue('Ana Flores');
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const alPro = avisos.find(
+        (a: any) => a.recipient.userId === 'user-medico',
+      );
+      expect(alPro).toBeDefined();
+      expect(alPro.payload.change).toBe('REQUESTED');
+      expect(alPro.bodyText).toContain('Ana Flores');
+      // La acción va en el cuerpo: avisar sin decir qué se espera es ruido.
+      expect(alPro.bodyText).toMatch(/acept/i);
+    });
+
+    it('acusa recibo al paciente, y dice que todavía falta la respuesta', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const alPaciente = avisos.find(
+        (a: any) => a.recipient.patientProfileId === PATIENT,
+      );
+      expect(alPaciente).toBeDefined();
+      expect(alPaciente.bodyText).toContain('Dra. Rivas');
+      // Un acuse que se lee como confirmación manda a alguien al consultorio
+      // con un turno que nadie tomó.
+      expect(alPaciente.bodyText).toMatch(/falta que lo confirmen/i);
+      expect(avisos).toHaveLength(2);
+    });
+
+    it('sin nombre de paciente el aviso del profesional sigue saliendo', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+      d.noticeRepo.findDisplayNameForProfile.mockResolvedValue(null);
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const alPro = avisos.find(
+        (a: any) => a.recipient.userId === 'user-medico',
+      );
+      expect(alPro.bodyText).toMatch(/^Un paciente pidió turno/);
+    });
+
+    it('una sala no tiene a quién avisarle, pero el paciente igual recibe su acuse', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue(null);
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      expect(avisos).toHaveLength(1);
+      expect(avisos[0].recipient).toEqual({ patientProfileId: PATIENT });
+    });
+
+    it('los dos avisos rebotan por separado: uno por destinatario', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(solicitada);
+      d.noticeRepo.findResourceAccount.mockResolvedValue('user-medico');
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      const [avisos] = d.notices.emitMany.mock.calls[0];
+      const claves = avisos.map((a: any) => a.debounceKey);
+      expect(new Set(claves).size).toBe(2);
+      expect(claves.every((k: string) => k.includes('booking-1'))).toBe(true);
+    });
+
+    it('que la cita no se describa no rompe la solicitud', async () => {
+      const d = build();
+      conHoldVivo(d);
+      d.noticeRepo.describeBooking.mockResolvedValue(null);
+
+      const res = await d.service.requestBooking(
+        'hold-token',
+        solicitud,
+        actor,
+      );
+
+      expect(res.id).toBe('booking-1');
+      expect(d.notices.emitMany).not.toHaveBeenCalled();
+    });
   });
 
   describe('motivo obligatorio y visible (corrección #14)', () => {
@@ -1063,6 +1201,293 @@ describe('SchedulingBookingsService', () => {
         resourceName: 'Consultorio del Dr. Paz',
       };
     }
+
+    describe('la cita puntual — AG-2', () => {
+      const medico = {
+        id: 'user-med',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-1',
+      } as never;
+
+      const dto = {
+        patientProfileId: 'pp-ana',
+        resourceId: 'res-1',
+        startAt: '2026-09-10T14:00:00Z',
+        durationMinutes: 180,
+        reasonText: 'Cirugía de implante',
+      };
+
+      /** Deja la agenda del médico lista para asignar. */
+      function listoParaAsignar(d: ReturnType<typeof build>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          tenantId: 'ten-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+          timeZone: 'America/La_Paz',
+        });
+        d.bookingsRepo.findPatientNames.mockResolvedValue(
+          new Map([['pp-ana', 'Ana Quispe']]),
+        );
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.bookingsRepo.createBooking.mockReturnValue({ id: 'bk-directa' });
+        return d;
+      }
+
+      it('crea cupo único + reserva CONFIRMADA en una transacción', async () => {
+        const d = listoParaAsignar(build());
+
+        const res = await d.service.createDirectAppointment(
+          dto as never,
+          medico,
+        );
+
+        expect(res.bookingId).toBe('bk-directa');
+        expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+        // el cupo nace ya tomado y sin plantilla: nunca estuvo ofrecido.
+        const slotArgs = d.catalogRepo.createSlot.mock.calls[0][1];
+        expect(slotArgs.capacity).toBe(1);
+        expect(slotArgs.remainingCapacity).toBe(0);
+        expect(slotArgs.scheduleTemplateId).toBeUndefined();
+      });
+
+      /**
+       * La modalidad de la atención — teleconsulta.
+       *
+       * `clinical.appointments.channel_concept_id` existía desde el modelo y
+       * estaba sin conjunto y sin usar; por eso la teleconsulta no se podía
+       * declarar aunque el modelo ya la admitiera. Estas pruebas fijan las dos
+       * mitades: que el valor elegido llega a la cita CLÍNICA (no a la
+       * reserva, que es otro eje), y que omitirlo no inventa nada.
+       */
+      describe('el canal de la atención', () => {
+        it('escribe la teleconsulta en la cita clínica, no en la reserva', async () => {
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(
+            { ...dto, channel: 'TELECONSULTA' } as never,
+            medico,
+          );
+
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.channelConceptId).toBe(
+            CLIN.APPOINTMENT_CHANNEL_TELEHEALTH,
+          );
+
+          // El canal de la RESERVA es otro eje y no se contagia: la asignó
+          // alguien desde el mostrador, y eso sigue siendo cierto.
+          const reserva = d.bookingsRepo.createBooking.mock.calls[0][1];
+          expect(reserva.bookingChannelConceptId).toBe(CONCEPTS.CHANNEL_DESK);
+        });
+
+        it('sin canal no escribe ninguno: ausente ≠ presencial explícito', async () => {
+          // «Nadie lo dijo» y «dijeron que es presencial» son cosas distintas.
+          // Sólo la primera puede cambiar de significado si mañana el valor por
+          // defecto cambia, y por eso la columna queda en NULL.
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(dto as never, medico);
+
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.channelConceptId).toBeUndefined();
+        });
+
+        it('la visita a domicilio también es un canal, no un tipo de cita', async () => {
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(
+            { ...dto, channel: 'DOMICILIO' } as never,
+            medico,
+          );
+
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.channelConceptId).toBe(
+            CLIN.APPOINTMENT_CHANNEL_HOME_VISIT,
+          );
+          // `type_concept_id` responde otra pregunta —qué clase de atención
+          // es— y no lo toca nadie acá.
+          expect(cita.typeConceptId).toBeUndefined();
+        });
+      });
+
+      it('la duración es libre: la cirugía de 3 horas es el caso entero', async () => {
+        const d = listoParaAsignar(build());
+
+        await d.service.createDirectAppointment(dto as never, medico);
+
+        const slotArgs = d.catalogRepo.createSlot.mock.calls[0][1];
+        const durMs = slotArgs.endAt.getTime() - slotArgs.startAt.getTime();
+        expect(durMs).toBe(180 * 60_000);
+      });
+
+      it('la regla madre corre ANTES de crear nada', async () => {
+        const d = listoParaAsignar(build());
+        d.tiempoProfesional.assertRangoLibre.mockRejectedValue(
+          new PreconditionFailedException('El profesional ya tiene a Beto…'),
+        );
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/ya tiene a Beto/);
+        expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+        expect(d.bookingsRepo.createBooking).not.toHaveBeenCalled();
+      });
+
+      it('el tiempo del PACIENTE también se protege', async () => {
+        // La regla 1 vale igual cuando quien agenda es el doctor: el paciente
+        // tampoco puede estar en dos lugares.
+        const d = listoParaAsignar(build());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([
+          {
+            id: 'bk-otra',
+            resourceName: 'Otro consultorio',
+            startAt: new Date(),
+          },
+        ]);
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/paciente ya tiene un turno/);
+      });
+
+      it('retira los cupos libres que pisa y lo INFORMA', async () => {
+        // Decisión 8: informar, no pedir permiso.
+        const d = listoParaAsignar(build());
+        const libre1 = {
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          capacity: 1,
+          remainingCapacity: 1,
+        };
+        const libre2 = {
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          capacity: 1,
+          remainingCapacity: 1,
+        };
+        d.catalogRepo.findOpenSlotsOfProfessionalInWindow.mockResolvedValue([
+          libre1,
+          libre2,
+        ]);
+
+        const res = await d.service.createDirectAppointment(
+          dto as never,
+          medico,
+        );
+
+        expect(res.retractedSlots).toBe(2);
+        expect(libre1.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+        expect(libre2.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      });
+
+      it('un profesional NO asigna en la agenda de otro', async () => {
+        const d = listoParaAsignar(build());
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          tenantId: 'ten-1',
+          resourceRefId: 'hp-OTRO',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/su propia agenda/);
+      });
+
+      it('un paciente que no existe rebota con 404, no crea nada', async () => {
+        const d = listoParaAsignar(build());
+        d.bookingsRepo.findPatientNames.mockResolvedValue(new Map());
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/Paciente no encontrado/);
+        expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+      });
+
+      it('hereda el gating del vínculo: revocado no asigna', async () => {
+        const d = listoParaAsignar(build());
+        d.vinculos.evaluar.mockResolvedValue('no-vigente' as never);
+
+        await expect(
+          d.service.createDirectAppointment(dto as never, medico),
+        ).rejects.toThrow(/no está vigente/);
+      });
+    });
+
+    describe('la regla madre — AG-1', () => {
+      it('aceptar consulta el tiempo del profesional EXCLUYENDO la propia cita', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-1',
+          appointmentId: 'appt-1',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+        d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await d.service.accept('booking-1', {}, actor);
+
+        const llamada = d.tiempoProfesional.assertRangoLibre.mock.calls[0];
+        expect(llamada[1]).toBe('hp-1');
+        // el último argumento es la propia reserva: aceptarse no es chocar
+        // consigo misma.
+        expect(llamada[4]).toBe('booking-1');
+      });
+
+      it('si el profesional ya está comprometido en OTRA sede, aceptar rebota', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-1',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.tiempoProfesional.assertRangoLibre.mockRejectedValue(
+          new PreconditionFailedException('El profesional ya tiene a Ana…'),
+        );
+
+        await expect(d.service.accept('booking-1', {}, actor)).rejects.toThrow(
+          /ya tiene a Ana/,
+        );
+      });
+
+      it('una sala o un equipo no pasan por la regla del profesional', async () => {
+        // La regla protege a la persona; una sala puede tener dos agendas sin
+        // ser un problema humano.
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-sala',
+          appointmentId: 'appt-1',
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        });
+        d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+        d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-sala',
+          resourceRefId: 'sala-1',
+          resourceRefType: 'rooms',
+        });
+
+        await d.service.accept('booking-1', {}, actor);
+
+        expect(d.tiempoProfesional.assertRangoLibre).not.toHaveBeenCalled();
+      });
+    });
 
     describe('vinculo vigente con la organizacion — MAC-VINCULO', () => {
       // El `actor` de este archivo es un SCHEDULING_AGENT, que opera agendas
@@ -1732,6 +2157,49 @@ describe('SchedulingBookingsService', () => {
       expect(res.items[0].patientName).toBe('Marisol Quispe');
     });
 
+    it('el estado de pago viaja en la página, en UNA sola consulta', async () => {
+      // El punto entero de la lectura en lote. Si esto se resolviera cita por
+      // cita, la columna de pago no sería una ineficiencia: sería una columna
+      // que no se puede construir. Es el mismo defecto que Itzan levantó como
+      // B-1 en la TAREA-22.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina(['b1', 'b2']));
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.bookingsRepo.findPaymentStatesForBookings.mockResolvedValue(
+        new Map([
+          [
+            'b1',
+            {
+              appointmentBookingId: 'b1',
+              statusConceptId: SCHED.PAYMENT_PAID,
+              insuranceUsed: true,
+              markedByUserId: 'u-9',
+              markedAt: new Date('2026-09-01T10:00:00Z'),
+            },
+          ],
+        ]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      // Una llamada para las dos citas, no una por cita.
+      expect(d.bookingsRepo.findPaymentStatesForBookings).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(res.items[0].paymentState?.state).toBe('PAID');
+      expect(res.items[0].paymentState?.insuranceUsed).toBe(true);
+      // Y la que nadie marcó se OMITE: `undefined` y no «pendiente». La
+      // diferencia tiene que sobrevivir hasta la pantalla.
+      expect(res.items[1].paymentState).toBeUndefined();
+    });
+
     it('MAC-6 · un profesional ajeno NO ve el nombre', async () => {
       // Misma regla que el motivo de consulta: se omite, no se vacía.
       const d = build();
@@ -1771,6 +2239,119 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(d.bookingsRepo.findPatientNames).toHaveBeenCalledTimes(1);
+    });
+
+    /* ------------------------------------------------------------------
+       TAREA-12 §3.2 · la tipología viaja para que la agenda pueda pintarla
+       ------------------------------------------------------------------ */
+
+    it('la tipología de la cita llega en el listado', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: 'appt-1',
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+      d.appointmentsRepo.findTypesByIds.mockResolvedValue(
+        new Map([['appt-1', 'tipo-operacion']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(res.items[0].typeConceptId).toBe('tipo-operacion');
+    });
+
+    it('se pide UNA vez para toda la página, no una por cita', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: ['b1', 'b2', 'b3'].map((id, i) => ({
+          booking: {
+            ...guardada,
+            id,
+            resourceId: 'res-1',
+            appointmentId: `appt-${i}`,
+          },
+          slot: null,
+        })),
+        fetchCapReached: false,
+      });
+
+      await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(d.appointmentsRepo.findTypesByIds).toHaveBeenCalledTimes(1);
+      const [, ids] = d.appointmentsRepo.findTypesByIds.mock.calls[0];
+      expect(ids).toHaveLength(3);
+    });
+
+    it('una reserva sin cita clínica no pide tipología ni la inventa', async () => {
+      // Una reserva que nunca se confirmó no crea `clinical.appointments`: su
+      // id no entra en la consulta y el campo se omite.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: null,
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(res.items[0].typeConceptId).toBeUndefined();
+      const [, ids] = d.appointmentsRepo.findTypesByIds.mock.calls[0];
+      expect(ids).toHaveLength(0);
+    });
+
+    it('una cita clínica sin tipo declarado omite el campo, no lo vacía', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: 'appt-1',
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+      // El repositorio no la incluye: «no declaró tipo» no es «tipo nulo».
+      d.appointmentsRepo.findTypesByIds.mockResolvedValue(new Map());
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect('typeConceptId' in res.items[0]).toBe(false);
     });
 
     it('el listado por omisión incluye las pendientes y las completadas', async () => {
@@ -2014,5 +2595,233 @@ describe('SchedulingBookingsService', () => {
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
+  });
+});
+
+/**
+ * EL ESTADO DE PAGO DE UNA CITA — TAREA-13, punto 5.
+ *
+ * Lo que fijan estas pruebas es la regla que dio el propietario y que es fácil
+ * de romper sin darse cuenta, porque no es una máquina de estados sino **dos
+ * ejes que corren en paralelo**: «el estado del pago no es excluyente con
+ * pendiente, aceptada y realizada; pero sí lo es con rechazada y cancelada».
+ *
+ * Y una segunda cosa que no se ve leyendo: marcar un pago **sobrescribe** la
+ * fila, así que sin la revisión en el historial, volver a «pendiente» borraría
+ * que la cita alguna vez estuvo pagada.
+ */
+describe('SchedulingBookingsService · el estado de pago', () => {
+  const BOOKING = '33333333-3333-3333-3333-333333333333';
+  const TENANT = '44444444-4444-4444-4444-444444444444';
+
+  /** Una cita en el estado que se le pida, lista para operar. */
+  function citaEn(statusConceptId: string) {
+    return {
+      id: BOOKING,
+      tenantId: TENANT,
+      statusConceptId,
+      resourceId: null,
+    };
+  }
+
+  it('marca una cita confirmada y la firma con quién y cuándo', async () => {
+    const { service, bookingsRepo, tx } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    const antes = Date.now();
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PAID' },
+      actor as any,
+    );
+
+    expect(res.state).toBe('PAID');
+    expect(res.label).toBe('Pagada');
+    expect(res.conceptId).toBe(SCHED.PAYMENT_PAID);
+    // AC-13-10: la firma. Sin esto, marcar una cita como pagada sería una
+    // afirmación sobre el dinero de alguien que nadie hizo.
+    expect(res.markedByUserId).toBe(actor.id);
+    expect(new Date(res.markedAt).getTime()).toBeGreaterThanOrEqual(antes);
+    expect(tx.persist).toHaveBeenCalled();
+  });
+
+  it('los tres estados existen y ninguno es un booleano', async () => {
+    // El pedido original decía «pagada o pendiente de pago». El propietario
+    // agregó el intermedio, y es exactamente el que un booleano no puede
+    // expresar.
+    for (const [state, label, concepto] of [
+      ['PENDING', 'Pendiente de pago', SCHED.PAYMENT_PENDING],
+      ['PARTIALLY_PAID', 'Parcialmente pagada', SCHED.PAYMENT_PARTIALLY_PAID],
+      ['PAID', 'Pagada', SCHED.PAYMENT_PAID],
+    ] as const) {
+      const { service, bookingsRepo } = build();
+      bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        citaEn(CONCEPTS.BOOKING_CONFIRMED),
+      );
+      const res = await service.setPaymentState(
+        BOOKING,
+        { state },
+        actor as any,
+      );
+      expect(res.label).toBe(label);
+      expect(res.conceptId).toBe(concepto);
+    }
+  });
+
+  it('el seguro es una marca SEPARADA, no un cuarto estado', async () => {
+    // Es la decisión del propietario: una cita puede estar parcialmente pagada
+    // con seguro o sin él. Si el seguro viviera dentro del estado, este caso
+    // necesitaría un valor propio y serían seis.
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PARTIALLY_PAID', insuranceUsed: true },
+      actor as any,
+    );
+
+    expect(res.state).toBe('PARTIALLY_PAID');
+    expect(res.insuranceUsed).toBe(true);
+  });
+
+  it('sin decir nada del seguro, queda en false y no en indefinido', async () => {
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PENDING' },
+      actor as any,
+    );
+
+    expect(res.insuranceUsed).toBe(false);
+  });
+
+  it('una cita cancelada o rechazada NO admite estado de pago (422)', async () => {
+    // La mitad excluyente de la regla. Rechazar cancela con motivo
+    // `CANCEL_REJECTED`, así que las dos palabras del propietario caen en el
+    // mismo concepto.
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CANCELLED),
+    );
+
+    await expect(
+      service.setPaymentState(BOOKING, { state: 'PAID' }, actor as any),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('la exclusión es del servidor: no se guarda NADA cuando rechaza', async () => {
+    // Esconder el botón en la pantalla no es una regla. Lo que importa es que
+    // el 422 ocurra ANTES de tocar la base.
+    const { service, bookingsRepo, tx, historyRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CANCELLED),
+    );
+
+    await expect(
+      service.setPaymentState(BOOKING, { state: 'PAID' }, actor as any),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+    expect(tx.persist).not.toHaveBeenCalled();
+    expect(historyRepo.append).not.toHaveBeenCalled();
+  });
+
+  it('los estados que el propietario SÍ permite, pasan los tres', async () => {
+    // «pendiente, aceptada y realizada» — la mitad permisiva, falsable.
+    for (const estado of [
+      SCHED.BOOKING_REQUESTED,
+      CONCEPTS.BOOKING_CONFIRMED,
+      SCHED.BOOKING_COMPLETED,
+    ]) {
+      const { service, bookingsRepo } = build();
+      bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaEn(estado));
+      await expect(
+        service.setPaymentState(BOOKING, { state: 'PAID' }, actor as any),
+      ).resolves.toMatchObject({ state: 'PAID' });
+    }
+  });
+
+  it('volver a marcar ACTUALIZA la fila, no crea una segunda', async () => {
+    // Hay una fila por cita, y el único de la base lo garantiza. Si el servicio
+    // insertara otra, moriría con un 500 contra ese índice.
+    const filaVieja = {
+      id: 'pago-1',
+      statusConceptId: SCHED.PAYMENT_PENDING,
+      insuranceUsed: false,
+      markedByUserId: 'otro-usuario',
+      markedAt: new Date('2026-01-01T00:00:00Z'),
+      updatedAt: new Date('2026-01-01T00:00:00Z'),
+    };
+    const { service, bookingsRepo, tx } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+    bookingsRepo.findPaymentStateForUpdate.mockResolvedValue(filaVieja);
+
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PAID' },
+      actor as any,
+    );
+
+    expect(tx.persist).not.toHaveBeenCalled();
+    expect(filaVieja.statusConceptId).toBe(SCHED.PAYMENT_PAID);
+    // La firma se renueva: quien marcó AHORA es quien responde por el dato.
+    expect(res.markedByUserId).toBe(actor.id);
+  });
+
+  it('cada marca deja huella en el historial, con de dónde a dónde', async () => {
+    // Es lo que hace falsable el «nada se pisa en silencio» de AC-13-10: la
+    // fila se sobrescribe, la revisión no.
+    const { service, bookingsRepo, historyRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+    bookingsRepo.findPaymentStateForUpdate.mockResolvedValue({
+      id: 'pago-1',
+      statusConceptId: SCHED.PAYMENT_PAID,
+      insuranceUsed: false,
+      markedByUserId: 'otro',
+      markedAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await service.setPaymentState(BOOKING, { state: 'PENDING' }, actor as any);
+
+    expect(historyRepo.append).toHaveBeenCalledWith(
+      expect.anything(),
+      'appointment_bookings',
+      BOOKING,
+      expect.objectContaining({
+        operationConceptId: SCHED.HISTORY_OP_PAYMENT_MARKED,
+        changedByUserId: actor.id,
+        dataSnapshot: expect.objectContaining({
+          // El paso completo: sin el «de», la huella no dice qué se perdió.
+          fromPaymentConceptId: SCHED.PAYMENT_PAID,
+          toPaymentConceptId: SCHED.PAYMENT_PENDING,
+        }),
+      }),
+    );
+  });
+
+  it('sin marca previa, la lectura devuelve null y no «pendiente»', async () => {
+    // No son lo mismo: «pendiente de pago» es una afirmación que alguien firmó;
+    // la ausencia de fila es que del pago todavía no se dijo nada.
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      citaEn(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    await expect(
+      service.getPaymentState(BOOKING, actor as any),
+    ).resolves.toBeNull();
   });
 });

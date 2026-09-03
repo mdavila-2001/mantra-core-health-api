@@ -67,6 +67,12 @@ describe('IamPractitionerSelfRegistrationService', () => {
       create: fn(() => ({ id: 'cred-1' })),
     };
     const languagesRepo = { create: fn() };
+    const specialtiesRepo = { create: fn() };
+    // Da por buena cualquier especialidad: la validación de catálogo tiene su
+    // propio spec; acá lo que se prueba es el flujo del alta.
+    const specialtyCatalog = {
+      assertIsMedicalSpecialty: fn().mockResolvedValue(undefined),
+    };
     const accountLinksRepo = { create: fn() };
     const identifiersRepo = { create: fn() };
     const contactPointsRepo = { create: fn() };
@@ -95,6 +101,8 @@ describe('IamPractitionerSelfRegistrationService', () => {
       personsRepo as never,
       personProfilesRepo as never,
       practitionersRepo as never,
+      specialtiesRepo as never,
+      specialtyCatalog as never,
       authorizationsRepo as never,
       professionalCredentialsRepo as never,
       languagesRepo as never,
@@ -111,6 +119,8 @@ describe('IamPractitionerSelfRegistrationService', () => {
     return {
       service,
       effectiveRoles,
+      specialtiesRepo,
+      specialtyCatalog,
       tx,
       usersRepo,
       credentialsRepo,
@@ -221,6 +231,88 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       expect(d.activationsRepo.create).not.toHaveBeenCalled();
       expect(d.credentialsRepo.createPassword).toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * Las especialidades EN el alta — registro del cliente, módulo Médico §1.4.2.
+   *
+   * Hasta acá el alta no las aceptaba: la pantalla decía «se elige después» y
+   * la mayoría no volvía. Lo que estas pruebas fijan: que viajan en la misma
+   * transacción, que la primera es la principal, que cada una pasa por el
+   * catálogo (la FK acepta cualquier concepto; el value set decide), y que
+   * repetir una no crea dos filas.
+   */
+  describe('las especialidades del alta', () => {
+    it('crea una fila por especialidad, la primera como principal', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        specialtyConceptIds: ['esp-cardio', 'esp-neuro'],
+      });
+
+      const filas = d.specialtiesRepo.create.mock.calls.map(
+        (c: unknown[]) => c[1] as Record<string, unknown>,
+      );
+      expect(filas).toHaveLength(2);
+      expect(filas[0]).toMatchObject({
+        specialtyConceptId: 'esp-cardio',
+        isPrimary: true,
+      });
+      expect(filas[1]).toMatchObject({
+        specialtyConceptId: 'esp-neuro',
+        isPrimary: false,
+      });
+    });
+
+    it('cada concepto pasa por el catálogo: el formato uuid no alcanza', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        specialtyConceptIds: ['esp-cardio'],
+      });
+
+      expect(d.specialtyCatalog.assertIsMedicalSpecialty).toHaveBeenCalledWith(
+        expect.anything(),
+        'esp-cardio',
+      );
+    });
+
+    it('si el catálogo rechaza una, el alta entera no ocurre', async () => {
+      // Misma transacción a propósito: una cuenta creada con una especialidad
+      // inválida a medias sería peor que el rechazo completo.
+      const d = build();
+      d.specialtyCatalog.assertIsMedicalSpecialty.mockRejectedValue(
+        new Error('no es una especialidad'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          specialtyConceptIds: ['no-es-especialidad'],
+        }),
+      ).rejects.toThrow('no es una especialidad');
+    });
+
+    it('repetir una especialidad declara una, no dos', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        specialtyConceptIds: ['esp-cardio', 'esp-cardio'],
+      });
+
+      expect(d.specialtiesRepo.create.mock.calls).toHaveLength(1);
+    });
+
+    it('sin especialidades el alta sigue igual que siempre', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner(dto);
+
+      expect(d.specialtiesRepo.create).not.toHaveBeenCalled();
     });
   });
 

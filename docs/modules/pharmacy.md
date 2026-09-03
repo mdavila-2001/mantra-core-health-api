@@ -9,7 +9,7 @@
 # Módulo `pharmacy`
 
 **Fuente:** [`src/modules/pharmacy/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharmacy/README.md)
-· 1 controllers · 6 services · 9 repositories · 9 entidades · 9 DTO
+· 2 controllers · 7 services · 10 repositories · 9 entidades · 10 DTO
 
 ---
 
@@ -34,6 +34,28 @@ mapeo de productos, retiro de catálogo y proyección al read-model.
 | UC-24-09 | `DELETE /pharmacies/{pharmacyId}/products/{productId}` | Retirar (soft-delete) producto en cascada |
 | UC-24-10 | `POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close` | Cerrar/expirar lista de precios |
 | UC-24-11 | `POST /pharmacies/{pharmacyId}/projections` | Proyectar catálogo y precios a read-model |
+
+### Cara de lectura (carril E2 · `/pharmacy`)
+
+| Método y ruta | Resumen |
+| --- | --- |
+| `GET /pharmacy/pharmacies` | Directorio de farmacias publicadas del tenant activo |
+| `GET /pharmacy/pharmacies/{id}` | Perfil de una farmacia: ficha y sedes con dirección y coordenadas |
+| `GET /pharmacy/products?search=&conceptId=&limit=` | Búsqueda de productos por texto o por medicamento del vademécum |
+| `GET /pharmacy/sites/{siteId}/prices?product=` | Precios públicos vigentes de una sede |
+
+Visible = farmacia `ACTIVE` **y** `VERIFIED` del tenant del contexto (mismo
+criterio que el directorio de unidades diagnósticas); sedes y productos,
+además, activos. Lo ajeno o no publicado responde el mismo `404`. Los
+`*_concept_id` se sirven resueltos a `{code, display}` y la dirección de cada
+sede llega en texto con sus coordenadas (`pharmacy_site → practice_site →
+common.addresses`). El precio vigente respeta **tres ventanas a la vez**: lista
+`ACTIVE` dentro de `valid_from`/`valid_to` **y pública**, y versión de precio
+`ACTIVE` dentro de `effective_from`/`effective_to`. Una lista ligada a una
+aseguradora (`insurer_tenant_id`) nunca sale por esta cara aunque esté marcada
+visible: es un acuerdo entre partes, no precio de mostrador. `conceptId` de la
+búsqueda es el `medication_concept_id` del vademécum (`terminology`, códigos
+ATC): el mismo con que la receta identifica el fármaco.
 
 ## Entidades
 
@@ -64,7 +86,10 @@ mapeo de productos, retiro de catálogo y proyección al read-model.
 
 ## Permisos
 
-Todas las operaciones exigen rol `SECURITY_ADMIN` (guard global + `@Roles`).
+Todas las operaciones administrativas exigen rol `SECURITY_ADMIN` (guard global
++ `@Roles`). La cara de lectura (`/pharmacy/*`) no exige rol: son lecturas
+publicadas, y el filtro real es la publicación más el aislamiento por tenant
+que aplica el servicio — igual que el directorio de unidades diagnósticas.
 
 ## Logs
 

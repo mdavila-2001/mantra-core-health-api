@@ -203,17 +203,28 @@ export class TerminologyValueSetsController {
     required: false,
     description: `Miembros por página (por defecto ${DEFAULT_EXPANSION_PAGE_SIZE})`,
   })
+  @ApiQuery({
+    name: 'includeProperties',
+    required: false,
+    type: Boolean,
+    description:
+      'Trae también las propiedades de cada concepto. Opt-in: hay catálogos cuyo dato útil vive ahí (el nomenclador guarda especialidad, precio y unidad como propiedades).',
+  })
   readExpansion(
     @Param('id', ParseUUIDPipe) id: string,
     @Query('valueSetVersionId', new ParseUUIDPipe({ optional: true }))
     valueSetVersionId?: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    // Sin `ParseBoolPipe`: el parámetro es opcional y un pipe estricto haría
+    // fallar la petición que no lo manda, que es la mayoría.
+    @Query('includeProperties') includeProperties?: string,
   ): Promise<ReadValueSetExpansionResponseDto> {
     return this.valueSetsService.readExpansion(id, {
       valueSetVersionId,
       cursor,
       limit: limit ?? DEFAULT_EXPANSION_PAGE_SIZE,
+      includeProperties: includeProperties === 'true',
     });
   }
 }

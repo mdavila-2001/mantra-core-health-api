@@ -65,6 +65,66 @@ function build() {
   const darDeAltaPaciente = (personId: string) =>
     perfiles.set(personId, { profileId: personId });
 
+  /** `profile_id` → fila, como lo indexa `HealthPractitionerProfilesRepository`. */
+  const profesionales = new Map<string, { profileId: string }>();
+  const practitionerProfilesRepo = {
+    findById: mockFn((_em: unknown, profileId: string) =>
+      Promise.resolve(profesionales.get(profileId) ?? null),
+    ),
+  };
+  /** Da de alta un perfil profesional de esa persona. */
+  const darDeAltaProfesional = (personId: string) =>
+    profesionales.set(personId, { profileId: personId });
+
+  /**
+   * Las reservas, indexadas por par (profesional, paciente) como lo hace la consulta
+   * real. No devuelve lo que se le diga: si se pregunta por otro par, no hay filas —
+   * que es lo que tiene que pasar.
+   */
+  const reservas = new Map<
+    string,
+    { startAt: Date; timeZone: string | null }[]
+  >();
+  const clave = (pro: string, pac: string) => `${pro}→${pac}`;
+  /** Consultas en curso, por par profesional→paciente. */
+  const enCurso = new Set<string>();
+  const bookingsRepo = {
+    // Sin ventana de fechas a propósito: una consulta en curso no se pregunta
+    // por el calendario.
+    tieneConsultaEnCurso: mockFn((_em: unknown, pro: string, pac: string) =>
+      Promise.resolve(enCurso.has(clave(pro, pac))),
+    ),
+    findConfirmadasConPacienteEntre: mockFn(
+      (
+        _em: unknown,
+        practitionerProfileId: string,
+        patientProfileId: string,
+        desde: Date,
+        hasta: Date,
+      ) =>
+        Promise.resolve(
+          (
+            reservas.get(clave(practitionerProfileId, patientProfileId)) ?? []
+          ).filter((r) => r.startAt >= desde && r.startAt < hasta),
+        ),
+    ),
+  };
+  /** Agenda una reserva viva de ese profesional con ese paciente. */
+  const agendar = (
+    pro: string,
+    pac: string,
+    startAt: Date,
+    timeZone: string | null = 'America/La_Paz',
+  ) => {
+    const previas = reservas.get(clave(pro, pac)) ?? [];
+    reservas.set(clave(pro, pac), [...previas, { startAt, timeZone }]);
+  };
+
+  /** Marca que ese profesional YA empezó la consulta con ese paciente. */
+  const iniciarConsulta = (pro: string, pac: string): void => {
+    enCurso.add(clave(pro, pac));
+  };
+
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ClinicalReadService(
@@ -77,6 +137,8 @@ function build() {
     {} as any,
     accountLinksRepo as any,
     patientProfilesRepo as any,
+    practitionerProfilesRepo as any,
+    bookingsRepo as any,
     logger as any,
   );
 
@@ -84,7 +146,12 @@ function build() {
     service,
     accountLinksRepo,
     patientProfilesRepo,
+    practitionerProfilesRepo,
+    bookingsRepo,
     darDeAltaPaciente,
+    darDeAltaProfesional,
+    agendar,
+    iniciarConsulta,
     logger,
   };
 }
@@ -187,5 +254,260 @@ describe('ClinicalReadService · assertOwnRecord', () => {
     await expect(
       d.service.assertOwnRecord(PERSONA_AJENA, mentiroso),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+});
+
+/**
+ * El permiso de lectura de la historia (v4.2.2).
+ *
+ * Antes bastaba el rol: cualquier médico con sesión leía la historia de cualquier
+ * persona, y la tabla de permisos por paciente estaba —y sigue— vacía. Ahora quien
+ * atiende pasa sólo si HOY tiene turno con esa persona, y «hoy» es el día de la sede.
+ */
+describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
+  const MEDICO = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const PACIENTE = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+  const OTRO_PACIENTE = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+  const LA_PAZ = 'America/La_Paz';
+
+  /** Un actor con los roles pedidos. */
+  const actorCon = (id: string, ...roles: string[]) => ({ id, roles }) as any;
+
+  /** Hoy a las `hora` en punto, hora de La Paz (UTC−4), como instante UTC. */
+  const hoyEnLaPazALas = (hora: number) => {
+    const ahora = new Date();
+    const local = new Date(ahora.getTime() - 4 * 3600_000);
+    return new Date(
+      Date.UTC(
+        local.getUTCFullYear(),
+        local.getUTCMonth(),
+        local.getUTCDate(),
+        hora + 4,
+      ),
+    );
+  };
+
+  it('el titular lee su propia historia, como antes', async () => {
+    const c = build();
+    c.darDeAltaPaciente(PACIENTE);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+      personId: PACIENTE,
+    });
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'PATIENT')),
+    ).resolves.toBeUndefined();
+  });
+
+  it('quien atiende pasa si HOY tiene turno con esa persona', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.agendar(MEDICO, PACIENTE, hoyEnLaPazALas(10), LA_PAZ);
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).resolves.toBeUndefined();
+  });
+
+  it('el turno de AYER ya no abre la historia', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.agendar(
+      MEDICO,
+      PACIENTE,
+      new Date(hoyEnLaPazALas(10).getTime() - 86_400_000),
+      LA_PAZ,
+    );
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('sin turno con esa persona no alcanza el rol', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(
+        PACIENTE,
+        actorCon('u', 'PRACTITIONER'),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('el turno de hoy con OTRO paciente no abre esta historia', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.agendar(MEDICO, OTRO_PACIENTE, hoyEnLaPazALas(10), LA_PAZ);
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('una cuenta con rol de atender pero sin perfil profesional no pasa', async () => {
+    const c = build();
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  /**
+   * El borde que hace fallar a quien decide con la fecha del servidor: a las 23:30 en
+   * La Paz ya es el día siguiente en UTC. El turno es de hoy para la sede, y es la
+   * sede la que manda.
+   */
+  it('el turno de las 23:30 en La Paz es de HOY, aunque en UTC ya sea mañana', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    const alas2330 = hoyEnLaPazALas(23);
+    c.agendar(
+      MEDICO,
+      PACIENTE,
+      new Date(alas2330.getTime() + 30 * 60_000),
+      LA_PAZ,
+    );
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).resolves.toBeUndefined();
+  });
+
+  it('el recurso sin zona declarada cae al default del producto (UTC−4)', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.agendar(MEDICO, PACIENTE, hoyEnLaPazALas(10), null);
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).resolves.toBeUndefined();
+  });
+
+  /**
+   * LA CONSULTA YA EMPEZADA ABRE EL EXPEDIENTE, SIN MIRAR EL CALENDARIO.
+   *
+   * Las dos reglas del producto se contradecían y se midió en un recorrido
+   * real: la agenda deja **empezar una cita confirmada cuando el profesional
+   * decide, no cuando el reloj lo permite** (corrección #15, pedido del
+   * propietario), y el expediente exigía que el cupo fuera de hoy. Se podía
+   * iniciar la consulta y no leer la historia de quien estaba enfrente.
+   */
+  it('una consulta EN CURSO abre el expediente aunque el turno sea de otro día', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    // Sin turno hoy: la agenda de este profesional con este paciente está vacía
+    // en la ventana que mira `atiendeHoy`.
+    c.iniciarConsulta(MEDICO, PACIENTE);
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).resolves.toBeUndefined();
+  });
+
+  it('sin consulta en curso Y sin turno hoy, sigue sin poder', async () => {
+    // La cita con ese paciente sigue siendo el filtro: esto es lo que impide
+    // que «en curso» se lea como «cualquiera puede».
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('la consulta en curso es de ESE par, no de cualquiera', async () => {
+    // Iniciar con un paciente no abre el expediente de otro. Es el error fácil
+    // de cometer si la consulta se escribiera sin el par completo.
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.iniciarConsulta(MEDICO, 'otro-paciente-cualquiera');
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('el camino barato va primero: con consulta en curso no se consulta la agenda', async () => {
+    // No es cosmético: `findConfirmadasConPacienteEntre` trae una ventana de 96
+    // horas y compara zona por zona. Si la respuesta ya se sabe, no se paga.
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.iniciarConsulta(MEDICO, PACIENTE);
+
+    await c.service.assertPuedeLeerHistoria(
+      PACIENTE,
+      actorCon('u', 'CLINICIAN'),
+    );
+
+    expect(
+      c.bookingsRepo.findConfirmadasConPacienteEntre,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('SUPERADMIN pasa sin turno y sin perfil: el guard ya lo trata como comodín', async () => {
+    const c = build();
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'SUPERADMIN')),
+    ).resolves.toBeUndefined();
+    expect(
+      c.bookingsRepo.findConfirmadasConPacienteEntre,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('el profesional lee su PROPIA historia aunque no tenga turno consigo mismo', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.darDeAltaPaciente(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(MEDICO, actorCon('u', 'CLINICIAN')),
+    ).resolves.toBeUndefined();
+  });
+
+  /**
+   * Sin esto, el mensaje delata: «no es tuya» contra «no la atendés hoy» le confirmaría
+   * a quien probó un uuid al azar que esa persona existe.
+   */
+  it('el rechazo es indistinguible entre paciente inexistente y sin-turno', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    const actor = actorCon('u', 'CLINICIAN');
+
+    const existeSinTurno = await c.service
+      .assertPuedeLeerHistoria(PACIENTE, actor)
+      .catch((e: Error) => e.message);
+    const inventado = await c.service
+      .assertPuedeLeerHistoria('dddddddd-dddd-dddd-dddd-dddddddddddd', actor)
+      .catch((e: Error) => e.message);
+
+    expect(existeSinTurno).toBe(inventado);
+  });
+
+  it('resuelve el vínculo de la cuenta UNA sola vez por lectura', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+
+    await c.service
+      .assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN'))
+      .catch(() => undefined);
+
+    expect(c.accountLinksRepo.findActiveByUser).toHaveBeenCalledTimes(1);
   });
 });

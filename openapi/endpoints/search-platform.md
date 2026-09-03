@@ -296,6 +296,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | El documento trae campos no declarados para este índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

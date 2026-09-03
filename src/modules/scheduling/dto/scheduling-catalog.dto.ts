@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  ArrayNotEmpty,
   IsBoolean,
   IsIn,
   IsInt,
@@ -300,6 +301,30 @@ export class ScheduleRuleDto {
   @IsInt()
   @Min(1)
   capacityPerSlot?: number;
+
+  /**
+   * El respiro entre consultas, en minutos.
+   *
+   * El paso del generador pasa a ser `slotMinutes + gapMinutes`, pero **cada
+   * turno sigue durando `slotMinutes`**: el respiro separa un turno del
+   * siguiente, no alarga la consulta. Sin él, una agenda de 08:00 a 12:00 con
+   * turnos de 30 minutos ofrece ocho seguidos y el profesional no tiene un
+   * minuto entre paciente y paciente.
+   *
+   * **Anulable y sin valor por defecto**, igual que `slotMinutes`, que está en
+   * la misma tabla y describe lo mismo. Ausente se lee como cero: «nadie lo
+   * declaró» y «declararon cero» significan lo mismo para el generador, y un
+   * `NOT NULL DEFAULT 0` obligaría a escribir un dato que nadie dio.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0',
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  gapMinutes?: number;
 }
 
 /**
@@ -400,6 +425,16 @@ export class TemplateRuleDto {
   /** Pacientes por turno, si la franja lo declara. */
   @ApiProperty({ required: false })
   capacityPerSlot?: number;
+
+  /**
+   * Minutos de respiro entre turnos, si la franja lo declara.
+   *
+   * Ausente ≡ 0: el front ya lo fija así (PR #234). No se emite cuando la
+   * columna está nula, para que «no declarado» y «cero» sigan siendo
+   * distinguibles por quien lee el contrato.
+   */
+  @ApiProperty({ required: false })
+  gapMinutes?: number;
 }
 
 /**
@@ -422,6 +457,22 @@ export class TemplateDetailDto {
   /** Las franjas, ordenadas por día y hora. */
   @ApiProperty({ type: [TemplateRuleDto] })
   rules!: TemplateRuleDto[];
+
+  /**
+   * Si el horario fue retirado y ya no se publica.
+   *
+   * Viaja como booleano y no como `statusConceptId` a secas porque quien lo
+   * consume es una pantalla, y comparar contra un UUID de concepto la obligaría
+   * a conocerlo — que es exactamente lo que el proyecto evita. Mismo criterio
+   * que `requiresText` en el catálogo de motivos.
+   *
+   * Importa para la lectura, no sólo para la etiqueta: el listado devuelve
+   * **todas** las plantillas del recurso, retiradas incluidas, y sin esto la
+   * pantalla mostraría un horario retirado como si fuera el vigente —basta con
+   * que sea el más reciente—.
+   */
+  @ApiProperty({ description: 'true cuando el horario está retirado' })
+  retired!: boolean;
 
   /** Duración por defecto de la plantilla, si la declara. */
   @ApiProperty({ required: false })
@@ -470,6 +521,19 @@ export class AvailabilityExceptionDto {
   /** Tipo de excepción, como concepto. */
   @ApiProperty({ format: 'uuid' })
   exceptionTypeConceptId!: string;
+
+  /**
+   * El motivo catalogado, en palabras.
+   *
+   * **Viaja para todos**, incluido el paciente: es una etiqueta de una lista
+   * cerrada —«Vacaciones», «Congreso o capacitación»— y no puede contener nada
+   * que el profesional no haya elegido a propósito.
+   *
+   * Es la mitad segura del motivo. La otra —`reason`, el texto libre— sólo la
+   * ve quien administra la agenda.
+   */
+  @ApiProperty({ example: 'Vacaciones' })
+  reasonLabel!: string;
 
   /** Comienzo del bloqueo. */
   @ApiProperty({ format: 'date-time' })
@@ -572,10 +636,51 @@ export class GenerateSlotsResponseDto {
    */
   @ApiProperty({ description: 'Slots que ya existían y se conservaron' })
   skipped!: number;
+
+  /**
+   * Cupos que NO se generaron porque pisaban un compromiso del profesional.
+   *
+   * La regla madre (AG-1): la cirugía del jueves hace que ese rato no se
+   * ofrezca, en ninguna de sus sedes. Se informa para que quien publica sepa
+   * que el hueco no es un error del generador.
+   */
+  @ApiProperty({
+    description:
+      'Cupos omitidos por chocar con compromisos del profesional (citas confirmadas en cualquiera de sus sedes)',
+  })
+  omittedByCommitments!: number;
 }
 
-/** Tipo de excepción de disponibilidad. */
-export type ExceptionType = 'ABSENCE' | 'HOLIDAY' | 'EXTRA';
+/**
+ * Motivo de una excepción de disponibilidad.
+ *
+ * Los tres primeros nacieron con el módulo y describen la **mecánica**; los
+ * cuatro siguientes son los motivos que el profesional elige, catalogados a
+ * pedido del propietario.
+ *
+ * `OTHER` **exige** el texto libre de `reason`: es lo que permite que la lista
+ * se quede corta sin bloquear a nadie, y lo que la gente escriba ahí es la
+ * mejor fuente para ampliarla después.
+ */
+export type ExceptionType =
+  | 'ABSENCE'
+  | 'HOLIDAY'
+  | 'EXTRA'
+  | 'VACATION'
+  | 'CONFERENCE'
+  | 'ERRAND'
+  | 'OTHER';
+
+/** Los motivos que la pantalla ofrece, en el orden en que se muestran. */
+export const EXCEPTION_TYPES: readonly ExceptionType[] = [
+  'ABSENCE',
+  'HOLIDAY',
+  'VACATION',
+  'CONFERENCE',
+  'ERRAND',
+  'EXTRA',
+  'OTHER',
+];
 
 /** Cuerpo de `POST /scheduling/resources/{id}/exceptions` (UC-41-04). */
 export class CreateExceptionDto {
@@ -583,10 +688,10 @@ export class CreateExceptionDto {
    * Valor de exception type mantenido por la instancia.
    */
   @ApiProperty({
-    description: 'Tipo de excepción',
-    enum: ['ABSENCE', 'HOLIDAY', 'EXTRA'],
+    description: 'Motivo de la excepción',
+    enum: EXCEPTION_TYPES,
   })
-  @IsIn(['ABSENCE', 'HOLIDAY', 'EXTRA'])
+  @IsIn(EXCEPTION_TYPES)
   exceptionType!: ExceptionType;
 
   /**
@@ -606,7 +711,10 @@ export class CreateExceptionDto {
   /**
    * Valor de reason mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Motivo visible en agenda' })
+  @ApiPropertyOptional({
+    description:
+      'Texto libre del motivo. OBLIGATORIO cuando el tipo es OTHER; lo lee el profesional',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)
@@ -641,5 +749,353 @@ export class ExceptionResponseDto {
   @ApiProperty({
     description: 'Slots libres que quedaron bloqueados por la excepción',
   })
+  blockedSlots!: number;
+}
+
+/**
+ * Lo que deja retirar un horario (TAREA-10, punto 6).
+ *
+ * Dice qué se soltó y qué se conservó, y no sólo «listo»: retirar suelta los
+ * cupos que nadie tocó y **conserva** los que tienen historia. Quien lo hace
+ * tiene derecho a ver esa diferencia sin ir a mirar la base.
+ */
+/**
+ * Lo que responde reactivar un horario pausado.
+ *
+ * Lleva `slotsPendientes` porque **reactivar no regenera los cupos**: retirar
+ * los borró, y volver a crearlos es `generate-slots` con la ventana que el
+ * profesional elija. Sin este campo, quien reactiva vería su horario «vigente»
+ * y sin un solo turno ofrecido, y no tendría cómo saber por qué.
+ */
+export class ReactivateTemplateResponseDto {
+  /** La plantilla reactivada. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** El estado con el que queda: `TPL_PUBLISHED`. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /** Hay que generar cupos: el horario está vigente pero todavía no ofrece nada. */
+  @ApiProperty({
+    description:
+      'true cuando el horario quedó vigente sin cupos materializados y hay que generarlos',
+  })
+  slotsPendientes!: boolean;
+}
+
+export class RetireTemplateResponseDto {
+  /** La plantilla retirada. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** El estado con el que queda: `TPL_RETIRED`. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /** Cupos que nadie reservó y dejaron de publicarse. */
+  @ApiProperty({
+    description: 'Cupos libres que se soltaron al retirar el horario',
+  })
+  releasedSlots!: number;
+
+  /**
+   * Cupos que se conservaron por tener una cita detrás, viva o histórica.
+   *
+   * Un número distinto de cero no es un error: es el historial que el retiro
+   * respeta a propósito.
+   */
+  @ApiProperty({
+    description: 'Cupos conservados porque tienen una cita detrás',
+  })
+  keptSlots!: number;
+}
+
+/** Un motivo de bloqueo tal como lo ofrece la pantalla. */
+export class ExceptionTypeDto {
+  /** Clave estable con la que se envía al crear la excepción. */
+  @ApiProperty({ enum: EXCEPTION_TYPES })
+  type!: ExceptionType;
+
+  /** El concepto real detrás, por si el cliente lo necesita. */
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  /** Cómo se llama en pantalla, en castellano. */
+  @ApiProperty({ example: 'Congreso o capacitación' })
+  label!: string;
+
+  /**
+   * Si elegirlo obliga a escribir el motivo.
+   *
+   * Viaja con el catálogo para que el formulario pueda pedir la explicación sin
+   * saber de antemano cuál de los motivos la exige.
+   */
+  @ApiProperty({ description: 'true en «Otro»: exige texto libre' })
+  requiresText!: boolean;
+
+  /**
+   * Si cierra horario o lo abre.
+   *
+   * `EXTRA` **añade** disponibilidad fuera del patrón: viaja en la misma lista
+   * porque es una excepción más, pero la pantalla necesita distinguirlo para no
+   * ofrecerlo donde se espera un bloqueo.
+   */
+  @ApiProperty({ description: 'false en la atención extraordinaria' })
+  blocks!: boolean;
+}
+
+/** Respuesta de `GET /scheduling/exception-types`. */
+export class ExceptionTypeListDto {
+  /** Los motivos, en el orden en que se muestran. */
+  @ApiProperty({ type: [ExceptionTypeDto] })
+  items!: ExceptionTypeDto[];
+}
+
+/* -- Tipología raíz de la actividad (carril 12) ----------------------------- */
+
+/** Las tipologías que la agenda sabe pintar, en el orden en que se muestran. */
+export type ActivityType =
+  'APPOINTMENT' | 'PROCEDURE' | 'FOLLOW_UP' | 'TELEHEALTH' | 'OTHER';
+
+export const ACTIVITY_TYPES: readonly ActivityType[] = [
+  'APPOINTMENT',
+  'PROCEDURE',
+  'FOLLOW_UP',
+  'TELEHEALTH',
+  'OTHER',
+];
+
+/**
+ * Una tipología de actividad, tal como la publica la API.
+ *
+ * Lleva `tone` y no un color: el pedido dice «con otros colores», pero **el
+ * color concreto es del sistema de diseño**, no de la API. Mandar un `#RRGGBB`
+ * desde el servidor obligaría a redesplegarlo para cambiar una paleta, y
+ * rompería el tema oscuro. El tono es semántico y cada pantalla lo resuelve con
+ * sus propios tokens.
+ */
+export class ActivityTypeDto {
+  /** Clave estable con la que se identifica la tipología. */
+  @ApiProperty({ enum: ACTIVITY_TYPES })
+  type!: ActivityType;
+
+  /** El concepto real detrás, que es lo que guarda `appointments`. */
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  /** Cómo se llama en pantalla, en castellano. */
+  @ApiProperty({ example: 'Operación o procedimiento' })
+  label!: string;
+
+  /**
+   * El tono con el que se pinta, del sistema de diseño.
+   *
+   * `error` queda reservado para los BLOQUEOS —el propietario los pidió «con
+   * rojo»— así que ninguna tipología lo usa: si una actividad se pintara igual
+   * que un bloqueo, la agenda diría que ese rato está cerrado cuando no lo está.
+   */
+  @ApiProperty({ enum: ['primary', 'secondary', 'info', 'warning', 'success'] })
+  tone!: string;
+}
+
+export class ActivityTypeListDto {
+  @ApiProperty({ type: [ActivityTypeDto] })
+  items!: ActivityTypeDto[];
+}
+
+/* -- Mover el horario N minutos (carril 12) --------------------------------- */
+
+/** Cuánto se puede correr una agenda de una vez, en minutos. */
+export const MIN_SHIFT_MINUTES = -240;
+export const MAX_SHIFT_MINUTES = 240;
+
+/**
+ * Cuerpo de `POST /scheduling/resources/{id}/shift-slots`.
+ *
+ * El pedido original: *«un botón que se llame mover horario, que desplace los
+ * slots N minutos después y envíe mensajes automáticos por la app de mover
+ * horarios y sea seleccionable a todos o ciertos slots en específico»*.
+ */
+export class ShiftSlotsDto {
+  /**
+   * Cuántos minutos se corre. Negativo adelanta.
+   *
+   * Se admite adelantar además de atrasar porque la situación real es
+   * simétrica: el profesional que termina antes quiere adelantar a los que
+   * esperan, y negarlo lo obligaría a cancelar y volver a crear.
+   */
+  @ApiProperty({
+    description: 'Minutos a correr. Negativo adelanta.',
+    minimum: MIN_SHIFT_MINUTES,
+    maximum: MAX_SHIFT_MINUTES,
+    example: 20,
+  })
+  @IsInt()
+  @Min(MIN_SHIFT_MINUTES)
+  @Max(MAX_SHIFT_MINUTES)
+  shiftMinutes!: number;
+
+  /** Desde cuándo se mira la agenda. */
+  @ApiProperty({ format: 'date-time' })
+  @IsISO8601()
+  from!: string;
+
+  /** Hasta cuándo. */
+  @ApiProperty({ format: 'date-time' })
+  @IsISO8601()
+  to!: string;
+
+  /**
+   * Qué cupos mover. **Ausente = todos los de la ventana.**
+   *
+   * Es el «seleccionable a todos o ciertos slots en específico» del pedido. Se
+   * distingue ausente de lista vacía: una lista vacía no mueve nada, y es una
+   * petición que alguien armó mal — mejor que no haga nada a que mueva la
+   * agenda entera.
+   */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  slotIds?: string[];
+}
+
+/** Lo que responde mover el horario. */
+export class ShiftSlotsResponseDto {
+  /** Cuántos cupos se corrieron. */
+  @ApiProperty()
+  movedSlots!: number;
+
+  /**
+   * A cuántas personas se les avisó.
+   *
+   * Menor que `movedSlots` es lo corriente: los cupos libres se mueven y no
+   * hay a quién avisarle.
+   */
+  @ApiProperty()
+  notified!: number;
+
+  /** Los minutos que se aplicaron, para que el cliente confirme lo que pidió. */
+  @ApiProperty()
+  shiftMinutes!: number;
+}
+
+/* -- Cerrar cupos sueltos del día (carril 12) ------------------------------- */
+
+/**
+ * Cuerpo de `POST /scheduling/resources/{id}/close-slots`.
+ *
+ * El pedido original: *«otro botón para cancelar cita específica o slots
+ * específicos, esto implícitamente detona un bloqueo de horario para el día de
+ * hoy únicamente (para que no genere conflictos a la hora de generar los slots
+ * disponibles en los horarios del doctor)»*.
+ *
+ * Esa aclaración entre paréntesis es la razón de ser del endpoint: cerrar un
+ * cupo **sin** dejar la excepción sirve hasta que alguien regenera, y ahí el
+ * cupo vuelve como si nada.
+ */
+export class CloseSlotsDto {
+  /** Por qué se cierra. Del mismo catálogo que los bloqueos. */
+  @ApiProperty({ enum: EXCEPTION_TYPES })
+  @IsIn(EXCEPTION_TYPES)
+  exceptionType!: ExceptionType;
+
+  /** La explicación, obligatoria si el motivo la exige. */
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+
+  /**
+   * Los cupos a cerrar.
+   *
+   * **Al menos uno.** A diferencia de mover, acá no hay «todos los de la
+   * ventana»: cerrar la agenda entera de un día ya tiene su pantalla —bloquear—
+   * y ofrecerlo también acá haría que un clic distraído cierre el día.
+   */
+  @ApiProperty({ type: [String], format: 'uuid' })
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsUUID('4', { each: true })
+  slotIds!: string[];
+}
+
+/** Lo que responde cerrar cupos sueltos. */
+export class CloseSlotsResponseDto {
+  /** Cuántos cupos quedaron cerrados. */
+  @ApiProperty()
+  closedSlots!: number;
+
+  /**
+   * La excepción que se creó para que regenerar no los devuelva.
+   *
+   * Es la parte que el pedido pone entre paréntesis y que es su razón de ser:
+   * sin ella, cerrar un cupo dura hasta la próxima generación.
+   */
+  @ApiProperty({ format: 'uuid' })
+  exceptionId!: string;
+
+  /** Desde cuándo cubre la excepción. */
+  @ApiProperty({ format: 'date-time' })
+  from!: string;
+
+  /** Hasta cuándo. */
+  @ApiProperty({ format: 'date-time' })
+  to!: string;
+}
+
+/* -- Editar un bloqueo (carril 11, P-11-3) ---------------------------------- */
+
+/**
+ * Cuerpo de `PATCH /scheduling/exceptions/{id}`.
+ *
+ * Todo opcional: editar un bloqueo suele ser corregir **una** cosa —la hora de
+ * fin, el motivo— y obligar a reenviar el resto haría que un cliente
+ * desactualizado pise campos que nadie quiso tocar.
+ */
+export class UpdateExceptionDto {
+  @ApiPropertyOptional({ enum: EXCEPTION_TYPES })
+  @IsOptional()
+  @IsIn(EXCEPTION_TYPES)
+  exceptionType?: ExceptionType;
+
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  startAt?: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  endAt?: string;
+}
+
+/** Lo que responde editar un bloqueo. */
+export class UpdateExceptionResponseDto {
+  /** El MISMO id que antes: editar no borra y recrea. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  startAt!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  endAt!: string;
+
+  /**
+   * Cupos que se cerraron porque el rango creció.
+   *
+   * Achicar el rango **no reabre ninguno**, y por eso no hay campo para eso:
+   * en este módulo los cupos sólo los crea publicar el horario.
+   */
+  @ApiProperty()
   blockedSlots!: number;
 }

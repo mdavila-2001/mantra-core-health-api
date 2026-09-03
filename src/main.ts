@@ -4,9 +4,9 @@
 // tarde y no se emite ni un span. Ver `src/observability/telemetry.bootstrap.ts`.
 import './observability/telemetry.bootstrap';
 
-import type { Server } from 'node:http';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
@@ -44,11 +44,17 @@ const BANNER = `
 async function bootstrap() {
   process.stdout.write(BANNER);
 
+  // Tipado como aplicación de Express (y no como `INestApplication` a secas)
+  // porque más abajo hace falta `app.set('trust proxy', …)`, que es del
+  // adaptador de Express y no del contrato genérico de Nest.
+  //
   // `bufferLogs: true` retiene la totalidad de lo registrado durante la inicialización
   // -incluida la materialización del DDL, que ocurre en OnApplicationBootstrap-
   // hasta que se fija el logger definitivo. Sin esto, esos primeros logs saldrían
   // por el logger por defecto de Nest y no por pino.
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+  });
 
   // Sin esto, Nest ignora SIGTERM/SIGINT y no dispara `onModuleDestroy` /
   // `beforeApplicationShutdown` (cierre de conexiones de MikroORM, Redis,
@@ -97,6 +103,32 @@ async function bootstrap() {
     processName: 'api',
     timeoutMs: Number(process.env.API_SHUTDOWN_TIMEOUT_MS ?? 30_000),
   });
+
+  // Proxies de confianza delante de la API. Es lo que decide qué considera
+  // Express la dirección del cliente (`req.ip`).
+  //
+  // Sin esto, detrás de un proxy inverso TODAS las peticiones parecen venir de
+  // la misma dirección —la del último salto—, y el limitador de tasa global
+  // (300 peticiones/minuto en `ThrottlerModule`) deja de ser un límite por
+  // cliente para convertirse en un límite por despliegue: con una decena de
+  // pantallas abiertas empiezan los 429 y en los logs no hay ninguna pista de
+  // por qué, porque el cubo que se llenó es compartido. Lo mismo vale para
+  // todo lo que registre la IP de origen: auditoría y bloqueo de cuentas
+  // apuntarían al proxy.
+  //
+  // Es un NÚMERO DE SALTOS y no `true` a propósito. `true` acepta el primer
+  // valor de `X-Forwarded-For` venga de donde venga, así que cualquiera puede
+  // declararse la IP que quiera con una cabecera y saltarse el límite o
+  // ensuciar la auditoría. Con un número, Express cuenta desde el final de la
+  // cadena y descarta lo que el cliente haya inventado antes.
+  //
+  // 0 (el valor por defecto) es «no hay proxy», que es la situación de
+  // desarrollo local. En el despliegue de Coolify son 2: el Traefik de Coolify
+  // y el nginx del frontend. Ver `docker-compose.coolify.yml`.
+  const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS ?? 0);
+  if (Number.isFinite(trustProxyHops) && trustProxyHops > 0) {
+    app.set('trust proxy', trustProxyHops);
+  }
 
   // Cabeceras de seguridad HTTP (HSTS, X-Content-Type-Options, X-Frame-Options,
   // Referrer-Policy, etc.). Imprescindible en un backend de salud expuesto.
@@ -167,11 +199,11 @@ async function bootstrap() {
     );
   }
 
-  // `app.listen` está tipado como `Promise<any>` en Nest porque el servidor
-  // depende del adaptador. Se acota al `Server` de Node, que es lo que devuelve
-  // el adaptador de Express que usa esta aplicación, para poder tocar sus
-  // plazos con el tipo puesto.
-  const server = (await app.listen(process.env.PORT ?? 3000)) as Server;
+  // Ya viene tipado como el `Server` de Node: al declarar la aplicación como
+  // `NestExpressApplication` (arriba, por `app.set('trust proxy', …)`),
+  // `listen` deja de devolver `any` y el acotamiento explícito que había aquí
+  // sobra. Los plazos de más abajo se pueden tocar con el tipo puesto igual.
+  const server = await app.listen(process.env.PORT ?? 3000);
 
   // Plazos del servidor HTTP. Son la defensa contra el agotamiento de
   // descriptores de fichero por conexiones que no progresan (el patrón

@@ -7,6 +7,8 @@ import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { BoEmployersSeedService } from './bo-employers-seed.service';
+import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
@@ -114,6 +116,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
+   * @param boOccupations - Ocupaciones de Bolivia (`VS_BO_OCCUPATION`).
+   * @param boEmployers - Empresas y empleadores de Bolivia (`VS_BO_EMPLOYER`).
    * @param boliviaFacilities - Directorio de establecimientos de salud de
    *   Santa Cruz (`VS_BO_HEALTH_FACILITY`).
    * @param boliviaInsurance - Aseguradoras bolivianas con su producto de
@@ -135,6 +139,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
+    private readonly boOccupations: BoOccupationsSeedService,
+    private readonly boEmployers: BoEmployersSeedService,
     private readonly boliviaFacilities: BoliviaFacilitiesSeedService,
     private readonly boliviaInsurance: BoliviaInsuranceSeedService,
     private readonly boliviaFeeSchedule: BoliviaFeeScheduleSeedService,
@@ -262,6 +268,25 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'departamentos de Bolivia',
         kind: 'core',
         run: () => this.boGeography.run(),
+      },
+      // Y con ellos, por lo mismo: el alta de paciente resuelve
+      // `VS_BO_OCCUPATION` por su código para el desplegable de ocupación.
+      // Es núcleo y no contenido porque sin el conjunto el campo se queda en el
+      // texto libre que este catálogo vino a cerrar.
+      {
+        name: 'ocupaciones de Bolivia',
+        kind: 'core',
+        run: () => this.boOccupations.run(),
+      },
+      // Y con ellas, por lo mismo: el alta pregunta la empresa donde se
+      // trabaja —antes preguntaba dónde queda, que eran tres campos— y
+      // resuelve `VS_BO_EMPLOYER` por su código para el buscador. Es núcleo por
+      // el mismo motivo: sin el conjunto el campo se queda en el texto libre
+      // que este catálogo vino a cerrar.
+      {
+        name: 'empresas de Bolivia',
+        kind: 'core',
+        run: () => this.boEmployers.run(),
       },
       // Junto a los departamentos y por lo mismo: son catálogos de referencia de
       // Bolivia que las pantallas resuelven por el código del conjunto. El

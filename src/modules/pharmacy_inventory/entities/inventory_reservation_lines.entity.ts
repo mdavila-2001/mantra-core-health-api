@@ -71,6 +71,16 @@ export class InventoryReservationLines {
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
+  @Property({
+    fieldName: 'unit_price_amount',
+    columnType: 'numeric',
+    nullable: true,
+  })
+  unitPriceAmount?: string;
+
+  @Property({ fieldName: 'currency_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  currencyConceptId?: string;
+
   /**
    * Fecha y hora en que se creó el registro.
    */

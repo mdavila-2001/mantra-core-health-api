@@ -29,6 +29,9 @@ describe('TerminologyValueSetsController', () => {
       valueSetVersionId: undefined,
       cursor: undefined,
       limit: 50,
+      // Siempre presente: el opt-in se resuelve en el controlador, así el
+      // servicio recibe un booleano y no una cadena que interpretar.
+      includeProperties: false,
     });
   });
 
@@ -43,7 +46,25 @@ describe('TerminologyValueSetsController', () => {
       valueSetVersionId: 'vsv-2',
       cursor: 'cursor-opaco',
       limit: 10,
+      includeProperties: false,
     });
+  });
+
+  it('readExpansion sólo pide propiedades cuando el cliente escribe `true`', async () => {
+    const service = { readExpansion: jest.fn() } as any;
+    const controller = new TerminologyValueSetsController(service);
+    service.readExpansion.mockResolvedValue({ items: [] });
+
+    await controller.readExpansion('vs-1', undefined, undefined, 10, 'true');
+    expect(service.readExpansion.mock.calls[0][1].includeProperties).toBe(true);
+
+    // Cualquier otra cosa es `false`, no un error: el parámetro es opcional y
+    // hacer fallar la petición que lo manda mal rompería a quien hoy no lo
+    // manda en absoluto.
+    await controller.readExpansion('vs-1', undefined, undefined, 10, '1');
+    expect(service.readExpansion.mock.calls[1][1].includeProperties).toBe(
+      false,
+    );
   });
 });
 

@@ -1,4 +1,6 @@
 import {
+  avisoDeSolicitudAlPaciente,
+  avisoDeSolicitudAlProfesional,
   avisoDeCambioDeCita,
   avisoDeCupoLiberado,
   avisoDeDemora,
@@ -155,5 +157,40 @@ describe('redacción de los avisos de agenda (P8)', () => {
       });
       expect(aviso.recipient).toEqual({ userId: 'user-1' });
     });
+  });
+});
+
+/**
+ * «EN TAL LUGAR» — lo que el propietario pidió y el aviso no decía.
+ *
+ * El pedido es «tenés una nueva solicitud de consulta en tal horario **en tal
+ * lugar**». El horario estaba desde el principio; el lugar no viajaba en el
+ * snapshot, y el comentario del módulo decía que faltaba exponer la sede en la
+ * lectura de agenda. Ya estaba expuesta: lo único que faltaba era traerla.
+ */
+describe('el lugar en los avisos de solicitud', () => {
+  const USUARIO = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+  const conSede: BookingNoticeSnapshot = {
+    ...cita,
+    siteLabel: 'Consultorio del Sur',
+  };
+
+  it('el aviso al profesional dice dónde', () => {
+    const aviso = avisoDeSolicitudAlProfesional(conSede, 'Ana Quispe', USUARIO);
+    expect(aviso.bodyText).toContain('en Consultorio del Sur');
+  });
+
+  it('el aviso al paciente dice dónde', () => {
+    const aviso = avisoDeSolicitudAlPaciente(conSede);
+    expect(aviso.bodyText).toContain('en Consultorio del Sur');
+  });
+
+  it('sin sede la frase se omite ENTERA, no queda un hueco', () => {
+    // «pidió turno para el jueves en .» se lee peor que sin el dato. Un recurso
+    // sin sede declarada es corriente, no un error.
+    const aviso = avisoDeSolicitudAlProfesional(cita, 'Ana Quispe', USUARIO);
+    expect(aviso.bodyText).not.toContain(' en .');
+    expect(aviso.bodyText).not.toContain('undefined');
+    expect(aviso.bodyText).toContain('pidió turno para el');
   });
 });

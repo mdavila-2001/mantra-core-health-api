@@ -5,6 +5,7 @@ import {
   BookableSlots,
   SlotHolds,
   AppointmentBookings,
+  AppointmentPaymentStates,
   BookingReschedules,
   BookingCancellations,
   WaitlistEntries,
@@ -314,6 +315,63 @@ export class SchedulingBookingsRepository {
       { id },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * El estado de pago de una cita, bloqueado para escribir (TAREA-13 punto 5).
+   *
+   * Se bloquea porque marcar el pago es leer-decidir-escribir: sin el lock, dos
+   * peticiones simultáneas leerían las dos «no hay fila» y la segunda moriría
+   * contra `ux_appointment_payment_states_booking` con un 500 en vez de
+   * serializarse.
+   */
+  findPaymentStateForUpdate(
+    em: EntityManager,
+    bookingId: string,
+  ): Promise<AppointmentPaymentStates | null> {
+    return em.findOne(
+      AppointmentPaymentStates,
+      { appointmentBookingId: bookingId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Los estados de pago de VARIAS citas, en una sola consulta.
+   *
+   * Existe para que la columna de pago de la tabla de citas sea posible. La
+   * alternativa —pedir el estado de cada fila— no es una ineficiencia sino una
+   * columna que no se puede construir: es el mismo defecto que Itzan levantó
+   * como B-1 en la TAREA-22, y no vale la pena volver a cometerlo sabiendo.
+   *
+   * Las citas sin marca simplemente no aparecen en el mapa. Ausencia y
+   * «pendiente de pago» son cosas distintas, y esa diferencia tiene que
+   * sobrevivir hasta la pantalla.
+   */
+  async findPaymentStatesForBookings(
+    em: EntityManager,
+    bookingIds: readonly string[],
+  ): Promise<Map<string, AppointmentPaymentStates>> {
+    const porCita = new Map<string, AppointmentPaymentStates>();
+    if (bookingIds.length === 0) return porCita;
+
+    const filas = await em.find(AppointmentPaymentStates, {
+      appointmentBookingId: { $in: [...bookingIds] },
+    });
+    for (const fila of filas) {
+      porCita.set(fila.appointmentBookingId, fila);
+    }
+    return porCita;
+  }
+
+  /** El estado de pago, sin bloquear: es la cara de lectura. */
+  findPaymentState(
+    em: EntityManager,
+    bookingId: string,
+  ): Promise<AppointmentPaymentStates | null> {
+    return em.findOne(AppointmentPaymentStates, {
+      appointmentBookingId: bookingId,
+    });
   }
 
   /** Cita concreta, sin bloquear: es la cara de lectura de UC-41-15. */
@@ -688,6 +746,259 @@ export class SchedulingBookingsRepository {
         excepto ?? null,
       ],
     );
+  }
+
+  /**
+   * Los compromisos del PROFESIONAL que pisan una franja, cruzando TODAS sus
+   * agendas.
+   *
+   * Es la consulta de la regla madre (AG-1): el médico es el recurso escaso, no
+   * la sede. Un doctor con consultorio propio y hospital tiene DOS recursos, y
+   * hasta esta consulta nada miraba los dos juntos: se comprobó reservándole a
+   * dos pacientes 14:00–14:30 y 14:15–14:45 en sus dos agendas — ambas quedaron
+   * confirmadas, y el médico citado en dos lugares a la vez.
+   *
+   * Se busca por `resource_ref_id` —el vínculo del recurso con el perfil— y no
+   * por tenant, con el mismo argumento que la validación de plantillas: el que
+   * no puede estar en dos lugares es él, publique donde publique.
+   *
+   * Tocarse en el borde no cuenta (`<` y `>` estrictos): terminar 10:30 acá y
+   * empezar 10:30 allá es apretado pero posible — mismo criterio que la
+   * validación del paciente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - El profesional cuyos compromisos se miran.
+   * @param desde - Inicio de la franja que se quiere ocupar.
+   * @param hasta - Fin de la franja.
+   * @param estados - Estados que cuentan como compromiso.
+   * @param excepto - Reserva que no se compara consigo misma, si aplica.
+   * @returns Los compromisos que se cruzan, del más próximo al más lejano.
+   */
+  async findProfessionalCommitmentsOverlapping(
+    em: EntityManager,
+    practitionerProfileId: string,
+    desde: Date,
+    hasta: Date,
+    estados: readonly string[],
+    excepto?: string,
+  ): Promise<
+    {
+      id: string;
+      startAt: Date;
+      endAt: Date;
+      statusConceptId: string;
+      resourceName: string | null;
+      timeZone: string | null;
+      patientProfileId: string;
+    }[]
+  > {
+    if (estados.length === 0) return [];
+
+    const filas: {
+      id: string;
+      startAt: Date | string;
+      endAt: Date | string;
+      statusConceptId: string;
+      resourceName: string | null;
+      timeZone: string | null;
+      patientProfileId: string;
+    }[] = await em.getConnection().execute(
+      `SELECT b.id,
+              s.start_at          AS "startAt",
+              s.end_at            AS "endAt",
+              b.status_concept_id AS "statusConceptId",
+              r.name              AS "resourceName",
+              r.time_zone         AS "timeZone",
+              b.patient_profile_id AS "patientProfileId"
+         FROM scheduling.appointment_bookings b
+         JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
+         JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
+        WHERE r.resource_ref_id = ?
+          AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
+          AND b.status_concept_id IN (?)
+          AND s.start_at < ?
+          AND s.end_at   > ?
+          AND (? IS NULL OR b.id <> ?)
+        ORDER BY s.start_at ASC`,
+      [
+        practitionerProfileId,
+        [...estados],
+        hasta,
+        desde,
+        excepto ?? null,
+        excepto ?? null,
+      ],
+    );
+
+    // El driver devuelve los timestamptz del SQL crudo como texto, no como
+    // `Date`; quien formatee la hora con eso revienta con «Invalid time value».
+    // Se normaliza acá, que es la frontera con la base — apareció ejecutando el
+    // experimento de la regla madre, no leyendo.
+    return filas.map((fila) => ({
+      ...fila,
+      startAt: new Date(fila.startAt),
+      endAt: new Date(fila.endAt),
+    }));
+  }
+
+  /**
+   * Las reservas vivas de un profesional CON un paciente concreto, en una ventana.
+   *
+   * La usa el permiso de lectura de la historia clínica (v4.2.2): quien atiende abre
+   * el resumen de alguien sólo si hoy lo tiene citado. Devuelve la zona horaria del
+   * recurso junto a cada fila porque «hoy» es el día de la SEDE, no el del servidor:
+   * un turno de las 23:30 en La Paz ya es «mañana» en UTC, y decidir con la fecha del
+   * servidor le cerraría la historia al profesional que lo está atendiendo.
+   *
+   * Mira `appointment_bookings` y no `clinical.appointments` a propósito: la cita
+   * clínica NO refleja las cancelaciones —`APPT_CANCELLED` no se escribe en ningún
+   * lado— así que un turno cancelado seguiría abriendo la historia todo el día.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - El profesional que quiere leer.
+   * @param patientProfileId - El paciente cuya historia se pide.
+   * @param desde - Inicio de la ventana a mirar.
+   * @param hasta - Fin de la ventana.
+   * @param estados - Estados de reserva que cuentan como turno vivo.
+   * @returns Las reservas del par, con la zona de su sede, de la más próxima en adelante.
+   */
+  /**
+   * ¿Hay una consulta **ya iniciada** entre ese profesional y ese paciente?
+   *
+   * Sin ventana de fechas, y ésa es toda la diferencia con
+   * {@link findConfirmadasConPacienteEntre}. Una consulta en curso no se
+   * pregunta por el calendario: el estado dice que **está pasando ahora**, y el
+   * cupo sólo dice cuándo se pensaba que iba a pasar.
+   *
+   * Existe porque las dos reglas del producto se contradecían. La agenda deja
+   * empezar una cita confirmada **cuando el profesional decide, no cuando el
+   * reloj lo permite** (corrección #15, instrucción del propietario), y el
+   * expediente exigía que el cupo fuera de hoy. Resultado medido en un
+   * recorrido real: el profesional inicia la consulta y no puede abrir la
+   * historia de la persona que tiene enfrente.
+   *
+   * @param practitionerProfileId - El profesional que pide.
+   * @param patientProfileId - El paciente cuya historia se pide.
+   * @returns `true` si hay al menos una consulta en curso entre los dos.
+   */
+  async tieneConsultaEnCurso(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+    estadoEnCurso: string,
+  ): Promise<boolean> {
+    const filas: { existe: number }[] = await em.getConnection().execute(
+      `SELECT 1 AS "existe"
+         FROM scheduling.appointment_bookings b
+         JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
+        WHERE r.resource_ref_id = ?
+          AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
+          AND b.patient_profile_id = ?
+          AND b.status_concept_id = ?
+        LIMIT 1`,
+      [practitionerProfileId, patientProfileId, estadoEnCurso],
+    );
+    return filas.length > 0;
+  }
+
+  async findConfirmadasConPacienteEntre(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+    desde: Date,
+    hasta: Date,
+    estados: readonly string[],
+  ): Promise<{ startAt: Date; timeZone: string | null }[]> {
+    if (estados.length === 0) return [];
+
+    const filas: { startAt: Date | string; timeZone: string | null }[] =
+      await em.getConnection().execute(
+        `SELECT s.start_at AS "startAt",
+                r.time_zone AS "timeZone"
+           FROM scheduling.appointment_bookings b
+           JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
+           JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
+          WHERE r.resource_ref_id = ?
+            AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
+            AND b.patient_profile_id = ?
+            AND b.status_concept_id IN (?)
+            AND s.start_at >= ?
+            AND s.start_at <  ?
+          ORDER BY s.start_at ASC`,
+        [practitionerProfileId, patientProfileId, [...estados], desde, hasta],
+      );
+
+    // Mismo cuidado que arriba: el driver devuelve los timestamptz como texto.
+    return filas.map((fila) => ({
+      ...fila,
+      startAt: new Date(fila.startAt),
+    }));
+  }
+
+  /**
+   * El tiempo ocupado del profesional que pisa una franja, cruzando sus sedes.
+   *
+   * Son las excepciones de NO disponibilidad con rango horario — la reunión de
+   * 13:15, la guardia del martes— de cualquiera de sus recursos (AG-3). El
+   * paciente nunca las ve; para la regla madre cuentan igual que una cita:
+   * nada se reserva ni se genera encima.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - El profesional.
+   * @param desde - Inicio de la franja.
+   * @param hasta - Fin de la franja.
+   * @param excepto - Excepción que no se compara consigo misma, si aplica.
+   * @returns Los ratos ocupados que se cruzan, del más próximo al más lejano.
+   */
+  async findProfessionalBusyExceptionsOverlapping(
+    em: EntityManager,
+    practitionerProfileId: string,
+    desde: Date,
+    hasta: Date,
+    excepto?: string,
+  ): Promise<
+    {
+      id: string;
+      startAt: Date;
+      endAt: Date;
+      reason: string | null;
+      resourceName: string | null;
+      timeZone: string | null;
+    }[]
+  > {
+    const filas: {
+      id: string;
+      startAt: Date | string;
+      endAt: Date | string;
+      reason: string | null;
+      resourceName: string | null;
+      timeZone: string | null;
+    }[] = await em.getConnection().execute(
+      `SELECT e.id,
+              e.start_at  AS "startAt",
+              e.end_at    AS "endAt",
+              e.reason    AS "reason",
+              r.name      AS "resourceName",
+              r.time_zone AS "timeZone"
+         FROM scheduling.availability_exceptions e
+         JOIN scheduling.schedulable_resources r ON r.id = e.resource_id
+        WHERE r.resource_ref_id = ?
+          AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
+          AND e.is_available = false
+          AND e.start_at < ?
+          AND e.end_at   > ?
+          AND (? IS NULL OR e.id <> ?)
+        ORDER BY e.start_at ASC`,
+      [practitionerProfileId, hasta, desde, excepto ?? null, excepto ?? null],
+    );
+
+    // Misma frontera que los compromisos: el SQL crudo trae timestamptz como
+    // texto y quien formatee la hora con eso revienta.
+    return filas.map((fila) => ({
+      ...fila,
+      startAt: new Date(fila.startAt),
+      endAt: new Date(fila.endAt),
+    }));
   }
 
   async findPatientNames(

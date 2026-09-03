@@ -13,3 +13,4 @@ export { SchedulingDelayService } from './scheduling-delay.service';
 export { SchedulingAgendaNoticesService } from './scheduling-agenda-notices.service';
 export * from './scheduling-tenant-agenda.service';
 export * from './practitioner-affiliation-gate.service';
+export * from './scheduling-professional-time.service';

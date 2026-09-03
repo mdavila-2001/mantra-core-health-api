@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PaymentStateDto } from './scheduling-bookings.dto';
 
 /**
  * Un hueco de la agenda tal como lo ve quien va a reservar (UC-41-14).
@@ -193,6 +194,18 @@ export class BookingDelayNoticeDto {
 /** Una cita, tal como la devuelven el listado y el detalle (UC-41-15). */
 export class BookingItemDto {
   /**
+   * El estado de pago, si alguien lo marcó (TAREA-13 punto 5).
+   *
+   * **Se omite cuando no hay marca**, y no viaja como «pendiente de pago»:
+   * pendiente es una afirmación que alguien firmó, la ausencia es que del pago
+   * todavía no se dijo nada. Comprobalo con `if (item.paymentState)`.
+   *
+   * Viene en la misma consulta que la página, no una por fila.
+   */
+  @ApiPropertyOptional({ type: () => PaymentStateDto })
+  paymentState?: PaymentStateDto;
+
+  /**
    * Identificador único de la instancia.
    */
   @ApiProperty({ format: 'uuid' })
@@ -273,6 +286,26 @@ export class BookingItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   bookingChannelConceptId?: string;
+
+  /**
+   * Qué clase de actividad es: consulta, procedimiento, control…
+   *
+   * Vive en `clinical.appointments.type_concept_id` y viaja acá porque la
+   * agenda del día pinta cada bloque según su tipología —el pedido del
+   * propietario habla de «TURNOS, OPERACIONES, ETC.»— y colorear por algo que
+   * la respuesta no trae es imposible.
+   *
+   * **Es un identificador de concepto, no un enum.** El catálogo de tipologías
+   * lo define el propietario (P-12-2) y todavía no está publicado: quien lo
+   * consuma hoy puede agrupar por id, no traducirlo a un nombre.
+   *
+   * Se omite cuando la cita no tiene contraparte clínica —una reserva que
+   * nunca llegó a confirmarse no crea `clinical.appointments`— o cuando la
+   * tiene y no declara tipo. Omitido, no vacío: `null` diría «no tiene tipo»,
+   * que es una afirmación distinta.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  typeConceptId?: string;
 
   /**
    * Valor de confirmed at mantenido por la instancia.

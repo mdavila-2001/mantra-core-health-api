@@ -10,6 +10,7 @@ import {
   ReconciliationController,
   BrokerCommissionController,
   InsuranceReadController,
+  InsuranceCatalogController,
 } from './controllers';
 import {
   InsuranceBackboneService,
@@ -20,6 +21,7 @@ import {
   ReconciliationService,
   BrokerCommissionService,
   InsuranceReadService,
+  InsuranceCatalogService,
 } from './services';
 import {
   CatalogRepository,
@@ -47,6 +49,7 @@ import {
     ReconciliationController,
     BrokerCommissionController,
     InsuranceReadController,
+    InsuranceCatalogController,
   ],
   providers: [
     // Repositorios
@@ -66,9 +69,12 @@ import {
     ReconciliationService,
     BrokerCommissionService,
     InsuranceReadService,
+    InsuranceCatalogService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.
-  exports: [CatalogRepository],
+  // `CoverageRepository` lo necesita iam: el alta de paciente anota en la misma
+  // transacción el seguro que la persona declara tener.
+  exports: [CatalogRepository, CoverageRepository],
 })
 export class InsuranceModule {}

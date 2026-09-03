@@ -2,15 +2,36 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UPLOAD_MIME_ALLOWLIST,
   decodeKeysetCursor,
   encodeKeysetCursor,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { PROF } from '../profiles.concepts';
+import { AttachableFileService } from '../../common/services';
+import { AdministrativeAreaCatalogService } from './administrative-area-catalog.service';
+import {
+  requiereCriterioDeBusqueda,
+  resolvePatientSearchScope,
+} from './patient-search-scope';
+import { findCurrentIdentityAssertionForPerson } from '../../identity_assurance/repositories/identity-assertions.repository';
+import {
+  AddressesRepository,
+  ContactPointsRepository,
+  IdentifiersRepository,
+} from '../../common/repositories';
+import { createResidenceAddress } from '../../common/services/residence-address';
+import {
+  BIRTH_SEX_CODE_BY_CONCEPT,
+  BIRTH_SEX_CONCEPT_BY_CODE,
+  PROF,
+} from '../profiles.concepts';
+import { composePersonDisplayName } from '../person-name';
+import type { Persons, PatientProfiles } from '../entities';
 import {
   PersonsRepository,
   PersonProfilesRepository,
@@ -43,8 +64,175 @@ import {
   PatientSummaryResponseDto,
   SearchPatientsResponseDto,
   PatientDetailResponseDto,
+  OwnPatientProfileResponseDto,
+  OwnAddressDto,
+  OwnCoverageDto,
+  OwnGuardianDto,
+  UpdateOwnPatientProfileDto,
+  SetOwnPatientPhotoDto,
 } from '../dto';
+import { Addresses, Identifiers } from '../../common/entities';
+import { INS } from '../../insurance/insurance.concepts';
+// `isPublic` no es columna: el modelo todavía no persiste el tipo de pagador
+// (deuda declarada en el alta, PR #258), así que se deriva del catálogo
+// sembrado — mismo criterio que usa el propio alta al aceptarlos.
+import { isPublicCarrierId } from '../../../common/seed/bolivia-insurance.catalog';
 import { ProfileOwnershipService } from './profile-ownership.service';
+
+/**
+ * Deja fuera de la respuesta los campos sin valor.
+ *
+ * El contrato de las lecturas propias dice que lo opcional viaja **ausente, no
+ * `null`**, y hace falta traducir: el ORM hidrata una columna `NULL` como `null`,
+ * así que devolver la entidad tal cual pondría un `null` donde el contrato
+ * promete que no hay nada. La distinción importa: `null` se lee como «este dato
+ * está vacío» y la ausencia como «esta persona no lo declaró», y un formulario
+ * que los confunde pinta un campo borrado donde nunca hubo uno.
+ *
+ * @param respuesta - La respuesta armada, con sus huecos.
+ * @returns La misma respuesta sin las claves nulas ni indefinidas.
+ */
+function sinCamposAusentes<T extends object>(respuesta: T): T {
+  return Object.fromEntries(
+    Object.entries(respuesta).filter(
+      ([, valor]) => valor !== null && valor !== undefined,
+    ),
+  ) as T;
+}
+
+/**
+ * Normaliza un texto opcional que el titular puede querer dejar en blanco.
+ *
+ * `''` —y un texto de sólo espacios— significa «esto no lo tengo», no «tengo un
+ * dato vacío». La columna es nullable, así que la forma de decirlo es `NULL`:
+ * guardar la cadena vacía dejaría un valor que la lectura devolvería como `""`,
+ * indistinguible de un dato real y contrario a la convención del contrato —lo
+ * que no se declaró viaja ausente—. Además metería un espacio de más al
+ * recomponer el nombre visible.
+ *
+ * @param valor - Lo que llegó en el cuerpo.
+ * @returns El texto, o `undefined` para que la columna quede en `NULL`.
+ */
+function textoOpcional(valor: string): string | undefined {
+  return valor.trim() === '' ? undefined : valor;
+}
+
+/**
+ * Escribe la ocupación, que se declara de dos formas que no pueden convivir.
+ *
+ * La persona tiene una sola ocupación, y el modelo la guarda en dos columnas: el
+ * concepto del catálogo (`VS_BO_OCCUPATION`) para lo que está en la lista y el
+ * texto libre para lo que no. Dejar las dos con valor diría que tiene dos, y la
+ * lectura tendría que elegir una por su cuenta.
+ *
+ * La regla es la misma del alta: **el catálogo gana**. Declarar un concepto borra
+ * el texto libre —aunque venga en el mismo cuerpo—, y declarar un texto borra el
+ * concepto, porque escribir la ocupación a mano es decir que no está en la lista.
+ * Vaciar uno de los dos no toca al otro: es quitar lo que se declaró, no
+ * redeclararlo.
+ *
+ * @param person - La persona bajo edición, que se muta.
+ * @param dto - Los campos que llegaron en el cuerpo.
+ */
+function aplicarOcupacion(
+  person: Persons,
+  dto: UpdateOwnPatientProfileDto,
+): void {
+  const conceptoDeclarado = dto.occupationConceptId;
+
+  if (dto.occupationFreeText !== undefined) {
+    person.occupationFreeText = textoOpcional(dto.occupationFreeText);
+    // Sólo un texto con contenido desplaza al concepto: vaciarlo es quedarse sin
+    // texto, no negar la ocupación del catálogo. Y si el cuerpo también trae
+    // concepto, decide el bloque de abajo y éste sobra.
+    if (
+      person.occupationFreeText !== undefined &&
+      conceptoDeclarado === undefined
+    ) {
+      person.occupationConceptId = undefined;
+    }
+  }
+
+  if (conceptoDeclarado !== undefined) {
+    person.occupationConceptId = textoOpcional(conceptoDeclarado);
+    if (person.occupationConceptId !== undefined) {
+      person.occupationFreeText = undefined;
+    }
+  }
+}
+
+/** Las cuatro partes del nombre, que son las que recomponen `display_name`. */
+const PARTES_DEL_NOMBRE = [
+  'name',
+  'middleName',
+  'lastName',
+  'motherLastName',
+] as const satisfies readonly (keyof UpdateOwnPatientProfileDto)[];
+
+/**
+ * Los campos del cuerpo que se escriben en `profiles.persons`.
+ *
+ * Las partes del nombre salen de {@link PARTES_DEL_NOMBRE} en vez de repetirse:
+ * dos listas de campos acaban divergiendo, y la que se olvide de una hará que
+ * editar ese campo no marque la fila como modificada —o al revés—.
+ *
+ * El teléfono y el domicilio quedan **fuera** a propósito: no viven en esta
+ * tabla, y sus filas llevan su propia auditoría al crearse o cerrarse.
+ */
+const CAMPOS_DE_LA_PERSONA = [
+  ...PARTES_DEL_NOMBRE,
+  'birthDate',
+  'sexAtBirth',
+  'occupationConceptId',
+  'occupationFreeText',
+] as const satisfies readonly (keyof UpdateOwnPatientProfileDto)[];
+
+/**
+ * Si el cuerpo declara alguno de los campos indicados.
+ *
+ * Se pregunta por la **presencia** del campo y no por si el valor cambió: un
+ * `PATCH` que reenvía el mismo apellido sigue siendo una declaración de cómo se
+ * llama la persona.
+ *
+ * @param dto - Los campos que llegaron en el cuerpo.
+ * @param campos - Los campos por los que se pregunta.
+ * @returns `true` si el cuerpo trae al menos uno.
+ */
+function declaraAlguno(
+  dto: UpdateOwnPatientProfileDto,
+  campos: readonly (keyof UpdateOwnPatientProfileDto)[],
+): boolean {
+  return campos.some((campo) => dto[campo] !== undefined);
+}
+
+/**
+ * Si la edición toca alguna de las cuatro partes del nombre.
+ *
+ * Decide si hay que recomponer el nombre visible.
+ *
+ * @param dto - Los campos que llegaron en el cuerpo.
+ * @returns `true` si el cuerpo declara alguna parte del nombre.
+ */
+function cambiaAlgunaParteDelNombre(dto: UpdateOwnPatientProfileDto): boolean {
+  return declaraAlguno(dto, PARTES_DEL_NOMBRE);
+}
+
+/**
+ * Si la edición escribe algo en `profiles.persons`.
+ *
+ * Decide si la fila de la persona se marca como modificada. Un `PATCH` que no
+ * trae ninguno de estos campos —el cuerpo vacío, o uno que sólo cambia el
+ * teléfono o el domicilio— **no la toca**: mover `updated_at`,
+ * `updated_by_user_id` y `row_version` sin haber cambiado ni una columna
+ * convierte la auditoría en ruido y hace fallar por conflicto de versión a
+ * quien tuviera la fila leída.
+ *
+ * @param dto - Los campos que llegaron en el cuerpo.
+ * @returns `true` si el cuerpo declara algún campo de la persona.
+ */
+function cambiaLaPersona(dto: UpdateOwnPatientProfileDto): boolean {
+  return declaraAlguno(dto, CAMPOS_DE_LA_PERSONA);
+}
 
 /**
  * Casos de uso del ciclo de vida de personas y pacientes: alta (UC-05-01),
@@ -56,6 +244,34 @@ import { ProfileOwnershipService } from './profile-ownership.service';
  * padre antes de crear hijos, porque las FK son columnas uuid planas y MikroORM
  * no ordena inserts entre entidades no relacionadas.
  */
+/**
+ * Una fila de `common.addresses` como la ve el perfil.
+ *
+ * Devuelve `undefined` —y no un objeto vacío— cuando no hay dirección: la
+ * pantalla distingue «no la declaró» de «la declaró sin datos», y un objeto con
+ * todo ausente pintaría una tarjeta vacía.
+ */
+function aDireccion(fila?: Addresses | null): OwnAddressDto | undefined {
+  if (!fila) return undefined;
+  return {
+    ...(fila.lines === undefined ? {} : { lines: fila.lines }),
+    ...(fila.city === undefined ? {} : { city: fila.city }),
+    ...(fila.municipalityConceptId === undefined
+      ? {}
+      : { municipalityConceptId: fila.municipalityConceptId }),
+    // Las coordenadas viajan juntas o no viajan: media coordenada no ubica nada.
+    //
+    // Se compara con `== null` y no con `=== undefined`: la columna es nullable y
+    // la base devuelve **null**, que no es `undefined`. Con la comparación
+    // estricta el ternario tomaba la rama de «sí hay coordenadas» y emitía
+    // `Number(null)` — que es **0**. Una dirección sin ubicar salía en el mapa
+    // en el golfo de Guinea. Se vio con una dirección de trabajo cargada sin GPS.
+    ...(fila.latitude == null || fila.longitude == null
+      ? {}
+      : { latitude: Number(fila.latitude), longitude: Number(fila.longitude) }),
+  };
+}
+
 @Injectable()
 export class ProfilesPatientsService {
   /**
@@ -70,6 +286,9 @@ export class ProfilesPatientsService {
    * @param mergeEventsRepo - Valor de merge events repo requerido por la operación.
    * @param relatedPersonsRepo - Valor de related persons repo requerido por la operación.
    * @param portalProxiesRepo - Valor de portal proxies repo requerido por la operación.
+   * @param contactPointsRepo - Teléfono del paciente (`common.contact_points`).
+   * @param addressesRepo - Domicilio del paciente (`common.addresses`).
+   * @param attachableFiles - La regla compartida de qué archivo se puede referenciar.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -82,7 +301,17 @@ export class ProfilesPatientsService {
     private readonly mergeEventsRepo: PatientMergeEventsRepository,
     private readonly relatedPersonsRepo: RelatedPersonsRepository,
     private readonly portalProxiesRepo: PatientPortalProxiesRepository,
+    // El teléfono y el domicilio del paciente no viven en `profiles`: son un
+    // punto de contacto y una dirección de `common`, y el módulo ya los exporta
+    // para que quien da de alta a la persona los escriba en su transacción.
+    private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly addressesRepo: AddressesRepository,
+    private readonly identifiersRepo: IdentifiersRepository,
     private readonly ownership: ProfileOwnershipService,
+    private readonly attachableFiles: AttachableFileService,
+    // Quién decide si un uuid es un departamento boliviano. La FK acepta
+    // cualquier concepto del catálogo, así que la regla es de dominio.
+    private readonly administrativeAreas: AdministrativeAreaCatalogService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPatientsService.name);
@@ -161,12 +390,16 @@ export class ProfilesPatientsService {
   }
 
   /**
-   * Resumen del propio paciente, tras la verificación de identidad.
+   * Resumen del propio paciente, verificada su identidad o no.
    *
-   * Es el ejemplo mínimo de una función que exige identidad probada (el guard
-   * `@RequiresVerifiedIdentity` la corta antes de llegar aquí): no es la ficha
-   * médica completa, es el patrón que seguirían los endpoints clínicos cuando se
-   * les aplique el mismo guard.
+   * Verificarse es un trámite posterior e independiente del alta, así que el
+   * titular ve desde el primer día lo que él mismo declaró al registrarse. Lo
+   * único que la verificación habilita es el **código de paciente**: mientras no
+   * haya aserción vigente, `patientCode` no viaja —ausente, no `null`— y
+   * `identityVerified` dice por qué. Es el servidor quien decide qué ve cada
+   * sesión; el cliente no oculta campos por su cuenta.
+   *
+   * No es la ficha médica: es filiación, nunca dato clínico.
    *
    * @param actor - Usuario autenticado.
    * @returns Datos básicos del paciente.
@@ -177,7 +410,530 @@ export class ProfilesPatientsService {
     actor: AuthenticatedUser,
   ): Promise<PatientSummaryResponseDto> {
     const em = this.em.fork();
+    const { person, patient } = await this.resolveOwnPatient(em, actor);
 
+    const identityVerified = Boolean(
+      await findCurrentIdentityAssertionForPerson(em, person.id),
+    );
+
+    return {
+      personId: person.id,
+      patientProfileId: patient.profileId,
+      identityVerified,
+      displayName: person.displayName,
+      birthDate: person.birthDate,
+      personStatus: person.personStatusConceptId,
+      // Ausente mientras no esté verificado: quien no puede verlo tampoco tiene
+      // que distinguir «no lo tiene» de «todavía no puede verlo».
+      ...(identityVerified ? { patientCode: patient.patientCode } : {}),
+    };
+  }
+
+  /**
+   * El propio perfil del paciente, con las partes del nombre y el contacto.
+   *
+   * Es la lectura que sostiene la pantalla de «mis datos»: {@link getOwnSummary}
+   * devuelve el nombre ya compuesto, y con eso un formulario no puede corregir un
+   * apellido —no hay forma de saber dónde termina uno y empieza el otro—. Acá
+   * viajan las cuatro partes, la fecha de nacimiento, el sexo al nacer como
+   * código, el teléfono vigente y el municipio del domicilio vigente: exactamente
+   * el conjunto que la persona declaró al registrarse y el mismo que puede
+   * editar con `PATCH`.
+   *
+   * No trae nada clínico ni de terceros: es filiación propia.
+   *
+   * @param actor - Usuario autenticado, que es también el sujeto.
+   * @returns El perfil propio, con los campos no declarados ausentes.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  async getOwnProfile(
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    const em = this.em.fork();
+    const { person, patient } = await this.resolveOwnPatient(em, actor);
+
+    // Las tres lecturas son independientes entre sí y ninguna depende del
+    // resultado de otra: encadenarlas sólo sumaría latencia.
+    // Todas son independientes entre sí: se piden juntas porque encadenarlas
+    // sólo sumaría latencia a una pantalla que se abre en cada visita.
+    const [
+      assertion,
+      telefono,
+      domicilio,
+      trabajo,
+      correo,
+      identificadores,
+      coberturas,
+      tutores,
+    ] = await Promise.all([
+      findCurrentIdentityAssertionForPerson(em, person.id),
+      this.contactPointsRepo.findVigenteByOwnerAndSystem(
+        em,
+        person.id,
+        CONCEPTS.CONTACT_PHONE,
+      ),
+      this.addressesRepo.findVigenteByOwnerAndUse(
+        em,
+        person.id,
+        CONCEPTS.ADDR_USE_HOME,
+      ),
+      this.addressesRepo.findVigenteByOwnerAndUse(
+        em,
+        person.id,
+        CONCEPTS.ADDR_USE_WORK,
+      ),
+      this.contactPointsRepo.findVigenteByOwnerAndSystem(
+        em,
+        person.id,
+        CONCEPTS.CONTACT_EMAIL,
+      ),
+      this.leerIdentificadores(em, person.id),
+      this.leerCoberturas(em, patient.profileId),
+      this.leerTutores(em, patient.profileId),
+    ]);
+    const identityVerified = Boolean(assertion);
+
+    return sinCamposAusentes({
+      personId: person.id,
+      patientProfileId: patient.profileId,
+      name: person.name,
+      middleName: person.middleName,
+      lastName: person.lastName,
+      motherLastName: person.motherLastName,
+      displayName: person.displayName,
+      birthDate: person.birthDate,
+      // El camino inverso del alta: la columna guarda el concepto y el
+      // formulario habla en códigos. Un concepto que no esté en el mapa —una
+      // fila anterior a este catálogo— llega ausente en vez de como un uuid
+      // suelto que el cliente no sabría interpretar.
+      sexAtBirth: person.sexAtBirthConceptId
+        ? BIRTH_SEX_CODE_BY_CONCEPT[person.sexAtBirthConceptId]
+        : undefined,
+      // Las dos formas de declarar la ocupación viajan juntas y sólo una tiene
+      // valor: el formulario no puede pintar el desplegable con el texto libre,
+      // y quien eligió del catálogo veía su ocupación vacía mientras acá sólo
+      // salía el texto.
+      occupationConceptId: person.occupationConceptId,
+      occupationFreeText: person.occupationFreeText,
+      phone: telefono?.value,
+      photoFileId: person.photoFileId,
+      residenceMunicipalityConceptId: domicilio?.municipalityConceptId,
+      identityVerified,
+      // Mismo criterio que el resumen: ausente mientras no esté verificado.
+      ...(identityVerified ? { patientCode: patient.patientCode } : {}),
+      nationalId: identificadores.nationalId,
+      issuerAdministrativeAreaConceptId: identificadores.issuerArea,
+      taxId: identificadores.taxId,
+      taxHolderName: identificadores.taxHolderName,
+      email: correo?.value,
+      homeAddress: aDireccion(domicilio),
+      workAddress: aDireccion(trabajo),
+      // Listas siempre presentes, aunque vengan vacías: quien las pinta
+      // distingue «no declaró ninguna» de «esta respuesta no las trae».
+      coverages: coberturas,
+      guardians: tutores,
+    });
+  }
+
+  /**
+   * Edita los datos que el paciente dio al registrarse.
+   *
+   * ## El hueco que cierra
+   *
+   * El auto-registro escribía la filiación una sola vez y nadie podía volver a
+   * tocarla. Un apellido mal tipeado, un teléfono que cambió o una mudanza
+   * quedaban así para siempre, salvo que alguien escribiera en la base. El
+   * titular es quien mejor conoce estos datos y era el único que no podía
+   * corregirlos.
+   *
+   * ## Qué se toca y qué no
+   *
+   * El sujeto sale de la sesión —vía `person_account_links`, nunca de un claim
+   * del token—, así que no hay forma de editar el de otro. Y lo editable es lo
+   * que la persona **declara** sobre sí misma: nombre, nacimiento, sexo al
+   * nacer, ocupación, teléfono y municipio. El documento de identidad, el correo,
+   * la contraseña, el código de paciente y los estados quedan fuera: tienen su
+   * propio circuito, y moverlos por autoservicio convertiría el perfil en una
+   * declaración jurada de uno mismo.
+   *
+   * `PATCH`: lo que no viene no se toca. Un cuerpo vacío es válido y devuelve el
+   * perfil sin cambios.
+   *
+   * ## Por qué el teléfono y el domicilio no se pisan
+   *
+   * Porque son historia. Por el número anterior se llamó a esta persona y en la
+   * dirección anterior vivía: sobrescribir la fila dejaría al sistema afirmando
+   * que nunca existieron. Se les pone fin de vigencia y se crea la nueva, que es
+   * lo que ya hacen el resto de los datos con vigencia del modelo.
+   *
+   * @param dto - Los campos a cambiar.
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo releído, ya actualizado.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  async updateOwnProfile(
+    dto: UpdateOwnPatientProfileDto,
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.updateOwn', actorId: actor.id },
+      'Updating own patient profile',
+    );
+
+    await this.em.transactional(async (tx) => {
+      const { person } = await this.resolveOwnPatient(tx, actor);
+      const ahora = new Date();
+
+      // Campo por campo y con `!== undefined`: un `??` trataría `''` como «no
+      // vino», y el segundo nombre o el apellido materno son justamente los
+      // campos que alguien vacía cuando descubre que no tiene.
+      //
+      // `name` y `lastName` se asignan tal cual: el DTO les exige `@MinLength(1)`,
+      // así que no se pueden vaciar por acá. Los otros dos sí, y por eso pasan
+      // por {@link textoOpcional}, que traduce el blanco a `NULL`.
+      if (dto.name !== undefined) person.name = dto.name;
+      if (dto.middleName !== undefined) {
+        person.middleName = textoOpcional(dto.middleName);
+      }
+      if (dto.lastName !== undefined) person.lastName = dto.lastName;
+      if (dto.motherLastName !== undefined) {
+        person.motherLastName = textoOpcional(dto.motherLastName);
+      }
+      if (cambiaAlgunaParteDelNombre(dto)) {
+        this.recomponerDisplayName(person);
+      }
+
+      if (dto.birthDate !== undefined) {
+        // `new Date(null)` es el 1/1/1970, no «sin fecha»: mandar `null` para
+        // borrarla dejaba a la persona nacida en la época Unix. Es el mismo
+        // defecto que se corrigió en el perfil del profesional; vivía también acá.
+        person.birthDate = dto.birthDate ? new Date(dto.birthDate) : undefined;
+      }
+      if (dto.sexAtBirth !== undefined) {
+        // El mismo mapeo del alta: el formulario manda un código y la columna
+        // guarda el concepto.
+        person.sexAtBirthConceptId = BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth];
+      }
+      // Las dos columnas de la ocupación se deciden juntas: ver
+      // {@link aplicarOcupacion}, porque cuál gana depende de la otra.
+      aplicarOcupacion(person, dto);
+      // Sólo si de verdad se escribió algo en la fila: ver {@link cambiaLaPersona}.
+      if (cambiaLaPersona(dto)) {
+        touch(person, actor.id);
+      }
+
+      if (dto.phone !== undefined) {
+        await this.reemplazarTelefono(
+          tx,
+          person.id,
+          dto.phone,
+          actor.id,
+          ahora,
+        );
+      }
+      if (dto.residenceMunicipalityConceptId !== undefined) {
+        await this.reemplazarDomicilio(
+          tx,
+          person.id,
+          dto.residenceMunicipalityConceptId,
+          actor.id,
+          ahora,
+        );
+      }
+
+      // El NIT y las dos direcciones: se declaraban al registrarse y después no
+      // había forma de corregirlos. El perfil los mostraba y el editor no los
+      // ofrecía, que es la peor combinación —ves el dato viejo y no podés tocarlo—.
+      // La razón social viaja CON el NIT: son el mismo hecho —a nombre de quién
+      // factura esta persona—, y separarlos permitiría dejar una razón social
+      // colgada de un NIT que ya no existe. Si sólo llega una de las dos, la
+      // otra se conserva de la fila vigente.
+      if (dto.taxId !== undefined || dto.taxHolderName !== undefined) {
+        await this.reemplazarNit(
+          tx,
+          person.id,
+          dto.taxId,
+          dto.taxHolderName,
+          actor.id,
+          ahora,
+        );
+      }
+      if (dto.homeAddressLines !== undefined) {
+        await this.reemplazarTextoDeDireccion(
+          tx,
+          person.id,
+          CONCEPTS.ADDR_USE_HOME,
+          dto.homeAddressLines,
+          actor.id,
+          ahora,
+        );
+      }
+      if (dto.workAddressLines !== undefined) {
+        await this.reemplazarTextoDeDireccion(
+          tx,
+          person.id,
+          CONCEPTS.ADDR_USE_WORK,
+          dto.workAddressLines,
+          actor.id,
+          ahora,
+        );
+      }
+
+      await tx.flush();
+    });
+
+    // Se relee entero en vez de armar la respuesta con lo que se acaba de
+    // escribir: así quien edita ve lo mismo que vería al recargar, incluido el
+    // `displayName` recompuesto y el teléfono que quedó vigente.
+    return this.getOwnProfile(actor);
+  }
+
+  /**
+   * Fija la foto de perfil de la persona.
+   *
+   * Escribe `profiles.persons.photo_file_id`, no una columna de
+   * `patient_profiles`: la foto es de la **persona**, igual que decidió
+   * v4.0.11 al declarar la columna —identifica a quien entra por la puerta
+   * cualquiera sea su rol—. Un médico que además tenga un vínculo de paciente
+   * activo comparte la misma foto en los dos perfiles, y es lo esperado, no
+   * un cruce accidental.
+   *
+   * ## La tensión que esto no resuelve
+   *
+   * El perfil profesional tiene su propia
+   * `profiles.health_practitioner_profiles.photo_file_id`
+   * ({@link ProfilesPractitionersService.setPractitionerPhoto}), y encima
+   * `community.public_profiles.avatar_file_id` es una tercera columna para la
+   * vitrina pública. Las tres coexisten hoy sin sincronizarse: este método no
+   * las unifica ni escribe en cascada —eso acoplaría tres dominios distintos
+   * detrás de un solo botón—. Si el día de mañana se decide que
+   * `health_practitioner_profiles` deje de tener su propia foto, la salida
+   * natural es que su lectura haga *fallback* a esta columna, no que este
+   * método escriba en las otras.
+   *
+   * @param dto - El archivo ya subido que pasa a ser la foto.
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo releído, ya con su foto.
+   * @throws PreconditionFailedException si la cuenta no tiene persona
+   *   vinculada, o si el archivo está borrado, sin versión vigente,
+   *   infectado o no es una imagen.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de
+   *   paciente, o si el archivo no existe o no es del titular.
+   */
+  async setOwnPhoto(
+    dto: SetOwnPatientPhotoDto,
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.setOwnPhoto', actorId: actor.id },
+      'Setting own patient photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      const { person } = await this.resolveOwnPatient(tx, actor);
+      // Dentro de la misma transacción que la escritura: comprobar contra un
+      // estado y escribir sobre otro no comprueba nada.
+      await this.attachableFiles.assertUsableBy(
+        tx,
+        dto.fileId,
+        actor,
+        {
+          allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+          operation: 'profiles.patient.setOwnPhoto',
+        },
+        {
+          subject: 'El archivo de la foto',
+          notFound: 'El archivo de la foto no existe',
+        },
+      );
+      person.photoFileId = dto.fileId;
+      touch(person, actor.id);
+      await tx.flush();
+    });
+
+    return this.getOwnProfile(actor);
+  }
+
+  /**
+   * Quita la foto de perfil de la persona.
+   *
+   * Deja `photo_file_id` en nulo y no toca el archivo: quitar la foto de la
+   * ficha es una decisión de presentación, borrar un archivo del
+   * almacenamiento es otra cosa y tiene su propio camino. Es idempotente
+   * —quitar la foto de un perfil que ya no la tiene no es un error—.
+   *
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo releído, ya sin foto.
+   * @throws PreconditionFailedException si la cuenta no tiene persona
+   *   vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de
+   *   paciente.
+   */
+  async removeOwnPhoto(
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.removeOwnPhoto', actorId: actor.id },
+      'Removing own patient photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      const { person } = await this.resolveOwnPatient(tx, actor);
+      person.photoFileId = undefined;
+      touch(person, actor.id);
+      await tx.flush();
+    });
+
+    return this.getOwnProfile(actor);
+  }
+
+  /**
+   * Documento, departamento emisor y NIT, de una sola lectura.
+   *
+   * Los tres viven en `common.identifiers` distinguidos por tipo, así que
+   * pedirlos por separado serían tres viajes por la misma fila-vecina.
+   */
+  private async leerIdentificadores(
+    em: EntityManager,
+    personId: string,
+  ): Promise<{
+    nationalId?: string;
+    issuerArea?: string;
+    taxId?: string;
+    taxHolderName?: string;
+  }> {
+    const filas = await em.find(Identifiers, {
+      ownerId: personId,
+      validTo: null,
+    });
+    const documento = filas.find(
+      (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    );
+    const fiscal = filas.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
+    return {
+      nationalId: documento?.value,
+      issuerArea: documento?.issuerAdministrativeAreaConceptId,
+      taxId: fiscal?.value,
+      taxHolderName: fiscal?.holderName,
+    };
+  }
+
+  /**
+   * Los seguros declarados, con la aseguradora y el plan EN PALABRAS.
+   *
+   * Se resuelven acá y no en la pantalla porque son dos catálogos más que el
+   * cliente tendría que pedir para pintar una línea de texto.
+   *
+   * `isPublic` se deriva del catálogo sembrado y no de una columna: el modelo
+   * todavía no persiste el tipo de pagador —deuda declarada en el DTO del alta
+   * (PR #258)—, así que una aseguradora cargada por otra vía cae en «privada»
+   * hasta que eso exista.
+   */
+  private async leerCoberturas(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<OwnCoverageDto[]> {
+    const filas = await em.getConnection().execute<
+      {
+        carrier_id: string;
+        carrier_name: string;
+        plan_name: string | null;
+        member_identifier: string | null;
+        verification_status_concept_id: string | null;
+      }[]
+    >(
+      // El vínculo pasa por `insurance_products`: un plan cuelga de un producto
+      // y el producto de la aseguradora. Saltarse el intermedio fallaba con
+      // «column pl.insurance_carrier_id does not exist».
+      `select ca.id         as carrier_id,
+              ca.legal_name as carrier_name,
+              pl.name       as plan_name,
+              c.member_identifier,
+              c.verification_status_concept_id
+         from insurance.patient_coverages c
+         join insurance.insurance_plans pl on pl.id = c.insurance_plan_id
+         join insurance.insurance_products pr on pr.id = pl.insurance_product_id
+         join insurance.insurance_carriers ca on ca.id = pr.insurance_carrier_id
+        where c.patient_profile_id = ?
+        order by c.coverage_order nulls last`,
+      [patientProfileId],
+    );
+    return filas.map((f) => ({
+      carrierName: f.carrier_name,
+      ...(f.plan_name === null ? {} : { planName: f.plan_name }),
+      isPublic: isPublicCarrierId(f.carrier_id),
+      ...(f.member_identifier === null
+        ? {}
+        : { memberIdentifier: f.member_identifier }),
+      verified: f.verification_status_concept_id === INS.VERIFY_VERIFIED,
+    }));
+  }
+
+  /** Tutores y personas autorizadas, con su nombre y su teléfono. */
+  private async leerTutores(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<OwnGuardianDto[]> {
+    const filas = await em.getConnection().execute<
+      {
+        display_name: string | null;
+        relationship_concept_id: string | null;
+        is_emergency_contact: boolean;
+        is_legal_guardian: boolean;
+        phone: string | null;
+      }[]
+    >(
+      `select p.display_name,
+              r.relationship_concept_id,
+              r.is_emergency_contact,
+              r.is_legal_guardian,
+              (select cp.value from common.contact_points cp
+                where cp.owner_id = r.person_id
+                  and cp.system_concept_id = ?
+                  and cp.valid_to is null
+                order by cp.rank nulls last limit 1) as phone
+         from profiles.related_persons r
+         join profiles.persons p on p.id = r.person_id
+        where r.patient_profile_id = ?`,
+      [CONCEPTS.CONTACT_PHONE, patientProfileId],
+    );
+    return filas.map((f) => ({
+      ...(f.display_name === null ? {} : { displayName: f.display_name }),
+      ...(f.relationship_concept_id === null
+        ? {}
+        : { relationshipConceptId: f.relationship_concept_id }),
+      isEmergencyContact: f.is_emergency_contact,
+      isLegalGuardian: f.is_legal_guardian,
+      ...(f.phone === null ? {} : { phone: f.phone }),
+    }));
+  }
+
+  /**
+   * Resuelve a qué paciente corresponde una sesión.
+   *
+   * El sujeto sale **siempre** de `person_account_links` y nunca de un claim del
+   * token: `pid` es un dato de identificación que no participa de ninguna
+   * decisión, y usarlo acá lo convertiría en una credencial. Este es el mismo
+   * camino que recorre el resumen propio, extraído para que las tres lecturas
+   * propias no puedan divergir en a quién consideran el titular.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param actor - Usuario autenticado.
+   * @returns La persona y su perfil de paciente.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  private async resolveOwnPatient(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<{
+    /** La persona titular de la cuenta. */
+    person: Persons;
+    /** Su perfil de paciente. */
+    patient: PatientProfiles;
+  }> {
     const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
     if (!link) {
       throw new PreconditionFailedException(
@@ -193,14 +949,212 @@ export class ProfilesPatientsService {
       });
     }
 
-    return {
-      personId: person.id,
-      patientProfileId: patient.profileId,
-      patientCode: patient.patientCode,
-      displayName: person.displayName,
-      birthDate: person.birthDate,
-      personStatus: person.personStatusConceptId,
-    };
+    return { person, patient };
+  }
+
+  /**
+   * Recompone el nombre para mostrar con la misma regla del alta.
+   *
+   * `displayName` es derivado, no editable: quien corrige su apellido espera
+   * verlo corregido en toda pantalla que lo muestre, y dejarlo intacto haría que
+   * el perfil dijera una cosa y el nombre visible otra.
+   *
+   * Si la persona se quedara sin ninguna parte del nombre, conserva el que
+   * tenía: es el caso de quien se registró con la forma anterior —sólo
+   * `displayName`— y edita otro campo. Vaciarle el nombre visible sería un
+   * efecto colateral que nadie pidió.
+   *
+   * @param person - La persona con las partes ya actualizadas.
+   */
+  private recomponerDisplayName(person: Persons): void {
+    const recompuesto = composePersonDisplayName(person);
+    if (recompuesto !== undefined) {
+      person.displayName = recompuesto;
+    }
+  }
+
+  /**
+   * Deja vigente el teléfono indicado, cerrando el anterior.
+   *
+   * Si el número es el que ya estaba vigente no escribe nada: crear una fila
+   * idéntica ensuciaría el historial con un cambio que no ocurrió.
+   *
+   * En blanco significa **quitar** el teléfono: se cierra el vigente y no nace
+   * ninguno. Quedarse sin teléfono es un dato —ya no hay por dónde llamar a esta
+   * persona—, y escribir una fila con el valor vacío lo contaría como si tuviera
+   * uno.
+   *
+   * @param tx - Transacción de la edición.
+   * @param personId - Dueño del punto de contacto.
+   * @param telefono - El número nuevo, o en blanco para quedarse sin teléfono.
+   * @param actorUserId - Quién edita.
+   * @param ahora - Instante de la edición, fin de vigencia del anterior.
+   */
+  private async reemplazarTelefono(
+    tx: EntityManager,
+    personId: string,
+    telefono: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const nuevo = textoOpcional(telefono);
+    const vigente = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+      tx,
+      personId,
+      CONCEPTS.CONTACT_PHONE,
+    );
+
+    if (nuevo === undefined) {
+      if (vigente) {
+        this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+      }
+      return;
+    }
+    if (vigente?.value === nuevo) return;
+
+    if (vigente) {
+      this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+    }
+    // Mismo dueño, mismo sistema y mismo uso que escribe el alta: el número
+    // cambió, no la clase de contacto que es.
+    this.contactPointsRepo.create(tx, {
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      ownerId: personId,
+      systemConceptId: CONCEPTS.CONTACT_PHONE,
+      value: nuevo,
+      useConceptId: CONCEPTS.CONTACT_USE_HOME,
+      actorUserId,
+    });
+  }
+
+  /**
+   * Deja vigente el domicilio del municipio indicado, cerrando el anterior.
+   *
+   * La dirección nueva la arma el mismo ayudante que usa el alta, que es quien
+   * deriva el departamento del código del INE y valida el municipio contra el
+   * catálogo: duplicar esa regla acá abriría la puerta a que las dos vías
+   * escribieran direcciones distintas para el mismo municipio.
+   *
+   * @param tx - Transacción de la edición.
+   * @param personId - Dueño de la dirección.
+   * @param municipalityConceptId - El municipio nuevo.
+   * @param actorUserId - Quién edita.
+   * @param ahora - Instante de la edición, fin de vigencia de la anterior.
+   */
+  private async reemplazarDomicilio(
+    tx: EntityManager,
+    personId: string,
+    municipalityConceptId: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
+      tx,
+      personId,
+      CONCEPTS.ADDR_USE_HOME,
+    );
+    if (vigente?.municipalityConceptId === municipalityConceptId) return;
+
+    if (vigente) {
+      this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
+    }
+    createResidenceAddress(this.addressesRepo, tx, {
+      personId,
+      municipalityConceptId,
+      actorUserId,
+    });
+  }
+
+  /**
+   * El NIT de facturación, que vive en `common.identifiers` como un tipo más.
+   *
+   * Se cierra el vigente y se abre otro en vez de sobrescribir el valor: la
+   * tabla lleva `valid_to`, y una factura emitida con el NIT anterior tiene que
+   * seguir explicándose. Cadena vacía cierra sin abrir: es quedarse sin NIT.
+   */
+  private async reemplazarNit(
+    tx: EntityManager,
+    personId: string,
+    nit: string | undefined,
+    razonSocial: string | undefined,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const filas = await tx.find(Identifiers, {
+      ownerId: personId,
+      validTo: null,
+    });
+    const vigente = filas.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
+    // Lo que no llegó se conserva de la fila vigente: editar sólo la razón
+    // social no puede borrar el NIT, ni al revés.
+    const numero = (nit ?? vigente?.value ?? '').trim();
+    const titular = (razonSocial ?? vigente?.holderName ?? '').trim();
+    if (vigente?.value === numero && (vigente?.holderName ?? '') === titular) {
+      return;
+    }
+
+    if (vigente) {
+      vigente.validTo = ahora;
+      touch(vigente, actorUserId);
+    }
+    // Sin número no hay identificador que abrir: una razón social sola no es un
+    // NIT, y guardarla suelta dejaría una fila fiscal sin valor.
+    if (numero === '') return;
+
+    this.identifiersRepo.create(tx, {
+      ownerId: personId,
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      typeConceptId: CONCEPTS.ID_TYPE_TAX,
+      value: numero,
+      holderName: titular === '' ? undefined : titular,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+      actorUserId,
+    });
+  }
+
+  /**
+   * El texto de una dirección —domicilio o trabajo— conservando su municipio.
+   *
+   * Cierra la vigente y abre otra, como el municipio: `common.addresses` lleva
+   * `valid_to`, así que mudarse no borra dónde vivía la persona cuando la
+   * atendieron. El municipio y las coordenadas de la anterior se arrastran
+   * porque cambiar la calle no es cambiar de municipio; para eso está
+   * `residenceMunicipalityConceptId`, que viaja aparte.
+   */
+  private async reemplazarTextoDeDireccion(
+    tx: EntityManager,
+    personId: string,
+    usoConceptId: string,
+    lineas: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
+      tx,
+      personId,
+      usoConceptId,
+    );
+    const limpio = lineas.trim();
+    if ((vigente?.lines ?? '') === limpio) return;
+
+    if (vigente) {
+      this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
+    }
+    if (limpio === '') return;
+
+    this.addressesRepo.create(tx, {
+      ownerId: personId,
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      useConceptId: usoConceptId,
+      lines: limpio,
+      // Se arrastran del anterior: cambiar la calle no es cambiar de país ni de
+      // municipio, y perder las coordenadas dejaría el «Ver en el mapa» mudo.
+      countryConceptId: vigente?.countryConceptId ?? CONCEPTS.COUNTRY_BOLIVIA,
+      municipalityConceptId: vigente?.municipalityConceptId,
+      latitude: vigente?.latitude,
+      longitude: vigente?.longitude,
+      actorUserId,
+    });
   }
 
   /**
@@ -218,15 +1172,49 @@ export class ProfilesPatientsService {
    * @param options - Texto de búsqueda, cursor de continuación y tope de página.
    * @returns Página de pacientes con el cursor de la siguiente.
    */
-  async searchPatients(options: {
-    /** Texto libre sobre código de paciente y nombre. */
-    query?: string;
-    /** Cursor opaco devuelto por la página anterior. */
-    cursor?: string;
-    /** Tope de filas de la página. */
-    limit: number;
-  }): Promise<SearchPatientsResponseDto> {
+  async searchPatients(
+    options: {
+      /** Texto libre sobre código de paciente y nombre. */
+      query?: string;
+      /**
+       * Documento de identidad exacto. Junto con
+       * {@link issuerAdministrativeAreaConceptId} es el camino que abre
+       * AC-07-1/AC-07-2: encontrar a alguien aunque su código o su nombre no
+       * contengan el texto buscado.
+       */
+      nationalId?: string;
+      /** Departamento que expidió el documento (`VS_BO_DEPARTMENT`). */
+      issuerAdministrativeAreaConceptId?: string;
+      /** Cursor opaco devuelto por la página anterior. */
+      cursor?: string;
+      /** Tope de filas de la página. */
+      limit: number;
+    },
+    actor: AuthenticatedUser,
+  ): Promise<SearchPatientsResponseDto> {
+    // P-07-10: el padrón ya no está acotado por actividad (ver
+    // `patient-search-scope.ts`), así que sin este freno un rol clínico sin
+    // texto ni documento recibiría la primera página del padrón entero — es
+    // enumeración, no búsqueda. `SECURITY_ADMIN`/`SUPERADMIN` administran el
+    // padrón y siguen listando sin criterio, como siempre.
+    if (
+      requiereCriterioDeBusqueda(actor) &&
+      !options.query &&
+      !options.nationalId
+    ) {
+      throw new PreconditionFailedException(
+        'Buscá por nombre, código o documento: no se puede listar el padrón completo de pacientes',
+      );
+    }
+
     const em = this.em.fork();
+
+    if (options.issuerAdministrativeAreaConceptId) {
+      await this.administrativeAreas.assertIsAdministrativeArea(
+        em,
+        options.issuerAdministrativeAreaConceptId,
+      );
+    }
 
     const after = options.cursor
       ? decodeKeysetCursor(options.cursor)
@@ -238,7 +1226,14 @@ export class ProfilesPatientsService {
     // COUNT sobre toda la tabla en cada página.
     const rows = await this.patientProfilesRepo.searchPage(
       em,
-      { query: options.query, afterPatientCode },
+      {
+        query: options.query,
+        nationalId: options.nationalId,
+        issuerAdministrativeAreaConceptId:
+          options.issuerAdministrativeAreaConceptId,
+        scope: resolvePatientSearchScope(actor),
+        afterPatientCode,
+      },
       options.limit + 1,
     );
     const hasMore = rows.length > options.limit;

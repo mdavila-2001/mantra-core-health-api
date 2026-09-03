@@ -393,9 +393,41 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     PROF.CREDENTIAL_TYPE_DEGREE,
     {
-      display: 'Título académico',
+      display: 'Título universitario',
       definition:
-        'Credencial que acredita la formación del profesional: el título expedido por la universidad.',
+        'El título de grado expedido por la universidad. Un profesional puede tener más de uno: el registro contempla a quien cursó dos carreras.',
+    },
+  ],
+  [
+    PROF.CREDENTIAL_TYPE_DIPLOMA,
+    {
+      display: 'Diplomado',
+      definition:
+        'Curso de posgrado corto. Se cargan tantos como haya cursado el profesional.',
+    },
+  ],
+  [
+    PROF.CREDENTIAL_TYPE_MASTER,
+    {
+      display: 'Maestría',
+      definition:
+        'Título de maestría. Se cargan tantos como haya obtenido el profesional.',
+    },
+  ],
+  [
+    PROF.CREDENTIAL_TYPE_DOCTORATE,
+    {
+      display: 'Doctorado',
+      definition:
+        'Título de doctorado. Se cargan tantos como haya obtenido el profesional.',
+    },
+  ],
+  [
+    PROF.CREDENTIAL_TYPE_SPECIALTY,
+    {
+      display: 'Título de especialidad',
+      definition:
+        'El diploma que respalda una especialidad. No es la especialidad que ejerce —eso lo declara practitioner_specialties— sino el documento que la acredita.',
     },
   ],
   [
@@ -911,6 +943,13 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     {
       display: 'Domicilio particular',
       definition: 'Dirección donde vive la persona.',
+    },
+  ],
+  [
+    CONCEPTS.ADDR_USE_WORK,
+    {
+      display: 'Domicilio laboral',
+      definition: 'Dirección donde la persona trabaja.',
     },
   ],
   [

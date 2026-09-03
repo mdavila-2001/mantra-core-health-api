@@ -2,6 +2,7 @@ export * from './inventory-locations.service';
 export * from './pharmacy-procurement.service';
 export * from './inventory-reservations.service';
 export * from './pharmacy-orders.service';
+export * from './pharmacy-order-notifications.service';
 export * from './medication-dispensations.service';
 export * from './inventory-count.service';
 export * from './inventory-recall.service';

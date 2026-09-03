@@ -12,6 +12,7 @@ import { TerminologyModule } from '../terminology/terminology.module';
 import { DirectoryModule } from '../directory/directory.module';
 import * as entities from './entities';
 import { MedicalSpecialtyCatalogService } from './services/medical-specialty-catalog.service';
+import { AdministrativeAreaCatalogService } from './services/administrative-area-catalog.service';
 import {
   ProfilesPatientsController,
   ProfilesPractitionersController,
@@ -73,6 +74,7 @@ import { MessagingModule } from '../messaging/messaging.module';
   providers: [
     ProfileOwnershipService,
     MedicalSpecialtyCatalogService,
+    AdministrativeAreaCatalogService,
     ProfilesAffiliationsService,
     LinkableOrganizationsService,
     // El emisor de avisos del vínculo entra por su puerto: el servicio que
@@ -118,6 +120,16 @@ import { MessagingModule } from '../messaging/messaging.module';
     // perfil, licencia, título e idioma en la misma transacción que la cuenta.
     ProfessionalCredentialsRepository,
     PractitionerLanguagesRepository,
+    // Y desde que la especialidad se elige EN el alta (registro del cliente,
+    // módulo Médico §1.4.2), también estas dos: la fila y su validación de
+    // dominio — la base acepta cualquier concepto, el catálogo decide cuáles
+    // son especialidades.
+    PractitionerSpecialtiesRepository,
+    MedicalSpecialtyCatalogService,
+    AdministrativeAreaCatalogService,
+    // Y desde que el alta de paciente registra al tutor o persona autorizada
+    // que lo acompaña, también la de personas relacionadas.
+    RelatedPersonsRepository,
   ],
 })
 export class ProfilesModule {}

@@ -42,8 +42,18 @@ export const telemetryEnvSchema = Joi.object({
   OTEL_EXPORTER_OTLP_PROTOCOL: Joi.string()
     .valid('http/protobuf')
     .default('http/protobuf'),
+  // `.empty('')` y no solo `.default()`: Docker Compose materializa una
+  // variable declarada como `${OTEL_…:-}` que nadie definió como CADENA VACÍA,
+  // no como ausente, y `Joi.default()` solo actúa sobre lo ausente. Sin esto,
+  // un despliegue que declara la variable y la deja sin valor —el caso normal
+  // cuando no hay colector— mata el proceso ANTES de que exista un logger, con
+  // «"OTEL_EXPORTER_OTLP_TRACES_ENDPOINT" is not allowed to be empty» escrito
+  // en crudo por Node y ninguna otra pista. Y ocurre con la telemetría
+  // apagada, que es lo que lo hace desconcertante. Mismo criterio que
+  // `appSecurityEnvSchema`.
   OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: Joi.string()
     .uri()
+    .empty('')
     .default(DEFAULT_ENDPOINT),
   OTEL_EXPORT_TIMEOUT_MS: Joi.number()
     .integer()

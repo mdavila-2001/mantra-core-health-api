@@ -68,10 +68,227 @@ cerró el PR #115 el 17/08; el registro quedó desactualizado.
 
 ## Bloqueantes abiertos
 
+**B-12 · La lista de precios de una práctica la lee cualquier sesión autenticada, de cualquier
+tenant.** *(Levantado por Marcelo el 02/09 como P-21-10; verificado de nuevo el mismo día antes
+de registrarlo.)*
+
+`GET /billing/service-catalog` no comprueba **nada** sobre quién pregunta: el único acotamiento
+es el `practiceId` que manda el propio cliente.
+
+| Capa | Qué hace | Verificado |
+|---|---|---|
+| Controlador | `@Get()` **sin `@Roles` y sin `@CurrentUser()`** — el actor no se toca | `billing-service-catalog.controller.ts:62,93` |
+| Repositorio | `const where = { practiceId: filters.practiceId }` | `service-catalog.repository.ts:113` |
+| Entidad | **No tiene `tenant_id`** — no habría por dónde filtrar aunque se quisiera | `service_catalog.entity.ts:19` (sólo `practiceId`) |
+
+Consecuencia: cualquier usuario autenticado —incluido `PATIENT`, y de **otro** tenant— que
+tenga un `practiceId` lee la lista completa con `defaultPrice`, `taxCodeId` e
+`incomeAccountId`. Los uuid no se adivinan, pero viajan en URLs, presupuestos y facturas.
+
+**El proyecto sabe hacerlo bien al lado**: `GET /practices` lleva `@Roles(...)` y llama
+`listPractices(requireTenantId())` (`practices.controller.ts:90-108`). Es este endpoint el que
+se olvidó, y el arreglo tiene su precedente pegado.
+
+**Preexistente**, del módulo `billing`; no lo introduce ninguna tarea del lote actual. **No se
+arregló de contrabando dentro de T21/T24 a propósito**: falta decidir si la lista de precios es
+dato de la organización (entonces es un IDOR y se cierra con `requireTenantId()`) o es pública
+para cualquier autenticado (entonces se documenta como diseño). Hoy el código no declara
+ninguna de las dos. Es la pregunta **P-21-10** al propietario.
+
+---
+
+**B-13 · Hay 17 medicamentos con contraindicaciones, efectos adversos e interacciones escritos a
+mano, sembrados en la base viva y legibles sin rol — CERRADO el 02/09.** *(Levantado por Marcelo
+el 02/09 como P-25-10; ampliado acá con lo que él no midió; retracción y gate decididos por
+Marcelo el mismo día.)*
+
+> [!important] Resuelto — sin fuentes falsas, sin contenido clínico, con gate de producción
+> Rama `marcelo/b13-vademecum-without-fake-sources`. Las tres acciones:
+>
+> 1. **`sources` pasó de 3 (RxNorm/SNOMED CT/WHO ATC) a 1** (`MANTRA_DEV_VADEMECUM`, licencia
+>    explícita «dato de desarrollo sin fuente autoritativa»); `codeSystem[0].source_id` repunta a
+>    ella. Efecto colateral aceptado y documentado: `tools/terminology-import/import-rxnorm-full.mjs`
+>    sigue exigiendo que exista un `code_system` `RXNORM` — lo crea `import-rxterms.mjs`, no este
+>    dataset; no hay acoplamiento real.
+> 2. **Las 68 filas clínicas (`contraindications`/`indications`/`adverse_effects`/`monitoring`,
+>    17 c/u) y los 18 códigos externos que citaban las fuentes falsas (`rxnorm_cui` ×17,
+>    `snomed_code` ×1) salieron del dataset.** Cero consumidores en `src/`: la receta sigue leyendo
+>    sólo `dose_forms`/`strengths` (`medication-block.ts:773-781`), verificado con una lectura real
+>    de `GET /terminology/concepts/:id` post-retracción (`200`, sin las cuatro claves clínicas,
+>    `dose_forms`/`strengths`/`routes` intactos). Las **5 interacciones no se tocaron** (CDS las
+>    consume; su fuente queda para P-25-1).
+> 3. **Gate de no-producción dentro de `VademecumSeedService.run()`**
+>    (`SEED_VADEMECUM_ALLOW_PRODUCTION`, documentado en `.env.example`), mismo patrón que
+>    `ProviderAccountsSeedService` — cubre también `POST /content-packs/VADEMECUM/apply`, que llama
+>    al mismo método.
+>
+> **Retractado hoy en la base viva** (`mantra_redesa_health`, transacción con conteo
+> antes/después):
+>
+> ```text
+> antes:   68 filas (adverse_effects/contraindications/indications/monitoring, 17 c/u)
+> DELETE 68
+> después:  0 filas
+> interacciones_intactas: 5
+> ```
+>
+> Alcance deliberado de la retracción viva: **sólo** esas 68 filas. `rxnorm_cui`/`snomed_code`
+> (18) y las filas de `terminology_sources`/`code_systems` de esta base **no** se tocaron — el
+> dataset corregido evita que una base **nueva** los traiga; sincronizar esta base con el dataset
+> byte a byte es trabajo de `rebuild_stack.py`, no de este patch.
+>
+> **Verificado**: `yarn typecheck` limpio · `yarn test src/common/seed src/modules/content_packs`
+> — 166/166 · nuevo `vademecum-seed.service.spec.ts` (8 casos: inserta sobre base vacía, gate de
+> producción activo/desactivado, idempotencia, y 4 aserciones negativas directas sobre el JSON
+> importado — ninguna propiedad clínica, ningún `rxnorm_cui`/`snomed_code`, una única fuente y
+> `codeSystem[0].source_id` apuntándole). `test/integration/vademecum.int-spec.ts` sigue **roto por
+> path** (preexistente, apunta a `SQL/patches/` de antes de que el modelo se mudara a
+> `mantra-core-health-model/`; es un artefacto de un seed SQL crudo distinto de
+> `VademecumSeedService`, no se tocó).
+
+`src/common/seed/data/vademecum/vademecum.dataset.json` siembra 17 conceptos con **155
+propiedades** y **5 interacciones**. El comentario del servicio lo dice sin eufemismo: «17
+medicamentos **tipeados a mano** para poder ejercitar la receta en desarrollo»
+(`vademecum-seed.service.ts:45`).
+
+Medido contra `mantra_redesa_health` el 02/09 — **no es hipotético, está cargado**:
+
+```text
+vademecum                  17 conceptos
+contraindications          17 filas
+indications                17 filas
+adverse_effects            17 filas
+monitoring                 17 filas
+```
+
+Más `interactions`, con `mechanism_text` redactado (por ejemplo, azitromicina potenciando
+warfarina).
+
+**Lo que agrava el hallazgo, y no estaba en el informe de Marcelo:**
+
+1. **El dataset declara tres fuentes autoritativas —RxNorm, SNOMED CT y WHO ATC/DDD— que no
+   publican nada de esto.** RxNorm y ATC son nomenclaturas de códigos; ninguna emite
+   contraindicaciones, efectos adversos ni mecanismos de interacción. Las fuentes cubren el
+   `code_system`, no el contenido clínico. El efecto es peor que el dato inventado a secas:
+   **hace que un dato sin fuente parezca tenerla.**
+2. **Se lee sin rol.** `GET /terminology/concepts/:conceptId` no lleva `@Roles`, y el comentario
+   que lo justifica dice «el catálogo es metadato compartido, **sin datos de paciente**»
+   (`terminology-concepts.controller.ts:207-208`). Es cierto sobre datos de paciente y es
+   exactamente el hueco: hoy el catálogo **sí** contiene contenido clínico, que es otra clase de
+   riesgo. Cualquier sesión autenticada lee esas contraindicaciones.
+
+**Lo que NO pasa, para no exagerarlo:** el vademécum **no pertenece a ningún value set**
+(consulta contra la base: cero filas), así que la lectura en lote con `includeProperties=true`
+del PR #288 **no lo alcanza**. Se lee de a uno. Pero si alguien agrega estos 17 a un value set,
+esa lectura pasa a devolverlos en bloque sin ningún cambio de código.
+
+**Los tres caminos** (la decisión no es de un carril, es de producto):
+
+- marcarlos `dev-only` y excluirlos de toda superficie de usuario —incluida la receta, que hoy
+  los consume—;
+- borrarlos y dejar la receta sin catálogo hasta tener fuente;
+- reemplazarlos cuando se resuelva **P-25-1** (de qué fuente salen posología, dosis y
+  contraindicaciones, y con qué licencia).
+
+Mientras tanto, lo mínimo que no cuesta una decisión: **quitar del dataset las tres fuentes que
+no respaldan el contenido**, porque hoy están firmando algo que no escribieron.
+
+---
+
+**B-14 · `glossary.int-spec.ts › exclusión de borradores` afirma un 404 que el código nunca
+produce — falso verde histórico, invisible porque CI no corre este int-spec.** *(Encontrado por
+Marcelo el 02/09 verificando el fix del bug de búsqueda del glosario; no forma parte de ese
+carril, se registra aparte.)*
+
+El test (`test/integration/glossary.int-spec.ts:315-371`) crea un concepto `TERM_DRAFT` y lo
+afilia **sólo** al value set de la categoría (`glossary-category-anatomy`), nunca al paraguas
+`glossary-all-terms`. Después espera `404` al leerlo por `GET /terminology/concepts/:id`.
+
+`ConceptsService.readConcept` (`concepts.service.ts:837-852`) sólo excluye un borrador cuando
+`esTerminoDelGlosario` es `true`, y esa bandera exige membresía **exacta** en
+`glossary-all-terms` (`valueSet.internalCode === GLOSSARY_ALL_TERMS_CODE`, línea 839) — no
+alcanza con pertenecer a una categoría. Como el test nunca crea esa membresía, la condición es
+siempre `false`, el borrador nunca se excluye, y la petición responde `200` con la ficha
+completa. **Reproducido de forma determinista y aislada:**
+`yarn test:integration --testPathPatterns=glossary --testNamePattern="no aparece en la búsqueda
+por categoría ni en la ficha"` → `expected 404 "Not Found", got 200 "OK"`, sin ningún otro test
+del archivo corriendo antes (descarta contaminación de otro caso).
+
+**Dos lecturas posibles, sin decidir cuál es la correcta:**
+
+1. El test está mal escrito: le falta la segunda `em.create(ValueSetMembers, …)` bajo
+   `glossary-all-terms` que sí hacen los términos reales sembrados por `GlossarySeedService`
+   (ver la nota de `src/common/seed/glossary-terms.catalog.ts:19` — cada término real entra por
+   **dos** membresías, una a su categoría y otra al paraguas). Si es así, el fix es agregar esa
+   membresía en el test.
+2. O el producto realmente quiere que un borrador de *cualquier* categoría del glosario quede
+   fuera de `readConcept`, y la condición debería ser «pertenece a alguna `glossary-category-*`
+   o a `glossary-all-terms`», no sólo al paraguas exacto. Si es así, el fix es en
+   `ConceptsService`.
+
+**No se tocó ninguna de las dos capas**: es ortogonal al bug de búsqueda (directiva 1) y no hay
+evidencia de negocio en esta sesión para elegir entre las dos lecturas. **Por qué no se ve en
+CI**: `docs/architecture/...` — de integración sólo corre `postgres-privileges`
+(ver `CLAUDE.md`, sección de tests); cualquier otro int-spec en rojo, incluido éste, pasa
+invisible. Los otros 9 casos de `glossary.int-spec.ts` (incluidos los 2 nuevos del fix de
+búsqueda) pasan limpio; sólo este falla.
+
+---
+
+**B-15 · El CSP del front bloquea su propio script anti-parpadeo de tema — sólo se ve al
+navegar a la ficha de un término.** *(Encontrado por Marcelo el 02/09 corriendo Playwright para
+verificar el fix del bug de búsqueda del glosario; repo `mantra-core-health`, no la API.)*
+
+`src/index.html:9-33` tiene un `<script>` en línea deliberado (anti-FOUC del tema, documentado
+en el propio archivo) que `src/server/security-headers.ts` debería autorizar calculando su hash
+`sha256` en tiempo de respuesta (`security-headers.ts:47,76,172`). En la práctica el navegador
+bloquea la ejecución con `Content-Security-Policy: script-src 'self'` y reporta un hash
+`sha256-…` distinto al que el CSP declaró — el mecanismo de autorización no está calculando (o
+no está sirviendo) el hash correcto para lo que realmente llega al navegador.
+
+**Reproducido**: `playwright/lane-25-glossary.spec.ts` — `cero errores de consola…` (ahora en
+`test.fixme`, ver comentario ahí) entra a `/glossary`, busca y abre la ficha de un término;
+`page.on('console')` capturó 4 violaciones de CSP (2 hashes distintos, cada uno repetido). Los
+otros 5 casos del mismo archivo pasan limpio contra la misma sesión de navegador — no es un
+problema de la búsqueda ni de esta sesión de Playwright en particular, es del CSP en cualquier
+página que renderice ese script.
+
+**No se investigó más** (fuera de alcance del carril que lo destapó): no se determinó si el
+hash se calcula mal, si SSR y CSR sirven contenidos ligeramente distintos del mismo script, o si
+el header se genera antes de que el script final esté armado. Sin diagnosticar cuál de los tres
+es, cualquier arreglo sería una conjetura.
+
+---
+
 **B-2 · `.puml`, `SQL/` y `salud-db/` no están bajo control de versiones.**
 Ningún cambio de esquema puede viajar en un PR: se distribuye por zip. Es la causa raíz de
 B-3 y de que el ajuste de `rebuild_stack.py` del PR #107 no pueda revisarse.
 *(`CARRIL_REPORT.md:98-103`)*
+
+> **CERRADO el 28/08.** Las seis carpetas (`Mantra Core Health Context/`, `SQL/`, `NoSQL/`,
+> `salud-db/`, `seedsGenerales/`, `seedsProd/`) viven ahora en
+> **`mantra-core-technologies/mantra-core-health-model`**, privado, con `dev` como rama por
+> defecto. Se clona como **hermano** de este repo, no adentro:
+>
+> ```bash
+> git clone https://github.com/mantra-core-technologies/mantra-core-health-model.git
+> ```
+>
+> Mover las carpetas rompía la forma en que los generadores encontraban todo —resolvían las
+> rutas como «mi carpeta padre es el workspace»—, así que ahora hay dos raíces declaradas en
+> `salud-db/paths.py`: `MODEL_ROOT` (ese repo) y `WORKSPACE` (la carpeta que lo contiene, donde
+> la bóveda y esta API son hermanas suyas; reapuntable con `SALUD_WORKSPACE`). Verificado
+> regenerando: `gen_ddl.py all` deja `SQL/` byte a byte idéntico.
+>
+> De este lado cambiaron los montajes del compose (`../SQL` → `../mantra-core-health-model/SQL`
+> y los tres de `NoSQL`), el script `ddl:sources`, el default de `tools/bolivia-datasets/` y las
+> referencias en docs y en la plantilla de PR.
+>
+> El corpus MeSH (`seedsProd/modules/`, 501 MB) no se versiona: va como asset de Release y se
+> verifica contra el `seedsProd/checksums.json` que sí está en el repo.
+>
+> **Esto habilita revisar B-3**: su condición era «regenerar sin el vault rompe», y ahora tanto
+> el generador como el vault se clonan.
 
 **B-3 · `gen_ddl.py 05` pierde 7 FK ya resueltas** al regenerar: lee un vault ausente.
 *(`CARRIL_REPORT.md:86-92`)*
@@ -185,7 +402,59 @@ byte a byte idéntico, al revés de lo que documenta `CLAUDE.md`. La salida can�
 las notas del módulo 65 en la bóveda (entidades + FKs + `<<INDEX_SET>>`), no volver a editar el
 catálogo a mano. Es trabajo de bóveda, con su propia tarjeta.
 
+**B-11 · Ampliar un value set deja su propia ficha diciendo el número viejo.** `upsert_rows` de
+`gen_seeds.py` sólo inserta filas con PK nueva y **nunca actualiza una existente**. Los ids de
+`value_sets` y `code_system_versions` son estables por value set, así que al agregarle miembros:
+
+- `value_sets.description` sigue diciendo cuántos conceptos gobernaba **antes** —tras la
+  ampliación del 28/08 dice «36 conceptos gobernados» con 63 miembros—, y
+- `code_system_versions.checksum`, que es `sha256` de la lista de códigos, **ya no corresponde a
+  esa lista**: queda congelado en el de la lista vieja.
+
+Es la misma raíz que el hallazgo de v4.1.9 sobre el `cache_token` de las enumeraciones dinámicas
+(el sembrador no renueva el testigo al ampliar un conjunto en base poblada), pero visible **en el
+paquete**, no sólo en base viva. Impacto hoy: informativo —nadie decide nada con esos dos
+campos—, pero el checksum existe justamente para detectar deriva y ahora miente. La salida es que
+esas dos entidades usen `replace_rows` en vez de `upsert_rows`, midiendo antes el diff sobre los
+35 value sets para no arrastrar cambios no buscados.
+
 ---
+
+**B-14 · Todo paciente queda afiliado al tenant por defecto, y eso deja sin filtro a las
+pantallas que se filtraban por membresía — ABIERTO, decisión de producto.** *(Medido el
+03/09/2026 contra la API viva.)*
+
+El alta de paciente crea a propósito una fila en `directory.tenant_memberships` contra
+`SEED.tenantId` («Mantra Core Default Tenant»), con `ROLE_STAFF` y `SCOPE_ALL_TENANT`. El motivo
+está escrito en el propio servicio y es bueno: sin esa fila el `TenantContextInterceptor` —global,
+corre en toda ruta autenticada— responde **403 a cualquier petición posterior**, y la cuenta
+recién creada queda inservible más allá del login.
+
+```
+POST /iam/auth/register-patient  → 201
+POST /iam/auth/login             → roles: ['USER','PATIENT']
+                                   tenants: ['1befcfea-44c0-563a-81cd-337ec6acc840']
+```
+
+El efecto que nadie previó está en el front: `requiresTenant` se escribió creyendo que un paciente
+«no pertenece a organización ninguna», y con esa premisa filtraba «Tu organización», «Pedidos de
+farmacia» y «Promociones». Como la premisa es falsa, **el paciente las veía en «Tus accesos»**.
+Tapado en el front con `hiddenFor` (PR #291 del repo web), que dice a quién no se le ofrece — no
+se pudo usar `roles` porque quien atiende el mostrador de una farmacia no tiene rol propio en el
+token.
+
+No hay fuga de datos: el guard del servidor sigue respondiendo 403. Lo que hay es una interfaz que
+le ofrece a un paciente pantallas que no son suyas, y un claim (`tenants`) que dejó de significar
+lo que su nombre dice.
+
+**Lo que falta decidir, y es del propietario:** qué organización y qué rol le corresponden a un
+paciente directo al consumidor. El servicio lo declara textualmente pendiente
+(`iam-patient-self-registration.service.ts`, paso 5): el catálogo `DIR.ROLE_*` sólo modela personal
+de una clínica y no existe un rol «paciente». Mientras siga así, `requiresTenant` no filtra a nadie
+y cualquier pantalla nueva que se apoye en él nace con el mismo agujero.
+
+---
+
 
 ## Defectos funcionales, verificados ejecutando
 

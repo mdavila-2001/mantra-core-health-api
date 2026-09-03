@@ -156,6 +156,12 @@ const COMMUNITY_PUBLIC_PROFILES: SearchIndexDefinition = {
       specialties: esKeyword,
       city: esKeyword,
       avatarUrl: { type: 'keyword', index: false },
+      // La portada no se busca ni se filtra: se pinta. `index: false` la deja
+      // en el documento sin pagar un índice invertido que nadie consulta.
+      coverUrl: { type: 'keyword', index: false },
+      // La calle SÍ se busca: «Av. Arce» es una consulta corriente en un
+      // directorio de centros de salud, y hasta ahora no encontraba nada.
+      address: esText,
       verified: { type: 'boolean' },
       // El sello viaja plano y no como objeto anidado: nadie filtra por su
       // interior y `nested` costaría un documento aparte por sello.
@@ -180,6 +186,9 @@ const COMMUNITY_PUBLIC_PROFILES: SearchIndexDefinition = {
     'specialties^3',
     'headline^2',
     'city',
+    // La calle pesa menos que la ciudad: quien escribe una dirección exacta ya
+    // sabe a dónde va, y quien escribe «Sopocachi» busca la zona.
+    'address',
     'biography',
   ],
   filterFields: [
@@ -209,6 +218,8 @@ const COMMUNITY_PUBLIC_PROFILES: SearchIndexDefinition = {
     'specialties',
     'city',
     'avatarUrl',
+    'coverUrl',
+    'address',
     'verified',
     'verifiedBadgeStatus',
     'badgeTypeConceptId',

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  AppointmentBookings,
+  SlotHolds,
   SchedulableResources,
   BookingPolicies,
   ScheduleTemplates,
@@ -8,7 +11,7 @@ import {
   AvailabilityExceptions,
   BookableSlots,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, touch } from '../../../common';
 import { inicioDeLoReservable } from '../scheduling-time';
 
 /**
@@ -185,6 +188,10 @@ export interface CreateRuleData {
    * Valor de capacity per slot mantenido por la instancia.
    */
   capacityPerSlot?: number;
+  /**
+   * Minutos de respiro entre un turno y el siguiente. Anulable: ausente ≡ 0.
+   */
+  gapMinutes?: number;
   /**
    * Identificador asociado a actor user.
    */
@@ -470,6 +477,7 @@ export class SchedulingCatalogRepository {
         endTime: data.endTime,
         slotMinutes: data.slotMinutes,
         capacityPerSlot: data.capacityPerSlot,
+        gapMinutes: data.gapMinutes,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -569,6 +577,68 @@ export class SchedulingCatalogRepository {
   }
 
   /**
+   * Los cupos ABIERTOS y sin tomar del profesional que pisan un rango,
+   * cruzando todas sus sedes.
+   *
+   * Es la retracción de AG-2/AG-3: la cita que el doctor se pone encima de
+   * horarios que él mismo ofreció los retira — con aviso, sin preguntar. Sólo
+   * los intactos: un cupo con una reserva adentro no se toca desde acá (eso lo
+   * gobierna la política de choques).
+   *
+   * Se materializa vía entidades y no SQL crudo porque el llamador los MUTA:
+   * las filas crudas no pasan por la unidad de trabajo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceRefId - El perfil profesional dueño de los recursos.
+   * @param desde - Inicio del rango.
+   * @param hasta - Fin del rango.
+   * @param openStatusConceptId - El concepto de cupo abierto.
+   * @returns Los cupos abiertos e intactos que se cruzan.
+   */
+  async findOpenSlotsOfProfessionalInWindow(
+    em: EntityManager,
+    resourceRefId: string,
+    desde: Date,
+    hasta: Date,
+    openStatusConceptId: string,
+  ): Promise<BookableSlots[]> {
+    const recursos = await em.find(SchedulableResources, { resourceRefId });
+    if (recursos.length === 0) return [];
+
+    const slots = await em.find(BookableSlots, {
+      resourceId: { $in: recursos.map((recurso) => recurso.id) },
+      statusConceptId: openStatusConceptId,
+      startAt: { $lt: hasta },
+      endAt: { $gt: desde },
+    });
+    return slots.filter((slot) => slot.remainingCapacity === slot.capacity);
+  }
+
+  /**
+   * Una excepción por su id, o `null` si no existe.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - La excepción buscada.
+   * @returns La fila, o `null`.
+   */
+  findExceptionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<AvailabilityExceptions | null> {
+    return em.findOne(AvailabilityExceptions, { id });
+  }
+
+  /**
+   * Elimina una excepción.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param exception - La fila a eliminar.
+   */
+  removeException(em: EntityManager, exception: AvailabilityExceptions): void {
+    em.remove(exception);
+  }
+
+  /**
    * Crea create exception.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -623,6 +693,232 @@ export class SchedulingCatalogRepository {
    * Slots ya generados para la plantilla en la ventana pedida. La regeneración es
    * idempotente: los que ya existen no se vuelven a crear.
    */
+  /**
+   * Las citas que cuelgan de los cupos de una plantilla, vivas e históricas.
+   *
+   * Devuelve las dos cifras a propósito, porque son dos conversaciones
+   * distintas con quien quiere borrar el horario:
+   *
+   * - **`live`** son compromisos: gente que va a presentarse. Se resuelven
+   *   cancelando o moviendo, y entonces el número baja.
+   * - **`total`** incluye además las canceladas y las cumplidas, que **no se
+   *   pueden resolver**: `appointment_bookings.bookable_slot_id` es `NOT NULL`,
+   *   así que una cita histórica fija su cupo para siempre. Borrar ese cupo
+   *   sería borrar el registro de que esa persona tuvo un turno.
+   *
+   * Por eso cancelar **no** libera un horario para ser borrado. Es lo que hace
+   * que «borrar definitivamente» tenga un techo real, y no un techo que se
+   * pueda esquivar cancelando todo primero.
+   *
+   * @param em - Contexto de persistencia.
+   * @param scheduleTemplateId - Plantilla que se quiere borrar.
+   * @param activeStates - Estados en los que una cita todavía compromete.
+   * @param limit - Tope de la lista que se devuelve al cliente.
+   */
+  async findBookingsOfTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+    activeStates: readonly string[],
+    limit: number,
+  ): Promise<{
+    total: number;
+    live: number;
+    sample: AppointmentBookings[];
+  }> {
+    const slots = await em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { fields: ['id'] },
+    );
+    if (slots.length === 0) return { total: 0, live: 0, sample: [] };
+
+    const enSusCupos = { bookableSlotId: { $in: slots.map((s) => s.id) } };
+    const total = await em.count(AppointmentBookings, enSusCupos);
+    if (total === 0) return { total: 0, live: 0, sample: [] };
+
+    const conEstadoVivo = {
+      ...enSusCupos,
+      statusConceptId: { $in: [...activeStates] },
+    };
+    const live = await em.count(AppointmentBookings, conEstadoVivo);
+
+    // La muestra prioriza las vivas: son las accionables, y son las que el
+    // médico necesita ver nombradas para ir a resolverlas.
+    const sample = await em.find(
+      AppointmentBookings,
+      live > 0 ? conEstadoVivo : enSusCupos,
+      { limit },
+    );
+    return { total, live, sample };
+  }
+
+  /**
+   * Retira un horario: deja de publicarse y suelta lo que nadie usó.
+   *
+   * **No borra la plantilla.** No es una preferencia: es lo único posible.
+   * `audit.schedule_templates_history` referencia toda plantilla publicada —una
+   * fila por plantilla, escrita al publicar— así que ninguna se puede borrar
+   * nunca. Se descubrió ejecutándolo, no leyéndolo (P-10-2).
+   *
+   * Lo que sí se va son los **cupos que nadie tocó**: no tienen cita ni la
+   * tuvieron, son derivados puros de la plantilla, y dejarlos publicados
+   * después de retirar el horario sería seguir ofreciendo turnos de una agenda
+   * que ya no existe.
+   *
+   * Los cupos **con historia se quedan**, aunque la cita esté cancelada:
+   * `appointment_bookings.bookable_slot_id` es `NOT NULL`, así que borrar ese
+   * cupo sería borrar el registro de que alguien tuvo un turno.
+   *
+   * Las retenciones de los cupos que se van se borran con ellos: son efímeras
+   * —tienen TTL y no comprometen a nadie— y su FK bloquearía el borrado. Es la
+   * primera de las tres barreras que apareció corriendo esto contra la base.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param scheduleTemplateId - Plantilla a retirar.
+   * @param retiredStatusConceptId - Estado con el que queda.
+   * @param actorUserId - Quién la retira.
+   * @returns Cuántos cupos libres se soltaron y cuántos quedaron por tener historia.
+   */
+  /**
+   * Vuelve a poner en vigencia una plantilla retirada.
+   *
+   * **No regenera los cupos**, y es deliberado: retirar los borró, y volver a
+   * crearlos es `generate-slots` con la ventana que el profesional elija. Un
+   * horario que se reactiva solo con los cupos del mes pasado abriría turnos en
+   * fechas que ya pasaron.
+   *
+   * El servicio se encarga de decirlo; acá sólo se cambia el estado.
+   */
+  /**
+   * Los cupos de un recurso en una ventana, bloqueados para escribir.
+   *
+   * `FOR UPDATE` porque mover el horario es leer-decidir-escribir: sin el lock,
+   * alguien podría reservar uno de estos cupos entre la lectura y la escritura
+   * y terminar con un turno en un horario que su paciente nunca aceptó.
+   */
+  findSlotsOfResourceForUpdate(
+    em: EntityManager,
+    resourceId: string,
+    desde: Date,
+    hasta: Date,
+    slotIds?: readonly string[],
+  ): Promise<BookableSlots[]> {
+    return em.find(
+      BookableSlots,
+      {
+        resourceId,
+        startAt: { $gte: desde, $lt: hasta },
+        ...(slotIds === undefined ? {} : { id: { $in: [...slotIds] } }),
+      },
+      { lockMode: LockMode.PESSIMISTIC_WRITE, orderBy: { startAt: 'ASC' } },
+    );
+  }
+
+  /** Las citas vivas que cuelgan de esos cupos, con su paciente. */
+  async findBookingsOfSlots(
+    em: EntityManager,
+    slotIds: readonly string[],
+    estados: readonly string[],
+  ): Promise<AppointmentBookings[]> {
+    if (slotIds.length === 0) return [];
+    return em.find(AppointmentBookings, {
+      bookableSlotId: { $in: [...slotIds] },
+      statusConceptId: { $in: [...estados] },
+    });
+  }
+
+  async reactivateTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+    activeStatusConceptId: string,
+    actorUserId: string,
+  ): Promise<void> {
+    const plantilla = await em.findOne(ScheduleTemplates, {
+      id: scheduleTemplateId,
+    });
+    if (plantilla) {
+      plantilla.statusConceptId = activeStatusConceptId;
+      touch(plantilla, actorUserId);
+    }
+  }
+
+  async retireTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+    retiredStatusConceptId: string,
+    actorUserId: string,
+  ): Promise<{ releasedSlots: number; keptSlots: number }> {
+    const cupos = await em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { fields: ['id'] },
+    );
+
+    let releasedSlots = 0;
+    let keptSlots = 0;
+
+    if (cupos.length > 0) {
+      const ids = cupos.map((cupo) => cupo.id);
+      const conHistoria = await em.find(
+        AppointmentBookings,
+        { bookableSlotId: { $in: ids } },
+        { fields: ['bookableSlotId'] },
+      );
+      const intocables = new Set(
+        conHistoria.map((booking) => booking.bookableSlotId),
+      );
+      const libres = ids.filter((id) => !intocables.has(id));
+      keptSlots = ids.length - libres.length;
+
+      if (libres.length > 0) {
+        await em.nativeDelete(SlotHolds, {
+          bookableSlotId: { $in: libres },
+        });
+        releasedSlots = await em.nativeDelete(BookableSlots, {
+          id: { $in: libres },
+        });
+      }
+    }
+
+    const plantilla = await em.findOne(ScheduleTemplates, {
+      id: scheduleTemplateId,
+    });
+    if (plantilla) {
+      plantilla.statusConceptId = retiredStatusConceptId;
+      touch(plantilla, actorUserId);
+    }
+
+    return { releasedSlots, keptSlots };
+  }
+
+  /**
+   * Si un paciente tiene alguna cita con este recurso.
+   *
+   * Es la regla que decide si puede ver por qué el profesional bloqueó un rato:
+   * **sólo del médico con el que tiene cita**, que es el mismo criterio con el
+   * que ya se resuelve qué historial ve. Sin cita no hay vínculo, y el motivo
+   * de un bloqueo es información del consultorio, no del público.
+   *
+   * Mira TODAS las citas, incluidas las canceladas y las cumplidas: alguien que
+   * se atendió el mes pasado y quiere volver sigue siendo su paciente, y
+   * enterarse de que su médico está de vacaciones le ahorra el viaje.
+   *
+   * @param em - Contexto de persistencia.
+   * @param resourceId - La agenda que se quiere leer.
+   * @param patientProfileId - Quién pregunta.
+   */
+  async patientHasBookingWithResource(
+    em: EntityManager,
+    resourceId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    const cuantas = await em.count(AppointmentBookings, {
+      resourceId,
+      patientProfileId,
+    });
+    return cuantas > 0;
+  }
+
   findSlotsByTemplateInRange(
     em: EntityManager,
     scheduleTemplateId: string,
@@ -642,11 +938,24 @@ export class SchedulingCatalogRepository {
    * slots se generaban pero no se podían listar, así que el único modo de
    * conseguir un `slotId` para tomar un hold era mirar la base de datos.
    *
-   * `onlyAvailable` filtra por capacidad restante y no por estado: un slot puede
-   * seguir marcado como abierto y tener el cupo tomado por un hold vivo, y
-   * ofrecerlo llevaría al paciente a un 409 al intentar reservarlo. Con `ahora`
-   * descarta además los que ya empezaron —un turno de ayer no se puede pedir—;
-   * ver {@link inicioDeLoReservable}.
+   * `onlyAvailable` descarta lo que no se puede pedir, por **dos** motivos
+   * distintos y ambos necesarios:
+   *
+   * - **Sin capacidad restante**: el slot sigue marcado como abierto pero un
+   *   hold vivo ya se llevó el cupo; ofrecerlo lleva a un 409 al reservar.
+   * - **Sin estado abierto**: desde AG-2 y AG-3 un slot puede quedar
+   *   `SLOT_BLOCKED` conservando su capacidad —lo bloquea una excepción de
+   *   disponibilidad, o lo retira una cita puntual que lo pisa—. Su
+   *   `remaining_capacity` sigue en 1, así que el filtro de capacidad no lo ve.
+   *
+   * El segundo faltaba, y el journey de AG-6 lo midió: sobre el mismo día, esta
+   * ruta ofrecía **10** horarios y la hermana del portal —`GET
+   * /scheduling/slots`, que sí compara el estado— ofrecía **2**. Los ocho de
+   * diferencia eran la reunión del médico y las tres horas de una cirugía: si
+   * un cliente los mostraba, el paciente elegía un horario que iba a fallar.
+   *
+   * Con `ahora` descarta además los que ya empezaron —un turno de ayer no se
+   * puede pedir—; ver {@link inicioDeLoReservable}.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param resourceId - Recurso cuya agenda se consulta.
@@ -660,7 +969,13 @@ export class SchedulingCatalogRepository {
     resourceId: string,
     from: Date,
     to: Date,
-    options: { onlyAvailable: boolean; limit: number; ahora?: Date },
+    options: {
+      onlyAvailable: boolean;
+      limit: number;
+      ahora?: Date;
+      /** El concepto de «cupo abierto», cuando `onlyAvailable`. */
+      openStatusConceptId?: string;
+    },
   ): Promise<BookableSlots[]> {
     const desde =
       options.onlyAvailable && options.ahora
@@ -673,6 +988,11 @@ export class SchedulingCatalogRepository {
     };
     if (options.onlyAvailable) {
       where.remainingCapacity = { $gt: 0 };
+      // El concepto lo aporta el servicio, igual que en la ruta hermana: la
+      // consulta no depende de una constante del catálogo.
+      if (options.openStatusConceptId) {
+        where.statusConceptId = options.openStatusConceptId;
+      }
     }
     return em.find(BookableSlots, where, {
       orderBy: { startAt: 'ASC' },

@@ -53,6 +53,13 @@ lerna-debug.log*
 # El manifiesto lo **genera** `seed-e2e.mjs` y trae los uuid de las cuentas de
 # esa base. Versionarlo prometería actores que en otra máquina no existen.
 tools/e2e/seed-manifest.json
+# `.env.faker.local` — igual criterio que `.env.e2e`: si apunta a una base
+# remota, lleva su cadena de conexión real y no debe versionarse.
+.env.faker.local
+# La caché de `faker-worker.mjs`: los correos de la última tanda generada
+# contra cada target. Se regenera sola; versionarla prometería una cuenta que
+# en otra máquina, o contra otra base, no existe.
+tools/redesa/.faker-cache/
 
 # temp directory
 .temp

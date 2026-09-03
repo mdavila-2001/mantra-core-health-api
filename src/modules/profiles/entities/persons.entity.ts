@@ -142,7 +142,7 @@ export class Persons {
   preferredLanguageConceptId?: string;
 
   /**
-   * Ocupación (miembro de `VS_SEGIP_OCCUPATION`), buscable con lupa
+   * Ocupación (miembro de `VS_BO_OCCUPATION`), buscable con lupa
    * (SALUD/Arquitectura/alovida-backlog-procesos.md, T-02).
    */
   @Property({
@@ -163,6 +163,37 @@ export class Persons {
     nullable: true,
   })
   occupationFreeText?: string;
+
+  /**
+   * Empresa donde trabaja (miembro de `VS_BO_EMPLOYER`).
+   *
+   * Reemplaza a la ubicación del trabajo en el alta: preguntar municipio,
+   * calle y coordenadas del trabajo eran tres campos para un dato que casi
+   * nadie completaba y que no agrupaba a nadie. El empleador es una sola
+   * pregunta y sí agrupa —salud ocupacional, convenios corporativos—.
+   */
+  @Property({
+    fieldName: 'work_employer_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  workEmployerConceptId?: string;
+
+  /**
+   * Empresa en texto libre, para cuando no está en el catálogo.
+   *
+   * Hace más falta acá que en la ocupación: el catálogo de empresas **no
+   * puede** ser exhaustivo —el SEPREC no publica su base empresarial, y son
+   * unas 394.000 unidades económicas, ver `bo-employers.catalog.ts`—. Sólo
+   * tiene sentido sin `workEmployerConceptId`; el catálogo gana cuando ambos
+   * vienen, igual que en la ocupación.
+   */
+  @Property({
+    fieldName: 'work_employer_free_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  workEmployerFreeText?: string;
 
   /**
    * Identificador asociado a merge survivor person.

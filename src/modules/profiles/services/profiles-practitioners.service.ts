@@ -68,9 +68,17 @@ import {
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
   SetPractitionerPhotoDto,
+  AddOwnCredentialDto,
+  OwnCredentialResponseDto,
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
-import { ContactPointsRepository } from '../../common/repositories';
+import {
+  AddressesRepository,
+  ContactPointsRepository,
+} from '../../common/repositories';
+import { Identifiers } from '../../common/entities';
+import { composeAccountDisplayName } from '../person-name';
+import { createResidenceAddress } from '../../common/services/residence-address';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
 
@@ -130,6 +138,7 @@ export class ProfilesPractitionersService {
     private readonly affiliations: ProfilesAffiliationsService,
     private readonly attachableFiles: AttachableFileService,
     private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly addressesRepo: AddressesRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly verificationBypass: VerificationBypassService,
@@ -481,6 +490,114 @@ export class ProfilesPractitionersService {
   }
 
   /**
+   * Deja vigente el teléfono nuevo y cierra el anterior.
+   *
+   * No se edita la fila: `common.contact_points` lleva vigencia, así que
+   * cambiar el valor en su lugar borraría el historial de por dónde se lo pudo
+   * contactar antes. Se cierra el vigente y se abre otro — mismos dueño,
+   * sistema y uso que escribe el alta del profesional (`CONTACT_USE_WORK`: el
+   * teléfono que declara es el de su consulta).
+   *
+   * Una cadena vacía cierra el vigente y no abre ninguno: es cómo se borra.
+   */
+  private async reemplazarTelefono(
+    tx: EntityManager,
+    personId: string,
+    telefono: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const nuevo = telefono.trim() === '' ? undefined : telefono.trim();
+    const vigente = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+      tx,
+      personId,
+      CONCEPTS.CONTACT_PHONE,
+    );
+
+    if (nuevo === undefined) {
+      if (vigente)
+        this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+      return;
+    }
+    if (vigente?.value === nuevo) return;
+    if (vigente)
+      this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+
+    this.contactPointsRepo.create(tx, {
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      ownerId: personId,
+      systemConceptId: CONCEPTS.CONTACT_PHONE,
+      value: nuevo,
+      useConceptId: CONCEPTS.CONTACT_USE_WORK,
+      actorUserId,
+    });
+  }
+
+  /**
+   * Deja vigente el domicilio nuevo y cierra el anterior.
+   *
+   * Mismo criterio de vigencia que el teléfono, y misma función que usa el alta
+   * (`createResidenceAddress`) para derivar ciudad y departamento del municipio:
+   * si la derivación viviera en dos lados, una mudanza escribiría una fila con
+   * otra forma que la del registro.
+   */
+  private async reemplazarDomicilio(
+    tx: EntityManager,
+    personId: string,
+    municipalityConceptId: string,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
+      tx,
+      personId,
+      CONCEPTS.ADDR_USE_HOME,
+    );
+    if (vigente?.municipalityConceptId === municipalityConceptId) return;
+    if (vigente) this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
+
+    createResidenceAddress(this.addressesRepo, tx, {
+      personId,
+      municipalityConceptId,
+      actorUserId,
+    });
+  }
+
+  /**
+   * El documento de identidad y el municipio del domicilio.
+   *
+   * Los dos los escribe el alta y ninguno volvía en la ficha. Van juntos en una
+   * lectura porque se piden a la vez y ninguno depende del otro; y devuelve un
+   * objeto vacío en vez de fallar, para que la envoltura `sinTumbarLaFicha`
+   * tenga algo neutro con lo que seguir.
+   */
+  private async leerDocumentoYDomicilio(
+    em: EntityManager,
+    personId: string,
+  ): Promise<{
+    nationalId?: string;
+    issuerArea?: string;
+    municipio?: string;
+  }> {
+    const [documentos, domicilio] = await Promise.all([
+      em.find(Identifiers, { ownerId: personId, validTo: null }),
+      this.addressesRepo.findVigenteByOwnerAndUse(
+        em,
+        personId,
+        CONCEPTS.ADDR_USE_HOME,
+      ),
+    ]);
+    const documento = documentos.find(
+      (d: Identifiers) => d.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    );
+    return {
+      nationalId: documento?.value,
+      issuerArea: documento?.issuerAdministrativeAreaConceptId,
+      municipio: domicilio?.municipalityConceptId,
+    };
+  }
+
+  /**
    * Arma el summary de un perfil ya identificado.
    *
    * Compartido entre la lectura propia y la ajena: el contrato es el mismo y
@@ -534,6 +651,7 @@ export class ProfilesPractitionersService {
       affiliations,
       activity,
       contactos,
+      filiacion,
     ] = await Promise.all([
       this.sinTumbarLaFicha(
         () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
@@ -590,6 +708,17 @@ export class ProfilesPractitionersService {
             { profileId, pieza: 'contacto' },
           )
         : Promise.resolve([]),
+      // El documento y el domicilio: sólo en la lectura propia y envueltos como
+      // el resto. Un fallo acá deja la ficha sin esos dos datos, no sin ficha.
+      incluyeContacto
+        ? this.sinTumbarLaFicha(
+            () => this.leerDocumentoYDomicilio(em, person.id),
+            {} as Awaited<ReturnType<typeof this.leerDocumentoYDomicilio>>,
+            { profileId, pieza: 'filiación' },
+          )
+        : Promise.resolve(
+            {} as Awaited<ReturnType<typeof this.leerDocumentoYDomicilio>>,
+          ),
     ]);
 
     // El primero de cada sistema gana: el repositorio ya los devuelve por
@@ -607,6 +736,16 @@ export class ProfilesPractitionersService {
       photoFileId: practitioner.photoFileId,
       email: contacto(CONCEPTS.CONTACT_EMAIL),
       phone: contacto(CONCEPTS.CONTACT_PHONE),
+      // Las cuatro partes del nombre viajan además del compuesto: es lo único
+      // con lo que se puede corregir un apellido sin adivinar dónde cortarlo.
+      name: person.name,
+      middleName: person.middleName,
+      lastName: person.lastName,
+      motherLastName: person.motherLastName,
+      birthDate: person.birthDate,
+      nationalId: filiacion.nationalId,
+      issuerAdministrativeAreaConceptId: filiacion.issuerArea,
+      residenceMunicipalityConceptId: filiacion.municipio,
       practitionerCategoryConceptId: practitioner.practitionerCategoryConceptId,
       verificationStatusConceptId: practitioner.verificationStatusConceptId,
       practiceStatusConceptId: practitioner.practiceStatusConceptId,
@@ -723,6 +862,68 @@ export class ProfilesPractitionersService {
         practitioner.telehealthAvailable = dto.telehealthAvailable;
       }
       touch(practitioner, actor.id);
+
+      // --- los datos personales, que viven en `persons` y no en el perfil ----
+      const person = await this.personsRepo.findById(tx, link.personId);
+      if (person) {
+        const ahora = new Date();
+        // Una cadena vacía BORRA el dato opcional: es lo que hace falta cuando
+        // alguien descubre que no lleva segundo nombre ni apellido materno.
+        if (dto.name !== undefined) person.name = dto.name;
+        if (dto.middleName !== undefined) {
+          person.middleName =
+            dto.middleName === '' ? undefined : dto.middleName;
+        }
+        if (dto.lastName !== undefined) person.lastName = dto.lastName;
+        if (dto.motherLastName !== undefined) {
+          person.motherLastName =
+            dto.motherLastName === '' ? undefined : dto.motherLastName;
+        }
+        // El nombre visible lo compone el backend: quien corrige su apellido
+        // espera verlo corregido en su ficha, no la versión anterior.
+        if (
+          dto.name !== undefined ||
+          dto.middleName !== undefined ||
+          dto.lastName !== undefined ||
+          dto.motherLastName !== undefined
+        ) {
+          person.displayName = composeAccountDisplayName({
+            name: person.name,
+            middleName: person.middleName,
+            lastName: person.lastName,
+            motherLastName: person.motherLastName,
+          });
+        }
+        if (dto.birthDate !== undefined) {
+          // `new Date(null)` es el 1/1/1970, no «sin fecha»: mandar `null` para
+          // borrarla dejaba a la persona nacida en la época Unix. Se borra
+          // igual que las partes opcionales del nombre, con `undefined`.
+          person.birthDate = dto.birthDate
+            ? new Date(dto.birthDate)
+            : undefined;
+        }
+        touch(person, actor.id);
+
+        if (dto.phone !== undefined) {
+          await this.reemplazarTelefono(
+            tx,
+            person.id,
+            dto.phone,
+            actor.id,
+            ahora,
+          );
+        }
+        if (dto.residenceMunicipalityConceptId !== undefined) {
+          await this.reemplazarDomicilio(
+            tx,
+            person.id,
+            dto.residenceMunicipalityConceptId,
+            actor.id,
+            ahora,
+          );
+        }
+      }
+
       await tx.flush();
     });
 
@@ -988,31 +1189,41 @@ export class ProfilesPractitionersService {
       await tx.flush();
 
       // Licencia inicial (UC-05-04) + credencial de soporte (verificable UC-05-05).
-      const license = this.authorizationsRepo.create(tx, {
-        practitionerProfileId: personId,
-        jurisdictionConceptId:
-          dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
-        licenseNumber: dto.licenseNumber,
-        regulatoryAuthority: dto.regulatoryAuthority,
-        stateConceptId: PROF.AUTH_PENDING,
-        actorUserId: actor.id,
-      });
-      const credential = this.credentialsRepo.create(tx, {
-        practitionerProfileId: personId,
-        credentialTypeConceptId:
-          dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
-        number: dto.credentialNumber,
-        // Dónde y cuándo se cursó. Las dos columnas existían y ninguna
-        // escritura las llenaba: la formación se guardaba sin decir de dónde
-        // salía, que es justamente lo que la hace legible en un perfil.
-        issuingInstitutionText: dto.credentialIssuingInstitutionText,
-        issueDate:
-          dto.credentialIssueDate === undefined
-            ? undefined
-            : new Date(dto.credentialIssueDate),
-        stateConceptId: PROF.CRED_PENDING,
-        actorUserId: actor.id,
-      });
+      // Las dos son OPCIONALES: una ficha de directorio —el padrón de una
+      // aseguradora, que dice quién atiende y dónde pero no publica matrículas—
+      // se da de alta sin ellas. Crearlas con un número inventado sería peor que
+      // no tenerlas: la ficha afirmaría una credencial que nadie declaró.
+      const license =
+        dto.licenseNumber === undefined
+          ? undefined
+          : this.authorizationsRepo.create(tx, {
+              practitionerProfileId: personId,
+              jurisdictionConceptId:
+                dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
+              licenseNumber: dto.licenseNumber,
+              regulatoryAuthority: dto.regulatoryAuthority,
+              stateConceptId: PROF.AUTH_PENDING,
+              actorUserId: actor.id,
+            });
+      const credential =
+        dto.credentialNumber === undefined
+          ? undefined
+          : this.credentialsRepo.create(tx, {
+              practitionerProfileId: personId,
+              credentialTypeConceptId:
+                dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
+              number: dto.credentialNumber,
+              // Dónde y cuándo se cursó. Las dos columnas existían y ninguna
+              // escritura las llenaba: la formación se guardaba sin decir de dónde
+              // salía, que es justamente lo que la hace legible en un perfil.
+              issuingInstitutionText: dto.credentialIssuingInstitutionText,
+              issueDate:
+                dto.credentialIssueDate === undefined
+                  ? undefined
+                  : new Date(dto.credentialIssueDate),
+              stateConceptId: PROF.CRED_PENDING,
+              actorUserId: actor.id,
+            });
       this.languagesRepo.create(tx, {
         practitionerProfileId: personId,
         languageConceptId: dto.languageConceptId ?? PROF.LANGUAGE_SPANISH,
@@ -1038,8 +1249,9 @@ export class ProfilesPractitionersService {
         practitionerCode: practitioner.practitionerCode,
         verificationStatus: practitioner.verificationStatusConceptId,
         practiceStatus: practitioner.practiceStatusConceptId,
-        licenseId: license.id,
-        credentialId: credential.id,
+        // Ausentes cuando la ficha es de directorio: no hay matrícula que citar.
+        licenseId: license?.id,
+        credentialId: credential?.id,
         createdAt: practitioner.createdAt,
       };
     });
@@ -1434,6 +1646,42 @@ export class ProfilesPractitionersService {
     dto: CreateAffiliationDto,
     actor: AuthenticatedUser,
   ): Promise<AffiliationResponseDto> {
+    return this.agregarAfiliacion(dto, actor, null);
+  }
+
+  /**
+   * Registra un consultorio de un profesional que NO es quien llama.
+   *
+   * Existe para las fichas de directorio: los profesionales que las redes de
+   * las aseguradoras publican no tienen cuenta —no traen correo— y por eso no
+   * pueden declarar sus consultorios ellos mismos. Sin esto, un médico que
+   * atiende en tres lugares se veía sin ninguno, o peor, había que cargarlo
+   * tres veces para que se notara.
+   *
+   * Es la misma escritura que la propia: mismas reglas de duplicado, mismo
+   * estado inicial y el mismo aviso a la organización cuando corresponde. Lo
+   * único que cambia es de dónde sale el sujeto, y por eso pide rol
+   * administrativo — sin eso sería una forma de escribirle el currículum a
+   * cualquiera.
+   */
+  async addAffiliationFor(
+    profileId: string,
+    dto: CreateAffiliationDto,
+    actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    return this.agregarAfiliacion(dto, actor, profileId);
+  }
+
+  /**
+   * El cuerpo compartido por las dos altas de afiliación.
+   *
+   * @param perfilExplicito - `null` para tomar el perfil del actor.
+   */
+  private async agregarAfiliacion(
+    dto: CreateAffiliationDto,
+    actor: AuthenticatedUser,
+    perfilExplicito: string | null,
+  ): Promise<AffiliationResponseDto> {
     const startDate = new Date(dto.startDate);
     const endDate = dto.endDate ? new Date(dto.endDate) : undefined;
     if (endDate && endDate < startDate) {
@@ -1448,10 +1696,17 @@ export class ProfilesPractitionersService {
       'Adding practitioner affiliation',
     );
     const creado = await this.em.transactional(async (tx) => {
-      const profileId = await this.ownership.requireOwnPractitionerProfileId(
-        tx,
-        actor,
-      );
+      const profileId =
+        perfilExplicito ??
+        (await this.ownership.requireOwnPractitionerProfileId(tx, actor));
+      if (perfilExplicito !== null) {
+        const existe = await this.practitionersRepo.findById(tx, profileId);
+        if (!existe) {
+          throw new ResourceNotFoundException('Profesional no encontrado', {
+            profileId,
+          });
+        }
+      }
 
       const organizationName = dto.organizationName.trim();
       const roleTitle = dto.roleTitle.trim();
@@ -1559,6 +1814,107 @@ export class ProfilesPractitionersService {
       afiliacion.id,
       afiliacion.practitionerProfileId,
     );
+  }
+
+  /**
+   * Los cinco tipos que el modelo admite para una credencial académica.
+   *
+   * La FK acepta CUALQUIER concepto del catálogo, así que sin esta lista un
+   * profesional podría declarar como «título» el concepto de un idioma o de un
+   * estado de cita. Quién decide cuáles son tipos de credencial es la
+   * enumeración `professional-credential-type`, la misma que siembra la app.
+   */
+  private static readonly TIPOS_DE_CREDENCIAL: readonly string[] = [
+    PROF.CREDENTIAL_TYPE_DEGREE,
+    PROF.CREDENTIAL_TYPE_DIPLOMA,
+    PROF.CREDENTIAL_TYPE_MASTER,
+    PROF.CREDENTIAL_TYPE_DOCTORATE,
+    PROF.CREDENTIAL_TYPE_SPECIALTY,
+  ];
+
+  /**
+   * Agrega un título propio a la formación, con su diploma adjunto.
+   *
+   * El registro de procesos pide «espacio para poder subir varios diplomados»
+   * —y lo mismo para maestrías, doctorados y especialidades—, pero tanto el
+   * alta administrativa como la de autorregistro creaban **una** credencial y
+   * ahí terminaba: no había forma de agregar la segunda. Cada llamada agrega
+   * una fila.
+   *
+   * Nace PENDIENTE a propósito: declarar un título no es haberlo acreditado, y
+   * quien lo verifica es `POST /profiles/credentials/{id}/verify`, que exige
+   * `SECURITY_ADMIN`. Si el alta lo diera por verificado, el sello del perfil
+   * dejaría de significar algo.
+   */
+  async addOwnCredential(
+    dto: AddOwnCredentialDto,
+    actor: AuthenticatedUser,
+  ): Promise<OwnCredentialResponseDto> {
+    if (
+      !ProfilesPractitionersService.TIPOS_DE_CREDENCIAL.includes(
+        dto.credentialTypeConceptId,
+      )
+    ) {
+      throw new PreconditionFailedException(
+        'Ese concepto no es un tipo de credencial profesional',
+        { credentialTypeConceptId: dto.credentialTypeConceptId },
+      );
+    }
+
+    this.logger.info(
+      { operation: 'profiles.credential.addOwn', actorId: actor.id },
+      'Adding own professional credential',
+    );
+
+    const creada = await this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+
+      // Dentro de la MISMA transacción que la escritura: comprobar el archivo
+      // contra un estado y escribir sobre otro no comprueba nada. `assertUsableBy`
+      // es también lo que impide colgarse del archivo de otro.
+      if (dto.fileId !== undefined) {
+        await this.attachableFiles.assertUsableBy(
+          tx,
+          dto.fileId,
+          actor,
+          {
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.DOCUMENT,
+            operation: 'profiles.credential.addOwn',
+          },
+          {
+            subject: 'El archivo del título',
+            notFound: 'El archivo del título no existe',
+          },
+        );
+      }
+
+      const credencial = this.credentialsRepo.create(tx, {
+        practitionerProfileId: profileId,
+        credentialTypeConceptId: dto.credentialTypeConceptId,
+        number: dto.number.trim(),
+        issuingInstitutionText: dto.issuingInstitutionText?.trim(),
+        issueDate: dto.issueDate ? new Date(dto.issueDate) : undefined,
+        fileId: dto.fileId,
+        stateConceptId: PROF.CRED_PENDING,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+      return credencial;
+    });
+
+    return {
+      id: creada.id,
+      credentialTypeConceptId: creada.credentialTypeConceptId,
+      number: creada.number,
+      issuingInstitutionText: creada.issuingInstitutionText,
+      issueDate: creada.issueDate,
+      stateConceptId: creada.stateConceptId,
+      fileId: creada.fileId,
+      createdAt: creada.createdAt,
+    };
   }
 }
 

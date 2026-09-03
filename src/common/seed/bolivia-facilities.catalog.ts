@@ -24,7 +24,23 @@ export const BO_FACILITY_VALUE_SET = 'VS_BO_HEALTH_FACILITY';
 export const BO_FACILITY_VALUE_SET_NAME =
   'Establecimientos de salud de Santa Cruz';
 
-/** Versión del conjunto. Sube cuando cambie la lista, no cuando cambie el código. */
+/**
+ * Versión del conjunto.
+ *
+ * **No la subas todavía.** El comentario anterior decía «sube cuando cambie la
+ * lista», y hacerlo rompe el conjunto: `boFacilityMemberId` deriva el id de la
+ * membresía del **código del establecimiento**, sin la versión, así que al
+ * sembrar con una versión nueva los miembros que ya existen se saltan por id
+ * —siguen colgando de la versión vieja— y sólo los agregados caen en la nueva.
+ * Se verificó al agregar los consultorios de las redes: la 1.0.0 quedó con 523
+ * miembros y la 1.1.0 con 119, y el buscador de instituciones, que lee una
+ * sola versión, dejó de encontrar la mitad del padrón.
+ *
+ * Mientras el id de la membresía no incluya la versión, agregar establecimientos
+ * se hace **sin tocar esta constante**: el sembrador es idempotente por id y los
+ * nuevos entran a la versión que ya existe. Anotado para cuando se rehaga el
+ * versionado de conjuntos de valores.
+ */
 export const BO_FACILITY_VERSION = '1.0.0';
 
 /** Un establecimiento tal como lo declara el listado del stakeholder. */

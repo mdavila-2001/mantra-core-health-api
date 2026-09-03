@@ -26,6 +26,10 @@ function build() {
     addRelatedPerson: mockFn(),
     grantPortalProxy: mockFn(),
     decease: mockFn(),
+    getOwnProfile: mockFn(),
+    updateOwnProfile: mockFn(),
+    setOwnPhoto: mockFn(),
+    removeOwnPhoto: mockFn(),
   };
   const controller = new ProfilesPatientsController(patientsService as any);
   return { controller, patientsService };
@@ -115,5 +119,53 @@ describe('ProfilesPatientsController', () => {
     const d = build();
     await d.controller.decease('p1', {}, actor);
     expect(d.patientsService.decease).toHaveBeenCalledWith('p1', {}, actor);
+  });
+
+  // El sujeto de las rutas `me` no viaja como parámetro: lo resuelve el
+  // servicio desde la sesión, y lo único que el controller aporta es el actor.
+  const titular = { id: 'user-1', roles: [] } as any;
+
+  it('delega getOwnProfile con el actor de la sesión', async () => {
+    const d = build();
+    d.patientsService.getOwnProfile.mockResolvedValue({ personId: 'per-1' });
+
+    await expect(d.controller.getOwnProfile(titular)).resolves.toEqual({
+      personId: 'per-1',
+    });
+    expect(d.patientsService.getOwnProfile).toHaveBeenCalledWith(titular);
+  });
+
+  it('delega updateOwnProfile con el cuerpo y el actor', async () => {
+    const d = build();
+    const dto = { name: 'Ada' };
+    d.patientsService.updateOwnProfile.mockResolvedValue({ personId: 'per-1' });
+
+    await d.controller.updateOwnProfile(dto, titular);
+
+    expect(d.patientsService.updateOwnProfile).toHaveBeenCalledWith(
+      dto,
+      titular,
+    );
+  });
+
+  it('delega setOwnPhoto con el cuerpo y el actor', async () => {
+    const d = build();
+    const dto = { fileId: 'file-1' };
+    d.patientsService.setOwnPhoto.mockResolvedValue({ personId: 'per-1' });
+
+    await expect(d.controller.setOwnPhoto(dto, titular)).resolves.toEqual({
+      personId: 'per-1',
+    });
+    expect(d.patientsService.setOwnPhoto).toHaveBeenCalledWith(dto, titular);
+  });
+
+  it('delega removeOwnPhoto con el actor de la sesión', async () => {
+    const d = build();
+    d.patientsService.removeOwnPhoto.mockResolvedValue({ personId: 'per-1' });
+
+    await expect(d.controller.removeOwnPhoto(titular)).resolves.toEqual({
+      personId: 'per-1',
+    });
+    expect(d.patientsService.removeOwnPhoto).toHaveBeenCalledWith(titular);
   });
 });

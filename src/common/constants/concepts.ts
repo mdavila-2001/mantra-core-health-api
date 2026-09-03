@@ -343,6 +343,10 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   OWNER_USER: def('common:owner-type:user', 'OWNER_USER', 'User'),
   OWNER_PATIENT: def('common:owner-type:patient', 'OWNER_PATIENT', 'Patient'),
   OWNER_TENANT: def('common:owner-type:tenant', 'OWNER_TENANT', 'Tenant'),
+  // Una persona sin perfil de paciente: el tutor o la persona autorizada que el
+  // paciente declara en su alta. Reutilizar OWNER_PATIENT para ella envenenaría
+  // toda consulta futura que asuma "OWNER_PATIENT ⇒ titular con perfil".
+  OWNER_PERSON: def('common:owner-type:person', 'OWNER_PERSON', 'Person'),
 
   // --- Common: identificadores oficiales ---
   ID_TYPE_NATIONAL: def(
@@ -363,6 +367,10 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   CONTACT_USE_HOME: def('common:contact-use:home', 'HOME', 'Home'),
   CONTACT_USE_WORK: def('common:contact-use:work', 'WORK', 'Work'),
   ADDR_USE_HOME: def('common:addr-use:home', 'ADDR_HOME', 'Home address'),
+  // El domicilio laboral que pide el registro de paciente. El modelo ya preveía
+  // varias direcciones por persona vía `use_concept_id`; lo que faltaba era el
+  // concepto, no la columna.
+  ADDR_USE_WORK: def('common:addr-use:work', 'ADDR_WORK', 'Work address'),
   ADDR_TYPE_POSTAL: def('common:addr-type:postal', 'POSTAL', 'Postal'),
   COUNTRY_PE: def('common:country:pe', 'PE', 'Peru'),
   // ALoVida es una plataforma boliviana (SEGIP, catálogo de municipios del
@@ -1056,6 +1064,15 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'TPL_PUBLISHED',
     'Template published',
   ),
+  // Un horario que dejó de publicarse. NO es un borrado: la plantilla, sus
+  // franjas y sus cupos con historia siguen ahí. Existe porque el borrado duro
+  // es imposible — `audit.schedule_templates_history` referencia toda plantilla
+  // publicada, así que ninguna se puede borrar nunca (P-10-2).
+  TEMPLATE_RETIRED: def(
+    'scheduling:template-status:retired',
+    'TPL_RETIRED',
+    'Template retired',
+  ),
 
   // --- Scheduling: estado del slot (bookable_slots) ---
   SLOT_OPEN: def('scheduling:slot-status:open', 'SLOT_OPEN', 'Slot open'),
@@ -1151,6 +1168,32 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'scheduling:exception-type:extra',
     'EXC_EXTRA',
     'Extra availability',
+  ),
+  // Los tres de arriba nacieron con el módulo y describen la MECÁNICA (falta,
+  // feriado, disponibilidad extra). Los cuatro de acá describen el MOTIVO que
+  // el profesional elige, que es lo que el propietario pidió catalogar.
+  EXCEPTION_VACATION: def(
+    'scheduling:exception-type:vacation',
+    'EXC_VACATION',
+    'Vacation',
+  ),
+  EXCEPTION_CONFERENCE: def(
+    'scheduling:exception-type:conference',
+    'EXC_CONFERENCE',
+    'Conference or training',
+  ),
+  EXCEPTION_ERRAND: def(
+    'scheduling:exception-type:errand',
+    'EXC_ERRAND',
+    'Personal errand',
+  ),
+  // «Otro» existe para que la lista pueda quedarse corta sin bloquear a nadie.
+  // Exige el texto libre: un motivo «Otro» sin explicación no dice nada, y lo
+  // que la gente escriba ahí es la mejor fuente para la lista definitiva.
+  EXCEPTION_OTHER: def(
+    'scheduling:exception-type:other',
+    'EXC_OTHER',
+    'Other reason',
   ),
 
   // --- Scheduling: lista de espera ---

@@ -9,12 +9,34 @@ import { UnauthorizedException } from '@nestjs/common';
 import { CONCEPTS, ConflictException } from '../../../common';
 import { PROF } from '../../profiles/profiles.concepts';
 import { DIR } from '../../directory/directory.concepts';
+import { INS } from '../../insurance/insurance.concepts';
+import {
+  BOLIVIA_PUBLIC_INSURERS,
+  carrierPlanId,
+} from '../../../common/seed/bolivia-insurance.catalog';
+import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
 import type { RegisterPatientDto } from '../dto';
 
+/**
+ * El alta mínima que el contrato acepta.
+ *
+ * Los cinco campos de abajo del documento y la contraseña entraron con la
+ * TAREA 03 (AC-03-3): correo, fecha de nacimiento, teléfono, sexo y municipio
+ * de residencia dejaron de ser opcionales. Sin ellos el DTO ya no valida, así
+ * que este literal no es decoración: es lo que hoy define «un alta mínima».
+ */
 const dto: RegisterPatientDto = {
   nationalId: '1234567',
   password: 'password123',
   displayName: 'Ana Pérez',
+  email: 'ana@example.test',
+  birthDate: '1990-05-17',
+  phone: '+591 70012345',
+  sexAtBirth: 'FEMALE',
+  // Un municipio REAL del catálogo: `writeAddress` lo comprueba contra
+  // `VS_BO_MUNICIPALITY` y rechaza con 400 el que no pertenece
+  // (`common/services/residence-address.ts`). 030301 es Sacaba, Cochabamba.
+  residenceMunicipalityConceptId: boMunicipalityConceptId('030301'),
 };
 
 describe('IamPatientSelfRegistrationService', () => {
@@ -61,6 +83,17 @@ describe('IamPatientSelfRegistrationService', () => {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
     };
     const tenantMembershipsRepo = { create: fn() };
+    const relatedPersonsRepo = { create: fn() };
+    const insuranceCatalogRepo = {
+      findPlan: fn().mockResolvedValue({
+        id: 'plan-1',
+        statusConceptId: INS.PLAN_ACTIVE,
+      }),
+    };
+    const coverageRepo = {
+      findByMemberAndPlan: fn().mockResolvedValue(null),
+      createCoverage: fn(),
+    };
 
     const service = new IamPatientSelfRegistrationService(
       em as never,
@@ -77,6 +110,9 @@ describe('IamPatientSelfRegistrationService', () => {
       identifiersRepo as never,
       contactPointsRepo as never,
       addressesRepo as never,
+      relatedPersonsRepo as never,
+      insuranceCatalogRepo as never,
+      coverageRepo as never,
       notificationsService as never,
       tenantMembershipsRepo as never,
       logger as never,
@@ -95,6 +131,10 @@ describe('IamPatientSelfRegistrationService', () => {
       accountLinksRepo,
       identifiersRepo,
       contactPointsRepo,
+      addressesRepo,
+      relatedPersonsRepo,
+      insuranceCatalogRepo,
+      coverageRepo,
       notificationsService,
       tenantMembershipsRepo,
     };
@@ -120,7 +160,9 @@ describe('IamPatientSelfRegistrationService', () => {
         userId: 'user-1',
         personId: 'person-1',
         patientProfileId: 'person-1',
-        emailVerificationSent: false,
+        // El correo es obligatorio desde AC-03-3, así que el alta mínima ya
+        // trae uno y el token de verificación sale siempre.
+        emailVerificationSent: true,
       });
       expect(result.patientCode).toMatch(/^PAT-/);
     });
@@ -183,10 +225,198 @@ describe('IamPatientSelfRegistrationService', () => {
       );
     });
 
-    it('skips every email side effect when no email is given', async () => {
+    it('does not record a tax identifier when no NIT is given', async () => {
       const d = build();
 
       await d.service.registerPatient(dto);
+
+      expect(d.identifiersRepo.create).not.toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ typeConceptId: CONCEPTS.ID_TYPE_TAX }),
+      );
+    });
+
+    it('records the NIT as a tax identifier of the person', async () => {
+      const d = build();
+
+      await d.service.registerPatient({ ...dto, billingTaxId: '1023456789' });
+
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'person-1',
+          typeConceptId: CONCEPTS.ID_TYPE_TAX,
+          value: '1023456789',
+        }),
+      );
+    });
+
+    it('writes the street and the coordinates of the home address', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        homeAddressLines: 'Av. Banzer 3er anillo #42',
+        homeLatitude: -17.78,
+        homeLongitude: -63.18,
+      });
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          lines: 'Av. Banzer 3er anillo #42',
+          // La columna es numeric y la entidad la mapea a texto.
+          latitude: '-17.78',
+          longitude: '-63.18',
+          useConceptId: CONCEPTS.ADDR_USE_HOME,
+        }),
+      );
+    });
+
+    it('writes the work address as a second row with its own use', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        workAddressLines: 'Calle Ayacucho 120',
+      });
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          lines: 'Calle Ayacucho 120',
+          useConceptId: CONCEPTS.ADDR_USE_WORK,
+        }),
+      );
+    });
+
+    /**
+     * El servicio sigue sabiendo no escribir dirección cuando no le dan
+     * ninguna: una fila con país y nada más no es un dato, es una fila.
+     *
+     * Que el DTO ya **no permita** llegar así —el municipio de residencia es
+     * obligatorio desde AC-03-3— no vuelve muerta a esta rama: la validación
+     * vive en el pipe, y el servicio es llamado también por el registro
+     * asistido y por las pruebas de contrato. Por eso el municipio se quita a
+     * propósito acá, en vez de borrar la prueba.
+     */
+    it('writes no address at all when nothing about it was given', async () => {
+      const d = build();
+      const { residenceMunicipalityConceptId: _sinMunicipio, ...sinDireccion } =
+        dto;
+
+      await d.service.registerPatient(sinDireccion as typeof dto);
+
+      expect(d.addressesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('registers the guardian and hangs their phone off OWNER_PERSON', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        guardianName: 'Rosa Quispe',
+        guardianPhone: '+59171234567',
+      });
+
+      expect(d.relatedPersonsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          relationshipConceptId: PROF.RELATIONSHIP_GUARDIAN,
+          isEmergencyContact: true,
+          // Nadie verificó la tutela en el alta.
+          isLegalGuardian: false,
+        }),
+      );
+      expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerTypeConceptId: CONCEPTS.OWNER_PERSON,
+          value: '+59171234567',
+        }),
+      );
+    });
+
+    it('rejects a guardian phone with no guardian name', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPatient({ ...dto, guardianPhone: '+59171234567' }),
+      ).rejects.toThrow();
+      expect(d.relatedPersonsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('records the declared private and public coverages in order', async () => {
+      const d = build();
+      const privado = carrierPlanId(
+        'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A',
+        'RED_MAX',
+      );
+      const publico = carrierPlanId(BOLIVIA_PUBLIC_INSURERS[0].code, 'BASE');
+
+      await d.service.registerPatient({
+        ...dto,
+        privateInsurancePlanId: privado,
+        publicInsurancePlanId: publico,
+      });
+
+      expect(d.coverageRepo.createCoverage).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          insurancePlanId: privado,
+          coverageOrder: 1,
+          // Es lo que la persona declara, no lo que la aseguradora confirmó.
+          verificationStatusConceptId: INS.VERIFY_PENDING,
+          memberIdentifier: dto.nationalId,
+        }),
+      );
+      expect(d.coverageRepo.createCoverage).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ insurancePlanId: publico, coverageOrder: 2 }),
+      );
+    });
+
+    it('rejects a public insurer declared as the private one', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPatient({
+          ...dto,
+          privateInsurancePlanId: carrierPlanId(
+            BOLIVIA_PUBLIC_INSURERS[0].code,
+            'BASE',
+          ),
+        }),
+      ).rejects.toThrow();
+      expect(d.coverageRepo.createCoverage).not.toHaveBeenCalled();
+    });
+
+    it('skips a coverage that is already on file instead of failing the signup', async () => {
+      const d = build();
+      d.coverageRepo.findByMemberAndPlan.mockResolvedValue({ id: 'cov-1' });
+
+      await d.service.registerPatient({
+        ...dto,
+        privateInsurancePlanId: carrierPlanId(
+          'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A',
+          'RED_MAX',
+        ),
+      });
+
+      expect(d.coverageRepo.createCoverage).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Misma razón que la dirección: el DTO ya no deja llegar sin correo
+     * (AC-03-3), pero la rama del servicio sigue viva para el registro asistido
+     * y no se borra. Se quitan también el teléfono, que cuelga del mismo
+     * repositorio de puntos de contacto.
+     */
+    it('skips every email side effect when no email is given', async () => {
+      const d = build();
+      const { email: _sinCorreo, phone: _sinTelefono, ...sinContacto } = dto;
+
+      await d.service.registerPatient(sinContacto as typeof dto);
 
       expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
       expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();

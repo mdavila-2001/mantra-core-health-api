@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `clinical`
 
-Referencia exhaustiva de 24 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 25 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records`
 - **Controladores:** `ClinicalEncountersController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionPoliciesController`, `ClinicalReadController`, `ClinicalRecordsController`
@@ -14,27 +14,28 @@ Referencia exhaustiva de 24 operación(es) del módulo `clinical`, derivada del 
 1. [POST /clinical/allergy-intolerances](#1-post-clinical-allergy-intolerances) — Registrar una alergia con reacciones
 2. [POST /clinical/care-episodes](#2-post-clinical-care-episodes) — Abrir un episodio de cuidado
 3. [POST /clinical/conditions](#3-post-clinical-conditions) — Registrar una condición/diagnóstico
-4. [POST /clinical/diagnostic-reports](#4-post-clinical-diagnostic-reports) — Emitir un reporte diagnóstico desde la orden
-5. [POST /clinical/diagnostic-reports/{id}/release](#5-post-clinical-diagnostic-reports-id-release) — Liberar los resultados de un reporte diagnóstico
-6. [POST /clinical/encounters/{id}/close](#6-post-clinical-encounters-id-close) — Cerrar un encuentro en curso (gatilla facturación)
-7. [POST /clinical/encounters/check-in](#7-post-clinical-encounters-check-in) — Check-in de un encuentro con participantes y ubicación
-8. [POST /clinical/immunizations](#8-post-clinical-immunizations) — Registrar una inmunización
-9. [POST /clinical/medication-records](#9-post-clinical-medication-records) — Administrar/registrar medicación
-10. [POST /clinical/medication-requests](#10-post-clinical-medication-requests) — Prescribir medicación
-11. [POST /clinical/medication-requests/{id}/edit](#11-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
-12. [POST /clinical/medication-requests/{id}/invalidate](#12-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
-13. [POST /clinical/medication-requests/{id}/issue](#13-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
-14. [POST /clinical/medication-requests/{id}/renew](#14-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
-15. [POST /clinical/medication-requests/{id}/replace](#15-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
-16. [POST /clinical/medication-requests/{id}/sign](#16-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
-17. [POST /clinical/observations](#17-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
-18. [PATCH /clinical/observations/{id}/amend](#18-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
-19. [GET /clinical/patients/{patientProfileId}/summary](#19-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
-20. [GET /clinical/prescription-signature-policies](#20-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
-21. [POST /clinical/prescription-signature-policies](#21-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
-22. [POST /clinical/prescription-signature-policies/{id}/deactivate](#22-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
-23. [POST /clinical/procedures](#23-post-clinical-procedures) — Registrar un procedimiento
-24. [POST /clinical/service-requests](#24-post-clinical-service-requests) — Crear una orden de servicio
+4. [POST /clinical/conditions/{id}/change-status](#4-post-clinical-conditions-id-change-status) — Cambiar el estado clínico de una condición
+5. [POST /clinical/diagnostic-reports](#5-post-clinical-diagnostic-reports) — Emitir un reporte diagnóstico desde la orden
+6. [POST /clinical/diagnostic-reports/{id}/release](#6-post-clinical-diagnostic-reports-id-release) — Liberar los resultados de un reporte diagnóstico
+7. [POST /clinical/encounters/{id}/close](#7-post-clinical-encounters-id-close) — Cerrar un encuentro en curso (gatilla facturación)
+8. [POST /clinical/encounters/check-in](#8-post-clinical-encounters-check-in) — Check-in de un encuentro con participantes y ubicación
+9. [POST /clinical/immunizations](#9-post-clinical-immunizations) — Registrar una inmunización
+10. [POST /clinical/medication-records](#10-post-clinical-medication-records) — Administrar/registrar medicación
+11. [POST /clinical/medication-requests](#11-post-clinical-medication-requests) — Prescribir medicación
+12. [POST /clinical/medication-requests/{id}/edit](#12-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
+13. [POST /clinical/medication-requests/{id}/invalidate](#13-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
+14. [POST /clinical/medication-requests/{id}/issue](#14-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
+15. [POST /clinical/medication-requests/{id}/renew](#15-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
+16. [POST /clinical/medication-requests/{id}/replace](#16-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
+17. [POST /clinical/medication-requests/{id}/sign](#17-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
+18. [POST /clinical/observations](#18-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
+19. [PATCH /clinical/observations/{id}/amend](#19-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
+20. [GET /clinical/patients/{patientProfileId}/summary](#20-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
+21. [GET /clinical/prescription-signature-policies](#21-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
+22. [POST /clinical/prescription-signature-policies](#22-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
+23. [POST /clinical/prescription-signature-policies/{id}/deactivate](#23-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
+24. [POST /clinical/procedures](#24-post-clinical-procedures) — Registrar un procedimiento
+25. [POST /clinical/service-requests](#25-post-clinical-service-requests) — Crear una orden de servicio
 
 ---
 
@@ -386,7 +387,10 @@ Content-Type: application/json
 | `categoryConceptId` | No | `string` | formato `uuid` | Categoría (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `severityConceptId` | No | `string` | formato `uuid` | Severidad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `lateralityConceptId` | No | `string` | formato `uuid` | Lateralidad (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `clinicalCourseConceptId` | No | `string` | formato `uuid` | Curso clínico: agudo/crónico/subagudo/recurrente (concept id). Sin declarar es un dato legítimo, no un olvido. | `00000000-0000-4000-8000-000000000001` |
 | `onsetAt` | No | `string` | formato `date-time` | Inicio de la condición | `2026-07-31T12:00:00.000Z` |
+| `expectedResolutionAt` | No | `string` | formato `date-time` | Fecha esperada de resolución o próxima revisión. Sólo tiene sentido en curso agudo/subagudo. | `2026-07-31T12:00:00.000Z` |
+| `noteText` | No | `string` | Sin restricción adicional declarada | Hallazgos y justificación clínica (narrativa libre de quien registra; Patch v4.1.3) | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -406,7 +410,10 @@ Content-Type: application/json
   "categoryConceptId": "00000000-0000-4000-8000-000000000001",
   "severityConceptId": "00000000-0000-4000-8000-000000000001",
   "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
-  "onsetAt": "2026-07-31T12:00:00.000Z"
+  "clinicalCourseConceptId": "00000000-0000-4000-8000-000000000001",
+  "onsetAt": "2026-07-31T12:00:00.000Z",
+  "expectedResolutionAt": "2026-07-31T12:00:00.000Z",
+  "noteText": "valor-ejemplo"
 }
 ```
 
@@ -432,6 +439,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
   "clinicalStatus": "00000000-0000-4000-8000-000000000001",
   "verificationStatus": "00000000-0000-4000-8000-000000000001",
+  "clinicalCourse": "00000000-0000-4000-8000-000000000001",
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -444,6 +452,7 @@ Campos de la respuesta:
 | `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
 | `clinicalStatus` | Sí | `string` | formato `uuid`; admite null | Estado clínico (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatus` | Sí | `string` | formato `uuid`; admite null | Estado de verificación (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `clinicalCourse` | Sí | `string` | formato `uuid`; admite null | Curso clínico (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -474,7 +483,147 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /clinical/diagnostic-reports
+## 4. POST /clinical/conditions/{id}/change-status
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-records`
+- **Nombre:** Cambiar el estado clínico de una condición
+- **Operation ID:** `ClinicalRecordsController_changeConditionStatus`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalRecordsController.changeConditionStatus](../../src/modules/clinical/controllers/clinical-records.controller.ts)
+
+### Descripción de negocio
+
+Cambiar el estado clínico de una condición. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Patch v4.0.8: transiciona el estado clínico de un diagnóstico ya registrado.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/conditions/{id}/change-status` en `ClinicalRecordsController_changeConditionStatus`. El controlador delega en `ConditionsService.changeClinicalStatus`. Valida el body como `ChangeConditionClinicalStatusDto` y consume `application/json`. El tipo de retorno estático es `Promise<ConditionResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ChangeConditionClinicalStatusDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/conditions/00000000-0000-4000-8000-000000000001/change-status HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "newClinicalStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `newClinicalStatusConceptId` | Sí | `string` | formato `uuid` | Estado clínico destino (concept id de `condition-clinical-status`) | `00000000-0000-4000-8000-000000000001` |
+| `reasonText` | Sí | `string` | Sin restricción adicional declarada | Motivo del cambio de estado (obligatorio) | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/conditions/00000000-0000-4000-8000-000000000001/change-status HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "newClinicalStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConditionResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "clinicalStatus": "00000000-0000-4000-8000-000000000001",
+  "verificationStatus": "00000000-0000-4000-8000-000000000001",
+  "clinicalCourse": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `clinicalStatus` | Sí | `string` | formato `uuid`; admite null | Estado clínico (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `verificationStatus` | Sí | `string` | formato `uuid`; admite null | Estado de verificación (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `clinicalCourse` | Sí | `string` | formato `uuid`; admite null | Curso clínico (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Condición no encontrada | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Esa transición de estado clínico no es válida desde el estado actual | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una condición de curso crónico no pasa a resuelta; marcala inactiva o en remisión | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/conditions/{id}/change-status"
+}
+```
+
+---
+
+## 5. POST /clinical/diagnostic-reports
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -618,7 +767,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /clinical/diagnostic-reports/{id}/release
+## 6. POST /clinical/diagnostic-reports/{id}/release
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -752,7 +901,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /clinical/encounters/{id}/close
+## 7. POST /clinical/encounters/{id}/close
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-encounters`
@@ -876,9 +1025,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/encounters.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONCURRENCY_CONFLICT` | Versión del encuentro desactualizada | Excepción explícita en src/modules/clinical/services/encounters.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El encuentro no está en curso | Excepción explícita en src/modules/clinical/services/encounters.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -896,7 +1048,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /clinical/encounters/check-in
+## 8. POST /clinical/encounters/check-in
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-encounters`
@@ -1073,7 +1225,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /clinical/immunizations
+## 9. POST /clinical/immunizations
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1217,7 +1369,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /clinical/medication-records
+## 10. POST /clinical/medication-records
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1362,7 +1514,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /clinical/medication-requests
+## 11. POST /clinical/medication-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1424,6 +1576,8 @@ Content-Type: application/json
 | `unitConceptId` | No | `string` | formato `uuid` | Unidad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Inicio de vigencia | `2026-07-31T12:00:00.000Z` |
 | `validTo` | No | `string` | formato `date-time` | Fin de vigencia | `2026-07-31T12:00:00.000Z` |
+| `patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3) | `valor-ejemplo` |
+| `indicationConditionId` | No | `string` | formato `uuid` | Condición clínica que motiva la prescripción — para qué es la receta. Debe pertenecer al mismo paciente (Patch v4.1.6) | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -1448,7 +1602,9 @@ Content-Type: application/json
   "quantityDecimal": 1,
   "unitConceptId": "00000000-0000-4000-8000-000000000001",
   "validFrom": "2026-07-31T12:00:00.000Z",
-  "validTo": "2026-07-31T12:00:00.000Z"
+  "validTo": "2026-07-31T12:00:00.000Z",
+  "patientInstructionsText": "valor-ejemplo",
+  "indicationConditionId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1504,6 +1660,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La condición indicada no existe o no pertenece a este paciente | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1521,7 +1678,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /clinical/medication-requests/{id}/edit
+## 12. POST /clinical/medication-requests/{id}/edit
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1581,6 +1738,8 @@ Content-Type: application/json
 | `unitConceptId` | No | `string` | formato `uuid` | Unidad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Inicio de vigencia | `2026-07-31T12:00:00.000Z` |
 | `validTo` | No | `string` | formato `date-time` | Fin de vigencia | `2026-07-31T12:00:00.000Z` |
+| `indicationConditionId` | No | `string` | formato `uuid` | Condición que motiva la prescripción; debe ser del mismo paciente (Patch v4.1.6) | `00000000-0000-4000-8000-000000000001` |
+| `patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente impresas en la receta (Patch v4.1.3) | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -1603,7 +1762,9 @@ Content-Type: application/json
   "quantityDecimal": 1,
   "unitConceptId": "00000000-0000-4000-8000-000000000001",
   "validFrom": "2026-07-31T12:00:00.000Z",
-  "validTo": "2026-07-31T12:00:00.000Z"
+  "validTo": "2026-07-31T12:00:00.000Z",
+  "indicationConditionId": "00000000-0000-4000-8000-000000000001",
+  "patientInstructionsText": "valor-ejemplo"
 }
 ```
 
@@ -1662,6 +1823,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo un borrador (DRAFT) admite edición; una receta emitida es inmutable | Excepción explícita en src/modules/clinical/services/medications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La condición indicada no existe o no pertenece a este paciente | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1679,7 +1841,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /clinical/medication-requests/{id}/invalidate
+## 13. POST /clinical/medication-requests/{id}/invalidate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1819,7 +1981,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /clinical/medication-requests/{id}/issue
+## 14. POST /clinical/medication-requests/{id}/issue
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1929,9 +2091,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/clinical/services/medications.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | La clave de idempotencia ya fue usada para emitir otra receta | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 422 | `PRECONDITION_FAILED` | Solo un borrador (DRAFT) puede emitirse | Excepción explícita en src/modules/clinical/services/medications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La política vigente exige firmar la receta antes de emitirla | Excepción explícita en src/modules/clinical/services/medications.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1949,7 +2114,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /clinical/medication-requests/{id}/renew
+## 15. POST /clinical/medication-requests/{id}/renew
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2095,7 +2260,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /clinical/medication-requests/{id}/replace
+## 16. POST /clinical/medication-requests/{id}/replace
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2253,7 +2418,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /clinical/medication-requests/{id}/sign
+## 17. POST /clinical/medication-requests/{id}/sign
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2378,7 +2543,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /clinical/observations
+## 18. POST /clinical/observations
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -2593,7 +2758,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. PATCH /clinical/observations/{id}/amend
+## 19. PATCH /clinical/observations/{id}/amend
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -2741,7 +2906,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /clinical/patients/{patientProfileId}/summary
+## 20. GET /clinical/patients/{patientProfileId}/summary
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-read`
@@ -2823,8 +2988,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
       "severityConceptId": "00000000-0000-4000-8000-000000000001",
       "encounterId": "00000000-0000-4000-8000-000000000001",
+      "clinicalCourseConceptId": "00000000-0000-4000-8000-000000000001",
       "onsetAt": "2026-07-31T12:00:00.000Z",
+      "expectedResolutionAt": "2026-07-31T12:00:00.000Z",
       "resolvedAt": "2026-07-31T12:00:00.000Z",
+      "noteText": "valor-ejemplo",
       "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
@@ -2849,6 +3017,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "frequencyText": "valor-ejemplo",
       "validFrom": "2026-07-31T12:00:00.000Z",
       "validTo": "2026-07-31T12:00:00.000Z",
+      "patientInstructionsText": "valor-ejemplo",
+      "indicationConditionId": "00000000-0000-4000-8000-000000000001",
       "signedAt": "2026-07-31T12:00:00.000Z",
       "issuedAt": "2026-07-31T12:00:00.000Z",
       "createdAt": "2026-07-31T12:00:00.000Z"
@@ -2906,7 +3076,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
-| `conditions` | Sí | `array<ConditionItemDto>` | Sin restricción adicional declarada | Valor de conditions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","onsetAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `conditions` | Sí | `array<ConditionItemDto>` | Sin restricción adicional declarada | Valor de conditions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","clinicalCourseConceptId":"00000000-0000-4000-8000-000000000001","onsetAt":"2026-07-31T12:00:00.000Z","expectedResolutionAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z","noteText":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `conditions[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].codeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a code concept. | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].categoryConceptId` | No | `string` | formato `uuid` | Identificador asociado a category concept. | `00000000-0000-4000-8000-000000000001` |
@@ -2914,8 +3084,11 @@ Campos de la respuesta:
 | `conditions[].verificationStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a verification status concept. | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].severityConceptId` | No | `string` | formato `uuid` | Identificador asociado a severity concept. | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].encounterId` | No | `string` | formato `uuid` | Identificador asociado a encounter. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].clinicalCourseConceptId` | No | `string` | formato `uuid` | Identificador asociado a clinical course concept (Patch v4.0.8). | `00000000-0000-4000-8000-000000000001` |
 | `conditions[].onsetAt` | No | `string` | formato `date-time` | Valor de onset at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `conditions[].expectedResolutionAt` | No | `string` | formato `date-time` | Fecha esperada de resolución o próxima revisión (Patch v4.0.8). | `2026-07-31T12:00:00.000Z` |
 | `conditions[].resolvedAt` | No | `string` | formato `date-time` | Valor de resolved at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `conditions[].noteText` | No | `string` | Sin restricción adicional declarada | Hallazgos y justificación clínica (Patch v4.1.3). | `valor-ejemplo` |
 | `conditions[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 | `allergies` | Sí | `array<AllergyItemDto>` | Sin restricción adicional declarada | Valor de allergies mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","substanceConceptId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","criticalityConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `allergies[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
@@ -2925,7 +3098,7 @@ Campos de la respuesta:
 | `allergies[].criticalityConceptId` | No | `string` | formato `uuid` | Identificador asociado a criticality concept. | `00000000-0000-4000-8000-000000000001` |
 | `allergies[].clinicalStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a clinical status concept. | `00000000-0000-4000-8000-000000000001` |
 | `allergies[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
-| `medicationRequests` | Sí | `array<MedicationRequestItemDto>` | Sin restricción adicional declarada | Valor de medication requests mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","prescriberProfileId":"00000000-0000-4000-8000-000000000001","doseText":"valor-ejemplo","frequencyText":"valor-ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","signedAt":"2026-07-31T12:00:00.000Z","issuedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `medicationRequests` | Sí | `array<MedicationRequestItemDto>` | Sin restricción adicional declarada | Valor de medication requests mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","prescriberProfileId":"00000000-0000-4000-8000-000000000001","doseText":"valor-ejemplo","frequencyText":"valor-ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","patientInstructionsText":"valor-ejemplo","indicationConditionId":"00000000-0000-4000-8000-000000000001","signedAt":"2026-07-31T12:00:00.000Z","issuedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `medicationRequests[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].medicationConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a medication concept. | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
@@ -2934,6 +3107,8 @@ Campos de la respuesta:
 | `medicationRequests[].frequencyText` | No | `string` | Sin restricción adicional declarada | Valor de frequency text mantenido por la instancia. | `valor-ejemplo` |
 | `medicationRequests[].validFrom` | No | `string` | formato `date-time` | Valor de valid from mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `medicationRequests[].validTo` | No | `string` | formato `date-time` | Valor de valid to mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `medicationRequests[].patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente impresas en la receta (Patch v4.1.3). | `valor-ejemplo` |
+| `medicationRequests[].indicationConditionId` | No | `string` | formato `uuid` | Condición que motiva la prescripción — para qué es la receta (Patch v4.1.6). | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequests[].signedAt` | No | `string` | formato `date-time` | Valor de signed at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `medicationRequests[].issuedAt` | No | `string` | formato `date-time` | Valor de issued at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `medicationRequests[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
@@ -2998,7 +3173,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /clinical/prescription-signature-policies
+## 21. GET /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -3110,7 +3285,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /clinical/prescription-signature-policies
+## 22. POST /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -3257,7 +3432,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /clinical/prescription-signature-policies/{id}/deactivate
+## 23. POST /clinical/prescription-signature-policies/{id}/deactivate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -3381,7 +3556,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /clinical/procedures
+## 24. POST /clinical/procedures
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3540,7 +3715,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /clinical/service-requests
+## 25. POST /clinical/service-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`

@@ -16,6 +16,7 @@ import {
   PharmacyProcurementService,
   InventoryReservationsService,
   PharmacyOrdersService,
+  PharmacyOrderNotificationsService,
   MedicationDispensationsService,
   InventoryCountService,
   InventoryRecallService,
@@ -23,6 +24,10 @@ import {
   InventorySyncService,
   PharmacyInventoryReadService,
 } from './services';
+// La campana del pedido resuelve la cuenta del paciente igual que el carril
+// clínico: el repositorio de vínculos persona↔cuenta se registra local, como
+// hace `clinical.module.ts`.
+import { PersonAccountLinksRepository } from '../profiles/repositories';
 import {
   SuppliersRepository,
   LocationsRepository,
@@ -34,6 +39,7 @@ import {
   ReservationsRepository,
   PharmacyOrdersRepository,
   DispensationsRepository,
+  PharmacyOrderSubstitutionsRepository,
   CountSessionsRepository,
   RecallHoldsRepository,
   SerialsRepository,
@@ -80,16 +86,19 @@ import {
     ReservationsRepository,
     PharmacyOrdersRepository,
     DispensationsRepository,
+    PharmacyOrderSubstitutionsRepository,
     CountSessionsRepository,
     RecallHoldsRepository,
     SerialsRepository,
     SyncRepository,
     InventoryReadRepository,
+    PersonAccountLinksRepository,
     // Servicios
     InventoryLocationsService,
     PharmacyProcurementService,
     InventoryReservationsService,
     PharmacyOrdersService,
+    PharmacyOrderNotificationsService,
     MedicationDispensationsService,
     InventoryCountService,
     InventoryRecallService,
