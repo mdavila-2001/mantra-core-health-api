@@ -10,3 +10,4 @@ export * from './dunning.dto';
 export * from './payment-plan.dto';
 export * from './kpi-snapshot.dto';
 export * from './service-catalog.dto';
+export * from './procedure-nomenclature.dto';

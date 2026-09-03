@@ -19,9 +19,14 @@ import {
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
-import { BillingServiceCatalogService } from '../services';
+import {
+  BillingServiceCatalogService,
+  ProcedureNomenclatureService,
+} from '../services';
 import {
   CreateServiceCatalogItemDto,
+  ProcedureNomenclatureResponseDto,
+  ProcedureSpecialtiesResponseDto,
   SearchServiceCatalogResponseDto,
   ServiceCatalogItemDto,
 } from '../dto';
@@ -47,6 +52,7 @@ export class BillingServiceCatalogController {
    */
   constructor(
     private readonly serviceCatalogService: BillingServiceCatalogService,
+    private readonly nomenclature: ProcedureNomenclatureService,
   ) {}
 
   /**
@@ -121,5 +127,71 @@ export class BillingServiceCatalogController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ServiceCatalogItemDto> {
     return this.serviceCatalogService.create(dto, actor);
+  }
+
+  /**
+   * Las especialidades del nomenclador de procedimientos, con su recuento.
+   *
+   * Es lo que permite dibujar el filtro **sin traer las 4408 entradas**: la
+   * pantalla pide esto una vez y después pagina dentro de la especialidad
+   * elegida.
+   *
+   * Sin `@Roles` por la misma razón que la lectura del catálogo: es un arancel
+   * de referencia público, y cualquier profesional que arme un presupuesto
+   * necesita resolverlo. Lo que sigue siendo administrativo es el **alta** del
+   * servicio.
+   *
+   * @returns Las especialidades, ordenadas en español.
+   */
+  @Get('procedure-specialties')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Listar las especialidades del nomenclador de procedimientos',
+  })
+  listProcedureSpecialties(): Promise<ProcedureSpecialtiesResponseDto> {
+    return this.nomenclature.listSpecialties();
+  }
+
+  /**
+   * El nomenclador de procedimientos, por cursor.
+   *
+   * @param specialty - Especialidad exacta del arancel.
+   * @param query - Texto libre sobre el nombre del procedimiento.
+   * @param cursor - Cursor opaco devuelto por la página anterior.
+   * @param limit - Entradas por página.
+   * @returns La página del nomenclador.
+   */
+  @Get('procedures')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Listar el nomenclador de procedimientos (arancel de referencia)',
+  })
+  @ApiQuery({
+    name: 'specialty',
+    required: false,
+    description: 'Especialidad exacta, tal cual la publica el arancel',
+  })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    description: 'Texto a buscar en el nombre del procedimiento',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Entradas por página',
+  })
+  searchProcedures(
+    @Query('specialty') specialty?: string,
+    @Query('q') query?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ProcedureNomenclatureResponseDto> {
+    return this.nomenclature.search({ specialty, query, cursor, limit });
   }
 }

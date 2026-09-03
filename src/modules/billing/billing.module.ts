@@ -20,6 +20,7 @@ import {
   DunningService,
   KpiSnapshotsService,
   BillingServiceCatalogService,
+  ProcedureNomenclatureService,
 } from './services';
 import {
   InvoicesRepository,
@@ -77,6 +78,7 @@ import {
     DunningService,
     KpiSnapshotsService,
     BillingServiceCatalogService,
+    ProcedureNomenclatureService,
   ],
   // Carril 18 — `accounting` reutiliza `LedgerService.postToLedger` (anclar
   // `transaction_id` en el documento de origen, idempotente por documento)
