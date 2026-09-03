@@ -1,6 +1,8 @@
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { bootstrapTestApp, bearer, type TestContext,
+  camposObligatoriosDePaciente,
+} from './harness';
 import { IDA } from '../../src/modules/identity_assurance/identity_assurance.concepts';
 import { IDENTITY_CARD_VERTICAL } from '../../src/modules/identity_assurance/identity_assurance.seed';
 
@@ -34,6 +36,8 @@ import { IDENTITY_CARD_VERTICAL } from '../../src/modules/identity_assurance/ide
  */
 describe('Verificación de identidad — el titular se verifica solo (integración)', () => {
   let ctx: TestContext;
+  /** Los campos que el alta de paciente exige; salen del arnés. */
+  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
 
   /** Documento con el que el paciente se registra y luego inicia sesión. */
   const nationalId = `INT-H01-${randomUUID().slice(0, 8)}`;
@@ -45,11 +49,13 @@ describe('Verificación de identidad — el titular se verifica solo (integraci�
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
 
     // Alta pública: sin token y sin que ningún admin lo dé de alta.
     await http()
       .post('/iam/auth/register-patient')
       .send({
+        ...camposDePaciente,
         nationalId,
         password,
         displayName: 'Paciente H-01',

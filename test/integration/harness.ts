@@ -356,6 +356,45 @@ async function seedAdmin(orm: MikroORM): Promise<void> {
 }
 
 /** Authorization header helper. */
+/**
+ * Los campos que `POST /iam/auth/register-patient` exige además de la
+ * identidad, con valores válidos y un municipio real del catálogo.
+ *
+ * Existe porque el DTO se endureció —`birthDate`, `phone`, `sexAtBirth` y
+ * `residenceMunicipalityConceptId` pasaron a obligatorios cuando se implementó
+ * el orden de campos que pidió el propietario— y **once suites de integración
+ * quedaron atrás sin que nadie se enterara**: CI sólo corre
+ * `postgres-privileges` de este directorio, así que el 400 no rompía ningún
+ * check. Cada suite volvía a escribir su propio alta, así que el próximo campo
+ * obligatorio habría vuelto a romperlas una por una.
+ *
+ * El municipio se **busca**, no se clava: los ids son deterministas, pero
+ * fijarlos haría caducar las suites el día que el namespace cambie.
+ *
+ * @param ctx - El contexto de la prueba, del que sale la conexión.
+ * @returns Los cuatro campos, listos para desparramar en el cuerpo del alta.
+ */
+export async function camposObligatoriosDePaciente(ctx: TestContext): Promise<{
+  birthDate: string;
+  phone: string;
+  sexAtBirth: string;
+  residenceMunicipalityConceptId: string;
+}> {
+  const municipios = await ctx.orm.em
+    .getConnection()
+    .execute<{ id: string }[]>(
+      `select id from terminology.catalog_concepts
+        where code like 'geo:bo:municipality:%' order by code limit 1`,
+    );
+
+  return {
+    birthDate: '1990-01-01',
+    phone: '+591 70000000',
+    sexAtBirth: 'FEMALE',
+    residenceMunicipalityConceptId: municipios[0]?.id ?? '',
+  };
+}
+
 export function bearer(token: string): {
   /**
    * Valor de authorization mantenido por la instancia.
