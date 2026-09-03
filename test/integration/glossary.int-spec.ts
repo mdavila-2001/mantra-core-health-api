@@ -123,6 +123,98 @@ describe('Glosario médico (integración)', () => {
       });
       expect(res.body.items[0].relationsCount).toBeGreaterThanOrEqual(2);
     });
+
+    /**
+     * El caso real de `searchGlossary` (`terminology.client.ts`): la landing
+     * filtrada por texto, sin categoría elegida, nunca manda `valueSetId` —
+     * sólo `includeValueSets=true`. Antes de este fix, esa combinación
+     * devolvía el concepto pelado (sin `category`/`tags`/`relationsCount`) y
+     * el front reventaba al pintar la primera fila. Fija la causa raíz, no
+     * el síntoma.
+     */
+    it('sin valueSetId, con includeValueSets=true, resuelve el paraguas y trae la forma completa', async () => {
+      const res = await http()
+        .get('/terminology/concepts')
+        .query({ q: 'corazon', lang: 'ES', includeValueSets: 'true' })
+        .set(bearer(ctx.adminToken))
+        .expect(200);
+
+      expect(res.body.count).toBe(1);
+      expect(res.body.items[0]).toMatchObject({
+        slug: 'corazon',
+        display: 'Corazón',
+        category: {
+          internalCode: 'glossary-category-anatomy',
+          name: 'Anatomía',
+        },
+        tags: ['Cardiovascular'],
+        status: 'active',
+      });
+      expect(res.body.items[0].relationsCount).toBeGreaterThanOrEqual(2);
+    });
+
+    it('un término en TERM_DRAFT no aparece en la búsqueda por texto sin valueSetId', async () => {
+      const em = orm.em.fork();
+      const draftConceptId = '00000000-0000-4000-9000-00000000dfd2';
+
+      em.create(
+        CatalogConcepts,
+        {
+          id: draftConceptId,
+          codeSystemVersionId: SEED.codeSystemVersionId,
+          code: 'GLOSSARY_TEST_DRAFT_SEARCH',
+          display: 'Draft searchable term',
+          abstract: false,
+          selectable: true,
+          stateConceptId: CONCEPTS.TERM_DRAFT,
+          ...createdBy(),
+        },
+        { partial: true },
+      );
+      await em.flush();
+
+      const membershipId = glossaryValueSetMemberId(
+        anatomyCategory.internalCode,
+        draftConceptId,
+      );
+      em.create(
+        ValueSetMembers,
+        {
+          id: membershipId,
+          valueSetVersionId: glossaryValueSetVersionId(
+            anatomyCategory.internalCode,
+          ),
+          conceptId: draftConceptId,
+          included: true,
+          ordinal: 998,
+          ...createdBy(),
+        },
+        { partial: true },
+      );
+      await em.flush();
+
+      try {
+        const res = await http()
+          .get('/terminology/concepts')
+          .query({
+            q: 'Draft searchable term',
+            lang: 'ES',
+            includeValueSets: 'true',
+          })
+          .set(bearer(ctx.adminToken))
+          .expect(200);
+
+        expect(
+          res.body.items.some(
+            (item: { conceptId: string }) => item.conceptId === draftConceptId,
+          ),
+        ).toBe(false);
+      } finally {
+        const cleanup = orm.em.fork();
+        await cleanup.nativeDelete(ValueSetMembers, { id: membershipId });
+        await cleanup.nativeDelete(CatalogConcepts, { id: draftConceptId });
+      }
+    });
   });
 
   describe('ficha de un término', () => {

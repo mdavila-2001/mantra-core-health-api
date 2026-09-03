@@ -148,6 +148,47 @@ esa lectura pasa a devolverlos en bloque sin ningún cambio de código.
 Mientras tanto, lo mínimo que no cuesta una decisión: **quitar del dataset las tres fuentes que
 no respaldan el contenido**, porque hoy están firmando algo que no escribieron.
 
+---
+
+**B-14 · `glossary.int-spec.ts › exclusión de borradores` afirma un 404 que el código nunca
+produce — falso verde histórico, invisible porque CI no corre este int-spec.** *(Encontrado por
+Marcelo el 02/09 verificando el fix del bug de búsqueda del glosario; no forma parte de ese
+carril, se registra aparte.)*
+
+El test (`test/integration/glossary.int-spec.ts:315-371`) crea un concepto `TERM_DRAFT` y lo
+afilia **sólo** al value set de la categoría (`glossary-category-anatomy`), nunca al paraguas
+`glossary-all-terms`. Después espera `404` al leerlo por `GET /terminology/concepts/:id`.
+
+`ConceptsService.readConcept` (`concepts.service.ts:837-852`) sólo excluye un borrador cuando
+`esTerminoDelGlosario` es `true`, y esa bandera exige membresía **exacta** en
+`glossary-all-terms` (`valueSet.internalCode === GLOSSARY_ALL_TERMS_CODE`, línea 839) — no
+alcanza con pertenecer a una categoría. Como el test nunca crea esa membresía, la condición es
+siempre `false`, el borrador nunca se excluye, y la petición responde `200` con la ficha
+completa. **Reproducido de forma determinista y aislada:**
+`yarn test:integration --testPathPatterns=glossary --testNamePattern="no aparece en la búsqueda
+por categoría ni en la ficha"` → `expected 404 "Not Found", got 200 "OK"`, sin ningún otro test
+del archivo corriendo antes (descarta contaminación de otro caso).
+
+**Dos lecturas posibles, sin decidir cuál es la correcta:**
+
+1. El test está mal escrito: le falta la segunda `em.create(ValueSetMembers, …)` bajo
+   `glossary-all-terms` que sí hacen los términos reales sembrados por `GlossarySeedService`
+   (ver la nota de `src/common/seed/glossary-terms.catalog.ts:19` — cada término real entra por
+   **dos** membresías, una a su categoría y otra al paraguas). Si es así, el fix es agregar esa
+   membresía en el test.
+2. O el producto realmente quiere que un borrador de *cualquier* categoría del glosario quede
+   fuera de `readConcept`, y la condición debería ser «pertenece a alguna `glossary-category-*`
+   o a `glossary-all-terms`», no sólo al paraguas exacto. Si es así, el fix es en
+   `ConceptsService`.
+
+**No se tocó ninguna de las dos capas**: es ortogonal al bug de búsqueda (directiva 1) y no hay
+evidencia de negocio en esta sesión para elegir entre las dos lecturas. **Por qué no se ve en
+CI**: `docs/architecture/...` — de integración sólo corre `postgres-privileges`
+(ver `CLAUDE.md`, sección de tests); cualquier otro int-spec en rojo, incluido éste, pasa
+invisible. Los otros 9 casos de `glossary.int-spec.ts` (incluidos los 2 nuevos del fix de
+búsqueda) pasan limpio; sólo este falla.
+
+---
 
 **B-2 · `.puml`, `SQL/` y `salud-db/` no están bajo control de versiones.**
 Ningún cambio de esquema puede viajar en un PR: se distribuye por zip. Es la causa raíz de
