@@ -5,7 +5,7 @@
 # (58 TimescaleDB, 59 pgvector) si aún no existen. Idempotente.
 #
 # Orden: apply_all.sql (sin 90_fk_deferred) → apply_deferred.sql (FK
-# cross-schema) → 99_migrations → time_series → vector_rag.
+# cross-schema) → patches → time_series → vector_rag.
 # =========================================================================
 set -euo pipefail
 
@@ -45,15 +45,45 @@ fi
 # Migraciones posteriores a la generación de SQL/ (tablas y columnas que los
 # módulos añadieron después). Todas son ADITIVAS e idempotentes por contrato
 # (IF NOT EXISTS), así que se aplican siempre y en orden de nombre — que al ser
-# `YYYY-MM-DD_*.sql` es también orden cronológico. Sin este paso quedaban sin
-# aplicar contra una base recién levantada y las tablas que declaran (p. ej.
-# iam.account_activations) sólo existían si se arrancaba con ORM_SCHEMA_SYNC=safe.
+# `YYYY-MM-DD_*.sql` es también orden cronológico.
+#
+# **El directorio se llama `patches/`.** Esto buscaba en `99_migrations/`, que no
+# existe en ninguno de los dos montajes —ni en `SQL/` del repositorio del modelo
+# ni en la copia versionada de `database/SQL/`—, así que el glob no encontraba
+# nada. Y como `nullglob` convierte un glob sin coincidencias en la lista vacía,
+# el bucle daba CERO vueltas sin una línea de aviso: las 24 migraciones llevaban
+# semanas sin aplicarse y el arranque decía «completado» igual.
+#
+# El síntoma no aparece en el arranque sino mucho después y en otro sitio: con
+# `ORM_SCHEMA_SYNC=safe` la entidad crea por su cuenta las columnas que sabe
+# declarar, así que la falta sólo se nota en lo que NINGUNA entidad puede
+# reconstruir —datos de arranque, backfills, restricciones— y revienta al
+# escribir. `insurance_carriers.sigla` fue justo eso.
+#
+# Por eso el paso ya no puede quedarse callado: si no hay ni un archivo, aborta.
+MIGRACIONES=/init/SQL/patches
+# `99_migrations/` se sigue aceptando por si algún despliegue lo tiene con el
+# nombre viejo; el que exista de los dos manda, y `patches/` tiene prioridad.
+[ -d "$MIGRACIONES" ] || MIGRACIONES=/init/SQL/99_migrations
+
 shopt -s nullglob
-for migration in /init/SQL/99_migrations/*.sql; do
-    echo ">>> 99_migrations/$(basename "$migration")"
+migraciones=("$MIGRACIONES"/*.sql)
+shopt -u nullglob
+
+if [ ${#migraciones[@]} -eq 0 ]; then
+    echo "!!! No hay una sola migración en $MIGRACIONES."
+    echo "!!! Eso NO es un caso normal: el repositorio trae dos docenas y sin ellas"
+    echo "!!! la base queda a medias de una forma que no se nota hasta la primera"
+    echo "!!! escritura. Revisá que el montaje del DDL apunte a un 'SQL/' con"
+    echo "!!! 'patches/' dentro (compose: ../mantra-core-health-model/SQL o ./database/SQL)."
+    exit 4
+fi
+
+echo ">>> $(basename "$MIGRACIONES"): ${#migraciones[@]} migraciones"
+for migration in "${migraciones[@]}"; do
+    echo ">>> $(basename "$MIGRACIONES")/$(basename "$migration")"
     "${PSQL[@]}" -f "$migration"
 done
-shopt -u nullglob
 
 # 58/59 son extensiones PG en esta misma instancia — se aplican siempre.
 echo ">>> NoSQL 58: time_series (TimescaleDB)"
