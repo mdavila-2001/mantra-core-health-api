@@ -317,17 +317,15 @@ export class IamPatientSelfRegistrationService {
         actorUserId: user.id,
       });
 
-      // El NIT con el que quiere que le facturen. Va como identificador y no
-      // como columna del perfil porque es eso: un número que la administración
-      // tributaria le asignó. La razón social no se pide: el modelo todavía no
-      // tiene dónde guardarla y pedir un dato que se pierde es peor que no
-      // pedirlo.
+      // El NIT con el que quiere que le facturen. Va como identificador oficial
+      // de tipo tributario junto con su razón social (holderName).
       if (dto.billingTaxId) {
         this.identifiersRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
           typeConceptId: CONCEPTS.ID_TYPE_TAX,
           value: dto.billingTaxId,
+          holderName: dto.billingLegalName,
           useConceptId: CONCEPTS.USE_OFFICIAL,
           stateConceptId: CONCEPTS.STATE_ACTIVE,
           actorUserId: user.id,

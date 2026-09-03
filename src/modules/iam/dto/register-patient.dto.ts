@@ -553,6 +553,20 @@ export class RegisterPatientDto {
     message: 'El NIT sólo admite dígitos',
   })
   billingTaxId?: string;
+
+  /**
+   * Nombre o Razón Social asociada al NIT para facturación.
+   */
+  @ApiPropertyOptional({
+    description: 'Nombre o Razón Social para facturación',
+    maxLength: 200,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200, {
+    message: 'La razón social no puede exceder 200 caracteres',
+  })
+  billingLegalName?: string;
 }
 
 /** Resultado del auto-registro de un paciente. */
