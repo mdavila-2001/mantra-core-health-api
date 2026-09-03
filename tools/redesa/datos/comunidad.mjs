@@ -40,6 +40,13 @@
  *
  * `titular` es la línea de debajo del nombre en su vitrina. No dicen profesión
  * médica ninguno: son quienes leen, no quienes publican.
+ *
+ * `sexo` está **declarado**, no deducido del nombre. `RegisterPatientDto` lo
+ * exige (`sexAtBirth`, obligatorio desde que el alta de paciente cerró su
+ * contrato), y adivinarlo a partir de un nombre de pila es exactamente el tipo
+ * de dato clínico que no se infiere: el sexo al nacer condiciona rangos de
+ * referencia y tamizajes. Son personas de ficción, así que acá se elige y se
+ * escribe; en producción lo declara quien se registra.
  */
 export const CIUDADANOS = [
   {
@@ -48,6 +55,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Ticona',
     ci: '4821337',
     ciudad: 'La Paz',
+    sexo: 'FEMALE',
     nacimiento: '1972-04-18',
     titular: 'Comerciante en la Uyustus · mamá de tres',
   },
@@ -57,6 +65,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Apaza',
     ci: '6720914',
     ciudad: 'El Alto',
+    sexo: 'MALE',
     nacimiento: '1985-09-02',
     titular: 'Chofer de minibús · vecino de Villa Adela',
   },
@@ -66,6 +75,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Villca',
     ci: '5109882',
     ciudad: 'Cochabamba',
+    sexo: 'FEMALE',
     nacimiento: '1990-01-27',
     titular: 'Maestra de primaria · corre los domingos en la Coronilla',
   },
@@ -75,6 +85,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Roca',
     ci: '7734025',
     ciudad: 'Santa Cruz de la Sierra',
+    sexo: 'MALE',
     nacimiento: '1978-06-11',
     titular: 'Ingeniero agrónomo · Warnes',
   },
@@ -84,6 +95,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Mamani',
     ci: '3998471',
     ciudad: 'La Paz',
+    sexo: 'FEMALE',
     nacimiento: '1965-11-30',
     titular: 'Jubilada · cuida a su nieto los martes',
   },
@@ -93,6 +105,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Arce',
     ci: '8102336',
     ciudad: 'Sucre',
+    sexo: 'MALE',
     nacimiento: '1996-03-15',
     titular: 'Estudiante de Derecho en la USFX',
   },
@@ -102,6 +115,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Ledezma',
     ci: '6541209',
     ciudad: 'Tarija',
+    sexo: 'FEMALE',
     nacimiento: '1988-08-08',
     titular: 'Contadora · embarazada de 22 semanas',
   },
@@ -111,6 +125,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Huanca',
     ci: '5233718',
     ciudad: 'El Alto',
+    sexo: 'MALE',
     nacimiento: '1974-12-04',
     titular: 'Albañil · diabético desde hace nueve años',
   },
@@ -120,6 +135,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Peredo',
     ci: '7009645',
     ciudad: 'Santa Cruz de la Sierra',
+    sexo: 'FEMALE',
     nacimiento: '1993-05-21',
     titular: 'Diseñadora gráfica · trabaja doce horas frente a la pantalla',
   },
@@ -129,6 +145,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Balderrama',
     ci: '4470182',
     ciudad: 'Cochabamba',
+    sexo: 'MALE',
     nacimiento: '1969-02-14',
     titular: 'Taxista · dejó de fumar hace un año y medio',
   },
@@ -138,6 +155,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Tarqui',
     ci: '6180553',
     ciudad: 'La Paz',
+    sexo: 'FEMALE',
     nacimiento: '1982-07-19',
     titular: 'Enfermera auxiliar · Red de Salud Sur',
   },
@@ -147,6 +165,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Ovando',
     ci: '7856430',
     ciudad: 'Santa Cruz de la Sierra',
+    sexo: 'MALE',
     nacimiento: '1999-10-06',
     titular: 'Juega fútbol los sábados en la Villa Primero de Mayo',
   },
@@ -156,6 +175,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Alanoca',
     ci: '3721996',
     ciudad: 'El Alto',
+    sexo: 'FEMALE',
     nacimiento: '1961-01-09',
     titular: 'Vendedora en la 16 de Julio · hipertensa',
   },
@@ -165,6 +185,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Melgar',
     ci: '8298107',
     ciudad: 'Tarija',
+    sexo: 'MALE',
     nacimiento: '1994-04-25',
     titular: 'Guía de turismo en el Valle de la Concepción',
   },
@@ -174,6 +195,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Ríos',
     ci: '7412668',
     ciudad: 'Sucre',
+    sexo: 'FEMALE',
     nacimiento: '1991-12-13',
     titular: 'Bioquímica · trabaja en laboratorio clínico',
   },
@@ -183,6 +205,7 @@ export const CIUDADANOS = [
     segundoApellido: 'Limachi',
     ci: '5680341',
     ciudad: 'La Paz',
+    sexo: 'MALE',
     nacimiento: '1980-03-28',
     titular: 'Mecánico en Villa Fátima · papá de dos',
   },
