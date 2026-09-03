@@ -53,9 +53,9 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;  -- requerido por EXCLUDE
 -- El matiz importa desde que este archivo se aplica de verdad: los `patches/`
 -- corren en cada arranque bajo `ON_ERROR_STOP`, así que un error acá deja
 -- `postgres-init` en rojo y la API no levanta nunca. Un puñado de citas
--- solapadas heredadas —96 en la base de desarrollo cuando se escribió esto—
--- no puede ser motivo de que el sistema entero no arranque. Se avisa en cada
--- pasada y la restricción entra sola en cuanto los datos estén limpios.
+-- solapadas heredadas —94 en la base de desarrollo cuando se escribió esto— no
+-- puede ser motivo de que el sistema entero no arranque. Se avisa en cada pasada
+-- y la restricción entra sola en cuanto los datos estén limpios.
 --
 -- Para verlos:
 --   SELECT a.id, b.id, a.practitioner_profile_id, a.start_at, a.end_at
@@ -65,8 +65,6 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;  -- requerido por EXCLUDE
 --      AND a.id < b.id
 --      AND tstzrange(a.start_at, a.end_at, '[)') && tstzrange(b.start_at, b.end_at, '[)')
 --    WHERE a.status_concept_id IN ('51530fd7-…', '37dded87-…');
-BEGIN;
-
 DO $$
 DECLARE n bigint;
 BEGIN
@@ -108,5 +106,3 @@ BEGIN
             )
         );
 END $$;
-
-COMMIT;
