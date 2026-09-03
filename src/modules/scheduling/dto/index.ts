@@ -20,6 +20,10 @@ export {
   ExceptionTypeDto,
   ExceptionTypeListDto,
   EXCEPTION_TYPES,
+  ACTIVITY_TYPES,
+  ActivityTypeDto,
+  ActivityTypeListDto,
+  type ActivityType,
   RESOURCE_TYPES,
 } from './scheduling-catalog.dto';
 export type { ResourceType, ExceptionType } from './scheduling-catalog.dto';

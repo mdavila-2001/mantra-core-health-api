@@ -850,3 +850,55 @@ export class ExceptionTypeListDto {
   @ApiProperty({ type: [ExceptionTypeDto] })
   items!: ExceptionTypeDto[];
 }
+
+/* -- Tipología raíz de la actividad (carril 12) ----------------------------- */
+
+/** Las tipologías que la agenda sabe pintar, en el orden en que se muestran. */
+export type ActivityType =
+  'APPOINTMENT' | 'PROCEDURE' | 'FOLLOW_UP' | 'TELEHEALTH' | 'OTHER';
+
+export const ACTIVITY_TYPES: readonly ActivityType[] = [
+  'APPOINTMENT',
+  'PROCEDURE',
+  'FOLLOW_UP',
+  'TELEHEALTH',
+  'OTHER',
+];
+
+/**
+ * Una tipología de actividad, tal como la publica la API.
+ *
+ * Lleva `tone` y no un color: el pedido dice «con otros colores», pero **el
+ * color concreto es del sistema de diseño**, no de la API. Mandar un `#RRGGBB`
+ * desde el servidor obligaría a redesplegarlo para cambiar una paleta, y
+ * rompería el tema oscuro. El tono es semántico y cada pantalla lo resuelve con
+ * sus propios tokens.
+ */
+export class ActivityTypeDto {
+  /** Clave estable con la que se identifica la tipología. */
+  @ApiProperty({ enum: ACTIVITY_TYPES })
+  type!: ActivityType;
+
+  /** El concepto real detrás, que es lo que guarda `appointments`. */
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  /** Cómo se llama en pantalla, en castellano. */
+  @ApiProperty({ example: 'Operación o procedimiento' })
+  label!: string;
+
+  /**
+   * El tono con el que se pinta, del sistema de diseño.
+   *
+   * `error` queda reservado para los BLOQUEOS —el propietario los pidió «con
+   * rojo»— así que ninguna tipología lo usa: si una actividad se pintara igual
+   * que un bloqueo, la agenda diría que ese rato está cerrado cuando no lo está.
+   */
+  @ApiProperty({ enum: ['primary', 'secondary', 'info', 'warning', 'success'] })
+  tone!: string;
+}
+
+export class ActivityTypeListDto {
+  @ApiProperty({ type: [ActivityTypeDto] })
+  items!: ActivityTypeDto[];
+}

@@ -609,6 +609,45 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
      * `booked` antes de que el profesional la acepte sería afirmar un compromiso
      * que nadie tomó. La acepta el profesional y recién ahí pasa a `booked`.
      */
+    // --- Tipología raíz de la actividad (`appointments.type_concept_id`) ----
+    //
+    // El propietario la pidió así, con ejemplos y sin lista: «con otros colores
+    // los otros procedimientos (TURNOS, OPERACIONES, ETC.) catalogado por
+    // tipología raíz». La columna existía desde siempre y **no había un solo
+    // concepto que ponerle**, así que toda actividad era indistinguible de las
+    // demás en la agenda del día.
+    //
+    // Viven acá y no en scheduling porque la columna es de `clinical`. El
+    // catálogo que las publica sí es de scheduling: es la agenda la que las
+    // pinta.
+    //
+    // Los dos primeros son los que él nombró. `FOLLOW_UP` y `TELEHEALTH` son
+    // los que la agenda ya distingue de hecho —el control y la teleconsulta
+    // aparecen en la máquina de citas y en la modalidad—, así que no se
+    // inventan: se nombran. `OTHER` va por lo mismo que en los motivos de
+    // bloqueo: una lista cerrada que se queda corta bloquea a alguien, y lo que
+    // la gente elija ahí es la mejor fuente para la lista definitiva.
+    ACTIVITY_APPOINTMENT: {
+      code: 'ACT_APPOINTMENT',
+      display: 'Consultation appointment',
+    },
+    ACTIVITY_PROCEDURE: {
+      code: 'ACT_PROCEDURE',
+      display: 'Procedure or operation',
+    },
+    ACTIVITY_FOLLOW_UP: {
+      code: 'ACT_FOLLOW_UP',
+      display: 'Follow-up visit',
+    },
+    ACTIVITY_TELEHEALTH: {
+      code: 'ACT_TELEHEALTH',
+      display: 'Telehealth consultation',
+    },
+    ACTIVITY_OTHER: {
+      code: 'ACT_OTHER',
+      display: 'Other activity',
+    },
+
     APPOINTMENT_PENDING: {
       code: 'APPT_PENDING',
       display: 'Appointment pending confirmation',
