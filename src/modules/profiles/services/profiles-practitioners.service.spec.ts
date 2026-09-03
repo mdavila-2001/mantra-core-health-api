@@ -51,6 +51,7 @@ function build() {
     findByCode: mockFn(),
     create: mockFn(),
     listPage: mockFn().mockResolvedValue([]),
+    findVisibleProfileIds: mockFn().mockResolvedValue([]),
   };
   const authorizationsRepo = {
     create: mockFn(),
@@ -70,6 +71,7 @@ function build() {
     findAllByPractitioner: mockFn().mockResolvedValue([]),
     findByPractitioners: mockFn().mockResolvedValue([]),
     findProfileIdsBySpecialty: mockFn().mockResolvedValue([]),
+    findCurrentSpecialtyPairs: mockFn().mockResolvedValue([]),
     demotePrimary: mockFn().mockResolvedValue(0),
   };
   const languagesRepo = {
@@ -1169,6 +1171,72 @@ describe('ProfilesPractitionersService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
+  describe('countPractitionersBySpecialty (portada de la guía)', () => {
+    it('cuenta gente sin repetir y deja fuera a quien la guía no muestra', async () => {
+      const d = build();
+      // `bal-1` no está entre los visibles: su perfil no está verificado.
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue([
+        'per-1',
+        'per-2',
+      ]);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+        { practitionerProfileId: 'per-2', specialtyConceptId: 'con-cardio' },
+        // El mismo profesional dos veces en la misma especialidad —una
+        // recertificación deja dos filas vigentes— cuenta UNA.
+        { practitionerProfileId: 'per-2', specialtyConceptId: 'con-cardio' },
+        { practitionerProfileId: 'per-2', specialtyConceptId: 'con-pediatria' },
+        { practitionerProfileId: 'bal-1', specialtyConceptId: 'con-cardio' },
+      ]);
+
+      const recuento = await d.service.countPractitionersBySpecialty();
+
+      expect(recuento.items).toEqual([
+        { specialtyConceptId: 'con-cardio', practitionerCount: 2 },
+        { specialtyConceptId: 'con-pediatria', practitionerCount: 1 },
+      ]);
+      // El total NO es la suma de las tarjetas: `per-2` ejerce dos.
+      expect(recuento.practitionerTotal).toBe(2);
+    });
+
+    it('no devuelve la especialidad en la que no queda nadie visible', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue(['per-1']);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+        { practitionerProfileId: 'bal-1', specialtyConceptId: 'con-oncologia' },
+      ]);
+
+      const recuento = await d.service.countPractitionersBySpecialty();
+
+      // Una tarjeta que promete y abre vacía es peor que no estar.
+      expect(recuento.items.map((i) => i.specialtyConceptId)).toEqual([
+        'con-cardio',
+      ]);
+    });
+
+    /**
+     * La razón de ser del endpoint: que el número de la tarjeta sea el largo de
+     * la lista que abre. El criterio de visibilidad tiene que ser el MISMO en
+     * los dos —hoy, ninguno—; si un día vuelve a haber filtro y sólo se pone en
+     * uno, esta prueba es la que lo atrapa.
+     */
+    it('usa el mismo criterio de visibilidad que el listado: sin filtro', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue([]);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([]);
+      d.practitionersRepo.listPage.mockResolvedValue([]);
+
+      await d.service.countPractitionersBySpecialty();
+      await d.service.listPractitioners({ limit: 50 });
+
+      const delRecuento = d.practitionersRepo.findVisibleProfileIds.mock.calls[0][1];
+      const delListado = d.practitionersRepo.listPage.mock.calls[0][1].verificationStatusConceptId;
+      expect(delRecuento).toBeUndefined();
+      expect(delRecuento).toBe(delListado);
+    });
+  });
+
   describe('listPractitioners (guía de profesionales, R2-1)', () => {
     const fila = {
       profileId: 'per-1',
@@ -1251,17 +1319,40 @@ describe('ProfilesPractitionersService', () => {
     });
 
     /**
-     * Corrección #12/#13: fuera del bypass, la guía solo lista verificados.
+     * Revierte la #12/#13. Un perfil nace pendiente por diseño y verificarlo
+     * exige que una autoridad valide la matrícula: filtrar dejaba la guía vacía
+     * fuera de DEV —835 de 836 pendientes— y sostenida por un bypass. Un padrón
+     * publica a quien existe; el sello distingue a quien probó lo que declara.
      */
-    it('con el bypass apagado filtra por verificado', async () => {
+    it('NO filtra por verificación: la guía lista el padrón entero', async () => {
       const d = build();
       d.practitionersRepo.listPage.mockResolvedValue([fila]);
 
       await d.service.listPractitioners({ limit: 50 });
 
-      expect(d.practitionersRepo.listPage.mock.calls[0][1]).toMatchObject({
-        verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
-      });
+      expect(
+        d.practitionersRepo.listPage.mock.calls[0][1].verificationStatusConceptId,
+      ).toBeUndefined();
+    });
+
+    it('cada fila dice si está verificada, para que la tarjeta lo muestre', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([
+        fila,
+        { ...fila, profileId: 'per-2', practitionerCode: 'MED-2', verificationStatusConceptId: 'otro' },
+      ]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([
+          ['per-1', { id: 'per-1', displayName: 'Dra. Verificada' }],
+          ['per-2', { id: 'per-2', displayName: 'Dr. Pendiente' }],
+        ]),
+      );
+
+      const pagina = await d.service.listPractitioners({ limit: 50 });
+
+      // El front no compara conceptos: el uuid del estado no viaja escrito en
+      // ningún cliente.
+      expect(pagina.items.map((i) => i.verified)).toEqual([true, false]);
     });
 
     it('con el bypass activo no filtra por verificación', async () => {

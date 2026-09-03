@@ -67,6 +67,7 @@ import {
   PractitionerActivityDto,
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
+  ListSpecialtyCountsResponseDto,
   SetPractitionerPhotoDto,
   AddOwnCredentialDto,
   OwnCredentialResponseDto,
@@ -348,21 +349,85 @@ export class ProfilesPractitionersService {
    * especialidad considera únicamente las vigentes: presentar a alguien por
    * una especialidad que dejó de ejercer es decir algo falso.
    *
-   * ## Filtro de verificación (corrección #12/#13)
+   * ## La verificación se MUESTRA, no excluye (revierte la #12/#13)
    *
-   * Fuera del bypass DEV/TEST, la guía solo lista profesionales con
-   * `verificationStatusConceptId = PRACT_VERIF_VERIFIED`: presentar a un
-   * paciente un profesional no verificado como si fuera elegible sería el
-   * mismo tipo de dato falso que una especialidad ya abandonada. Con el
-   * bypass activo (`VerificationBypassService.isActive()`), el filtro se
-   * suprime — los sembrados/registrados sin verificar deben poder probarse
-   * de punta a punta en DEV/TEST — pero el estado sigue viajando en cada
-   * fila (`verificationStatusConceptId`) como badge informativo, nunca como
-   * criterio de exclusión adicional.
+   * La guía filtraba por `PRACT_VERIF_VERIFIED` para no presentar como
+   * elegible a quien no probó su matrícula. El argumento seguía en pie; el
+   * problema fue el efecto: un perfil nace `PRACT_VERIF_PENDING` por diseño
+   * —«registrarse es declarar una matrícula, no probarla»— y verificarlo exige
+   * que una autoridad valide la licencia. Con el padrón cargado, eso dejaba la
+   * guía **vacía** fuera de DEV: 835 de 836 profesionales pendientes, y la
+   * pantalla entera sostenida por `DEV_VERIFICATION_BYPASS`. Una guía que sólo
+   * existe en desarrollo no es una guía.
+   *
+   * Un padrón publica a quien existe; el sello distingue a quien además probó
+   * su matrícula. Por eso cada fila viaja con `verified`, que es lo que la
+   * tarjeta dibuja — exactamente el «badge informativo» que la nota anterior
+   * ya proponía—. Excluir y no decirlo era la peor de las dos: el paciente no
+   * veía la diferencia porque no veía a nadie.
    *
    * @param options - Filtro por especialidad, cursor y tope de página.
    * @returns Página de la guía con el cursor de la siguiente.
    */
+  /**
+   * Cuántos profesionales visibles ejerce cada especialidad (portada de la guía).
+   *
+   * Se apoya en los MISMOS dos filtros que {@link listPractitioners} —perfil
+   * verificado, salvo bypass; especialidad vigente— y por eso el número de una
+   * tarjeta es exactamente el largo de la lista que abre. Cualquier atajo que
+   * los separe reintroduce el defecto de contar una cosa y mostrar otra.
+   *
+   * El cruce se hace en memoria y no en SQL a propósito: ningún repositorio del
+   * proyecto usa agregaciones, y las dos lecturas que esto reemplaza son
+   * **menos** trabajo que lo que hacía el front —paginar la guía entera sólo
+   * para contar—.
+   *
+   * @returns Una fila por especialidad con gente, más el total sin repetir.
+   */
+  async countPractitionersBySpecialty(): Promise<ListSpecialtyCountsResponseDto> {
+    const em = this.em.fork();
+
+    // Mismo criterio que el listado —y esto es lo que sostiene el contrato de
+    // que la tarjeta y la lista digan el mismo número—: sin filtro.
+    const verificationStatusConceptId = undefined;
+
+    const [visibleIds, pairs] = await Promise.all([
+      this.practitionersRepo.findVisibleProfileIds(
+        em,
+        verificationStatusConceptId,
+      ),
+      this.specialtiesRepo.findCurrentSpecialtyPairs(em),
+    ]);
+
+    const visibles = new Set(visibleIds);
+    // Por especialidad, los profesionales SIN repetir: una fila por cada
+    // vigencia haría contar dos veces a quien la recertificó.
+    const porEspecialidad = new Map<string, Set<string>>();
+    for (const par of pairs) {
+      if (!visibles.has(par.practitionerProfileId)) continue;
+      const gente =
+        porEspecialidad.get(par.specialtyConceptId) ?? new Set<string>();
+      gente.add(par.practitionerProfileId);
+      porEspecialidad.set(par.specialtyConceptId, gente);
+    }
+
+    const items = [...porEspecialidad.entries()]
+      .map(([specialtyConceptId, gente]) => ({
+        specialtyConceptId,
+        practitionerCount: gente.size,
+      }))
+      // De mayor a menor, y a igualdad por concepto para que el orden sea
+      // estable entre llamadas: quien dibuja decide cómo mostrarlo, pero no
+      // debería ver bailar las tarjetas.
+      .sort(
+        (a, b) =>
+          b.practitionerCount - a.practitionerCount ||
+          a.specialtyConceptId.localeCompare(b.specialtyConceptId),
+      );
+
+    return { items, practitionerTotal: visibles.size };
+  }
+
   async listPractitioners(options: {
     /** Sólo perfiles que ejercen esta especialidad hoy. */
     specialtyConceptId?: string;
@@ -394,9 +459,9 @@ export class ProfilesPractitionersService {
       }
     }
 
-    const verificationStatusConceptId = this.verificationBypass.isActive()
-      ? undefined
-      : PROF.PRACT_VERIF_VERIFIED;
+    // Sin filtro de verificación: la guía lista el padrón entero y cada fila
+    // dice si está verificada. Ver el JSDoc del método.
+    const verificationStatusConceptId = undefined;
 
     // Una fila de más para saber si hay página siguiente sin pagar un COUNT
     // sobre toda la tabla en cada página.
@@ -443,6 +508,10 @@ export class ProfilesPractitionersService {
         professionalTitle: row.professionalTitle,
         photoFileId: row.photoFileId,
         verificationStatusConceptId: row.verificationStatusConceptId,
+        // Resuelto acá y no en el front: comparar contra el uuid del concepto
+        // exigiría llevarlo escrito en el cliente, que es el literal mágico
+        // que este proyecto prohíbe.
+        verified: row.verificationStatusConceptId === PROF.PRACT_VERIF_VERIFIED,
         acceptsNewPatients: row.acceptsNewPatients ?? false,
         telehealthAvailable: row.telehealthAvailable ?? false,
         specialties: specialtiesByProfile.get(row.profileId) ?? [],
