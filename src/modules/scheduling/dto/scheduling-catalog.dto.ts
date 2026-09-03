@@ -1045,3 +1045,57 @@ export class CloseSlotsResponseDto {
   @ApiProperty({ format: 'date-time' })
   to!: string;
 }
+
+/* -- Editar un bloqueo (carril 11, P-11-3) ---------------------------------- */
+
+/**
+ * Cuerpo de `PATCH /scheduling/exceptions/{id}`.
+ *
+ * Todo opcional: editar un bloqueo suele ser corregir **una** cosa —la hora de
+ * fin, el motivo— y obligar a reenviar el resto haría que un cliente
+ * desactualizado pise campos que nadie quiso tocar.
+ */
+export class UpdateExceptionDto {
+  @ApiPropertyOptional({ enum: EXCEPTION_TYPES })
+  @IsOptional()
+  @IsIn(EXCEPTION_TYPES)
+  exceptionType?: ExceptionType;
+
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  startAt?: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  endAt?: string;
+}
+
+/** Lo que responde editar un bloqueo. */
+export class UpdateExceptionResponseDto {
+  /** El MISMO id que antes: editar no borra y recrea. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  startAt!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  endAt!: string;
+
+  /**
+   * Cupos que se cerraron porque el rango creció.
+   *
+   * Achicar el rango **no reabre ninguno**, y por eso no hay campo para eso:
+   * en este módulo los cupos sólo los crea publicar el horario.
+   */
+  @ApiProperty()
+  blockedSlots!: number;
+}

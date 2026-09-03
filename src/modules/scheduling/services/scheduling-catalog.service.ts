@@ -34,6 +34,8 @@ import {
   ACTIVITY_TYPES,
   type ShiftSlotsDto,
   type CloseSlotsDto,
+  type UpdateExceptionDto,
+  type UpdateExceptionResponseDto,
   type CloseSlotsResponseDto,
   type ShiftSlotsResponseDto,
   type ActivityType,
@@ -1517,6 +1519,132 @@ export class SchedulingCatalogService {
    * @param exceptionId - La excepción a eliminar.
    * @param actor - Quien la elimina; tiene que poder operar el recurso.
    */
+  /**
+   * Edita un bloqueo sin borrarlo — AC-11-7, y resuelve la P-11-3.
+   *
+   * ## La pregunta abierta, y por qué se responde así
+   *
+   * La P-11-3 preguntaba qué hace editar con los cupos: *«achicar el rango
+   * debería reabrir los que ya no están cubiertos; agrandarlo debería cerrar
+   * los nuevos. Pero borrar no reabre nada por decisión documentada, y hacer
+   * que editar sí reabra crea dos semánticas distintas para la misma tabla»*.
+   *
+   * **Agrandar cierra. Achicar NO reabre.** Y no es una simetría rota por
+   * comodidad: es que las dos direcciones no tienen la misma consecuencia.
+   *
+   * - Cerrar de más **ofrece menos turnos**, y el profesional lo pidió al
+   *   agrandar el bloqueo. Nada aparece que nadie haya decidido.
+   * - Reabrir **ofrece turnos que nadie decidió ofrecer**. Un cupo pudo
+   *   cerrarse por más de un motivo, y devolverlo en silencio pone en la agenda
+   *   un rato que el profesional creía cerrado.
+   *
+   * Con esto el módulo queda con **una sola regla, y es fácil de decir**: los
+   * cupos sólo los crea publicar el horario. Ni borrar un bloqueo, ni achicarlo,
+   * ni reactivar una plantilla reponen nada — las tres lo dicen con esas
+   * palabras en su respuesta o en su pantalla.
+   *
+   * ## Todo opcional
+   *
+   * Editar un bloqueo suele ser corregir **una** cosa. Obligar a reenviar el
+   * resto haría que un cliente desactualizado pise campos que nadie quiso
+   * tocar.
+   */
+  async updateException(
+    exceptionId: string,
+    dto: UpdateExceptionDto,
+    actor: AuthenticatedUser,
+  ): Promise<UpdateExceptionResponseDto> {
+    return this.em.transactional(async (tx) => {
+      const exception = await this.catalogRepo.findExceptionById(
+        tx,
+        exceptionId,
+      );
+      if (!exception) {
+        throw new ResourceNotFoundException('Excepción no encontrada', {
+          exceptionId,
+        });
+      }
+      const resource = await this.catalogRepo.findResourceById(
+        tx,
+        exception.resourceId,
+      );
+      if (resource) this.assertRecursoDelActor(resource, actor);
+
+      const startAt =
+        dto.startAt === undefined ? exception.startAt : new Date(dto.startAt);
+      const endAt =
+        dto.endAt === undefined ? exception.endAt : new Date(dto.endAt);
+      if (endAt !== undefined && endAt !== null && startAt >= endAt) {
+        throw new PreconditionFailedException(
+          'El bloqueo termina antes de empezar',
+          { startAt: startAt.toISOString(), endAt: endAt.toISOString() },
+        );
+      }
+
+      // «Otro» sigue exigiendo explicación, y se mira el motivo QUE VA A
+      // QUEDAR: cambiar el tipo a «Otro» sin tocar el texto dejaría un bloqueo
+      // sin explicar por la puerta de atrás.
+      const tipoFinal = dto.exceptionType;
+      const textoFinal = dto.reason ?? exception.reason;
+      if (
+        tipoFinal === MOTIVO_QUE_EXIGE_TEXTO &&
+        (textoFinal === undefined || textoFinal.trim() === '')
+      ) {
+        throw new PreconditionFailedException(
+          'Elegiste «Otro» como motivo: escribí cuál es',
+          { exceptionType: tipoFinal },
+        );
+      }
+
+      const creció =
+        startAt < exception.startAt ||
+        (endAt !== undefined &&
+          endAt !== null &&
+          exception.endAt !== undefined &&
+          exception.endAt !== null &&
+          endAt > exception.endAt);
+
+      if (tipoFinal !== undefined) {
+        exception.exceptionTypeConceptId = EXCEPTION_TYPE_CONCEPT[tipoFinal];
+      }
+      if (dto.reason !== undefined) exception.reason = dto.reason;
+      exception.startAt = startAt;
+      if (endAt !== undefined && endAt !== null) exception.endAt = endAt;
+      touch(exception, actor.id);
+
+      let blockedSlots = 0;
+      if (creció && exception.isAvailable !== true) {
+        const alcanzados = await this.catalogRepo.findOpenSlotsInWindow(
+          tx,
+          exception.resourceId,
+          startAt,
+          endAt ?? startAt,
+        );
+        for (const slot of alcanzados) {
+          const intacto = slot.remainingCapacity === slot.capacity;
+          if (slot.statusConceptId === CONCEPTS.SLOT_OPEN && intacto) {
+            slot.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+            touch(slot, actor.id);
+            blockedSlots += 1;
+          }
+        }
+      }
+
+      this.logger.info(
+        { operation: 'scheduling.exception.update', exceptionId, blockedSlots },
+        'Updating availability exception',
+      );
+
+      return {
+        // El MISMO id: editar no borra y recrea, que es lo que pide AC-11-7.
+        id: exception.id,
+        startAt: startAt.toISOString(),
+        endAt: (endAt ?? startAt).toISOString(),
+        blockedSlots,
+      };
+    });
+  }
+
   async removeException(
     exceptionId: string,
     actor: AuthenticatedUser,

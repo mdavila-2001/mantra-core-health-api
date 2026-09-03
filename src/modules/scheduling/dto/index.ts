@@ -23,6 +23,8 @@ export {
   ACTIVITY_TYPES,
   ShiftSlotsDto,
   CloseSlotsDto,
+  UpdateExceptionDto,
+  UpdateExceptionResponseDto,
   CloseSlotsResponseDto,
   ShiftSlotsResponseDto,
   MIN_SHIFT_MINUTES,
