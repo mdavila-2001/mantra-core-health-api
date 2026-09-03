@@ -175,7 +175,11 @@ export class ClinicalReadService {
 
     if (
       perfilProfesional &&
-      (await this.atiendeHoy(em, perfilProfesional.profileId, patientProfileId))
+      (await this.estaAtendiendo(
+        em,
+        perfilProfesional.profileId,
+        patientProfileId,
+      ))
     ) {
       return;
     }
@@ -183,6 +187,58 @@ export class ClinicalReadService {
     // Sin turno hoy no alcanza el rol; queda la titularidad, que además cubre al
     // profesional que lee su propia historia.
     await this.assertOwnRecord(patientProfileId, actor, link);
+  }
+
+  /**
+   * ¿Está este profesional atendiendo a esta persona?
+   *
+   * Dos caminos, y el orden importa porque el barato va primero:
+   *
+   * 1. **Hay una consulta en curso.** Sin mirar el calendario. Que el
+   *    profesional haya apretado «Iniciar consulta» es la afirmación más fuerte
+   *    que el sistema tiene de que está atendiendo a esa persona **ahora**; la
+   *    fecha del cupo sólo dice cuándo se pensaba que iba a atenderla.
+   * 2. **Hay una reserva viva que cae hoy**, que es la regla de siempre.
+   *
+   * ## Por qué se agregó el primero
+   *
+   * Porque las dos reglas del producto se contradecían, y se midió en un
+   * recorrido real. La agenda deja **empezar una cita confirmada cuando el
+   * profesional decide, no cuando el reloj lo permite** —corrección #15, pedido
+   * explícito del propietario, con casos reales detrás: la teleconsulta, el
+   * consultorio de una sola persona, el paciente que llegó antes—. Y el
+   * expediente exigía que el cupo fuera de hoy. El resultado era que se podía
+   * iniciar la consulta y no leer la historia de quien estaba enfrente.
+   *
+   * ## Qué ensancha, dicho sin adornos
+   *
+   * Un profesional con una cita **de otro día** puede iniciarla y leer el
+   * expediente ese día. Se aceptó con tres razones: la cita con ese paciente
+   * sigue siendo el filtro —nadie llega a alguien con quien no tiene turno—;
+   * iniciar **deja rastro firmado** en el historial de la reserva, con quién y
+   * cuándo, cosa que una lectura no deja; y ya había una puerta igual de ancha
+   * en el otro eje, porque una cita `COMPLETED` de hace meses habilita el
+   * expediente el día en que ocurrió.
+   *
+   * La alternativa era la contraria —prohibir iniciar una cita que no sea de
+   * hoy—, y se descartó porque deshacía la corrección #15.
+   */
+  private async estaAtendiendo(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    if (
+      await this.bookingsRepo.tieneConsultaEnCurso(
+        em,
+        practitionerProfileId,
+        patientProfileId,
+        SCHED.BOOKING_IN_PROGRESS,
+      )
+    ) {
+      return true;
+    }
+    return this.atiendeHoy(em, practitionerProfileId, patientProfileId);
   }
 
   /**
