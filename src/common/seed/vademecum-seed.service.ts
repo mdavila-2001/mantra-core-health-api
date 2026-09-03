@@ -45,6 +45,21 @@ import vademecumDataset from './data/vademecum/vademecum.dataset.json';
  * > No es un vademécum clínico: son 17 medicamentos tipeados a mano para poder
  * > ejercitar la receta en desarrollo. La carga real es de datos —una versión
  * > nueva del code system— y no de código.
+ *
+ * ## B-13 — sin contenido clínico ni fuentes que no lo respaldan
+ *
+ * Hasta el 2026-09-02 el dataset citaba RxNorm, SNOMED CT y WHO ATC/DDD como
+ * fuentes de `contraindications`/`indications`/`adverse_effects`/`monitoring`
+ * —155 propiedades, 68 de ellas clínicas—, pero ninguna de esas tres nomen-
+ * claturas publica ese contenido: son códigos, no dosis ni contraindicaciones.
+ * Peor que el dato sin fuente: uno **con una fuente que no lo respalda**. Se
+ * retiraron las 68 filas clínicas y los 18 códigos externos (`rxnorm_cui`,
+ * `snomed_code`) que citaban esas fuentes, y `sources` quedó con una única
+ * entrada honesta (`MANTRA_DEV_VADEMECUM`) que dice lo que el dataset es: 17
+ * medicamentos de desarrollo, sin fuente autoritativa. La receta no se entera
+ * — sólo lee `dose_forms`/`strengths` (`medication-block.ts`). Las 5
+ * interacciones (`clinical_ext.drug_interactions`) no se tocan: las consume
+ * CDS y su fuente es una decisión de producto aparte (P-25-1).
  */
 @Injectable()
 export class VademecumSeedService {
@@ -65,14 +80,37 @@ export class VademecumSeedService {
    * Ejecuta el seed. Público para que las pruebas de integración lo invoquen
    * tras materializar el esquema.
    *
+   * Se niega en producción salvo permiso explícito (mismo patrón que
+   * {@link ProviderAccountsSeedService.run}): el dataset es contenido de
+   * desarrollo sin fuente autoritativa (B-13), y una imagen que arranca con
+   * `NODE_ENV=production` no debería poblarlo sin que alguien lo pida a
+   * propósito. También cubre `POST /content-packs/VADEMECUM/apply`, que llama
+   * a este mismo método.
+   *
+   * @param nodeEnv - Entorno, para negarse en producción.
+   * @param allowProduction - Permiso explícito para sembrar en producción.
    * @returns Cuántas filas se insertaron en esta pasada.
    */
-  async run(): Promise<{
+  async run(
+    nodeEnv = process.env.NODE_ENV,
+    allowProduction = process.env.SEED_VADEMECUM_ALLOW_PRODUCTION === 'true',
+  ): Promise<{
     /**
-     * Filas efectivamente insertadas; 0 si el catálogo ya estaba completo.
+     * Filas efectivamente insertadas; 0 si el catálogo ya estaba completo o si
+     * se saltó por `skipped`.
      */
     inserted: number;
+    /** Motivo por el que no se hizo nada, si se saltó. */
+    skipped?: 'production-not-allowed';
   }> {
+    if (nodeEnv === 'production' && !allowProduction) {
+      this.logger.warn(
+        { operation: 'seed.vademecum' },
+        'Vademécum de desarrollo omitido en producción: hace falta SEED_VADEMECUM_ALLOW_PRODUCTION=true',
+      );
+      return { inserted: 0, skipped: 'production-not-allowed' };
+    }
+
     const em = this.orm.em.fork();
     const now = new Date();
     let inserted = 0;
