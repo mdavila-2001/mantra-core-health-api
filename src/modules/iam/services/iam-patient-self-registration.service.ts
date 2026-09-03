@@ -391,6 +391,7 @@ export class IamPatientSelfRegistrationService {
           patientProfileId: patient.profileId,
           name: dto.guardianName,
           phone: dto.guardianPhone,
+          relationshipConceptId: dto.guardianRelationshipConceptId,
           actorUserId: user.id,
         },
       );

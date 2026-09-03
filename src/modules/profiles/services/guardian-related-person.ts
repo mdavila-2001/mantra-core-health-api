@@ -17,6 +17,13 @@ export interface GuardianData {
   readonly name?: string;
   /** Teléfono del tutor; opcional incluso habiendo nombre. */
   readonly phone?: string;
+  /**
+   * Parentesco declarado, como concepto de `related-person-relationship`.
+   *
+   * Opcional: sin él se escribe `RELATIONSHIP_GUARDIAN`, que es lo que se
+   * escribía siempre. Ver {@link createGuardianRelatedPerson}.
+   */
+  readonly relationshipConceptId?: string;
   /** Quién escribe las filas, para la auditoría. */
   readonly actorUserId: string;
 }
@@ -38,6 +45,18 @@ export interface GuardianData {
  * contacto de emergencia —que es lo que el dato realmente es hoy— y la tutela
  * la declara después quien pueda respaldarla.
  *
+ * Vale igual para el parentesco declarado: elegir «Madre» en el alta describe
+ * quién es esa persona, no le otorga la representación legal del paciente.
+ *
+ * ## Por qué el parentesco por defecto sigue siendo el tutor
+ *
+ * Porque es lo que esta función escribía antes de que el campo existiera, y el
+ * conjunto no tenía otro miembro. Dejarlo como valor por defecto es lo que hace
+ * que un cliente que no declare parentesco —el móvil, o un integrador— siga
+ * produciendo exactamente la misma fila. La alternativa sería un
+ * `RELATIONSHIP_OTHER` por omisión, que cambiaría el significado de las filas ya
+ * escritas sin que nadie lo hubiera pedido.
+ *
  * ## Por qué el teléfono cuelga de `OWNER_PERSON`
  *
  * `common.contact_points` identifica a su dueño con un par
@@ -48,7 +67,8 @@ export interface GuardianData {
  *
  * @param repos - Repositorios de personas, personas relacionadas y contactos.
  * @param tx - Contexto transaccional del alta.
- * @param data - Perfil del paciente, nombre y teléfono del tutor, y actor.
+ * @param data - Perfil del paciente, nombre, teléfono y parentesco del tutor, y
+ *   actor.
  * @returns `true` si registró al tutor.
  * @throws BadRequestException si llega un teléfono sin nombre: sería un contacto
  *   sin dueño, imposible de mostrar y de corregir.
@@ -84,7 +104,8 @@ export async function createGuardianRelatedPerson(
   repos.relatedPersons.create(tx, {
     patientProfileId: data.patientProfileId,
     personId: guardian.id,
-    relationshipConceptId: PROF.RELATIONSHIP_GUARDIAN,
+    relationshipConceptId:
+      data.relationshipConceptId ?? PROF.RELATIONSHIP_GUARDIAN,
     isEmergencyContact: true,
     isLegalGuardian: false,
     statusConceptId: PROF.RELATED_ACTIVE,

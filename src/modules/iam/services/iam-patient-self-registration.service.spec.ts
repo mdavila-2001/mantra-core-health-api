@@ -342,6 +342,51 @@ describe('IamPatientSelfRegistrationService', () => {
       );
     });
 
+    /**
+     * El parentesco declarado manda sobre el valor por defecto.
+     *
+     * Es la mitad que faltaba del contacto de emergencia: la columna y el
+     * conjunto de valores existían, pero el alta escribía siempre «tutor o
+     * representante legal», así que toda persona de contacto quedaba anotada
+     * como representante legal de alguien.
+     */
+    it('writes the declared relationship instead of the guardian default', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        guardianName: 'Rosa Quispe',
+        guardianRelationshipConceptId: PROF.RELATIONSHIP_MOTHER,
+      });
+
+      expect(d.relatedPersonsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          relationshipConceptId: PROF.RELATIONSHIP_MOTHER,
+          // Declarar el parentesco describe quién es esa persona; no le otorga
+          // la representación legal del paciente, que nadie verificó.
+          isLegalGuardian: false,
+        }),
+      );
+    });
+
+    /**
+     * Un parentesco sin contacto no escribe nada.
+     *
+     * El campo viaja aparte del nombre, así que un cliente puede mandarlo solo.
+     * La regla no cambia: sin nombre no hay persona relacionada que crear.
+     */
+    it('ignores a declared relationship when no guardian was given', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        guardianRelationshipConceptId: PROF.RELATIONSHIP_MOTHER,
+      });
+
+      expect(d.relatedPersonsRepo.create).not.toHaveBeenCalled();
+    });
+
     it('rejects a guardian phone with no guardian name', async () => {
       const d = build();
 
