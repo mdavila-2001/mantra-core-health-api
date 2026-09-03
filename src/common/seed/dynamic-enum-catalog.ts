@@ -232,7 +232,21 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'related-person-relationship',
     name: 'Parentesco de la persona relacionada',
     description: 'Relación de la persona de contacto con el paciente.',
-    concepts: [PROF.RELATIONSHIP_GUARDIAN],
+    // El orden es el que se ofrece en pantalla, y va de lo más frecuente a lo
+    // más general: la familia directa primero, la salida del catálogo al final.
+    // `RELATIONSHIP_GUARDIAN` encabeza porque es el valor que el alta escribe
+    // cuando no se declara parentesco, y el único que existía hasta ahora.
+    concepts: [
+      PROF.RELATIONSHIP_GUARDIAN,
+      PROF.RELATIONSHIP_MOTHER,
+      PROF.RELATIONSHIP_FATHER,
+      PROF.RELATIONSHIP_SPOUSE,
+      PROF.RELATIONSHIP_CHILD,
+      PROF.RELATIONSHIP_SIBLING,
+      PROF.RELATIONSHIP_OTHER_RELATIVE,
+      PROF.RELATIONSHIP_FRIEND,
+      PROF.RELATIONSHIP_OTHER,
+    ],
     targets: ['profiles.related_persons.relationship_concept_id'],
   },
   {
