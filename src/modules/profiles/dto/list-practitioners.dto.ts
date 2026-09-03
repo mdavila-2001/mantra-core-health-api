@@ -67,6 +67,17 @@ export class PractitionerListItemDto {
   verificationStatusConceptId!: string;
 
   /**
+   * Si su matrícula fue verificada por la plataforma.
+   *
+   * Se resuelve en el servidor y no comparando el concepto en el cliente: el
+   * uuid del estado no debe viajar escrito en ningún front. Es lo que la guía
+   * dibuja como sello — la guía lista el padrón entero, y esto distingue a
+   * quien además probó lo que declara.
+   */
+  @ApiProperty({ description: 'Si la matrícula fue verificada' })
+  verified!: boolean;
+
+  /**
    * Si declara tomar pacientes nuevos.
    */
   @ApiProperty()

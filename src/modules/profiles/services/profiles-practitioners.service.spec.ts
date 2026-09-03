@@ -1217,20 +1217,23 @@ describe('ProfilesPractitionersService', () => {
 
     /**
      * La razón de ser del endpoint: que el número de la tarjeta sea el largo de
-     * la lista que abre. Si un día se optimiza contando por otro camino, esta
-     * prueba es la que lo impide.
+     * la lista que abre. El criterio de visibilidad tiene que ser el MISMO en
+     * los dos —hoy, ninguno—; si un día vuelve a haber filtro y sólo se pone en
+     * uno, esta prueba es la que lo atrapa.
      */
-    it('exige el mismo estado de verificación que el listado', async () => {
+    it('usa el mismo criterio de visibilidad que el listado: sin filtro', async () => {
       const d = build();
       d.practitionersRepo.findVisibleProfileIds.mockResolvedValue([]);
       d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([]);
+      d.practitionersRepo.listPage.mockResolvedValue([]);
 
       await d.service.countPractitionersBySpecialty();
+      await d.service.listPractitioners({ limit: 50 });
 
-      expect(d.practitionersRepo.findVisibleProfileIds).toHaveBeenCalledWith(
-        expect.anything(),
-        PROF.PRACT_VERIF_VERIFIED,
-      );
+      const delRecuento = d.practitionersRepo.findVisibleProfileIds.mock.calls[0][1];
+      const delListado = d.practitionersRepo.listPage.mock.calls[0][1].verificationStatusConceptId;
+      expect(delRecuento).toBeUndefined();
+      expect(delRecuento).toBe(delListado);
     });
   });
 
@@ -1316,17 +1319,40 @@ describe('ProfilesPractitionersService', () => {
     });
 
     /**
-     * Corrección #12/#13: fuera del bypass, la guía solo lista verificados.
+     * Revierte la #12/#13. Un perfil nace pendiente por diseño y verificarlo
+     * exige que una autoridad valide la matrícula: filtrar dejaba la guía vacía
+     * fuera de DEV —835 de 836 pendientes— y sostenida por un bypass. Un padrón
+     * publica a quien existe; el sello distingue a quien probó lo que declara.
      */
-    it('con el bypass apagado filtra por verificado', async () => {
+    it('NO filtra por verificación: la guía lista el padrón entero', async () => {
       const d = build();
       d.practitionersRepo.listPage.mockResolvedValue([fila]);
 
       await d.service.listPractitioners({ limit: 50 });
 
-      expect(d.practitionersRepo.listPage.mock.calls[0][1]).toMatchObject({
-        verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
-      });
+      expect(
+        d.practitionersRepo.listPage.mock.calls[0][1].verificationStatusConceptId,
+      ).toBeUndefined();
+    });
+
+    it('cada fila dice si está verificada, para que la tarjeta lo muestre', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([
+        fila,
+        { ...fila, profileId: 'per-2', practitionerCode: 'MED-2', verificationStatusConceptId: 'otro' },
+      ]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([
+          ['per-1', { id: 'per-1', displayName: 'Dra. Verificada' }],
+          ['per-2', { id: 'per-2', displayName: 'Dr. Pendiente' }],
+        ]),
+      );
+
+      const pagina = await d.service.listPractitioners({ limit: 50 });
+
+      // El front no compara conceptos: el uuid del estado no viaja escrito en
+      // ningún cliente.
+      expect(pagina.items.map((i) => i.verified)).toEqual([true, false]);
     });
 
     it('con el bypass activo no filtra por verificación', async () => {
