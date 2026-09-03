@@ -292,7 +292,9 @@ export class GeneralLedgerEntryItemDto {
   @ApiProperty({ description: 'Importe al haber, decimal como texto' })
   credit!: string;
   /** Saldo acumulado **con signo por naturaleza** hasta esta fila, inclusive. */
-  @ApiProperty({ description: 'Saldo corrido según la naturaleza de la cuenta' })
+  @ApiProperty({
+    description: 'Saldo corrido según la naturaleza de la cuenta',
+  })
   runningBalance!: string;
   @ApiPropertyOptional({ nullable: true }) memo!: string | null;
 }
@@ -393,7 +395,9 @@ export class IncomeStatementResponseDto {
   @ApiProperty() count!: number;
   @ApiProperty() limit!: number;
   @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
-  @ApiProperty({ description: 'Si se alcanzó el tope y el informe está incompleto' })
+  @ApiProperty({
+    description: 'Si se alcanzó el tope y el informe está incompleto',
+  })
   truncated!: boolean;
 }
 
@@ -430,6 +434,8 @@ export class BalanceSheetResponseDto {
   @ApiProperty() count!: number;
   @ApiProperty() limit!: number;
   @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
-  @ApiProperty({ description: 'Si se alcanzó el tope y el informe está incompleto' })
+  @ApiProperty({
+    description: 'Si se alcanzó el tope y el informe está incompleto',
+  })
   truncated!: boolean;
 }

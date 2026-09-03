@@ -418,9 +418,12 @@ export class LedgerReadService {
 
     const cuenta = await this.accountsRepo.findById(em, query.accountId);
     if (!cuenta || cuenta.practiceId !== query.practiceId) {
-      throw new ResourceNotFoundException('Cuenta no encontrada en la práctica', {
-        accountId: query.accountId,
-      });
+      throw new ResourceNotFoundException(
+        'Cuenta no encontrada en la práctica',
+        {
+          accountId: query.accountId,
+        },
+      );
     }
     const deudora = cuenta.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
 
@@ -461,7 +464,8 @@ export class LedgerReadService {
       // Cronológico, ascendente: es como se lee un mayor. `id` desempata
       // dentro del mismo instante para que el orden sea estable entre páginas.
       .sort((a, b) => {
-        const porFecha = a.transactionDate.getTime() - b.transactionDate.getTime();
+        const porFecha =
+          a.transactionDate.getTime() - b.transactionDate.getTime();
         return porFecha !== 0 ? porFecha : a.id.localeCompare(b.id);
       });
 
@@ -494,11 +498,17 @@ export class LedgerReadService {
         ? 0
         : conSaldo.findIndex((l) => {
             const cmp = l.transactionDate.getTime() - afterFecha;
-            return cmp > 0 || (cmp === 0 && afterId !== undefined && l.id.localeCompare(afterId) > 0);
+            return (
+              cmp > 0 ||
+              (cmp === 0 &&
+                afterId !== undefined &&
+                l.id.localeCompare(afterId) > 0)
+            );
           });
     const desde = inicio === -1 ? conSaldo.length : inicio;
 
-    const saldoApertura = desde > 0 ? aTexto(conSaldo[desde - 1].runningBalance) : '0.00';
+    const saldoApertura =
+      desde > 0 ? aTexto(conSaldo[desde - 1].runningBalance) : '0.00';
     const pagina = conSaldo.slice(desde, desde + limit);
     const ultima = pagina.at(-1);
     const huboMas = desde + limit < conSaldo.length;
@@ -516,8 +526,10 @@ export class LedgerReadService {
         transactionNumber: numeroPorTransaccion.get(l.transactionId) ?? null,
         transactionDate: l.transactionDate,
         directionConceptId: l.directionConceptId,
-        debit: l.directionConceptId === ACCT.DIRECTION_DEBIT ? l.amount : '0.00',
-        credit: l.directionConceptId === ACCT.DIRECTION_CREDIT ? l.amount : '0.00',
+        debit:
+          l.directionConceptId === ACCT.DIRECTION_DEBIT ? l.amount : '0.00',
+        credit:
+          l.directionConceptId === ACCT.DIRECTION_CREDIT ? l.amount : '0.00',
         runningBalance: aTexto(l.runningBalance),
         memo: l.memo,
       })),
@@ -547,7 +559,9 @@ export class LedgerReadService {
     practiceId: string,
     filtros: { fiscalPeriodId?: string; from?: Date; to?: Date },
   ): Promise<{
-    items: Array<FinancialStatementLineDto & { normalBalanceConceptId: string | null }>;
+    items: Array<
+      FinancialStatementLineDto & { normalBalanceConceptId: string | null }
+    >;
     truncated: boolean;
   }> {
     const em = this.em.fork();
@@ -579,8 +593,12 @@ export class LedgerReadService {
       const importe = aCentimos(importeEnBase(linea));
       const signo =
         linea.directionConceptId === ACCT.DIRECTION_DEBIT
-          ? (deudora ? importe : -importe)
-          : (deudora ? -importe : importe);
+          ? deudora
+            ? importe
+            : -importe
+          : deudora
+            ? -importe
+            : importe;
       sumas.set(linea.accountId, (sumas.get(linea.accountId) ?? 0n) + signo);
     }
 
@@ -720,7 +738,10 @@ export class LedgerReadService {
       limit,
     );
 
-    const totalAssets = assetItems.reduce((acc, i) => acc + aCentimos(i.amount), 0n);
+    const totalAssets = assetItems.reduce(
+      (acc, i) => acc + aCentimos(i.amount),
+      0n,
+    );
     const totalLiabilities = liabilityItems.reduce(
       (acc, i) => acc + aCentimos(i.amount),
       0n,
@@ -776,15 +797,18 @@ function paginarPorCodigo<T extends { accountId: string; code: string | null }>(
   cursor: string | undefined,
   limit: number,
 ): { page: T[]; nextCursor: string | null } {
-  const ordenados = [...items].sort((a, b) =>
-    (a.code ?? '￿').localeCompare(b.code ?? '￿') || a.accountId.localeCompare(b.accountId),
+  const ordenados = [...items].sort(
+    (a, b) =>
+      (a.code ?? '￿').localeCompare(b.code ?? '￿') ||
+      a.accountId.localeCompare(b.accountId),
   );
 
   let desde = 0;
   if (cursor) {
     const after = decodeKeysetCursor(cursor);
     const afterCode = typeof after.code === 'string' ? after.code : null;
-    const afterId = typeof after.accountId === 'string' ? after.accountId : undefined;
+    const afterId =
+      typeof after.accountId === 'string' ? after.accountId : undefined;
     desde = ordenados.findIndex(
       (i) =>
         (i.code ?? '￿').localeCompare(afterCode ?? '￿') > 0 ||
@@ -803,7 +827,10 @@ function paginarPorCodigo<T extends { accountId: string; code: string | null }>(
     page,
     nextCursor:
       hayMas && ultima
-        ? encodeKeysetCursor({ code: ultima.code ?? '', accountId: ultima.accountId })
+        ? encodeKeysetCursor({
+            code: ultima.code ?? '',
+            accountId: ultima.accountId,
+          })
         : null,
   };
 }
