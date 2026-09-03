@@ -88,6 +88,9 @@ describe('IamPractitionerSelfRegistrationService', () => {
     // El repositorio de activaciones sólo se usa en el alta administrativa: en
     // el autorregistro la cuenta nace activa y no hay token que emitir.
     const activationsRepo = { create: fn() };
+    const fileUploadService = {
+      upload: fn().mockResolvedValue({ id: 'file-foto-123' }),
+    };
 
     const service = new IamPractitionerSelfRegistrationService(
       em as never,
@@ -115,6 +118,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       notificationsService as never,
       logger as never,
       new TracingService(),
+      fileUploadService as never,
     );
     return {
       service,
@@ -135,6 +139,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       tenantMembershipsRepo,
       notificationsService,
       activationsRepo,
+      fileUploadService,
     };
   }
 
@@ -581,5 +586,91 @@ describe('IamPractitionerSelfRegistrationService', () => {
     // de mensajería no puede deshacer un alta que ya es válida.
     expect(result.userId).toBe('user-1');
     expect(result.emailVerificationSent).toBe(false);
+  });
+
+  describe('foto de perfil durante el registro', () => {
+    // Cabecera JPEG válida para que sniffMimeType la reconozca como IMAGE
+    const FOTO_JPEG_B64 =
+      'data:image/jpeg;base64,' +
+      Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]).toString('base64');
+
+    it('procesa y vincula la foto de perfil en base64 cuando se envía', async () => {
+      const d = build();
+
+      const result = await d.service.registerPractitioner({
+        ...dto,
+        profilePhotoBase64: FOTO_JPEG_B64,
+      });
+
+      expect(d.fileUploadService.upload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mimetype: 'image/jpeg',
+        }),
+        {
+          category: 'IMAGE',
+          sensitivity: 'NORMAL',
+        },
+        expect.objectContaining({
+          id: 'user-1',
+          roles: ['PRACTITIONER'],
+        }),
+      );
+
+      expect(d.personsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: 'file-foto-123',
+        }),
+      );
+
+      expect(d.practitionersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: 'file-foto-123',
+        }),
+      );
+
+      expect(result.photoFileId).toBe('file-foto-123');
+    });
+
+    it('omite la subida y el identificador de foto cuando no se envía foto', async () => {
+      const d = build();
+
+      const result = await d.service.registerPractitioner(dto);
+
+      expect(d.fileUploadService.upload).not.toHaveBeenCalled();
+      expect(d.personsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: undefined,
+        }),
+      );
+      expect(d.practitionersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: undefined,
+        }),
+      );
+      expect(result.photoFileId).toBeUndefined();
+    });
+
+    it('si el servicio de subida falla, el registro concluye sin bloquear', async () => {
+      const d = build();
+      d.fileUploadService.upload.mockRejectedValue(new Error('storage full'));
+
+      const result = await d.service.registerPractitioner({
+        ...dto,
+        profilePhotoBase64: FOTO_JPEG_B64,
+      });
+
+      expect(result.userId).toBe('user-1');
+      expect(result.photoFileId).toBeUndefined();
+      expect(d.personsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: undefined,
+        }),
+      );
+    });
   });
 });

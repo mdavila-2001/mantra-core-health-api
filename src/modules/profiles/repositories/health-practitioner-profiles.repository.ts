@@ -34,6 +34,10 @@ export interface CreatePractitionerProfileData {
    */
   professionalBio?: string;
   /**
+   * Identificador de foto de perfil (FK → common.files).
+   */
+  photoFileId?: string;
+  /**
    * Valor de accepts new patients mantenido por la instancia.
    */
   acceptsNewPatients?: boolean;
@@ -133,6 +137,7 @@ export class HealthPractitionerProfilesRepository {
         practitionerCategoryConceptId: data.practitionerCategoryConceptId,
         professionalTitle: data.professionalTitle,
         professionalBio: data.professionalBio,
+        photoFileId: data.photoFileId,
         verificationStatusConceptId: data.verificationStatusConceptId,
         practiceStatusConceptId: data.practiceStatusConceptId,
         acceptsNewPatients: data.acceptsNewPatients ?? false,
