@@ -70,6 +70,7 @@ function buildCatalog() {
       live: 0,
       sample: [],
     }),
+    reactivateTemplate: mockFn(),
     retireTemplate: mockFn().mockResolvedValue({
       releasedSlots: 0,
       keptSlots: 0,
@@ -812,6 +813,93 @@ describe('SchedulingCatalogService', () => {
     /* --------------------------------------------------------------------
        TAREA-10 punto 6 · borrar un horario avisa antes de romper nada
        -------------------------------------------------------------------- */
+
+    /**
+     * REACTIVAR UN HORARIO PAUSADO — «me voy de viaje y vuelvo».
+     *
+     * Retirar era un camino de ida: volver obligaba a publicar un horario nuevo
+     * y dejar el viejo en la lista para siempre. El caso lo dijo el dueño del
+     * carril con sus palabras, y es el uso corriente de un consultorio.
+     */
+    describe('reactivateTemplate', () => {
+      function conPlantilla(
+        d: ReturnType<typeof buildCatalog>,
+        statusConceptId: string,
+      ) {
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          statusConceptId,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+      }
+
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      it('devuelve a vigente un horario retirado', async () => {
+        const d = buildCatalog();
+        conPlantilla(d, CONCEPTS.TEMPLATE_RETIRED);
+
+        const res = await d.service.reactivateTemplate(
+          'tpl-1',
+          duenio as never,
+        );
+
+        expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_PUBLISHED);
+        expect(d.catalogRepo.reactivateTemplate).toHaveBeenCalled();
+      });
+
+      it('avisa que faltan cupos: reactivar NO los regenera', async () => {
+        // Retirar borró los libres. Sin este aviso, el horario quedaría
+        // «vigente» y sin un solo turno ofrecido, y nadie sabría por qué.
+        const d = buildCatalog();
+        conPlantilla(d, CONCEPTS.TEMPLATE_RETIRED);
+
+        const res = await d.service.reactivateTemplate(
+          'tpl-1',
+          duenio as never,
+        );
+
+        expect(res.slotsPendientes).toBe(true);
+      });
+
+      it('reactivar lo que ya está vigente no rompe ni toca nada', async () => {
+        // No es un error del que haya que avisar: es que alguien tocó dos
+        // veces. Se responde lo mismo y no se escribe.
+        const d = buildCatalog();
+        conPlantilla(d, CONCEPTS.TEMPLATE_PUBLISHED);
+
+        const res = await d.service.reactivateTemplate(
+          'tpl-1',
+          duenio as never,
+        );
+
+        expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_PUBLISHED);
+        expect(res.slotsPendientes).toBe(false);
+        expect(d.catalogRepo.reactivateTemplate).not.toHaveBeenCalled();
+      });
+
+      it('no se reactiva la agenda de otro', async () => {
+        const d = buildCatalog();
+        conPlantilla(d, CONCEPTS.TEMPLATE_RETIRED);
+
+        await expect(
+          d.service.reactivateTemplate('tpl-1', {
+            ...duenio,
+            practitionerProfileId: 'hp-DE-OTRO',
+          } as never),
+        ).rejects.toBeDefined();
+      });
+    });
 
     describe('retireTemplate (TAREA-10, punto 6)', () => {
       /** Deja la plantilla y su recurso al alcance del actor. */

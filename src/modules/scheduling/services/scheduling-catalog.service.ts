@@ -21,6 +21,7 @@ import {
   CreateTemplateDto,
   AvailabilityExceptionListDto,
   RetireTemplateResponseDto,
+  ReactivateTemplateResponseDto,
   TemplateListDto,
   TemplateResponseDto,
   TemplateRuleDto,
@@ -382,6 +383,85 @@ export class SchedulingCatalogService {
    * @param actor - Quién lo pide; tiene que ser su agenda o administrarla.
    * @returns Qué se borró, con el tamaño de lo que arrastró.
    */
+  /**
+   * Vuelve a poner en vigencia un horario retirado — «pausar y volver».
+   *
+   * ## Por qué existe
+   *
+   * Retirar un horario es lo más parecido a pausarlo que el modelo permite: el
+   * borrado duro es imposible porque `audit.schedule_templates_history` guarda
+   * una fila por plantilla publicada y su FK lo impide.
+   *
+   * Pero hasta acá el camino era de ida. El caso que lo destapó lo dijo el
+   * propietario del carril con sus palabras: **«me voy de viaje, ya no atiendo,
+   * y cuando vuelvo elijo qué días atender»**. Sin reactivar, volver obligaba a
+   * publicar un horario nuevo y dejar el viejo en la lista para siempre.
+   *
+   * ## Lo que NO hace, y hay que decirlo
+   *
+   * **No regenera los cupos.** Retirar los borró —los libres; los que tenían
+   * paciente se conservaron— y volver a crearlos es `generate-slots` con la
+   * ventana que el profesional elija. Reactivar y materializar cupos del mes
+   * pasado abriría turnos en fechas que ya pasaron.
+   *
+   * Por eso la respuesta lo dice explícito en `slotsPendientes`: quien reactiva
+   * tiene que generar, y la pantalla se lo tiene que pedir.
+   */
+  async reactivateTemplate(
+    templateId: string,
+    actor: AuthenticatedUser,
+  ): Promise<ReactivateTemplateResponseDto> {
+    this.logger.info(
+      { operation: 'scheduling.template.reactivate', templateId },
+      'Reactivating schedule template',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const template = await this.catalogRepo.findTemplateById(tx, templateId);
+      if (!template) {
+        throw new ResourceNotFoundException('Plantilla no encontrada', {
+          templateId,
+        });
+      }
+
+      const resource = await this.catalogRepo.findResourceById(
+        tx,
+        template.resourceId,
+      );
+      if (!resource) {
+        throw new ResourceNotFoundException(
+          'Recurso de la plantilla no encontrado',
+          { resourceId: template.resourceId },
+        );
+      }
+      this.assertRecursoDelActor(resource, actor);
+
+      // Reactivar lo que ya está vigente no es un error del que haya que
+      // avisar: es que alguien tocó dos veces. Se responde lo mismo.
+      if (template.statusConceptId !== CONCEPTS.TEMPLATE_RETIRED) {
+        return {
+          id: templateId,
+          statusConceptId: template.statusConceptId,
+          slotsPendientes: false,
+        };
+      }
+
+      await this.catalogRepo.reactivateTemplate(
+        tx,
+        templateId,
+        CONCEPTS.TEMPLATE_PUBLISHED,
+        actor.id,
+      );
+
+      return {
+        id: templateId,
+        statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
+        // Siempre true al volver de retirado: retirar borró los cupos libres.
+        slotsPendientes: true,
+      };
+    });
+  }
+
   async retireTemplate(
     templateId: string,
     actor: AuthenticatedUser,

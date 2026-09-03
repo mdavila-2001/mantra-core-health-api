@@ -758,6 +758,31 @@ export class ExceptionResponseDto {
  * cupos que nadie tocó y **conserva** los que tienen historia. Quien lo hace
  * tiene derecho a ver esa diferencia sin ir a mirar la base.
  */
+/**
+ * Lo que responde reactivar un horario pausado.
+ *
+ * Lleva `slotsPendientes` porque **reactivar no regenera los cupos**: retirar
+ * los borró, y volver a crearlos es `generate-slots` con la ventana que el
+ * profesional elija. Sin este campo, quien reactiva vería su horario «vigente»
+ * y sin un solo turno ofrecido, y no tendría cómo saber por qué.
+ */
+export class ReactivateTemplateResponseDto {
+  /** La plantilla reactivada. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** El estado con el que queda: `TPL_PUBLISHED`. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /** Hay que generar cupos: el horario está vigente pero todavía no ofrece nada. */
+  @ApiProperty({
+    description:
+      'true cuando el horario quedó vigente sin cupos materializados y hay que generarlos',
+  })
+  slotsPendientes!: boolean;
+}
+
 export class RetireTemplateResponseDto {
   /** La plantilla retirada. */
   @ApiProperty({ format: 'uuid' })
