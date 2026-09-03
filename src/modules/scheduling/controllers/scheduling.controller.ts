@@ -47,6 +47,8 @@ import {
   ExceptionResponseDto,
   ExceptionTypeListDto,
   ActivityTypeListDto,
+  ShiftSlotsDto,
+  ShiftSlotsResponseDto,
   CreateHoldDto,
   HoldResponseDto,
   ConfirmBookingDto,
@@ -329,6 +331,33 @@ export class SchedulingController {
       new Date(to),
       actor,
     );
+  }
+
+  /**
+   * Corre los cupos de una agenda N minutos — «mover horario» del carril 12.
+   *
+   * Distinto de «avisar demora», que **sólo avisa** y deja los cupos donde
+   * estaban. Acá el turno de la persona pasa a ser otro, así que se escribe y
+   * se avisa.
+   *
+   * Todo o nada: si un cupo no puede moverse porque su horario nuevo pisa otra
+   * cita del mismo profesional, no se mueve ninguno. La colisión la rechaza la
+   * base con `ex_appointments_practitioner_time`, no este código.
+   */
+  @Post('resources/:id/shift-slots')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Correr los cupos de una agenda N minutos',
+    description:
+      'Mueve todos los cupos de la ventana, o sólo los que se nombren, y avisa a quien tenía turno. Todo o nada.',
+  })
+  shiftSlots(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ShiftSlotsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ShiftSlotsResponseDto> {
+    return this.catalogService.shiftSlots(id, dto, actor);
   }
 
   /**
