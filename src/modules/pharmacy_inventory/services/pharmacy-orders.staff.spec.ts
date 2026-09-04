@@ -730,6 +730,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       const d = build();
       const confirmado = retiroConfirmado();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(confirmado);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([linea()]);
 
       const res = await runWithTenant('tenant-a', () =>
         d.service.ready('order-1', staff),
@@ -759,6 +760,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       );
       // La lectura de staff NO revela el código: es la prueba del titular.
       expect(res.pickupCode).toBeNull();
+      expect(res.lines[0].medicationConceptId).toBe('concept-amoxi');
     });
 
     it('a re-ready keeps the already sealed code: nobody re-notifies a new one', async () => {

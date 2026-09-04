@@ -118,6 +118,12 @@ export class PharmacyOrderLineDto {
   productId!: string;
 
   /**
+   * Concepto de medicamento asociado al producto, cuando fue publicado.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  medicationConceptId!: string | null;
+
+  /**
    * Código interno del producto.
    */
   @ApiProperty()
