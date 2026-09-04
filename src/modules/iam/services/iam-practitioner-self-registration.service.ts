@@ -520,14 +520,35 @@ export class IamPractitionerSelfRegistrationService {
         stateConceptId: PROF.AUTH_PENDING,
         actorUserId: user.id,
       });
-      const credential = this.professionalCredentialsRepo.create(tx, {
-        practitionerProfileId: person.id,
-        credentialTypeConceptId:
-          dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
-        number: dto.credentialNumber,
-        stateConceptId: PROF.CRED_PENDING,
-        actorUserId: user.id,
-      });
+      // El registro del SEDES es una SEGUNDA habilitación, no un título. El
+      // SEDES autoriza a ejercer en su departamento igual que la matrícula del
+      // Ministerio autoriza en todo el país, así que va en la misma tabla y el
+      // perfil las muestra juntas. Antes entraba por `credentialNumber` y se
+      // archivaba como `CREDENTIAL_TYPE_DEGREE`: el padrón real cargaba ahí su
+      // «T.I. 538/14» y el perfil lo anunciaba como «Título universitario».
+      const sedesLicense =
+        dto.sedesLicenseNumber === undefined
+          ? undefined
+          : this.authorizationsRepo.create(tx, {
+              practitionerProfileId: person.id,
+              jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
+              licenseNumber: dto.sedesLicenseNumber,
+              stateConceptId: PROF.AUTH_PENDING,
+              actorUserId: user.id,
+            });
+      // La credencial sólo nace si se declara un título de verdad. Dejó de ser
+      // obligatoria junto con `credentialNumber`.
+      const credential =
+        dto.credentialNumber === undefined
+          ? undefined
+          : this.professionalCredentialsRepo.create(tx, {
+              practitionerProfileId: person.id,
+              credentialTypeConceptId:
+                dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
+              number: dto.credentialNumber,
+              stateConceptId: PROF.CRED_PENDING,
+              actorUserId: user.id,
+            });
       this.languagesRepo.create(tx, {
         practitionerProfileId: person.id,
         languageConceptId: dto.languageConceptId ?? PROF.LANGUAGE_SPANISH,
@@ -703,7 +724,8 @@ export class IamPractitionerSelfRegistrationService {
         practitionerProfileId: practitioner.profileId,
         practitionerCode,
         licenseId: license.id,
-        credentialId: credential.id,
+        credentialId: credential?.id,
+        sedesLicenseId: sedesLicense?.id,
         photoFileId,
         emailVerificationToken: raw,
         activacion,
@@ -734,7 +756,12 @@ export class IamPractitionerSelfRegistrationService {
       practitionerProfileId: created.practitionerProfileId,
       practitionerCode: created.practitionerCode,
       licenseId: created.licenseId,
-      credentialId: created.credentialId,
+      // Ausentes, y no `undefined` explícito, cuando el alta no los declaró:
+      // el contrato dice opcionales y la respuesta no debe inventar claves.
+      ...(created.credentialId ? { credentialId: created.credentialId } : {}),
+      ...(created.sedesLicenseId
+        ? { sedesLicenseId: created.sedesLicenseId }
+        : {}),
       verificationStatus: 'PENDING',
       emailVerificationSent,
       ...(created.photoFileId ? { photoFileId: created.photoFileId } : {}),

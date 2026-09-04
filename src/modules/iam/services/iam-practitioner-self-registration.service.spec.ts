@@ -372,6 +372,50 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
+  it('files the SEDES number as a second authorization, not as a degree', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      email: dto.email,
+      password: dto.password,
+      licenseNumber: dto.licenseNumber,
+      sedesLicenseNumber: 'T.I. 538/14',
+    });
+
+    // La habilitación departamental va a la MISMA tabla que la nacional: es lo
+    // que la pone al lado de la matrícula en el perfil.
+    expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
+        licenseNumber: 'T.I. 538/14',
+        stateConceptId: PROF.AUTH_PENDING,
+      }),
+    );
+    // Y no nace ninguna credencial: era el defecto que hacía que el padrón
+    // real mostrara «Título universitario · T.I. 538/14».
+    expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('still creates the degree credential when a real credential number is sent', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      email: dto.email,
+      password: dto.password,
+      licenseNumber: dto.licenseNumber,
+      credentialNumber: 'TIT-99310',
+    });
+
+    expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+        number: 'TIT-99310',
+      }),
+    );
+  });
+
   it('gives the account a tenant membership so it is usable beyond login', async () => {
     const d = build();
 
