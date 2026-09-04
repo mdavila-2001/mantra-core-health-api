@@ -94,6 +94,21 @@ export class PractitionerListItemDto {
    */
   @ApiProperty({ type: [PractitionerListSpecialtyDto] })
   specialties!: PractitionerListSpecialtyDto[];
+
+  /**
+   * Dónde atiende, en palabras.
+   *
+   * Texto plano y no una entidad porque eso es lo que el modelo guarda: la
+   * afiliación tiene `organization_name` —donde el padrón dejó «DIRECCIÓN –
+   * CLÍNICA» en una sola línea— y casi ninguna apunta a una sede registrada.
+   * Ordenar por cercanía o agrupar por clínica exigiría normalizar eso
+   * primero; mostrar dónde trabaja, no.
+   *
+   * Sólo las **publicables**: declaradas y aprobadas. Una pendiente diría que
+   * una organización aceptó a alguien que todavía no aceptó.
+   */
+  @ApiProperty({ type: [String], description: 'Dónde atiende, en texto' })
+  workplaces!: string[];
 }
 
 /**

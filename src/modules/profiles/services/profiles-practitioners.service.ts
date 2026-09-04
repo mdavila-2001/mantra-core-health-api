@@ -133,6 +133,20 @@ const SIN_ACTIVIDAD: PractitionerActivityDto = {
   documents: 0,
 };
 
+/**
+ * Los estados de vínculo que la guía puede mostrar.
+ *
+ * `DECLARADO` entra a propósito: los hospitales públicos y las cajas del padrón
+ * nunca van a registrarse en la plataforma, así que nadie va a aprobar a sus
+ * médicos —esperar esa aprobación los dejaría sin sede para siempre—. Lo que no
+ * entra es `PENDIENTE`: decir que alguien atiende en una organización que
+ * todavía no lo aceptó es afirmar algo que la organización no dijo (TP-2).
+ */
+const ESTADOS_PUBLICABLES = [
+  PROF.AFFILIATION_DECLARED,
+  PROF.AFFILIATION_APPROVED,
+] as const;
+
 @Injectable()
 export class ProfilesPractitionersService {
   /**
@@ -537,10 +551,32 @@ export class ProfilesPractitionersService {
     const page = hasMore ? rows.slice(0, options.limit) : rows;
 
     const pageIds = page.map((row) => row.profileId);
-    const [persons, specialties] = await Promise.all([
+    const [persons, specialties, affiliations] = await Promise.all([
       this.personsRepo.findByIds(em, pageIds),
       this.specialtiesRepo.findByPractitioners(em, pageIds),
+      // Dónde atiende cada uno. En lote y no de a uno: pedirlas por fila serían
+      // cincuenta consultas por página.
+      this.affiliationsRepo.findByPractitioners(em, pageIds, [
+        ...ESTADOS_PUBLICABLES,
+      ]),
     ]);
+
+    // Por profesional, sin repetir. El padrón trae la misma sede escrita de dos
+    // formas para el mismo médico —«CLINICA DE LAS AMERICAS» y «CLINICA
+    // METROPOLITANA DE LAS AMERICAS»—, así que esto deduplica lo idéntico y
+    // nada más: colapsar variantes exigiría normalizar los nombres, que es otro
+    // trabajo y no se hace a ciegas acá.
+    const workplacesByProfile = new Map<string, string[]>();
+    for (const afiliacion of affiliations) {
+      const nombre = afiliacion.organizationName?.trim();
+      if (!nombre) continue;
+      const lugares =
+        workplacesByProfile.get(afiliacion.practitionerProfileId) ?? [];
+      if (!lugares.includes(nombre)) {
+        lugares.push(nombre);
+      }
+      workplacesByProfile.set(afiliacion.practitionerProfileId, lugares);
+    }
 
     const specialtiesByProfile = new Map<
       string,
@@ -578,6 +614,7 @@ export class ProfilesPractitionersService {
         acceptsNewPatients: row.acceptsNewPatients ?? false,
         telehealthAvailable: row.telehealthAvailable ?? false,
         specialties: specialtiesByProfile.get(row.profileId) ?? [],
+        workplaces: workplacesByProfile.get(row.profileId) ?? [],
       };
     });
 
