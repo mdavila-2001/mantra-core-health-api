@@ -86,6 +86,7 @@ function build() {
     findByPractitionerInStatus: mockFn().mockResolvedValue([]),
     findById: mockFn().mockResolvedValue(null),
     findBySites: mockFn().mockResolvedValue([]),
+    findByPractitioners: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
   const afiliaciones = {
@@ -1171,6 +1172,57 @@ describe('ProfilesPractitionersService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
+  describe('dónde atiende cada uno, en la guía', () => {
+    const fila = {
+      profileId: 'per-1',
+      practitionerCode: 'MED-1',
+      professionalTitle: 'Cardióloga',
+      verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
+      acceptsNewPatients: true,
+      telehealthAvailable: false,
+    };
+
+    it('lista sus sedes en texto, sin repetir la misma dos veces', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([fila]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([['per-1', { id: 'per-1', displayName: 'Dra. Salas' }]]),
+      );
+      d.affiliationsRepo.findByPractitioners.mockResolvedValue([
+        { practitionerProfileId: 'per-1', organizationName: 'Clínica Foianini' },
+        { practitionerProfileId: 'per-1', organizationName: 'Hospital San Juan de Dios' },
+        // La misma, otra vez: el padrón repite la sede por cada especialidad.
+        { practitionerProfileId: 'per-1', organizationName: 'Clínica Foianini' },
+        // Sin nombre: no hay nada que mostrar.
+        { practitionerProfileId: 'per-1', organizationName: '  ' },
+      ]);
+
+      const pagina = await d.service.listPractitioners({ limit: 50 });
+
+      expect(pagina.items[0].workplaces).toEqual([
+        'Clínica Foianini',
+        'Hospital San Juan de Dios',
+      ]);
+    });
+
+    /**
+     * TP-2: un vínculo que la organización todavía no decidió no puede
+     * presentarse como si lo hubiera aceptado. La guía pide sólo los estados
+     * publicables, y esta prueba es la que impide que alguien agregue
+     * `PENDIENTE` a la lista sin darse cuenta.
+     */
+    it('pide sólo los vínculos publicables: declarado y aprobado', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([fila]);
+
+      await d.service.listPractitioners({ limit: 50 });
+
+      const estados = d.affiliationsRepo.findByPractitioners.mock.calls[0][2];
+      expect(estados).toEqual([PROF.AFFILIATION_DECLARED, PROF.AFFILIATION_APPROVED]);
+      expect(estados).not.toContain(PROF.AFFILIATION_PENDING);
+    });
+  });
+
   describe('countPractitionersBySpecialty (portada de la guía)', () => {
     it('cuenta gente sin repetir y deja fuera a quien la guía no muestra', async () => {
       const d = build();
