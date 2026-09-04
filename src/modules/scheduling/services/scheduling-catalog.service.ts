@@ -331,6 +331,21 @@ export class SchedulingCatalogService {
           },
         );
       }
+
+      // REQ-10-026: sin esto, un slot más largo que la franja no rompía nada
+      // — `generateSlots` simplemente no producía ningún turno para ese día,
+      // en silencio. Quien publicó el horario veía «Vigente» y descubría
+      // recién en «cuántos turnos por semana» que ese día no ofrece ninguno.
+      const slotMinutes =
+        rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES;
+      const duracionFranja =
+        minutosDelDia(rule.endTime) - minutosDelDia(rule.startTime);
+      if (slotMinutes > duracionFranja) {
+        throw new PreconditionFailedException(
+          `El turno de ${slotMinutes} min no entra en la franja de ${rule.startTime} a ${rule.endTime} (${duracionFranja} min)`,
+          { dayOfWeek: rule.dayOfWeek, slotMinutes, duracionFranja },
+        );
+      }
     }
 
     return this.em.transactional(async (tx) => {
@@ -2074,6 +2089,12 @@ function seSolapan(
   b: { desde: number; hasta: number },
 ): boolean {
   return a.desde < b.hasta && b.desde < a.hasta;
+}
+
+/** Los minutos desde medianoche de un `HH:MM` o `HH:MM:SS`. */
+function minutosDelDia(hhmm: string): number {
+  const [h, m] = hhmm.split(':');
+  return Number(h) * 60 + Number(m ?? 0);
 }
 
 /** Cómo se nombra una franja cuando hay que decir con cuál choca. */
