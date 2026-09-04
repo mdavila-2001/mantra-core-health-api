@@ -10,6 +10,10 @@ import { TerminologyModule } from '../terminology/terminology.module';
 // TP-2: quién administra cada organización lo decide `directory`, y de ahí sale
 // el permiso para aprobar o rechazar un vínculo médico–organización.
 import { DirectoryModule } from '../directory/directory.module';
+// El seguro declarado por autoservicio (PATCH del propio perfil) reusa el
+// mismo catálogo de planes y coberturas que ya usa el alta. Sin ciclo:
+// `insurance` no importa `profiles`.
+import { InsuranceModule } from '../insurance/insurance.module';
 import * as entities from './entities';
 import { MedicalSpecialtyCatalogService } from './services/medical-specialty-catalog.service';
 import { AdministrativeAreaCatalogService } from './services/administrative-area-catalog.service';
@@ -65,6 +69,7 @@ import { MessagingModule } from '../messaging/messaging.module';
     TerminologyModule,
     DirectoryModule,
     MessagingModule,
+    InsuranceModule,
   ],
   controllers: [
     ProfilesPatientsController,

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { createdBy } from '../../../common';
+import { INS } from '../insurance.concepts';
 import {
   PatientCoverages,
   CoverageDependents,
@@ -46,6 +47,32 @@ export class CoverageRepository {
     insurancePlanId: string,
   ): Promise<PatientCoverages | null> {
     return em.findOne(PatientCoverages, { memberIdentifier, insurancePlanId });
+  }
+
+  /**
+   * La cobertura activa de un paciente en un orden dado (1 = privada, 2 = pública).
+   *
+   * `patient_coverages` no tiene un estado de baja más allá de `COVERAGE_ACTIVE`
+   * —no existe un `COVERAGE_TERMINATED`—, así que esta consulta es lo que
+   * distingue «declarar por primera vez» de «ya tenía una de este sector»: el
+   * `PATCH` propio del paciente usa el resultado para no duplicar la fila ni
+   * inventar un reemplazo que el modelo no declara.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Perfil de paciente.
+   * @param coverageOrder - 1 para la cobertura privada, 2 para la pública.
+   * @returns La cobertura activa de ese orden, o `null` si no declaró ninguna.
+   */
+  findActiveByPatientAndOrder(
+    em: EntityManager,
+    patientProfileId: string,
+    coverageOrder: number,
+  ): Promise<PatientCoverages | null> {
+    return em.findOne(PatientCoverages, {
+      patientProfileId,
+      coverageOrder,
+      statusConceptId: INS.COVERAGE_ACTIVE,
+    });
   }
 
   /**

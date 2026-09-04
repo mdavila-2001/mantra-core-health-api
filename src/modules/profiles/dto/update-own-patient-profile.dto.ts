@@ -2,11 +2,14 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsIn,
   IsISO8601,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   Matches,
+  Max,
   MaxLength,
+  Min,
   MinLength,
   ValidateIf,
 } from 'class-validator';
@@ -14,6 +17,7 @@ import {
 // dato declarado por la misma persona, y dos copias de un `MaxLength` acaban
 // divergiendo el día que alguien ajusta una sola.
 import {
+  EMPLOYER_FREE_TEXT_MAX_LENGTH,
   OCCUPATION_FREE_TEXT_MAX_LENGTH,
   PERSON_NAME_PART_MAX_LENGTH,
   PHONE_MAX_LENGTH,
@@ -34,13 +38,25 @@ import { BIRTH_SEX_CODES, type BirthSexCode } from '../profiles.concepts';
  *
  * ## Qué NO se puede tocar desde acá, y por qué
  *
- * El **documento de identidad** y su departamento emisor, porque son el
- * identificador con el que la cuenta inicia sesión y lo que la verificación de
+ * El **documento de identidad** en sí, porque son los dígitos con los que la
+ * cuenta inicia sesión (`external_subject`) y lo que la verificación de
  * identidad contrasta: cambiarlos por autoservicio convertiría el trámite en una
- * declaración de uno mismo. El **correo** y la **contraseña**, porque tienen su
- * propio circuito con verificación. El **código de paciente** y los estados,
- * porque los emite y los mueve el sistema. Y el **género administrativo**, que
- * hoy sólo se declara en el alta y no forma parte de esta pantalla.
+ * declaración de uno mismo. Su **departamento de emisión** sí se puede corregir
+ * —es metadato de la misma fila, no toca el número con el que se entra—. El
+ * **correo** y la **contraseña**, porque tienen su propio circuito con
+ * verificación. El **código de paciente** y los estados, porque los emite y los
+ * mueve el sistema. Y el **género administrativo**, que hoy sólo se declara en
+ * el alta y no forma parte de esta pantalla.
+ *
+ * ## Lo que se agregó para igualar el alta (registro de procesos · PACIENTE)
+ *
+ * GPS de domicilio y de trabajo, municipio de trabajo, empresa (§1.10-§1.11),
+ * tutor o persona autorizada (§1.7) y seguro declarado (§1.13-§1.14). Todos
+ * opcionales y todos con el mismo criterio de «vacío borra» que ya rige acá,
+ * **salvo el tutor y el seguro**: `profiles.related_persons` y
+ * `insurance.patient_coverages` no tienen hoy un estado de baja, así que
+ * quitarlos por completo no es una operación soportada — ver el JSDoc de cada
+ * campo.
  *
  * Todos los campos son opcionales: es un `PATCH`, así que lo que no viene no se
  * toca. Un cuerpo vacío es válido y devuelve el perfil sin cambios.
@@ -267,7 +283,8 @@ export class UpdateOwnPatientProfileDto {
    */
   @ApiPropertyOptional({
     maxLength: 300,
-    description: 'Domicilio, tal como lo escribe la persona. Vacío para quitarlo.',
+    description:
+      'Domicilio, tal como lo escribe la persona. Vacío para quitarlo.',
   })
   @IsOptional()
   @IsString()
@@ -282,4 +299,190 @@ export class UpdateOwnPatientProfileDto {
   @IsString()
   @MaxLength(300)
   workAddressLines?: string;
+
+  /**
+   * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`).
+   *
+   * A diferencia del número del documento, esto **sí** se corrige: es un dato
+   * descriptivo de la fila de `common.identifiers` y no toca `external_subject`,
+   * que es lo único que la sesión usa para reconocer la cuenta.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Departamento que emitió el documento (VS_BO_DEPARTMENT)',
+  })
+  @IsOptional()
+  @IsUUID()
+  issuerAdministrativeAreaConceptId?: string;
+
+  /**
+   * Latitud del domicilio. Mismo par ambos-o-ninguno que en el alta.
+   */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: UpdateOwnPatientProfileDto) =>
+      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  homeLatitude?: number;
+
+  /** Longitud del domicilio. Ver {@link UpdateOwnPatientProfileDto.homeLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: UpdateOwnPatientProfileDto) =>
+      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  homeLongitude?: number;
+
+  /**
+   * Municipio del lugar de trabajo (miembro de `VS_BO_MUNICIPALITY`).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Municipio del trabajo (catálogo VS_BO_MUNICIPALITY)',
+  })
+  @IsOptional()
+  @IsUUID()
+  workMunicipalityConceptId?: string;
+
+  /** Latitud del trabajo. Mismo par ambos-o-ninguno que el domicilio. */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: UpdateOwnPatientProfileDto) =>
+      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  workLatitude?: number;
+
+  /** Longitud del trabajo. Ver {@link UpdateOwnPatientProfileDto.workLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: UpdateOwnPatientProfileDto) =>
+      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  workLongitude?: number;
+
+  /**
+   * Empresa donde trabaja, como miembro de `VS_BO_EMPLOYER`. En blanco, se
+   * borra. Mismo criterio que la ocupación: si viene junto al texto libre, gana
+   * el catálogo.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta.',
+  })
+  @ValidateIf(
+    (dto: UpdateOwnPatientProfileDto) => dto.workEmployerConceptId !== '',
+  )
+  @IsOptional()
+  @IsUUID()
+  workEmployerConceptId?: string;
+
+  /**
+   * Empresa en texto libre, para cuando no está en el catálogo. En blanco, se
+   * borra. Se ignora si el mismo cuerpo trae `workEmployerConceptId`.
+   */
+  @ApiPropertyOptional({
+    maxLength: EMPLOYER_FREE_TEXT_MAX_LENGTH,
+    description:
+      'Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)
+  workEmployerFreeText?: string;
+
+  /**
+   * Nombre del tutor o persona autorizada (registro · PACIENTE §1.7).
+   *
+   * **Sin soporte de borrado.** `profiles.related_persons` no tiene un estado
+   * de baja —sólo existe `RELATED_ACTIVE`—, así que a diferencia del teléfono o
+   * el NIT, no hay una forma honesta de «quitar» al tutor ya declarado por
+   * autoservicio: inventar un estado inactivo sin que el modelo lo declare es
+   * justo lo que la regla del proyecto prohíbe (00.1/00.4). Mandar este campo
+   * declara o corrige al tutor; no mandarlo lo deja como está.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description:
+      'Nombre del tutor o persona autorizada. No hay forma de quitarlo, sólo de declararlo o corregirlo.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  guardianName?: string;
+
+  /**
+   * Teléfono del tutor o persona autorizada.
+   *
+   * Igual que en el alta, un teléfono sin nombre —ni el que llega en este
+   * cuerpo ni el ya declarado— lo rechaza el servicio, no este validador: sería
+   * un contacto sin dueño.
+   */
+  @ApiPropertyOptional({
+    maxLength: 40,
+    description: 'Teléfono del tutor, en formato E.164 o nacional',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
+  guardianPhone?: string;
+
+  /**
+   * Qué es esa persona del paciente: madre, cónyuge, amistad… Miembro del
+   * conjunto dinámico `related-person-relationship`.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Parentesco del tutor o contacto de emergencia (conjunto related-person-relationship)',
+  })
+  @IsOptional()
+  @IsUUID()
+  guardianRelationshipConceptId?: string;
+
+  /**
+   * Plan de salud privado que la persona declara tener (registro · PACIENTE
+   * §1.13).
+   *
+   * **Sin soporte de reemplazo.** `insurance.patient_coverages` no tiene hoy un
+   * estado de baja —sólo `COVERAGE_ACTIVE`—, así que este campo **declara** una
+   * cobertura si la persona no tenía ninguna de este sector; si ya había una
+   * declarada, mandar un plan distinto no la reemplaza (el servicio lo deja sin
+   * efecto en vez de duplicar la fila o inventar una baja que el modelo no
+   * declara).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Plan de la aseguradora privada declarada. Sólo si la persona no tenía ninguna ya.',
+  })
+  @IsOptional()
+  @IsUUID()
+  privateInsurancePlanId?: string;
+
+  /**
+   * Plan del seguro público que la persona declara tener (CNS, CPS, SUS…).
+   * Mismo criterio de sólo-declaración que {@link privateInsurancePlanId}.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Plan del seguro público declarado. Sólo si la persona no tenía ninguno ya.',
+  })
+  @IsOptional()
+  @IsUUID()
+  publicInsurancePlanId?: string;
 }

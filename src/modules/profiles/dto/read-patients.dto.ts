@@ -374,6 +374,20 @@ export class OwnCoverageDto {
       'Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar.',
   })
   verified!: boolean;
+
+  /**
+   * El plan elegido, para que el editor del perfil pueda preseleccionarlo.
+   *
+   * `carrierName`/`planName` son para mostrar; nada en la respuesta hasta acá
+   * traía el uuid del plan, así que un formulario no tenía con qué armar el
+   * `<select>` ya elegido — sólo podía mostrar el texto.
+   */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Plan de salud elegido' })
+  planId?: string;
+
+  /** 1 para la cobertura privada, 2 para la pública. */
+  @ApiProperty({ description: 'Orden de la cobertura: 1 privada, 2 pública' })
+  coverageOrder!: number;
 }
 
 /**
@@ -508,6 +522,22 @@ export class OwnPatientProfileResponseDto {
    */
   @ApiPropertyOptional({ description: 'Ocupación declarada en texto libre' })
   occupationFreeText?: string;
+
+  /**
+   * Empresa donde trabaja, elegida del catálogo (`VS_BO_EMPLOYER`).
+   *
+   * Mismo criterio que la ocupación: nunca viaja junto a
+   * {@link OwnPatientProfileResponseDto.workEmployerFreeText}.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)',
+  })
+  workEmployerConceptId?: string;
+
+  /** Empresa en texto libre, para cuando no está en el catálogo. */
+  @ApiPropertyOptional({ description: 'Empresa declarada en texto libre' })
+  workEmployerFreeText?: string;
 
   /**
    * Teléfono de contacto vigente.
