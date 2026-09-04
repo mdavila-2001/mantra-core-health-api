@@ -54,4 +54,16 @@ export class PracticeTenantLookupService {
     );
     return [...new Set(assignments.map((a) => a.practiceId))];
   }
+
+  /**
+   * El tenant dueño de una práctica, o `null` si esa práctica no existe.
+   *
+   * La alternativa era `findActive()`, que trae **todas** las prácticas activas
+   * para mirar una sola. Un dominio que sólo necesita acotar «esta práctica es
+   * de mi organización» pregunta por esa práctica.
+   */
+  async findTenantOfPractice(practiceId: string): Promise<string | null> {
+    const practice = await this.practices.findById(this.em.fork(), practiceId);
+    return practice?.tenantId ?? null;
+  }
 }
