@@ -4,6 +4,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -29,6 +32,7 @@ import {
   ProcedureSpecialtiesResponseDto,
   SearchServiceCatalogResponseDto,
   ServiceCatalogItemDto,
+  UpdateServiceCatalogItemDto,
 } from '../dto';
 
 /** Tope de servicios por página cuando el cliente no pide uno. */
@@ -127,6 +131,32 @@ export class BillingServiceCatalogController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ServiceCatalogItemDto> {
     return this.serviceCatalogService.create(dto, actor);
+  }
+
+  /**
+   * Corrige un servicio del catálogo de una práctica propia.
+   *
+   * Los roles son más anchos que los del alta a propósito: quien atiende pone el
+   * precio de lo que ofrece en **su** práctica, y la cuenta administradora
+   * corrige lo que dio de alta. El alcance no lo decide el rol sino la
+   * vinculación —o el tenant—, y se comprueba en el servicio; un servicio de otra
+   * práctica responde **404**, igual que uno inexistente.
+   *
+   * @param id - Servicio a corregir.
+   * @param dto - Campos a corregir; los ausentes se conservan.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns El servicio ya corregido.
+   */
+  @Patch(':id')
+  @Roles('PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Corregir un servicio del catálogo de mi práctica' })
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateServiceCatalogItemDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ServiceCatalogItemDto> {
+    return this.serviceCatalogService.update(id, dto, actor);
   }
 
   /**

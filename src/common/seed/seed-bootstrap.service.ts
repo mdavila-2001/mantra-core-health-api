@@ -18,6 +18,7 @@ import { AudioAssetsSeedService } from './audio-assets-seed.service';
 import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
 import { loadSeedBootEnv } from './seed-boot.env';
 
 /** Resultado de un paso de la cadena, ya medido. */
@@ -132,6 +133,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param platformPermissions - Permisos de sistema en `authz.permissions`.
    * @param bootstrapAdmin - Primer `SECURITY_ADMIN`, si el entorno lo pide.
    * @param clinicalForms - Catálogo de formularios clínicos estándar.
+   * @param practiceDefaultServices - «Cita médica» en las prácticas que nacieron
+   *   sin catálogo.
    * @param logger - Logger estructurado del arranque.
    */
   constructor(
@@ -153,6 +156,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
     private readonly providerAccounts: ProviderAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
+    private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
@@ -371,6 +375,17 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'cuentas de proveedores',
         kind: 'content',
         run: () => this.providerAccounts.run(),
+      },
+      // El último, y no por importancia: es el único paso que siembra **sobre
+      // filas de negocio que ya existen** —una por práctica— en vez de
+      // materializar un catálogo. Corre después de todo lo demás para que, si
+      // el arranque acaba de crear la primera organización, encuentre su
+      // práctica. No es núcleo: una práctica sin el servicio por defecto
+      // funciona, sólo abre su catálogo vacío.
+      {
+        name: 'servicio por defecto de cada práctica',
+        kind: 'content',
+        run: () => this.practiceDefaultServices.run(),
       },
     ];
   }

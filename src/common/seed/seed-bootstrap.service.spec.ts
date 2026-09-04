@@ -29,6 +29,7 @@ const PASOS = [
   'clinicalForms',
   'bootstrapAdmin',
   'providerAccounts',
+  'practiceDefaultServices',
 ] as const;
 
 type Paso = (typeof PASOS)[number];
@@ -84,6 +85,7 @@ function armar(fallan: Paso[] = []) {
     dobles.bootstrapAdmin as never,
     dobles.providerAccounts as never,
     dobles.clinicalForms as never,
+    dobles.practiceDefaultServices as never,
     logger as never,
   );
 
@@ -99,6 +101,7 @@ const CONTENIDO: readonly Paso[] = [
   'vademecum',
   'clinicalForms',
   'providerAccounts',
+  'practiceDefaultServices',
 ];
 
 /** Los pasos de núcleo, que corren siempre que la cadena corra. */
