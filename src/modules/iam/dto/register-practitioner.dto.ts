@@ -156,15 +156,45 @@ export class RegisterPractitionerDto {
 
   /**
    * Número del título o credencial que respalda la licencia.
+   *
+   * Dejó de ser obligatorio. Era el único lugar donde entraba el «segundo
+   * número» del alta y por eso terminaba recibiendo lo que no era un título:
+   * el registro del SEDES viajaba acá y se archivaba como
+   * `CREDENTIAL_TYPE_DEGREE`, así que el perfil lo mostraba como «Título
+   * universitario». Para eso está ahora {@link sedesLicenseNumber}; este campo
+   * queda para lo que su nombre dice —un título de grado— y sigue aceptándose
+   * para no romper a quien ya integró contra este endpoint.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Número del título profesional que respalda la licencia',
     maxLength: 100,
   })
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(100)
-  credentialNumber!: string;
+  credentialNumber?: string;
+
+  /**
+   * Registro departamental del SEDES — el «T.I. 538/14» del padrón.
+   *
+   * Es una **habilitación**, no formación: el SEDES autoriza a ejercer en su
+   * departamento igual que la matrícula del Ministerio autoriza en todo el
+   * país. Por eso nace como una segunda fila de
+   * `profiles.jurisdiction_authorizations` con jurisdicción
+   * `JURISDICTION_SEDES_SANTA_CRUZ`, y el perfil la muestra al lado de la
+   * matrícula nacional en vez de enterrarla en «Formación».
+   */
+  @ApiPropertyOptional({
+    description: 'Número de registro del SEDES departamental',
+    maxLength: 100,
+    example: 'T.I. 538/14',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  sedesLicenseNumber?: string;
 
   /**
    * Autoridad que emitió la licencia (colegio, ministerio, junta).
@@ -503,9 +533,22 @@ export class RegisterPractitionerResponseDto {
    * ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no
    * expone ningún listado de credenciales. La verificación quedaba fuera de
    * alcance salvo consultando la base de datos a mano.
+   *
+   * Ausente cuando el alta no declara `credentialNumber`, que dejó de ser
+   * obligatorio: sin credencial no hay id que devolver.
    */
-  @ApiProperty({ format: 'uuid' })
-  credentialId!: string;
+  @ApiPropertyOptional({ format: 'uuid' })
+  credentialId?: string;
+
+  /**
+   * Autorización del SEDES creada, pendiente de verificación.
+   *
+   * El equivalente de {@link credentialId} para la habilitación departamental:
+   * se devuelve para poder verificarla por id sin consultar la base. Ausente
+   * cuando el alta no declara `sedesLicenseNumber`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  sedesLicenseId?: string;
 
   /**
    * Estado de verificación del perfil al terminar el alta. Siempre PENDING:
