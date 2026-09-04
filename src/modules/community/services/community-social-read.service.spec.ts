@@ -34,6 +34,9 @@ function build() {
   const commentsRepo = {
     listRootsPage: mockFn().mockResolvedValue([]),
     listRepliesOf: mockFn().mockResolvedValue([]),
+    listMediaForComments: mockFn().mockResolvedValue([]),
+    findById: mockFn(),
+    findMediaByFileId: mockFn(),
   };
   const reactionsRepo = {
     summarizeByTarget: mockFn().mockResolvedValue([]),
@@ -60,6 +63,9 @@ function build() {
   // `community-engagement.service.spec.ts`, con los repositorios reales de por
   // medio. Acá interesa que la lectura lo pida y con qué.
   const engagement = { ofPosts: mockFn().mockResolvedValue(new Map()) };
+  // FND-01: sirve los bytes recién después de que este servicio autorizó
+  // verlos; el propio doble no vuelve a decidir nada.
+  const files = { downloadPublicMedia: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new CommunitySocialReadService(
@@ -74,6 +80,7 @@ function build() {
     prestigeRepo as any,
     visibility as any,
     engagement as any,
+    files as any,
     logger as any,
   );
   return {
@@ -88,6 +95,7 @@ function build() {
     blocksRepo,
     prestigeRepo,
     visibility,
+    files,
   };
 }
 
@@ -239,6 +247,58 @@ describe('CommunitySocialReadService', () => {
       expect(res.items).toHaveLength(1);
       expect(res.items[0].replies).toHaveLength(1);
       expect(res.items[0].replies[0].id).toBe('c-2');
+    });
+  });
+
+  describe('getCommentMedia', () => {
+    const adjunto = { id: 'cm-1', commentId: 'c-1', fileId: 'f-1' };
+    const comentario = {
+      id: 'c-1',
+      commentableTypeConceptId: COMM.CONTENT_TYPE_POST,
+      commentableRefId: 'post-1',
+    };
+
+    it('sirve los bytes cuando el post del comentario es visible para el lector', async () => {
+      const d = build();
+      d.commentsRepo.findMediaByFileId.mockResolvedValue(adjunto);
+      d.commentsRepo.findById.mockResolvedValue(comentario);
+      d.postsRepo.findById.mockResolvedValue(post);
+      d.files.downloadPublicMedia.mockResolvedValue({
+        buffer: Buffer.from('img'),
+        mimeType: 'image/png',
+      });
+
+      const res = await d.service.getCommentMedia('f-1', actor, 'p-2');
+
+      // Lo que decide es la visibilidad del post, no quién subió el archivo
+      // (FND-01): sólo entonces se pide el contenido, y por el mismo camino
+      // que ya usa la superficie pública.
+      expect(d.visibility.canViewPost).toHaveBeenCalled();
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-1');
+      expect(res.mimeType).toBe('image/png');
+    });
+
+    it('404 cuando el fileId no es un adjunto de comentario', async () => {
+      const d = build();
+      d.commentsRepo.findMediaByFileId.mockResolvedValue(null);
+
+      await expect(
+        d.service.getCommentMedia('f-ajeno', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.files.downloadPublicMedia).not.toHaveBeenCalled();
+    });
+
+    it('404 —y no 403— cuando el adjunto existe pero el post ya no es visible', async () => {
+      const d = build();
+      d.commentsRepo.findMediaByFileId.mockResolvedValue(adjunto);
+      d.commentsRepo.findById.mockResolvedValue(comentario);
+      d.postsRepo.findById.mockResolvedValue(post);
+      d.visibility.canViewPost.mockResolvedValue(false);
+
+      await expect(
+        d.service.getCommentMedia('f-1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.files.downloadPublicMedia).not.toHaveBeenCalled();
     });
   });
 

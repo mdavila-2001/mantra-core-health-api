@@ -32,7 +32,11 @@ import {
   SearchIndexService,
   type SearchHit,
 } from '../../search_platform/services';
-import { COMM, REACTION_CODE_BY_CONCEPT } from '../community.concepts';
+import {
+  COMM,
+  COMMENT_MEDIA_KIND_BY_CONCEPT,
+  REACTION_CODE_BY_CONCEPT,
+} from '../community.concepts';
 import {
   CommunityVerificationService,
   type VerifiedBadgeDto,
@@ -169,6 +173,7 @@ export const PUBLIC_COMMENT_KEYS = [
   'createdAt',
   'replyCount',
   'author',
+  'media',
 ] as const;
 
 /** Las claves del autor de un comentario público. Nada más. */
@@ -544,6 +549,24 @@ export class CommunityPublicService {
       createdAt: fila.createdAt.toISOString(),
       replyCount: fila.replyCount,
       author: this.toPublicActor(fila),
+      // REQ-01-011: sólo la URL servida por la API y el tipo — nunca el
+      // fileId ni el mediaRoleConceptId internos (mismo criterio que
+      // `avatarUrl`, ver el encabezado de `PublicCommentMediaDto`).
+      media: (fila.media ?? [])
+        .map((adjunto) => ({
+          url: this.fileUrl(adjunto.fileId),
+          kind: COMMENT_MEDIA_KIND_BY_CONCEPT[adjunto.mediaRoleConceptId],
+          altText: adjunto.altText,
+        }))
+        .filter(
+          (
+            adjunto,
+          ): adjunto is {
+            url: string;
+            kind: 'IMAGE' | 'STICKER' | 'GIF';
+            altText: string | null;
+          } => adjunto.url !== null && adjunto.kind !== undefined,
+        ),
     };
   }
 
@@ -627,7 +650,10 @@ export class CommunityPublicService {
     const em = this.em.fork();
     const permitido =
       (await this.profiles.isPublicMedia(em, fileId)) ||
-      (await this.repo.isPublicPostMedia(em, fileId));
+      (await this.repo.isPublicPostMedia(em, fileId)) ||
+      // REQ-01-011: la tercera clase de imagen pública, junto al avatar/portada
+      // y las fotos del cuerpo del post — un adjunto de comentario visible.
+      (await this.repo.isPublicCommentMedia(em, fileId));
     if (!permitido) {
       throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
     }

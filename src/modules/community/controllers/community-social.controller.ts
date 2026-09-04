@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,7 +11,9 @@ import {
   Post,
   Put,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
@@ -329,6 +332,35 @@ export class CommunitySocialController {
       cursor,
       limit: limit ?? DEFAULT_PAGE_LIMIT,
     });
+  }
+
+  /**
+   * FND-01: el contenido de un adjunto de comentario, para quien tiene sesión
+   * y puede ver el post del que cuelga — no sólo para quien lo subió.
+   *
+   * Declarada con un segmento fijo (`media`) antes que nada bajo `comments/`
+   * capture `:id`: hoy no hay otra ruta `comments/:algo` en este controlador,
+   * pero es la misma cautela que ya deja escrita `listLinks` en
+   * `CommonFilesController` para `links` contra `:id/content`.
+   */
+  @Get('comments/media/:fileId/content')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar el adjunto de un comentario (imagen, sticker o GIF)',
+  })
+  async getCommentMediaContent(
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Res() res: Response,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('actorProfileId') actorProfileId?: string,
+  ): Promise<void> {
+    const contenido = await this.readService.getCommentMedia(
+      fileId,
+      actor,
+      actorProfileId,
+    );
+    res.setHeader('Content-Type', contenido.mimeType);
+    res.send(contenido.buffer);
   }
 
   /** Resumen de reacciones de una publicación. */

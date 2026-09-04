@@ -1,4 +1,5 @@
 export * from './bookmarks.entity';
+export * from './comment_media.entity';
 export * from './comments.entity';
 export * from './content_hashtags.entity';
 export * from './content_reports.entity';
