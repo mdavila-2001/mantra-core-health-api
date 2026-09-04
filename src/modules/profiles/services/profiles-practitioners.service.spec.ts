@@ -1237,6 +1237,49 @@ describe('ProfilesPractitionersService', () => {
     });
   });
 
+  describe('los que no declaran especialidad', () => {
+    it('el recuento los cuenta aparte: la portada tiene que poder ofrecerlos', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue(['per-1', 'per-2', 'per-3']);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+      ]);
+
+      const recuento = await d.service.countPractitionersBySpecialty();
+
+      // `per-2` y `per-3` no aparecen en ninguna tarjeta de especialidad: sin
+      // este número, la guía no tendría por dónde ofrecerlos.
+      expect(recuento.withoutSpecialtyCount).toBe(2);
+      expect(recuento.practitionerTotal).toBe(3);
+    });
+
+    it('el listado sabe pedirlos, y es el complemento exacto del filtro', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue(['per-1', 'per-2']);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+      ]);
+      d.practitionersRepo.listPage.mockResolvedValue([]);
+
+      await d.service.listPractitioners({ withoutSpecialty: true, limit: 50 });
+
+      expect(d.practitionersRepo.listPage.mock.calls[0][1].profileIds).toEqual(['per-2']);
+    });
+
+    it('sin nadie sin especialidad devuelve vacío sin consultar la página', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue(['per-1']);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+      ]);
+
+      const pagina = await d.service.listPractitioners({ withoutSpecialty: true, limit: 50 });
+
+      expect(pagina.items).toEqual([]);
+      expect(d.practitionersRepo.listPage).not.toHaveBeenCalled();
+    });
+  });
+
   describe('listPractitioners (guía de profesionales, R2-1)', () => {
     const fila = {
       profileId: 'per-1',

@@ -145,6 +145,11 @@ export class ProfilesPractitionersController {
     required: false,
     description: 'Filtra por especialidad vigente (concept id)',
   })
+  @ApiQuery({
+    name: 'withoutSpecialty',
+    required: false,
+    description: 'true = sólo quienes no declaran ninguna especialidad vigente',
+  })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({
     name: 'limit',
@@ -154,11 +159,13 @@ export class ProfilesPractitionersController {
   listPractitioners(
     @Query('specialtyConceptId', new ParseUUIDPipe({ optional: true }))
     specialtyConceptId?: string,
+    @Query('withoutSpecialty') withoutSpecialty?: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<ListPractitionersResponseDto> {
     return this.practitionersService.listPractitioners({
       specialtyConceptId,
+      withoutSpecialty: withoutSpecialty === 'true',
       cursor,
       limit: limit ?? 50,
     });

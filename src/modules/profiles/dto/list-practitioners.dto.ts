@@ -171,4 +171,15 @@ export class ListSpecialtyCountsResponseDto {
    */
   @ApiProperty({ description: 'Profesionales visibles, sin repetir' })
   practitionerTotal!: number;
+
+  /**
+   * Cuántos no declaran **ninguna** especialidad vigente.
+   *
+   * Existe porque son alcanzables sólo si la portada los ofrece: quien entra
+   * por especialidad no llega nunca a quien no tiene ninguna. Hoy son casi
+   * trescientos —todo el que se registra solo nace así— e incluyen a los
+   * médicos con cuenta, que son justamente los que atienden por la app.
+   */
+  @ApiProperty({ description: 'Visibles sin ninguna especialidad vigente' })
+  withoutSpecialtyCount!: number;
 }
