@@ -243,6 +243,26 @@ export class CommentsRepository {
   }
 
   /**
+   * El adjunto que apunta a un archivo, si alguno.
+   *
+   * Punto de entrada de `GET /community/comments/media/:fileId/content`
+   * (FND-01): a quien pide los bytes con sesión no le alcanza con el `fileId`
+   * solo —no dice de qué post es el comentario, que es lo que decide si el
+   * lector puede verlo—, así que primero hay que volver de `fileId` a
+   * `commentId`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fileId - Archivo del que se pide el adjunto.
+   * @returns El adjunto, o `null` si ese archivo no es un adjunto de comentario.
+   */
+  findMediaByFileId(
+    em: EntityManager,
+    fileId: string,
+  ): Promise<CommentMedia | null> {
+    return em.findOne(CommentMedia, { fileId });
+  }
+
+  /**
    * Crea create media.
    *
    * @param em - Contexto de persistencia o transacción activa.
