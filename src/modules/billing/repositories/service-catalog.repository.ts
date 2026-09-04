@@ -18,6 +18,14 @@ export interface CreateServiceCatalogItemData {
    */
   name: string;
   /**
+   * Valor de description text mantenido por la instancia.
+   */
+  descriptionText?: string;
+  /**
+   * Identificador asociado a image file.
+   */
+  imageFileId?: string;
+  /**
    * Identificador asociado a service concept.
    */
   serviceConceptId?: string;
@@ -149,6 +157,8 @@ export class ServiceCatalogRepository {
         practiceId: data.practiceId,
         code: data.code,
         name: data.name,
+        descriptionText: data.descriptionText,
+        imageFileId: data.imageFileId,
         serviceConceptId: data.serviceConceptId,
         defaultPrice: data.defaultPrice,
         currencyConceptId: data.currencyConceptId,
