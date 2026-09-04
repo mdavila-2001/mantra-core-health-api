@@ -131,6 +131,8 @@ export class BillingServiceCatalogService {
         practiceId: dto.practiceId,
         code: dto.code,
         name: dto.name,
+        descriptionText: dto.descriptionText,
+        imageFileId: dto.imageFileId,
         serviceConceptId: dto.serviceConceptId,
         defaultPrice: dto.defaultPrice,
         currencyConceptId: dto.currencyConceptId,
@@ -164,6 +166,8 @@ function toItemDto(row: {
   practiceId: string;
   code: string;
   name: string;
+  descriptionText?: string;
+  imageFileId?: string;
   serviceConceptId?: string;
   defaultPrice: string;
   currencyConceptId?: string;
@@ -176,6 +180,8 @@ function toItemDto(row: {
     practiceId: row.practiceId,
     code: row.code,
     name: row.name,
+    descriptionText: row.descriptionText,
+    imageFileId: row.imageFileId,
     serviceConceptId: row.serviceConceptId,
     defaultPrice: row.defaultPrice,
     currencyConceptId: row.currencyConceptId,

@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `billing`.
- * 140 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 141 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -126,6 +126,7 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['reimbursements', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['service_catalog', 'created_by_user_id', 'iam', 'users', 'id'],
   ['service_catalog', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_catalog', 'image_file_id', 'common', 'files', 'id'],
   ['service_catalog', 'income_account_id', 'accounting', 'accounts', 'id'],
   ['service_catalog', 'practice_id', 'practice', 'practices', 'id'],
   ['service_catalog', 'service_concept_id', 'terminology', 'catalog_concepts', 'id'],

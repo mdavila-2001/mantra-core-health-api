@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `billing`.
- * 156 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 157 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingIndexes: readonly IndexTuple[] = [
@@ -141,6 +141,7 @@ export const billingIndexes: readonly IndexTuple[] = [
   ['reimbursements', 'ix_reimbursements_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['reimbursements', 'ix_reimbursements_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_practice_id', ['practice_id'], false, 'btree'],
+  ['service_catalog', 'ix_service_catalog_image_file_id', ['image_file_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_service_concept_id', ['service_concept_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_currency_concept_id', ['currency_concept_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_tax_code_id', ['tax_code_id'], false, 'btree'],

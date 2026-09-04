@@ -34,6 +34,28 @@ export class CreateServiceCatalogItemDto {
   name!: string;
 
   /**
+   * Valor de description text mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Descripción larga del servicio, para la tarjeta',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  descriptionText?: string;
+
+  /**
+   * Identificador asociado a image file.
+   */
+  @ApiPropertyOptional({
+    description: 'Imagen del servicio (`common.files`)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  imageFileId?: string;
+
+  /**
    * Identificador asociado a service concept.
    */
   @ApiPropertyOptional({
@@ -120,6 +142,22 @@ export class ServiceCatalogItemDto {
    */
   @ApiProperty()
   name!: string;
+
+  /**
+   * Valor de description text mantenido por la instancia.
+   */
+  @ApiPropertyOptional()
+  descriptionText?: string;
+
+  /**
+   * Identificador asociado a image file.
+   *
+   * Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese
+   * contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió
+   * o a un rol de revisión.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  imageFileId?: string;
 
   /**
    * Identificador asociado a service concept.
