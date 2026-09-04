@@ -577,6 +577,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
           message: 'Ya existe un recurso con esa clave',
           internals,
         };
+      // Restricción EXCLUDE (`ex_appointments_practitioner_time`, carril 12
+      // REQ-017): dos citas del mismo profesional se pisan en el tiempo. Sin
+      // este caso caía al 500 genérico del `default`, y quien movía un horario
+      // veía "Ocurrió un error inesperado" en vez de que hubo un choque —el
+      // pedido explícito era mostrar el conflicto, no esconderlo.
+      case '23P01':
+        return {
+          status: HttpStatus.CONFLICT,
+          code: ErrorCode.CONFLICT,
+          message:
+            'Ese horario se pisa con otra cita ya confirmada del mismo profesional',
+          internals,
+        };
       // Valor ausente, fuera de restricción o con sintaxis inválida: es un
       // defecto de forma del cuerpo, así que 400 + `VALIDATION_FAILED`, igual
       // que cuando lo detecta el `ValidationPipe`. Antes salía 422 con ese
