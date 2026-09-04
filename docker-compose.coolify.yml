@@ -617,82 +617,32 @@ services:
     command: ["node", "dist/src/worker-read_models.js"]
 
   # =======================================================================
-  # WORKERS OPCIONALES
-  # Comentar este bloque entero en un VPS de 4 GB: la API, el alta de
-  # pacientes y el resto del uso sincrónico funcionan sin ellos. Lo que se
-  # detiene es el procesamiento en segundo plano de cada dominio.
+  # WORKERS OPCIONALES — APAGADOS EN COOLIFY, A PROPÓSITO
+  #
+  # Estaban acá los dieciocho workers de dominio, y salieron por dos razones
+  # que empujan en la misma dirección.
+  #
+  # **Coolify no puede desplegar un compose de este tamaño.** Escribe el
+  # archivo en el servidor mandándolo en base64 dentro de UN argumento de
+  # shell, y Linux corta un argumento en 131 072 bytes (`MAX_ARG_STRLEN`).
+  # Con los veintidós workers, este compose expandido por Coolify pesaba
+  # 217 KB —289 KB en base64—, así que el despliegue moría siempre en el
+  # mismo paso, «Failed to write deployment configurations», antes de clonar
+  # el repositorio. No es un fallo intermitente ni de red: es determinista, y
+  # reintentar no lo arregla. Las aplicaciones de ATLAS, que sí despliegan,
+  # tienen composes de entre 2,6 y 26 KB.
+  #
+  # **Y no entrarían en memoria.** Cada worker reserva 384 MB; dieciocho son
+  # 6,9 GB de reserva sobre un VPS que ya está usando swap al completo.
+  #
+  # Es la salida que este mismo archivo proponía para un VPS chico. Lo que se
+  # detiene es el procesamiento en segundo plano de cada dominio; la API, el
+  # alta de pacientes, el directorio público y el resto del uso sincrónico
+  # funcionan sin ellos. Los cuatro esenciales de arriba siguen en pie.
+  #
+  # Para recuperarlos hay que partir el stack en varias aplicaciones de
+  # Coolify —una por grupo de workers—, no volver a pegarlos acá.
   # =======================================================================
-  worker-identity_assurance:
-    <<: *worker
-    command: ["node", "dist/src/worker-identity_assurance.js"]
-
-  worker-consent:
-    <<: *worker
-    command: ["node", "dist/src/worker-consent.js"]
-
-  worker-health_context:
-    <<: *worker
-    command: ["node", "dist/src/worker-health_context.js"]
-
-  worker-automation:
-    <<: *worker
-    command: ["node", "dist/src/worker-automation.js"]
-
-  worker-billing:
-    <<: *worker
-    command: ["node", "dist/src/worker-billing.js"]
-
-  worker-community:
-    <<: *worker
-    command: ["node", "dist/src/worker-community.js"]
-
-  worker-cross_store_consistency:
-    <<: *worker
-    command: ["node", "dist/src/worker-cross_store_consistency.js"]
-
-  worker-delegated_access:
-    <<: *worker
-    command: ["node", "dist/src/worker-delegated_access.js"]
-
-  worker-integrations:
-    <<: *worker
-    command: ["node", "dist/src/worker-integrations.js"]
-
-  worker-pharmacy_inventory:
-    <<: *worker
-    command: ["node", "dist/src/worker-pharmacy_inventory.js"]
-
-  worker-promotions:
-    <<: *worker
-    command: ["node", "dist/src/worker-promotions.js"]
-
-  worker-qa_lab:
-    <<: *worker
-    command: ["node", "dist/src/worker-qa_lab.js"]
-
-  worker-reporting:
-    <<: *worker
-    command: ["node", "dist/src/worker-reporting.js"]
-
-  worker-tracking:
-    <<: *worker
-    command: ["node", "dist/src/worker-tracking.js"]
-
-  worker-audio-assets:
-    <<: *worker
-    command: ["node", "dist/src/worker-audio-assets.js"]
-
-  worker-vector_rag:
-    <<: *worker
-    command: ["node", "dist/src/worker-vector_rag.js"]
-
-  worker-lakehouse:
-    <<: *worker
-    command: ["node", "dist/src/worker-lakehouse.js"]
-
-  worker-time_series:
-    <<: *worker
-    command: ["node", "dist/src/worker-time_series.js"]
 
 # -------------------------------------------------------------------------
 # Volúmenes. Son lo único del stack que no se puede reconstruir: Coolify
