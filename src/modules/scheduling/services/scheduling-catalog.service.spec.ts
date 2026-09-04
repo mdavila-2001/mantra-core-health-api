@@ -829,6 +829,60 @@ describe('SchedulingCatalogService', () => {
           d.service.createTemplate(RESOURCE, dto, actor as any),
         ).rejects.toBeInstanceOf(ResourceNotFoundException);
       });
+
+      /**
+       * REQ-10-026 · el slot tiene que entrar en la franja.
+       *
+       * Antes de esto, un slot más largo que la franja no rechazaba nada:
+       * `generateSlots` simplemente no producía ni un turno para ese día, en
+       * silencio. Quien publicó veía «Vigente» y recién descubría el hueco al
+       * contar los turnos por semana.
+       */
+      it('rejects a slot longer than its own franja', async () => {
+        const d = buildCatalog();
+
+        await expect(
+          d.service.createTemplate(
+            RESOURCE,
+            {
+              ...dto,
+              rules: [
+                {
+                  dayOfWeek: 1,
+                  startTime: '08:00:00',
+                  endTime: '08:20:00',
+                  slotMinutes: 30,
+                },
+              ],
+            },
+            actor as any,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('accepts a slot that fills the franja exactly', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+        const res = await d.service.createTemplate(
+          RESOURCE,
+          {
+            ...dto,
+            rules: [
+              {
+                dayOfWeek: 1,
+                startTime: '08:00:00',
+                endTime: '08:30:00',
+                slotMinutes: 30,
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res.ruleCount).toBe(1);
+      });
     });
 
     /* --------------------------------------------------------------------
