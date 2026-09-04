@@ -96,6 +96,36 @@ import { ProfilesAffiliationsService } from './profiles-affiliations.service';
  * responde si el conteo no se pudo hacer. Cero es un dato legítimo acá: un
  * perfil dado de alta por la organización nunca escribió nada.
  */
+/* --- los cuatro contactos que el registro del médico pide por separado ------
+   Cada uno es una fila de `common.contact_points` identificada por su par
+   sistema × uso. Viven como constantes con nombre para que la edición del
+   perfil y el alta escriban exactamente el mismo par: si divergieran, el
+   perfil leería un contacto que el alta guardó en otro lado. */
+
+/** Correo personal: el que no sirve para entrar. */
+const PAR_CORREO_PERSONAL = {
+  systemConceptId: CONCEPTS.CONTACT_EMAIL,
+  useConceptId: CONCEPTS.CONTACT_USE_HOME,
+} as const;
+
+/** Celular personal o privado. */
+const PAR_CELULAR_PERSONAL = {
+  systemConceptId: CONCEPTS.CONTACT_MOBILE,
+  useConceptId: CONCEPTS.CONTACT_USE_HOME,
+} as const;
+
+/** Celular del lugar de trabajo. */
+const PAR_CELULAR_TRABAJO = {
+  systemConceptId: CONCEPTS.CONTACT_MOBILE,
+  useConceptId: CONCEPTS.CONTACT_USE_WORK,
+} as const;
+
+/** Teléfono fijo del lugar de trabajo. */
+const PAR_FIJO_TRABAJO = {
+  systemConceptId: CONCEPTS.CONTACT_PHONE,
+  useConceptId: CONCEPTS.CONTACT_USE_WORK,
+} as const;
+
 const SIN_ACTIVIDAD: PractitionerActivityDto = {
   encounters: 0,
   medicationRequests: 0,
@@ -609,11 +639,44 @@ export class ProfilesPractitionersService {
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
-    const nuevo = telefono.trim() === '' ? undefined : telefono.trim();
-    const vigente = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+    await this.reemplazarContacto(tx, personId, telefono, actorUserId, ahora, {
+      systemConceptId: CONCEPTS.CONTACT_PHONE,
+      useConceptId: CONCEPTS.CONTACT_USE_WORK,
+    });
+  }
+
+  /**
+   * Deja vigente el contacto nuevo de un par sistema × uso y cierra el anterior.
+   *
+   * Es {@link reemplazarTelefono} generalizado: desde que el alta pide correo y
+   * celular personales además de los del trabajo, «el teléfono de esta persona»
+   * dejó de ser uno solo. El uso entra en la búsqueda para que cambiar el
+   * celular personal no cierre el de trabajo, que es lo que pasaría buscando
+   * sólo por sistema.
+   *
+   * Una cadena vacía cierra el vigente y no abre ninguno: es cómo se borra.
+   *
+   * @param tx - Transacción activa.
+   * @param personId - Persona dueña del contacto.
+   * @param valor - Valor declarado; vacío borra.
+   * @param actorUserId - Quién hace el cambio.
+   * @param ahora - Instante del cambio, para la vigencia.
+   * @param par - Sistema y uso que identifican al contacto.
+   */
+  private async reemplazarContacto(
+    tx: EntityManager,
+    personId: string,
+    valor: string,
+    actorUserId: string,
+    ahora: Date,
+    par: { systemConceptId: string; useConceptId: string },
+  ): Promise<void> {
+    const nuevo = valor.trim() === '' ? undefined : valor.trim();
+    const vigente = await this.contactPointsRepo.findVigenteByOwnerSystemAndUse(
       tx,
       personId,
-      CONCEPTS.CONTACT_PHONE,
+      par.systemConceptId,
+      par.useConceptId,
     );
 
     if (nuevo === undefined) {
@@ -628,9 +691,9 @@ export class ProfilesPractitionersService {
     this.contactPointsRepo.create(tx, {
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
       ownerId: personId,
-      systemConceptId: CONCEPTS.CONTACT_PHONE,
+      systemConceptId: par.systemConceptId,
       value: nuevo,
-      useConceptId: CONCEPTS.CONTACT_USE_WORK,
+      useConceptId: par.useConceptId,
       actorUserId,
     });
   }
@@ -815,7 +878,7 @@ export class ProfilesPractitionersService {
       incluyeContacto
         ? this.sinTumbarLaFicha(
             () => this.leerDocumentoYDomicilio(em, person.id),
-            {} as Awaited<ReturnType<typeof this.leerDocumentoYDomicilio>>,
+            {},
             { profileId, pieza: 'filiación' },
           )
         : Promise.resolve(
@@ -828,6 +891,15 @@ export class ProfilesPractitionersService {
     const contacto = (sistema: string): string | undefined =>
       contactos.find((punto) => punto.systemConceptId === sistema)?.value;
 
+    // Desde que el alta pide los contactos separados, el sistema no alcanza
+    // para saber cuál es cuál: hay dos correos y dos celulares, y lo que los
+    // distingue es el uso. Sin este par, el personal y el de trabajo se pisan.
+    const contactoPorUso = (sistema: string, uso: string): string | undefined =>
+      contactos.find(
+        (punto) =>
+          punto.systemConceptId === sistema && punto.useConceptId === uso,
+      )?.value;
+
     return {
       profileId,
       personId: person.id,
@@ -838,6 +910,28 @@ export class ProfilesPractitionersService {
       photoFileId: practitioner.photoFileId,
       email: contacto(CONCEPTS.CONTACT_EMAIL),
       phone: contacto(CONCEPTS.CONTACT_PHONE),
+      // Los cinco contactos del registro del médico. `email`/`phone` siguen
+      // arriba tal cual para no romper a quien ya los lee.
+      workEmail: contactoPorUso(
+        CONCEPTS.CONTACT_EMAIL,
+        CONCEPTS.CONTACT_USE_WORK,
+      ),
+      personalEmail: contactoPorUso(
+        CONCEPTS.CONTACT_EMAIL,
+        CONCEPTS.CONTACT_USE_HOME,
+      ),
+      mobilePhone: contactoPorUso(
+        CONCEPTS.CONTACT_MOBILE,
+        CONCEPTS.CONTACT_USE_HOME,
+      ),
+      workMobilePhone: contactoPorUso(
+        CONCEPTS.CONTACT_MOBILE,
+        CONCEPTS.CONTACT_USE_WORK,
+      ),
+      workLandline: contactoPorUso(
+        CONCEPTS.CONTACT_PHONE,
+        CONCEPTS.CONTACT_USE_WORK,
+      ),
       // Las cuatro partes del nombre viajan además del compuesto: es lo único
       // con lo que se puede corregir un apellido sin adivinar dónde cortarlo.
       name: person.name,
@@ -1013,6 +1107,26 @@ export class ProfilesPractitionersService {
             dto.phone,
             actor.id,
             ahora,
+          );
+        }
+        // Los cuatro contactos que el alta captura por separado. `phone` sigue
+        // arriba —es la forma anterior— y escribe el mismo par que
+        // `workMobilePhone` escribiría con el sistema viejo, así que enviar los
+        // dos a la vez no tiene sentido: gana el que llegue segundo.
+        for (const [valor, par] of [
+          [dto.personalEmail, PAR_CORREO_PERSONAL],
+          [dto.mobilePhone, PAR_CELULAR_PERSONAL],
+          [dto.workMobilePhone, PAR_CELULAR_TRABAJO],
+          [dto.workLandline, PAR_FIJO_TRABAJO],
+        ] as const) {
+          if (valor === undefined) continue;
+          await this.reemplazarContacto(
+            tx,
+            person.id,
+            valor,
+            actor.id,
+            ahora,
+            par,
           );
         }
         if (dto.residenceMunicipalityConceptId !== undefined) {

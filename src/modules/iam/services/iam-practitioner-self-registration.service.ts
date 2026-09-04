@@ -105,6 +105,86 @@ const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
  */
 const ACTIVATION_TTL_MS = 72 * 60 * 60 * 1000;
 
+/** Un punto de contacto listo para persistirse, ya resuelto su par sistema/uso. */
+interface ContactoDeclarado {
+  readonly systemConceptId: string;
+  readonly value: string;
+  readonly useConceptId: string;
+}
+
+/**
+ * Traduce los cinco campos de contacto del alta a filas de
+ * `common.contact_points`.
+ *
+ * El registro del médico pide correo y celular **personales** además de los del
+ * trabajo, y un fijo de trabajo. Cada uno se distingue por el par
+ * sistema × uso; el correo de trabajo es además la identidad de login, por eso
+ * es el único obligatorio.
+ *
+ * `dto.phone` es la forma anterior de declarar el teléfono y se grababa como
+ * `PHONE` con uso de trabajo. **Sigue cayendo exactamente ahí**: reinterpretarlo
+ * como celular cambiaría el significado de las filas ya escritas y dejaría sin
+ * teléfono a todo el que las lee hoy por sistema. Ese lugar es el mismo del
+ * fijo de trabajo, que es lo que `PHONE` significa; si llegan los dos, manda el
+ * campo nuevo.
+ *
+ * @param dto - Cuerpo del alta de profesional.
+ * @returns Los contactos declarados, sin los vacíos.
+ */
+function contactosDeclarados(
+  dto: Pick<
+    RegisterPractitionerDto,
+    | 'email'
+    | 'personalEmail'
+    | 'mobilePhone'
+    | 'workMobilePhone'
+    | 'workLandline'
+    | 'phone'
+  >,
+): readonly ContactoDeclarado[] {
+  const fijoDeTrabajo = dto.workLandline ?? dto.phone;
+
+  const candidatos: readonly (ContactoDeclarado | null)[] = [
+    {
+      systemConceptId: CONCEPTS.CONTACT_EMAIL,
+      value: dto.email,
+      useConceptId: CONCEPTS.CONTACT_USE_WORK,
+    },
+    dto.personalEmail
+      ? {
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          value: dto.personalEmail,
+          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+        }
+      : null,
+    dto.mobilePhone
+      ? {
+          systemConceptId: CONCEPTS.CONTACT_MOBILE,
+          value: dto.mobilePhone,
+          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+        }
+      : null,
+    dto.workMobilePhone
+      ? {
+          systemConceptId: CONCEPTS.CONTACT_MOBILE,
+          value: dto.workMobilePhone,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        }
+      : null,
+    fijoDeTrabajo
+      ? {
+          systemConceptId: CONCEPTS.CONTACT_PHONE,
+          value: fijoDeTrabajo,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        }
+      : null,
+  ];
+
+  return candidatos.filter(
+    (contacto): contacto is ContactoDeclarado => contacto !== null,
+  );
+}
+
 /**
  * Auto-registro público de profesionales de salud.
  *
@@ -516,22 +596,17 @@ export class IamPractitionerSelfRegistrationService {
         actorUserId: user.id,
       });
 
-      // 6) Contacto: el correo siempre, el teléfono si lo aportó.
-      this.contactPointsRepo.create(tx, {
-        ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-        ownerId: person.id,
-        systemConceptId: CONCEPTS.CONTACT_EMAIL,
-        value: dto.email,
-        useConceptId: CONCEPTS.CONTACT_USE_WORK,
-        actorUserId: user.id,
-      });
-      if (dto.phone) {
+      // 6) Contacto: el correo de trabajo siempre —es el de login—, y los
+      // demás si los aportó. Cada uno es una fila propia de
+      // `common.contact_points`, distinguida por el par sistema/uso: el modelo
+      // ya admitía N contactos por persona, lo que faltaba era pedirlos.
+      for (const contacto of contactosDeclarados(dto)) {
         this.contactPointsRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
-          systemConceptId: CONCEPTS.CONTACT_PHONE,
-          value: dto.phone,
-          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+          systemConceptId: contacto.systemConceptId,
+          value: contacto.value,
+          useConceptId: contacto.useConceptId,
           actorUserId: user.id,
         });
       }
