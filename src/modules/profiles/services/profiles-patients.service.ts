@@ -24,7 +24,10 @@ import {
   ContactPointsRepository,
   IdentifiersRepository,
 } from '../../common/repositories';
-import { createResidenceAddress } from '../../common/services/residence-address';
+import {
+  createResidenceAddress,
+  createWorkAddress,
+} from '../../common/services/residence-address';
 import {
   BIRTH_SEX_CODE_BY_CONCEPT,
   BIRTH_SEX_CONCEPT_BY_CODE,
@@ -73,10 +76,19 @@ import {
 } from '../dto';
 import { Addresses, Identifiers } from '../../common/entities';
 import { INS } from '../../insurance/insurance.concepts';
+import { createDeclaredCoverage } from '../../insurance/services/declared-coverage';
+import {
+  CatalogRepository,
+  CoverageRepository,
+} from '../../insurance/repositories';
+import { createGuardianRelatedPerson } from './guardian-related-person';
 // `isPublic` no es columna: el modelo todavía no persiste el tipo de pagador
 // (deuda declarada en el alta, PR #258), así que se deriva del catálogo
 // sembrado — mismo criterio que usa el propio alta al aceptarlos.
-import { isPublicCarrierId } from '../../../common/seed/bolivia-insurance.catalog';
+import {
+  isPublicCarrierId,
+  type InsuranceSector,
+} from '../../../common/seed/bolivia-insurance.catalog';
 import { ProfileOwnershipService } from './profile-ownership.service';
 
 /**
@@ -115,6 +127,21 @@ function sinCamposAusentes<T extends object>(respuesta: T): T {
  */
 function textoOpcional(valor: string): string | undefined {
   return valor.trim() === '' ? undefined : valor;
+}
+
+/**
+ * Una columna `numeric` mapeada como string, de vuelta a número.
+ *
+ * `common.addresses.latitude`/`longitude` viajan como texto en la entidad
+ * —ver {@link createResidenceAddress}— y el DTO del `PATCH` los recibe como
+ * número. Comparar «lo que ya había» contra «lo que llegó» exige que los dos
+ * lados hablen el mismo tipo.
+ *
+ * @param valor - El texto de la columna, o `undefined` si no hay fila vigente.
+ * @returns El número, o `undefined`.
+ */
+function numeroDeColumna(valor: string | undefined): number | undefined {
+  return valor === undefined ? undefined : Number(valor);
 }
 
 /**
@@ -161,6 +188,41 @@ function aplicarOcupacion(
   }
 }
 
+/**
+ * Escribe la empresa donde trabaja, con la misma regla de las dos formas que
+ * no pueden convivir que rige la ocupación — ver {@link aplicarOcupacion}, del
+ * que ésta es la copia exacta para `work_employer_concept_id`/
+ * `work_employer_free_text`. Existe separada y no parametrizada porque las dos
+ * parejas de columnas viven en la misma entidad y una función genérica sobre
+ * «cuál par» sería más difícil de leer que la duplicación de ocho líneas.
+ *
+ * @param person - La persona bajo edición, que se muta.
+ * @param dto - Los campos que llegaron en el cuerpo.
+ */
+function aplicarEmpresa(
+  person: Persons,
+  dto: UpdateOwnPatientProfileDto,
+): void {
+  const conceptoDeclarado = dto.workEmployerConceptId;
+
+  if (dto.workEmployerFreeText !== undefined) {
+    person.workEmployerFreeText = textoOpcional(dto.workEmployerFreeText);
+    if (
+      person.workEmployerFreeText !== undefined &&
+      conceptoDeclarado === undefined
+    ) {
+      person.workEmployerConceptId = undefined;
+    }
+  }
+
+  if (conceptoDeclarado !== undefined) {
+    person.workEmployerConceptId = textoOpcional(conceptoDeclarado);
+    if (person.workEmployerConceptId !== undefined) {
+      person.workEmployerFreeText = undefined;
+    }
+  }
+}
+
 /** Las cuatro partes del nombre, que son las que recomponen `display_name`. */
 const PARTES_DEL_NOMBRE = [
   'name',
@@ -185,6 +247,8 @@ const CAMPOS_DE_LA_PERSONA = [
   'sexAtBirth',
   'occupationConceptId',
   'occupationFreeText',
+  'workEmployerConceptId',
+  'workEmployerFreeText',
 ] as const satisfies readonly (keyof UpdateOwnPatientProfileDto)[];
 
 /**
@@ -289,6 +353,8 @@ export class ProfilesPatientsService {
    * @param contactPointsRepo - Teléfono del paciente (`common.contact_points`).
    * @param addressesRepo - Domicilio del paciente (`common.addresses`).
    * @param attachableFiles - La regla compartida de qué archivo se puede referenciar.
+   * @param insuranceCatalogRepo - Catálogo de planes de salud (`insurance.insurance_plans`).
+   * @param coverageRepo - Coberturas declaradas (`insurance.patient_coverages`).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -312,6 +378,10 @@ export class ProfilesPatientsService {
     // Quién decide si un uuid es un departamento boliviano. La FK acepta
     // cualquier concepto del catálogo, así que la regla es de dominio.
     private readonly administrativeAreas: AdministrativeAreaCatalogService,
+    // El seguro declarado por autoservicio (PATCH) usa los mismos dos
+    // repositorios que ya usa el alta: catálogo de planes y coberturas.
+    private readonly insuranceCatalogRepo: CatalogRepository,
+    private readonly coverageRepo: CoverageRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPatientsService.name);
@@ -516,6 +586,9 @@ export class ProfilesPatientsService {
       // salía el texto.
       occupationConceptId: person.occupationConceptId,
       occupationFreeText: person.occupationFreeText,
+      // Mismo criterio que la ocupación, para la empresa.
+      workEmployerConceptId: person.workEmployerConceptId,
+      workEmployerFreeText: person.workEmployerFreeText,
       phone: telefono?.value,
       photoFileId: person.photoFileId,
       residenceMunicipalityConceptId: domicilio?.municipalityConceptId,
@@ -583,7 +656,9 @@ export class ProfilesPatientsService {
     );
 
     await this.em.transactional(async (tx) => {
-      const { person } = await this.resolveOwnPatient(tx, actor);
+      // `patient.profileId` hace falta para el tutor y el seguro declarado,
+      // que cuelgan del PERFIL de paciente, no de la persona.
+      const { person, patient } = await this.resolveOwnPatient(tx, actor);
       const ahora = new Date();
 
       // Campo por campo y con `!== undefined`: un `??` trataría `''` como «no
@@ -619,6 +694,8 @@ export class ProfilesPatientsService {
       // Las dos columnas de la ocupación se deciden juntas: ver
       // {@link aplicarOcupacion}, porque cuál gana depende de la otra.
       aplicarOcupacion(person, dto);
+      // Misma regla, para la empresa: ver {@link aplicarEmpresa}.
+      aplicarEmpresa(person, dto);
       // Sólo si de verdad se escribió algo en la fila: ver {@link cambiaLaPersona}.
       if (cambiaLaPersona(dto)) {
         touch(person, actor.id);
@@ -629,15 +706,6 @@ export class ProfilesPatientsService {
           tx,
           person.id,
           dto.phone,
-          actor.id,
-          ahora,
-        );
-      }
-      if (dto.residenceMunicipalityConceptId !== undefined) {
-        await this.reemplazarDomicilio(
-          tx,
-          person.id,
-          dto.residenceMunicipalityConceptId,
           actor.id,
           ahora,
         );
@@ -660,24 +728,95 @@ export class ProfilesPatientsService {
           ahora,
         );
       }
-      if (dto.homeAddressLines !== undefined) {
-        await this.reemplazarTextoDeDireccion(
+
+      // Domicilio: municipio, calle y GPS fundidos en una sola escritura — ver
+      // {@link reemplazarDireccion}. Se llama sólo si el cuerpo trae al menos
+      // uno de los tres, para no tocar la fila por nada.
+      if (
+        dto.residenceMunicipalityConceptId !== undefined ||
+        dto.homeAddressLines !== undefined ||
+        (dto.homeLatitude !== undefined && dto.homeLongitude !== undefined)
+      ) {
+        await this.reemplazarDireccion(
           tx,
           person.id,
           CONCEPTS.ADDR_USE_HOME,
-          dto.homeAddressLines,
+          {
+            municipio: dto.residenceMunicipalityConceptId,
+            lines: dto.homeAddressLines,
+            latitude: dto.homeLatitude,
+            longitude: dto.homeLongitude,
+          },
           actor.id,
           ahora,
         );
       }
-      if (dto.workAddressLines !== undefined) {
-        await this.reemplazarTextoDeDireccion(
+      // Trabajo: mismo criterio, con su propio municipio.
+      if (
+        dto.workMunicipalityConceptId !== undefined ||
+        dto.workAddressLines !== undefined ||
+        (dto.workLatitude !== undefined && dto.workLongitude !== undefined)
+      ) {
+        await this.reemplazarDireccion(
           tx,
           person.id,
           CONCEPTS.ADDR_USE_WORK,
-          dto.workAddressLines,
+          {
+            municipio: dto.workMunicipalityConceptId,
+            lines: dto.workAddressLines,
+            latitude: dto.workLatitude,
+            longitude: dto.workLongitude,
+          },
           actor.id,
           ahora,
+        );
+      }
+
+      // El departamento que emitió el documento: metadato de la fila vigente
+      // `ID_TYPE_NATIONAL`, no del número en sí — ver el JSDoc del campo en el
+      // DTO sobre por qué esto NO toca la identidad de login.
+      if (dto.issuerAdministrativeAreaConceptId !== undefined) {
+        await this.reemplazarExpedicion(
+          tx,
+          person.id,
+          dto.issuerAdministrativeAreaConceptId,
+          actor.id,
+        );
+      }
+
+      // El tutor o persona autorizada: ver el JSDoc de
+      // `guardianName` en el DTO sobre por qué esto declara o corrige, y nunca
+      // quita.
+      if (
+        dto.guardianName !== undefined ||
+        dto.guardianPhone !== undefined ||
+        dto.guardianRelationshipConceptId !== undefined
+      ) {
+        await this.reemplazarTutor(tx, patient.profileId, dto, actor.id);
+      }
+
+      // El seguro declarado: sólo agrega si el sector no tenía ninguno — ver
+      // el JSDoc de `privateInsurancePlanId` en el DTO.
+      if (dto.privateInsurancePlanId) {
+        await this.declararCobertura(
+          tx,
+          patient.profileId,
+          person.id,
+          dto.privateInsurancePlanId,
+          'private',
+          1,
+          actor.id,
+        );
+      }
+      if (dto.publicInsurancePlanId) {
+        await this.declararCobertura(
+          tx,
+          patient.profileId,
+          person.id,
+          dto.publicInsurancePlanId,
+          'public',
+          2,
+          actor.id,
         );
       }
 
@@ -842,6 +981,8 @@ export class ProfilesPatientsService {
         plan_name: string | null;
         member_identifier: string | null;
         verification_status_concept_id: string | null;
+        insurance_plan_id: string;
+        coverage_order: number | null;
       }[]
     >(
       // El vínculo pasa por `insurance_products`: un plan cuelga de un producto
@@ -851,7 +992,9 @@ export class ProfilesPatientsService {
               ca.legal_name as carrier_name,
               pl.name       as plan_name,
               c.member_identifier,
-              c.verification_status_concept_id
+              c.verification_status_concept_id,
+              c.insurance_plan_id,
+              c.coverage_order
          from insurance.patient_coverages c
          join insurance.insurance_plans pl on pl.id = c.insurance_plan_id
          join insurance.insurance_products pr on pr.id = pl.insurance_product_id
@@ -868,6 +1011,10 @@ export class ProfilesPatientsService {
         ? {}
         : { memberIdentifier: f.member_identifier }),
       verified: f.verification_status_concept_id === INS.VERIFY_VERIFIED,
+      // El uuid del plan, para que el editor del perfil preseleccione el mismo
+      // `<select>` que ofreció el alta — ver el JSDoc de `planId` en el DTO.
+      planId: f.insurance_plan_id,
+      coverageOrder: f.coverage_order ?? 0,
     }));
   }
 
@@ -1041,26 +1188,108 @@ export class ProfilesPatientsService {
    * @param actorUserId - Quién edita.
    * @param ahora - Instante de la edición, fin de vigencia de la anterior.
    */
-  private async reemplazarDomicilio(
+  /**
+   * Deja vigente una dirección —domicilio o trabajo— que **funde** lo que llega
+   * en el `PATCH` con lo que ya había, en vez de exigir el par completo.
+   *
+   * ## Por qué existe, y qué reemplaza
+   *
+   * Antes había dos funciones: una para el municipio
+   * (`reemplazarDomicilio`, sólo domicilio) y otra para el texto
+   * (`reemplazarTextoDeDireccion`, domicilio y trabajo). Cambiar sólo el
+   * municipio **perdía** la calle y el GPS que ya estaban cargados —creaba la
+   * fila nueva con nada más que el municipio—, porque cada función sólo sabía
+   * de su propio campo. Fundir los tres en una sola escritura es lo que evita
+   * that alguien que corrige el municipio se quede sin la calle que ya había
+   * escrito.
+   *
+   * ## Por qué cierra y vuelve a crear, y no edita la fila
+   *
+   * `common.addresses` lleva `valid_to`: mudarse no debe borrar dónde vivía la
+   * persona cuando la atendieron. Se cierra la vigente y se abre otra con el
+   * estado fundido — mismo criterio que ya regía acá.
+   *
+   * ## Por qué usa `createResidenceAddress`/`createWorkAddress` y no un `create`
+   * directo
+   *
+   * Esas funciones son las mismas que usa el alta: derivan el departamento del
+   * municipio, copian el nombre de la ciudad y usan `CONCEPTS.COUNTRY_BO` — el
+   * código anterior escribía `CONCEPTS.COUNTRY_BOLIVIA`, que **no existe** en
+   * `CONCEPT_DEFS` (la constante real es `COUNTRY_BO`); como el mapa está
+   * tipado `Record<string, ConceptDef>`, TypeScript no lo marcaba, y en
+   * runtime la fila se habría escrito con `country_concept_id: undefined` —
+   * columna no-nulable— para cualquiera que mudara la calle de trabajo sin
+   * tener antes una dirección de trabajo vigente. Pasar por el helper
+   * compartido cierra ese hueco de raíz en vez de corregir el literal acá.
+   *
+   * @param tx - Transacción activa.
+   * @param personId - Persona dueña de la dirección.
+   * @param usoConceptId - `ADDR_USE_HOME` o `ADDR_USE_WORK`.
+   * @param cambios - Lo que el cuerpo trae de esta dirección. `undefined` en
+   *   cualquiera de los tres es «no vino en este cuerpo», no «se borra»: acá se
+   *   completa con lo que ya estaba vigente. Sólo `lines` tiene una forma
+   *   explícita de vaciarse —cadena vacía—, porque es el único cuya ausencia
+   *   total tiene sentido (una dirección sin calle, con sólo el municipio,
+   *   sigue siendo un dato).
+   * @param actorUserId - Quién edita.
+   * @param ahora - Instante de la edición, fin de vigencia de la anterior.
+   */
+  private async reemplazarDireccion(
     tx: EntityManager,
     personId: string,
-    municipalityConceptId: string,
+    usoConceptId: string,
+    cambios: {
+      municipio?: string;
+      lines?: string;
+      latitude?: number;
+      longitude?: number;
+    },
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
     const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
       tx,
       personId,
-      CONCEPTS.ADDR_USE_HOME,
+      usoConceptId,
     );
-    if (vigente?.municipalityConceptId === municipalityConceptId) return;
+
+    const municipio = cambios.municipio ?? vigente?.municipalityConceptId;
+    const lines =
+      cambios.lines === undefined
+        ? vigente?.lines
+        : cambios.lines.trim() === ''
+          ? undefined
+          : cambios.lines.trim();
+    const tieneGps =
+      cambios.latitude !== undefined && cambios.longitude !== undefined;
+    const latitude = tieneGps
+      ? cambios.latitude
+      : numeroDeColumna(vigente?.latitude);
+    const longitude = tieneGps
+      ? cambios.longitude
+      : numeroDeColumna(vigente?.longitude);
+
+    const sinCambios =
+      (vigente?.municipalityConceptId ?? undefined) === municipio &&
+      (vigente?.lines ?? undefined) === lines &&
+      numeroDeColumna(vigente?.latitude) === latitude &&
+      numeroDeColumna(vigente?.longitude) === longitude;
+    if (sinCambios) return;
 
     if (vigente) {
       this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
     }
-    createResidenceAddress(this.addressesRepo, tx, {
+
+    const escribir =
+      usoConceptId === CONCEPTS.ADDR_USE_WORK
+        ? createWorkAddress
+        : createResidenceAddress;
+    escribir(this.addressesRepo, tx, {
       personId,
-      municipalityConceptId,
+      municipalityConceptId: municipio,
+      lines,
+      latitude,
+      longitude,
       actorUserId,
     });
   }
@@ -1113,48 +1342,193 @@ export class ProfilesPatientsService {
   }
 
   /**
-   * El texto de una dirección —domicilio o trabajo— conservando su municipio.
+   * Corrige el departamento que emitió el documento, sin tocar el número.
    *
-   * Cierra la vigente y abre otra, como el municipio: `common.addresses` lleva
-   * `valid_to`, así que mudarse no borra dónde vivía la persona cuando la
-   * atendieron. El municipio y las coordenadas de la anterior se arrastran
-   * porque cambiar la calle no es cambiar de municipio; para eso está
-   * `residenceMunicipalityConceptId`, que viaja aparte.
+   * Edita la fila vigente `ID_TYPE_NATIONAL` **en el lugar** — a diferencia del
+   * NIT o el teléfono, esto no cierra y reabre: el documento con el que la
+   * cuenta entra sigue siendo el mismo, sólo se corrige de qué departamento es.
+   * Cerrar y reabrir la fila habría exigido repetir el número, que este
+   * `PATCH` no recibe ni debe recibir.
+   *
+   * No hace nada si la persona no tiene documento vigente: no hay a qué
+   * departamento atarlo (mismo caso que el alta, donde la expedición viaja
+   * siempre junto al documento).
+   *
+   * @param tx - Transacción activa.
+   * @param personId - Persona dueña del documento.
+   * @param issuerAdministrativeAreaConceptId - El departamento nuevo.
+   * @param actorUserId - Quién edita.
    */
-  private async reemplazarTextoDeDireccion(
+  private async reemplazarExpedicion(
     tx: EntityManager,
     personId: string,
-    usoConceptId: string,
-    lineas: string,
+    issuerAdministrativeAreaConceptId: string,
     actorUserId: string,
-    ahora: Date,
   ): Promise<void> {
-    const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
-      tx,
-      personId,
-      usoConceptId,
-    );
-    const limpio = lineas.trim();
-    if ((vigente?.lines ?? '') === limpio) return;
-
-    if (vigente) {
-      this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
-    }
-    if (limpio === '') return;
-
-    this.addressesRepo.create(tx, {
+    const filas = await tx.find(Identifiers, {
       ownerId: personId,
-      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-      useConceptId: usoConceptId,
-      lines: limpio,
-      // Se arrastran del anterior: cambiar la calle no es cambiar de país ni de
-      // municipio, y perder las coordenadas dejaría el «Ver en el mapa» mudo.
-      countryConceptId: vigente?.countryConceptId ?? CONCEPTS.COUNTRY_BOLIVIA,
-      municipalityConceptId: vigente?.municipalityConceptId,
-      latitude: vigente?.latitude,
-      longitude: vigente?.longitude,
-      actorUserId,
+      validTo: null,
     });
+    const documento = filas.find(
+      (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    );
+    if (!documento) return;
+    if (
+      documento.issuerAdministrativeAreaConceptId ===
+      issuerAdministrativeAreaConceptId
+    ) {
+      return;
+    }
+
+    documento.issuerAdministrativeAreaConceptId =
+      issuerAdministrativeAreaConceptId;
+    touch(documento, actorUserId);
+  }
+
+  /**
+   * Declara o corrige al tutor o persona autorizada (registro · PACIENTE §1.7).
+   *
+   * ## Por qué corrige en el lugar y no cierra y recrea
+   *
+   * `profiles.related_persons` no lleva `valid_to` como `contact_points` o
+   * `addresses`: sólo tiene `RELATED_ACTIVE`. Cerrar la fila del tutor
+   * declarado y abrir una nueva —el patrón que sí sirve para teléfono y
+   * dirección— dejaría DOS filas activas sin un estado que distinga cuál es la
+   * vigente, porque ese estado no existe. Corregir el nombre, el teléfono y el
+   * parentesco de la misma fila declarada evita ese problema sin inventar un
+   * concepto que el modelo no declara (regla 00.1/00.4 del proyecto).
+   *
+   * ## Por qué usa {@link findActiveDeclaredGuardian} y no `findActiveGuardian`
+   *
+   * Ver el JSDoc de ese método: el tutor declarado por autoservicio nace con
+   * `isLegalGuardian: false`, así que `findActiveGuardian` —que filtra por
+   * `true`— nunca lo encuentra.
+   *
+   * @param tx - Transacción activa.
+   * @param patientProfileId - Perfil de paciente que declara al tutor.
+   * @param dto - Los campos del tutor que llegaron en el cuerpo.
+   * @param actorUserId - Quién edita.
+   */
+  private async reemplazarTutor(
+    tx: EntityManager,
+    patientProfileId: string,
+    dto: UpdateOwnPatientProfileDto,
+    actorUserId: string,
+  ): Promise<void> {
+    const declarado = await this.relatedPersonsRepo.findActiveDeclaredGuardian(
+      tx,
+      patientProfileId,
+    );
+
+    if (!declarado) {
+      // Nadie declarado todavía: se crea con el mismo helper del alta.
+      await createGuardianRelatedPerson(
+        {
+          persons: this.personsRepo,
+          relatedPersons: this.relatedPersonsRepo,
+          contactPoints: this.contactPointsRepo,
+        },
+        tx,
+        {
+          patientProfileId,
+          name: dto.guardianName,
+          phone: dto.guardianPhone,
+          relationshipConceptId: dto.guardianRelationshipConceptId,
+          actorUserId,
+        },
+      );
+      return;
+    }
+
+    if (dto.guardianRelationshipConceptId !== undefined) {
+      declarado.relationshipConceptId = dto.guardianRelationshipConceptId;
+      touch(declarado, actorUserId);
+    }
+
+    if (dto.guardianName) {
+      const persona = await this.personsRepo.findById(tx, declarado.personId);
+      if (persona) {
+        persona.displayName = dto.guardianName;
+        touch(persona, actorUserId);
+      }
+    }
+
+    if (dto.guardianPhone) {
+      const vigente = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+        tx,
+        declarado.personId,
+        CONCEPTS.CONTACT_PHONE,
+      );
+      if (vigente?.value !== dto.guardianPhone) {
+        if (vigente) {
+          this.contactPointsRepo.closeVigente(vigente, new Date(), actorUserId);
+        }
+        this.contactPointsRepo.create(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_PERSON,
+          ownerId: declarado.personId,
+          systemConceptId: CONCEPTS.CONTACT_PHONE,
+          value: dto.guardianPhone,
+          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+          actorUserId,
+        });
+      }
+    }
+  }
+
+  /**
+   * Declara el seguro que el paciente dice tener, en un sector que no tenía
+   * declarado todavía (registro · PACIENTE §1.13-§1.14).
+   *
+   * **No reemplaza una cobertura ya declarada.** `insurance.patient_coverages`
+   * no tiene una baja modelada —sólo `COVERAGE_ACTIVE`—, así que si el paciente
+   * ya tenía una del mismo sector (orden 1 o 2), esta función no hace nada: ni
+   * la pisa, ni la duplica, ni inventa un estado de baja que el modelo no
+   * declara. Cambiar de aseguradora por autoservicio queda fuera de este
+   * `PATCH` hasta que exista esa baja.
+   *
+   * @param tx - Transacción activa.
+   * @param patientProfileId - Perfil de paciente que declara la cobertura.
+   * @param personId - Persona dueña del documento, para el número de afiliado
+   *   provisional.
+   * @param insurancePlanId - Plan elegido.
+   * @param sector - `'private'` o `'public'`, según el campo que lo trajo.
+   * @param coverageOrder - 1 para la privada, 2 para la pública.
+   * @param actorUserId - Quién declara.
+   */
+  private async declararCobertura(
+    tx: EntityManager,
+    patientProfileId: string,
+    personId: string,
+    insurancePlanId: string,
+    sector: InsuranceSector,
+    coverageOrder: number,
+    actorUserId: string,
+  ): Promise<void> {
+    const yaDeclarada = await this.coverageRepo.findActiveByPatientAndOrder(
+      tx,
+      patientProfileId,
+      coverageOrder,
+    );
+    if (yaDeclarada) return;
+
+    const { nationalId } = await this.leerIdentificadores(tx, personId);
+    // No debería pasar —el alta exige documento—, pero sin él no hay número de
+    // afiliado provisional que anotar, y declarar sin identificador dejaría
+    // una fila que nadie puede buscar después.
+    if (!nationalId) return;
+
+    await createDeclaredCoverage(
+      { catalog: this.insuranceCatalogRepo, coverage: this.coverageRepo },
+      tx,
+      {
+        patientProfileId,
+        insurancePlanId,
+        expectedSector: sector,
+        coverageOrder,
+        memberIdentifier: nationalId,
+        actorUserId,
+      },
+    );
   }
 
   /**

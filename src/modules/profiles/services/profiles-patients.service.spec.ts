@@ -20,6 +20,12 @@ import {
 import { AttachableFileService } from '../../common/services';
 import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
 import { boOccupationConceptId } from '../../../common/seed/bo-occupations.catalog';
+import { boEmployerConceptId } from '../../../common/seed/bo-employers.catalog';
+import { INS } from '../../insurance/insurance.concepts';
+import {
+  BOLIVIA_PUBLIC_INSURERS,
+  carrierPlanId,
+} from '../../../common/seed/bolivia-insurance.catalog';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -100,6 +106,7 @@ function build() {
     findById: mockFn(),
     create: mockFn(),
     findActiveGuardian: mockFn(),
+    findActiveDeclaredGuardian: mockFn().mockResolvedValue(null),
     findActiveByPatient: mockFn().mockResolvedValue([]),
     reassignPatientProfile: mockFn().mockResolvedValue(0),
   };
@@ -167,6 +174,15 @@ function build() {
     fileVersionsRepo as any,
     { setContext: mockFn(), info: mockFn(), warn: mockFn() } as any,
   );
+  const insuranceCatalogRepo = {
+    findPlan: mockFn().mockResolvedValue(null),
+  };
+  const coverageRepo = {
+    findByMemberAndPlan: mockFn().mockResolvedValue(null),
+    findActiveByPatientAndOrder: mockFn().mockResolvedValue(null),
+    countActiveByPatient: mockFn().mockResolvedValue(0),
+    createCoverage: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ProfilesPatientsService(
@@ -185,6 +201,8 @@ function build() {
     ownership as never,
     attachableFiles,
     administrativeAreas as never,
+    insuranceCatalogRepo as never,
+    coverageRepo as never,
     logger as any,
   );
   return {
@@ -198,6 +216,8 @@ function build() {
     mergeEventsRepo,
     relatedPersonsRepo,
     portalProxiesRepo,
+    insuranceCatalogRepo,
+    coverageRepo,
     contactPointsRepo,
     addressesRepo,
     identifiersRepo,
@@ -1600,9 +1620,10 @@ describe('ProfilesPatientsService', () => {
      */
     it('mudarse conserva el municipio y las coordenadas', async () => {
       const d = conPaciente();
+      const sacaba = boMunicipalityConceptId('031001');
       d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
         lines: 'Calle vieja 1',
-        municipalityConceptId: 'muni-1',
+        municipalityConceptId: sacaba,
         latitude: '-17.78',
         longitude: '-63.18',
         countryConceptId: 'bo',
@@ -1615,7 +1636,7 @@ describe('ProfilesPatientsService', () => {
 
       const [, data] = d.addressesRepo.create.mock.calls[0];
       expect(data.lines).toBe('Av. Nueva 200');
-      expect(data.municipalityConceptId).toBe('muni-1');
+      expect(data.municipalityConceptId).toBe(sacaba);
       expect(data.latitude).toBe('-17.78');
       expect(d.addressesRepo.closeVigente).toHaveBeenCalled();
     });
@@ -1635,6 +1656,111 @@ describe('ProfilesPatientsService', () => {
     });
 
     /** El mismo defecto que el perfil del profesional tenía, y que vivía acá también. */
+    /**
+     * `reemplazarDireccion` funde el cuerpo con la fila vigente en vez de
+     * exigir el par completo — el defecto que tenían por separado
+     * `reemplazarDomicilio` (perdía calle y GPS al cambiar el municipio) y
+     * `reemplazarTextoDeDireccion`. Las cuatro pruebas de acá fijan la fusión;
+     * la de más abajo fija además el `CONCEPTS.COUNTRY_BOLIVIA` que no existía.
+     */
+    it('cambiar sólo el municipio conserva la calle y el GPS', async () => {
+      const d = conPaciente();
+      const sacaba = boMunicipalityConceptId('031001');
+      const trinidad = boMunicipalityConceptId('030301');
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+        lines: 'Av. Blanco Galindo km 5',
+        municipalityConceptId: sacaba,
+        latitude: '-17.40',
+        longitude: '-66.03',
+        countryConceptId: CONCEPTS.COUNTRY_BO,
+      });
+
+      await d.service.updateOwnProfile(
+        { residenceMunicipalityConceptId: trinidad } as any,
+        titular,
+      );
+
+      const [, data] = d.addressesRepo.create.mock.calls[0];
+      expect(data.municipalityConceptId).toBe(trinidad);
+      expect(data.lines).toBe('Av. Blanco Galindo km 5');
+      expect(data.latitude).toBe('-17.4');
+      expect(data.longitude).toBe('-66.03');
+      expect(d.addressesRepo.closeVigente).toHaveBeenCalled();
+    });
+
+    it('cambiar sólo el GPS conserva la calle y el municipio', async () => {
+      const d = conPaciente();
+      const sacaba = boMunicipalityConceptId('031001');
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+        lines: 'Av. Blanco Galindo km 5',
+        municipalityConceptId: sacaba,
+        latitude: '-17.40',
+        longitude: '-66.03',
+        countryConceptId: CONCEPTS.COUNTRY_BO,
+      });
+
+      await d.service.updateOwnProfile(
+        { homeLatitude: -17.41, homeLongitude: -66.05 } as any,
+        titular,
+      );
+
+      const [, data] = d.addressesRepo.create.mock.calls[0];
+      expect(data.municipalityConceptId).toBe(sacaba);
+      expect(data.lines).toBe('Av. Blanco Galindo km 5');
+      expect(data.latitude).toBe('-17.41');
+      expect(data.longitude).toBe('-66.05');
+    });
+
+    it('los mismos tres valores no cierran ni abren ninguna fila', async () => {
+      const d = conPaciente();
+      const sacaba = boMunicipalityConceptId('031001');
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+        lines: 'Av. Blanco Galindo km 5',
+        municipalityConceptId: sacaba,
+        latitude: '-17.40',
+        longitude: '-66.03',
+        countryConceptId: CONCEPTS.COUNTRY_BO,
+      });
+
+      await d.service.updateOwnProfile(
+        {
+          residenceMunicipalityConceptId: sacaba,
+          homeAddressLines: 'Av. Blanco Galindo km 5',
+          homeLatitude: -17.4,
+          homeLongitude: -66.03,
+        } as any,
+        titular,
+      );
+
+      expect(d.addressesRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.addressesRepo.create).not.toHaveBeenCalled();
+    });
+
+    /**
+     * El defecto real: `reemplazarTextoDeDireccion` escribía
+     * `CONCEPTS.COUNTRY_BOLIVIA`, que no existe en `CONCEPT_DEFS` (la
+     * constante es `COUNTRY_BO`). Como `CONCEPT_DEFS` está tipado
+     * `Record<string, ConceptDef>`, TypeScript no lo marcaba, y en runtime la
+     * fila se habría escrito con `country_concept_id: undefined` — columna
+     * no-nulable — para cualquiera que declarara la dirección de trabajo por
+     * primera vez desde el editor de perfil. Este caso, sin dirección de
+     * trabajo previa, no estaba cubierto por ningún spec.
+     */
+    it('sin dirección de trabajo previa, el país es el de Bolivia', async () => {
+      const d = conPaciente();
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
+
+      await d.service.updateOwnProfile(
+        { workAddressLines: 'Av. América esq. Beijing' } as any,
+        titular,
+      );
+
+      const [, data] = d.addressesRepo.create.mock.calls[0];
+      expect(data.countryConceptId).toBe(CONCEPTS.COUNTRY_BO);
+      expect(data.lines).toBe('Av. América esq. Beijing');
+    });
+
+    /** El mismo defecto que el perfil del profesional tenía, y que vivía acá también. */
     it('borrar la fecha de nacimiento la deja sin valor, no en 1970', async () => {
       const d = conPaciente();
       d.person.birthDate = new Date(1990, 4, 5);
@@ -1642,6 +1768,307 @@ describe('ProfilesPatientsService', () => {
       await d.service.updateOwnProfile({ birthDate: null } as any, titular);
 
       expect(d.person.birthDate).toBeUndefined();
+    });
+  });
+
+  /**
+   * **Lo que quedaba fuera del `PATCH` y ya tiene dónde ir en el alta.**
+   *
+   * Trabajo (municipio + calle + GPS fundidos, igual que el domicilio),
+   * empresa (misma regla de las dos formas que la ocupación), el departamento
+   * de emisión del documento, el tutor declarado y el seguro declarado —los
+   * dos últimos con las limitaciones que documenta el DTO: ninguno tiene hoy
+   * un estado de baja en el modelo, así que no hay «reemplazo» ni «quitar»,
+   * sólo declarar o corregir.
+   */
+  describe('updateOwnProfile · trabajo, empresa, expedición, tutor y seguro', () => {
+    const titular = { id: 'user-1', roles: [] } as any;
+
+    function conPaciente() {
+      const d = build();
+      const person = {
+        id: 'per-1',
+        name: 'Ada',
+        lastName: 'Lovelace',
+        workEmployerFreeText: undefined,
+        workEmployerConceptId: undefined,
+      } as any;
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue(person);
+      d.patientProfilesRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        patientCode: 'PC-1',
+      });
+      return { ...d, person };
+    }
+
+    /* ---- trabajo: municipio + calle + GPS fundidos, igual que el domicilio */
+
+    it('el municipio de trabajo se guarda como una dirección de uso WORK', async () => {
+      const d = conPaciente();
+      const trinidad = boMunicipalityConceptId('030301');
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
+
+      await d.service.updateOwnProfile(
+        { workMunicipalityConceptId: trinidad } as any,
+        titular,
+      );
+
+      expect(d.addressesRepo.findVigenteByOwnerAndUse).toHaveBeenCalledWith(
+        d.tx,
+        'per-1',
+        CONCEPTS.ADDR_USE_WORK,
+      );
+      const [, data] = d.addressesRepo.create.mock.calls[0];
+      expect(data.useConceptId).toBe(CONCEPTS.ADDR_USE_WORK);
+      expect(data.municipalityConceptId).toBe(trinidad);
+    });
+
+    /* ---- empresa: misma matriz de reglas que la ocupación ------------------ */
+
+    it('elegir una empresa del catálogo borra el texto libre que hubiera', async () => {
+      const d = conPaciente();
+      d.person.workEmployerFreeText = 'Kiosco de la esquina';
+      const empresa = boEmployerConceptId('BANCO_UNION');
+
+      await d.service.updateOwnProfile(
+        { workEmployerConceptId: empresa } as any,
+        titular,
+      );
+
+      expect(d.person.workEmployerConceptId).toBe(empresa);
+      expect(d.person.workEmployerFreeText).toBeUndefined();
+    });
+
+    it('vaciar la del catálogo la deja en NULL y no toca el texto libre', async () => {
+      const d = conPaciente();
+      d.person.workEmployerConceptId = boEmployerConceptId('BANCO_UNION');
+      d.person.workEmployerFreeText = 'Kiosco de la esquina';
+
+      await d.service.updateOwnProfile(
+        { workEmployerConceptId: '' } as any,
+        titular,
+      );
+
+      expect(d.person.workEmployerConceptId).toBeUndefined();
+      expect(d.person.workEmployerFreeText).toBe('Kiosco de la esquina');
+    });
+
+    it('declararla en texto libre borra la del catálogo', async () => {
+      const d = conPaciente();
+      d.person.workEmployerConceptId = boEmployerConceptId('BANCO_UNION');
+
+      await d.service.updateOwnProfile(
+        { workEmployerFreeText: 'Kiosco de la esquina' } as any,
+        titular,
+      );
+
+      expect(d.person.workEmployerFreeText).toBe('Kiosco de la esquina');
+      expect(d.person.workEmployerConceptId).toBeUndefined();
+    });
+
+    it('con las dos en el mismo cuerpo gana el catálogo', async () => {
+      const d = conPaciente();
+      const empresa = boEmployerConceptId('BANCO_UNION');
+
+      await d.service.updateOwnProfile(
+        {
+          workEmployerConceptId: empresa,
+          workEmployerFreeText: 'Kiosco de la esquina',
+        } as any,
+        titular,
+      );
+
+      expect(d.person.workEmployerConceptId).toBe(empresa);
+      expect(d.person.workEmployerFreeText).toBeUndefined();
+    });
+
+    /* ---- expedición del documento: edita en el lugar, no cierra y reabre --- */
+
+    it('corrige el departamento de emisión sin tocar el número del documento', async () => {
+      const d = conPaciente();
+      const documento = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '4821993',
+        issuerAdministrativeAreaConceptId: 'dep-lp',
+        validTo: null,
+      } as any;
+      d.tx.find.mockResolvedValue([documento]);
+
+      await d.service.updateOwnProfile(
+        { issuerAdministrativeAreaConceptId: 'dep-sc' } as any,
+        titular,
+      );
+
+      expect(documento.issuerAdministrativeAreaConceptId).toBe('dep-sc');
+      expect(documento.value).toBe('4821993');
+      expect(documento.validTo).toBeNull();
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin documento vigente no hace nada: no hay a qué departamento atarlo', async () => {
+      const d = conPaciente();
+      d.tx.find.mockResolvedValue([]);
+
+      await d.service.updateOwnProfile(
+        { issuerAdministrativeAreaConceptId: 'dep-sc' } as any,
+        titular,
+      );
+
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    });
+
+    /* ---- tutor: declara si no hay, corrige en el lugar si ya había -------- */
+
+    it('sin tutor declarado, lo crea con el mismo helper del alta', async () => {
+      const d = conPaciente();
+      d.relatedPersonsRepo.findActiveDeclaredGuardian.mockResolvedValue(null);
+      d.personsRepo.create.mockReturnValue({ id: 'guardian-1' });
+
+      await d.service.updateOwnProfile(
+        {
+          guardianName: 'María Paz',
+          guardianPhone: '+591 70011111',
+        } as any,
+        titular,
+      );
+
+      expect(d.relatedPersonsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          patientProfileId: 'pp-1',
+          personId: 'guardian-1',
+          isEmergencyContact: true,
+          isLegalGuardian: false,
+        }),
+      );
+      expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerTypeConceptId: CONCEPTS.OWNER_PERSON,
+          ownerId: 'guardian-1',
+          value: '+591 70011111',
+        }),
+      );
+    });
+
+    it('con un tutor ya declarado, corrige su nombre en el lugar', async () => {
+      const d = conPaciente();
+      const guardianPerson = {
+        id: 'guardian-1',
+        displayName: 'María Paz',
+      } as any;
+      d.relatedPersonsRepo.findActiveDeclaredGuardian.mockResolvedValue({
+        personId: 'guardian-1',
+        relationshipConceptId: 'rel-madre',
+      } as any);
+      // El primer `findById` resuelve al titular; el segundo, al tutor.
+      d.personsRepo.findById
+        .mockResolvedValueOnce(d.person)
+        .mockResolvedValueOnce(guardianPerson);
+
+      await d.service.updateOwnProfile(
+        { guardianName: 'María Paz Quispe' } as any,
+        titular,
+      );
+
+      expect(guardianPerson.displayName).toBe('María Paz Quispe');
+      // No se crea una segunda fila: se corrige la que ya existía.
+      expect(d.relatedPersonsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('con un tutor ya declarado, corrige el parentesco sin tocar el nombre', async () => {
+      const d = conPaciente();
+      const declarado = {
+        personId: 'guardian-1',
+        relationshipConceptId: 'rel-madre',
+      } as any;
+      d.relatedPersonsRepo.findActiveDeclaredGuardian.mockResolvedValue(
+        declarado,
+      );
+
+      await d.service.updateOwnProfile(
+        { guardianRelationshipConceptId: 'rel-abuela' } as any,
+        titular,
+      );
+
+      expect(declarado.relationshipConceptId).toBe('rel-abuela');
+      // `findById` se llama para resolver al titular y de nuevo al releer el
+      // perfil al final, pero nunca con el id del tutor: sin `guardianName` en
+      // el cuerpo no hay por qué corregirle el nombre.
+      expect(d.personsRepo.findById).not.toHaveBeenCalledWith(
+        d.tx,
+        'guardian-1',
+      );
+    });
+
+    /* ---- seguro declarado: agrega si no había, no reemplaza si ya había --- */
+
+    it('declara el seguro privado si el paciente no tenía ninguno de ese sector', async () => {
+      const d = conPaciente();
+      const plan = carrierPlanId(
+        'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A',
+        'RED_MAX',
+      );
+      d.coverageRepo.findActiveByPatientAndOrder.mockResolvedValue(null);
+      d.coverageRepo.findByMemberAndPlan.mockResolvedValue(null);
+      d.insuranceCatalogRepo.findPlan.mockResolvedValue({
+        id: 'plan-1',
+        statusConceptId: INS.PLAN_ACTIVE,
+      });
+      d.tx.find.mockResolvedValue([
+        { typeConceptId: CONCEPTS.ID_TYPE_NATIONAL, value: '4821993' },
+      ]);
+
+      await d.service.updateOwnProfile(
+        { privateInsurancePlanId: plan } as any,
+        titular,
+      );
+
+      expect(d.coverageRepo.createCoverage).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          patientProfileId: 'pp-1',
+          insurancePlanId: plan,
+          coverageOrder: 1,
+          memberIdentifier: '4821993',
+          verificationStatusConceptId: INS.VERIFY_PENDING,
+        }),
+      );
+    });
+
+    it('el seguro público usa el orden 2, y no se toca si ya había uno declarado', async () => {
+      const d = conPaciente();
+      const plan = carrierPlanId(BOLIVIA_PUBLIC_INSURERS[0].code, 'BASE');
+      d.coverageRepo.findActiveByPatientAndOrder.mockResolvedValue({
+        id: 'cov-existente',
+      } as any);
+
+      await d.service.updateOwnProfile(
+        { publicInsurancePlanId: plan } as any,
+        titular,
+      );
+
+      expect(d.coverageRepo.createCoverage).not.toHaveBeenCalled();
+    });
+
+    it('sin documento vigente, no declara el seguro: no hay número de afiliado', async () => {
+      const d = conPaciente();
+      const plan = carrierPlanId(
+        'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A',
+        'RED_MAX',
+      );
+      d.coverageRepo.findActiveByPatientAndOrder.mockResolvedValue(null);
+      d.tx.find.mockResolvedValue([]);
+
+      await d.service.updateOwnProfile(
+        { privateInsurancePlanId: plan } as any,
+        titular,
+      );
+
+      expect(d.coverageRepo.createCoverage).not.toHaveBeenCalled();
     });
   });
 
