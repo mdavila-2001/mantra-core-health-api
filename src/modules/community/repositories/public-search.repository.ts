@@ -111,6 +111,16 @@ export interface PublicReactionRow extends PublicSocialActorRow {
   readonly reactionTypeConceptId: string;
 }
 
+/** Un adjunto de comentario público (REQ-01-011), tal como sale de la fila. */
+export interface PublicCommentMediaRow {
+  /** Archivo en `common.files`; el servicio lo resuelve a `/public/media/:fileId`. */
+  readonly fileId: string;
+  /** Concept id del rol (imagen, sticker, GIF); el servicio lo resuelve al código. */
+  readonly mediaRoleConceptId: string;
+  /** Texto alternativo, si se aportó. */
+  readonly altText: string | null;
+}
+
 /** Un comentario público con su autor. */
 export interface PublicCommentRow extends PublicSocialActorRow {
   /** Identificador del comentario. */
@@ -121,6 +131,8 @@ export interface PublicCommentRow extends PublicSocialActorRow {
   readonly createdAt: Date;
   /** Cuántas respuestas cuelgan de él. */
   readonly replyCount: number;
+  /** Adjuntos, en orden de despliegue (REQ-01-011). */
+  readonly media: readonly PublicCommentMediaRow[];
 }
 
 /**
@@ -1094,6 +1106,63 @@ export class PublicSearchRepository {
     return filas.length > 0;
   }
 
+  /**
+   * Si un archivo es un adjunto (imagen, sticker o GIF) de un comentario
+   * público (REQ-01-011). Tercera pieza del mismo trío que `isPublicMedia`
+   * (avatar/portada) e `isPublicPostMedia` (fotos del cuerpo del post):
+   * `PublicCommentMediaDto.url` sirve `/public/media/:fileId`, y sin esta
+   * comprobación esa URL sería un 404 para cualquier anónimo — la miniatura
+   * se vería en la propia sesión de quien comentó y rota para todos los demás.
+   *
+   * Dos vitrinas tienen que ser públicas a la vez, no una: la de quien
+   * **comentó** (si su perfil se privatiza, su adjunto deja de servirse con
+   * él, igual que su texto) y la de quien **publicó** el post comentado
+   * (mismo criterio que `POST_PUBLICO_SQL`). Cubre respuestas igual que
+   * comentarios raíz: ambas guardan el mismo `commentable_ref_id` — el post—,
+   * la única diferencia es `parent_comment_id`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fileId - El archivo a comprobar.
+   */
+  async isPublicCommentMedia(
+    em: EntityManager,
+    fileId: string,
+  ): Promise<boolean> {
+    const filas = await em.getConnection().execute<{ uno: number }[]>(
+      `SELECT 1 AS uno
+         FROM community.comment_media cm
+         JOIN community.comments c ON c.id = cm.comment_id
+         JOIN community.public_profiles author ON author.id = c.author_profile_id
+         JOIN community.social_posts sp ON sp.id = c.commentable_ref_id
+         JOIN community.public_profiles post_author ON post_author.id = sp.author_public_profile_id
+        WHERE cm.file_id = ?
+          AND c.commentable_type_concept_id = ?
+          AND c.status_concept_id = ?
+          AND author.visibility_concept_id = ?
+          AND author.status_concept_id = ?
+          AND sp.visibility_concept_id = ?
+          AND sp.publication_status_concept_id = ?
+          AND sp.moderation_status_concept_id <> ?
+          AND post_author.visibility_concept_id = ?
+          AND post_author.status_concept_id = ?
+        LIMIT 1`,
+      [
+        fileId,
+        COMM.CONTENT_TYPE_POST,
+        CONCEPTS.STATE_ACTIVE,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+        COMM.POST_VISIBILITY_PUBLIC,
+        COMM.PUBLICATION_PUBLISHED,
+        COMM.MODERATION_REMOVED,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ],
+      'all',
+    );
+    return filas.length > 0;
+  }
+
   /** Cuántas reseñas publicadas tiene un perfil (para la ficha). */
   async countPublishedReviews(
     em: EntityManager,
@@ -1410,6 +1479,11 @@ export class PublicSearchRepository {
       'all',
     );
 
+    const mediaByComment = await this.listPublicCommentMedia(
+      em,
+      filas.map((fila) => fila.id),
+    );
+
     return filas.map((fila) => ({
       id: fila.id,
       bodyText: fila.body_text,
@@ -1420,6 +1494,50 @@ export class PublicSearchRepository {
       authorHeadline: fila.author_headline,
       authorAvatarFileId: fila.author_avatar_file_id,
       authorKindConceptId: fila.author_kind_concept_id,
+      media: mediaByComment.get(fila.id) ?? [],
     }));
+  }
+
+  /**
+   * Adjuntos de un lote de comentarios públicos, agrupados por comentario
+   * (REQ-01-011).
+   *
+   * No hay `JOIN` con `pp`/`AUTOR_PUBLICO_SQL` acá: los `commentIds` ya
+   * salieron de `listPublicComments`, que sólo devolvió comentarios de
+   * autores públicos — repetir el filtro sería repetir un chequeo que la
+   * fila que lo pide ya pasó.
+   */
+  private async listPublicCommentMedia(
+    em: EntityManager,
+    commentIds: string[],
+  ): Promise<Map<string, PublicCommentMediaRow[]>> {
+    const byComment = new Map<string, PublicCommentMediaRow[]>();
+    if (commentIds.length === 0) return byComment;
+    const marcadores = commentIds.map(() => '?').join(', ');
+    const filas = await em.getConnection().execute<
+      {
+        comment_id: string;
+        file_id: string;
+        media_role_concept_id: string;
+        alt_text: string | null;
+      }[]
+    >(
+      `SELECT comment_id, file_id, media_role_concept_id, alt_text
+         FROM community.comment_media
+        WHERE comment_id IN (${marcadores})
+        ORDER BY ordinal ASC NULLS LAST, id ASC`,
+      commentIds,
+      'all',
+    );
+    for (const fila of filas) {
+      const lista = byComment.get(fila.comment_id) ?? [];
+      lista.push({
+        fileId: fila.file_id,
+        mediaRoleConceptId: fila.media_role_concept_id,
+        altText: fila.alt_text,
+      });
+      byComment.set(fila.comment_id, lista);
+    }
+    return byComment;
   }
 }

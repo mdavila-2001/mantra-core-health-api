@@ -80,6 +80,7 @@ function build(opciones?: {
     listFeedPublico: mockFn().mockResolvedValue([]),
     engagementByPost: mockFn().mockResolvedValue(new Map()),
     isPublicPostMedia: mockFn().mockResolvedValue(false),
+    isPublicCommentMedia: mockFn().mockResolvedValue(false),
     countPublishedReviews: mockFn().mockResolvedValue(0),
     nearbyProfiles: mockFn().mockResolvedValue([]),
     badgesByProfiles: mockFn().mockResolvedValue(new Map()),
@@ -169,6 +170,49 @@ function build(opciones?: {
 }
 
 describe('CommunityPublicService', () => {
+  describe('getPublicMedia — qué archivo se sirve a un anónimo', () => {
+    it('sirve el avatar/portada de un perfil (primera de las tres clases)', async () => {
+      const d = build();
+      d.profiles.isPublicMedia.mockResolvedValue(true);
+
+      await d.service.getPublicMedia('f-avatar');
+
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-avatar');
+    });
+
+    it('sirve una foto del cuerpo de un post público (segunda clase)', async () => {
+      const d = build();
+      d.repo.isPublicPostMedia.mockResolvedValue(true);
+
+      await d.service.getPublicMedia('f-post');
+
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-post');
+    });
+
+    // REQ-01-011: la tercera clase — un adjunto de comentario.
+    it('sirve un adjunto de comentario público (tercera clase)', async () => {
+      const d = build();
+      d.repo.isPublicCommentMedia.mockResolvedValue(true);
+
+      await d.service.getPublicMedia('f-comentario');
+
+      expect(d.repo.isPublicCommentMedia).toHaveBeenCalledWith(
+        expect.anything(),
+        'f-comentario',
+      );
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-comentario');
+    });
+
+    it('ninguna de las tres clases lo reclama: 404, no se sirve nada', async () => {
+      const d = build();
+
+      await expect(d.service.getPublicMedia('f-ajeno')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.files.downloadPublicMedia).not.toHaveBeenCalled();
+    });
+  });
+
   describe('la proyección no filtra campos internos', () => {
     it('la fila del buscador tiene exactamente las claves permitidas', async () => {
       const d = build();
@@ -1123,6 +1167,9 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     authorHeadline: null,
     authorAvatarFileId: null,
     authorKindConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
+    // REQ-01-011: el repositorio real siempre trae el arreglo (vacío si no
+    // hay adjuntos), nunca `undefined` — ver `listPublicComments`.
+    media: [],
   });
 
   describe('quién reaccionó (AC-01-9)', () => {

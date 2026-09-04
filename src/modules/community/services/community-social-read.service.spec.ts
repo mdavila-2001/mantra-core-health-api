@@ -34,6 +34,7 @@ function build() {
   const commentsRepo = {
     listRootsPage: mockFn().mockResolvedValue([]),
     listRepliesOf: mockFn().mockResolvedValue([]),
+    listMediaForComments: mockFn().mockResolvedValue([]),
   };
   const reactionsRepo = {
     summarizeByTarget: mockFn().mockResolvedValue([]),

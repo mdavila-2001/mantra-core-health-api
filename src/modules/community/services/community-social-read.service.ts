@@ -35,6 +35,7 @@ import type {
   PostListItemDto,
   CommentThreadPageDto,
   CommentThreadItemDto,
+  CommentMediaDto,
   ReactionSummaryDto,
   FollowPageDto,
   BookmarkPageDto,
@@ -385,9 +386,18 @@ export class CommunitySocialReadService {
       REPLIES_PER_PAGE,
     );
 
+    // REQ-01-011: los adjuntos de raíces y respuestas, en un solo viaje —
+    // pedirlos comentario por comentario sería un N+1 por cada uno con foto.
+    const mediaByComment = await this.mediaByComment(em, [
+      ...roots.map((root) => root.id),
+      ...replies.map((reply) => reply.id),
+    ]);
+
     const last = roots.at(-1);
     return {
-      items: roots.map((root) => this.toCommentThread(root, replies)),
+      items: roots.map((root) =>
+        this.toCommentThread(root, replies, mediaByComment),
+      ),
       count: roots.length,
       limit: options.limit,
       nextCursor:
@@ -662,6 +672,7 @@ export class CommunitySocialReadService {
   private toCommentThread(
     root: Comments,
     replies: Comments[],
+    mediaByComment: Map<string, CommentMediaDto[]>,
   ): CommentThreadItemDto {
     const own = replies.filter((reply) => reply.parentCommentId === root.id);
     return {
@@ -672,7 +683,31 @@ export class CommunitySocialReadService {
       threadDepth: root.threadDepth ?? null,
       replyCount: root.replyCount ?? null,
       createdAt: root.createdAt,
-      replies: own.map((reply) => this.toCommentThread(reply, replies)),
+      replies: own.map((reply) =>
+        this.toCommentThread(reply, replies, mediaByComment),
+      ),
+      media: mediaByComment.get(root.id) ?? [],
     };
+  }
+
+  /** Adjuntos de un lote de comentarios, agrupados por comentario (REQ-01-011). */
+  private async mediaByComment(
+    em: EntityManager,
+    commentIds: string[],
+  ): Promise<Map<string, CommentMediaDto[]>> {
+    const rows = await this.commentsRepo.listMediaForComments(em, commentIds);
+    const byComment = new Map<string, CommentMediaDto[]>();
+    for (const row of rows) {
+      const list = byComment.get(row.commentId) ?? [];
+      list.push({
+        id: row.id,
+        fileId: row.fileId,
+        mediaRoleConceptId: row.mediaRoleConceptId,
+        altText: row.altText ?? null,
+        ordinal: row.ordinal ?? null,
+      });
+      byComment.set(row.commentId, list);
+    }
+    return byComment;
   }
 }

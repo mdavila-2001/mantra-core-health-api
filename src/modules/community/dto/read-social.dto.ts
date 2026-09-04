@@ -129,6 +129,29 @@ export class PostMediaDto {
   ordinal?: number | null;
 }
 
+/** Adjunto de un comentario (REQ-01-011: imagen, sticker o GIF). */
+export class CommentMediaDto {
+  /** Identificador del adjunto. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Archivo en `common.files`. */
+  @ApiProperty({ format: 'uuid' })
+  fileId!: string;
+
+  /** Concept id del rol del medio (imagen, sticker, GIF). */
+  @ApiProperty({ format: 'uuid' })
+  mediaRoleConceptId!: string;
+
+  /** Texto alternativo para lectores de pantalla. */
+  @ApiPropertyOptional()
+  altText?: string | null;
+
+  /** Orden de despliegue. */
+  @ApiPropertyOptional()
+  ordinal?: number | null;
+}
+
 /** Etiqueta asociada a una publicación. */
 export class PostHashtagDto {
   /** Identificador de la etiqueta. */
@@ -340,6 +363,10 @@ export class CommentThreadItemDto {
   /** Respuestas anidadas de este comentario. */
   @ApiProperty({ type: [CommentThreadItemDto] })
   replies!: CommentThreadItemDto[];
+
+  /** Adjuntos del comentario (REQ-01-011), en orden de despliegue. */
+  @ApiProperty({ type: [CommentMediaDto] })
+  media!: CommentMediaDto[];
 }
 
 /** Página de comentarios raíz con sus hilos. */

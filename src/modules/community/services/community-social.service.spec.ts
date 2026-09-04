@@ -50,7 +50,11 @@ function build() {
     linkHashtag: mockFn(),
     createMention: mockFn(),
   };
-  const commentsRepo = { findById: mockFn(), create: mockFn() };
+  const commentsRepo = {
+    findById: mockFn(),
+    create: mockFn(),
+    createMedia: mockFn(),
+  };
   const reactionsRepo = { findByActorTarget: mockFn(), create: mockFn() };
   const bookmarksRepo = { findByProfileTarget: mockFn(), create: mockFn() };
   const followsRepo = {
@@ -844,6 +848,79 @@ describe('CommunitySocialService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    // REQ-01-011: imágenes, stickers y GIFs adjuntos.
+    it('persists each attachment with its own media-role concept and ordinal', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({ id: 'p1' });
+      d.commentsRepo.create.mockReturnValue({ id: 'c1' });
+
+      await d.service.createComment(
+        {
+          authorProfileId: 'p1',
+          commentableType: 'POST',
+          commentableRefId: 'post1',
+          bodyText: 'con adjuntos',
+          media: [
+            { fileId: 'f1', mediaRole: 'STICKER' },
+            { fileId: 'f1', mediaRole: 'GIF', altText: 'reacción' },
+          ],
+        } as any,
+        actor,
+      );
+
+      expect(d.commentsRepo.createMedia).toHaveBeenCalledTimes(2);
+      expect(d.commentsRepo.createMedia).toHaveBeenNthCalledWith(
+        1,
+        d.tx,
+        expect.objectContaining({
+          commentId: 'c1',
+          fileId: 'f1',
+          mediaRoleConceptId: COMM.MEDIA_ROLE_STICKER,
+          ordinal: 0,
+          actorUserId: actor.id,
+        }),
+      );
+      expect(d.commentsRepo.createMedia).toHaveBeenNthCalledWith(
+        2,
+        d.tx,
+        expect.objectContaining({
+          commentId: 'c1',
+          fileId: 'f1',
+          mediaRoleConceptId: COMM.MEDIA_ROLE_GIF,
+          altText: 'reacción',
+          ordinal: 1,
+        }),
+      );
+    });
+
+    // Mismo IDOR que ya cubría `publishPost`: un `fileId` que no subió el
+    // actor no cuelga de su comentario sólo porque lo mandó en el body.
+    it('rejects a fileId that was uploaded by someone else', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({ id: 'p1' });
+      d.commentsRepo.create.mockReturnValue({ id: 'c1' });
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'f-ajeno',
+        createdByUserId: 'otro-usuario',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        d.service.createComment(
+          {
+            authorProfileId: 'p1',
+            commentableType: 'POST',
+            commentableRefId: 'post1',
+            bodyText: 'con adjunto ajeno',
+            media: [{ fileId: 'f-ajeno', mediaRole: 'IMAGE' }],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.commentsRepo.createMedia).not.toHaveBeenCalled();
     });
   });
 

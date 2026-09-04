@@ -80,6 +80,31 @@ export class PublicPostReactionDto extends PublicSocialActorDto {
  * abrir las respuestas (AC-01-12), y porque es el único identificador de esta
  * superficie que no referencia a una persona.
  */
+/**
+ * Un adjunto de comentario público (REQ-01-011).
+ *
+ * Mismo criterio que `PublicSocialActorDto.avatarUrl`: se sirve la **URL**
+ * servida por la propia API (`/public/media/:fileId`), nunca el `fileId` ni
+ * el `mediaRoleConceptId` internos — un uuid de `common.files` regalado a un
+ * anónimo es un dato que no se puede volver a esconder.
+ */
+export class PublicCommentMediaDto {
+  @ApiProperty({ description: 'URL servida por la API, no el fileId interno' })
+  url!: string;
+
+  @ApiProperty({
+    description: 'Qué tipo de adjunto es',
+    enum: ['IMAGE', 'STICKER', 'GIF'],
+  })
+  kind!: 'IMAGE' | 'STICKER' | 'GIF';
+
+  @ApiProperty({
+    nullable: true,
+    description: 'Texto alternativo, si lo tiene',
+  })
+  altText!: string | null;
+}
+
 export class PublicCommentDto {
   @ApiProperty({ description: 'Identificador del comentario' })
   id!: string;
@@ -101,6 +126,12 @@ export class PublicCommentDto {
       'Quién lo escribió, con la misma proyección que el autor del feed',
   })
   author!: PublicSocialActorDto;
+
+  @ApiProperty({
+    type: [PublicCommentMediaDto],
+    description: 'Imágenes, stickers y GIFs adjuntos (REQ-01-011)',
+  })
+  media!: PublicCommentMediaDto[];
 }
 
 /** Página de «quién reaccionó» (AC-01-9). */
