@@ -606,9 +606,34 @@ describe('PharmacyOrdersService', () => {
       expect(d.ordersRepo.findPharmaciesByIdsInTenant).toHaveBeenCalledTimes(1);
       expect(d.ordersRepo.findProductsByIds).toHaveBeenCalledTimes(1);
       expect(d.ordersRepo.findConceptsByIds).toHaveBeenCalledTimes(1);
-      // Cero UUIDs pintables: la línea sale con nombre y estado en palabras.
+      // El UUID técnico se publica para buscar sustitutos; la UI sigue pintando palabras.
+      expect(res.items[0].lines[0].medicationConceptId).toBe('concept-amoxi');
       expect(res.items[0].lines[0].genericName).toBe('Amoxicilina');
       expect(res.items[0].pharmacyName).toBe('Farmacia Andina');
+    });
+
+    it('preserves a null medication concept on an order line', async () => {
+      const d = build();
+      d.ordersRepo.findOrdersByPatient.mockResolvedValue([pedido()]);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
+        {
+          inventoryReservationId: 'order-1',
+          pharmacyProductId: 'prod-1',
+          requestedQuantity: '1',
+          reservedQuantity: '1',
+          statusConceptId: PINV.RES_LINE_CONFIRMED,
+        },
+      ]);
+      d.ordersRepo.findProductsByIds.mockResolvedValue([
+        { ...PRODUCTO, medicationConceptId: null },
+      ]);
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.listMine(paciente),
+      );
+
+      expect(res.items[0].lines[0].medicationConceptId).toBeNull();
+      expect(res.items[0].lines[0].genericName).toBe('Amoxicilina');
     });
 
     it('an order from a pharmacy outside the tenant simply does not appear', async () => {

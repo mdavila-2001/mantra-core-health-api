@@ -2401,6 +2401,7 @@ function toOrderDto(
       const product = productById.get(productId);
       return {
         productId,
+        medicationConceptId: product?.medicationConceptId ?? null,
         productCode: product?.productCode ?? '',
         brandName: product?.brandName ?? null,
         genericName: product?.genericName ?? null,
