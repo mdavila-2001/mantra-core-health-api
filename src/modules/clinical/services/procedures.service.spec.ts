@@ -22,14 +22,16 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const proceduresRepo = { findById: mockFn(), create: mockFn() };
   const serviceRequestsRepo = { findById: mockFn() };
+  const filesService = { createLink: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ProceduresService(
     em as any,
     proceduresRepo,
     serviceRequestsRepo as any,
+    filesService as any,
     logger as any,
   );
-  return { service, proceduresRepo, serviceRequestsRepo };
+  return { service, proceduresRepo, serviceRequestsRepo, filesService };
 }
 
 describe('ProceduresService (UC-08-12)', () => {
@@ -91,5 +93,42 @@ describe('ProceduresService (UC-08-12)', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+});
+
+describe('ProceduresService · attachFile (ALV-033, odontología)', () => {
+  it('liga el archivo a ESTE procedimiento, con OwnerType.PROCEDURE', async () => {
+    const d = build();
+    d.proceduresRepo.findById.mockResolvedValue({ id: 'proc1' });
+    d.filesService.createLink.mockResolvedValue({
+      id: 'link1',
+      fileId: 'file1',
+      ownerId: 'proc1',
+      ownerType: 'PROCEDURE',
+      createdAt: new Date('2026-01-01'),
+    });
+
+    const resultado = await d.service.attachFile(
+      'proc1',
+      { fileId: 'file1' },
+      actor,
+    );
+
+    expect(d.filesService.createLink).toHaveBeenCalledWith(
+      'file1',
+      { ownerType: 'PROCEDURE', ownerId: 'proc1' },
+      actor,
+    );
+    expect(resultado.ownerId).toBe('proc1');
+  });
+
+  it('rechaza adjuntar a un procedimiento que no existe', async () => {
+    const d = build();
+    d.proceduresRepo.findById.mockResolvedValue(null);
+
+    await expect(
+      d.service.attachFile('missing', { fileId: 'file1' }, actor),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.filesService.createLink).not.toHaveBeenCalled();
   });
 });

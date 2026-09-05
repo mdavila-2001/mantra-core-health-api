@@ -2138,7 +2138,7 @@ export class ProfilesPractitionersService {
         tx,
         affiliation.practitionerProfileId,
         organizationName,
-        roleTitle,
+        roleTitle ?? null,
         startDate,
       );
       if (igual && igual.id !== affiliation.id) {
@@ -2150,7 +2150,7 @@ export class ProfilesPractitionersService {
 
       affiliation.organizationName = organizationName;
       // La entidad tipa la columna `nullable: true` como `string | undefined`
-      // (mismo criterio que el alta): `null` es «sin cargo» para
+      // (mismo criterio que el alta, línea ~2005): `null` es «sin cargo» para
       // `findSame`/el DTO, `undefined` es lo que la propiedad ORM acepta.
       affiliation.roleTitle = roleTitle ?? undefined;
       affiliation.startDate = startDate;

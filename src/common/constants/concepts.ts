@@ -370,6 +370,14 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'OWNER_CONDITION',
     'Condition',
   ),
+  // Un archivo ligado a UN procedimiento puntual (`clinical.procedures`) —
+  // incluye lo odontológico, que es un procedimiento con categoría dental
+  // (ver `PeriopDentalService`). Mismo criterio que OWNER_CONDITION.
+  OWNER_PROCEDURE: def(
+    'common:owner-type:procedure',
+    'OWNER_PROCEDURE',
+    'Procedure',
+  ),
 
   // --- Common: identificadores oficiales ---
   ID_TYPE_NATIONAL: def(

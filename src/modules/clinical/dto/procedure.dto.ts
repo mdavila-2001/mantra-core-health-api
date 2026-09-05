@@ -1,6 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
+/** Cuerpo de `POST /clinical/procedures/:id/attachments` (ALV-033, odontología). */
+export class AttachFileToProcedureDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  fileId!: string;
+}
+
 /** Cuerpo de `POST /clinical/procedures` (UC-08-12). */
 export class CreateProcedureDto {
   /**
