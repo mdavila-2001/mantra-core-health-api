@@ -133,6 +133,12 @@ function build() {
     assertRangoLibre: mockFn(async () => undefined),
     compromisos: mockFn(async () => []),
   };
+  // ALV-021: por omisión nadie declara cobertura, que es el caso de la gran
+  // mayoría de las reservas de estas pruebas. Las que sí comprueban el nombre
+  // de la aseguradora devuelven un mapa a propósito.
+  const coverageRepo = {
+    findActiveCarriersByPatients: mockFn().mockResolvedValue(new Map()),
+  };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -144,12 +150,14 @@ function build() {
     logger as any,
     vinculos as any,
     tiempoProfesional as any,
+    coverageRepo as any,
   );
   return {
     service,
     tx,
     vinculos,
     tiempoProfesional,
+    coverageRepo,
     bookingsRepo,
     catalogRepo,
     historyRepo,
@@ -2155,6 +2163,67 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(res.items[0].patientName).toBe('Marisol Quispe');
+    });
+
+    it('ALV-021 · con cobertura activa, la fila dice el nombre de la aseguradora', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.coverageRepo.findActiveCarriersByPatients.mockResolvedValue(
+        new Map([[PATIENT, 'Seguros Illimani']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      expect(res.items[0].insuranceCarrierName).toBe('Seguros Illimani');
+    });
+
+    it('ALV-021 · sin cobertura, la fila dice `null` — Particular, no un hueco', async () => {
+      // `null` es la respuesta comprobada: se buscó y no tiene. Un `undefined`
+      // acá diría «no se supo», que es la otra prueba de abajo.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.coverageRepo.findActiveCarriersByPatients.mockResolvedValue(new Map());
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      expect(res.items[0].insuranceCarrierName).toBeNull();
+    });
+
+    it('ALV-021 · un profesional ajeno no ve la cobertura: misma regla que el nombre', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-DE-OTRO',
+      });
+      d.coverageRepo.findActiveCarriersByPatients.mockResolvedValue(
+        new Map([[PATIENT, 'Seguros Illimani']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-propio') as any,
+      );
+
+      expect(res.items[0].insuranceCarrierName).toBeUndefined();
+      expect(JSON.stringify(res)).not.toContain('Illimani');
     });
 
     it('el estado de pago viaja en la página, en UNA sola consulta', async () => {
