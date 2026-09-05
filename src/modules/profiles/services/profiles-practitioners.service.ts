@@ -2082,7 +2082,10 @@ export class ProfilesPractitionersService {
 
       const organizationName =
         dto.organizationName?.trim() ?? affiliation.organizationName;
-      const roleTitle = dto.roleTitle?.trim() ?? affiliation.roleTitle;
+      // ALV-007: el cargo es opcional; el repositorio distingue «sin cargo»
+      // como `null`, nunca como `undefined`.
+      const roleTitle =
+        (dto.roleTitle?.trim() || affiliation.roleTitle) ?? null;
       const startDate =
         dto.startDate !== undefined
           ? new Date(dto.startDate)
