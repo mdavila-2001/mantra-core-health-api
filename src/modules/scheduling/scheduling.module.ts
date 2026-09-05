@@ -31,6 +31,7 @@ import {
 } from './repositories';
 import { AuditModule } from '../audit/audit.module';
 import { DirectoryModule } from '../directory/directory.module';
+import { InsuranceModule } from '../insurance/insurance.module';
 // El repositorio de citas clínicas es una clase sin estado que recibe el
 // `EntityManager` por parámetro, así que proveerlo acá no duplica nada ni crea
 // dos fuentes de verdad: evita importar el módulo clínico entero sólo para
@@ -71,6 +72,10 @@ import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice
     DirectoryModule,
     PracticeModule,
     MessagingModule,
+    // ALV-021: la lista de consultas dice «Particular» o el nombre de la
+    // aseguradora. `CoverageRepository` es de sólo lectura y ya lo consumen
+    // `iam` y `profiles` desde afuera con el mismo patrón.
+    InsuranceModule,
   ],
   controllers: [
     SchedulingController,
