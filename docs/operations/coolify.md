@@ -305,6 +305,18 @@ internet (`POSTGRES_PUBLIC_PORT`, por defecto `5432`). Es la **única** base del
 stack que se expone: Mongo, Redis, OpenSearch y MinIO siguen solo en la red
 interna `alovida`.
 
+### El tráfico va sin cifrar
+
+`DB_SSL` está vacío y el contenedor no lleva certificado, así que la conexión
+del tester viaja en claro: contraseña incluida en el primer intercambio, y
+después las filas. Sobre una base con historias clínicas eso es material
+sensible atravesando internet sin TLS.
+
+Mientras siga así, lo que reduce el riesgo es que el rol expuesto solo lea, que
+la contraseña sea larga y de un solo uso, y que el puerto se cierre en cuanto
+los testers terminen. Para cerrarlo del todo hay que montar un certificado en
+el contenedor y exigir `hostssl` en `pg_hba.conf`; eso no está hecho.
+
 ### Lo que hay que hacer una sola vez en el servidor
 
 1. **Abrir el puerto en el firewall** del servidor. En Ubuntu con `ufw`:
@@ -316,37 +328,28 @@ interna `alovida`.
    Sin esto el contenedor publica el puerto pero nadie llega.
 
 2. **Crear el rol de solo lectura.** El rol `alovida` (`POSTGRES_USER`) es el
-   dueño del esquema y **no se reparte**. Desde el contenedor:
+   dueño del esquema y **no se reparte**: quien tenga esa contraseña puede
+   borrar la base. Los testers reciben `alovida_reader`, que solo hace SELECT.
+
+   El script está en el repositorio y es idempotente, así que se puede volver a
+   correr después de cada migración sin miedo:
 
    ```bash
-   docker exec -it <contenedor-postgres> psql -U alovida -d alovida_health
+   docker cp scripts/postgres/provision-reader-role.sql <contenedor-postgres>:/tmp/
+   docker exec <contenedor-postgres> psql -U alovida -d alovida_health \
+     -v role_reader=alovida_reader -v owner=alovida -v database=alovida_health \
+     -f /tmp/provision-reader-role.sql
    ```
 
-   ```sql
-   -- Generar la contraseña aparte: openssl rand -base64 18
-   CREATE ROLE alovida_reader LOGIN PASSWORD '<PASSWORD_LECTOR>'
-     NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
-   GRANT CONNECT ON DATABASE alovida_health TO alovida_reader;
+3. **Ponerle contraseña al lector.** El script no la fija —no contiene
+   contraseñas, igual que `provision-roles.sql`— y un rol con LOGIN sin
+   contraseña no autentica a nadie bajo `scram-sha-256`:
 
-   -- SELECT sobre todos los esquemas de la aplicación, presentes y futuros.
-   DO $$
-   DECLARE s text;
-   BEGIN
-     FOR s IN
-       SELECT nspname FROM pg_namespace
-       WHERE nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
-         AND nspname NOT LIKE 'pg_temp%' AND nspname NOT LIKE '_timescaledb%'
-     LOOP
-       EXECUTE format('GRANT USAGE ON SCHEMA %I TO alovida_reader', s);
-       EXECUTE format('GRANT SELECT ON ALL TABLES IN SCHEMA %I TO alovida_reader', s);
-       EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE alovida IN SCHEMA %I GRANT SELECT ON TABLES TO alovida_reader', s);
-     END LOOP;
-   END $$;
+   ```bash
+   openssl rand -base64 18   # guardar el valor: es lo que se reparte
+   docker exec <contenedor-postgres> psql -U alovida -d alovida_health \
+     -c "ALTER ROLE alovida_reader PASSWORD '<PASSWORD_LECTOR>'"
    ```
-
-   `scripts/postgres/provision-roles.sql` hace lo mismo esquema por esquema y
-   además retira privilegios sobrantes; usarlo si un DBA va a mantener los
-   roles.
 
 ### Lo que se entrega a los testers
 
@@ -354,11 +357,17 @@ interna `alovida`.
 postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health
 ```
 
-Comprobación desde fuera:
+Comprobación desde fuera. La segunda es la que importa: leer el catálogo de
+concesiones describe la intención, pero que el lector no puede escribir solo se
+demuestra intentando escribir y recibiendo un `42501`.
 
 ```bash
 psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health" \
   -c 'select count(*) from information_schema.tables'
+
+psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health" \
+  -c 'insert into accounting.account_determination_rules default values'
+#   ERROR: permission denied for table account_determination_rules
 ```
 
 ### Para volver a cerrarlo
