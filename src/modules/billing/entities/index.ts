@@ -12,6 +12,8 @@ export * from './patient_statements.entity';
 export * from './payable_payment_allocations.entity';
 export * from './payments_made.entity';
 export * from './payments_received.entity';
+export * from './quotation_installments.entity';
+export * from './quotations.entity';
 export * from './receivable_payment_allocations.entity';
 export * from './reimbursements.entity';
 export * from './service_catalog.entity';
