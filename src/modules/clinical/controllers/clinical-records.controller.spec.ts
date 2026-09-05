@@ -27,7 +27,7 @@ function build() {
     replace: mockFn(),
     renew: mockFn(),
   };
-  const proceduresService = { create: mockFn() };
+  const proceduresService = { create: mockFn(), attachFile: mockFn() };
   const immunizationsService = { create: mockFn() };
   const controller = new ClinicalRecordsController(
     conditionsService as any,
@@ -151,6 +151,17 @@ describe('ClinicalRecordsController', () => {
     };
     await d.controller.createProcedure(dto, actor);
     expect(d.proceduresService.create).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delegates attachFileToProcedure (ALV-033, odontología)', async () => {
+    const d = build();
+    const dto = { fileId: 'file1' };
+    await d.controller.attachFileToProcedure('proc1', dto, actor);
+    expect(d.proceduresService.attachFile).toHaveBeenCalledWith(
+      'proc1',
+      dto,
+      actor,
+    );
   });
 
   it('delegates createImmunization (UC-08-13)', async () => {

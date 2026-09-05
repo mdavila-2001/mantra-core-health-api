@@ -21,6 +21,7 @@ import {
 import {
   AllergyIntoleranceResponseDto,
   AttachFileToConditionDto,
+  AttachFileToProcedureDto,
   ChangeConditionClinicalStatusDto,
   ConditionResponseDto,
   CreateAllergyIntoleranceDto,
@@ -220,6 +221,23 @@ export class ClinicalRecordsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ProcedureResponseDto> {
     return this.proceduresService.create(dto, actor);
+  }
+
+  /**
+   * ALV-033 (odontología): liga un archivo ya subido a este procedimiento
+   * puntual. Sirve también a los tratamientos odontológicos —son
+   * `clinical.procedures` con categoría dental, ver `PeriopDentalService`—,
+   * así que no hace falta un endpoint propio en ese módulo.
+   */
+  @Post('procedures/:id/attachments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adjuntar un archivo ya subido a un procedimiento' })
+  attachFileToProcedure(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AttachFileToProcedureDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    return this.proceduresService.attachFile(id, dto, actor);
   }
 
   /** UC-08-13. */
