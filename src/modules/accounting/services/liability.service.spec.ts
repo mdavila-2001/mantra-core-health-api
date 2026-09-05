@@ -40,7 +40,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new LiabilityService(
     em as any,
-    liabilityRepo,
+    liabilityRepo as any,
     posting as any,
     logger as any,
   );
