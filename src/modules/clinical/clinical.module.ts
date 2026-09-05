@@ -124,11 +124,17 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
   // una reseña sólo vale si hubo atención real, y comprobarlo es leer el
   // encuentro. El repositorio ya estaba en `providers`; sin exportarlo, el
   // módulo que lo inyecta no puede verlo.
+  // `ClinicalReadService` se exporta para `medical_groups` (FT-21): el
+  // selector de diagnóstico del grupo médico necesita el mismo gate de
+  // autorización que ya usa `/clinical/patients/:id/summary`
+  // (`assertPuedeLeerHistoria` — titular, o quien atiende con turno hoy), no
+  // uno propio y más débil. Ver `medical_groups.module.ts`.
   exports: [
     ConditionsService,
     ProceduresService,
     ServiceRequestsService,
     EncountersRepository,
+    ClinicalReadService,
   ],
 })
 export class ClinicalModule {}
