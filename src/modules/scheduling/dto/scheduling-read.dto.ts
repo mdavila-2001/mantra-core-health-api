@@ -337,6 +337,19 @@ export class BookingItemDto {
   patientName?: string;
 
   /**
+   * La aseguradora del paciente titular, o `null` si no declara ninguna
+   * (ALV-021 — «Particular» o el nombre de la cobertura).
+   *
+   * Viaja con la **misma regla de privacidad que `patientName`**: es un dato
+   * del paciente y lo ve quien ya puede verlo a él. `null` es la respuesta
+   * comprobada —«se buscó y no tiene»—; **ausente** es que no se comprobó
+   * porque quien mira no tiene el permiso, que es distinto de que el paciente
+   * no tenga seguro.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  insuranceCarrierName?: string | null;
+
+  /**
    * De cuándo se movió, si la cita se reprogramó.
    *
    * Ausente cuando nunca se movió — que es distinto de «se movió y no sé

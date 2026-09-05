@@ -56,6 +56,31 @@ export class PracticeTenantLookupService {
   }
 
   /**
+   * Las prácticas activas (`practice.practices.id`) de una organización.
+   *
+   * Puerto que necesita `insurance` (TAREA-16): el reclamo lo presenta una
+   * práctica —`insurance_claims.billing_provider_entity_id`— y no tiene
+   * `tenant_id` propio, así que acotar «los reclamos que envió mi
+   * organización» exige saber primero cuáles son sus prácticas. Sin esto,
+   * `insurance` tendría que importar la entidad persistente de `practice`.
+   *
+   * Devuelve la lista vacía cuando la organización no tiene ninguna práctica
+   * activa: quién llama decide si eso es un listado vacío o un rechazo, porque
+   * la respuesta correcta depende de su propio contrato.
+   *
+   * @param tenantId - Organización activa.
+   * @returns Los ids de práctica activa de esa organización.
+   */
+  async findActivePracticeIdsForTenant(tenantId: string): Promise<string[]> {
+    const practices = await this.practices.findByTenant(
+      this.em.fork(),
+      tenantId,
+      PRAC.PRACTICE_ACTIVE,
+    );
+    return practices.map((practice) => practice.id);
+  }
+
+  /**
    * El tenant dueño de una práctica, o `null` si esa práctica no existe.
    *
    * La alternativa era `findActive()`, que trae **todas** las prácticas activas

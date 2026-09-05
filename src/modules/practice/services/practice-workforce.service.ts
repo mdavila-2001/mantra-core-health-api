@@ -6,6 +6,8 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import { PublicProfiles } from '../../community/entities';
+import { COMM } from '../../community/community.concepts';
 import { PRAC } from '../practice.concepts';
 import {
   PracticesRepository,
@@ -275,6 +277,21 @@ export class PracticeWorkforceService {
         .map((p) => [p.id, p] as const),
     );
 
+    // El logo de una organización vive en su ficha pública
+    // (`community.public_profiles`), no en `practice.practices`: es la única
+    // fuente para no terminar con dos logos que se contradicen.
+    const avatarsByPracticeId =
+      practiceIds.length === 0
+        ? new Map<string, string | null>()
+        : new Map(
+            (
+              await em.find(PublicProfiles, {
+                targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+                targetId: { $in: practiceIds },
+              })
+            ).map((p) => [p.targetId, this.fileUrl(p.avatarFileId)] as const),
+          );
+
     return assignments.map((a) => {
       const practice = practices.get(a.practiceId);
       return {
@@ -290,8 +307,17 @@ export class PracticeWorkforceService {
         validFrom: a.validFrom ?? null,
         validTo: a.validTo ?? null,
         createdAt: a.createdAt,
+        avatarUrl: avatarsByPracticeId.get(a.practiceId) ?? null,
       };
     });
+  }
+
+  /**
+   * URL pública de un archivo, o `null`. Nunca el identificador interno: ver
+   * el mismo criterio en `CommunityPublicService.fileUrl`.
+   */
+  private fileUrl(fileId?: string): string | null {
+    return fileId ? `/public/media/${fileId}` : null;
   }
 
   /**

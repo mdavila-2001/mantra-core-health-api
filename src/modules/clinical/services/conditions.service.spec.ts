@@ -32,14 +32,16 @@ function build() {
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const filesService = { createLink: mockFn() };
   const service = new ConditionsService(
     em as any,
     conditionsRepo as any,
     auditTrail as any,
     historyRepo as any,
     logger as any,
+    filesService as any,
   );
-  return { service, conditionsRepo, auditTrail, historyRepo };
+  return { service, conditionsRepo, auditTrail, historyRepo, filesService };
 }
 
 describe('ConditionsService (UC-08-08)', () => {
@@ -224,5 +226,42 @@ describe('ConditionsService.changeClinicalStatus (Patch v4.0.8)', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+});
+
+describe('ConditionsService · attachFile (ALV-033)', () => {
+  it('liga el archivo a ESTA condición, con OwnerType.CONDITION', async () => {
+    const d = build();
+    d.conditionsRepo.findById.mockResolvedValue({ id: 'cond1' });
+    d.filesService.createLink.mockResolvedValue({
+      id: 'link1',
+      fileId: 'file1',
+      ownerId: 'cond1',
+      ownerType: 'CONDITION',
+      createdAt: new Date('2026-01-01'),
+    });
+
+    const resultado = await d.service.attachFile(
+      'cond1',
+      { fileId: 'file1' },
+      actor,
+    );
+
+    expect(d.filesService.createLink).toHaveBeenCalledWith(
+      'file1',
+      { ownerType: 'CONDITION', ownerId: 'cond1' },
+      actor,
+    );
+    expect(resultado.ownerId).toBe('cond1');
+  });
+
+  it('rechaza adjuntar a una condición que no existe', async () => {
+    const d = build();
+    d.conditionsRepo.findById.mockResolvedValue(null);
+
+    await expect(
+      d.service.attachFile('missing', { fileId: 'file1' }, actor),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.filesService.createLink).not.toHaveBeenCalled();
   });
 });

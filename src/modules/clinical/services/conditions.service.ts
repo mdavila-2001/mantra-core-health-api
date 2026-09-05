@@ -10,6 +10,7 @@ import {
 } from '../../../common';
 import { ConditionsRepository } from '../repositories';
 import {
+  AttachFileToConditionDto,
   ChangeConditionClinicalStatusDto,
   CreateConditionDto,
   ConditionResponseDto,
@@ -19,6 +20,11 @@ import { CLIN } from '../clinical.concepts';
 import { AuditTrailService } from '../../audit/services';
 import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
+// ALV-033 (reemplazo de ALV-032): un archivo se liga a ESTE diagnóstico, no al
+// paciente en general. `createLink` es el único punto de la app que escribe
+// `common.file_links`; reusarlo evita una segunda forma de vincular archivos.
+import { FilesService } from '../../common/services';
+import { OwnerType, type FileLinkResponseDto } from '../../common/dto';
 
 /** Resource sellado en la cadena WORM para cada evento de condición (CAN-AUDIT-001). */
 const CONDITION_AUDIT_ENTITY = 'condition';
@@ -81,6 +87,7 @@ export class ConditionsService {
    * @param auditTrail - Cadena WORM transversal (CAN-AUDIT-001).
    * @param historyRepo - Versionado append-only (`audit.conditions_history`).
    * @param logger - Valor de logger requerido por la operación.
+   * @param filesService - Liga un archivo ya subido a esta condición (ALV-033).
    */
   constructor(
     private readonly em: EntityManager,
@@ -88,6 +95,7 @@ export class ConditionsService {
     private readonly auditTrail: AuditTrailService,
     private readonly historyRepo: HistoryRepository,
     private readonly logger: PinoLogger,
+    private readonly filesService: FilesService,
   ) {
     this.logger.setContext(ConditionsService.name);
   }
@@ -288,6 +296,45 @@ export class ConditionsService {
       );
       return this.toResponse(condition);
     });
+  }
+
+  /**
+   * Liga un archivo ya subido a este diagnóstico (ALV-033, reemplazo de
+   * ALV-032). El archivo se sube antes por separado
+   * (`POST /common/files` → `POST /common/files/:id/versions`); esto sólo
+   * registra a qué condición corresponde, no mueve bytes.
+   *
+   * Mismo umbral de autorización que registrar la condición: el guard de
+   * clase (`@Roles('CLINICIAN', 'PRACTITIONER')`) del controlador, sin exigir
+   * además una relación asistencial con el paciente — igual que `create()` y
+   * `changeClinicalStatus()`, que tampoco la piden. Pedirle más a adjuntar un
+   * archivo que a crear el diagnóstico en sí sería una regla nueva e
+   * inconsistente, no una corrección.
+   *
+   * @param conditionId - La condición a la que se liga el archivo.
+   * @param dto - El archivo ya subido.
+   * @param actor - Quién liga el archivo.
+   * @throws ResourceNotFoundException si la condición no existe.
+   */
+  async attachFile(
+    conditionId: string,
+    dto: AttachFileToConditionDto,
+    actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    const condition = await this.loadConditionOrThrow(this.em, conditionId);
+    this.logger.info(
+      {
+        operation: 'clinical.condition.attach_file',
+        conditionId,
+        fileId: dto.fileId,
+      },
+      'Attaching file to condition',
+    );
+    return this.filesService.createLink(
+      dto.fileId,
+      { ownerType: OwnerType.CONDITION, ownerId: condition.id },
+      actor,
+    );
   }
 
   /** Condición por id, o `ResourceNotFoundException`. */

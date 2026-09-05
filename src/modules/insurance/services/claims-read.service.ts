@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   decodeKeysetCursor,
   encodeKeysetCursor,
   requireTenantId,
-  ResourceNotFoundException,
   sumarDecimales,
 } from '../../../common';
 import { CatalogConcepts } from '../../terminology/entities';
 import { Persons, PatientProfiles } from '../../profiles/entities';
+import { PracticeTenantLookupService } from '../../practice/services';
 import type {
   ClaimAdjudicationVersions,
   ClaimDisputes,
@@ -37,7 +37,17 @@ import {
 } from '../repositories';
 
 /** Tamaño de página por defecto del listado de solicitudes. */
-const LIMITE_POR_DEFECTO = 25;
+const DEFAULT_PAGE_SIZE = 25;
+
+/**
+ * Único texto con el que esta cara rechaza el acceso a una solicitud.
+ *
+ * AC-16-14 exige que «no es tuya» y «ese uuid no existe» sean indistinguibles.
+ * La forma de garantizarlo es que **haya un solo lugar** donde se construye el
+ * rechazo: dos mensajes distintos, aunque hoy dijeran lo mismo, se separan en
+ * cuanto alguien edite uno.
+ */
+const CLAIM_ACCESS_DENIED = 'No hay acceso a esa solicitud de seguro';
 
 /**
  * Lectura de solicitudes de seguro presentadas: listado y detalle.
@@ -47,11 +57,17 @@ const LIMITE_POR_DEFECTO = 25;
  * había forma de volver a verlo. Esto agrega esa cara; no relaja ninguna
  * escritura.
  *
- * Tres reglas gobiernan todo lo de acá:
+ * Cuatro reglas gobiernan todo lo de acá:
  *
- * - **Aislamiento en la raíz.** La solicitud no tiene `tenant_id`: cuelga de la
- *   aseguradora. Toda consulta arranca por las aseguradoras del tenant activo,
- *   y una solicitud de otra organización es indistinguible de una inexistente.
+ * - **El alcance es el del prestador que envió la solicitud** (TAREA-16 · D1.a,
+ *   decisión de Justin del 2026-09-04): son «solicitudes **enviadas**», así que
+ *   la pantalla es la del consultorio o la clínica que las presenta. La
+ *   solicitud no tiene `tenant_id`, pero sí `billing_provider_entity_id`, que
+ *   con el tipo `BILLING_PROVIDER_TYPE_PRACTICE` es una `practice.practices`.
+ *   Toda consulta arranca por las prácticas activas de la organización activa.
+ * - **Fuera de alcance e inexistente se responden igual**: un 403 con el mismo
+ *   cuerpo en los dos casos. Si el id viajara en `details`, el error volvería a
+ *   servir de sonda (AC-16-14).
  * - **Los importes no se recalculan.** Si la adjudicación ya trae
  *   `total_approved_amount`, ése es el número; sumar las líneas por segunda vez
  *   es cómo nacen los descuadres. Lo que sí se suma es el total de líneas
@@ -68,58 +84,56 @@ export class ClaimsReadService {
    *
    * @param em - Contexto de persistencia.
    * @param claimRepo - Consultas de lectura del ciclo del reclamo.
+   * @param practiceLookup - Puerto de `practice`: las prácticas de la organización.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly claimRepo: ClaimReadRepository,
+    private readonly practiceLookup: PracticeTenantLookupService,
   ) {}
 
   /**
-   * Página de solicitudes del tenant activo.
+   * Página de solicitudes enviadas por la organización activa.
    *
    * @param query - Filtros y paginación.
    * @returns Las filas de la página y el cursor de la siguiente.
+   * @throws ForbiddenException si la organización no tiene prácticas activas.
    */
   async listClaims(query: ClaimListQueryDto): Promise<ClaimListResponseDto> {
-    const tenantId = requireTenantId();
     const em = this.em.fork();
-    const limite = query.limit ?? LIMITE_POR_DEFECTO;
+    const limit = query.limit ?? DEFAULT_PAGE_SIZE;
 
-    const carrierIds = await this.claimRepo.findCarrierIdsByTenant(
-      em,
-      tenantId,
-    );
-    if (carrierIds.length === 0) return { items: [], nextCursor: null };
+    const practiceIds = await this.practiceIdsInScope();
 
-    const filtros: ClaimListFilters = {
+    const filters: ClaimListFilters = {
       statusConceptId: query.statusConceptId,
       insuranceCarrierId: query.insuranceCarrierId,
-      submittedFrom: this.fecha(query.submittedFrom),
-      submittedTo: this.fecha(query.submittedTo),
+      submittedFrom: this.parseDate(query.submittedFrom),
+      submittedTo: this.parseDate(query.submittedTo),
     };
     const cursor = query.cursor
       ? (decodeKeysetCursor(query.cursor) as unknown as ClaimCursor)
       : null;
 
-    const filas = await this.claimRepo.findClaimsPage(
+    const rows = await this.claimRepo.findClaimsPage(
       em,
-      carrierIds,
-      filtros,
-      limite,
+      practiceIds,
+      filters,
+      limit,
       cursor,
     );
     // La fila de sondeo se descarta: existía para saber si hay siguiente, no
     // para mostrarse.
-    const hayMas = filas.length > limite;
-    const pagina = hayMas ? filas.slice(0, limite) : filas;
-    if (pagina.length === 0) return { items: [], nextCursor: null };
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    if (page.length === 0) return { items: [], nextCursor: null };
 
-    const items = await this.armarFilas(em, pagina);
-    const ultima = pagina[pagina.length - 1];
-    const nextCursor = hayMas
+    const items = await this.buildRows(em, page);
+    const last = page[page.length - 1];
+    const nextCursor = hasMore
       ? encodeKeysetCursor({
-          submittedAt: ultima.submittedAt?.toISOString() ?? null,
-          id: ultima.id,
+          submittedAt: last.submittedAt?.toISOString() ?? null,
+          id: last.id,
         })
       : null;
 
@@ -131,82 +145,99 @@ export class ClaimsReadService {
    *
    * @param id - Solicitud consultada.
    * @returns El detalle completo.
-   * @throws ResourceNotFoundException si no está en el alcance del tenant.
+   * @throws ForbiddenException si no la envió la organización activa, o no existe.
    */
   async getClaim(id: string): Promise<ClaimDetailDto> {
-    const tenantId = requireTenantId();
     const em = this.em.fork();
 
-    const carrierIds = await this.claimRepo.findCarrierIdsByTenant(
-      em,
-      tenantId,
-    );
-    const claim = await this.claimRepo.findClaimInScope(em, carrierIds, id);
+    const practiceIds = await this.practiceIdsInScope();
+    const claim = await this.claimRepo.findClaimInScope(em, practiceIds, id);
     if (!claim) {
-      // Mismo cuerpo que un uuid inexistente, y **sin detalles**: si el id
-      // viajara en `details`, «no es tuya» y «no existe» dejarían de ser
-      // indistinguibles y el 404 volvería a servir de sonda (AC-16-14).
-      throw new ResourceNotFoundException('Solicitud de seguro no encontrada');
+      // Mismo cuerpo que un uuid inexistente, y **sin detalles** (AC-16-14).
+      throw this.accessDenied();
     }
 
-    const [lineas, versiones, disputas] = await Promise.all([
+    const [lines, versions, disputes] = await Promise.all([
       this.claimRepo.findLinesByClaimIds(em, [claim.id]),
       this.claimRepo.findAdjudicationsByClaimIds(em, [claim.id]),
       this.claimRepo.findDisputesByClaimIds(em, [claim.id]),
     ]);
 
-    const vigente = this.versionVigente(versiones);
-    const porLinea = vigente
-      ? await this.claimRepo.findLineAdjudications(em, [vigente.id])
+    const current = this.currentVersion(versions);
+    const byLine = current
+      ? await this.claimRepo.findLineAdjudications(em, [current.id])
       : [];
 
-    const conceptos = await this.mapaDeConceptos(em, [
+    const concepts = await this.conceptMap(em, [
       claim.statusConceptId,
       claim.currencyConceptId,
-      ...lineas.map((linea) => linea.serviceConceptId),
-      ...versiones.map((version) => version.outcomeConceptId),
-      ...porLinea.flatMap((adj) => [
-        adj.decisionConceptId,
-        adj.reasonConceptId,
-      ]),
-      ...disputas.flatMap((disputa) => [
-        disputa.disputeTypeConceptId,
-        disputa.disputeReasonConceptId,
-        disputa.statusConceptId,
+      ...lines.map((line) => line.serviceConceptId),
+      ...versions.map((version) => version.outcomeConceptId),
+      ...byLine.flatMap((adj) => [adj.decisionConceptId, adj.reasonConceptId]),
+      ...disputes.flatMap((dispute) => [
+        dispute.disputeTypeConceptId,
+        dispute.disputeReasonConceptId,
+        dispute.statusConceptId,
       ]),
     ]);
 
-    const [cabecera] = await this.armarFilas(em, [claim], conceptos);
-    const moneda = conceptos.get(claim.currencyConceptId ?? '') ?? null;
-    const adjPorLinea = new Map(
-      porLinea.map((adj) => [adj.insuranceClaimLineId, adj]),
+    const [header] = await this.buildRows(em, [claim], concepts);
+    const currency = concepts.get(claim.currencyConceptId ?? '') ?? null;
+    const adjByLine = new Map(
+      byLine.map((adj) => [adj.insuranceClaimLineId, adj]),
     );
 
-    const items = lineas.map((linea) =>
-      this.armarLinea(linea, adjPorLinea.get(linea.id), conceptos, moneda),
+    const items = lines.map((line) =>
+      this.buildLine(line, adjByLine.get(line.id), concepts, currency),
     );
 
-    const facturado = sumarDecimales(lineas.map((linea) => linea.billedAmount));
-    const aprobado = sumarDecimales(
-      lineas.map((linea) => adjPorLinea.get(linea.id)?.approvedAmount ?? null),
+    const billed = sumarDecimales(lines.map((line) => line.billedAmount));
+    const approved = sumarDecimales(
+      lines.map((line) => adjByLine.get(line.id)?.approvedAmount ?? null),
     );
 
     return {
-      header: cabecera,
+      header,
       lines: items,
-      lineBilledTotal: { amount: facturado ?? '0', currency: moneda },
+      lineBilledTotal: { amount: billed ?? '0', currency },
       lineApprovedTotal:
-        aprobado === null ? null : { amount: aprobado, currency: moneda },
-      adjudication: vigente
-        ? this.armarAdjudicacion(vigente, conceptos, moneda)
+        approved === null ? null : { amount: approved, currency },
+      adjudication: current
+        ? this.buildAdjudication(current, concepts, currency)
         : null,
-      adjudicationHistory: versiones.map((version) =>
-        this.armarAdjudicacion(version, conceptos, moneda),
+      adjudicationHistory: versions.map((version) =>
+        this.buildAdjudication(version, concepts, currency),
       ),
-      disputes: disputas.map((disputa) =>
-        this.armarDisputa(disputa, conceptos),
-      ),
+      disputes: disputes.map((dispute) => this.buildDispute(dispute, concepts)),
     };
+  }
+
+  /**
+   * Las prácticas activas de la organización activa, o el rechazo.
+   *
+   * Una organización sin prácticas activas no envió ninguna solicitud, y
+   * AC-16-14 pide **403 en el listado y en el detalle** para una sesión sin
+   * relación con la solicitud — no una lista vacía, que se leería como «no hay
+   * solicitudes» en vez de «esta pantalla no es tuya».
+   *
+   * @returns Los ids de práctica que acotan toda consulta de esta cara.
+   * @throws ForbiddenException si la organización no tiene prácticas activas.
+   */
+  private async practiceIdsInScope(): Promise<string[]> {
+    const tenantId = requireTenantId();
+    const practiceIds =
+      await this.practiceLookup.findActivePracticeIdsForTenant(tenantId);
+    if (practiceIds.length === 0) throw this.accessDenied();
+    return practiceIds;
+  }
+
+  /**
+   * El rechazo único de esta cara.
+   *
+   * @returns La excepción, siempre con el mismo cuerpo y sin `details`.
+   */
+  private accessDenied(): ForbiddenException {
+    return new ForbiddenException(CLAIM_ACCESS_DENIED);
   }
 
   /**
@@ -218,36 +249,36 @@ export class ClaimsReadService {
    *
    * @param em - Contexto de persistencia.
    * @param claims - Solicitudes de la página.
-   * @param conceptosPrevios - Conceptos ya resueltos, si los hay.
+   * @param knownConcepts - Conceptos ya resueltos, si los hay.
    * @returns Las filas listas para la pantalla.
    */
-  private async armarFilas(
+  private async buildRows(
     em: EntityManager,
     claims: readonly InsuranceClaims[],
-    conceptosPrevios?: Map<string, InsuranceConceptDto>,
+    knownConcepts?: Map<string, InsuranceConceptDto>,
   ): Promise<ClaimListItemDto[]> {
     const claimIds = claims.map((claim) => claim.id);
-    const [carriers, coverages, versiones, disputas] = await Promise.all([
+    const [carriers, coverages, versions, disputes] = await Promise.all([
       this.claimRepo.findCarriersByIds(
         em,
-        unicos(claims.map((claim) => claim.insuranceCarrierId)),
+        unique(claims.map((claim) => claim.insuranceCarrierId)),
       ),
       this.claimRepo.findCoveragesByIds(
         em,
-        unicos(claims.map((claim) => claim.patientCoverageId)),
+        unique(claims.map((claim) => claim.patientCoverageId)),
       ),
       this.claimRepo.findAdjudicationsByClaimIds(em, claimIds),
       this.claimRepo.findDisputesByClaimIds(em, claimIds),
     ]);
 
-    const personIds = unicos(
+    const personIds = unique(
       coverages.map((coverage) => coverage.patientProfileId),
     );
-    const brokerIds = unicos(
+    const brokerIds = unique(
       coverages.map((coverage) => coverage.insuranceBrokerId),
     );
 
-    const [personas, perfiles, brokers] = await Promise.all([
+    const [persons, profiles, brokers] = await Promise.all([
       personIds.length > 0
         ? em.find(Persons, { id: { $in: personIds } })
         : Promise.resolve([]),
@@ -259,67 +290,67 @@ export class ClaimsReadService {
         : Promise.resolve([]),
     ]);
 
-    const conceptos =
-      conceptosPrevios ??
-      (await this.mapaDeConceptos(em, [
+    const concepts =
+      knownConcepts ??
+      (await this.conceptMap(em, [
         ...claims.map((claim) => claim.statusConceptId),
         ...claims.map((claim) => claim.currencyConceptId),
       ]));
 
-    const carrierPorId = new Map(carriers.map((c) => [c.id, c]));
-    const coveragePorId = new Map(coverages.map((c) => [c.id, c]));
-    const personaPorId = new Map(personas.map((p) => [p.id, p]));
-    const perfilPorId = new Map(perfiles.map((p) => [p.profileId, p]));
-    const brokerPorId = new Map(brokers.map((b) => [b.id, b]));
+    const carrierById = new Map(carriers.map((c) => [c.id, c]));
+    const coverageById = new Map(coverages.map((c) => [c.id, c]));
+    const personById = new Map(persons.map((p) => [p.id, p]));
+    const profileById = new Map(profiles.map((p) => [p.profileId, p]));
+    const brokerById = new Map(brokers.map((b) => [b.id, b]));
 
     // La versión vigente por solicitud: las versiones vienen ordenadas de la
     // más nueva a la más vieja, así que la primera de cada grupo es la que
     // manda.
-    const vigentePorClaim = new Map<string, ClaimAdjudicationVersions>();
-    for (const version of versiones) {
-      if (!vigentePorClaim.has(version.insuranceClaimId)) {
-        vigentePorClaim.set(version.insuranceClaimId, version);
+    const currentByClaim = new Map<string, ClaimAdjudicationVersions>();
+    for (const version of versions) {
+      if (!currentByClaim.has(version.insuranceClaimId)) {
+        currentByClaim.set(version.insuranceClaimId, version);
       }
     }
-    const conDisputaAbierta = new Set(
-      disputas
-        .filter((disputa) => disputa.statusConceptId !== INS.DISPUTE_RESOLVED)
-        .map((disputa) => disputa.insuranceClaimId),
+    const withOpenDispute = new Set(
+      disputes
+        .filter((dispute) => dispute.statusConceptId !== INS.DISPUTE_RESOLVED)
+        .map((dispute) => dispute.insuranceClaimId),
     );
 
     return claims.map((claim) => {
-      const carrier = carrierPorId.get(claim.insuranceCarrierId);
-      const coverage = coveragePorId.get(claim.patientCoverageId);
-      const persona = coverage
-        ? personaPorId.get(coverage.patientProfileId)
+      const carrier = carrierById.get(claim.insuranceCarrierId);
+      const coverage = coverageById.get(claim.patientCoverageId);
+      const person = coverage
+        ? personById.get(coverage.patientProfileId)
         : undefined;
-      const perfil = coverage
-        ? perfilPorId.get(coverage.patientProfileId)
+      const profile = coverage
+        ? profileById.get(coverage.patientProfileId)
         : undefined;
       const broker = coverage?.insuranceBrokerId
-        ? brokerPorId.get(coverage.insuranceBrokerId)
+        ? brokerById.get(coverage.insuranceBrokerId)
         : undefined;
-      const moneda = conceptos.get(claim.currencyConceptId ?? '') ?? null;
-      const vigente = vigentePorClaim.get(claim.id);
+      const currency = concepts.get(claim.currencyConceptId ?? '') ?? null;
+      const current = currentByClaim.get(claim.id);
 
       return {
         id: claim.id,
         claimIdentifier: claim.claimIdentifier,
         patient: {
           id: coverage?.patientProfileId ?? '',
-          displayName: persona?.displayName ?? null,
-          patientCode: perfil?.patientCode ?? null,
+          displayName: person?.displayName ?? null,
+          patientCode: profile?.patientCode ?? null,
           memberIdentifier: coverage?.memberIdentifier ?? null,
         },
         carrierName: carrier?.legalName ?? '',
         insuranceCarrierId: claim.insuranceCarrierId,
         policyIdentifier: coverage?.policyIdentifier ?? null,
-        policyBrokerName: this.nombreDeBroker(broker),
-        billedTotal: { amount: claim.totalAmount ?? '0', currency: moneda },
-        approvedTotal: this.dinero(vigente?.totalApprovedAmount, moneda),
+        policyBrokerName: this.brokerName(broker),
+        billedTotal: { amount: claim.totalAmount ?? '0', currency },
+        approvedTotal: this.money(current?.totalApprovedAmount, currency),
         submittedAt: claim.submittedAt?.toISOString() ?? null,
-        status: conceptos.get(claim.statusConceptId) ?? null,
-        hasOpenDispute: conDisputaAbierta.has(claim.id),
+        status: concepts.get(claim.statusConceptId) ?? null,
+        hasOpenDispute: withOpenDispute.has(claim.id),
       };
     });
   }
@@ -327,32 +358,32 @@ export class ClaimsReadService {
   /**
    * Arma un ítem con su dictamen, si lo tiene.
    *
-   * @param linea - El ítem facturado.
+   * @param line - El ítem facturado.
    * @param adj - Su adjudicación en la versión vigente, si existe.
-   * @param conceptos - Conceptos ya resueltos.
-   * @param moneda - Moneda de la solicitud.
+   * @param concepts - Conceptos ya resueltos.
+   * @param currency - Moneda de la solicitud.
    * @returns El ítem listo para la pantalla.
    */
-  private armarLinea(
-    linea: InsuranceClaimLines,
+  private buildLine(
+    line: InsuranceClaimLines,
     adj: ClaimLineAdjudications | undefined,
-    conceptos: Map<string, InsuranceConceptDto>,
-    moneda: InsuranceConceptDto | null,
+    concepts: Map<string, InsuranceConceptDto>,
+    currency: InsuranceConceptDto | null,
   ): ClaimLineViewDto {
-    const { referenceType, reference } = this.origenClinico(linea);
+    const { referenceType, reference } = this.clinicalOrigin(line);
     return {
-      id: linea.id,
-      lineSequence: linea.lineSequence,
-      service: conceptos.get(linea.serviceConceptId ?? '') ?? null,
-      billedAmount: { amount: linea.billedAmount ?? '0', currency: moneda },
-      patientResponsibilityAmount: this.dinero(
-        linea.patientResponsibilityAmount,
-        moneda,
+      id: line.id,
+      lineSequence: line.lineSequence,
+      service: concepts.get(line.serviceConceptId ?? '') ?? null,
+      billedAmount: { amount: line.billedAmount ?? '0', currency },
+      patientResponsibilityAmount: this.money(
+        line.patientResponsibilityAmount,
+        currency,
       ),
-      approvedAmount: this.dinero(adj?.approvedAmount, moneda),
-      deniedAmount: this.dinero(adj?.deniedAmount, moneda),
-      decision: conceptos.get(adj?.decisionConceptId ?? '') ?? null,
-      denialReason: conceptos.get(adj?.reasonConceptId ?? '') ?? null,
+      approvedAmount: this.money(adj?.approvedAmount, currency),
+      deniedAmount: this.money(adj?.deniedAmount, currency),
+      decision: concepts.get(adj?.decisionConceptId ?? '') ?? null,
+      denialReason: concepts.get(adj?.reasonConceptId ?? '') ?? null,
       referenceType,
       reference,
     };
@@ -369,28 +400,28 @@ export class ClaimsReadService {
    * se devuelve el texto con el tipo en `null`, para que la pantalla diga que
    * el tipo no está registrado en vez de adivinarlo.
    *
-   * @param linea - El ítem facturado.
+   * @param line - El ítem facturado.
    * @returns El tipo y el identificador de origen.
    */
-  private origenClinico(linea: InsuranceClaimLines): {
+  private clinicalOrigin(line: InsuranceClaimLines): {
     referenceType: ClaimLineViewDto['referenceType'];
     reference: string | null;
   } {
-    if (linea.diagnosticStudyOfferingId) {
+    if (line.diagnosticStudyOfferingId) {
       return {
         referenceType: 'DIAGNOSTIC_STUDY',
-        reference: linea.diagnosticStudyOfferingId,
+        reference: line.diagnosticStudyOfferingId,
       };
     }
-    if (linea.medicationDispensationLineId) {
+    if (line.medicationDispensationLineId) {
       return {
         referenceType: 'MEDICATION_DISPENSATION',
-        reference: linea.medicationDispensationLineId,
+        reference: line.medicationDispensationLineId,
       };
     }
     return {
       referenceType: null,
-      reference: linea.supportingClinicalReference ?? null,
+      reference: line.supportingClinicalReference ?? null,
     };
   }
 
@@ -398,23 +429,23 @@ export class ClaimsReadService {
    * Arma una versión de adjudicación.
    *
    * @param version - La versión leída.
-   * @param conceptos - Conceptos ya resueltos.
-   * @param moneda - Moneda de la solicitud.
+   * @param concepts - Conceptos ya resueltos.
+   * @param currency - Moneda de la solicitud.
    * @returns El dictamen listo para la pantalla.
    */
-  private armarAdjudicacion(
+  private buildAdjudication(
     version: ClaimAdjudicationVersions,
-    conceptos: Map<string, InsuranceConceptDto>,
-    moneda: InsuranceConceptDto | null,
+    concepts: Map<string, InsuranceConceptDto>,
+    currency: InsuranceConceptDto | null,
   ): ClaimAdjudicationDto {
     return {
       id: version.id,
       adjudicationVersion: version.adjudicationVersion,
-      outcome: conceptos.get(version.outcomeConceptId ?? '') ?? null,
+      outcome: concepts.get(version.outcomeConceptId ?? '') ?? null,
       dispositionText: version.dispositionText ?? null,
-      totalApprovedAmount: this.dinero(version.totalApprovedAmount, moneda),
-      totalPatientAmount: this.dinero(version.totalPatientAmount, moneda),
-      totalDeniedAmount: this.dinero(version.totalDeniedAmount, moneda),
+      totalApprovedAmount: this.money(version.totalApprovedAmount, currency),
+      totalPatientAmount: this.money(version.totalPatientAmount, currency),
+      totalDeniedAmount: this.money(version.totalDeniedAmount, currency),
       adjudicatedAt: version.adjudicatedAt.toISOString(),
     };
   }
@@ -422,23 +453,22 @@ export class ClaimsReadService {
   /**
    * Arma el resumen de una disputa.
    *
-   * @param disputa - La disputa leída.
-   * @param conceptos - Conceptos ya resueltos.
+   * @param dispute - La disputa leída.
+   * @param concepts - Conceptos ya resueltos.
    * @returns El resumen listo para la pantalla.
    */
-  private armarDisputa(
-    disputa: ClaimDisputes,
-    conceptos: Map<string, InsuranceConceptDto>,
+  private buildDispute(
+    dispute: ClaimDisputes,
+    concepts: Map<string, InsuranceConceptDto>,
   ): ClaimDisputeSummaryDto {
     return {
-      id: disputa.id,
-      disputeType: conceptos.get(disputa.disputeTypeConceptId ?? '') ?? null,
-      disputeReason:
-        conceptos.get(disputa.disputeReasonConceptId ?? '') ?? null,
-      status: conceptos.get(disputa.statusConceptId) ?? null,
-      submittedAt: disputa.submittedAt?.toISOString() ?? null,
-      filingDeadline: disputa.filingDeadline
-        ? fechaSola(disputa.filingDeadline)
+      id: dispute.id,
+      disputeType: concepts.get(dispute.disputeTypeConceptId ?? '') ?? null,
+      disputeReason: concepts.get(dispute.disputeReasonConceptId ?? '') ?? null,
+      status: concepts.get(dispute.statusConceptId) ?? null,
+      submittedAt: dispute.submittedAt?.toISOString() ?? null,
+      filingDeadline: dispute.filingDeadline
+        ? dateOnly(dispute.filingDeadline)
         : null,
     };
   }
@@ -451,20 +481,20 @@ export class ClaimsReadService {
    * simplemente la de número más alto funcionaría hoy y dejaría de funcionar el
    * día que se inserte una corrección fuera de orden.
    *
-   * @param versiones - Todas las versiones de la solicitud.
+   * @param versions - Todas las versiones de la solicitud.
    * @returns La vigente, o `undefined` si no hay ninguna.
    */
-  private versionVigente(
-    versiones: readonly ClaimAdjudicationVersions[],
+  private currentVersion(
+    versions: readonly ClaimAdjudicationVersions[],
   ): ClaimAdjudicationVersions | undefined {
-    if (versiones.length === 0) return undefined;
-    const superadas = new Set(
-      versiones
+    if (versions.length === 0) return undefined;
+    const superseded = new Set(
+      versions
         .map((version) => version.supersedesVersionId)
         .filter((id): id is string => id != null),
     );
     return (
-      versiones.find((version) => !superadas.has(version.id)) ?? versiones[0]
+      versions.find((version) => !superseded.has(version.id)) ?? versions[0]
     );
   }
 
@@ -475,17 +505,17 @@ export class ClaimsReadService {
    * @param ids - Ids, con nulos y repetidos.
    * @returns Mapa de id a concepto.
    */
-  private async mapaDeConceptos(
+  private async conceptMap(
     em: EntityManager,
     ids: ReadonlyArray<string | null | undefined>,
   ): Promise<Map<string, InsuranceConceptDto>> {
-    const limpios = unicos(ids);
-    if (limpios.length === 0) return new Map();
-    const conceptos = await em.find(CatalogConcepts, { id: { $in: limpios } });
+    const clean = unique(ids);
+    if (clean.length === 0) return new Map();
+    const concepts = await em.find(CatalogConcepts, { id: { $in: clean } });
     return new Map(
-      conceptos.map((concepto) => [
-        concepto.id,
-        { code: concepto.code, display: concepto.display },
+      concepts.map((concept) => [
+        concept.id,
+        { code: concept.code, display: concept.display },
       ]),
     );
   }
@@ -497,16 +527,16 @@ export class ClaimsReadService {
    * otro «el dictamen aprobó cero». Confundirlos es un error contable, así que
    * la ausencia se propaga tal cual hasta la pantalla.
    *
-   * @param importe - Importe crudo de la base, o nulo.
-   * @param moneda - Moneda de la solicitud.
+   * @param amount - Importe crudo de la base, o nulo.
+   * @param currency - Moneda de la solicitud.
    * @returns El importe con su moneda, o `null`.
    */
-  private dinero(
-    importe: string | null | undefined,
-    moneda: InsuranceConceptDto | null,
+  private money(
+    amount: string | null | undefined,
+    currency: InsuranceConceptDto | null,
   ): MoneyDto | null {
-    if (importe == null || importe === '') return null;
-    return { amount: importe, currency: moneda };
+    if (amount == null || amount === '') return null;
+    return { amount, currency };
   }
 
   /**
@@ -515,7 +545,7 @@ export class ClaimsReadService {
    * @param broker - El corredor, si la póliza declara uno.
    * @returns Su razón social, o `null`.
    */
-  private nombreDeBroker(broker: InsuranceBrokers | undefined): string | null {
+  private brokerName(broker: InsuranceBrokers | undefined): string | null {
     if (!broker) return null;
     return broker.legalName ?? broker.brokerCode ?? null;
   }
@@ -523,13 +553,13 @@ export class ClaimsReadService {
   /**
    * Convierte un ISO de la consulta a `Date`.
    *
-   * @param texto - Fecha en ISO 8601, si vino.
+   * @param text - Fecha en ISO 8601, si vino.
    * @returns La fecha, o `undefined`.
    */
-  private fecha(texto: string | undefined): Date | undefined {
-    if (!texto) return undefined;
-    const fecha = new Date(texto);
-    return Number.isNaN(fecha.getTime()) ? undefined : fecha;
+  private parseDate(text: string | undefined): Date | undefined {
+    if (!text) return undefined;
+    const parsed = new Date(text);
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed;
   }
 }
 
@@ -539,7 +569,7 @@ export class ClaimsReadService {
  * @param ids - Ids con nulos y repetidos.
  * @returns Los ids presentes, una vez cada uno.
  */
-function unicos(ids: ReadonlyArray<string | null | undefined>): string[] {
+function unique(ids: ReadonlyArray<string | null | undefined>): string[] {
   return [
     ...new Set(ids.filter((id): id is string => id != null && id !== '')),
   ];
@@ -552,10 +582,10 @@ function unicos(ids: ReadonlyArray<string | null | undefined>): string[] {
  * hora invita a que el cliente la interprete en su zona y muestre el día de
  * antes.
  *
- * @param fecha - La fecha leída.
+ * @param date - La fecha leída.
  * @returns `YYYY-MM-DD`.
  */
-function fechaSola(fecha: Date | string): string {
-  const texto = typeof fecha === 'string' ? fecha : fecha.toISOString();
-  return texto.slice(0, 10);
+function dateOnly(date: Date | string): string {
+  const text = typeof date === 'string' ? date : date.toISOString();
+  return text.slice(0, 10);
 }

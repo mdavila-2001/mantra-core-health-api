@@ -1,12 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ResourceNotFoundException } from '../../../common';
-// Las direcciones son datos transversales (`common.addresses`) y se leen, no se
-// escriben: el sitio guarda su `address_id` y acá se resuelve a texto. Se usa la
-// entidad y no el repositorio de `common` porque ese módulo no lo exporta, y
-// exportarlo para una lectura sería abrirle la escritura a todo el sistema.
+import {
+  CONCEPTS,
+  requireTenantId,
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
+// Las direcciones son datos transversales (`common.addresses`); se leían y no
+// se escribían acá, por eso originalmente sólo se importaba la entidad. ALV-006
+// agrega la escritura de la sede propia, y para eso sí hace falta el
+// repositorio — igual que `ServiceCatalogRepository` (de `billing`) más abajo,
+// se registra la clase sin importar `CommonModule` entero.
 import { Addresses } from '../../common/entities';
+import { AddressesRepository } from '../../common/repositories';
+// Mismo patrón que `clinical_ext` con `ProfileOwnershipService`: se importa la
+// clase puntual, no `ProfilesModule`, para no cerrar un ciclo entre módulos.
+import { ProfileOwnershipService } from '../../profiles/services/profile-ownership.service';
 import { PRAC } from '../practice.concepts';
 import {
   CareSpacesRepository,
@@ -14,7 +24,7 @@ import {
   PracticesRepository,
   PractitionerRoleAssignmentsRepository,
 } from '../repositories';
-import { PractitionerSiteDto } from '../dto';
+import { CreateOwnSiteDto, PractitionerSiteDto } from '../dto';
 import type { PracticeSites } from '../entities';
 
 /**
@@ -79,6 +89,8 @@ export class PractitionerSitesService {
    * @param sitesRepo - Sedes.
    * @param spacesRepo - Espacios de atención.
    * @param rolesRepo - Asignaciones de rol, de donde sale la sede del profesional.
+   * @param addressesRepo - Direcciones (ALV-006: alta de la sede propia).
+   * @param ownership - Resuelve el perfil profesional del actor autenticado.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -87,9 +99,202 @@ export class PractitionerSitesService {
     private readonly sitesRepo: PracticeSitesRepository,
     private readonly spacesRepo: CareSpacesRepository,
     private readonly rolesRepo: PractitionerRoleAssignmentsRepository,
+    private readonly addressesRepo: AddressesRepository,
+    private readonly ownership: ProfileOwnershipService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PractitionerSitesService.name);
+  }
+
+  /**
+   * ALV-005/006: da de alta un consultorio propio del profesional autenticado.
+   *
+   * El alta de profesional dejaba un hueco concreto: "atiendo en mi propio
+   * consultorio" no tenía dónde registrarse sin pasar por una afiliación a una
+   * organización que no existe. Esto resuelve las tres filas en una
+   * transacción — práctica personal (reutilizada si ya existe), dirección (si
+   * se manda) y sede — más la asignación de rol que la conecta con la agenda.
+   *
+   * La práctica personal es idempotente por profesional: la segunda sede que
+   * agregue cuelga de la MISMA práctica, no de una nueva.
+   *
+   * @param actor - El profesional autenticado.
+   * @param dto - Nombre, huso horario y dirección opcional de la sede.
+   * @returns La sede recién creada, en el mismo formato que {@link listSitesOfPractitioner}.
+   */
+  async createOwnSite(
+    actor: AuthenticatedUser,
+    dto: CreateOwnSiteDto,
+  ): Promise<PractitionerSiteDto> {
+    this.logger.info(
+      { operation: 'practice.sites.createOwn', actorId: actor.id },
+      'Creating practitioner own site',
+    );
+    const tenantId = requireTenantId();
+    return this.em.transactional(async (tx) => {
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+
+      let practice = await this.practicesRepo.findOwnOffice(
+        tx,
+        tenantId,
+        actor.id,
+        PRAC.PRACTICE_TYPE_OFFICE,
+      );
+      if (!practice) {
+        practice = this.practicesRepo.create(tx, {
+          tenantId,
+          // Determinista y único por usuario: dos altas del mismo profesional
+          // deben resolver a la MISMA práctica, no chocar por código.
+          code: `OFFICE-${actor.id}`,
+          name: 'Consultorio propio',
+          typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+          adminUserId: actor.id,
+          statusConceptId: PRAC.PRACTICE_ACTIVE,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
+      }
+
+      let addressId: string | undefined;
+      if (dto.address) {
+        const address = this.addressesRepo.create(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_USER,
+          ownerId: actor.id,
+          lines: dto.address.lines.join('\n'),
+          city: dto.address.city,
+          municipalityConceptId: dto.address.municipalityConceptId,
+          administrativeAreaConceptId: dto.address.administrativeAreaConceptId,
+          countryConceptId: CONCEPTS.COUNTRY_BO,
+          useConceptId: CONCEPTS.ADDR_USE_HOME,
+          typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+          latitude:
+            dto.address.latitude !== undefined
+              ? String(dto.address.latitude)
+              : undefined,
+          longitude:
+            dto.address.longitude !== undefined
+              ? String(dto.address.longitude)
+              : undefined,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
+        addressId = address.id;
+      }
+
+      const code = await this.uniqueSiteCode(tx, practice.id, dto.name);
+      const site = this.sitesRepo.create(tx, {
+        practiceId: practice.id,
+        code,
+        name: dto.name,
+        siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,
+        operationalStatusConceptId: PRAC.SITE_OP_PLANNED,
+        timeZone: dto.timeZone,
+        addressId,
+        managingTenantId: tenantId,
+        statusConceptId: PRAC.SITE_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.rolesRepo.create(tx, {
+        practitionerProfileId,
+        practiceId: practice.id,
+        practiceSiteId: site.id,
+        roleConceptId: PRAC.ROLE_ATTENDING,
+        // Es su propio consultorio: no hay nadie más a quien pedirle permiso,
+        // así que nace activa directo (mismo criterio que el bootstrap de
+        // práctica, no el de pedir unirse a la de otro — eso sí nace
+        // pendiente, ver `selfRequestAffiliation`).
+        statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+        isPrimary: false,
+        validFrom: new Date(),
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.logger.info(
+        { operation: 'practice.sites.createOwn', siteId: site.id },
+        'Practitioner own site created',
+      );
+      return {
+        id: site.id,
+        practiceId: site.practiceId,
+        code: site.code,
+        name: site.name,
+        timeZone: site.timeZone ?? null,
+        addressText: dto.address ? ownSiteAddressText(dto.address) : null,
+        latitude: dto.address?.latitude ?? null,
+        longitude: dto.address?.longitude ?? null,
+        status: site.statusConceptId,
+      };
+    });
+  }
+
+  /**
+   * ALV-005: retira una sede propia. No la borra —queda como historial de la
+   * práctica—, cierra la asignación de rol que la conectaba con la agenda.
+   *
+   * @param actor - El profesional autenticado.
+   * @param siteId - La sede a retirar.
+   * @throws ResourceNotFoundException si la sede no es una asignación vigente del actor.
+   */
+  async deleteOwnSite(actor: AuthenticatedUser, siteId: string): Promise<void> {
+    return this.em.transactional(async (tx) => {
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      const assignment = await this.rolesRepo.findCurrentBySite(
+        tx,
+        practitionerProfileId,
+        siteId,
+      );
+      if (!assignment) {
+        throw new ResourceNotFoundException(
+          'No tenés una vinculación vigente con esa sede',
+          { siteId },
+        );
+      }
+      assignment.statusConceptId = PRAC.ROLE_ASSIGNMENT_ENDED;
+      assignment.validTo = new Date();
+      assignment.updatedByUserId = actor.id;
+      assignment.updatedAt = new Date();
+      await tx.flush();
+      this.logger.info(
+        { operation: 'practice.sites.deleteOwn', siteId },
+        'Practitioner own site assignment ended',
+      );
+    });
+  }
+
+  /**
+   * Un código de sitio único dentro de la práctica, derivado del nombre.
+   *
+   * `createSite` (el alta administrativa) exige el código como dato del
+   * cliente; acá no tiene sentido pedírselo al profesional —es un detalle de
+   * unicidad interna, no algo que el consultorio "tenga"—, así que se deriva
+   * y se resuelve el choque con un sufijo numérico.
+   */
+  private async uniqueSiteCode(
+    em: EntityManager,
+    practiceId: string,
+    name: string,
+  ): Promise<string> {
+    const base = name
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 90);
+    let candidate = base || 'CONSULTORIO';
+    let suffix = 1;
+    while (
+      await this.sitesRepo.findByPracticeAndCode(em, practiceId, candidate)
+    ) {
+      suffix += 1;
+      candidate = `${base || 'CONSULTORIO'}-${suffix}`;
+    }
+    return candidate;
   }
 
   /**
@@ -228,6 +433,10 @@ export class PractitionerSitesService {
         name: site.name,
         timeZone: site.timeZone ?? null,
         addressText: address ? addressText(address) : null,
+        latitude:
+          address?.latitude !== undefined ? Number(address.latitude) : null,
+        longitude:
+          address?.longitude !== undefined ? Number(address.longitude) : null,
         status: site.statusConceptId,
       });
     }
@@ -269,6 +478,24 @@ function unique(ids: readonly string[]): string[] {
  */
 function addressText(address: Addresses): string | null {
   const partes = [address.lines, address.city, address.postalCode]
+    .map((parte) => parte?.trim())
+    .filter((parte): parte is string => Boolean(parte));
+  return partes.length === 0 ? null : partes.join(', ');
+}
+
+/**
+ * Igual que {@link addressText}, para el `OwnSiteAddressDto` que
+ * `createOwnSite` acaba de recibir y todavía no releyó de la base.
+ *
+ * Compone `lines` igual que `AddressesService.create` la va a persistir —
+ * unidas por salto de línea, como una sola "parte"— para que la respuesta
+ * inmediata coincida con lo que un `GET` posterior mostraría.
+ */
+function ownSiteAddressText(address: {
+  lines: string[];
+  city?: string;
+}): string | null {
+  const partes = [address.lines.join('\n'), address.city]
     .map((parte) => parte?.trim())
     .filter((parte): parte is string => Boolean(parte));
   return partes.length === 0 ? null : partes.join(', ');

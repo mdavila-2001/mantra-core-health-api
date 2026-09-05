@@ -160,6 +160,31 @@ export class LineAdjudicationDto {
   decision!: 'APPROVED' | 'DENIED';
 
   /**
+   * Motivo catalogado por el que se denegó esta línea.
+   *
+   * `claim_line_adjudications.reason_concept_id` existe en el modelo desde
+   * siempre y **ningún endpoint podía escribirlo**: la columna quedaba nula, y
+   * por eso la columna «Motivo» del detalle sale vacía en todos los rechazos.
+   * Esto abre la vía de escritura; el **contenido** del catálogo es otra cosa.
+   *
+   * Justin decidió (2026-09-04) que los motivos salen de un **catálogo interno
+   * único de MANTRA**, no de la aseguradora ni de uno por tenant. Ese catálogo
+   * **todavía no declara miembros** —la terminología sólo trae el concepto de
+   * arranque, sin lista—, y acuñar códigos «plausibles» está prohibido. Hasta
+   * que exista, el campo se acepta y se persiste tal cual: es un `uuid` de
+   * `terminology.catalog_concepts` y quien lo envía responde por él (AC-16-8).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Motivo catalogado de la denegación (concepto de terminology). El ' +
+      'catálogo interno todavía no declara sus miembros — AC-16-8.',
+  })
+  @IsOptional()
+  @IsUUID()
+  reasonConceptId?: string;
+
+  /**
    * Valor de approved amount mantenido por la instancia.
    */
   @ApiPropertyOptional({ example: '80.00' })

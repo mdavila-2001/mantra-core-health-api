@@ -29,6 +29,7 @@ function build() {
     findByTenant: mockFn().mockResolvedValue([]),
     findActive: mockFn(),
     findById: mockFn(),
+    findOwnOffice: mockFn().mockResolvedValue(null),
     create: mockFn(),
   };
   const sitesRepo = {

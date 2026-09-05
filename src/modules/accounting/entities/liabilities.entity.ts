@@ -105,6 +105,13 @@ export class Liabilities {
   statusConceptId!: string;
 
   /**
+   * Si un worker programado puede pagar sus cuotas solo (FT-26), o si sólo
+   * avanza cuando alguien llama al auto-servicio a mano.
+   */
+  @Property({ fieldName: 'automated', columnType: 'boolean' })
+  automated: boolean = true;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

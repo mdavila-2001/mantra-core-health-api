@@ -298,7 +298,89 @@ que ninguna otra cosa.
 
 ---
 
-## 7 · Qué mirar cuando algo falla
+## 7 · Acceso remoto a PostgreSQL para testers de datos
+
+El servicio `postgres` del compose publica el puerto **5432 del host** hacia
+internet (`POSTGRES_PUBLIC_PORT`, por defecto `5432`). Es la **única** base del
+stack que se expone: Mongo, Redis, OpenSearch y MinIO siguen solo en la red
+interna `alovida`.
+
+### El tráfico va sin cifrar
+
+`DB_SSL` está vacío y el contenedor no lleva certificado, así que la conexión
+del tester viaja en claro: contraseña incluida en el primer intercambio, y
+después las filas. Sobre una base con historias clínicas eso es material
+sensible atravesando internet sin TLS.
+
+Mientras siga así, lo que reduce el riesgo es que el rol expuesto solo lea, que
+la contraseña sea larga y de un solo uso, y que el puerto se cierre en cuanto
+los testers terminen. Para cerrarlo del todo hay que montar un certificado en
+el contenedor y exigir `hostssl` en `pg_hba.conf`; eso no está hecho.
+
+### Lo que hay que hacer una sola vez en el servidor
+
+1. **Abrir el puerto en el firewall** del servidor. En Ubuntu con `ufw`:
+
+   ```bash
+   sudo ufw allow 5432/tcp
+   ```
+
+   Sin esto el contenedor publica el puerto pero nadie llega.
+
+2. **Crear el rol de solo lectura.** El rol `alovida` (`POSTGRES_USER`) es el
+   dueño del esquema y **no se reparte**: quien tenga esa contraseña puede
+   borrar la base. Los testers reciben `alovida_reader`, que solo hace SELECT.
+
+   El script está en el repositorio y es idempotente, así que se puede volver a
+   correr después de cada migración sin miedo:
+
+   ```bash
+   docker cp scripts/postgres/provision-reader-role.sql <contenedor-postgres>:/tmp/
+   docker exec <contenedor-postgres> psql -U alovida -d alovida_health \
+     -v role_reader=alovida_reader -v owner=alovida -v database=alovida_health \
+     -f /tmp/provision-reader-role.sql
+   ```
+
+3. **Ponerle contraseña al lector.** El script no la fija —no contiene
+   contraseñas, igual que `provision-roles.sql`— y un rol con LOGIN sin
+   contraseña no autentica a nadie bajo `scram-sha-256`:
+
+   ```bash
+   openssl rand -base64 18   # guardar el valor: es lo que se reparte
+   docker exec <contenedor-postgres> psql -U alovida -d alovida_health \
+     -c "ALTER ROLE alovida_reader PASSWORD '<PASSWORD_LECTOR>'"
+   ```
+
+### Lo que se entrega a los testers
+
+```
+postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health
+```
+
+Comprobación desde fuera. La segunda es la que importa: leer el catálogo de
+concesiones describe la intención, pero que el lector no puede escribir solo se
+demuestra intentando escribir y recibiendo un `42501`.
+
+```bash
+psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health" \
+  -c 'select count(*) from information_schema.tables'
+
+psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health" \
+  -c 'insert into accounting.account_determination_rules default values'
+#   ERROR: permission denied for table account_determination_rules
+```
+
+### Para volver a cerrarlo
+
+Cambiar `POSTGRES_PUBLIC_PORT` no basta: hay que dejar el puerto atado al
+loopback del servidor. En `docker-compose.coolify.yml`, en el servicio
+`postgres`, poner `"127.0.0.1:5432:5432"`, redesplegar y cerrar el puerto en el
+firewall (`sudo ufw delete allow 5432/tcp`). Desde ese momento se entra por
+túnel SSH: `ssh -L 5432:localhost:5432 usuario@servidor`.
+
+---
+
+## 8 · Qué mirar cuando algo falla
 
 | Síntoma | Causa casi segura |
 |---|---|
@@ -316,7 +398,7 @@ que ninguna otra cosa.
 
 ---
 
-## 8 · Copias de seguridad
+## 9 · Copias de seguridad
 
 Lo único que no se puede reconstruir son los volúmenes. `postgres_data` es el
 crítico:

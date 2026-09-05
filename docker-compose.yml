@@ -39,12 +39,25 @@ x-app-env: &app-env
   # Producción usa manifiestos propios, no este archivo.
   NODE_ENV: ${NODE_ENV:-development}
   PORT: "3000"
-  DB_HOST: postgres
-  DB_PORT: "5432"
-  DB_USER: ${POSTGRES_USER}
-  DB_PASSWORD: ${POSTGRES_PASSWORD}
-  DB_NAME: ${POSTGRES_DB}
-  MONGODB_URI: mongodb://mongodb:27017/${MONGO_DB:-mantra_redesa_health_document_store}
+  # Conexión a datos: se lee del `.env` del host, con los nombres de servicio
+  # del compose como default. Así el mismo archivo sirve para las dos formas
+  # de correr: contra Postgres/Mongo gestionados (Neon, Atlas — el `.env`
+  # trae host, credenciales y `DB_SSL=true`; los contenedores locales de base
+  # ni se levantan, ver el perfil `local-db`) o contra los contenedores del
+  # propio compose (`.env` sin `DB_HOST`/`MONGODB_URI`, o con los nombres de
+  # servicio). Ojo con el híbrido «API en contenedor + base local»: el `.env`
+  # de `.env.example` dice `DB_HOST=localhost`, que dentro del contenedor no
+  # existe; ahí hay que pasar `DB_HOST=postgres DB_PORT=5432` al `up`.
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_USER: ${DB_USER:-${POSTGRES_USER}}
+  DB_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD}}
+  DB_NAME: ${DB_NAME:-${POSTGRES_DB}}
+  # Obligatorio contra un Postgres gestionado: sin esto `orm.env.ts` cae a su
+  # default `false`, y Neon corta el `startup` en claro. No estaba declarado
+  # en este bloque, así que el `.env` no podía activarlo dentro del contenedor.
+  DB_SSL: ${DB_SSL:-false}
+  MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/mantra_redesa_health_document_store}
   MONGO_DB: ${MONGO_DB:-mantra_redesa_health_document_store}
   REDIS_HOST: redis
   REDIS_PORT: "6379"
@@ -303,7 +316,18 @@ x-worker-healthcheck: &worker-healthcheck
   start_period: 30s
 
 services:
+  # --- Bases de datos LOCALES: perfil opcional `local-db` --------------------
+  # Desde 2026-09-05 el entorno de desarrollo apunta a Postgres y Mongo
+  # gestionados (NeonDB y Atlas, ver `.env`), así que estos cuatro servicios
+  # —los más pesados del stack— ya no se levantan con `docker compose up`.
+  # Quien quiera la base en la máquina los activa explícitamente:
+  #   docker compose --profile local-db up -d postgres postgres-init mongodb mongo-init
+  # y apunta el `.env` a ellos (`DB_HOST=postgres` desde un contenedor,
+  # `localhost:5433` desde el host). La API ya no espera por ellos (ver su
+  # `depends_on`): con el perfil activo hay que dejar terminar `postgres-init`
+  # antes de arrancarla, o arranca contra una base sin tablas.
   postgres:
+    profiles: ["local-db"]
     image: timescale/timescaledb-ha:pg18
     restart: always
     environment:
@@ -329,6 +353,7 @@ services:
   # One-shot: aplica SQL/ (apply_all → apply_deferred) y los stores PG de
   # NoSQL/ (58 TimescaleDB, 59 pgvector) solo si las tablas no existen.
   postgres-init:
+    profiles: ["local-db"]
     image: timescale/timescaledb-ha:pg18
     restart: "no"
     entrypoint: ["bash", "/init/bin/init-postgres.sh"]
@@ -350,6 +375,7 @@ services:
       - mantra-redesa-network
 
   mongodb:
+    profiles: ["local-db"]
     # 8.2.12: mongod 8.0.x aborta al arrancar en kernels >= 6.19 (SERVER-121912).
     # Este equipo corre 7.0, por eso el contenedor entraba en crash-loop.
     image: mongo:8.2.12
@@ -382,6 +408,7 @@ services:
   # One-shot: crea las colecciones del módulo 55 document_store
   # (validadores $jsonSchema + índices) solo si no existen.
   mongo-init:
+    profiles: ["local-db"]
     # Debe coincidir con la version de `mongodb` (ver nota alli).
     image: mongo:8.2.12
     restart: "no"
@@ -605,19 +632,16 @@ services:
       retries: 5
       start_period: 120s
     depends_on:
-      # No basta con que Postgres esté healthy: `TerminologySeedService`
-      # corre en `onApplicationBootstrap` y necesita el esquema ya aplicado
-      # (`postgres-init`), o la API arranca contra una base sin tablas en un
-      # `docker compose up` desde cero. Mismo razonamiento para Mongo/OpenSearch:
-      # document_store/search_platform asumen sus colecciones/índices creados.
-      postgres:
-        condition: service_healthy
-      postgres-init:
-        condition: service_completed_successfully
-      mongodb:
-        condition: service_healthy
-      mongo-init:
-        condition: service_completed_successfully
+      # Postgres y Mongo ya NO figuran acá: viven fuera del compose (Neon y
+      # Atlas, con el esquema y los seeds aplicados desde `salud-db/`) y los
+      # contenedores locales quedaron bajo el perfil `local-db`. Un `depends_on`
+      # sobre un servicio de otro perfil lo arrastraría al `up` de todos los
+      # días, que es justo lo que se quiere evitar. El precio, sólo para quien
+      # active el perfil: arrancar `postgres-init`/`mongo-init` antes que la
+      # API — `TerminologySeedService` corre en `onApplicationBootstrap` y
+      # necesita el esquema ya aplicado, o arranca contra una base sin tablas.
+      # OpenSearch y Redis siguen siendo locales y sí se esperan:
+      # search_platform asume sus índices creados por `opensearch-init`.
       opensearch:
         condition: service_healthy
       opensearch-init:

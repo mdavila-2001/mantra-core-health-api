@@ -125,7 +125,38 @@ function build() {
     enCurso.add(clave(pro, pac));
   };
 
+  /**
+   * Relaciones asistenciales ACTIVAS, indexadas por par (profesional, paciente)
+   * como lo hace `findActiveForPractitionerPatient`. Sin filtro de ventana acá
+   * a propósito: la ventana la evalúa el servicio, no el repositorio.
+   */
+  const relacionesAsistenciales = new Map<
+    string,
+    { validFrom: Date; validTo?: Date; purposeConceptId?: string }[]
+  >();
+  const careRelationshipsRepo = {
+    findActiveForPractitionerPatient: mockFn(
+      (_em: unknown, pro: string, pac: string) =>
+        Promise.resolve(relacionesAsistenciales.get(clave(pro, pac)) ?? []),
+    ),
+  };
+  /** Da de alta una relación asistencial ACTIVA entre ambos. */
+  const vincular = (
+    pro: string,
+    pac: string,
+    validFrom: Date = new Date(Date.now() - 86_400_000),
+    validTo?: Date,
+    purposeConceptId?: string,
+  ) => {
+    const previas = relacionesAsistenciales.get(clave(pro, pac)) ?? [];
+    relacionesAsistenciales.set(clave(pro, pac), [
+      ...previas,
+      { validFrom, validTo, purposeConceptId },
+    ]);
+  };
+
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const pdp = { evaluate: mockFn().mockResolvedValue({ decision: 'DENY' }) };
 
   const service = new ClinicalReadService(
     em as any,
@@ -139,6 +170,8 @@ function build() {
     patientProfilesRepo as any,
     practitionerProfilesRepo as any,
     bookingsRepo as any,
+    pdp as any,
+    careRelationshipsRepo as any,
     logger as any,
   );
 
@@ -148,10 +181,13 @@ function build() {
     patientProfilesRepo,
     practitionerProfilesRepo,
     bookingsRepo,
+    pdp,
+    careRelationshipsRepo,
     darDeAltaPaciente,
     darDeAltaProfesional,
     agendar,
     iniciarConsulta,
+    vincular,
     logger,
   };
 }
@@ -359,6 +395,68 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
+  describe('sin turno hoy, autorización explícita vía PDP (FT-07-R05/R06/R08)', () => {
+    const actorAutorizado = () =>
+      ({
+        id: 'u',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: MEDICO,
+        tenantIds: ['t1'],
+      }) as any;
+
+    it('pasa cuando el PDP concede (relación asistencial/grant vigente)', async () => {
+      const c = build();
+      c.darDeAltaProfesional(MEDICO);
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: MEDICO,
+      });
+      c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+
+      await expect(
+        c.service.assertPuedeLeerHistoria(PACIENTE, actorAutorizado()),
+      ).resolves.toBeUndefined();
+      expect(c.pdp.evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patientProfileId: PACIENTE,
+          practitionerProfileId: MEDICO,
+          action: 'READ',
+          purposeOfUse: 'TREATMENT',
+        }),
+        expect.anything(),
+      );
+    });
+
+    it('sigue rechazando cuando el PDP también deniega', async () => {
+      const c = build();
+      c.darDeAltaProfesional(MEDICO);
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: MEDICO,
+      });
+      c.pdp.evaluate.mockResolvedValue({ decision: 'DENY' });
+
+      await expect(
+        c.service.assertPuedeLeerHistoria(PACIENTE, actorAutorizado()),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('no consulta el PDP sin tenant en el actor', async () => {
+      const c = build();
+      c.darDeAltaProfesional(MEDICO);
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: MEDICO,
+      });
+
+      await expect(
+        c.service.assertPuedeLeerHistoria(PACIENTE, {
+          id: 'u',
+          roles: ['PRACTITIONER'],
+          practitionerProfileId: MEDICO,
+        } as any),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(c.pdp.evaluate).not.toHaveBeenCalled();
+    });
+  });
+
   /**
    * El borde que hace fallar a quien decide con la fecha del servidor: a las 23:30 en
    * La Paz ya es el día siguiente en UTC. El turno es de hoy para la sede, y es la
@@ -497,6 +595,99 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
       .catch((e: Error) => e.message);
 
     expect(existeSinTurno).toBe(inventado);
+  });
+
+  /**
+   * ALV-029. Antes de esta base, un profesional con paciente asignado pero sin
+   * cupo agendado para hoy caía en `assertOwnRecord` como un desconocido.
+   */
+  it('un profesional con relación asistencial vigente abre la historia aunque no tenga turno hoy', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.vincular(MEDICO, PACIENTE);
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).resolves.toBeUndefined();
+  });
+
+  it('una relación asistencial YA VENCIDA no abre la historia', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.vincular(
+      MEDICO,
+      PACIENTE,
+      new Date(Date.now() - 30 * 86_400_000),
+      new Date(Date.now() - 86_400_000),
+    );
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('una relación asistencial que TODAVÍA no empieza no abre la historia', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.vincular(MEDICO, PACIENTE, new Date(Date.now() + 86_400_000));
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  /**
+   * Espejo del caso 6c del PDP (`AuthzPdpService`): una relación acotada a un
+   * propósito sólo habilita acciones que declaren ese mismo propósito. Este
+   * endpoint no pide propósito de uso —es el resumen completo—, así que una
+   * relación acotada no debe abrirlo: sería darle más alcance del que su
+   * propio propósito le fija.
+   */
+  it('una relación asistencial ACOTADA A UN PROPÓSITO no abre el resumen completo', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.vincular(
+      MEDICO,
+      PACIENTE,
+      new Date(Date.now() - 86_400_000),
+      undefined,
+      'purpose:second-opinion',
+    );
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('la relación asistencial es de ESE par: con OTRO paciente no abre esta historia', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.vincular(MEDICO, OTRO_PACIENTE);
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('el camino barato va primero: con turno de hoy no se consulta la relación asistencial', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.agendar(MEDICO, PACIENTE, hoyEnLaPazALas(10), LA_PAZ);
+
+    await c.service.assertPuedeLeerHistoria(
+      PACIENTE,
+      actorCon('u', 'CLINICIAN'),
+    );
+
+    expect(
+      c.careRelationshipsRepo.findActiveForPractitionerPatient,
+    ).not.toHaveBeenCalled();
   });
 
   it('resuelve el vínculo de la cuenta UNA sola vez por lectura', async () => {
