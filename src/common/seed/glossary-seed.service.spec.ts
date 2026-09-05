@@ -39,6 +39,13 @@ function build(existing: Set<string> = new Set()) {
       flushes += 1;
       return Promise.resolve();
     }),
+    // `backfillTermCodeSystem` (FND-25-03) es un `UPDATE ... WHERE` de una
+    // sola sentencia: este doble no modela filas persistidas fuera de
+    // `created`, así que no hay nada que backfillear en este mundo de
+    // prueba — 0 es la respuesta correcta en los dos escenarios que cubre
+    // este archivo (base vacía, y reseed sobre lo que la propia corrida
+    // anterior ya sembró bajo el code system nuevo).
+    nativeUpdate: mockFn(() => Promise.resolve(0)),
   };
   const orm = { em: { fork: mockFn(() => em) } };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -85,6 +92,16 @@ const TOTAL_DESIGNATIONS = GLOSSARY_TERMS.reduce(
   0,
 );
 
+/**
+ * Cuántas propiedades declara el catálogo: 3 por término (slug, definición
+ * clínica, resumen llano) + 4 más (`active_ingredients`/`dosage_form`/
+ * `route`/`manufacturer`) por cada término con `drugFacts` (FND-25-02).
+ */
+const TOTAL_PROPERTIES = GLOSSARY_TERMS.reduce(
+  (total, term) => total + 3 + (term.drugFacts ? 4 : 0),
+  0,
+);
+
 describe('GlossarySeedService', () => {
   it('materializa la taxonomía y el catálogo curado sobre una base vacía', async () => {
     const g = build();
@@ -95,10 +112,7 @@ describe('GlossarySeedService', () => {
     expect(g.rowsOf('ValueSetVersions')).toHaveLength(GLOSSARY_TAXONOMY.length);
     expect(g.rowsOf('CatalogConcepts')).toHaveLength(GLOSSARY_TERMS.length);
     expect(g.rowsOf('ConceptDesignations')).toHaveLength(TOTAL_DESIGNATIONS);
-    // 3 propiedades por término: slug, definición clínica, resumen llano.
-    expect(g.rowsOf('ConceptProperties')).toHaveLength(
-      GLOSSARY_TERMS.length * 3,
-    );
+    expect(g.rowsOf('ConceptProperties')).toHaveLength(TOTAL_PROPERTIES);
     expect(g.rowsOf('ValueSetMembers')).toHaveLength(TOTAL_MEMBERSHIPS);
     expect(g.rowsOf('ConceptRelationships')).toHaveLength(
       TOTAL_RESOLVABLE_RELATIONS,
@@ -138,13 +152,23 @@ describe('GlossarySeedService', () => {
     const propertyCodes = new Set(
       g.rowsOf('ConceptProperties').map((property) => property.propertyCode),
     );
-    expect(propertyCodes).toEqual(
-      new Set([
-        'glossary-slug',
-        'glossary-clinical-definition',
-        'glossary-plain-summary',
-      ]),
-    );
+    // Los cuatro códigos de FND-25-02 (`active_ingredients`/`dosage_form`/
+    // `route`/`manufacturer`) sólo aparecen para los términos que declaran
+    // `drugFacts` en el catálogo — no para los 64+ restantes. Lo que este
+    // test sigue fijando es que `glossary-image` nunca aparece.
+    expect(propertyCodes.has('glossary-image')).toBe(false);
+    const esperados = new Set([
+      'glossary-slug',
+      'glossary-clinical-definition',
+      'glossary-plain-summary',
+      'active_ingredients',
+      'dosage_form',
+      'route',
+      'manufacturer',
+    ]);
+    for (const code of propertyCodes) {
+      expect(esperados.has(code)).toBe(true);
+    }
   });
 
   it('re-sembrar sobre una base ya poblada no duplica ninguna fila (reseed idempotente)', async () => {
@@ -169,6 +193,7 @@ describe('GlossarySeedService', () => {
       memberships: 0,
       relationships: 0,
       orphanRelationships: 1,
+      codeSystemBackfilled: 0,
     });
   });
 

@@ -23,7 +23,7 @@ import { CONCEPTS } from '../../common';
  */
 export const GLOSSARY_ALL_TERMS_CODE = 'glossary-all-terms';
 
-/** Prefijo de los 11 value sets de categoría (`glossary-category-<key>`). */
+/** Prefijo de los 12 value sets de categoría (`glossary-category-<key>`). */
 export const GLOSSARY_CATEGORY_PREFIX = 'glossary-category-';
 
 /** Prefijo de los 15 value sets de etiqueta (`glossary-tag-<key>`). */
@@ -70,6 +70,33 @@ export const GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE = 'glossary-plain-summary';
  * términos usan iconografía de categoría en el frontend en su lugar.
  */
 export const GLOSSARY_IMAGE_PROPERTY_CODE = 'glossary-image';
+
+// --- Ficha de medicamento (FND-25-02) ---------------------------------------
+//
+// Los cuatro códigos de acá abajo son EXACTAMENTE los que ya escribe
+// `tools/terminology-import/import-ndc.mjs` sobre los conceptos reales del
+// FDA National Drug Code (NDC) Directory (`code_system=ndc`) — no una
+// convención nueva del glosario. Reusarlos para los términos curados que
+// declaran `drugFacts` (`glossary-terms.catalog.ts`) es lo que hace que
+// `GlossaryDrugFacts.drugFactsFrom()` (frontend) los lea sin ningún cambio: ya
+// sabe leer `active_ingredients`/`dosage_form`/`route`/`manufacturer` de
+// `properties`, sea el concepto un producto NDC crudo o un término curado con
+// estos cuatro datos copiados verbatim de un producto NDC real que lo
+// representa (ver la nota de selección determinista en
+// `glossary-terms.catalog.ts`).
+
+/** Principios activos: jsonb `string[]` (p. ej. `["ACETAMINOPHEN 500 mg/1"]`). */
+export const GLOSSARY_DRUG_ACTIVE_INGREDIENTS_PROPERTY_CODE =
+  'active_ingredients';
+
+/** Forma farmacéutica: jsonb `string` (p. ej. `"TABLET"`), verbatim de NDC. */
+export const GLOSSARY_DRUG_DOSAGE_FORM_PROPERTY_CODE = 'dosage_form';
+
+/** Vía de administración: jsonb `string[]` (p. ej. `["ORAL"]`), verbatim de NDC. */
+export const GLOSSARY_DRUG_ROUTE_PROPERTY_CODE = 'route';
+
+/** Fabricante: jsonb `string` (`labeler_name`), verbatim de NDC. */
+export const GLOSSARY_DRUG_MANUFACTURER_PROPERTY_CODE = 'manufacturer';
 
 /** Contenido bilingüe `{ es, en? }` tal como se guarda en `value_json`. */
 export interface GlossaryBilingualText {

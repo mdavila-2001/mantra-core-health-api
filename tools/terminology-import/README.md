@@ -33,6 +33,33 @@ duplicar datos.
 > planificar una tarea asumiendo esos datos, corré la consulta de arriba
 > contra la base que vas a usar.
 
+> [!aviso] `import-ndc.mjs` SÍ se corrió contra `mantra_redesa_health_e2e`
+> (carril FT-25, 2026-09-04). Verificado con la misma consulta:
+>
+> ```
+> --  ndc                  | 135002
+> --  mantra-core-internal |   8954
+> --  vademecum            |     17
+> ```
+>
+> 135 002 `catalog_concepts` (product_ndc únicos) + 649 475 `concept_properties`
+> (`manufacturer`, `dosage_form`, `route`, `active_ingredients`, `product_type`)
+> insertados de una corrida limpia (0 conflictos, re-ejecutable sin duplicar).
+>
+> **Esto NO alcanza para que el glosario (`/glossary`) muestre fichas de
+> medicamento.** `ConceptsService.searchConcepts` acota toda lectura del
+> glosario a los miembros del value set `glossary-all-terms`
+> (`glossary-terms.catalog.ts`, 64 términos curados a mano), y ninguno de esos
+> 64 términos —incluido el curado «Paracetamol», `categoryKey: 'pharmacology'`—
+> es miembro del `code_system` `ndc` ni tiene sus `concept_properties`
+> enlazadas a un producto NDC concreto. Vincular un término curado genérico
+> (p. ej. «Paracetamol») a UN producto comercial específico de los 135 002
+> importados sería elegir un fabricante/forma farmacéutica arbitrario para
+> representar el genérico — una decisión de curación de contenido, no un ETL,
+> y por eso queda fuera de esta corrida (ver P-25-1 en
+> `glossary-drug-facts.ts`). El catálogo `ndc` queda disponible en la base para
+> quien resuelva esa curación.
+
 ## Fuentes ya importadas (públicas, sin cuenta necesaria)
 
 | Script | Fuente | code_system | Conceptos reales |
