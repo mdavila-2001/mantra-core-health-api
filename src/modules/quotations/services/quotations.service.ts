@@ -207,10 +207,7 @@ export class QuotationsService {
     if (quotation === null) {
       throw new ResourceNotFoundException('Cotización no encontrada', { id });
     }
-    const installments = await this.installmentsRepo.findByQuotationId(
-      em,
-      id,
-    );
+    const installments = await this.installmentsRepo.findByQuotationId(em, id);
     return toResponseDto(quotation, installments);
   }
 

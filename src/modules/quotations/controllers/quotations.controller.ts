@@ -15,11 +15,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  CurrentUser,
-  Roles,
-  type AuthenticatedUser,
-} from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { QuotationsService, toInstallmentPreviewDto } from '../services';
 import {
   CreateQuotationDto,

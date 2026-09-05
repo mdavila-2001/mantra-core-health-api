@@ -68,7 +68,9 @@ export class SimulatePaymentPlanDto {
    * Fecha de atención, usada como base para calcular los vencimientos de las
    * cuotas (cuotas mensuales a partir de esta fecha).
    */
-  @ApiProperty({ description: 'Fecha de atención (ISO), base de los vencimientos' })
+  @ApiProperty({
+    description: 'Fecha de atención (ISO), base de los vencimientos',
+  })
   @IsDateString()
   attentionDate!: string;
 }

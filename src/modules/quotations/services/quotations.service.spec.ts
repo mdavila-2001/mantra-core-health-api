@@ -5,7 +5,10 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { QuotationsService } from './quotations.service';
 import { simulatePaymentPlan } from './payment-plan-simulator';
-import { PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = {
   id: 'user-1',
@@ -63,7 +66,14 @@ function build() {
     serviceCatalogRepo as any,
     logger as any,
   );
-  return { service, tx, em, quotationsRepo, installmentsRepo, serviceCatalogRepo };
+  return {
+    service,
+    tx,
+    em,
+    quotationsRepo,
+    installmentsRepo,
+    serviceCatalogRepo,
+  };
 }
 
 /** Fila de cotización persistida, con los campos que lee `toResponseDto`. */
@@ -138,13 +148,7 @@ describe('payment-plan-simulator', () => {
   });
 
   it('las cuotas vencen una por mes a partir de attentionDate', () => {
-    const rows = simulatePaymentPlan(
-      '300.00',
-      3,
-      '0',
-      'FLAT',
-      attentionDate,
-    );
+    const rows = simulatePaymentPlan('300.00', 3, '0', 'FLAT', attentionDate);
     expect(rows[0].dueDate.toISOString().slice(0, 10)).toBe('2026-02-01');
     expect(rows[1].dueDate.toISOString().slice(0, 10)).toBe('2026-03-01');
     expect(rows[2].dueDate.toISOString().slice(0, 10)).toBe('2026-04-01');
@@ -225,9 +229,9 @@ describe('QuotationsService.createQuotation', () => {
     const d = build();
     d.serviceCatalogRepo.findById.mockResolvedValue(null);
 
-    await expect(d.service.createQuotation(baseDto, actor)).rejects.toBeInstanceOf(
-      ResourceNotFoundException,
-    );
+    await expect(
+      d.service.createQuotation(baseDto, actor),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
     expect(d.quotationsRepo.create).not.toHaveBeenCalled();
   });
 
@@ -241,9 +245,7 @@ describe('QuotationsService.createQuotation', () => {
     expect(d.installmentsRepo.createMany).toHaveBeenCalledTimes(1);
     const [, installments] = d.installmentsRepo.createMany.mock.calls[0];
     expect(installments).toHaveLength(baseDto.paymentPlanInstallmentCount);
-    expect(installments.every((i: any) => i.quotationId === 'q-42')).toBe(
-      true,
-    );
+    expect(installments.every((i: any) => i.quotationId === 'q-42')).toBe(true);
   });
 });
 
