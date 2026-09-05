@@ -34,6 +34,7 @@ import type {
 } from '../entities';
 // Va en un import de valor y no de tipo: `tx.create()` necesita la clase, no su forma.
 import { AppointmentPaymentStates } from '../entities';
+import { CoverageRepository } from '../../insurance/repositories/coverage.repository';
 import { SCHED } from '../scheduling.concepts';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
 import {
@@ -331,6 +332,7 @@ export class SchedulingBookingsService {
     private readonly logger: PinoLogger,
     private readonly vinculos: PractitionerAffiliationGateService,
     private readonly tiempoProfesional: SchedulingProfessionalTimeService,
+    private readonly coverageRepo: CoverageRepository,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
   }
@@ -2498,6 +2500,17 @@ export class SchedulingBookingsService {
       page.map(({ booking }) => booking.id),
     );
 
+    // La aseguradora de cada paciente, en lote (ALV-021). Sólo se pide para
+    // quien de todos modos va a poder ver el nombre del paciente: es el mismo
+    // dato de privacidad, y pedirla para el resto sería trabajo tirado.
+    const aseguradoras =
+      actor?.practitionerProfileId !== undefined ||
+      actor?.patientProfileId !== undefined
+        ? await this.coverageRepo.findActiveCarriersByPatients(em, [
+            ...new Set(page.map(({ booking }) => booking.patientProfileId)),
+          ])
+        : new Map<string, string>();
+
     return {
       items: page.map(({ booking, slot }) =>
         this.aBookingItem(
@@ -2515,6 +2528,7 @@ export class SchedulingBookingsService {
             ? undefined
             : tipos.get(booking.appointmentId),
           pagos.get(booking.id),
+          aseguradoras,
         ),
       ),
       count: page.length,
@@ -2648,6 +2662,7 @@ export class SchedulingBookingsService {
     nombreDelPaciente?: string,
     tipoDeLaCita?: string,
     estadoDePago?: AppointmentPaymentStates,
+    aseguradoraPorPaciente?: Map<string, string>,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -2685,6 +2700,16 @@ export class SchedulingBookingsService {
       ...(nombreDelPaciente !== undefined &&
       this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
         ? { patientName: nombreDelPaciente }
+        : {}),
+      // ALV-021: misma compuerta que el nombre. `null` es «se buscó y no
+      // tiene» —Particular—; el campo entero se omite cuando quien mira no
+      // puede ver al paciente, que es una pregunta distinta.
+      ...(aseguradoraPorPaciente !== undefined &&
+      this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
+        ? {
+            insuranceCarrierName:
+              aseguradoraPorPaciente.get(booking.patientProfileId) ?? null,
+          }
         : {}),
       // La tipología viaja siempre que exista: no es dato clínico —es qué
       // clase de actividad ocupa el rato, lo mismo que ya dice la duración del
