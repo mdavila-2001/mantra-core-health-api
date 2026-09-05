@@ -36,8 +36,14 @@ describe('IdentitySelfServiceService', () => {
       findById: fn().mockResolvedValue(null),
       findBySubjects: fn().mockResolvedValue([]),
     };
-    const evidenceRepo = { create: fn(() => ({ id: 'ev-1' })) };
-    const checksRepo = { create: fn(() => ({ id: 'check-1' })) };
+    const evidenceRepo = {
+      create: fn(() => ({ id: 'ev-1' })),
+      findLatestByCase: fn().mockResolvedValue(null),
+    };
+    const checksRepo = {
+      create: fn(() => ({ id: 'check-1' })),
+      findRequiredByCase: fn().mockResolvedValue([]),
+    };
     const accountLinksRepo = {
       findActiveByUser: fn().mockResolvedValue({ personId: 'person-1' }),
     };
@@ -51,6 +57,12 @@ describe('IdentitySelfServiceService', () => {
     const membershipsRepo = {
       findActiveByUserTenant: fn().mockResolvedValue(null),
     };
+    const manualReviewRepo = {
+      findLatestDecidedByCase: fn().mockResolvedValue(null),
+    };
+    const checkResultsRepo = {
+      findLatestByCheck: fn().mockResolvedValue(null),
+    };
     const service = new IdentitySelfServiceService(
       em as never,
       casesRepo as never,
@@ -60,6 +72,8 @@ describe('IdentitySelfServiceService', () => {
       practitionersRepo as never,
       authorizationsRepo as never,
       membershipsRepo as never,
+      manualReviewRepo as never,
+      checkResultsRepo as never,
       logger as never,
     );
     return {
@@ -72,6 +86,8 @@ describe('IdentitySelfServiceService', () => {
       practitionersRepo,
       authorizationsRepo,
       membershipsRepo,
+      manualReviewRepo,
+      checkResultsRepo,
     };
   }
 
@@ -245,6 +261,66 @@ describe('IdentitySelfServiceService', () => {
       });
     });
 
+    it('resuelve el tipo, el archivo y el motivo del veredicto (FT-32-R02/R03/R05)', async () => {
+      const d = build();
+      d.casesRepo.findById.mockResolvedValue({
+        id: 'case-1',
+        statusConceptId: IDA.CASE_REJECTED,
+        subjectEntityId: 'auth-1',
+        subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_LICENSE,
+      });
+      d.authorizationsRepo.findById.mockResolvedValue({
+        id: 'auth-1',
+        practitionerProfileId: 'person-1',
+      });
+      d.evidenceRepo.findLatestByCase.mockResolvedValue({
+        evidenceFileId: 'file-9',
+      });
+      d.manualReviewRepo.findLatestDecidedByCase.mockResolvedValue({
+        decisionReason: 'El documento no coincide con la matrícula declarada',
+      });
+      d.checksRepo.findRequiredByCase.mockResolvedValue([
+        {
+          id: 'check-1',
+          checkTypeConceptId: IDA.CHECK_TYPE_MEDICAL_LICENSE,
+          statusConceptId: IDA.CHECK_FAILED,
+        },
+      ]);
+      d.checkResultsRepo.findLatestByCheck.mockResolvedValue({
+        resultConceptId: IDA.RESULT_NO_MATCH,
+        checkedAt: new Date('2026-08-01T00:00:00Z'),
+      });
+
+      await expect(
+        d.service.getOwnCaseStatus('case-1', actor),
+      ).resolves.toMatchObject({
+        id: 'case-1',
+        type: 'PRACTITIONER_LICENSE',
+        evidenceFileId: 'file-9',
+        reasonText: 'El documento no coincide con la matrícula declarada',
+        checks: [
+          expect.objectContaining({
+            checkTypeConceptId: IDA.CHECK_TYPE_MEDICAL_LICENSE,
+            resultConceptId: IDA.RESULT_NO_MATCH,
+          }),
+        ],
+      });
+    });
+
+    it('un caso sin revisión manual no inventa un motivo', async () => {
+      const d = build();
+      d.casesRepo.findById.mockResolvedValue({
+        id: 'case-1',
+        statusConceptId: IDA.CASE_VERIFIED,
+        subjectEntityId: 'person-1',
+        subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_IDENTITY,
+      });
+
+      const res = await d.service.getOwnCaseStatus('case-1', actor);
+
+      expect(res.reasonText).toBeUndefined();
+    });
+
     it("hides someone else's case behind a not-found", async () => {
       const d = build();
       d.casesRepo.findById.mockResolvedValue({
@@ -290,6 +366,29 @@ describe('IdentitySelfServiceService', () => {
       ]);
     });
 
+    it('la lista trae el tipo pero no el trace de checks (FT-32-R01..R04)', async () => {
+      const d = build();
+      d.casesRepo.findBySubjects.mockResolvedValue([
+        {
+          id: 'case-9',
+          statusConceptId: IDA.CASE_OPEN,
+          subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_IDENTITY,
+          openedAt: new Date('2026-08-01T00:00:00Z'),
+        },
+      ]);
+
+      const [row] = await d.service.listOwnCases({ id: 'user-1', roles: [] });
+
+      expect(row).toMatchObject({
+        id: 'case-9',
+        type: 'PRACTITIONER_IDENTITY',
+      });
+      expect(row.checks).toBeUndefined();
+      // La lista no paga el N+1 de revisión manual/checks por fila.
+      expect(d.manualReviewRepo.findLatestDecidedByCase).not.toHaveBeenCalled();
+      expect(d.checksRepo.findRequiredByCase).not.toHaveBeenCalled();
+    });
+
     it('una cuenta sin persona vinculada no tiene casos, y eso no es un error', async () => {
       const d = build();
       d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
@@ -300,6 +399,57 @@ describe('IdentitySelfServiceService', () => {
         d.service.listOwnCases({ id: 'user-1', roles: [] }),
       ).resolves.toEqual([]);
       expect(d.casesRepo.findBySubjects).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listAvailableTypes', () => {
+    it('sin persona vinculada, ningún tipo disponible', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+      await expect(d.service.listAvailableTypes(actor)).resolves.toEqual({
+        types: [],
+      });
+    });
+
+    it('sin perfil profesional, ningún tipo disponible (catálogo del módulo Doctor)', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(d.service.listAvailableTypes(actor)).resolves.toEqual({
+        types: [],
+      });
+    });
+
+    it('ofrece identidad y cada matrícula propia, marcando cuáles ya tienen solicitud viva (FT-32-R09/R11)', async () => {
+      const d = build();
+      d.authorizationsRepo.findByPractitioner.mockResolvedValue([
+        { id: 'auth-1', licenseNumber: 'MAT-1' },
+        { id: 'auth-2', licenseNumber: 'MAT-2' },
+      ]);
+      d.casesRepo.countLiveForSubject.mockImplementation(
+        (_em: unknown, _subjectType: string, subjectEntityId: string) =>
+          Promise.resolve(subjectEntityId === 'auth-1' ? 1 : 0),
+      );
+
+      const res = await d.service.listAvailableTypes(actor);
+
+      expect(res.types).toEqual([
+        expect.objectContaining({
+          code: 'PRACTITIONER_IDENTITY',
+          hasPendingRequest: false,
+        }),
+        expect.objectContaining({
+          code: 'PRACTITIONER_LICENSE',
+          jurisdictionAuthorizationId: 'auth-1',
+          hasPendingRequest: true,
+        }),
+        expect.objectContaining({
+          code: 'PRACTITIONER_LICENSE',
+          jurisdictionAuthorizationId: 'auth-2',
+          hasPendingRequest: false,
+        }),
+      ]);
     });
   });
 });
