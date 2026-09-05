@@ -157,6 +157,15 @@ export class ProfessionalCredentialsRepository {
   }
 
   /**
+   * Borra una credencial (ALV-009/formación: retirar un título propio
+   * cargado por error, sólo mientras está pendiente — la regla de negocio
+   * vive en el servicio, acá sólo el borrado físico).
+   */
+  remove(em: EntityManager, row: ProfessionalCredentials): void {
+    em.remove(row);
+  }
+
+  /**
    * Nº de credenciales del profesional que siguen en un estado dado (típicamente
    * "pendiente"), excluyendo una credencial concreta. Sirve para decidir si el
    * profesional pasa a verificado cuando ya no le quedan credenciales pendientes.

@@ -2,11 +2,15 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsISO8601,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   Matches,
+  Max,
   MaxLength,
+  Min,
+  ValidateIf,
 } from 'class-validator';
 
 /**
@@ -181,4 +185,46 @@ export class UpdateOwnPractitionerProfileDto {
   @IsOptional()
   @IsUUID()
   residenceMunicipalityConceptId?: string;
+
+  /* --- el domicilio, ALV-009 ------------------------------------------------
+     Mismo contrato que `UpdateOwnPatientProfileDto.homeAddressLines/
+     homeLatitude/homeLongitude`: `common.addresses` es la misma tabla, y el
+     profesional tenía municipio pero nunca calle ni coordenadas — el front
+     pegaba un `POST /common/addresses` suelto que ninguna lectura buscaba. */
+
+  /**
+   * Calle y número del domicilio, tal como la persona lo escribe. Vacío para
+   * quitarlo — igual que el resto del `PATCH`.
+   */
+  @ApiPropertyOptional({
+    maxLength: 300,
+    description:
+      'Domicilio, tal como lo escribe la persona. Vacío para quitarlo.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  homeAddressLines?: string;
+
+  /** Latitud del domicilio. Ambos-o-ninguno con {@link homeLongitude}. */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: UpdateOwnPractitionerProfileDto) =>
+      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  homeLatitude?: number;
+
+  /** Longitud del domicilio. Ver {@link homeLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: UpdateOwnPractitionerProfileDto) =>
+      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  homeLongitude?: number;
 }
