@@ -210,6 +210,10 @@ import {
     PublicProfileProjectionService,
     CommunityRatingsService,
     CommunityVerificationService,
+    // TAREA-15 (P8 → SupportAdmin): `scheduling` reusa la mensajería directa
+    // tal cual la usa «Escribir al doctor», en vez de inventar un tercer
+    // sistema de chat. No hay ciclo — `community` no importa `scheduling`.
+    CommunityMessagingService,
   ],
 })
 export class CommunityModule {}

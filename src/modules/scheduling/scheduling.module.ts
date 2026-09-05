@@ -46,6 +46,10 @@ import { PracticeModule } from '../practice/practice.module';
 // ya evalúa consentimiento, preferencia por categoría y horas de silencio.
 // `messaging` no importa `scheduling`, así que la dependencia no cierra ciclo.
 import { MessagingModule } from '../messaging/messaging.module';
+// TAREA-15 · el aviso de agenda también llega al chat de `SupportAdmin`
+// (`community.conversations`, reusado tal cual). `community` no importa
+// `scheduling`, así que la dependencia no cierra ciclo.
+import { CommunityModule } from '../community/community.module';
 // Las entidades de `profiles` que el aviso necesita leer para saber a qué
 // cuenta va y cómo se llama el profesional. Se registran acá —y no se importa
 // el módulo entero— por el mismo criterio que `AppointmentsRepository`.
@@ -53,6 +57,7 @@ import * as profileEntities from '../profiles/entities';
 import { schedulingPersistenceProviders } from './scheduling.persistence';
 import { AGENDA_NOTICE_PORT } from './ports/agenda-notice.port';
 import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice.adapter';
+import { SupportAdminNoticeAdapter } from './adapters/support-admin-notice.adapter';
 
 /**
  * Módulo de agenda: recursos, políticas, plantillas, slots, reservas con
@@ -71,6 +76,7 @@ import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice
     DirectoryModule,
     PracticeModule,
     MessagingModule,
+    CommunityModule,
   ],
   controllers: [
     SchedulingController,
@@ -108,6 +114,7 @@ import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice
     // **sólo** esta línea y ningún caso de uso cambia.
     SchedulingDelayService,
     SchedulingAgendaNoticesService,
+    SupportAdminNoticeAdapter,
     MessagingAgendaNoticeAdapter,
     { provide: AGENDA_NOTICE_PORT, useExisting: MessagingAgendaNoticeAdapter },
   ],
