@@ -7,6 +7,10 @@ import { AuditModule } from '../audit/audit.module';
 // porque `MessagingModule` ya exporta `NotificationsService` justamente para
 // esto, y no hay ciclo: `messaging` no sabe nada de `clinical`.
 import { MessagingModule } from '../messaging/messaging.module';
+// FT-07-R08: `ClinicalRecordAccessGuard` evalúa relación asistencial/acceso
+// clínico contra el PDP de `authz` antes de servir PHI. Import unidireccional
+// (`clinical` → `authz`); `authz` no conoce `clinical`, así que no hay ciclo.
+import { AuthzModule } from '../authz/authz.module';
 import {
   ClinicalEncountersController,
   ClinicalObservationsController,
@@ -15,6 +19,7 @@ import {
   ClinicalRecordsController,
   ClinicalReadController,
 } from './controllers';
+import { ClinicalRecordAccessGuard } from './guards';
 import {
   CareEpisodesService,
   EncountersService,
@@ -52,16 +57,9 @@ import {
 // no duplican fuente de verdad. Importar `ProfilesModule` además cerraría un
 // ciclo: `profiles` ya cuenta lo que un profesional dejó asentado en `clinical`.
 import {
-  HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../profiles/repositories';
-// v4.2.2 — el permiso de lectura de la historia nace del turno, así que la lectura
-// clínica necesita preguntarle a la agenda. Mismo criterio de arriba: es una clase
-// sin estado que recibe el `EntityManager` por parámetro. El cruce inverso ya
-// existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
-// tampoco acá se importa el módulo entero ni se cierra un ciclo.
-import { SchedulingBookingsRepository } from '../scheduling/repositories';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -74,6 +72,7 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
     MikroOrmModule.forFeature(Object.values(entities)),
     AuditModule,
     MessagingModule,
+    AuthzModule,
   ],
   controllers: [
     ClinicalEncountersController,
@@ -87,8 +86,6 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
     // Repositorios
     PersonAccountLinksRepository,
     PatientProfilesRepository,
-    HealthPractitionerProfilesRepository,
-    SchedulingBookingsRepository,
     CareEpisodesRepository,
     AppointmentsRepository,
     EncountersRepository,
@@ -116,6 +113,7 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
     ImmunizationsService,
     ClinicalReadService,
     ClinicalNotificationsService,
+    ClinicalRecordAccessGuard,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:
@@ -124,11 +122,16 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
   // una reseña sólo vale si hubo atención real, y comprobarlo es leer el
   // encuentro. El repositorio ya estaba en `providers`; sin exportarlo, el
   // módulo que lo inyecta no puede verlo.
+  // `AppointmentsRepository` y `ClinicalRecordAccessGuard` se exportan para que
+  // `ChartModule` aplique el mismo guard sobre `GET /charts/patients/:id/chart`
+  // (FT-07-R08): es la misma pregunta de autorización sobre la misma persona.
   exports: [
     ConditionsService,
     ProceduresService,
     ServiceRequestsService,
     EncountersRepository,
+    AppointmentsRepository,
+    ClinicalRecordAccessGuard,
   ],
 })
 export class ClinicalModule {}

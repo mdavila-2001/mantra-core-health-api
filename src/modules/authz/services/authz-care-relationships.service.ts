@@ -13,9 +13,14 @@ import {
   CareRelationshipsRepository,
   PatientLegalRepresentationsRepository,
 } from '../repositories';
+import { DataAccessLogRepository } from '../../audit/repositories';
+import { AuditTrailService } from '../../audit/services';
+import { OutboxService } from '../../messaging/services';
 import {
   CreateCareRelationshipDto,
   CreateLegalRepresentationDto,
+  RequestCareRelationshipDto,
+  RespondCareRelationshipDto,
   AuthzIdResponseDto,
   AuthzStatusResultDto,
   CareRelationshipView,
@@ -25,6 +30,10 @@ import {
   type LegalRepresentationType,
 } from '../dto';
 import { AUTHZ } from '../authz.concepts';
+
+/** Techo de vigencia cuando el paciente acepta sin fijar un `validTo`: la
+ * relación queda abierta y se revoca explícitamente, nunca vence sola. */
+const NO_EXPIRY = undefined;
 
 const CARE_REL_TYPE_CONCEPT: Record<CareRelationshipType, string> = {
   TREATING: AUTHZ.CARE_REL_TREATING,

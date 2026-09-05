@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -7,6 +14,7 @@ import {
 } from '@nestjs/swagger';
 import { ParseOptionalLimitPipe, Roles } from '../../../common';
 import { ChartReadService } from '../services';
+import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import type { PatientChartResponseDto } from '../dto';
 
 /**
@@ -15,13 +23,14 @@ import type { PatientChartResponseDto } from '../dto';
  *
  * Mismos roles que la escritura del módulo: el expediente es PHI y lo consulta
  * quien lo redacta. El acceso por relación asistencial concreta
- * (`authz.care_relationships`) no lo impone este endpoint —hoy ningún endpoint
- * clínico lo hace— y sigue siendo deuda transversal del backend, no de esta
- * lectura en particular.
+ * (`authz.care_relationships`/`clinical_access_grants`) o por cita registrada
+ * lo impone `ClinicalRecordAccessGuard` (FT-07-R08) — antes ningún endpoint
+ * clínico lo hacía y el rol solo ya bastaba para leer cualquier expediente.
  */
 @ApiTags('chart-read')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER')
+@UseGuards(ClinicalRecordAccessGuard)
 @Controller('charts/patients')
 export class ChartReadController {
   /**

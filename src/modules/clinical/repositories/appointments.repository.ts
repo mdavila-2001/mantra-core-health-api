@@ -33,13 +33,6 @@ export interface CreateAppointmentData {
    */
   reasonText?: string;
   /**
-   * Por qué medio ocurre la atención: presencial, teleconsulta o domicilio.
-   *
-   * Ausente deja la columna en NULL, que se lee como presencial —lo que fueron
-   * todas las citas hasta que existió este conjunto—.
-   */
-  channelConceptId?: string;
-  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -80,7 +73,6 @@ export class AppointmentsRepository {
         startAt: data.startAt,
         endAt: data.endAt,
         reasonText: data.reasonText,
-        channelConceptId: data.channelConceptId,
         createdAt: ahora,
         updatedAt: ahora,
         createdByUserId: data.actorUserId,
@@ -102,32 +94,30 @@ export class AppointmentsRepository {
   }
 
   /**
-   * La tipología de un lote de citas, indexada por su id.
+   * Comprueba si existe (o existió) un turno entre este profesional y este
+   * paciente, en cualquier estado.
    *
-   * En lote y no una por una: la agenda proyecta hasta cien citas por página y
-   * pedir el tipo de cada una convertiría un listado en cien consultas más. Es
-   * el mismo criterio con el que la agenda ya carga motivos, demoras y nombres.
-   *
-   * Devuelve **sólo** las que declaran tipo: una cita sin `type_concept_id` no
-   * aparece en el mapa, y quien lo consulta distingue «no lo declaró» de «no
-   * existe la cita» por su cuenta.
+   * La usa {@link ClinicalRecordAccessGuard} como base legítima de acceso al
+   * expediente: quien atendió (o tiene programado atender) a una persona puede
+   * abrir su historia por el identificador que trae su propia agenda, sin
+   * necesitar además un `care_relationship`/`clinical_access_grant` explícito
+   * para ese mismo vínculo. No sustituye esas dos vías — es una tercera, más
+   * barata de comprobar y ya presente en el dominio.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param ids - Citas cuya tipología se necesita.
-   * @returns Mapa `appointmentId` → `type_concept_id`.
+   * @param practitionerProfileId - Profesional que pide ver el expediente.
+   * @param patientProfileId - Paciente cuyo expediente se pide.
+   * @returns `true` si existe al menos una cita entre ambos.
    */
-  async findTypesByIds(
+  async existsForPractitionerAndPatient(
     em: EntityManager,
-    ids: readonly string[],
-  ): Promise<Map<string, string>> {
-    const mapa = new Map<string, string>();
-    if (ids.length === 0) return mapa;
-    const citas = await em.find(Appointments, { id: { $in: [...ids] } });
-    for (const cita of citas) {
-      if (cita.typeConceptId != null) {
-        mapa.set(cita.id, cita.typeConceptId);
-      }
-    }
-    return mapa;
+    practitionerProfileId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    const count = await em.count(Appointments, {
+      practitionerProfileId,
+      patientProfileId,
+    });
+    return count > 0;
   }
 }

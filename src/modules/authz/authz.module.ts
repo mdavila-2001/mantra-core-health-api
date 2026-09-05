@@ -96,6 +96,13 @@ import { MessagingModule } from '../messaging/messaging.module';
   // `diagnostics` para compartir un resultado con un profesional por un plazo:
   // el grant vive acá, en la única tabla de grants del producto, y no se
   // reimplementa del lado del que comparte.
-  exports: [AuthzEffectiveRolesService, ResourceScopeGrantsRepository],
+  // `AuthzPdpService` se exporta para que otros módulos clínicos (`clinical`,
+  // `chart`) puedan evaluar la decisión efectiva de acceso a PHI sin duplicar
+  // la lógica del PDP — ver `ClinicalRecordAccessGuard` (FT-07-R08).
+  exports: [
+    AuthzEffectiveRolesService,
+    ResourceScopeGrantsRepository,
+    AuthzPdpService,
+  ],
 })
 export class AuthzModule {}
