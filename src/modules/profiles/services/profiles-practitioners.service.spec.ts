@@ -61,6 +61,7 @@ function build() {
   const credentialsRepo = {
     findById: mockFn(),
     create: mockFn(),
+    remove: mockFn(),
     countInStateExcept: mockFn().mockResolvedValue(0),
     hasCurrentCredential: mockFn().mockResolvedValue(false),
     findByPractitioner: mockFn().mockResolvedValue([]),
@@ -215,6 +216,7 @@ function build() {
     languagesRepo,
     filesRepo,
     fileVersionsRepo,
+    addressesRepo,
   };
 }
 
@@ -1058,6 +1060,74 @@ describe('ProfilesPractitionersService', () => {
     });
 
     /**
+     * ALV-009: el perfil propio pegaba `POST /common/addresses` suelto y
+     * ninguna lectura lo devolvía — «guardar y recargar» no mostraba la
+     * dirección. Ahora la trae el summary.
+     */
+    it('devuelve el domicilio declarado (ALV-009)', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Lucía Salas',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      });
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+        lines: 'Av. Brasil 1234',
+        city: 'La Paz',
+        municipalityConceptId: 'mun-lp',
+        latitude: '-16.5',
+        longitude: '-68.15',
+      });
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.homeAddress).toEqual({
+        lines: 'Av. Brasil 1234',
+        city: 'La Paz',
+        municipalityConceptId: 'mun-lp',
+        latitude: -16.5,
+        longitude: -68.15,
+      });
+    });
+
+    /** Sin domicilio declarado, `homeAddress` no viaja como objeto vacío. */
+    it('sin domicilio declarado, homeAddress queda ausente', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({ id: 'per-1' });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      });
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.homeAddress).toBeUndefined();
+    });
+
+    /**
      * Historial laboral (UC-05-16): el resumen lo incluía para la escritura y
      * no para la lectura — sin esto, la pestaña Trayectoria del perfil no
      * tiene de dónde sacar la experiencia histórica ni la actividad actual.
@@ -1329,6 +1399,55 @@ describe('ProfilesPractitionersService', () => {
           id: 'u-1',
         } as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    /**
+     * ALV-009: `homeAddressLines` cierra la vigente (si hay) y crea otra —
+     * mismo criterio que ya tenía `PATCH /profiles/patients/me`.
+     */
+    it('homeAddressLines cierra la dirección vigente y crea otra', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+      const vigente = {
+        id: 'addr-1',
+        lines: 'Calle vieja 1',
+      };
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(vigente);
+
+      await d.service.updateOwnPractitionerProfile(
+        { homeAddressLines: 'Av. Brasil 1234' },
+        { id: 'u-1' } as any,
+      );
+
+      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+        vigente,
+        expect.any(Date),
+        'u-1',
+      );
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ lines: 'Av. Brasil 1234' }),
+      );
+    });
+
+    /** Sin dirección previa, la primera escritura no intenta cerrar nada. */
+    it('sin dirección previa, sólo crea la nueva', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
+
+      await d.service.updateOwnPractitionerProfile(
+        { homeAddressLines: 'Av. Brasil 1234' },
+        { id: 'u-1' } as any,
+      );
+
+      expect(d.addressesRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ lines: 'Av. Brasil 1234' }),
+      );
     });
   });
   describe('dónde atiende cada uno, en la guía', () => {
@@ -2345,6 +2464,64 @@ describe('ProfilesPractitionersService', () => {
         ),
       ).rejects.toThrow();
       expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removeOwnCredential (ALV-009/formación)', () => {
+    it('retira un título propio pendiente', async () => {
+      const d = build();
+      const credencial = {
+        id: 'cred-1',
+        practitionerProfileId: 'pp1',
+        stateConceptId: PROF.CRED_PENDING,
+      };
+      d.credentialsRepo.findById.mockResolvedValue(credencial);
+
+      await d.service.removeOwnCredential('cred-1', { id: 'u-1' } as any);
+
+      expect(d.credentialsRepo.remove).toHaveBeenCalledWith(
+        expect.anything(),
+        credencial,
+      );
+    });
+
+    /** Un id ajeno y uno inexistente responden igual: no delatan cuáles existen. */
+    it('un título de otro profesional responde 404, igual que uno inexistente', async () => {
+      const d = build();
+      d.credentialsRepo.findById.mockResolvedValue({
+        id: 'cred-1',
+        practitionerProfileId: 'OTRO-PERFIL',
+        stateConceptId: PROF.CRED_PENDING,
+      });
+
+      await expect(
+        d.service.removeOwnCredential('cred-1', { id: 'u-1' } as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.credentialsRepo.remove).not.toHaveBeenCalled();
+    });
+
+    it('inexistente responde 404', async () => {
+      const d = build();
+      d.credentialsRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.removeOwnCredential('cred-1', { id: 'u-1' } as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    /** Una verificada es un hecho de la autoridad; el titular no la deshace. */
+    it('ya verificado no se puede retirar', async () => {
+      const d = build();
+      d.credentialsRepo.findById.mockResolvedValue({
+        id: 'cred-1',
+        practitionerProfileId: 'pp1',
+        stateConceptId: PROF.CRED_VERIFIED,
+      });
+
+      await expect(
+        d.service.removeOwnCredential('cred-1', { id: 'u-1' } as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.credentialsRepo.remove).not.toHaveBeenCalled();
     });
   });
 

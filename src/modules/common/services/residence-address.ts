@@ -6,6 +6,7 @@ import {
   boDepartmentConceptId,
   boMunicipalityByConceptId,
 } from '../../../common/seed/bo-geography.catalog';
+import type { Addresses } from '../entities';
 import type { AddressesRepository } from '../repositories';
 
 /** Lo que hace falta para escribir una dirección de una persona. */
@@ -169,5 +170,145 @@ function coordinatesOf(
   return {
     latitude: String(data.latitude),
     longitude: String(data.longitude),
+  };
+}
+
+/* ============================================================================
+    ALV-009: corregir el domicilio ya declarado, y leerlo de vuelta.
+
+    Nace acá y no en `profiles` para que el profesional lo use sin duplicar
+    la lógica de "cerrar la vigente y abrir otra" que `ProfilesPatientsService`
+    ya tenía local (`reemplazarDireccion`). El servicio de pacientes NO se
+    tocó: sigue con su copia — un refactor a esta función queda de
+    seguimiento. Lo que sí comparten los dos es la tabla y el criterio de
+    vigencia (`valid_to null` o futuro).
+    ========================================================================== */
+
+/** Lo que hace falta para reemplazar el domicilio ya declarado de una persona. */
+export interface ReplaceResidenceAddressData {
+  /** La persona dueña de la dirección. */
+  readonly personId: string;
+  /** `ADDR_USE_HOME` o `ADDR_USE_WORK`. */
+  readonly useConceptId: string;
+  /** `undefined` = no vino en este `PATCH`, se conserva lo vigente. */
+  readonly municipalityConceptId?: string;
+  /**
+   * Calle y número. `undefined` conserva lo vigente; `''` la borra —es el
+   * único de los tres con una forma explícita de vaciarse, porque es el
+   * único cuya ausencia total tiene sentido (una dirección sin calle, con
+   * sólo el municipio, sigue siendo un dato).
+   */
+  readonly lines?: string;
+  /** Ambas o ninguna: el DTO ya rechaza el par incompleto. */
+  readonly latitude?: number;
+  readonly longitude?: number;
+  /** Quién edita, para la auditoría y el cierre de la fila anterior. */
+  readonly actorUserId: string;
+}
+
+/**
+ * El número de una columna `numeric` que MikroORM mapea a `string`.
+ *
+ * `undefined` (sin fila vigente, o columna sin dato) se preserva tal cual:
+ * `Number(undefined)` es `NaN`, y un `NaN !== NaN` rompería la comparación
+ * de "sin cambios" de más abajo aunque nada haya cambiado.
+ */
+function numeroDeColumna(valor: string | undefined): number | undefined {
+  return valor === undefined ? undefined : Number(valor);
+}
+
+/**
+ * Cierra la fila vigente y abre otra con la mezcla de lo que llegó y lo que
+ * ya estaba — mismo criterio que `ProfilesPatientsService.reemplazarDireccion`.
+ *
+ * No hace nada si, tras la mezcla, nada cambió: evita una fila nueva por
+ * cada `PATCH` que repite el mismo domicilio.
+ *
+ * @param repo - Repositorio de `common.addresses`.
+ * @param tx - Transacción activa.
+ * @param data - Persona, uso, lo que trae el cuerpo y el actor.
+ * @param ahora - Instante de la edición, fin de vigencia de la anterior.
+ */
+export async function replaceResidenceAddress(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  data: ReplaceResidenceAddressData,
+  ahora: Date,
+): Promise<void> {
+  const vigente = await repo.findVigenteByOwnerAndUse(
+    tx,
+    data.personId,
+    data.useConceptId,
+  );
+
+  const municipalityConceptId =
+    data.municipalityConceptId ?? vigente?.municipalityConceptId;
+  const lines =
+    data.lines === undefined
+      ? vigente?.lines
+      : data.lines.trim() === ''
+        ? undefined
+        : data.lines.trim();
+  const tieneGps = data.latitude !== undefined && data.longitude !== undefined;
+  const latitude = tieneGps ? data.latitude : numeroDeColumna(vigente?.latitude);
+  const longitude = tieneGps
+    ? data.longitude
+    : numeroDeColumna(vigente?.longitude);
+
+  const sinCambios =
+    (vigente?.municipalityConceptId ?? undefined) === municipalityConceptId &&
+    (vigente?.lines ?? undefined) === lines &&
+    numeroDeColumna(vigente?.latitude) === latitude &&
+    numeroDeColumna(vigente?.longitude) === longitude;
+  if (sinCambios) return;
+
+  if (vigente) repo.closeVigente(vigente, ahora, data.actorUserId);
+
+  const escribir =
+    data.useConceptId === CONCEPTS.ADDR_USE_WORK
+      ? createWorkAddress
+      : createResidenceAddress;
+  escribir(repo, tx, {
+    personId: data.personId,
+    municipalityConceptId,
+    lines,
+    latitude,
+    longitude,
+    actorUserId: data.actorUserId,
+  });
+}
+
+/** Una dirección, tal como la ve un perfil propio. Mismo contrato que `OwnAddressDto`. */
+export interface AddressSummary {
+  readonly lines?: string;
+  readonly city?: string;
+  readonly municipalityConceptId?: string;
+  readonly latitude?: number;
+  readonly longitude?: number;
+}
+
+/**
+ * Traduce una fila de `common.addresses` al resumen que un perfil devuelve.
+ *
+ * `undefined` —y no un objeto vacío— cuando no hay fila: la pantalla
+ * distingue «no lo declaró» de «lo declaró sin datos».
+ */
+export function summarizeAddress(
+  fila?: Addresses | null,
+): AddressSummary | undefined {
+  if (!fila) return undefined;
+  return {
+    ...(fila.lines === undefined ? {} : { lines: fila.lines }),
+    ...(fila.city === undefined ? {} : { city: fila.city }),
+    ...(fila.municipalityConceptId === undefined
+      ? {}
+      : { municipalityConceptId: fila.municipalityConceptId }),
+    // Las coordenadas viajan juntas o no viajan: media coordenada no ubica
+    // nada. Se compara con `== null` y no `=== undefined`: la columna es
+    // nullable y la base devuelve `null`, no `undefined` — con la
+    // comparación estricta `Number(null)` (que es 0) se cuela.
+    ...(fila.latitude == null || fila.longitude == null
+      ? {}
+      : { latitude: Number(fila.latitude), longitude: Number(fila.longitude) }),
   };
 }

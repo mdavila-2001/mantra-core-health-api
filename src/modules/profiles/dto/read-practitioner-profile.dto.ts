@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AffiliationResponseDto } from './affiliation.dto';
+import { OwnAddressDto } from './read-patients.dto';
 
 /* ============================================================================
     `GET /profiles/practitioners/me/summary` — el perfil profesional propio.
@@ -295,6 +296,13 @@ export class PractitionerProfileSummaryDto {
     description: 'Municipio de residencia (VS_BO_MUNICIPALITY)',
   })
   residenceMunicipalityConceptId?: string;
+
+  /**
+   * El domicilio, si lo declaró (ALV-009). Ausente y no un objeto vacío
+   * cuando no hay fila vigente — mismo criterio que `OwnPatientProfile`.
+   */
+  @ApiPropertyOptional({ type: OwnAddressDto })
+  homeAddress?: OwnAddressDto;
 
   @ApiProperty({ format: 'uuid' })
   practitionerCategoryConceptId!: string;

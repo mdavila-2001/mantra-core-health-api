@@ -461,6 +461,28 @@ export class ProfilesPractitionersController {
   }
 
   /**
+   * Retirar un título propio cargado por error.
+   *
+   * Sólo mientras está **pendiente**: uno ya verificado o rechazado es un
+   * hecho de la autoridad que lo revisó, no algo que el titular deshace
+   * borrándolo. `404` si no existe o es de otro profesional —indistinguible,
+   * como el resto del módulo—.
+   */
+  @Delete('practitioners/me/credentials/:credentialId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Retirar un título propio pendiente',
+    description:
+      '`404` si no existe o es de otro profesional. `422` si ya fue verificado o rechazado.',
+  })
+  removeOwnCredential(
+    @Param('credentialId', ParseUUIDPipe) credentialId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionersService.removeOwnCredential(credentialId, actor);
+  }
+
+  /**
    * Un consultorio de OTRO profesional — las fichas de directorio.
    *
    * Los profesionales que publican las redes de las aseguradoras no tienen
