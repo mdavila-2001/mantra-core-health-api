@@ -24,6 +24,13 @@ import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../profiles/repositories';
+// El permiso de lectura no puede depender sólo del turno del día: el PDP
+// (`AuthzPdpService`) ya define y evalúa esta base de acceso ("relación
+// asistencial vigente") para el resto del sistema. Se provee acá directo —y no
+// se importa `AuthzModule` entero— por el mismo criterio que el resto de este
+// archivo: es una clase sin estado que recibe el `EntityManager` por
+// parámetro, y `authz` no depende de `clinical`, así que no cierra ciclo.
+import { CareRelationshipsRepository } from '../../authz/repositories';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
 
 /**
@@ -91,6 +98,7 @@ export class ClinicalReadService {
    * @param observationsRepo - Acceso a observaciones.
    * @param encountersRepo - Acceso a encuentros.
    * @param episodesRepo - Acceso a episodios de cuidado (internaciones).
+   * @param careRelationshipsRepo - Acceso a relaciones asistenciales vigentes.
    * @param logger - Registro estructurado.
    */
   constructor(
@@ -105,6 +113,7 @@ export class ClinicalReadService {
     private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
     private readonly bookingsRepo: SchedulingBookingsRepository,
+    private readonly careRelationshipsRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ClinicalReadService.name);
@@ -123,14 +132,17 @@ export class ClinicalReadService {
    * si el soporte no debe leer PHI sin turno, se saca de acá y se decide qué lo
    * reemplaza — hoy hay pruebas de integración que dependen de este acceso.
    *
-   * ## 2 · Quien atiende: sólo con turno de HOY con ESE paciente
+   * ## 2 · Quien atiende: turno de HOY con ESE paciente, o relación asistencial vigente
    *
    * Antes pasaba cualquiera con el rol. El comentario que lo justificaba decía que a
    * quién puede atender lo decide la asignación de roles «y no este endpoint» — pero esa
    * asignación no existía: la tabla de permisos por paciente está vacía y nadie la
    * consulta. En los hechos, cualquier médico con sesión leía la historia de cualquier
    * persona. Esta es la regla mínima defendible mientras el grupo define el modelo de
-   * consentimiento: **nace del turno confirmado y dura el día del turno**.
+   * consentimiento: **nace del turno confirmado, o de una relación asistencial que
+   * `authz` ya declara vigente** (ALV-029: sin esta segunda vía, un profesional con
+   * paciente asignado pero sin cupo agendado para hoy caía en {@link assertOwnRecord}
+   * como un desconocido).
    *
    * «Hoy» es el día de la SEDE, no el del servidor. Un turno de las 23:30 en La Paz ya
    * cayó en «mañana» para UTC, y con la fecha del servidor el profesional se quedaría
@@ -192,13 +204,19 @@ export class ClinicalReadService {
   /**
    * ¿Está este profesional atendiendo a esta persona?
    *
-   * Dos caminos, y el orden importa porque el barato va primero:
+   * Tres caminos, y el orden importa porque el barato va primero:
    *
    * 1. **Hay una consulta en curso.** Sin mirar el calendario. Que el
    *    profesional haya apretado «Iniciar consulta» es la afirmación más fuerte
    *    que el sistema tiene de que está atendiendo a esa persona **ahora**; la
    *    fecha del cupo sólo dice cuándo se pensaba que iba a atenderla.
    * 2. **Hay una reserva viva que cae hoy**, que es la regla de siempre.
+   * 3. **Hay una relación asistencial vigente** (`authz.care_relationships`,
+   *    ACTIVA y dentro de su ventana `valid_from`/`valid_to`) — el paciente
+   *    asignado al profesional aunque hoy no tenga cupo agendado con él
+   *    (ALV-029). Es la misma base de acceso que ya evalúa el PDP
+   *    (`AuthzPdpService`) para el resto del sistema; acá se reusa el mismo
+   *    criterio, no uno nuevo.
    *
    * ## Por qué se agregó el primero
    *
@@ -238,7 +256,48 @@ export class ClinicalReadService {
     ) {
       return true;
     }
-    return this.atiendeHoy(em, practitionerProfileId, patientProfileId);
+    if (await this.atiendeHoy(em, practitionerProfileId, patientProfileId)) {
+      return true;
+    }
+    return this.tieneRelacionAsistencialVigente(
+      em,
+      practitionerProfileId,
+      patientProfileId,
+    );
+  }
+
+  /**
+   * ¿Hay una relación asistencial ACTIVA y vigente entre ambos? (ALV-029)
+   *
+   * `findActiveForPractitionerPatient` sólo filtra por `status_concept_id`: la
+   * ventana temporal (`valid_from`/`valid_to`) se comprueba acá, con el mismo
+   * criterio que ya usa `AuthzPdpService.isWithinWindow` — reusar la tabla sin
+   * reusar la ventana habilitaría una relación ya vencida.
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileId - El profesional que pide.
+   * @param patientProfileId - El paciente cuya historia se pide.
+   * @returns `true` si hay una relación activa cuya ventana cubre este instante.
+   */
+  private async tieneRelacionAsistencialVigente(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    const ahora = Date.now();
+    const relaciones =
+      await this.careRelationshipsRepo.findActiveForPractitionerPatient(
+        em,
+        practitionerProfileId,
+        patientProfileId,
+      );
+    return relaciones.some((relacion) => {
+      if (relacion.validFrom.getTime() > ahora) return false;
+      if (relacion.validTo && relacion.validTo.getTime() <= ahora) {
+        return false;
+      }
+      return true;
+    });
   }
 
   /**
