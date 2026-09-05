@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { EntityManager } from '@mikro-orm/postgresql';
+import { LockMode, type EntityManager } from '@mikro-orm/postgresql';
 import { createdBy } from '../../../common';
 import {
   InsuranceClaims,
@@ -29,6 +29,32 @@ export class ClaimRepository {
   findClaim(em: EntityManager, id: string): Promise<InsuranceClaims | null> {
     return em.findOne(InsuranceClaims, { id });
   }
+
+  /**
+   * La solicitud, bloqueada para escritura hasta el fin de la transacción.
+   *
+   * Lo pide la idempotencia de «Reclamar» (AC-16-13): la exclusión entre dos
+   * peticiones concurrentes la da este `FOR UPDATE` sobre la fila del reclamo,
+   * porque `claim_disputes` no declara un índice único que impida la segunda
+   * inserción. Es el patrón que el repositorio de `ads` ya usa para sus
+   * contadores; sin él, «buscar la disputa abierta y, si no hay, crearla» es
+   * una condición de carrera clásica.
+   *
+   * @param em - Transacción activa; fuera de una, el lock no significa nada.
+   * @param id - Solicitud a bloquear.
+   * @returns La solicitud, o `null` si no existe.
+   */
+  findClaimForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<InsuranceClaims | null> {
+    return em.findOne(
+      InsuranceClaims,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
   /**
    * Obtiene find by idempotency.
    *

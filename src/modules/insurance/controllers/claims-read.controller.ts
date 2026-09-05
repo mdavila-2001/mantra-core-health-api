@@ -1,11 +1,12 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiNotFoundResponse,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { Roles } from '../../../common';
 import { ClaimsReadService } from '../services';
 import {
   ClaimDetailDto,
@@ -14,30 +15,36 @@ import {
 } from '../dto';
 
 /**
- * Lectura de las solicitudes de seguro presentadas.
+ * Lectura de las solicitudes de seguro que **envió** la organización activa.
  *
- * **No exige rol de sección, y es deliberado.** Los seis endpoints de
- * escritura del ciclo del reclamo declaran `@Roles('BILLING', 'FINANCE')`, y
- * esos dos códigos **no existen** en el `RoleCode` cerrado que acepta
- * `role-mapping.ts`: `conceptIdsToRoleCodes` descarta lo desconocido, así que
- * hoy ningún JWT los puede llevar y esas escrituras sólo son alcanzables por
- * el comodín `SUPERADMIN`. Repetir aquí ese `@Roles` no protegería nada
- * distinto: dejaría la lectura fuera del alcance de todo su público legítimo
- * por un rol que la plataforma no sabe emitir.
+ * **Es la cara del prestador**, no la del pagador (TAREA-16 · D1.a, decisión de
+ * Justin del 2026-09-04): el consultorio o la clínica que le presenta el
+ * reclamo a la aseguradora. La primera versión de estas dos rutas acotaba por
+ * las aseguradoras del tenant, que es el lado contrario del mismo dato.
  *
- * Lo que sí protege es el **alcance por pertenencia**, que es la barrera real:
- * la solicitud no tiene `tenant_id` —cuelga de la aseguradora— y toda consulta
- * arranca por las aseguradoras del tenant que fijó `TenantContextInterceptor`,
- * dentro de la propia consulta. Una solicitud de otra organización recibe el
- * **mismo 404, con el mismo cuerpo**, que un uuid inexistente.
+ * **Dos barreras, y ninguna sustituye a la otra:**
  *
- * Cuál de los tres caminos de autorización se adopta —sumar `BILLING`/`FINANCE`
- * al conjunto cerrado, mover estos endpoints a `SECURITY_ADMIN`, o quedarse
- * con el alcance por pertenencia— es la P-16-1 de la ficha y **no se decidió
- * en este carril**: se implementó la barrera que no depende de esa decisión.
+ * - **Rol** (`@Roles`): `BILLING_OPERATOR` es quien factura y cobra del lado
+ *   del prestador, y es el rol que Justin eligió para ver y reclamar (D1.b).
+ *   `SECURITY_ADMIN` conserva el acceso administrativo de siempre y
+ *   `SUPERADMIN` entra por el comodín del `RolesGuard`. Los `@Roles` de las
+ *   escrituras del ciclo —adjudicar, EOB, revertir, apelar— **no** se tocan:
+ *   son decisiones de quien paga, y mezclarlas acá volvería a juntar los dos
+ *   lados en la misma pantalla.
+ * - **Alcance por pertenencia**: la solicitud no tiene `tenant_id`, así que
+ *   toda consulta arranca por las prácticas activas de la organización que fijó
+ *   `TenantContextInterceptor` y filtra por `billing_provider_entity_id`
+ *   **dentro de la consulta**. Una solicitud que envió otra organización recibe
+ *   el **mismo 403, con el mismo cuerpo**, que un uuid inexistente (AC-16-14).
+ *
+ * El 403 de acá es una decisión **de esta tarea**, no una regla nueva de la
+ * API: el resto del módulo 26 y los módulos que ocultan existencia con 404
+ * (comunidad, encuestas, audio) siguen igual hasta que alguien unifique el
+ * patrón en su propio carril.
  */
 @ApiTags('insurance-claims-read')
 @ApiBearerAuth()
+@Roles('BILLING_OPERATOR', 'SECURITY_ADMIN')
 @Controller()
 export class ClaimsReadController {
   /**
@@ -48,7 +55,7 @@ export class ClaimsReadController {
   constructor(private readonly claimsRead: ClaimsReadService) {}
 
   /**
-   * Solicitudes de seguro del tenant activo.
+   * Solicitudes de seguro que envió la organización activa.
    *
    * @param query - Filtros y paginación por cursor.
    * @returns Página de solicitudes con el cursor de la siguiente.
@@ -58,6 +65,11 @@ export class ClaimsReadController {
     summary: 'Listar las solicitudes de seguro presentadas (cursor)',
   })
   @ApiOkResponse({ type: ClaimListResponseDto })
+  @ApiForbiddenResponse({
+    description:
+      'La organización activa no tiene prácticas activas: no envió ninguna ' +
+      'solicitud y esta pantalla no es suya.',
+  })
   listClaims(@Query() query: ClaimListQueryDto): Promise<ClaimListResponseDto> {
     return this.claimsRead.listClaims(query);
   }
@@ -73,10 +85,10 @@ export class ClaimsReadController {
     summary: 'Consultar una solicitud de seguro con sus ítems y su dictamen',
   })
   @ApiOkResponse({ type: ClaimDetailDto })
-  @ApiNotFoundResponse({
+  @ApiForbiddenResponse({
     description:
-      'La solicitud no existe o no pertenece al tenant activo. El cuerpo es ' +
-      'el mismo en los dos casos: la existencia no se filtra.',
+      'La solicitud no existe o la envió otra organización. El cuerpo es el ' +
+      'mismo en los dos casos: la existencia no se filtra (AC-16-14).',
   })
   getClaim(@Param('id', ParseUUIDPipe) id: string): Promise<ClaimDetailDto> {
     return this.claimsRead.getClaim(id);

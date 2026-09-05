@@ -7,7 +7,12 @@ import {
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ClaimsService } from '../services';
 import {
@@ -83,10 +88,27 @@ export class ClaimsController {
     return this.service.reverse(id, dto, actor);
   }
 
-  /** UC-26-11. */
+  /**
+   * UC-26-11.
+   *
+   * **Único método de este controlador que cambia de rol** (TAREA-16 · D1.b,
+   * decisión de Justin del 2026-09-04): reclamar es un acto del prestador que
+   * presentó la solicitud, así que lo ejecuta `BILLING_OPERATOR` —con
+   * `SECURITY_ADMIN` como acceso administrativo y `SUPERADMIN` por comodín—.
+   * El `@Roles` del método **sobreescribe** el de la clase (`getAllAndOverride`
+   * en `RolesGuard`), así que enviar, adjudicar, publicar EOB y revertir siguen
+   * exigiendo lo que exigían: son decisiones de quien paga, no de quien
+   * reclama.
+   */
   @Post(':id/disputes')
+  @Roles('BILLING_OPERATOR', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir disputa sobre adjudicación' })
+  @ApiForbiddenResponse({
+    description:
+      'La solicitud no existe o la envió otra organización: mismo cuerpo en ' +
+      'los dos casos (AC-16-14).',
+  })
   openDispute(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateDisputeDto,
