@@ -85,6 +85,8 @@ function build() {
     findById: mockFn().mockResolvedValue(null),
     findBySites: mockFn().mockResolvedValue([]),
     create: mockFn(),
+    findOwn: mockFn().mockResolvedValue(null),
+    remove: mockFn(),
   };
   const afiliaciones = {
     estadoInicial: mockFn().mockResolvedValue(PROF.AFFILIATION_ACTIVE),
@@ -706,6 +708,125 @@ describe('ProfilesPractitionersService', () => {
         }),
       );
       expect(res).toMatchObject({ id: 'af-9', current: true });
+    });
+
+    /* ---- corregir (UC-05-16·E) ---------------------------------------- */
+
+    it('updates only the fields sent and looks the row up scoped to the owner', async () => {
+      const d = build();
+      const propia = fila({ departmentText: 'Clínica médica' });
+      d.affiliationsRepo.findOwn.mockResolvedValue(propia);
+
+      const res = await d.service.updateOwnAffiliation(
+        'af-1',
+        { roleTitle: '  Jefe de servicio ' } as any,
+        actor,
+      );
+
+      expect(d.affiliationsRepo.findOwn).toHaveBeenCalledWith(
+        d.tx,
+        'af-1',
+        'pp1',
+      );
+      expect(propia.roleTitle).toBe('Jefe de servicio');
+      expect(propia.organizationName).toBe('Hospital Obrero N.º 1');
+      expect(propia.departmentText).toBe('Clínica médica');
+      expect(propia.updatedByUserId).toBe(actor.id);
+      expect(d.tx.flush).toHaveBeenCalled();
+      expect(res).toMatchObject({ id: 'af-1', roleTitle: 'Jefe de servicio' });
+    });
+
+    it('answers 404 for an affiliation that is not the caller own (or does not exist)', async () => {
+      const d = build();
+      d.affiliationsRepo.findOwn.mockResolvedValue(null);
+
+      await expect(
+        d.service.updateOwnAffiliation(
+          'af-ajena',
+          { roleTitle: 'X' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('rejects an update whose resulting period ends before it starts', async () => {
+      const d = build();
+      d.affiliationsRepo.findOwn.mockResolvedValue(fila());
+
+      await expect(
+        d.service.updateOwnAffiliation(
+          'af-1',
+          { endDate: '2019-12-31' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects an update that collides with ANOTHER line, but not with itself', async () => {
+      const d = build();
+      d.affiliationsRepo.findOwn.mockResolvedValue(fila());
+
+      d.affiliationsRepo.findSame.mockResolvedValue(fila({ id: 'af-2' }));
+      await expect(
+        d.service.updateOwnAffiliation(
+          'af-1',
+          { startDate: '2020-03-01' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+
+      d.affiliationsRepo.findSame.mockResolvedValue(fila({ id: 'af-1' }));
+      await expect(
+        d.service.updateOwnAffiliation(
+          'af-1',
+          { startDate: '2020-03-01' } as any,
+          actor,
+        ),
+      ).resolves.toMatchObject({ id: 'af-1' });
+    });
+
+    it('`endDate: null` makes the affiliation current again', async () => {
+      const d = build();
+      d.affiliationsRepo.findOwn.mockResolvedValue(
+        fila({ endDate: new Date('2023-12-31') }),
+      );
+
+      const res = await d.service.updateOwnAffiliation(
+        'af-1',
+        { endDate: null } as any,
+        actor,
+      );
+
+      expect(res).toMatchObject({ current: true, endDate: null });
+    });
+
+    /* ---- quitar (UC-05-16·B) ------------------------------------------ */
+
+    it('removes the caller own affiliation inside the transaction', async () => {
+      const d = build();
+      const propia = fila();
+      d.affiliationsRepo.findOwn.mockResolvedValue(propia);
+
+      await d.service.removeOwnAffiliation('af-1', actor);
+
+      expect(d.affiliationsRepo.findOwn).toHaveBeenCalledWith(
+        d.tx,
+        'af-1',
+        'pp1',
+      );
+      expect(d.affiliationsRepo.remove).toHaveBeenCalledWith(d.tx, propia);
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('does not remove what is not the caller own: 404', async () => {
+      const d = build();
+      d.affiliationsRepo.findOwn.mockResolvedValue(null);
+
+      await expect(
+        d.service.removeOwnAffiliation('af-ajena', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.affiliationsRepo.remove).not.toHaveBeenCalled();
     });
   });
 
