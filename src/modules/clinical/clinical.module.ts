@@ -146,14 +146,19 @@ import { CareRelationshipsRepository } from '../authz/repositories';
   // módulo que lo inyecta no puede verlo.
   // `ClinicalRecordAccessGuard` se exporta para que `ChartModule` aplique el
   // mismo guard sobre `GET /charts/patients/:id/chart` (FT-07-R08): es la
-  // misma pregunta de autorización sobre la misma persona. Sus dependencias
-  // (`ClinicalReadService`) ya son providers de este módulo, así que Nest las
-  // resuelve acá sin que `ChartModule` necesite conocerlas.
+  // misma pregunta de autorización sobre la misma persona. Exportar el guard
+  // NO alcanza: `@UseGuards(ClinicalRecordAccessGuard)` hace que Nest lo
+  // resuelva en el contenedor de `ChartModule`, y ahí necesita a
+  // `ClinicalReadService` visible como export propio — no como provider
+  // interno de este módulo. Sin esto, el arranque revienta con
+  // `UnknownDependenciesException` apenas `ChartModule` intenta instanciar el
+  // guard (confirmado reproduciendo el arranque real, no sólo leyendo el DI).
   exports: [
     ConditionsService,
     ProceduresService,
     ServiceRequestsService,
     EncountersRepository,
+    ClinicalReadService,
     ClinicalRecordAccessGuard,
   ],
 })
