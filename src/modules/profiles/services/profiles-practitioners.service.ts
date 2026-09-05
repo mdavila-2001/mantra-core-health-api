@@ -2121,9 +2121,6 @@ export class ProfilesPractitionersService {
       affiliation.roleTitle = roleTitle;
       affiliation.startDate = startDate;
       affiliation.endDate = endDate;
-      if (dto.departmentText !== undefined) {
-        affiliation.departmentText = dto.departmentText.trim() || undefined;
-      }
       if (dto.affiliationTypeConceptId !== undefined) {
         affiliation.affiliationTypeConceptId = dto.affiliationTypeConceptId;
       }
