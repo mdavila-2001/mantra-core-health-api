@@ -2114,7 +2114,7 @@ export class ProfilesPractitionersService {
         tx,
         affiliation.practitionerProfileId,
         organizationName,
-        roleTitle,
+        roleTitle ?? null,
         startDate,
       );
       if (igual && igual.id !== affiliation.id) {
