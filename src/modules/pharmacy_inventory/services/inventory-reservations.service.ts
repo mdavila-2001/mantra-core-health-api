@@ -204,6 +204,9 @@ export class InventoryReservationsService {
    * @param tx - Transacción activa del caso de uso.
    * @param reservation - Reserva/pedido cuya reserva de stock se devuelve.
    * @param actor - Quien provoca la liberación.
+   * @param options - `onlyLineIds` acota la liberación a esas líneas (FAR-E2:
+   *                  marcar un renglón NO_DISPONIBLE devuelve SOLO su stock);
+   *                  sin opciones se liberan todas las CONFIRMED, como siempre.
    * @returns Cuántas líneas se liberaron.
    */
   async releaseConfirmedLines(
@@ -217,14 +220,21 @@ export class InventoryReservationsService {
       pharmacySiteId: string;
     },
     actor: AuthenticatedUser,
+    options?: {
+      /** Solo estas líneas; las demás CONFIRMED quedan intactas. */
+      onlyLineIds?: readonly string[];
+    },
   ): Promise<number> {
     const lines = await this.reservationsRepo.findLinesByReservation(
       tx,
       reservation.id,
     );
+    const only =
+      options?.onlyLineIds === undefined ? null : new Set(options.onlyLineIds);
     let released = 0;
     for (const rl of lines) {
       if (rl.statusConceptId !== PINV.RES_LINE_CONFIRMED) continue;
+      if (only !== null && !only.has(rl.id)) continue;
       rl.statusConceptId = PINV.RES_LINE_RELEASED;
       touch(rl, actor.id);
       released += 1;

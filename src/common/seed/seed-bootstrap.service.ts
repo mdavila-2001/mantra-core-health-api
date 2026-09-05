@@ -7,6 +7,8 @@ import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { BoEmployersSeedService } from './bo-employers-seed.service';
+import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
@@ -16,6 +18,7 @@ import { AudioAssetsSeedService } from './audio-assets-seed.service';
 import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
 import { loadSeedBootEnv } from './seed-boot.env';
 
 /** Resultado de un paso de la cadena, ya medido. */
@@ -114,6 +117,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
+   * @param boOccupations - Ocupaciones de Bolivia (`VS_BO_OCCUPATION`).
+   * @param boEmployers - Empresas y empleadores de Bolivia (`VS_BO_EMPLOYER`).
    * @param boliviaFacilities - Directorio de establecimientos de salud de
    *   Santa Cruz (`VS_BO_HEALTH_FACILITY`).
    * @param boliviaInsurance - Aseguradoras bolivianas con su producto de
@@ -128,6 +133,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param platformPermissions - Permisos de sistema en `authz.permissions`.
    * @param bootstrapAdmin - Primer `SECURITY_ADMIN`, si el entorno lo pide.
    * @param clinicalForms - Catálogo de formularios clínicos estándar.
+   * @param practiceDefaultServices - «Cita médica» en las prácticas que nacieron
+   *   sin catálogo.
    * @param logger - Logger estructurado del arranque.
    */
   constructor(
@@ -135,6 +142,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
+    private readonly boOccupations: BoOccupationsSeedService,
+    private readonly boEmployers: BoEmployersSeedService,
     private readonly boliviaFacilities: BoliviaFacilitiesSeedService,
     private readonly boliviaInsurance: BoliviaInsuranceSeedService,
     private readonly boliviaFeeSchedule: BoliviaFeeScheduleSeedService,
@@ -147,6 +156,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
     private readonly providerAccounts: ProviderAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
+    private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
@@ -263,6 +273,25 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'core',
         run: () => this.boGeography.run(),
       },
+      // Y con ellos, por lo mismo: el alta de paciente resuelve
+      // `VS_BO_OCCUPATION` por su código para el desplegable de ocupación.
+      // Es núcleo y no contenido porque sin el conjunto el campo se queda en el
+      // texto libre que este catálogo vino a cerrar.
+      {
+        name: 'ocupaciones de Bolivia',
+        kind: 'core',
+        run: () => this.boOccupations.run(),
+      },
+      // Y con ellas, por lo mismo: el alta pregunta la empresa donde se
+      // trabaja —antes preguntaba dónde queda, que eran tres campos— y
+      // resuelve `VS_BO_EMPLOYER` por su código para el buscador. Es núcleo por
+      // el mismo motivo: sin el conjunto el campo se queda en el texto libre
+      // que este catálogo vino a cerrar.
+      {
+        name: 'empresas de Bolivia',
+        kind: 'core',
+        run: () => this.boEmployers.run(),
+      },
       // Junto a los departamentos y por lo mismo: son catálogos de referencia de
       // Bolivia que las pantallas resuelven por el código del conjunto. El
       // directorio de establecimientos es el que le permite al médico decir en qué
@@ -346,6 +375,17 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'cuentas de proveedores',
         kind: 'content',
         run: () => this.providerAccounts.run(),
+      },
+      // El último, y no por importancia: es el único paso que siembra **sobre
+      // filas de negocio que ya existen** —una por práctica— en vez de
+      // materializar un catálogo. Corre después de todo lo demás para que, si
+      // el arranque acaba de crear la primera organización, encuentre su
+      // práctica. No es núcleo: una práctica sin el servicio por defecto
+      // funciona, sólo abre su catálogo vacío.
+      {
+        name: 'servicio por defecto de cada práctica',
+        kind: 'content',
+        run: () => this.practiceDefaultServices.run(),
       },
     ];
   }

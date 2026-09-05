@@ -34,6 +34,7 @@ import {
   InventoryMovementsRepository,
   PracticeOrganizationReadRepository,
 } from './repositories';
+import { ServiceCatalogRepository } from '../billing/repositories';
 
 /**
  * Módulo Practice (14): organizaciones de atención, sitios, unidades clínicas,
@@ -64,6 +65,12 @@ import {
     InventoryItemsRepository,
     InventoryMovementsRepository,
     PracticeOrganizationReadRepository,
+    // El catálogo de servicios es de `billing`, pero acá se registra la clase y
+    // no se importa `BillingModule`: la dependencia entre los dos módulos ya va
+    // en el otro sentido (billing → practice, por `PracticeTenantLookupService`)
+    // e importarlo cerraría el ciclo. El repositorio no guarda estado —recibe el
+    // `em` en cada llamada—, así que una segunda instancia es la misma cosa.
+    ServiceCatalogRepository,
     // Servicios
     PracticeSitesService,
     PracticeAccreditationsService,

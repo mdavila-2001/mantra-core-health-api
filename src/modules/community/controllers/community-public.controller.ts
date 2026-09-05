@@ -1,5 +1,14 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Header,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  Res,
+} from '@nestjs/common';
+import type { Response } from 'express';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Public, ResourceNotFoundException } from '../../../common';
 import {
@@ -7,8 +16,11 @@ import {
   TARGET_CONCEPT_BY_SLUG_PREFIX,
 } from '../services';
 import type {
+  PublicCommentPageDto,
   PublicDirectoryProfileDto,
+  PublicFeedPageDto,
   PublicNearbyPageDto,
+  PublicPostReactionPageDto,
   PublicSearchPageDto,
 } from '../dto';
 
@@ -54,6 +66,88 @@ export class CommunityPublicController {
    */
   constructor(private readonly service: CommunityPublicService) {}
 
+  /**
+   * El feed de la portada: lo último de todas las vitrinas, mezclado.
+   *
+   * Va declarado **antes** que `public/search` por la misma razón que todo este
+   * controlador va antes que `read_models`: Nest resuelve por orden, y una ruta
+   * hermana con parámetro capturaría este segmento.
+   */
+  @Public()
+  @Get('public/posts')
+  @ApiOperation({
+    summary: 'Últimas publicaciones de todos los profesionales',
+  })
+  feedPublico(
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicFeedPageDto> {
+    return this.service.feedPublico({ cursor, limit: this.toInt(limit) });
+  }
+
+  /**
+   * Quién reaccionó a una publicación (AC-01-9).
+   *
+   * Va inmediatamente detrás de `public/posts` y comparte todo lo suyo: es
+   * `@Public()`, cae bajo el mismo límite de 60 por minuto por IP que declara la
+   * clase, se envuelve en `items`/`nextCursor`/`totalHint`/`generatedAt` y gana
+   * su `ETag` y su `Cache-Control` de `PublicCacheInterceptor`, que actúa sobre
+   * todo `GET` marcado `@Public()`.
+   *
+   * `ParseUUIDPipe` rechaza con 400 lo que no es un uuid antes de tocar la base
+   * —igual que en `public/media/:id`—; el resto de los «no» son un 404
+   * indistinguible del «no existe».
+   */
+  @Public()
+  @Get('public/posts/:postId/reactions')
+  @ApiOperation({ summary: 'Quiénes reaccionaron a una publicación pública' })
+  postReactions(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicPostReactionPageDto> {
+    return this.service.postReactions(postId, {
+      cursor,
+      limit: this.toInt(limit),
+    });
+  }
+
+  /** El hilo de comentarios raíz de una publicación (AC-01-11, AC-01-12). */
+  @Public()
+  @Get('public/posts/:postId/comments')
+  @ApiOperation({ summary: 'Comentarios raíz de una publicación pública' })
+  postComments(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicCommentPageDto> {
+    return this.service.postComments(postId, {
+      cursor,
+      limit: this.toInt(limit),
+    });
+  }
+
+  /**
+   * Las respuestas de un comentario (AC-01-12, «Ver N respuestas»).
+   *
+   * Ruta propia y no un parámetro de la anterior: son dos recursos paginados
+   * distintos y el desplegable abre varios hilos a la vez. La justificación
+   * larga está en `CommunityPublicService.commentReplies`.
+   */
+  @Public()
+  @Get('public/comments/:commentId/replies')
+  @ApiOperation({ summary: 'Respuestas de un comentario público' })
+  commentReplies(
+    @Param('commentId', ParseUUIDPipe) commentId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PublicCommentPageDto> {
+    return this.service.commentReplies(commentId, {
+      cursor,
+      limit: this.toInt(limit),
+    });
+  }
+
   /** Búsqueda unificada sobre todos los verticales. */
   @Public()
   @Get('public/search')
@@ -66,13 +160,34 @@ export class CommunityPublicController {
     return this.service.search({ q, cursor, limit: this.toInt(limit) });
   }
 
-  /** Profesionales de la salud. */
+  /**
+   * Profesionales de la salud.
+   *
+   * `specialty` es el `concept_id` de una especialidad de `VS_MEDICAL_SPECIALTY`
+   * —las 36 del patch v4.0.11—, **no** el nombre de la especialidad: el
+   * directorio agrupa por catálogo, no por texto libre. El cliente ya lo
+   * mandaba (`public-directory.client.ts`, `searchPractitioners`) y el
+   * controlador no lo declaraba, así que hasta hoy se perdía entre los dos: la
+   * pantalla dibujaba un filtro que no filtraba, que es peor que no dibujarlo.
+   *
+   * Un uuid que no pertenece al conjunto se rechaza con **422** —el mismo
+   * `PreconditionFailedException` y el mismo `MedicalSpecialtyCatalogService`
+   * que usa el alta de profesional—, nunca se ignora en silencio (AC-02-8).
+   */
   @Public()
   @Get('public/search/practitioners')
   @ApiOperation({ summary: 'Profesionales en el directorio público' })
+  @ApiQuery({
+    name: 'specialty',
+    required: false,
+    description:
+      'concept_id de VS_MEDICAL_SPECIALTY al que acotar; uno ajeno al ' +
+      'conjunto da 422',
+  })
   searchPractitioners(
     @Query('q') q?: string,
     @Query('verified') verified?: string,
+    @Query('specialty') specialty?: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
   ): Promise<PublicSearchPageDto> {
@@ -80,23 +195,40 @@ export class CommunityPublicController {
       q,
       kind: 'PRACTITIONER',
       verified: this.toBool(verified),
+      specialtyConceptId: specialty,
       cursor,
       limit: this.toInt(limit),
     });
   }
 
-  /** Organizaciones de salud: hospitales, clínicas, centros. */
+  /**
+   * Organizaciones de salud: hospitales, clínicas, centros.
+   *
+   * `city` acota por la ciudad de la dirección vigente, sin distinguir tildes
+   * ni mayúsculas. Es el filtro que un directorio de **lugares** necesita antes
+   * que ningún otro —a nadie le sirve una clínica excelente en otra ciudad—, y
+   * está implementado en los dos caminos, el del índice y el de SQL: uno que
+   * sólo funcionara con OpenSearch arriba dejaría de acotar sin avisar el día
+   * que se cayera.
+   */
   @Public()
   @Get('public/search/organizations')
   @ApiOperation({ summary: 'Organizaciones en el directorio público' })
+  @ApiQuery({
+    name: 'city',
+    required: false,
+    description: 'Ciudad a la que acotar; sin tildes ni mayúsculas que valgan',
+  })
   searchOrganizations(
     @Query('q') q?: string,
+    @Query('city') city?: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
   ): Promise<PublicSearchPageDto> {
     return this.service.search({
       q,
       kind: 'ORGANIZATION',
+      city,
       cursor,
       limit: this.toInt(limit),
     });
@@ -229,6 +361,47 @@ export class CommunityPublicController {
       throw new ResourceNotFoundException('No encontrado', { slug });
 
     return this.service.getBySlug(slug, concepto);
+  }
+
+  /**
+   * Imagen de la superficie pública: el avatar o la portada de una vitrina, o
+   * una foto de una de sus publicaciones.
+   *
+   * La ficha y el buscador devuelven la URL `/public/media/:id` en vez del id
+   * de archivo pelado —un uuid interno regalado a un anónimo no se vuelve a
+   * esconder—, así que esta ruta es la contraparte que sirve esos bytes. Lo
+   * que autoriza es qué es el archivo, no quién lo pide: sin esto, cada foto
+   * del directorio es un enlace roto.
+   *
+   * `ParseUUIDPipe` rechaza con 400 lo que no es un uuid antes de tocar la
+   * base; el resto de los «no» son un 404 indistinguible del «no existe».
+   */
+  @Public()
+  @Get('public/media/:id')
+  // El límite de la superficie pública son 60 peticiones por minuto, y se
+  // dimensionó cuando la tarjeta del directorio no tenía foto: «una pantalla de
+  // resultados con sus avatares no llega a diez». Con la grilla de centros de
+  // salud una sola página son veinticinco portadas y veinticinco logos, así que
+  // el navegador chocaba contra el tope **dentro de la primera pantalla** y las
+  // fotos salían rotas —no en desarrollo, donde se abre una ficha por vez, sino
+  // apenas se abre el directorio.
+  //
+  // Subirlo acá y no en todo `/public` es la diferencia que importa: esta ruta
+  // devuelve bytes de una imagen ya cacheable una hora, no un resultado de
+  // búsqueda. Raspar el directorio sigue costando 60 búsquedas por minuto; lo
+  // que deja de costar es mirarlo.
+  @Throttle({ default: { limit: 600, ttl: 60_000 } })
+  @Header('Cache-Control', 'public, max-age=3600')
+  @ApiOperation({
+    summary: 'Servir una imagen pública (avatar, portada o post)',
+  })
+  async getPublicMedia(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const contenido = await this.service.getPublicMedia(id);
+    res.setHeader('Content-Type', contenido.mimeType);
+    res.send(contenido.buffer);
   }
 
   /** Ficha pública de un profesional. */

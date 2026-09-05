@@ -145,6 +145,9 @@ describe('AllExceptionsFilter · SQLSTATE del SQL crudo', () => {
     // 422 no puede llevar `VALIDATION_FAILED`: el contrato lo publica como 400.
     ['23503', HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.PRECONDITION_FAILED],
     ['23505', HttpStatus.CONFLICT, ErrorCode.CONFLICT],
+    // Carril 12 REQ-017: exclusion_violation de `ex_appointments_practitioner_time`
+    // — dos citas del mismo profesional se pisan. Antes cayó al 500 genérico.
+    ['23P01', HttpStatus.CONFLICT, ErrorCode.CONFLICT],
     ['23502', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_FAILED],
     ['22P02', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_FAILED],
     ['40001', HttpStatus.CONFLICT, ErrorCode.CONCURRENCY_CONFLICT],

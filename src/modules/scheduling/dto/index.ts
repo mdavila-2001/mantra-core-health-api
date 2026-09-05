@@ -9,12 +9,29 @@ export {
   TemplateRuleDto,
   TemplateDetailDto,
   TemplateListDto,
+  RetireTemplateResponseDto,
+  ReactivateTemplateResponseDto,
   AvailabilityExceptionDto,
   AvailabilityExceptionListDto,
   GenerateSlotsDto,
   GenerateSlotsResponseDto,
   CreateExceptionDto,
   ExceptionResponseDto,
+  ExceptionTypeDto,
+  ExceptionTypeListDto,
+  EXCEPTION_TYPES,
+  ACTIVITY_TYPES,
+  ShiftSlotsDto,
+  CloseSlotsDto,
+  UpdateExceptionDto,
+  UpdateExceptionResponseDto,
+  CloseSlotsResponseDto,
+  ShiftSlotsResponseDto,
+  MIN_SHIFT_MINUTES,
+  MAX_SHIFT_MINUTES,
+  ActivityTypeDto,
+  ActivityTypeListDto,
+  type ActivityType,
   RESOURCE_TYPES,
 } from './scheduling-catalog.dto';
 export type { ResourceType, ExceptionType } from './scheduling-catalog.dto';
@@ -26,6 +43,10 @@ export {
   RequestBookingDto,
   AcceptBookingDto,
   RejectBookingDto,
+  SetPaymentStateDto,
+  PaymentStateDto,
+  PAYMENT_STATES,
+  type PaymentState,
   RequestBookingInfoDto,
   ProposeScheduleDto,
   ProposeScheduleResponseDto,
@@ -51,12 +72,18 @@ export {
   WaitlistEntryItemDto,
   ListWaitlistResponseDto,
   BOOKING_CHANNELS,
+  APPOINTMENT_CHANNELS,
   MIN_DELAY_MINUTES,
   MAX_DELAY_MINUTES,
   MAX_DELAY_MESSAGE_LENGTH,
+  CreateDirectAppointmentDto,
+  DirectAppointmentResponseDto,
 } from './scheduling-bookings.dto';
 export type { BookingInfoRequest } from './scheduling-bookings.dto';
-export type { BookingChannel } from './scheduling-bookings.dto';
+export type {
+  BookingChannel,
+  AppointmentChannel,
+} from './scheduling-bookings.dto';
 
 export {
   CreateConfirmationRuleDto,

@@ -67,6 +67,12 @@ describe('IamPractitionerSelfRegistrationService', () => {
       create: fn(() => ({ id: 'cred-1' })),
     };
     const languagesRepo = { create: fn() };
+    const specialtiesRepo = { create: fn() };
+    // Da por buena cualquier especialidad: la validación de catálogo tiene su
+    // propio spec; acá lo que se prueba es el flujo del alta.
+    const specialtyCatalog = {
+      assertIsMedicalSpecialty: fn().mockResolvedValue(undefined),
+    };
     const accountLinksRepo = { create: fn() };
     const identifiersRepo = { create: fn() };
     const contactPointsRepo = { create: fn() };
@@ -82,6 +88,9 @@ describe('IamPractitionerSelfRegistrationService', () => {
     // El repositorio de activaciones sólo se usa en el alta administrativa: en
     // el autorregistro la cuenta nace activa y no hay token que emitir.
     const activationsRepo = { create: fn() };
+    const fileUploadService = {
+      upload: fn().mockResolvedValue({ id: 'file-foto-123' }),
+    };
 
     const service = new IamPractitionerSelfRegistrationService(
       em as never,
@@ -95,6 +104,8 @@ describe('IamPractitionerSelfRegistrationService', () => {
       personsRepo as never,
       personProfilesRepo as never,
       practitionersRepo as never,
+      specialtiesRepo as never,
+      specialtyCatalog as never,
       authorizationsRepo as never,
       professionalCredentialsRepo as never,
       languagesRepo as never,
@@ -107,10 +118,13 @@ describe('IamPractitionerSelfRegistrationService', () => {
       notificationsService as never,
       logger as never,
       new TracingService(),
+      fileUploadService as never,
     );
     return {
       service,
       effectiveRoles,
+      specialtiesRepo,
+      specialtyCatalog,
       tx,
       usersRepo,
       credentialsRepo,
@@ -125,6 +139,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       tenantMembershipsRepo,
       notificationsService,
       activationsRepo,
+      fileUploadService,
     };
   }
 
@@ -224,6 +239,88 @@ describe('IamPractitionerSelfRegistrationService', () => {
     });
   });
 
+  /**
+   * Las especialidades EN el alta — registro del cliente, módulo Médico §1.4.2.
+   *
+   * Hasta acá el alta no las aceptaba: la pantalla decía «se elige después» y
+   * la mayoría no volvía. Lo que estas pruebas fijan: que viajan en la misma
+   * transacción, que la primera es la principal, que cada una pasa por el
+   * catálogo (la FK acepta cualquier concepto; el value set decide), y que
+   * repetir una no crea dos filas.
+   */
+  describe('las especialidades del alta', () => {
+    it('crea una fila por especialidad, la primera como principal', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        specialtyConceptIds: ['esp-cardio', 'esp-neuro'],
+      });
+
+      const filas = d.specialtiesRepo.create.mock.calls.map(
+        (c: unknown[]) => c[1] as Record<string, unknown>,
+      );
+      expect(filas).toHaveLength(2);
+      expect(filas[0]).toMatchObject({
+        specialtyConceptId: 'esp-cardio',
+        isPrimary: true,
+      });
+      expect(filas[1]).toMatchObject({
+        specialtyConceptId: 'esp-neuro',
+        isPrimary: false,
+      });
+    });
+
+    it('cada concepto pasa por el catálogo: el formato uuid no alcanza', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        specialtyConceptIds: ['esp-cardio'],
+      });
+
+      expect(d.specialtyCatalog.assertIsMedicalSpecialty).toHaveBeenCalledWith(
+        expect.anything(),
+        'esp-cardio',
+      );
+    });
+
+    it('si el catálogo rechaza una, el alta entera no ocurre', async () => {
+      // Misma transacción a propósito: una cuenta creada con una especialidad
+      // inválida a medias sería peor que el rechazo completo.
+      const d = build();
+      d.specialtyCatalog.assertIsMedicalSpecialty.mockRejectedValue(
+        new Error('no es una especialidad'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          specialtyConceptIds: ['no-es-especialidad'],
+        }),
+      ).rejects.toThrow('no es una especialidad');
+    });
+
+    it('repetir una especialidad declara una, no dos', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        specialtyConceptIds: ['esp-cardio', 'esp-cardio'],
+      });
+
+      expect(d.specialtiesRepo.create.mock.calls).toHaveLength(1);
+    });
+
+    it('sin especialidades el alta sigue igual que siempre', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner(dto);
+
+      expect(d.specialtiesRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
   it('creates the account, the person and the practitioner profile in one call', async () => {
     const d = build();
 
@@ -272,6 +369,50 @@ describe('IamPractitionerSelfRegistrationService', () => {
     expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
       d.tx,
       expect.objectContaining({ stateConceptId: PROF.CRED_PENDING }),
+    );
+  });
+
+  it('files the SEDES number as a second authorization, not as a degree', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      email: dto.email,
+      password: dto.password,
+      licenseNumber: dto.licenseNumber,
+      sedesLicenseNumber: 'T.I. 538/14',
+    });
+
+    // La habilitación departamental va a la MISMA tabla que la nacional: es lo
+    // que la pone al lado de la matrícula en el perfil.
+    expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
+        licenseNumber: 'T.I. 538/14',
+        stateConceptId: PROF.AUTH_PENDING,
+      }),
+    );
+    // Y no nace ninguna credencial: era el defecto que hacía que el padrón
+    // real mostrara «Título universitario · T.I. 538/14».
+    expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('still creates the degree credential when a real credential number is sent', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      email: dto.email,
+      password: dto.password,
+      licenseNumber: dto.licenseNumber,
+      credentialNumber: 'TIT-99310',
+    });
+
+    expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+        number: 'TIT-99310',
+      }),
     );
   });
 
@@ -362,6 +503,40 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
+  it('persists the occupation concept on the person', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      occupationConceptId: '49e29a9b-2651-5ca1-b0db-6e6b528a3014',
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        occupationConceptId: '49e29a9b-2651-5ca1-b0db-6e6b528a3014',
+        occupationFreeText: undefined,
+      }),
+    );
+  });
+
+  it('persists free text occupation when no catalog concept is provided', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      occupationFreeText: 'Médico Investigador Independiente',
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        occupationConceptId: undefined,
+        occupationFreeText: 'Médico Investigador Independiente',
+      }),
+    );
+  });
+
   it('stores the phone as a contact point and the document as an identifier', async () => {
     const d = build();
 
@@ -385,6 +560,102 @@ describe('IamPractitionerSelfRegistrationService', () => {
         value: '4821993',
       }),
     );
+  });
+
+  it('guarda los cinco contactos del registro, cada uno con su sistema y su uso', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      personalEmail: 'ana.rojas@gmail.com',
+      mobilePhone: '+591 70011111',
+      workMobilePhone: '+591 70022222',
+      workLandline: '+591 3 3456789',
+    });
+
+    const esperados = [
+      // El correo de trabajo es además la identidad de login.
+      [CONCEPTS.CONTACT_EMAIL, CONCEPTS.CONTACT_USE_WORK, dto.email],
+      [
+        CONCEPTS.CONTACT_EMAIL,
+        CONCEPTS.CONTACT_USE_HOME,
+        'ana.rojas@gmail.com',
+      ],
+      [CONCEPTS.CONTACT_MOBILE, CONCEPTS.CONTACT_USE_HOME, '+591 70011111'],
+      [CONCEPTS.CONTACT_MOBILE, CONCEPTS.CONTACT_USE_WORK, '+591 70022222'],
+      [CONCEPTS.CONTACT_PHONE, CONCEPTS.CONTACT_USE_WORK, '+591 3 3456789'],
+    ] as const;
+
+    for (const [systemConceptId, useConceptId, value] of esperados) {
+      expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ systemConceptId, useConceptId, value }),
+      );
+    }
+    expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(esperados.length);
+  });
+
+  it('el celular personal y el de trabajo no se pisan entre sí', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      mobilePhone: '+591 70011111',
+      workMobilePhone: '+591 70022222',
+    });
+
+    const celulares = d.contactPointsRepo.create.mock.calls
+      .map(
+        ([, fila]: [unknown, { systemConceptId: string; value: string }]) =>
+          fila,
+      )
+      .filter(
+        (fila: { systemConceptId: string }) =>
+          fila.systemConceptId === CONCEPTS.CONTACT_MOBILE,
+      );
+
+    expect(celulares).toHaveLength(2);
+    expect(
+      new Set(celulares.map((fila: { value: string }) => fila.value)),
+    ).toEqual(new Set(['+591 70011111', '+591 70022222']));
+  });
+
+  it('el teléfono de la forma anterior sigue cayendo donde el fijo de trabajo', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({ ...dto, phone: '+591 3 3456789' });
+
+    expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        systemConceptId: CONCEPTS.CONTACT_PHONE,
+        useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        value: '+591 3 3456789',
+      }),
+    );
+  });
+
+  it('cuando llegan el campo nuevo y el anterior, manda el nuevo', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      phone: '+591 3 1111111',
+      workLandline: '+591 3 2222222',
+    });
+
+    const fijos = d.contactPointsRepo.create.mock.calls
+      .map(
+        ([, fila]: [unknown, { systemConceptId: string; value: string }]) =>
+          fila,
+      )
+      .filter(
+        (fila: { systemConceptId: string }) =>
+          fila.systemConceptId === CONCEPTS.CONTACT_PHONE,
+      );
+
+    expect(fijos).toHaveLength(1);
+    expect(fijos[0].value).toBe('+591 3 2222222');
   });
 
   it('ata el departamento emisor al identificador, no a la persona', async () => {
@@ -455,5 +726,93 @@ describe('IamPractitionerSelfRegistrationService', () => {
     // de mensajería no puede deshacer un alta que ya es válida.
     expect(result.userId).toBe('user-1');
     expect(result.emailVerificationSent).toBe(false);
+  });
+
+  describe('foto de perfil durante el registro', () => {
+    // Cabecera JPEG válida para que sniffMimeType la reconozca como IMAGE
+    const FOTO_JPEG_B64 =
+      'data:image/jpeg;base64,' +
+      Buffer.from([
+        0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46,
+      ]).toString('base64');
+
+    it('procesa y vincula la foto de perfil en base64 cuando se envía', async () => {
+      const d = build();
+
+      const result = await d.service.registerPractitioner({
+        ...dto,
+        profilePhotoBase64: FOTO_JPEG_B64,
+      });
+
+      expect(d.fileUploadService.upload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mimetype: 'image/jpeg',
+        }),
+        {
+          category: 'IMAGE',
+          sensitivity: 'NORMAL',
+        },
+        expect.objectContaining({
+          id: 'user-1',
+          roles: ['PRACTITIONER'],
+        }),
+      );
+
+      expect(d.personsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: 'file-foto-123',
+        }),
+      );
+
+      expect(d.practitionersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: 'file-foto-123',
+        }),
+      );
+
+      expect(result.photoFileId).toBe('file-foto-123');
+    });
+
+    it('omite la subida y el identificador de foto cuando no se envía foto', async () => {
+      const d = build();
+
+      const result = await d.service.registerPractitioner(dto);
+
+      expect(d.fileUploadService.upload).not.toHaveBeenCalled();
+      expect(d.personsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: undefined,
+        }),
+      );
+      expect(d.practitionersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: undefined,
+        }),
+      );
+      expect(result.photoFileId).toBeUndefined();
+    });
+
+    it('si el servicio de subida falla, el registro concluye sin bloquear', async () => {
+      const d = build();
+      d.fileUploadService.upload.mockRejectedValue(new Error('storage full'));
+
+      const result = await d.service.registerPractitioner({
+        ...dto,
+        profilePhotoBase64: FOTO_JPEG_B64,
+      });
+
+      expect(result.userId).toBe('user-1');
+      expect(result.photoFileId).toBeUndefined();
+      expect(d.personsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          photoFileId: undefined,
+        }),
+      );
+    });
   });
 });

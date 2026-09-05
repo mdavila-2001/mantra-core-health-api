@@ -9,7 +9,7 @@
 # Módulo `scheduling`
 
 **Fuente:** [`src/modules/scheduling/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/scheduling/README.md)
-· 5 controllers · 5 services · 5 repositories · 16 entidades · 5 DTO
+· 6 controllers · 10 services · 6 repositories · 16 entidades · 6 DTO
 
 ---
 
@@ -20,22 +20,22 @@ reservas con anti-double-booking, lista de espera y recordatorios.
 
 ## Casos de uso cubiertos (14)
 
-| UC | Endpoint | Descripción |
-| --- | --- | --- |
-| UC-41-01 | `POST /scheduling/resources` · `POST /scheduling/booking-policies` | Definir recurso y política |
-| UC-41-02 | `POST /scheduling/resources/:id/templates` | Publicar plantilla con franjas |
-| UC-41-03 | `POST /scheduling/templates/:id/generate-slots` | Materializar slots |
-| UC-41-04 | `POST /scheduling/resources/:id/exceptions` | Excepción de disponibilidad |
-| UC-41-05 | `POST /scheduling/slots/:id/holds` | Reserva temporal (anti-double-booking) |
-| UC-41-06 | `POST /scheduling/holds/:holdToken/confirm` | Confirmar cita |
-| UC-41-07 | `POST /scheduling/internal/expire-holds` | Worker: liberar holds vencidos |
-| UC-41-08 | `POST /scheduling/bookings/:id/reschedule` | Reprogramar |
-| UC-41-09 | `POST /scheduling/bookings/:id/cancel` | Cancelar (con cargo por no-show) |
-| UC-41-10 | `POST /scheduling/bookings/:id/check-in` | Check-in |
-| UC-41-11 | `POST /scheduling/waitlist` | Inscribir en lista de espera |
-| UC-41-12 | `POST /scheduling/internal/promote-waitlist/:slotId` | Worker: promover lista de espera |
-| UC-41-13 | `POST /scheduling/bookings/:id/reminders` | Programar recordatorios |
-| UC-41-14 | `POST /scheduling/internal/dispatch-reminders` | Worker: despachar recordatorios |
+| UC       | Endpoint                                                           | Descripción                            |
+| -------- | ------------------------------------------------------------------ | -------------------------------------- |
+| UC-41-01 | `POST /scheduling/resources` · `POST /scheduling/booking-policies` | Definir recurso y política             |
+| UC-41-02 | `POST /scheduling/resources/:id/templates`                         | Publicar plantilla con franjas         |
+| UC-41-03 | `POST /scheduling/templates/:id/generate-slots`                    | Materializar slots                     |
+| UC-41-04 | `POST /scheduling/resources/:id/exceptions`                        | Excepción de disponibilidad            |
+| UC-41-05 | `POST /scheduling/slots/:id/holds`                                 | Reserva temporal (anti-double-booking) |
+| UC-41-06 | `POST /scheduling/holds/:holdToken/confirm`                        | Confirmar cita                         |
+| UC-41-07 | `POST /scheduling/internal/expire-holds`                           | Worker: liberar holds vencidos         |
+| UC-41-08 | `POST /scheduling/bookings/:id/reschedule`                         | Reprogramar                            |
+| UC-41-09 | `POST /scheduling/bookings/:id/cancel`                             | Cancelar (con cargo por no-show)       |
+| UC-41-10 | `POST /scheduling/bookings/:id/check-in`                           | Check-in                               |
+| UC-41-11 | `POST /scheduling/waitlist`                                        | Inscribir en lista de espera           |
+| UC-41-12 | `POST /scheduling/internal/promote-waitlist/:slotId`               | Worker: promover lista de espera       |
+| UC-41-13 | `POST /scheduling/bookings/:id/reminders`                          | Programar recordatorios                |
+| UC-41-14 | `POST /scheduling/internal/dispatch-reminders`                     | Worker: despachar recordatorios        |
 
 ## Entidades
 
@@ -130,5 +130,4 @@ pedida: sin ese recorte, una zona al oeste de UTC materializaría cupos del día
 `horaUtcDeLocal`, una compensación deliberada de cuando el generador era incorrecto. Ahora que
 `generateSlots` lee `time_zone`, esa función sobra y las franjas deberían volver a declararse en
 hora local — vive en `salud-db`/`tools`, fuera del alcance de este cambio.
-
 

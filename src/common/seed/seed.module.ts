@@ -56,6 +56,8 @@ import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { BoEmployersSeedService } from './bo-employers-seed.service';
+import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
@@ -67,6 +69,7 @@ import {
   FieldAssignments,
 } from '../../modules/forms/entities';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -136,6 +139,8 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     DynamicEnumSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    BoOccupationsSeedService,
+    BoEmployersSeedService,
     BoliviaFacilitiesSeedService,
     BoliviaFeeScheduleSeedService,
     BoliviaInsuranceSeedService,
@@ -149,6 +154,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     ProviderAccountsSeedService,
     SeedBootstrapService,
     ClinicalFormsSeedService,
+    PracticeDefaultServicesSeedService,
   ],
   exports: [
     SeedBootstrapService,
@@ -156,6 +162,8 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     DynamicEnumSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    BoOccupationsSeedService,
+    BoEmployersSeedService,
     BoliviaFacilitiesSeedService,
     BoliviaFeeScheduleSeedService,
     BoliviaInsuranceSeedService,
@@ -168,6 +176,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     BootstrapAdminSeedService,
     ProviderAccountsSeedService,
     ClinicalFormsSeedService,
+    PracticeDefaultServicesSeedService,
   ],
 })
 export class SeedModule {}

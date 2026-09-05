@@ -15,18 +15,6 @@ import { ClinicalReadService } from '../services';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
 
 /**
- * Roles que leen la historia de **otra** persona: los que atienden.
- *
- * `SUPERADMIN` entra porque el `RolesGuard` lo trata como comodín; excluirlo
- * acá le negaría en el controlador lo que el guard ya le concedió.
- */
-const ROLES_QUE_ATIENDEN: readonly string[] = [
-  'CLINICIAN',
-  'PRACTITIONER',
-  'SUPERADMIN',
-];
-
-/**
  * Lectura del registro clínico (`/clinical/patients`). Capa fina: valida
  * parámetros y delega en `ClinicalReadService`.
  *
@@ -80,12 +68,10 @@ export class ClinicalReadController {
     @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PatientClinicalSummaryResponseDto> {
-    // Quien atiende pasa sin más: leer la historia de a quien atiende **es** su
-    // trabajo, y a quién puede atender lo decide la asignación de roles, no
-    // este endpoint. Al resto se le exige ser el titular.
-    if (!actor.roles.some((rol) => ROLES_QUE_ATIENDEN.includes(rol))) {
-      await this.readService.assertOwnRecord(patientProfileId, actor);
-    }
+    // Quién puede leer esta historia lo decide el servicio, entero: el titular
+    // siempre, y quien atiende **sólo si hoy tiene turno con esta persona**. Antes
+    // bastaba el rol, y en los hechos eso era cualquier médico leyendo a cualquiera.
+    await this.readService.assertPuedeLeerHistoria(patientProfileId, actor);
     return this.readService.getPatientSummary(patientProfileId, limit ?? 50);
   }
 }

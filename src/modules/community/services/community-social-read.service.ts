@@ -28,6 +28,8 @@ import {
   CommunityEngagementService,
   type PostEngagement,
 } from './community-engagement.service';
+import { FileUploadService } from '../../common/services';
+import type { FileContentDto } from '../../common/dto';
 import type {
   PublicProfileDetailDto,
   PostPageDto,
@@ -35,6 +37,7 @@ import type {
   PostListItemDto,
   CommentThreadPageDto,
   CommentThreadItemDto,
+  CommentMediaDto,
   ReactionSummaryDto,
   FollowPageDto,
   BookmarkPageDto,
@@ -72,6 +75,7 @@ export class CommunitySocialReadService {
    * @param prestigeRepo - Acceso a `community.prestige_scores`.
    * @param visibility - Reglas transversales de visibilidad y propiedad.
    * @param engagement - Recuento de reacciones y comentarios de la página.
+   * @param files - Bytes de un adjunto, una vez que este servicio autorizó verlo.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -86,6 +90,7 @@ export class CommunitySocialReadService {
     private readonly prestigeRepo: CommunityPrestigeRepository,
     private readonly visibility: CommunityVisibilityService,
     private readonly engagement: CommunityEngagementService,
+    private readonly files: FileUploadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunitySocialReadService.name);
@@ -385,9 +390,18 @@ export class CommunitySocialReadService {
       REPLIES_PER_PAGE,
     );
 
+    // REQ-01-011: los adjuntos de raíces y respuestas, en un solo viaje —
+    // pedirlos comentario por comentario sería un N+1 por cada uno con foto.
+    const mediaByComment = await this.mediaByComment(em, [
+      ...roots.map((root) => root.id),
+      ...replies.map((reply) => reply.id),
+    ]);
+
     const last = roots.at(-1);
     return {
-      items: roots.map((root) => this.toCommentThread(root, replies)),
+      items: roots.map((root) =>
+        this.toCommentThread(root, replies, mediaByComment),
+      ),
       count: roots.length,
       limit: options.limit,
       nextCursor:
@@ -398,6 +412,64 @@ export class CommunitySocialReadService {
             })
           : null,
     };
+  }
+
+  /**
+   * Sirve el adjunto de un comentario a quien tiene sesión (FND-01).
+   *
+   * `FileUploadService.download()` sólo deja pasar a quien subió el archivo o
+   * a un rol de revisión: correcto para evidencia de identidad o un adjunto
+   * clínico, pero no para esto — un comentarista distinto de quien subió la
+   * foto, o el propio autor del post, pedían la misma imagen que ya podían
+   * ver en el hilo y se llevaban un 403 con el ícono roto (`FilePreviewImage`
+   * lo cubría, mal, degradando a error). Acá lo que autoriza no es quién subió
+   * el archivo sino **quién puede ver el post** del que cuelga el comentario —
+   * la misma regla de `listPostComments` — y una vez que eso da luz verde se
+   * sirve exactamente como la superficie pública ya sirve un adjunto de
+   * comentario: imagen, sensibilidad normal, versión vigente sin infectar
+   * (`FileUploadService.downloadPublicMedia`, que ya no exige dueño).
+   *
+   * @param fileId - Adjunto pedido (`common.files`).
+   * @param actor - Sesión que pide verlo.
+   * @param requestedProfileId - Perfil propuesto por el lector, si actúa por otro.
+   * @returns Bytes y tipo MIME para servir por HTTP.
+   * @throws ResourceNotFoundException si el archivo no es un adjunto de
+   *   comentario, o si el post del que cuelga ese comentario no es visible
+   *   para el lector — el mismo 404 en los dos casos, para no confirmarle a
+   *   quien prueba ids al azar cuál de las dos cosas encontró.
+   */
+  async getCommentMedia(
+    fileId: string,
+    actor: AuthenticatedUser,
+    requestedProfileId?: string,
+  ): Promise<FileContentDto> {
+    const em = this.em.fork();
+    const adjunto = await this.commentsRepo.findMediaByFileId(em, fileId);
+    if (!adjunto) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+    }
+    const comentario = await this.commentsRepo.findById(em, adjunto.commentId);
+    if (
+      !comentario ||
+      comentario.commentableTypeConceptId !== SOCIAL_OBJECT_CONCEPT_BY_CODE.POST
+    ) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+    }
+
+    const actorProfileId = await this.visibility.resolveActorProfileId(
+      em,
+      actor,
+      requestedProfileId,
+    );
+    // Mismo 404 que «no existe»: a quien enumera fileIds ajenos no se le
+    // confirma si el archivo existe pero el post es privado.
+    await this.assertPostVisible(
+      em,
+      comentario.commentableRefId,
+      actorProfileId,
+    );
+
+    return this.files.downloadPublicMedia(fileId);
   }
 
   /**
@@ -662,6 +734,7 @@ export class CommunitySocialReadService {
   private toCommentThread(
     root: Comments,
     replies: Comments[],
+    mediaByComment: Map<string, CommentMediaDto[]>,
   ): CommentThreadItemDto {
     const own = replies.filter((reply) => reply.parentCommentId === root.id);
     return {
@@ -672,7 +745,31 @@ export class CommunitySocialReadService {
       threadDepth: root.threadDepth ?? null,
       replyCount: root.replyCount ?? null,
       createdAt: root.createdAt,
-      replies: own.map((reply) => this.toCommentThread(reply, replies)),
+      replies: own.map((reply) =>
+        this.toCommentThread(reply, replies, mediaByComment),
+      ),
+      media: mediaByComment.get(root.id) ?? [],
     };
+  }
+
+  /** Adjuntos de un lote de comentarios, agrupados por comentario (REQ-01-011). */
+  private async mediaByComment(
+    em: EntityManager,
+    commentIds: string[],
+  ): Promise<Map<string, CommentMediaDto[]>> {
+    const rows = await this.commentsRepo.listMediaForComments(em, commentIds);
+    const byComment = new Map<string, CommentMediaDto[]>();
+    for (const row of rows) {
+      const list = byComment.get(row.commentId) ?? [];
+      list.push({
+        id: row.id,
+        fileId: row.fileId,
+        mediaRoleConceptId: row.mediaRoleConceptId,
+        altText: row.altText ?? null,
+        ordinal: row.ordinal ?? null,
+      });
+      byComment.set(row.commentId, list);
+    }
+    return byComment;
   }
 }

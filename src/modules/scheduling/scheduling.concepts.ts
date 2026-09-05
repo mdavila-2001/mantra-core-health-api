@@ -36,6 +36,28 @@ export const { seeds: SCHEDULING_CONCEPT_SEEDS, ids: SCHED } =
       display: 'Booking no-show',
     },
 
+    // --- Estado de pago de una cita (TAREA-13 punto 5) ----------------------
+    // Los tres que pidió el propietario, y sólo esos: «reembolsada» quedó
+    // expresamente fuera. Viven acá y no en el catálogo central porque son del
+    // módulo, igual que los estados de cita de arriba.
+    //
+    // Ojo con la tentación de agregar un cuarto valor «pagada con seguro»: el
+    // propietario pidió que el seguro fuera una marca SEPARADA, y por eso es la
+    // columna booleana `insurance_used` y no un estado. Mezclarlos daría seis
+    // valores para responder dos preguntas distintas.
+    PAYMENT_PENDING: {
+      code: 'PAYMENT_PENDING',
+      display: 'Payment pending',
+    },
+    PAYMENT_PARTIALLY_PAID: {
+      code: 'PAYMENT_PARTIAL',
+      display: 'Partially paid',
+    },
+    PAYMENT_PAID: {
+      code: 'PAYMENT_PAID',
+      display: 'Paid',
+    },
+
     // --- Decisiones del motor de confirmación automática (C-11) --------------
     // decision_concept_id de scheduling.booking_confirmation_rules y resultado
     // de evaluateBookingRequest.
@@ -104,6 +126,22 @@ export const { seeds: SCHEDULING_CONCEPT_SEEDS, ids: SCHED } =
     HISTORY_OP_DELAY: {
       code: 'BOOKING_DELAY_ANNOUNCED',
       display: 'Practitioner announced a delay',
+    },
+
+    /**
+     * Alguien marcó el estado de pago de la cita (TAREA-13 punto 5).
+     *
+     * `scheduling.appointment_payment_states` guarda el estado **actual** y
+     * quién lo dejó así, pero se sobrescribe: sin esta operación, cambiar «pagada»
+     * de vuelta a «pendiente» borraría que alguna vez estuvo pagada. El historial
+     * es append-only y su `data_snapshot` es `jsonb`, así que ahí queda la cadena
+     * completa —de qué estado a cuál, y si se usó seguro—.
+     *
+     * Es lo que hace falsable el «nada se pisa en silencio» de AC-13-10.
+     */
+    HISTORY_OP_PAYMENT_MARKED: {
+      code: 'BOOKING_PAYMENT_MARKED',
+      display: 'Booking payment state marked',
     },
 
     // --- Categorías de los cuatro avisos de agenda (P8) ---------------------

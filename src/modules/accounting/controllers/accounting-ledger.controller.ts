@@ -18,7 +18,12 @@ import {
 } from '../../../common';
 import { LedgerReadService, LedgerService } from '../services';
 import {
+  BalanceSheetResponseDto,
   ChartOfAccountsResponseDto,
+  FinancialStatementQueryDto,
+  GeneralLedgerQueryDto,
+  GeneralLedgerResponseDto,
+  IncomeStatementResponseDto,
   JournalTransactionDetailDto,
   ListJournalQueryDto,
   ListJournalResponseDto,
@@ -96,6 +101,53 @@ export class AccountingLedgerController {
     @Query() query: ListJournalQueryDto,
   ): Promise<ListJournalResponseDto> {
     return this.ledgerReadService.listJournal(query);
+  }
+
+  /**
+   * TAREA-20 S3: libro mayor de una cuenta, con saldo corrido. Pagina por
+   * cursor (AC-20-14), nunca por `limit` con desplazamiento.
+   */
+  @Get('general-ledger')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Libro mayor de una cuenta (movimientos posteados, con saldo corrido)',
+  })
+  generalLedger(
+    @Query() query: GeneralLedgerQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<GeneralLedgerResponseDto> {
+    return this.ledgerReadService.generalLedger(query, actor);
+  }
+
+  /**
+   * TAREA-20 S3: estado de resultados (ingresos y gastos posteados de la
+   * ventana pedida). Agrega desde la misma fuente que el libro mayor, así
+   * que no puede divergir de él para la misma cuenta y período (AC-20-7).
+   */
+  @Get('income-statement')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+  @ApiOperation({ summary: 'Estado de resultados de una práctica' })
+  incomeStatement(
+    @Query() query: FinancialStatementQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IncomeStatementResponseDto> {
+    return this.ledgerReadService.incomeStatement(query, actor);
+  }
+
+  /**
+   * TAREA-20 S3: balance general a una fecha de corte. Distinto del balance
+   * de sumas y saldos (`trial-balance`): éste clasifica por tipo de cuenta y
+   * cumple `activo = pasivo + patrimonio` incorporando el resultado del
+   * período (AC-20-6).
+   */
+  @Get('balance-sheet')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+  @ApiOperation({ summary: 'Balance general de una práctica a una fecha de corte' })
+  balanceSheet(
+    @Query() query: FinancialStatementQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BalanceSheetResponseDto> {
+    return this.ledgerReadService.balanceSheet(query, actor);
   }
 
   /** UC-16-01·D: el asiento con sus líneas, que es lo que se audita. */

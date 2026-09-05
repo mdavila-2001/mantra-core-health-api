@@ -8,6 +8,132 @@ import {
   VerifiedBadges,
 } from '../entities';
 import { COMM } from '../community.concepts';
+import { PROF } from '../../profiles/profiles.concepts';
+
+/**
+ * Los estados de un vínculo laboral que se publican en la ficha pública.
+ *
+ * `DECLARADO` y `APROBADO` —con sus dos alias de v4.1.9, ver
+ * `ProfilesAffiliationsService.IDS_ACEPTADOS`—: un vínculo **declarado** sin
+ * sede de la plataforma «publica igual, lo que no tiene es el sello de la
+ * institución» (mismo criterio que ese servicio documenta), y es el caso más
+ * común —una línea de currículum sin sede asociada—. `PENDIENTE`, `RECHAZADO`
+ * y `REVOCADO` quedan fuera: no son un hecho confirmado que mostrarle a un
+ * anónimo.
+ */
+const AFFILIATION_ESTADOS_PUBLICOS: readonly string[] = [
+  PROF.AFFILIATION_DECLARED,
+  PROF.AFFILIATION_APPROVED,
+  PROF.AFFILIATION_ACTIVE,
+];
+
+/**
+ * Qué hace **pública** a una publicación, escrito una sola vez.
+ *
+ * Es la condición que ya aplicaba `listFeedPublico`, extraída para que las
+ * lecturas sociales públicas —quién reaccionó, el hilo de comentarios, las
+ * respuestas de un comentario— la compartan literalmente en vez de repetirla.
+ * Una regla de visibilidad copiada en cuatro consultas se olvida en la quinta, y
+ * la que se olvida es la que publica un borrador.
+ *
+ * Presupone que la consulta une `community.social_posts sp` con
+ * `community.public_profiles pp` por `pp.id = sp.author_public_profile_id`: son
+ * las dos condiciones del post y las dos del directorio sobre la vitrina de su
+ * autor. Si un perfil se despublica, todo lo suyo sale con él.
+ *
+ * No es lo mismo que `CommunityVisibilityService.canViewPost`, y no puede
+ * serlo: aquélla decide qué ve **un lector** —tiene bloqueos y follows que
+ * evaluar— y acá no hay lector. Sin sesión sólo califica `PUBLIC`, y además
+ * tiene que estar publicado y no moderado, que es lo que `canViewPost` no mira
+ * porque quien la llama ya viene de un listado que sí lo hizo.
+ */
+const POST_PUBLICO_SQL = `sp.visibility_concept_id = ?
+          AND sp.publication_status_concept_id = ?
+          AND sp.moderation_status_concept_id NOT IN (?, ?)
+          AND sp.published_at <= NOW()
+          AND pp.visibility_concept_id = ?
+          AND pp.status_concept_id = ?`;
+
+/** Los parámetros de {@link POST_PUBLICO_SQL}, en su orden. */
+const POST_PUBLICO_PARAMS: readonly unknown[] = [
+  COMM.POST_VISIBILITY_PUBLIC,
+  COMM.PUBLICATION_PUBLISHED,
+  COMM.MODERATION_REMOVED,
+  COMM.MODERATION_RESTRICTED,
+  COMM.PROFILE_VISIBILITY_PUBLIC,
+  CONCEPTS.STATE_ACTIVE,
+];
+
+/**
+ * Qué hace pública a la vitrina del autor de un comentario o de una reacción.
+ *
+ * Se compara por igualdad —y no con «distinto de privado»— por lo mismo que el
+ * resto del directorio: un valor nulo, o uno que todavía no existe como
+ * concepto, tiene que quedar fuera.
+ */
+const AUTOR_PUBLICO_SQL = `pp.visibility_concept_id = ?
+          AND pp.status_concept_id = ?`;
+
+/** Los parámetros de {@link AUTOR_PUBLICO_SQL}, en su orden. */
+const AUTOR_PUBLICO_PARAMS: readonly unknown[] = [
+  COMM.PROFILE_VISIBILITY_PUBLIC,
+  CONCEPTS.STATE_ACTIVE,
+];
+
+/** Las columnas del autor que la superficie pública sirve, y ninguna más. */
+const AUTOR_PUBLICO_COLUMNAS = `pp.slug                    AS author_slug,
+              pp.display_name            AS author_display_name,
+              pp.headline                AS author_headline,
+              pp.avatar_file_id          AS author_avatar_file_id,
+              pp.target_type_concept_id  AS author_kind_concept_id`;
+
+/** Una persona de la superficie pública, tal como sale de la consulta. */
+export interface PublicSocialActorRow {
+  /** Slug estable del perfil. */
+  readonly authorSlug: string;
+  /** Nombre visible. */
+  readonly authorDisplayName: string;
+  /** Titular corto, o `null`. */
+  readonly authorHeadline: string | null;
+  /** Archivo del avatar, que el servicio resuelve a URL. */
+  readonly authorAvatarFileId: string | null;
+  /** Concepto de vertical del perfil. */
+  readonly authorKindConceptId: string;
+}
+
+/** Una reacción con la persona que la dejó. */
+export interface PublicReactionRow extends PublicSocialActorRow {
+  /** Identificador de la reacción; alimenta el cursor, no la respuesta. */
+  readonly id: string;
+  /** Cuándo se dejó; alimenta el cursor, no la respuesta. */
+  readonly createdAt: Date;
+  /** Concepto del tipo de reacción, que el servicio traduce a código. */
+  readonly reactionTypeConceptId: string;
+}
+
+/** Un adjunto de comentario público (REQ-01-011), tal como sale de la fila. */
+export interface PublicCommentMediaRow {
+  /** Archivo en `common.files`; el servicio lo resuelve a `/public/media/:fileId`. */
+  readonly fileId: string;
+  /** Concept id del rol (imagen, sticker, GIF); el servicio lo resuelve al código. */
+  readonly mediaRoleConceptId: string;
+  /** Texto alternativo, si se aportó. */
+  readonly altText: string | null;
+}
+
+/** Un comentario público con su autor. */
+export interface PublicCommentRow extends PublicSocialActorRow {
+  /** Identificador del comentario. */
+  readonly id: string;
+  /** Texto. */
+  readonly bodyText: string;
+  /** Cuándo se escribió. */
+  readonly createdAt: Date;
+  /** Cuántas respuestas cuelgan de él. */
+  readonly replyCount: number;
+  /** Adjuntos, en orden de despliegue (REQ-01-011). */
+  readonly media: readonly PublicCommentMediaRow[];
+}
 
 /**
  * Lecturas del directorio público (P2).
@@ -75,10 +201,10 @@ export interface ProfileAffiliation {
 @Injectable()
 export class PublicSearchRepository {
   /**
-   * Página del directorio público, filtrada por texto, ciudad y tipo.
+   * Página del directorio público, filtrada por texto, ciudad, especialidad y tipo.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Texto, ciudad, tipo de sujeto y verificación.
+   * @param filtros - Texto, ciudad, especialidad, tipo de sujeto y verificación.
    * @param limit - Tope de filas; se pide una de más para saber si hay página.
    * @returns Los perfiles públicos que coinciden.
    */
@@ -91,6 +217,10 @@ export class PublicSearchRepository {
       targetTypeConceptId?: string;
       /** Sólo verificados. */
       verified?: boolean;
+      /** Ciudad exacta, sin distinguir tildes ni mayúsculas. */
+      city?: string;
+      /** Especialidad médica de `VS_MEDICAL_SPECIALTY`, ya validada. */
+      specialtyConceptId?: string;
       /** Clave de continuación `(displayName, id)`. */
       after?: { displayName: string; id: string };
     },
@@ -104,6 +234,40 @@ export class PublicSearchRepository {
       where.targetTypeConceptId = filtros.targetTypeConceptId;
     if (filtros.verified)
       where.verificationStatusConceptId = CONCEPTS.STATE_ACTIVE;
+
+    // La ciudad vive en `common.addresses`, no en el perfil: se resuelve a
+    // sujetos primero y se acota la búsqueda a ésos. Va **antes** de paginar,
+    // por lo mismo que el filtro de texto: acotar después de traer la página
+    // devolvería páginas de menos, y un directorio que muestra tres de veinte
+    // resultados se lee como un directorio con tres resultados.
+    //
+    // Ninguno es la respuesta honesta a «filtrá por una ciudad donde no hay
+    // nada», y por eso corta acá en vez de dejar caer el filtro: dejarlo caer
+    // devolvería el directorio entero y le diría a quien filtró, sin decírselo,
+    // que todos esos centros están en esa ciudad.
+    //
+    // La especialidad entra por la misma puerta y por lo mismo: vive en
+    // `profiles.practitioner_specialties`, no en el perfil. Los dos filtros
+    // acotan el **mismo eje** —el sujeto—, así que se intersecan en vez de
+    // pisarse: con el segundo sobreescribiendo al primero, «cardiólogos en
+    // Cochabamba» habría devuelto los cardiólogos del país entero.
+    const conjuntosDeSujetos: string[][] = [];
+    if (filtros.city) {
+      conjuntosDeSujetos.push(await this.targetIdsByCity(em, filtros.city));
+    }
+    if (filtros.specialtyConceptId) {
+      conjuntosDeSujetos.push(
+        await this.practitionerIdsBySpecialty(em, filtros.specialtyConceptId),
+      );
+    }
+    if (conjuntosDeSujetos.length > 0) {
+      const sujetos = conjuntosDeSujetos.reduce((acumulado, siguiente) => {
+        const presentes = new Set(siguiente);
+        return acumulado.filter((id) => presentes.has(id));
+      });
+      if (sujetos.length === 0) return [];
+      where.targetId = { $in: sujetos };
+    }
 
     // El keyset va sobre `(display_name, id)`: `display_name` solo no es único
     // —hay homónimos— y una página que empieza en un empate se saltea filas.
@@ -129,6 +293,57 @@ export class PublicSearchRepository {
     const ids = await this.matchIdsByText(em, filtros.q, where, limit);
     const permitidos = new Set(ids);
     return rows.filter((row) => permitidos.has(row.id));
+  }
+
+  /**
+   * Los sujetos con una dirección vigente en esa ciudad.
+   *
+   * Es el filtro de ciudad del buscador público por la vía SQL. Existe porque
+   * el índice puede no responder, y un filtro que sólo funciona cuando
+   * OpenSearch está arriba es peor que ninguno: el día que se cae, la lista
+   * deja de acotar **sin avisar** y quien filtró «Cochabamba» recibe el
+   * directorio entero creyendo que es Cochabamba.
+   *
+   * Compara sin tildes y sin distinguir mayúsculas —«la paz» y «La Paz» son la
+   * misma ciudad—, con la misma degradación que el filtro de texto: si
+   * `unaccent` no está instalada, cae a `lower(...)` en vez de romper.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param city - Ciudad tal como la escribió quien filtra.
+   * @returns Los `owner_id` con dirección vigente en esa ciudad.
+   */
+  private async targetIdsByCity(
+    em: EntityManager,
+    city: string,
+  ): Promise<string[]> {
+    const base = `
+      SELECT DISTINCT owner_id FROM common.addresses
+       WHERE (valid_to IS NULL OR valid_to >= CURRENT_DATE)
+         AND %NORM%(lower(coalesce(city, ''))) = %NORM%(lower(?))
+       LIMIT ?`;
+    // El tope existe para que el `IN` no crezca sin límite en una ciudad
+    // grande. Es holgado a propósito: por debajo del tamaño de cualquier
+    // directorio de una ciudad real, y muy por encima del de éste.
+    const params = [city, 5000];
+    try {
+      const filas = await em
+        .getConnection()
+        .execute<{ owner_id: string }[]>(
+          base.replace(/%NORM%/g, 'unaccent'),
+          params,
+          'all',
+        );
+      return filas.map((f) => f.owner_id);
+    } catch {
+      const filas = await em
+        .getConnection()
+        .execute<{ owner_id: string }[]>(
+          base.replace(/%NORM%/g, ''),
+          params,
+          'all',
+        );
+      return filas.map((f) => f.owner_id);
+    }
   }
 
   /**
@@ -453,9 +668,9 @@ export class PublicSearchRepository {
               department_text, start_date, end_date
          FROM profiles.practitioner_affiliations
         WHERE practitioner_profile_id IN (?)
-          AND status_concept_id = ?
+          AND status_concept_id IN (?)
         ORDER BY start_date DESC`,
-      [practitionerProfileIds, CONCEPTS.STATE_ACTIVE],
+      [practitionerProfileIds, AFFILIATION_ESTADOS_PUBLICOS],
       'all',
     );
 
@@ -678,6 +893,276 @@ export class PublicSearchRepository {
     );
   }
 
+  /**
+   * Las últimas publicaciones de **todas** las vitrinas públicas, mezcladas.
+   *
+   * Es el feed de la portada: quien entra sin sesión ve lo último que
+   * escribieron los profesionales, sin tener que elegir a uno primero. Las
+   * mismas condiciones de visibilidad que `listPublicPosts` —`PUBLIC`,
+   * publicado, no moderado, ya publicado— más las dos del directorio sobre la
+   * vitrina del autor: si un perfil se despublica, sus publicaciones salen del
+   * feed con él.
+   *
+   * Va en SQL y no por el ORM porque necesita los datos del autor en la misma
+   * fila: sin eso serían N lecturas de perfil para pintar N tarjetas.
+   *
+   * El cursor es `(published_at, id)` y no un `OFFSET`: con publicaciones
+   * entrando mientras alguien pagina, un offset repite y saltea filas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param limit - Cuántas traer.
+   * @param cursor - Desde dónde seguir, si se está paginando.
+   * @returns Las publicaciones con su autor, de la más reciente a la más antigua.
+   */
+  async listFeedPublico(
+    em: EntityManager,
+    limit: number,
+    cursor?: { publishedAt: Date; id: string },
+  ): Promise<
+    {
+      id: string;
+      bodyText: string;
+      publishedAt: Date;
+      authorSlug: string;
+      authorDisplayName: string;
+      authorHeadline: string | null;
+      authorAvatarFileId: string | null;
+      authorKindConceptId: string;
+    }[]
+  > {
+    const parametros: unknown[] = [...POST_PUBLICO_PARAMS];
+    // `(a, b) < (c, d)` es comparación de tuplas de Postgres: ordena por
+    // `published_at` y desempata por `id` en una sola condición, que es
+    // exactamente el orden del `ORDER BY`.
+    let condicionCursor = '';
+    if (cursor) {
+      condicionCursor = `AND (sp.published_at, sp.id) < (?, ?)`;
+      parametros.push(cursor.publishedAt, cursor.id);
+    }
+    parametros.push(limit);
+
+    const filas = await em.getConnection().execute<
+      {
+        id: string;
+        body_text: string;
+        published_at: Date;
+        author_slug: string;
+        author_display_name: string;
+        author_headline: string | null;
+        author_avatar_file_id: string | null;
+        author_kind_concept_id: string;
+      }[]
+    >(
+      `SELECT sp.id,
+              sp.body_text,
+              COALESCE(sp.published_at, sp.created_at) AS published_at,
+              ${AUTOR_PUBLICO_COLUMNAS}
+         FROM community.social_posts sp
+         JOIN community.public_profiles pp
+           ON pp.id = sp.author_public_profile_id
+        WHERE ${POST_PUBLICO_SQL}
+          ${condicionCursor}
+        ORDER BY sp.published_at DESC, sp.id DESC
+        LIMIT ?`,
+      parametros,
+      'all',
+    );
+
+    return filas.map((fila) => ({
+      id: fila.id,
+      bodyText: fila.body_text,
+      publishedAt: new Date(fila.published_at),
+      authorSlug: fila.author_slug,
+      authorDisplayName: fila.author_display_name,
+      authorHeadline: fila.author_headline,
+      authorAvatarFileId: fila.author_avatar_file_id,
+      authorKindConceptId: fila.author_kind_concept_id,
+    }));
+  }
+
+  /**
+   * Media, reacciones y comentarios de un lote de publicaciones, para la ficha.
+   *
+   * Una consulta por concepto en vez de tres viajes: `post_media` trae los
+   * archivos de imagen en orden, y dos `COUNT` agrupados traen la interacción.
+   * Las imágenes son las únicas que se publican —vídeo y documento se guardan
+   * pero no se sirven al anónimo todavía—, y el orden es `ordinal` y después
+   * `created_at`, el mismo con el que se subieron.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param postIds - Publicaciones del lote.
+   * @returns Mapa `postId → { imageFileIds, reactionCount, commentCount }`.
+   */
+  async engagementByPost(
+    em: EntityManager,
+    postIds: string[],
+  ): Promise<
+    Map<
+      string,
+      {
+        imageFileIds: string[];
+        reactionCount: number;
+        commentCount: number;
+      }
+    >
+  > {
+    const salida = new Map<
+      string,
+      { imageFileIds: string[]; reactionCount: number; commentCount: number }
+    >();
+    if (postIds.length === 0) return salida;
+
+    const asegurar = (id: string) => {
+      let fila = salida.get(id);
+      if (!fila) {
+        fila = { imageFileIds: [], reactionCount: 0, commentCount: 0 };
+        salida.set(id, fila);
+      }
+      return fila;
+    };
+
+    const conn = em.getConnection();
+
+    const medios = await conn.execute<{ post_id: string; file_id: string }[]>(
+      `SELECT post_id, file_id
+         FROM community.post_media
+        WHERE post_id IN (?)
+          AND media_role_concept_id = ?
+        ORDER BY COALESCE(ordinal, 0) ASC, created_at ASC`,
+      [postIds, COMM.MEDIA_ROLE_IMAGE],
+      'all',
+    );
+    for (const fila of medios)
+      asegurar(fila.post_id).imageFileIds.push(fila.file_id);
+
+    const reacciones = await conn.execute<
+      { reactable_ref_id: string; total: string }[]
+    >(
+      `SELECT reactable_ref_id, COUNT(*) AS total
+         FROM community.reactions
+        WHERE reactable_ref_id IN (?)
+          AND reactable_type_concept_id = ?
+        GROUP BY reactable_ref_id`,
+      [postIds, COMM.CONTENT_TYPE_POST],
+      'all',
+    );
+    for (const fila of reacciones) {
+      asegurar(fila.reactable_ref_id).reactionCount = Number(fila.total);
+    }
+
+    const comentarios = await conn.execute<
+      { commentable_ref_id: string; total: string }[]
+    >(
+      `SELECT commentable_ref_id, COUNT(*) AS total
+         FROM community.comments
+        WHERE commentable_ref_id IN (?)
+          AND commentable_type_concept_id = ?
+          AND status_concept_id <> ?
+        GROUP BY commentable_ref_id`,
+      [postIds, COMM.CONTENT_TYPE_POST, COMM.MODERATION_REMOVED],
+      'all',
+    );
+    for (const fila of comentarios) {
+      asegurar(fila.commentable_ref_id).commentCount = Number(fila.total);
+    }
+
+    return salida;
+  }
+
+  /**
+   * Si un archivo es una imagen adjunta a una publicación pública de una
+   * vitrina publicada. Es la otra mitad de `PublicProfilesRepository.isPublicMedia`:
+   * la primera cubre el avatar y la portada del perfil; ésta, las fotos que van
+   * dentro de las publicaciones que ese perfil dejó a la vista de todos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fileId - El archivo a comprobar.
+   */
+  async isPublicPostMedia(em: EntityManager, fileId: string): Promise<boolean> {
+    const filas = await em.getConnection().execute<{ uno: number }[]>(
+      `SELECT 1 AS uno
+         FROM community.post_media pm
+         JOIN community.social_posts sp ON sp.id = pm.post_id
+         JOIN community.public_profiles pp ON pp.id = sp.author_public_profile_id
+        WHERE pm.file_id = ?
+          AND pm.media_role_concept_id = ?
+          AND sp.visibility_concept_id = ?
+          AND sp.publication_status_concept_id = ?
+          AND sp.moderation_status_concept_id <> ?
+          AND pp.visibility_concept_id = ?
+          AND pp.status_concept_id = ?
+        LIMIT 1`,
+      [
+        fileId,
+        COMM.MEDIA_ROLE_IMAGE,
+        COMM.POST_VISIBILITY_PUBLIC,
+        COMM.PUBLICATION_PUBLISHED,
+        COMM.MODERATION_REMOVED,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ],
+      'all',
+    );
+    return filas.length > 0;
+  }
+
+  /**
+   * Si un archivo es un adjunto (imagen, sticker o GIF) de un comentario
+   * público (REQ-01-011). Tercera pieza del mismo trío que `isPublicMedia`
+   * (avatar/portada) e `isPublicPostMedia` (fotos del cuerpo del post):
+   * `PublicCommentMediaDto.url` sirve `/public/media/:fileId`, y sin esta
+   * comprobación esa URL sería un 404 para cualquier anónimo — la miniatura
+   * se vería en la propia sesión de quien comentó y rota para todos los demás.
+   *
+   * Dos vitrinas tienen que ser públicas a la vez, no una: la de quien
+   * **comentó** (si su perfil se privatiza, su adjunto deja de servirse con
+   * él, igual que su texto) y la de quien **publicó** el post comentado
+   * (mismo criterio que `POST_PUBLICO_SQL`). Cubre respuestas igual que
+   * comentarios raíz: ambas guardan el mismo `commentable_ref_id` — el post—,
+   * la única diferencia es `parent_comment_id`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fileId - El archivo a comprobar.
+   */
+  async isPublicCommentMedia(
+    em: EntityManager,
+    fileId: string,
+  ): Promise<boolean> {
+    const filas = await em.getConnection().execute<{ uno: number }[]>(
+      `SELECT 1 AS uno
+         FROM community.comment_media cm
+         JOIN community.comments c ON c.id = cm.comment_id
+         JOIN community.public_profiles author ON author.id = c.author_profile_id
+         JOIN community.social_posts sp ON sp.id = c.commentable_ref_id
+         JOIN community.public_profiles post_author ON post_author.id = sp.author_public_profile_id
+        WHERE cm.file_id = ?
+          AND c.commentable_type_concept_id = ?
+          AND c.status_concept_id = ?
+          AND author.visibility_concept_id = ?
+          AND author.status_concept_id = ?
+          AND sp.visibility_concept_id = ?
+          AND sp.publication_status_concept_id = ?
+          AND sp.moderation_status_concept_id <> ?
+          AND post_author.visibility_concept_id = ?
+          AND post_author.status_concept_id = ?
+        LIMIT 1`,
+      [
+        fileId,
+        COMM.CONTENT_TYPE_POST,
+        CONCEPTS.STATE_ACTIVE,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+        COMM.POST_VISIBILITY_PUBLIC,
+        COMM.PUBLICATION_PUBLISHED,
+        COMM.MODERATION_REMOVED,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ],
+      'all',
+    );
+    return filas.length > 0;
+  }
+
   /** Cuántas reseñas publicadas tiene un perfil (para la ficha). */
   async countPublishedReviews(
     em: EntityManager,
@@ -687,5 +1172,372 @@ export class PublicSearchRepository {
       targetPublicProfileId: profileId,
       publicationStatusConceptId: COMM.PUBLICATION_PUBLISHED,
     });
+  }
+
+  /**
+   * ¿Esta publicación es visible para un anónimo?
+   *
+   * Es la puerta de las tres lecturas sociales públicas y aplica
+   * {@link POST_PUBLICO_SQL}, exactamente el mismo predicado con el que el feed
+   * la habría servido. Una publicación que no pasa por acá es indistinguible de
+   * una que no existe: quien pregunta no se entera de si es un borrador, si está
+   * moderada o si el autor se despublicó.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param postId - Publicación preguntada.
+   * @returns `true` si el feed público la serviría.
+   */
+  async isPostPublic(em: EntityManager, postId: string): Promise<boolean> {
+    const filas = await em.getConnection().execute<{ uno: number }[]>(
+      `SELECT 1 AS uno
+         FROM community.social_posts sp
+         JOIN community.public_profiles pp
+           ON pp.id = sp.author_public_profile_id
+        WHERE sp.id = ?
+          AND ${POST_PUBLICO_SQL}
+        LIMIT 1`,
+      [postId, ...POST_PUBLICO_PARAMS],
+      'all',
+    );
+    return filas.length > 0;
+  }
+
+  /**
+   * Quién reaccionó a una publicación, de la reacción más reciente a la más
+   * vieja (AC-01-9).
+   *
+   * El `JOIN` con la vitrina no es decoración: es lo que deja fuera a quien no
+   * tiene perfil público y activo. Filtrar eso en memoria, después de traer la
+   * página, devolvería páginas de menos y —lo que más importa acá— dependería de
+   * que nadie olvidara el filtro. En la consulta no se olvida.
+   *
+   * El keyset va sobre `(created_at, id)` porque dos personas pueden reaccionar
+   * en el mismo instante y `created_at` solo saltearía a una de las dos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param postId - Publicación reaccionada.
+   * @param limit - Tope de filas; se pide una de más para saber si hay página.
+   * @param after - Clave de continuación `(createdAt, id)`.
+   * @returns Las reacciones de perfiles públicos, con su autor.
+   */
+  async listPostReactors(
+    em: EntityManager,
+    postId: string,
+    limit: number,
+    after?: { createdAt: string; id: string },
+  ): Promise<PublicReactionRow[]> {
+    const parametros: unknown[] = [
+      COMM.CONTENT_TYPE_POST,
+      postId,
+      ...AUTOR_PUBLICO_PARAMS,
+    ];
+    let condicionCursor = '';
+    if (after) {
+      condicionCursor = 'AND (r.created_at, r.id) < (?, ?)';
+      parametros.push(new Date(after.createdAt), after.id);
+    }
+    parametros.push(limit);
+
+    const filas = await em.getConnection().execute<
+      {
+        id: string;
+        created_at: Date;
+        reaction_type_concept_id: string;
+        author_slug: string;
+        author_display_name: string;
+        author_headline: string | null;
+        author_avatar_file_id: string | null;
+        author_kind_concept_id: string;
+      }[]
+    >(
+      `SELECT r.id,
+              r.created_at,
+              r.reaction_type_concept_id,
+              ${AUTOR_PUBLICO_COLUMNAS}
+         FROM community.reactions r
+         JOIN community.public_profiles pp ON pp.id = r.actor_profile_id
+        WHERE r.reactable_type_concept_id = ?
+          AND r.reactable_ref_id = ?
+          AND ${AUTOR_PUBLICO_SQL}
+          ${condicionCursor}
+        ORDER BY r.created_at DESC, r.id DESC
+        LIMIT ?`,
+      parametros,
+      'all',
+    );
+
+    return filas.map((fila) => ({
+      id: fila.id,
+      createdAt: new Date(fila.created_at),
+      reactionTypeConceptId: fila.reaction_type_concept_id,
+      authorSlug: fila.author_slug,
+      authorDisplayName: fila.author_display_name,
+      authorHeadline: fila.author_headline,
+      authorAvatarFileId: fila.author_avatar_file_id,
+      authorKindConceptId: fila.author_kind_concept_id,
+    }));
+  }
+
+  /**
+   * Los comentarios raíz de una publicación, del más viejo al más nuevo.
+   *
+   * Pagina sólo las raíces por lo mismo que `CommentsRepository.listRootsPage`:
+   * si la página contara también las respuestas, un hilo largo se comería el
+   * tope y las demás conversaciones no aparecerían nunca.
+   *
+   * El estado se compara **por igualdad con `STATE_ACTIVE`** y no con «distinto
+   * de removido», que es lo que hace el recuento del feed. La diferencia importa
+   * en una superficie anónima: un comentario restringido, o en un estado que el
+   * módulo todavía no declara, no se publica por omisión. El precio conocido es
+   * que el `commentCount` de `GET /public/posts` puede ser mayor que la cantidad
+   * de comentarios servidos acá — cuenta todo lo no removido, incluidos los de
+   * autores despublicados.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param postId - Publicación comentada.
+   * @param limit - Tope de raíces; se pide una de más para saber si hay página.
+   * @param after - Clave de continuación `(createdAt, id)`.
+   * @returns Los comentarios raíz de autores públicos, con su autor.
+   */
+  listPublicRootComments(
+    em: EntityManager,
+    postId: string,
+    limit: number,
+    after?: { createdAt: string; id: string },
+  ): Promise<PublicCommentRow[]> {
+    return this.listPublicComments(
+      em,
+      {
+        sql: `c.commentable_type_concept_id = ?
+          AND c.commentable_ref_id = ?
+          AND c.parent_comment_id IS NULL`,
+        params: [COMM.CONTENT_TYPE_POST, postId],
+      },
+      limit,
+      after,
+    );
+  }
+
+  /**
+   * Las respuestas directas de un comentario, del más viejo al más nuevo
+   * (AC-01-12, «Ver N respuestas»).
+   *
+   * Cuelga de `parent_comment_id` y no de `root_comment_id`: «las respuestas de
+   * este comentario» son las suyas, no las de todo el hilo al que pertenece.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param commentId - Comentario respondido.
+   * @param limit - Tope de respuestas; se pide una de más para saber si hay página.
+   * @param after - Clave de continuación `(createdAt, id)`.
+   * @returns Las respuestas de autores públicos, con su autor.
+   */
+  listPublicCommentReplies(
+    em: EntityManager,
+    commentId: string,
+    limit: number,
+    after?: { createdAt: string; id: string },
+  ): Promise<PublicCommentRow[]> {
+    return this.listPublicComments(
+      em,
+      { sql: 'c.parent_comment_id = ?', params: [commentId] },
+      limit,
+      after,
+    );
+  }
+
+  /**
+   * De qué publicación cuelga un comentario público, o `null`.
+   *
+   * Devuelve el sujeto y no el comentario entero porque lo único que el llamador
+   * puede hacer con él es comprobar la publicación: la visibilidad de un
+   * comentario es la de aquello que comenta, y preguntarla al revés —«¿es
+   * público este comentario?»— dejaría abierta la puerta de leer el hilo de un
+   * borrador conociendo el uuid de uno de sus comentarios.
+   *
+   * `null` también cuando el comentario cuelga de algo que no es una publicación
+   * (una reseña, por ejemplo): esta superficie sólo sabe de publicaciones.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param commentId - Comentario preguntado.
+   * @returns El id de la publicación comentada, o `null`.
+   */
+  async findPostOfPublicComment(
+    em: EntityManager,
+    commentId: string,
+  ): Promise<string | null> {
+    const filas = await em
+      .getConnection()
+      .execute<{ commentable_ref_id: string }[]>(
+        `SELECT c.commentable_ref_id
+         FROM community.comments c
+         JOIN community.public_profiles pp ON pp.id = c.author_profile_id
+        WHERE c.id = ?
+          AND c.commentable_type_concept_id = ?
+          AND c.status_concept_id = ?
+          AND ${AUTOR_PUBLICO_SQL}
+        LIMIT 1`,
+        [
+          commentId,
+          COMM.CONTENT_TYPE_POST,
+          CONCEPTS.STATE_ACTIVE,
+          ...AUTOR_PUBLICO_PARAMS,
+        ],
+        'all',
+      );
+    return filas[0]?.commentable_ref_id ?? null;
+  }
+
+  /**
+   * Los sujetos profesionales que declaran una especialidad vigente (AC-02-7).
+   *
+   * La especialidad vive en `profiles.practitioner_specialties` y no en el
+   * perfil público, así que se resuelve a sujetos primero y la búsqueda se acota
+   * a ésos — el mismo camino que `targetIdsByCity` hace con la ciudad, y por la
+   * misma razón: acotar después de paginar devuelve páginas de menos.
+   *
+   * Ninguno es la respuesta honesta a «filtrá por una especialidad que nadie
+   * declara»: dejar caer el filtro devolvería el directorio entero y le diría a
+   * quien filtró, sin decírselo, que todos ésos son cardiólogos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param specialtyConceptId - Concepto de `VS_MEDICAL_SPECIALTY`, ya validado.
+   * @returns Los `practitioner_profile_id` con esa especialidad vigente.
+   */
+  async practitionerIdsBySpecialty(
+    em: EntityManager,
+    specialtyConceptId: string,
+  ): Promise<string[]> {
+    const filas = await em
+      .getConnection()
+      .execute<{ practitioner_profile_id: string }[]>(
+        `SELECT DISTINCT ps.practitioner_profile_id
+           FROM profiles.practitioner_specialties ps
+          WHERE ps.specialty_concept_id = ?
+            AND (ps.valid_to IS NULL OR ps.valid_to >= CURRENT_DATE)
+          LIMIT ?`,
+        // El mismo tope holgado que el filtro de ciudad, y por lo mismo: que el
+        // `IN` no crezca sin límite en una especialidad muy poblada.
+        [specialtyConceptId, 5000],
+        'all',
+      );
+    return filas.map((fila) => fila.practitioner_profile_id);
+  }
+
+  /**
+   * El cuerpo compartido de las dos lecturas de comentarios públicos.
+   *
+   * Las raíces y las respuestas se diferencian en una línea del `WHERE` y en
+   * nada más: mismas columnas, mismo `JOIN` con la vitrina, mismo estado exigido
+   * y mismo keyset. Escribirlas dos veces serían dos oportunidades de que una de
+   * las dos olvidara el `JOIN`.
+   */
+  private async listPublicComments(
+    em: EntityManager,
+    alcance: { sql: string; params: unknown[] },
+    limit: number,
+    after?: { createdAt: string; id: string },
+  ): Promise<PublicCommentRow[]> {
+    const parametros: unknown[] = [
+      ...alcance.params,
+      CONCEPTS.STATE_ACTIVE,
+      ...AUTOR_PUBLICO_PARAMS,
+    ];
+    let condicionCursor = '';
+    if (after) {
+      condicionCursor = 'AND (c.created_at, c.id) > (?, ?)';
+      parametros.push(new Date(after.createdAt), after.id);
+    }
+    parametros.push(limit);
+
+    const filas = await em.getConnection().execute<
+      {
+        id: string;
+        body_text: string;
+        created_at: Date;
+        reply_count: number | null;
+        author_slug: string;
+        author_display_name: string;
+        author_headline: string | null;
+        author_avatar_file_id: string | null;
+        author_kind_concept_id: string;
+      }[]
+    >(
+      `SELECT c.id,
+              c.body_text,
+              c.created_at,
+              c.reply_count,
+              ${AUTOR_PUBLICO_COLUMNAS}
+         FROM community.comments c
+         JOIN community.public_profiles pp ON pp.id = c.author_profile_id
+        WHERE ${alcance.sql}
+          AND c.status_concept_id = ?
+          AND ${AUTOR_PUBLICO_SQL}
+          ${condicionCursor}
+        ORDER BY c.created_at ASC, c.id ASC
+        LIMIT ?`,
+      parametros,
+      'all',
+    );
+
+    const mediaByComment = await this.listPublicCommentMedia(
+      em,
+      filas.map((fila) => fila.id),
+    );
+
+    return filas.map((fila) => ({
+      id: fila.id,
+      bodyText: fila.body_text,
+      createdAt: new Date(fila.created_at),
+      replyCount: Number(fila.reply_count ?? 0),
+      authorSlug: fila.author_slug,
+      authorDisplayName: fila.author_display_name,
+      authorHeadline: fila.author_headline,
+      authorAvatarFileId: fila.author_avatar_file_id,
+      authorKindConceptId: fila.author_kind_concept_id,
+      media: mediaByComment.get(fila.id) ?? [],
+    }));
+  }
+
+  /**
+   * Adjuntos de un lote de comentarios públicos, agrupados por comentario
+   * (REQ-01-011).
+   *
+   * No hay `JOIN` con `pp`/`AUTOR_PUBLICO_SQL` acá: los `commentIds` ya
+   * salieron de `listPublicComments`, que sólo devolvió comentarios de
+   * autores públicos — repetir el filtro sería repetir un chequeo que la
+   * fila que lo pide ya pasó.
+   */
+  private async listPublicCommentMedia(
+    em: EntityManager,
+    commentIds: string[],
+  ): Promise<Map<string, PublicCommentMediaRow[]>> {
+    const byComment = new Map<string, PublicCommentMediaRow[]>();
+    if (commentIds.length === 0) return byComment;
+    const marcadores = commentIds.map(() => '?').join(', ');
+    const filas = await em.getConnection().execute<
+      {
+        comment_id: string;
+        file_id: string;
+        media_role_concept_id: string;
+        alt_text: string | null;
+      }[]
+    >(
+      `SELECT comment_id, file_id, media_role_concept_id, alt_text
+         FROM community.comment_media
+        WHERE comment_id IN (${marcadores})
+        ORDER BY ordinal ASC NULLS LAST, id ASC`,
+      commentIds,
+      'all',
+    );
+    for (const fila of filas) {
+      const lista = byComment.get(fila.comment_id) ?? [];
+      lista.push({
+        fileId: fila.file_id,
+        mediaRoleConceptId: fila.media_role_concept_id,
+        altText: fila.alt_text,
+      });
+      byComment.set(fila.comment_id, lista);
+    }
+    return byComment;
   }
 }

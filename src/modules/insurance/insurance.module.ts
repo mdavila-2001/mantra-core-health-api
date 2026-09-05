@@ -1,31 +1,37 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { PracticeModule } from '../practice/practice.module';
 import * as entities from './entities';
 import {
   InsuranceBackboneController,
   CoverageController,
   PriorAuthController,
   ClaimsController,
+  ClaimsReadController,
   AppealsController,
   ReconciliationController,
   BrokerCommissionController,
   InsuranceReadController,
+  InsuranceCatalogController,
 } from './controllers';
 import {
   InsuranceBackboneService,
   CoverageService,
   PriorAuthService,
   ClaimsService,
+  ClaimsReadService,
   AppealsService,
   ReconciliationService,
   BrokerCommissionService,
   InsuranceReadService,
+  InsuranceCatalogService,
 } from './services';
 import {
   CatalogRepository,
   CoverageRepository,
   PriorAuthRepository,
   ClaimRepository,
+  ClaimReadRepository,
   DisputeRepository,
   SettlementRepository,
   InsuranceReadRepository,
@@ -37,16 +43,26 @@ import {
  * conciliación y comisiones de broker. Repos stateless + servicios transaccionales.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // TAREA-16 — la lectura de solicitudes es la cara del prestador que las
+    // envió, y el reclamo cuelga de `billing_provider_entity_id`, que es una
+    // `practice.practices`. `PracticeModule` expone el puerto que traduce la
+    // organización activa a sus prácticas; sin él, `insurance` tendría que
+    // importar la entidad persistente de otro dominio.
+    PracticeModule,
+  ],
   controllers: [
     InsuranceBackboneController,
     CoverageController,
     PriorAuthController,
     ClaimsController,
+    ClaimsReadController,
     AppealsController,
     ReconciliationController,
     BrokerCommissionController,
     InsuranceReadController,
+    InsuranceCatalogController,
   ],
   providers: [
     // Repositorios
@@ -55,6 +71,7 @@ import {
     CoverageRepository,
     PriorAuthRepository,
     ClaimRepository,
+    ClaimReadRepository,
     DisputeRepository,
     SettlementRepository,
     // Servicios
@@ -62,13 +79,17 @@ import {
     CoverageService,
     PriorAuthService,
     ClaimsService,
+    ClaimsReadService,
     AppealsService,
     ReconciliationService,
     BrokerCommissionService,
     InsuranceReadService,
+    InsuranceCatalogService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.
-  exports: [CatalogRepository],
+  // `CoverageRepository` lo necesita iam: el alta de paciente anota en la misma
+  // transacción el seguro que la persona declara tener.
+  exports: [CatalogRepository, CoverageRepository],
 })
 export class InsuranceModule {}

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { Comments } from '../entities';
+import { CommentMedia, Comments } from '../entities';
 import { createdBy } from '../../../common';
 
 /**
@@ -46,6 +46,22 @@ export interface CreateCommentData {
   /**
    * Identificador asociado a actor user.
    */
+  actorUserId?: string;
+}
+
+/** Describe el contrato estructural de create comment media data. */
+export interface CreateCommentMediaData {
+  /** Comentario al que se adjunta. */
+  commentId: string;
+  /** Archivo ya subido (`common.files`). */
+  fileId: string;
+  /** Concepto del rol del medio (imagen, sticker, GIF). */
+  mediaRoleConceptId: string;
+  /** Texto alternativo, si se aportó. */
+  altText?: string;
+  /** Orden de despliegue dentro del comentario. */
+  ordinal?: number;
+  /** Quién subió el adjunto. */
   actorUserId?: string;
 }
 
@@ -197,6 +213,73 @@ export class CommentsRepository {
         isEdited: false,
         statusConceptId: data.statusConceptId,
         ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
+  }
+
+  /**
+   * Adjuntos de un conjunto de comentarios, en orden de despliegue
+   * (REQ-01-011).
+   *
+   * Se pide por lote y no comentario por comentario: una página del hilo trae
+   * raíces y respuestas juntas, y resolver los medios uno por uno sería un N+1
+   * por cada comentario con foto.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param commentIds - Comentarios cuyos adjuntos se quieren.
+   * @returns Los adjuntos de esos comentarios, del más antiguo al más nuevo.
+   */
+  listMediaForComments(
+    em: EntityManager,
+    commentIds: string[],
+  ): Promise<CommentMedia[]> {
+    if (commentIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      CommentMedia,
+      { commentId: { $in: commentIds } },
+      { orderBy: { ordinal: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
+   * El adjunto que apunta a un archivo, si alguno.
+   *
+   * Punto de entrada de `GET /community/comments/media/:fileId/content`
+   * (FND-01): a quien pide los bytes con sesión no le alcanza con el `fileId`
+   * solo —no dice de qué post es el comentario, que es lo que decide si el
+   * lector puede verlo—, así que primero hay que volver de `fileId` a
+   * `commentId`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fileId - Archivo del que se pide el adjunto.
+   * @returns El adjunto, o `null` si ese archivo no es un adjunto de comentario.
+   */
+  findMediaByFileId(
+    em: EntityManager,
+    fileId: string,
+  ): Promise<CommentMedia | null> {
+    return em.findOne(CommentMedia, { fileId });
+  }
+
+  /**
+   * Crea create media.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create media conforme al contrato `CommentMedia`.
+   */
+  createMedia(em: EntityManager, data: CreateCommentMediaData): CommentMedia {
+    return em.create(
+      CommentMedia,
+      {
+        commentId: data.commentId,
+        fileId: data.fileId,
+        mediaRoleConceptId: data.mediaRoleConceptId,
+        altText: data.altText,
+        ordinal: data.ordinal,
+        createdAt: new Date(),
+        createdByUserId: data.actorUserId,
       },
       { partial: true },
     );

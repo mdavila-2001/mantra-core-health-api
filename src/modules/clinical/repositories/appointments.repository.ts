@@ -33,6 +33,13 @@ export interface CreateAppointmentData {
    */
   reasonText?: string;
   /**
+   * Por qué medio ocurre la atención: presencial, teleconsulta o domicilio.
+   *
+   * Ausente deja la columna en NULL, que se lee como presencial —lo que fueron
+   * todas las citas hasta que existió este conjunto—.
+   */
+  channelConceptId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -73,6 +80,7 @@ export class AppointmentsRepository {
         startAt: data.startAt,
         endAt: data.endAt,
         reasonText: data.reasonText,
+        channelConceptId: data.channelConceptId,
         createdAt: ahora,
         updatedAt: ahora,
         createdByUserId: data.actorUserId,
@@ -91,5 +99,35 @@ export class AppointmentsRepository {
    */
   findById(em: EntityManager, id: string): Promise<Appointments | null> {
     return em.findOne(Appointments, { id });
+  }
+
+  /**
+   * La tipología de un lote de citas, indexada por su id.
+   *
+   * En lote y no una por una: la agenda proyecta hasta cien citas por página y
+   * pedir el tipo de cada una convertiría un listado en cien consultas más. Es
+   * el mismo criterio con el que la agenda ya carga motivos, demoras y nombres.
+   *
+   * Devuelve **sólo** las que declaran tipo: una cita sin `type_concept_id` no
+   * aparece en el mapa, y quien lo consulta distingue «no lo declaró» de «no
+   * existe la cita» por su cuenta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Citas cuya tipología se necesita.
+   * @returns Mapa `appointmentId` → `type_concept_id`.
+   */
+  async findTypesByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Map<string, string>> {
+    const mapa = new Map<string, string>();
+    if (ids.length === 0) return mapa;
+    const citas = await em.find(Appointments, { id: { $in: [...ids] } });
+    for (const cita of citas) {
+      if (cita.typeConceptId != null) {
+        mapa.set(cita.id, cita.typeConceptId);
+      }
+    }
+    return mapa;
   }
 }

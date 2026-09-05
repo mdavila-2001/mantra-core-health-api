@@ -12,6 +12,10 @@ import {
   PersonProfiles,
   Persons,
 } from '../../profiles/entities';
+import {
+  AuthenticationCredentials,
+  EmailVerifications,
+} from '../../iam/entities';
 import { PROF } from '../../profiles/profiles.concepts';
 
 /**
@@ -37,6 +41,19 @@ export interface BookingNoticeSnapshot {
   readonly endAt?: Date;
   /** Cómo se llama la agenda: el profesional, si el recurso es de uno. */
   readonly resourceLabel: string;
+  /**
+   * Dónde se atiende, si el recurso declara sede.
+   *
+   * El propietario pide el aviso «en tal horario **en tal lugar**». Hasta acá
+   * el horario estaba y el lugar no, y el comentario de `agenda-notices.ts`
+   * decía que faltaba exponer la sede en la lectura de agenda. **Ya está
+   * expuesta** —`ResourceSiteDto` en el listado de recursos—, así que lo único
+   * que faltaba era traerla también acá.
+   *
+   * `undefined` es corriente y no es un error: un recurso sin sede declarada
+   * existe, y el aviso se manda igual sin esa frase.
+   */
+  readonly siteLabel?: string;
 }
 
 /** Lo que un aviso necesita saber de un cupo liberado. */
@@ -129,6 +146,52 @@ export class SchedulingNoticeRepository {
     return profile?.personId ?? null;
   }
 
+  /**
+   * A qué dirección se le puede escribir a una cuenta.
+   *
+   * El correo de agenda necesita una dirección concreta: el canal `EMAIL` de
+   * mensajería exige `recipientAddress` porque el proveedor externo no sabe
+   * resolver un `userId`. Este proyecto guarda esa dirección en dos lugares y
+   * ninguno se llama «email»:
+   *
+   * 1. `iam.authentication_credentials.external_subject`, cuando la persona
+   *    entra con su correo. Quien entra con su cédula **no** tiene correo ahí,
+   *    y por eso no alcanza con mirar sólo esta tabla.
+   * 2. `iam.email_verifications.email`, que es el que declaró en el alta.
+   *
+   * Es el mismo orden que ya usa `IamEmailVerificationService` para decidir a
+   * dónde reenviar la verificación; se replica acá en vez de exportarlo para no
+   * acoplar `scheduling` a un servicio de `iam`, que arrastraría su módulo
+   * entero.
+   *
+   * Devuelve `null` cuando la cuenta no declaró correo en ninguno de los dos:
+   * no es un error, es un aviso que sale sólo por la campana.
+   *
+   * @param em - Contexto de persistencia.
+   * @param userId - Cuenta destinataria del aviso.
+   */
+  async findEmailForUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string | null> {
+    const credentials = await em.find(AuthenticationCredentials, { userId });
+    const porCredencial = credentials
+      .map((credential) => credential.externalSubject)
+      .find(
+        (subject): subject is string =>
+          typeof subject === 'string' && subject.includes('@'),
+      );
+    if (porCredencial !== undefined) return porCredencial.trim();
+
+    const verification = await em.findOne(
+      EmailVerifications,
+      { userId },
+      { orderBy: { createdAt: 'desc' } },
+    );
+    const declarado = verification?.email?.trim();
+    return declarado === undefined || declarado === '' ? null : declarado;
+  }
+
   /** Cómo se llama la persona de un perfil, para nombrarla en el aviso. */
   async findDisplayNameForProfile(
     em: EntityManager,
@@ -167,6 +230,7 @@ export class SchedulingNoticeRepository {
       ...(slot?.startAt === undefined ? {} : { startAt: slot.startAt }),
       ...(slot?.endAt === undefined ? {} : { endAt: slot.endAt }),
       resourceLabel: await this.describeResource(em, resourceId),
+      ...(await this.describeSite(em, resourceId)),
     };
   }
 
@@ -193,6 +257,34 @@ export class SchedulingNoticeRepository {
    * profesional; con el nombre del propio recurso —una sala, un equipo— si no.
    * Nunca con el uuid: un aviso que dice un identificador no dice nada.
    */
+  /**
+   * El nombre de la sede del recurso, listo para meter en una frase.
+   *
+   * Devuelve un objeto para poder **omitir la clave** cuando no hay sede, en
+   * vez de mandar `undefined`: el aviso distingue «no tiene sede» de «no se
+   * pudo leer», y una cadena vacía borraría esa diferencia.
+   */
+  private async describeSite(
+    em: EntityManager,
+    resourceId: string | undefined,
+  ): Promise<{ siteLabel?: string }> {
+    if (resourceId === undefined) return {};
+    const resource = await em.findOne(SchedulableResources, { id: resourceId });
+    if (!resource?.practiceId) return {};
+
+    const filas = await em
+      .getConnection()
+      .execute<{ name: string }[]>(
+        `SELECT name FROM practice.practices WHERE id = ? LIMIT 1`,
+        [resource.practiceId],
+      );
+
+    const nombre = filas[0]?.name;
+    return nombre === undefined || nombre.trim() === ''
+      ? {}
+      : { siteLabel: nombre };
+  }
+
   async describeResource(
     em: EntityManager,
     resourceId: string | undefined,

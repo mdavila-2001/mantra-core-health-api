@@ -1,6 +1,49 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { IdentityAssertions } from '../entities';
+import { IDA } from '../identity_assurance.concepts';
+
+/** Sujetos cuya aserción prueba la identidad de una persona. */
+const PERSON_SUBJECT_TYPES = [
+  IDA.SUBJECT_PATIENT_IDENTITY,
+  IDA.SUBJECT_PRACTITIONER_IDENTITY,
+];
+
+/**
+ * Aserción de identidad vigente de una persona: emitida sobre ella como sujeto,
+ * no revocada, y sin caducidad o con una caducidad todavía futura.
+ *
+ * Es **el** predicado de «identidad verificada» del sistema, y está aquí suelto
+ * a propósito. Lo consultan dos consumidores que no comparten módulo — el guard
+ * transversal `VerifiedIdentityGuard` (`common/auth`) y el resumen propio del
+ * paciente (`profiles`) — y ninguno de los dos puede inyectar
+ * `IdentityAssertionsRepository` sin reordenar módulos: el guard vive en un
+ * módulo global que se carga antes que los de dominio, y `profiles` es el módulo
+ * que `identity_assurance` importa, así que inyectarlo cerraría el ciclo. Una
+ * función que recibe el `EntityManager` no necesita contenedor de DI, y dos
+ * copias del mismo `$or` se separan solas con el tiempo.
+ *
+ * La vigencia se resuelve contra el reloj de cada llamada, no contra un valor
+ * cacheado: una aserción revocada por fraude tiene que cerrar el acceso en la
+ * petición siguiente.
+ *
+ * @param em - Contexto de persistencia o transacción activa.
+ * @param personId - Identificador de la persona sujeto de la aserción.
+ * @returns La aserción vigente, o `null` si la persona no tiene ninguna.
+ */
+export function findCurrentIdentityAssertionForPerson(
+  em: EntityManager,
+  personId: string,
+): Promise<IdentityAssertions | null> {
+  const now = new Date();
+  return em.findOne(IdentityAssertions, {
+    subjectTypeConceptId: { $in: PERSON_SUBJECT_TYPES },
+    subjectEntityId: personId,
+    revokedAt: null,
+    // Una aserción sin caducidad no expira; con caducidad, debe estar vigente.
+    $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }],
+  });
+}
 
 /** Emisión inmutable de una aserción de identidad (UC-27-10). */
 export interface CreateAssertionData {
@@ -58,6 +101,24 @@ export class IdentityAssertionsRepository {
    */
   findById(em: EntityManager, id: string): Promise<IdentityAssertions | null> {
     return em.findOne(IdentityAssertions, { id });
+  }
+
+  /**
+   * Obtiene la aserción de identidad vigente de una persona.
+   *
+   * Delega en `findCurrentIdentityAssertionForPerson`, que es la misma consulta
+   * que usan los consumidores de fuera del módulo; este método es la puerta para
+   * quien sí puede inyectar el repositorio.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param personId - Identificador de la persona sujeto de la aserción.
+   * @returns La aserción vigente, o `null` si la persona no tiene ninguna.
+   */
+  findCurrentForPerson(
+    em: EntityManager,
+    personId: string,
+  ): Promise<IdentityAssertions | null> {
+    return findCurrentIdentityAssertionForPerson(em, personId);
   }
 
   /**

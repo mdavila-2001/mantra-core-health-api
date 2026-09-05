@@ -20,6 +20,14 @@ import {
   type AdministrativeGenderCode,
   type BirthSexCode,
 } from '../../profiles/profiles.concepts';
+import { OCCUPATION_FREE_TEXT_MAX_LENGTH } from './register-patient.dto';
+
+/** Formato aceptado por los cuatro campos telefónicos del alta. */
+const PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;
+
+/** Mensaje único para los cuatro campos telefónicos del alta. */
+const PHONE_PATTERN_MESSAGE =
+  'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion';
 
 /**
  * Cuerpo de `POST /iam/auth/register-practitioner`.
@@ -36,16 +44,34 @@ import {
  */
 export class RegisterPractitionerDto {
   /**
-   * Correo con el que el profesional iniciará sesión.
+   * Correo de trabajo, con el que el profesional iniciará sesión.
+   *
+   * Es el **correo de trabajo** y a la vez la identidad de login: así se venía
+   * grabando ya (`CONTACT_USE_WORK`) y así lo confirmó el propietario al pedir
+   * los dos correos separados. El personal viaja en {@link personalEmail} y no
+   * sirve para entrar.
    */
   @ApiProperty({
-    description: 'Correo que actúa como identidad de login',
+    description: 'Correo de trabajo; es la identidad de login del profesional',
     format: 'email',
     maxLength: 320,
   })
   @IsEmail()
   @MaxLength(320)
   email!: string;
+
+  /**
+   * Correo personal, distinto del de trabajo con el que se entra.
+   */
+  @ApiPropertyOptional({
+    description: 'Correo personal; no sirve para iniciar sesión',
+    format: 'email',
+    maxLength: 320,
+  })
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(320)
+  personalEmail?: string;
 
   /**
    * Contraseña en claro; se persiste sólo su hash argon2id.
@@ -130,15 +156,45 @@ export class RegisterPractitionerDto {
 
   /**
    * Número del título o credencial que respalda la licencia.
+   *
+   * Dejó de ser obligatorio. Era el único lugar donde entraba el «segundo
+   * número» del alta y por eso terminaba recibiendo lo que no era un título:
+   * el registro del SEDES viajaba acá y se archivaba como
+   * `CREDENTIAL_TYPE_DEGREE`, así que el perfil lo mostraba como «Título
+   * universitario». Para eso está ahora {@link sedesLicenseNumber}; este campo
+   * queda para lo que su nombre dice —un título de grado— y sigue aceptándose
+   * para no romper a quien ya integró contra este endpoint.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Número del título profesional que respalda la licencia',
     maxLength: 100,
   })
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(100)
-  credentialNumber!: string;
+  credentialNumber?: string;
+
+  /**
+   * Registro departamental del SEDES — el «T.I. 538/14» del padrón.
+   *
+   * Es una **habilitación**, no formación: el SEDES autoriza a ejercer en su
+   * departamento igual que la matrícula del Ministerio autoriza en todo el
+   * país. Por eso nace como una segunda fila de
+   * `profiles.jurisdiction_authorizations` con jurisdicción
+   * `JURISDICTION_SEDES_SANTA_CRUZ`, y el perfil la muestra al lado de la
+   * matrícula nacional en vez de enterrarla en «Formación».
+   */
+  @ApiPropertyOptional({
+    description: 'Número de registro del SEDES departamental',
+    maxLength: 100,
+    example: 'T.I. 538/14',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  sedesLicenseNumber?: string;
 
   /**
    * Autoridad que emitió la licencia (colegio, ministerio, junta).
@@ -173,6 +229,32 @@ export class RegisterPractitionerDto {
   @IsString()
   @MaxLength(100)
   professionalTitle?: string;
+
+  /**
+   * Las especialidades que declara, elegidas EN el alta.
+   *
+   * El registro del cliente lo pide así (módulo Médico §1.4.2: «3 espacios
+   * adicionales a la profesión»), y hasta acá el alta no las aceptaba: la
+   * pantalla decía «se elige después, desde el perfil» y la mayoría no volvía —
+   * la Guía mostraba profesionales sin especialidad. La primera de la lista
+   * queda como principal, igual que en el alta administrativa.
+   *
+   * Cada uuid se valida contra `VS_MEDICAL_SPECIALTY` dentro de la transacción:
+   * la FK acepta cualquier concepto del catálogo, y quién decide cuáles son
+   * especialidades es el value set, no el formato.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Especialidades declaradas (hasta 3). La primera queda como principal.',
+    type: [String],
+    format: 'uuid',
+    maxItems: 3,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  @IsUUID(undefined, { each: true })
+  specialtyConceptIds?: string[];
 
   /**
    * Documento de identidad. Opcional: se guarda como identificador oficial de
@@ -235,19 +317,65 @@ export class RegisterPractitionerDto {
   residenceMunicipalityConceptId?: string;
 
   /**
-   * Teléfono de contacto profesional.
+   * Forma anterior de declarar el teléfono del trabajo.
+   *
+   * Dejó de ser la única forma de declarar un teléfono —ahora son tres campos
+   * separados— pero sigue siendo opcional en vez de prohibido: quitarlo de golpe
+   * rompería a todo cliente que ya integró contra este endpoint. Se sigue
+   * guardando donde siempre (`PHONE` con uso de trabajo), que es el lugar de
+   * {@link workLandline}: reinterpretarlo como celular cambiaría el significado
+   * de las filas ya escritas. Si llegan los dos, manda el campo nuevo.
    */
   @ApiPropertyOptional({
-    description: 'Teléfono de contacto en formato E.164 o nacional',
+    description:
+      'Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone.',
+    maxLength: 40,
+    deprecated: true,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
+  phone?: string;
+
+  /**
+   * Celular personal o privado del profesional.
+   */
+  @ApiPropertyOptional({
+    description: 'Celular personal en formato E.164 o nacional',
     maxLength: 40,
   })
   @IsOptional()
   @IsString()
   @MaxLength(40)
-  @Matches(/^[+]?[0-9 ()-]{6,}$/, {
-    message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
+  mobilePhone?: string;
+
+  /**
+   * Celular del lugar de trabajo.
+   */
+  @ApiPropertyOptional({
+    description: 'Celular de trabajo en formato E.164 o nacional',
+    maxLength: 40,
   })
-  phone?: string;
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
+  workMobilePhone?: string;
+
+  /**
+   * Teléfono fijo del lugar de trabajo.
+   */
+  @ApiPropertyOptional({
+    description: 'Teléfono fijo del lugar de trabajo',
+    maxLength: 40,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
+  workLandline?: string;
 
   /**
    * Fecha de nacimiento en ISO-8601.
@@ -322,6 +450,30 @@ export class RegisterPractitionerDto {
   acceptsNewPatients?: boolean;
 
   /**
+   * Ocupación del catálogo (VS_BO_OCCUPATION).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Ocupación del catálogo (VS_BO_OCCUPATION)',
+  })
+  @IsOptional()
+  @IsUUID()
+  occupationConceptId?: string;
+
+  /**
+   * Ocupación en texto libre, para cuando no está en el catálogo. Se ignora
+   * si viene `occupationConceptId`.
+   */
+  @ApiPropertyOptional({
+    maxLength: OCCUPATION_FREE_TEXT_MAX_LENGTH,
+    description: 'Ocupación en texto libre, para cuando no está en el catálogo',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)
+  occupationFreeText?: string;
+
+  /**
    * Zona horaria IANA.
    */
   @ApiPropertyOptional({ maxLength: 100 })
@@ -329,6 +481,16 @@ export class RegisterPractitionerDto {
   @IsString()
   @MaxLength(100)
   timeZone?: string;
+
+  /**
+   * Foto de perfil en formato Base64 (Data URI o base64 plano).
+   */
+  @ApiPropertyOptional({
+    description: 'Foto de perfil en formato Base64 (Data URI o base64 plano)',
+  })
+  @IsOptional()
+  @IsString()
+  profilePhotoBase64?: string;
 }
 
 /** Resultado del auto-registro de un profesional de salud. */
@@ -371,9 +533,22 @@ export class RegisterPractitionerResponseDto {
    * ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no
    * expone ningún listado de credenciales. La verificación quedaba fuera de
    * alcance salvo consultando la base de datos a mano.
+   *
+   * Ausente cuando el alta no declara `credentialNumber`, que dejó de ser
+   * obligatorio: sin credencial no hay id que devolver.
    */
-  @ApiProperty({ format: 'uuid' })
-  credentialId!: string;
+  @ApiPropertyOptional({ format: 'uuid' })
+  credentialId?: string;
+
+  /**
+   * Autorización del SEDES creada, pendiente de verificación.
+   *
+   * El equivalente de {@link credentialId} para la habilitación departamental:
+   * se devuelve para poder verificarla por id sin consultar la base. Ausente
+   * cuando el alta no declara `sedesLicenseNumber`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  sedesLicenseId?: string;
 
   /**
    * Estado de verificación del perfil al terminar el alta. Siempre PENDING:
@@ -387,6 +562,12 @@ export class RegisterPractitionerResponseDto {
    */
   @ApiProperty()
   emailVerificationSent!: boolean;
+
+  /**
+   * Identificador del archivo de foto de perfil (FK → common.files), si se subió.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  photoFileId?: string;
 }
 
 /**

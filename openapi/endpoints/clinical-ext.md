@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `clinical_ext`
 
-Referencia exhaustiva de 23 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 26 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters`
-- **Controladores:** `CareGapsController`, `CareTeamsController`, `CdsController`, `ClinicalAlertsController`, `OrderSetsController`, `ReferralsController`, `VirtualEncountersController`
+- **Etiquetas OpenAPI:** `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters`
+- **Controladores:** `CareGapsController`, `CareTeamsController`, `CdsController`, `ClinicalAlertsController`, `OrderSetsController`, `PrescriptionFavoritesController`, `ReferralsController`, `VirtualEncountersController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -28,12 +28,15 @@ Referencia exhaustiva de 23 operación(es) del módulo `clinical_ext`, derivada 
 15. [POST /order-sets](#15-post-order-sets) — Crear una plantilla de órdenes (order set) con sus ítems
 16. [POST /order-sets/{id}/apply](#16-post-order-sets-id-apply) — Aplicar un order set (fan-out de órdenes)
 17. [POST /patients/{id}/immunization-plan/project](#17-post-patients-id-immunization-plan-project) — Proyectar el plan de inmunización y abrir brechas
-18. [GET /referrals](#18-get-referrals) — Listar derivaciones de un paciente
-19. [POST /referrals](#19-post-referrals) — Emitir una referencia desde un encuentro
-20. [PATCH /referrals/{id}/respond](#20-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
-21. [POST /virtual-encounters](#21-post-virtual-encounters) — Iniciar una sesión de telesalud
-22. [PATCH /virtual-encounters/{id}/end](#22-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
-23. [PATCH /virtual-encounters/{id}/join](#23-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
+18. [GET /prescription-favorites](#18-get-prescription-favorites) — Listar mis favoritos de prescripción
+19. [POST /prescription-favorites](#19-post-prescription-favorites) — Guardar un favorito de prescripción
+20. [DELETE /prescription-favorites/{id}](#20-delete-prescription-favorites-id) — Borrar un favorito de prescripción propio
+21. [GET /referrals](#21-get-referrals) — Listar derivaciones de un paciente
+22. [POST /referrals](#22-post-referrals) — Emitir una referencia desde un encuentro
+23. [PATCH /referrals/{id}/respond](#23-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
+24. [POST /virtual-encounters](#24-post-virtual-encounters) — Iniciar una sesión de telesalud
+25. [PATCH /virtual-encounters/{id}/end](#25-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
+26. [PATCH /virtual-encounters/{id}/join](#26-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
 
 ---
 
@@ -2315,7 +2318,373 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /referrals
+## 18. GET /prescription-favorites
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-prescription-favorites`
+- **Nombre:** Listar mis favoritos de prescripción
+- **Operation ID:** `PrescriptionFavoritesController_listOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrescriptionFavoritesController.listOwn](../../src/modules/clinical_ext/controllers/prescription-favorites.controller.ts)
+
+### Descripción de negocio
+
+Devuelve la lista completa del profesional de la sesión, ordenada por rótulo: es una lista personal y corta que el cliente consume entera.
+
+Contexto declarado en el controlador: La lista personal completa, ordenada por rótulo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /prescription-favorites` en `PrescriptionFavoritesController_listOwn`. El controlador delega en `PrescriptionFavoritesService.listOwn`. No recibe body. El tipo de retorno estático es `Promise<PrescriptionFavoriteResponseDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /prescription-favorites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /prescription-favorites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PrescriptionFavoriteResponseDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PrescriptionFavoriteResponseDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PrescriptionFavoriteResponseDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PrescriptionFavoriteResponseDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PrescriptionFavoriteResponseDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PrescriptionFavoriteResponseDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionFavoriteResponseDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo",
+    "medicationConceptId": "00000000-0000-4000-8000-000000000001",
+    "substanceAtcConceptId": "00000000-0000-4000-8000-000000000001",
+    "doseText": "valor-ejemplo",
+    "routeConceptId": "00000000-0000-4000-8000-000000000001",
+    "frequencyText": "valor-ejemplo",
+    "quantityDecimal": "valor-ejemplo",
+    "unitConceptId": "00000000-0000-4000-8000-000000000001",
+    "patientInstructionsText": "valor-ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/prescription-favorites"
+}
+```
+
+---
+
+## 19. POST /prescription-favorites
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-prescription-favorites`
+- **Nombre:** Guardar un favorito de prescripción
+- **Operation ID:** `PrescriptionFavoritesController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrescriptionFavoritesController.create](../../src/modules/clinical_ext/controllers/prescription-favorites.controller.ts)
+
+### Descripción de negocio
+
+Guardar un favorito de prescripción. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Guarda una indicación repetida como favorito.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /prescription-favorites` en `PrescriptionFavoritesController_create`. El controlador delega en `PrescriptionFavoritesService.create`. Valida el body como `CreatePrescriptionFavoriteDto` y consume `application/json`. El tipo de retorno estático es `Promise<PrescriptionFavoriteResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreatePrescriptionFavoriteDto`; los campos opcionales se omiten.
+
+```http
+POST /prescription-favorites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "medicationConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 1; longitud máxima 120 | Rótulo del favorito, único dentro de la lista del profesional (p. ej. «ATB post extracción») | `Nombre de ejemplo` |
+| `medicationConceptId` | Sí | `string` | formato `uuid` | Medicamento codificado (terminology.catalog_concepts) | `00000000-0000-4000-8000-000000000001` |
+| `substanceAtcConceptId` | No | `string` | formato `uuid` | Principio activo ATC | `00000000-0000-4000-8000-000000000001` |
+| `doseText` | No | `string` | Sin restricción adicional declarada | Posología por defecto | `valor-ejemplo` |
+| `routeConceptId` | No | `string` | formato `uuid` | Vía de administración por defecto | `00000000-0000-4000-8000-000000000001` |
+| `frequencyText` | No | `string` | Sin restricción adicional declarada | Frecuencia por defecto | `valor-ejemplo` |
+| `quantityDecimal` | No | `number` | Sin restricción adicional declarada | Cantidad por defecto | `1` |
+| `unitConceptId` | No | `string` | formato `uuid` | Unidad de la cantidad | `00000000-0000-4000-8000-000000000001` |
+| `patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente por defecto, separadas de la posología | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /prescription-favorites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "medicationConceptId": "00000000-0000-4000-8000-000000000001",
+  "substanceAtcConceptId": "00000000-0000-4000-8000-000000000001",
+  "doseText": "valor-ejemplo",
+  "routeConceptId": "00000000-0000-4000-8000-000000000001",
+  "frequencyText": "valor-ejemplo",
+  "quantityDecimal": 1,
+  "unitConceptId": "00000000-0000-4000-8000-000000000001",
+  "patientInstructionsText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PrescriptionFavoriteResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PrescriptionFavoriteResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PrescriptionFavoriteResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PrescriptionFavoriteResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PrescriptionFavoriteResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PrescriptionFavoriteResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PrescriptionFavoriteResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PrescriptionFavoriteResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PrescriptionFavoriteResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionFavoriteResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "name": "Nombre de ejemplo",
+  "medicationConceptId": "00000000-0000-4000-8000-000000000001",
+  "substanceAtcConceptId": "00000000-0000-4000-8000-000000000001",
+  "doseText": "valor-ejemplo",
+  "routeConceptId": "00000000-0000-4000-8000-000000000001",
+  "frequencyText": "valor-ejemplo",
+  "quantityDecimal": "valor-ejemplo",
+  "unitConceptId": "00000000-0000-4000-8000-000000000001",
+  "patientInstructionsText": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Rótulo del favorito. | `Nombre de ejemplo` |
+| `medicationConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a medication concept. | `00000000-0000-4000-8000-000000000001` |
+| `substanceAtcConceptId` | No | `string` | formato `uuid` | Identificador asociado a substance atc concept. | `00000000-0000-4000-8000-000000000001` |
+| `doseText` | No | `string` | Sin restricción adicional declarada | Posología por defecto. | `valor-ejemplo` |
+| `routeConceptId` | No | `string` | formato `uuid` | Identificador asociado a route concept. | `00000000-0000-4000-8000-000000000001` |
+| `frequencyText` | No | `string` | Sin restricción adicional declarada | Frecuencia por defecto. | `valor-ejemplo` |
+| `quantityDecimal` | No | `string` | Sin restricción adicional declarada | Cantidad por defecto. | `valor-ejemplo` |
+| `unitConceptId` | No | `string` | formato `uuid` | Identificador asociado a unit concept. | `00000000-0000-4000-8000-000000000001` |
+| `patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente por defecto. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 409 | `CONFLICT` | Ya tenés un favorito con ese nombre | Excepción explícita en src/modules/clinical_ext/services/prescription-favorites.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La lista de favoritos llegó a su máximo; borrá alguno antes de guardar otro | Excepción explícita en src/modules/clinical_ext/services/prescription-favorites.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/prescription-favorites"
+}
+```
+
+---
+
+## 20. DELETE /prescription-favorites/{id}
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-prescription-favorites`
+- **Nombre:** Borrar un favorito de prescripción propio
+- **Operation ID:** `PrescriptionFavoritesController_remove`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrescriptionFavoritesController.remove](../../src/modules/clinical_ext/controllers/prescription-favorites.controller.ts)
+
+### Descripción de negocio
+
+Borrar un favorito de prescripción propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Borra un favorito propio.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /prescription-favorites/{id}` en `PrescriptionFavoritesController_remove`. El controlador delega en `PrescriptionFavoritesService.remove`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /prescription-favorites/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /prescription-favorites/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Favorito no encontrado | Excepción explícita en src/modules/clinical_ext/services/prescription-favorites.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/prescription-favorites/{id}"
+}
+```
+
+---
+
+## 21. GET /referrals
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -2408,7 +2777,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /referrals
+## 22. POST /referrals
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -2550,7 +2919,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. PATCH /referrals/{id}/respond
+## 23. PATCH /referrals/{id}/respond
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -2675,7 +3044,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /virtual-encounters
+## 24. POST /virtual-encounters
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -2806,7 +3175,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. PATCH /virtual-encounters/{id}/end
+## 25. PATCH /virtual-encounters/{id}/end
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -2934,7 +3303,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. PATCH /virtual-encounters/{id}/join
+## 26. PATCH /virtual-encounters/{id}/join
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`

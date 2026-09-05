@@ -95,6 +95,10 @@ function build() {
     findProductsByIds: mockFn(async () => [PRODUCTO]),
     findConceptsByIds: mockFn(async () => []),
     findOwnMedicationRequest: mockFn(async () => null),
+    findPrescriberProfileId: mockFn(async () => null),
+    findPersonNamesByProfileIds: mockFn(async () => new Map()),
+    findPharmaciesByTenant: mockFn(async () => [FARMACIA]),
+    findOrdersForPharmacies: mockFn(async () => []),
   };
   const reservationsRepo = {
     create: mockFn(() => ({
@@ -115,13 +119,34 @@ function build() {
     ]),
     findStockPositions: mockFn(async () => []),
   };
+  const dispensationsRepo = {
+    findByIdempotencyKey: mockFn(async () => null),
+    create: mockFn(() => ({ id: 'disp-1' })),
+    createLine: mockFn(() => ({ id: 'dline-1' })),
+  };
+  const substitutionsRepo = {
+    findByReservationIds: mockFn(async () => []),
+    create: mockFn(() => ({ id: 'sub-1' })),
+  };
   const pharmacyRepo = {
     findActiveSiteById: mockFn(async () => SEDE),
     findVisibleById: mockFn(async () => FARMACIA),
     findActiveProductsByIds: mockFn(async () => [PRODUCTO]),
+    findCurrentPublicPriceLists: mockFn(async () => []),
+    findCurrentPrices: mockFn(async () => []),
   };
   const reservationsService = { releaseConfirmedLines: mockFn(async () => 1) };
   const outbox = { publishDomainEvent: mockFn(async () => ({})) };
+  const orderNotifications = {
+    orderUnderReview: mockFn(async () => ({ suppressed: false })),
+    orderConfirmed: mockFn(async () => ({ suppressed: false })),
+    orderReady: mockFn(async () => ({ suppressed: false })),
+    orderRejected: mockFn(async () => ({ suppressed: false })),
+    substitutionsProposed: mockFn(async () => ({ suppressed: false })),
+    orderExpired: mockFn(async () => ({ suppressed: false })),
+    expiredToPrescriber: mockFn(async () => ({ suppressed: false })),
+    dispensedToPrescriber: mockFn(async () => ({ suppressed: false })),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new PharmacyOrdersService(
     em as any,
@@ -130,9 +155,12 @@ function build() {
     stockRepo as any,
     ledgerRepo as any,
     inventoryReadRepo as any,
+    dispensationsRepo as any,
+    substitutionsRepo as any,
     pharmacyRepo as any,
     reservationsService as any,
     outbox as any,
+    orderNotifications as any,
     logger as any,
   );
   return {
@@ -145,9 +173,12 @@ function build() {
     stockRepo,
     ledgerRepo,
     inventoryReadRepo,
+    dispensationsRepo,
+    substitutionsRepo,
     pharmacyRepo,
     reservationsService,
     outbox,
+    orderNotifications,
   };
 }
 
@@ -337,6 +368,141 @@ describe('PharmacyOrdersService', () => {
     });
   });
 
+  describe('create · precios congelados (v4.2.1)', () => {
+    it('freezes the line price and the header total at creation time', async () => {
+      const d = build();
+      d.pharmacyRepo.findCurrentPublicPriceLists.mockResolvedValue([
+        {
+          id: 'list-1',
+          pharmacyId: 'ph-1',
+          pharmacySiteId: null,
+          currencyConceptId: 'cur-bob',
+          code: 'PUBLICA',
+        },
+      ]);
+      d.pharmacyRepo.findCurrentPrices.mockResolvedValue([
+        {
+          pharmacyProductId: 'prod-1',
+          pharmacyPriceListId: 'list-1',
+          unitAmount: '68.00',
+          patientAmount: null,
+        },
+      ]);
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([posicion()]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(posicion());
+      conLectura(d, pedido(), [
+        {
+          inventoryReservationId: 'order-1',
+          pharmacyProductId: 'prod-1',
+          requestedQuantity: '3',
+          reservedQuantity: '3',
+          statusConceptId: PINV.RES_LINE_CONFIRMED,
+          unitPriceAmount: '68.00',
+          currencyConceptId: 'cur-bob',
+        },
+      ]);
+
+      await runWithTenant('tenant-a', () =>
+        d.service.create(
+          { siteId: 'site-1', lines: [{ productId: 'prod-1', quantity: 3 }] },
+          paciente,
+        ),
+      );
+
+      // Cada porción nace con el precio de HOY sellado.
+      expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          unitPriceAmount: '68.00',
+          currencyConceptId: 'cur-bob',
+        }),
+      );
+      // Y la cabecera con el total exacto: 3 × 68.00.
+      const cabecera = d.reservationsRepo.create.mock.results[0].value;
+      expect(cabecera.totalAmount).toBe('204.00');
+      expect(cabecera.currencyConceptId).toBe('cur-bob');
+    });
+
+    it('a product without a published price leaves the line and the total honestly null', async () => {
+      const d = build();
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([posicion()]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(posicion());
+      conLectura(d, pedido(), [
+        {
+          inventoryReservationId: 'order-1',
+          pharmacyProductId: 'prod-1',
+          requestedQuantity: '3',
+          reservedQuantity: '3',
+          statusConceptId: PINV.RES_LINE_CONFIRMED,
+        },
+      ]);
+
+      await runWithTenant('tenant-a', () =>
+        d.service.create(
+          { siteId: 'site-1', lines: [{ productId: 'prod-1', quantity: 3 }] },
+          paciente,
+        ),
+      );
+
+      expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ unitPriceAmount: undefined }),
+      );
+      const cabecera = d.reservationsRepo.create.mock.results[0].value;
+      expect(cabecera.totalAmount).toBeUndefined();
+    });
+  });
+
+  describe('create · modalidad de entrega (v4.2.1)', () => {
+    it('persists the RETIRO concept when the order declares pickup', async () => {
+      const d = build();
+      conLectura(d, pedido(), []);
+
+      await runWithTenant('tenant-a', () =>
+        d.service.create(
+          {
+            siteId: 'site-1',
+            deliveryMode: 'RETIRO',
+            lines: [{ productId: 'prod-1', quantity: 3 }],
+          },
+          paciente,
+        ),
+      );
+
+      expect(d.reservationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          deliveryModeConceptId: PINV.DELIVERY_RETIRO,
+        }),
+      );
+    });
+
+    it('shipping modes answer a typed 422 before touching anything (FAR-E4 lane)', async () => {
+      const d = build();
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service
+          .create(
+            {
+              siteId: 'site-1',
+              deliveryMode: 'DOMICILIO',
+              lines: [{ productId: 'prod-1', quantity: 3 }],
+            },
+            paciente,
+          )
+          .catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as any).details).toMatchObject({
+        deliveryMode: 'DOMICILIO',
+      });
+      // Ni transacción ni cabecera: el 422 corta antes de escribir.
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.reservationsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getOrder', () => {
     it('another patient gets the exact same 404 as a missing order', async () => {
       const d = build();
@@ -440,9 +606,34 @@ describe('PharmacyOrdersService', () => {
       expect(d.ordersRepo.findPharmaciesByIdsInTenant).toHaveBeenCalledTimes(1);
       expect(d.ordersRepo.findProductsByIds).toHaveBeenCalledTimes(1);
       expect(d.ordersRepo.findConceptsByIds).toHaveBeenCalledTimes(1);
-      // Cero UUIDs pintables: la línea sale con nombre y estado en palabras.
+      // El UUID técnico se publica para buscar sustitutos; la UI sigue pintando palabras.
+      expect(res.items[0].lines[0].medicationConceptId).toBe('concept-amoxi');
       expect(res.items[0].lines[0].genericName).toBe('Amoxicilina');
       expect(res.items[0].pharmacyName).toBe('Farmacia Andina');
+    });
+
+    it('preserves a null medication concept on an order line', async () => {
+      const d = build();
+      d.ordersRepo.findOrdersByPatient.mockResolvedValue([pedido()]);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
+        {
+          inventoryReservationId: 'order-1',
+          pharmacyProductId: 'prod-1',
+          requestedQuantity: '1',
+          reservedQuantity: '1',
+          statusConceptId: PINV.RES_LINE_CONFIRMED,
+        },
+      ]);
+      d.ordersRepo.findProductsByIds.mockResolvedValue([
+        { ...PRODUCTO, medicationConceptId: null },
+      ]);
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.listMine(paciente),
+      );
+
+      expect(res.items[0].lines[0].medicationConceptId).toBeNull();
+      expect(res.items[0].lines[0].genericName).toBe('Amoxicilina');
     });
 
     it('an order from a pharmacy outside the tenant simply does not appear', async () => {

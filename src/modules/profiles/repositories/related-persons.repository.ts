@@ -107,6 +107,37 @@ export class RelatedPersonsRepository {
     });
   }
 
+  /**
+   * El tutor o persona autorizada que el paciente declaró (alta o PATCH propio).
+   *
+   * **No es lo mismo que {@link findActiveGuardian}.** Esa consulta filtra por
+   * `isLegalGuardian: true`, y `createGuardianRelatedPerson` —el único código
+   * que produce estas filas hoy— siempre las crea con `isLegalGuardian: false`
+   * a propósito (nadie verificó la tutela). Filtrar por ese campo nunca
+   * encontraría lo que el alta acaba de escribir. El marcador real de «es el
+   * tutor declarado por autoservicio» es `isEmergencyContact: true` combinado
+   * con `isLegalGuardian: false`, que es exactamente lo que esa función fija.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Perfil de paciente cuyo tutor se busca.
+   * @returns El tutor declarado, o `null` si no declaró ninguno.
+   */
+  findActiveDeclaredGuardian(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<RelatedPersons | null> {
+    return em.findOne(
+      RelatedPersons,
+      {
+        patientProfileId,
+        isEmergencyContact: true,
+        isLegalGuardian: false,
+        statusConceptId: PROF.RELATED_ACTIVE,
+      },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
   /** Reasigna los contactos de un paciente al sobreviviente durante una fusión. */
   reassignPatientProfile(
     em: EntityManager,

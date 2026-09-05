@@ -1,0 +1,45 @@
+<meta charset="utf-8">
+<title>Verificación merge dev → PR #227</title>
+<style>
+  body { background:#0d1117; color:#c9d1d9; font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; padding:28px; margin:0; }
+  h1 { color:#e6edf3; font-size:17px; margin:0 0 4px; }
+  .sub { color:#8b949e; font-size:12px; margin-bottom:22px; }
+  .bloque { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:14px 18px; margin-bottom:16px; }
+  .cmd { color:#7ee787; margin-bottom:8px; }
+  .cmd::before { content:"$ "; color:#8b949e; }
+  pre { margin:0; white-space:pre-wrap; color:#c9d1d9; }
+  .ok { color:#3fb950; font-weight:700; }
+  .vacio { color:#8b949e; font-style:italic; }
+</style>
+<h1>PR #227 — conflictos resueltos, merge de <code>dev</code> verificado</h1>
+<div class="sub">rama feat/catalogos-bo-y-alta-completa · commit ff4e29b6 · 2026-08-26</div>
+
+<div class="bloque">
+  <div class="cmd">git diff --name-only --diff-filter=U</div>
+  <pre class="vacio">(sin salida — 0 conflictos pendientes)</pre>
+</div>
+
+<div class="bloque">
+  <div class="cmd">grep -rn '&lt;&lt;&lt;&lt;&lt;&lt;&lt;\|&gt;&gt;&gt;&gt;&gt;&gt;&gt;' src tools</div>
+  <pre class="vacio">(sin salida — ninguna marca de conflicto quedó en el árbol)</pre>
+</div>
+
+<div class="bloque">
+  <div class="cmd">npx tsc --noEmit -p tsconfig.json</div>
+  <pre><span class="ok">sin errores</span></pre>
+</div>
+
+<div class="bloque">
+  <div class="cmd">node --experimental-vm-modules node_modules/jest-cli/bin/jest.js</div>
+<pre>Test Suites: 1 skipped, <span class="ok">551 passed</span>, 551 of 552 total
+Tests:       1 skipped, <span class="ok">6035 passed</span>, 6036 total
+Snapshots:   0 total
+Time:        194.508 s
+Ran all test suites.</pre>
+</div>
+
+<div class="bloque">
+  <div class="cmd">gh pr view 227 --json mergeable,mergeStateStatus</div>
+<pre>{"mergeStateStatus":"BLOCKED","<span class="ok">mergeable":"MERGEABLE"</span>,
+ "title":"La ficha pública sirve dirección y especialidad reales, con coordenadas para el mapa"}</pre>
+</div>

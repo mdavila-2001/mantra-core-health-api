@@ -57,6 +57,28 @@ export class ValueSetExpansionItemDto {
     description: 'Posición del miembro dentro de la expansión',
   })
   ordinal?: number;
+
+  /**
+   * Las propiedades del concepto, indexadas por código.
+   *
+   * **Sólo viaja con `includeProperties=true`.** Es opt-in y no por omisión
+   * porque la mayoría de los consumidores de una expansión pinta una lista de
+   * opciones y no necesita nada más que código y etiqueta: mandárselas a todos
+   * engordaría respuestas que hoy son chicas.
+   *
+   * Existe porque hay catálogos cuyo dato útil ESTÁ en las propiedades. El
+   * nomenclador de procedimientos son 4 408 conceptos con su especialidad, su
+   * precio de referencia y su unidad ahí guardados; sin esto, pintarlo obliga a
+   * pedir 4 408 detalles, uno por fila.
+   *
+   * Se lee por nombre (`properties.specialty`), nunca recorriéndolo.
+   */
+  @ApiPropertyOptional({
+    description: 'Propiedades del concepto; sólo con includeProperties=true',
+    type: 'object',
+    additionalProperties: true,
+  })
+  properties?: Record<string, unknown>;
 }
 
 /** Página de la expansión vigente de un conjunto de valores. */

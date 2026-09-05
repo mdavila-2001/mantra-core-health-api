@@ -9,6 +9,7 @@ import {
 } from '../../pharmacy/entities';
 import { CatalogConcepts } from '../../terminology/entities';
 import { MedicationRequests } from '../../clinical/entities';
+import { PersonProfiles, Persons } from '../../profiles/entities';
 
 /**
  * Acceso a datos del pedido de farmacia del paciente (FAR-E1).
@@ -57,6 +58,94 @@ export class PharmacyOrdersRepository {
       },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * La bandeja del tenant (FAR-E2): pedidos de las farmacias dadas, más
+   * nuevos primero. Los `pharmacyIds` vienen de {@link findPharmaciesByTenant}
+   * — el recorte por organización ya ocurrió en esa consulta, y éste lo repite
+   * en el WHERE; nunca es un filtro a posteriori. Los filtros opcionales son
+   * exactamente los que el modelo declara: estado (`reservation_status_concept_id`),
+   * sede (`pharmacy_site_id`) y ventana de creación (`created_at`).
+   */
+  findOrdersForPharmacies(
+    em: EntityManager,
+    pharmacyIds: readonly string[],
+    statusIds: readonly string[],
+    filters: {
+      /** Sede puntual, si la bandeja se acota. */
+      siteId?: string;
+      /** Creados desde este instante, inclusive. */
+      from?: Date;
+      /** Creados hasta este instante, exclusive. */
+      to?: Date;
+      /** Tope de filas servidas. */
+      limit: number;
+    },
+  ): Promise<InventoryReservations[]> {
+    if (pharmacyIds.length === 0) return Promise.resolve([]);
+    const createdAt = {
+      ...(filters.from ? { $gte: filters.from } : {}),
+      ...(filters.to ? { $lt: filters.to } : {}),
+    };
+    return em.find(
+      InventoryReservations,
+      {
+        pharmacyId: { $in: [...pharmacyIds] },
+        reservationStatusConceptId: { $in: [...statusIds] },
+        ...(filters.siteId ? { pharmacySiteId: filters.siteId } : {}),
+        ...(Object.keys(createdAt).length > 0 ? { createdAt } : {}),
+      },
+      { orderBy: { createdAt: 'DESC' }, limit: filters.limit },
+    );
+  }
+
+  /** Las farmacias de la organización: el tenant va en el WHERE. */
+  findPharmaciesByTenant(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<Pharmacies[]> {
+    return em.find(Pharmacies, { tenantId });
+  }
+
+  /**
+   * Nombres de personas por id de perfil de paciente, en lote.
+   *
+   * `patient_profiles.profile_id` ES el id de la persona (la convención de los
+   * subtipos de `profiles`); se tolera la convención vieja resolviendo por
+   * `person_profiles` los ids que no matchearon directo — el mismo camino que
+   * `SchedulingNoticeRepository.findDisplayNameForProfile`, pero en dos
+   * consultas para N perfiles en vez de dos por perfil.
+   */
+  async findPersonNamesByProfileIds(
+    em: EntityManager,
+    profileIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const names = new Map<string, string>();
+    if (profileIds.length === 0) return names;
+
+    const direct = await em.find(Persons, { id: { $in: [...profileIds] } });
+    for (const person of direct) {
+      const name = personDisplayName(person);
+      if (name !== null) names.set(person.id, name);
+    }
+
+    const missing = profileIds.filter((id) => !names.has(id));
+    if (missing.length === 0) return names;
+    const profiles = await em.find(PersonProfiles, {
+      id: { $in: [...missing] },
+    });
+    if (profiles.length === 0) return names;
+    const persons = await em.find(Persons, {
+      id: { $in: profiles.map((profile) => profile.personId) },
+    });
+    const personById = new Map(persons.map((person) => [person.id, person]));
+    for (const profile of profiles) {
+      const person = personById.get(profile.personId);
+      const name = person ? personDisplayName(person) : null;
+      if (name !== null) names.set(profile.id, name);
+    }
+    return names;
   }
 
   /** Los pedidos de un paciente, más nuevos primero. */
@@ -175,6 +264,21 @@ export class PharmacyOrdersRepository {
     return em.findOne(MedicationRequests, { id, patientProfileId });
   }
 
+  /**
+   * El prescriptor de una receta, para el aviso de cierre (FAR-E3): la
+   * dispensación notifica a quien recetó. Lectura puntual de `clinical` —
+   * el módulo no se modifica, se consume, igual que en la validación del alta.
+   */
+  async findPrescriberProfileId(
+    em: EntityManager,
+    medicationRequestId: string,
+  ): Promise<string | null> {
+    const request = await em.findOne(MedicationRequests, {
+      id: medicationRequestId,
+    });
+    return request?.prescriberProfileId ?? null;
+  }
+
   /** Conceptos por id, para resolver `{code, display}` en lote. */
   findConceptsByIds(
     em: EntityManager,
@@ -183,4 +287,13 @@ export class PharmacyOrdersRepository {
     if (ids.length === 0) return Promise.resolve([]);
     return em.find(CatalogConcepts, { id: { $in: [...ids] } });
   }
+}
+
+/** El nombre pintable de una persona: display, o nombre y apellido. */
+function personDisplayName(person: Persons): string | null {
+  const compuesto = [person.name, person.lastName]
+    .filter((parte): parte is string => typeof parte === 'string')
+    .join(' ')
+    .trim();
+  return person.displayName ?? (compuesto === '' ? null : compuesto);
 }

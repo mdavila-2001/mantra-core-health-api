@@ -11,14 +11,27 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { BadRequestException } from '@nestjs/common';
 import {
   CommunityPublicService,
+  PUBLIC_COMMENT_AUTHOR_KEYS,
+  PUBLIC_COMMENT_KEYS,
   PUBLIC_PROFILE_KEYS,
+  PUBLIC_REACTION_KEYS,
   PUBLIC_RESULT_KEYS,
   TARGET_CONCEPT_BY_SLUG_PREFIX,
   haversineKm,
 } from './community-public.service';
 import { CommunityVerificationService } from './community-verification.service';
-import { ResourceNotFoundException, CONCEPTS } from '../../../common';
+import {
+  ResourceNotFoundException,
+  PreconditionFailedException,
+  CONCEPTS,
+} from '../../../common';
 import { COMM } from '../community.concepts';
+import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
+
+/** Un concepto de `VS_MEDICAL_SPECIALTY`, el que el catálogo doble declara. */
+const ESPECIALIDAD_CARDIOLOGIA = '11111111-1111-4111-8111-111111111111';
+/** Un concepto del catálogo que **no** es una especialidad médica. */
+const CONCEPTO_AJENO = '22222222-2222-4222-8222-222222222222';
 
 /**
  * Un perfil tal como sale de la base: **con** todos los campos internos.
@@ -64,6 +77,10 @@ function build(opciones?: {
     findPublicBySlug: mockFn().mockResolvedValue(null),
     ratingsByProfile: mockFn().mockResolvedValue(new Map()),
     listPublicPosts: mockFn().mockResolvedValue([]),
+    listFeedPublico: mockFn().mockResolvedValue([]),
+    engagementByPost: mockFn().mockResolvedValue(new Map()),
+    isPublicPostMedia: mockFn().mockResolvedValue(false),
+    isPublicCommentMedia: mockFn().mockResolvedValue(false),
     countPublishedReviews: mockFn().mockResolvedValue(0),
     nearbyProfiles: mockFn().mockResolvedValue([]),
     badgesByProfiles: mockFn().mockResolvedValue(new Map()),
@@ -71,6 +88,12 @@ function build(opciones?: {
     locationsByOwner: mockFn().mockResolvedValue(new Map()),
     specialtiesByPractitioner: mockFn().mockResolvedValue(new Map()),
     affiliationsByPractitioner: mockFn().mockResolvedValue(new Map()),
+    practitionerIdsBySpecialty: mockFn().mockResolvedValue([]),
+    isPostPublic: mockFn().mockResolvedValue(true),
+    listPostReactors: mockFn().mockResolvedValue([]),
+    listPublicRootComments: mockFn().mockResolvedValue([]),
+    listPublicCommentReplies: mockFn().mockResolvedValue([]),
+    findPostOfPublicComment: mockFn().mockResolvedValue('post-1'),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // Por omisión el índice falla: así estas pruebas ejercen el camino SQL —el
@@ -97,18 +120,99 @@ function build(opciones?: {
     recordView: mockFn(),
     recordImpressions: mockFn(),
   };
+  const profiles = {
+    isPublicMedia: mockFn().mockResolvedValue(false),
+  };
+  const files = {
+    downloadPublicMedia: mockFn().mockResolvedValue({
+      buffer: Buffer.alloc(0),
+      mimeType: 'image/jpeg',
+    }),
+  };
+  // El catálogo de especialidades es **real**, igual que el de verificación y
+  // por lo mismo: lo que AC-02-8 exige es que un uuid ajeno al value set dé 422,
+  // y con un doble se estaría probando el doble. Lo único falso es de dónde
+  // salen los 36 conceptos.
+  const valueSets = {
+    findByInternalCode: mockFn().mockResolvedValue({ id: 'vs-especialidades' }),
+    findIncludedConceptIdsByValueSet: mockFn().mockResolvedValue([
+      ESPECIALIDAD_CARDIOLOGIA,
+    ]),
+  };
+  const specialtyCatalog = new MedicalSpecialtyCatalogService(valueSets as any);
+  const concepts = {
+    findById: mockFn().mockResolvedValue({ display: 'Cardiología' }),
+  };
   const service = new CommunityPublicService(
     em as any,
     repo as any,
+    profiles as any,
+    files as any,
     searchIndex as any,
     verification,
     stats as any,
+    specialtyCatalog,
+    concepts as any,
     logger as any,
   );
-  return { service, repo, searchIndex, logger, verification, stats };
+  return {
+    service,
+    repo,
+    profiles,
+    files,
+    searchIndex,
+    logger,
+    verification,
+    stats,
+    valueSets,
+    concepts,
+  };
 }
 
 describe('CommunityPublicService', () => {
+  describe('getPublicMedia — qué archivo se sirve a un anónimo', () => {
+    it('sirve el avatar/portada de un perfil (primera de las tres clases)', async () => {
+      const d = build();
+      d.profiles.isPublicMedia.mockResolvedValue(true);
+
+      await d.service.getPublicMedia('f-avatar');
+
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-avatar');
+    });
+
+    it('sirve una foto del cuerpo de un post público (segunda clase)', async () => {
+      const d = build();
+      d.repo.isPublicPostMedia.mockResolvedValue(true);
+
+      await d.service.getPublicMedia('f-post');
+
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-post');
+    });
+
+    // REQ-01-011: la tercera clase — un adjunto de comentario.
+    it('sirve un adjunto de comentario público (tercera clase)', async () => {
+      const d = build();
+      d.repo.isPublicCommentMedia.mockResolvedValue(true);
+
+      await d.service.getPublicMedia('f-comentario');
+
+      expect(d.repo.isPublicCommentMedia).toHaveBeenCalledWith(
+        expect.anything(),
+        'f-comentario',
+      );
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-comentario');
+    });
+
+    it('ninguna de las tres clases lo reclama: 404, no se sirve nada', async () => {
+      const d = build();
+
+      await expect(d.service.getPublicMedia('f-ajeno')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.files.downloadPublicMedia).not.toHaveBeenCalled();
+    });
+  });
+
   describe('la proyección no filtra campos internos', () => {
     it('la fila del buscador tiene exactamente las claves permitidas', async () => {
       const d = build();
@@ -783,6 +887,525 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
       expect(d.stats.recordImpressions).toHaveBeenCalled();
       expect(d.stats.recordView).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('feed público de la portada', () => {
+    /** Una fila del feed tal como la devuelve el repositorio. */
+    const fila = (id: string, iso: string, slug = 'dra-demo') => ({
+      id,
+      bodyText: `Cuerpo de ${id}`,
+      publishedAt: new Date(iso),
+      authorSlug: slug,
+      authorDisplayName: 'Dra. Demo',
+      authorHeadline: 'Cardióloga',
+      authorAvatarFileId: null,
+      authorKindConceptId: 'concepto-desconocido',
+    });
+
+    it('cada tarjeta trae a su autor: en un feed mezclado es lo que las distingue', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({});
+
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0]).toMatchObject({
+        id: 'post-1',
+        authorSlug: 'dra-demo',
+        authorDisplayName: 'Dra. Demo',
+        authorHeadline: 'Cardióloga',
+        authorAvatarUrl: null,
+      });
+    });
+
+    it('un concepto de vertical que no se reconoce cae a PRACTITIONER y no rompe la página', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({});
+
+      expect(res.items[0].authorKind).toBe('PRACTITIONER');
+    });
+
+    it('pide una de más que el tope, y no la devuelve: es cómo sabe que hay más', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+        fila('post-2', '2026-08-27T09:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({ limit: 1 });
+
+      expect(d.repo.listFeedPublico).toHaveBeenCalledWith(
+        expect.anything(),
+        2,
+        undefined,
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).not.toBeNull();
+    });
+
+    it('sin página siguiente el cursor es null, no una cadena vacía', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({ limit: 5 });
+
+      expect(res.nextCursor).toBeNull();
+    });
+
+    it('el cursor que emite es el que vuelve a entender, en la fila donde cortó', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+        fila('post-2', '2026-08-27T09:00:00.000Z'),
+      ]);
+
+      const primera = await d.service.feedPublico({ limit: 1 });
+      await d.service.feedPublico({ limit: 1, cursor: primera.nextCursor! });
+
+      expect(d.repo.listFeedPublico).toHaveBeenLastCalledWith(
+        expect.anything(),
+        2,
+        { publishedAt: new Date('2026-08-27T10:00:00.000Z'), id: 'post-1' },
+      );
+    });
+
+    it('un cursor corrupto se ignora y sirve la primera página, no un 500', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([]);
+
+      await expect(
+        d.service.feedPublico({ cursor: 'no-es-base64-de-json' }),
+      ).resolves.toMatchObject({ items: [] });
+
+      expect(d.repo.listFeedPublico).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.any(Number),
+        undefined,
+      );
+    });
+
+    it('las imágenes y los contadores salen del mismo lote, sin un viaje por post', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+      d.repo.engagementByPost.mockResolvedValue(
+        new Map([
+          [
+            'post-1',
+            { imageFileIds: ['f1'], reactionCount: 3, commentCount: 2 },
+          ],
+        ]),
+      );
+
+      const res = await d.service.feedPublico({});
+
+      expect(d.repo.engagementByPost).toHaveBeenCalledTimes(1);
+      expect(res.items[0]).toMatchObject({
+        mediaUrls: ['/public/media/f1'],
+        reactionCount: 3,
+        commentCount: 2,
+      });
+    });
+
+    it('un post sin interacción no inventa contadores: van en cero y sin imágenes', async () => {
+      const d = build();
+      d.repo.listFeedPublico.mockResolvedValue([
+        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.feedPublico({});
+
+      expect(res.items[0]).toMatchObject({
+        mediaUrls: [],
+        reactionCount: 0,
+        commentCount: 0,
+      });
+    });
+  });
+});
+
+describe('CommunityPublicService · filtro por especialidad (AC-02-7, AC-02-8)', () => {
+  it('una especialidad del catálogo acota la consulta en vez de perderse', async () => {
+    const d = build();
+
+    await d.service.search({
+      kind: 'PRACTITIONER',
+      specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+    });
+
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+      }),
+      expect.any(Number),
+    );
+  });
+
+  it('un uuid ajeno al value set se rechaza con 422 y no se ignora en silencio', async () => {
+    const d = build();
+
+    await expect(
+      d.service.search({
+        kind: 'PRACTITIONER',
+        specialtyConceptId: CONCEPTO_AJENO,
+      }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+    // Lo que AC-02-8 prohíbe no es sólo el código: es que la búsqueda siga
+    // adelante y devuelva el directorio entero como si el filtro se hubiera
+    // aplicado.
+    expect(d.repo.searchProfiles).not.toHaveBeenCalled();
+  });
+
+  it('el 422 es 422 y no el 412 que el nombre de la excepción sugiere', async () => {
+    const d = build();
+
+    await d.service
+      .search({ specialtyConceptId: CONCEPTO_AJENO })
+      .catch((error: PreconditionFailedException) => {
+        expect(error.getStatus()).toBe(422);
+      });
+    expect.assertions(1);
+  });
+
+  it('el catálogo sin sembrar da 422 y no «ninguna especialidad es válida»', async () => {
+    const d = build();
+    d.valueSets.findByInternalCode.mockResolvedValue(null);
+
+    await expect(
+      d.service.search({ specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('sin especialidad pedida no se le pregunta nada al catálogo', async () => {
+    const d = build();
+
+    await d.service.search({ kind: 'PRACTITIONER' });
+
+    expect(d.valueSets.findByInternalCode).not.toHaveBeenCalled();
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ specialtyConceptId: undefined }),
+      expect.any(Number),
+    );
+  });
+
+  it('el índice acota por el rótulo del mismo concepto, no por su uuid', async () => {
+    const d = build({ hits: [] });
+
+    await d.service.search({
+      kind: 'PRACTITIONER',
+      specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+    });
+
+    expect(d.searchIndex.search).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        filters: expect.arrayContaining([
+          { field: 'specialties', values: ['Cardiología'] },
+        ]),
+      }),
+    );
+  });
+
+  it('sin rótulo que resolver degrada a SQL en vez de servir la página sin filtrar', async () => {
+    const d = build({ hits: [] });
+    d.concepts.findById.mockResolvedValue(null);
+
+    await d.service.search({
+      kind: 'PRACTITIONER',
+      specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+    });
+
+    expect(d.searchIndex.search).not.toHaveBeenCalled();
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+      }),
+      expect.any(Number),
+    );
+  });
+});
+
+describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)', () => {
+  /** Una reacción tal como la devuelve el repositorio, con su autor. */
+  const reaccion = (
+    id: string,
+    iso: string,
+    conceptId = COMM.REACTION_LIKE,
+  ) => ({
+    id,
+    createdAt: new Date(iso),
+    reactionTypeConceptId: conceptId,
+    authorSlug: 'dr-mamani',
+    authorDisplayName: 'Dr. Iván Mamani',
+    authorHeadline: 'Traumatología',
+    authorAvatarFileId: 'file-avatar',
+    authorKindConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
+  });
+
+  /** Un comentario tal como lo devuelve el repositorio, con su autor. */
+  const comentario = (id: string, iso: string, replyCount = 0) => ({
+    id,
+    bodyText: `Cuerpo de ${id}`,
+    createdAt: new Date(iso),
+    replyCount,
+    authorSlug: 'dra-quispe',
+    authorDisplayName: 'Dra. Marisol Quispe',
+    authorHeadline: null,
+    authorAvatarFileId: null,
+    authorKindConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
+    // REQ-01-011: el repositorio real siempre trae el arreglo (vacío si no
+    // hay adjuntos), nunca `undefined` — ver `listPublicComments`.
+    media: [],
+  });
+
+  describe('quién reaccionó (AC-01-9)', () => {
+    it('la fila tiene exactamente las claves permitidas: ni perfil ni concepto', async () => {
+      const d = build();
+      d.repo.listPostReactors.mockResolvedValue([
+        reaccion('r-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.postReactions('post-1', {});
+
+      expect(Object.keys(res.items[0]).sort()).toEqual(
+        [...PUBLIC_REACTION_KEYS].sort(),
+      );
+    });
+
+    it('sirve la misma proyección de persona que el autor del feed', async () => {
+      const d = build();
+      d.repo.listPostReactors.mockResolvedValue([
+        reaccion('r-1', '2026-08-27T10:00:00.000Z'),
+      ]);
+
+      const res = await d.service.postReactions('post-1', {});
+
+      expect(res.items[0]).toEqual({
+        slug: 'dr-mamani',
+        displayName: 'Dr. Iván Mamani',
+        headline: 'Traumatología',
+        avatarUrl: '/public/media/file-avatar',
+        kind: 'PRACTITIONER',
+        reactionType: 'LIKE',
+      });
+    });
+
+    it('una publicación que el feed no serviría da 404 y no se consulta a nadie', async () => {
+      const d = build();
+      d.repo.isPostPublic.mockResolvedValue(false);
+
+      await expect(
+        d.service.postReactions('post-1', {}),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.repo.listPostReactors).not.toHaveBeenCalled();
+    });
+
+    it('un tipo de reacción que el módulo no nombra viaja como null, no rompe la página', async () => {
+      const d = build();
+      d.repo.listPostReactors.mockResolvedValue([
+        reaccion('r-1', '2026-08-27T10:00:00.000Z', 'concepto-desconocido'),
+      ]);
+
+      const res = await d.service.postReactions('post-1', {});
+
+      expect(res.items[0].reactionType).toBeNull();
+    });
+
+    it('pide una de más que el tope, y no la devuelve: es cómo sabe que hay más', async () => {
+      const d = build();
+      d.repo.listPostReactors.mockResolvedValue([
+        reaccion('r-1', '2026-08-27T10:00:00.000Z'),
+        reaccion('r-2', '2026-08-27T09:00:00.000Z'),
+      ]);
+
+      const res = await d.service.postReactions('post-1', { limit: 1 });
+
+      expect(d.repo.listPostReactors).toHaveBeenCalledWith(
+        expect.anything(),
+        'post-1',
+        2,
+        undefined,
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).not.toBeNull();
+    });
+
+    it('el cursor que emite es el que vuelve a entender, en la fila donde cortó', async () => {
+      const d = build();
+      d.repo.listPostReactors.mockResolvedValue([
+        reaccion('r-1', '2026-08-27T10:00:00.000Z'),
+        reaccion('r-2', '2026-08-27T09:00:00.000Z'),
+      ]);
+
+      const primera = await d.service.postReactions('post-1', { limit: 1 });
+      await d.service.postReactions('post-1', {
+        limit: 1,
+        cursor: primera.nextCursor!,
+      });
+
+      expect(d.repo.listPostReactors).toHaveBeenLastCalledWith(
+        expect.anything(),
+        'post-1',
+        2,
+        { createdAt: '2026-08-27T10:00:00.000Z', id: 'r-1' },
+      );
+    });
+
+    it('un cursor corrupto sirve la primera página, no un 500', async () => {
+      const d = build();
+
+      await expect(
+        d.service.postReactions('post-1', { cursor: 'no-es-base64-de-json' }),
+      ).resolves.toMatchObject({ items: [] });
+      expect(d.repo.listPostReactors).toHaveBeenCalledWith(
+        expect.anything(),
+        'post-1',
+        expect.any(Number),
+        undefined,
+      );
+    });
+
+    it('la envoltura es la misma que la del resto de la superficie pública', async () => {
+      const d = build();
+
+      const res = await d.service.postReactions('post-1', {});
+
+      expect(Object.keys(res).sort()).toEqual([
+        'generatedAt',
+        'items',
+        'nextCursor',
+        'totalHint',
+      ]);
+    });
+  });
+
+  describe('hilo de comentarios (AC-01-11, AC-01-12)', () => {
+    it('el comentario tiene exactamente las claves permitidas, y su autor también', async () => {
+      const d = build();
+      d.repo.listPublicRootComments.mockResolvedValue([
+        comentario('c-1', '2026-08-27T10:00:00.000Z', 3),
+      ]);
+
+      const res = await d.service.postComments('post-1', {});
+
+      expect(Object.keys(res.items[0]).sort()).toEqual(
+        [...PUBLIC_COMMENT_KEYS].sort(),
+      );
+      expect(Object.keys(res.items[0].author).sort()).toEqual(
+        [...PUBLIC_COMMENT_AUTHOR_KEYS].sort(),
+      );
+    });
+
+    it('trae el recuento de respuestas para que «Ver N respuestas» sepa qué decir', async () => {
+      const d = build();
+      d.repo.listPublicRootComments.mockResolvedValue([
+        comentario('c-1', '2026-08-27T10:00:00.000Z', 3),
+      ]);
+
+      const res = await d.service.postComments('post-1', {});
+
+      expect(res.items[0]).toMatchObject({
+        id: 'c-1',
+        bodyText: 'Cuerpo de c-1',
+        createdAt: '2026-08-27T10:00:00.000Z',
+        replyCount: 3,
+      });
+    });
+
+    it('una publicación que el feed no serviría da 404 antes de leer el hilo', async () => {
+      const d = build();
+      d.repo.isPostPublic.mockResolvedValue(false);
+
+      await expect(d.service.postComments('post-1', {})).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.repo.listPublicRootComments).not.toHaveBeenCalled();
+    });
+
+    it('pagina por cursor y devuelve el que entiende', async () => {
+      const d = build();
+      d.repo.listPublicRootComments.mockResolvedValue([
+        comentario('c-1', '2026-08-27T10:00:00.000Z'),
+        comentario('c-2', '2026-08-27T11:00:00.000Z'),
+      ]);
+
+      const primera = await d.service.postComments('post-1', { limit: 1 });
+      await d.service.postComments('post-1', {
+        limit: 1,
+        cursor: primera.nextCursor!,
+      });
+
+      expect(d.repo.listPublicRootComments).toHaveBeenLastCalledWith(
+        expect.anything(),
+        'post-1',
+        2,
+        { createdAt: '2026-08-27T10:00:00.000Z', id: 'c-1' },
+      );
+    });
+  });
+
+  describe('respuestas de un comentario (AC-01-12)', () => {
+    it('la visibilidad la decide la publicación comentada, no el comentario', async () => {
+      const d = build();
+      d.repo.findPostOfPublicComment.mockResolvedValue('post-9');
+      d.repo.listPublicCommentReplies.mockResolvedValue([
+        comentario('c-2', '2026-08-27T12:00:00.000Z'),
+      ]);
+
+      await d.service.commentReplies('c-1', {});
+
+      expect(d.repo.isPostPublic).toHaveBeenCalledWith(
+        expect.anything(),
+        'post-9',
+      );
+    });
+
+    it('un comentario que no cuelga de una publicación pública da 404, sin leer respuestas', async () => {
+      const d = build();
+      d.repo.findPostOfPublicComment.mockResolvedValue(null);
+
+      await expect(d.service.commentReplies('c-1', {})).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.repo.listPublicCommentReplies).not.toHaveBeenCalled();
+    });
+
+    it('el hilo de un borrador no se abre por conocer el uuid de un comentario suyo', async () => {
+      const d = build();
+      d.repo.findPostOfPublicComment.mockResolvedValue('post-borrador');
+      d.repo.isPostPublic.mockResolvedValue(false);
+
+      await expect(d.service.commentReplies('c-1', {})).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.repo.listPublicCommentReplies).not.toHaveBeenCalled();
+    });
+
+    it('sirve la misma forma de comentario que el hilo raíz', async () => {
+      const d = build();
+      d.repo.listPublicCommentReplies.mockResolvedValue([
+        comentario('c-2', '2026-08-27T12:00:00.000Z'),
+      ]);
+
+      const res = await d.service.commentReplies('c-1', {});
+
+      expect(Object.keys(res.items[0]).sort()).toEqual(
+        [...PUBLIC_COMMENT_KEYS].sort(),
+      );
     });
   });
 });

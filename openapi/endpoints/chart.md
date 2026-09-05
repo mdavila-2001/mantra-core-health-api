@@ -1809,7 +1809,7 @@ Ejemplo de error normalizado:
 
 Listar las plantillas de chart por especialidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Carril 2 · punto 1: listar las plantillas por especialidad.
+Contexto declarado en el controlador: Carril 2 · punto 1: listar las plantillas por especialidad. Lectura abierta a los roles clínicos (Fase 3 del carril de consulta): el expediente necesita el esquema para pintar el formulario de especialidad, y pedirle SECURITY_ADMIN a quien atiende era pedirle el rol equivocado. Los POST administrativos siguen siendo del administrador.
 
 ### Descripción del sistema
 
@@ -1834,7 +1834,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1873,6 +1873,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "name": "Nombre de ejemplo",
     "version": 1,
     "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "sectionId": "00000000-0000-4000-8000-000000000001",
+    "fieldTargetConceptId": "00000000-0000-4000-8000-000000000001",
     "fields": [
       {
         "assignmentId": "00000000-0000-4000-8000-000000000001",
@@ -1882,7 +1884,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "dataType": {},
         "valueSetId": "00000000-0000-4000-8000-000000000001",
         "required": true,
-        "ordinal": 1
+        "ordinal": 1,
+        "own": true
       }
     ],
     "provenance": {
@@ -1910,7 +1913,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2050,6 +2053,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "name": "Nombre de ejemplo",
   "version": 1,
   "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "sectionId": "00000000-0000-4000-8000-000000000001",
+  "fieldTargetConceptId": "00000000-0000-4000-8000-000000000001",
   "fields": [
     {
       "assignmentId": "00000000-0000-4000-8000-000000000001",
@@ -2059,7 +2064,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "dataType": {},
       "valueSetId": "00000000-0000-4000-8000-000000000001",
       "required": true,
-      "ordinal": 1
+      "ordinal": 1,
+      "own": true
     }
   ],
   "provenance": {
@@ -2085,7 +2091,9 @@ Campos de la respuesta:
 | `name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la plantilla. | `Nombre de ejemplo` |
 | `version` | Sí | `number` | Sin restricción adicional declarada | Versión de la plantilla. | `1` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado de la plantilla. | `00000000-0000-4000-8000-000000000001` |
-| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","required":true,"ordinal":1}]` |
+| `sectionId` | No | `string` | formato `uuid` | Sección que aloja los campos de la plantilla. Se publica porque colgar un campo propio **dentro** de la plantilla exige nombrarla: una asignación en otra sección existe pero no la dibuja nadie. | `00000000-0000-4000-8000-000000000001` |
+| `fieldTargetConceptId` | Sí | `string` | formato `uuid` | Target de las asignaciones de campo de las plantillas de chart. Es un concepto del catálogo, y su UUID se deriva de un código: publicarlo evita que cada cliente lo copie a mano y quede clavado el día que cambie. | `00000000-0000-4000-8000-000000000001` |
+| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","required":true,"ordinal":1,"own":true}]` |
 | `fields[].assignmentId` | Sí | `string` | formato `uuid` | Identificador de la asignación (`forms.field_assignments.id`). | `00000000-0000-4000-8000-000000000001` |
 | `fields[].fieldId` | Sí | `string` | formato `uuid` | Identificador del campo (`forms.dynamic_field_definitions.id`). | `00000000-0000-4000-8000-000000000001` |
 | `fields[].code` | Sí | `string` | Sin restricción adicional declarada | Código del campo. | `CODIGO_EJEMPLO` |
@@ -2094,6 +2102,7 @@ Campos de la respuesta:
 | `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos, si el campo es de selección. | `00000000-0000-4000-8000-000000000001` |
 | `fields[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo es obligatorio al completar la plantilla. | `true` |
 | `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación del campo dentro de la plantilla. | `1` |
+| `fields[].own` | Sí | `boolean` | Sin restricción adicional declarada | ¿Es un campo propio del tenant, o del formulario estándar? | `true` |
 | `provenance` | No | `ChartTemplateProvenanceDto` | Sin restricción adicional declarada | De dónde salió la plantilla, si vino del catálogo de formularios estándar. | `{"sourceTitle":"valor-ejemplo","organization":"valor-ejemplo","url":"valor-ejemplo","license":"valor-ejemplo","sourceVersion":"valor-ejemplo","retrievedAt":"valor-ejemplo","note":"valor-ejemplo"}` |
 | `provenance.sourceTitle` | No | `string` | Sin restricción adicional declarada | Título del documento tal como lo publica el organismo. | `valor-ejemplo` |
 | `provenance.organization` | No | `string` | Sin restricción adicional declarada | Organismo que lo publica. | `valor-ejemplo` |
@@ -2168,7 +2177,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
 - Deben ser UUID válidos: `id`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -2208,6 +2217,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "name": "Nombre de ejemplo",
   "version": 1,
   "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "sectionId": "00000000-0000-4000-8000-000000000001",
+  "fieldTargetConceptId": "00000000-0000-4000-8000-000000000001",
   "fields": [
     {
       "assignmentId": "00000000-0000-4000-8000-000000000001",
@@ -2217,7 +2228,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "dataType": {},
       "valueSetId": "00000000-0000-4000-8000-000000000001",
       "required": true,
-      "ordinal": 1
+      "ordinal": 1,
+      "own": true
     }
   ],
   "provenance": {
@@ -2243,7 +2255,9 @@ Campos de la respuesta:
 | `name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la plantilla. | `Nombre de ejemplo` |
 | `version` | Sí | `number` | Sin restricción adicional declarada | Versión de la plantilla. | `1` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado de la plantilla. | `00000000-0000-4000-8000-000000000001` |
-| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","required":true,"ordinal":1}]` |
+| `sectionId` | No | `string` | formato `uuid` | Sección que aloja los campos de la plantilla. Se publica porque colgar un campo propio **dentro** de la plantilla exige nombrarla: una asignación en otra sección existe pero no la dibuja nadie. | `00000000-0000-4000-8000-000000000001` |
+| `fieldTargetConceptId` | Sí | `string` | formato `uuid` | Target de las asignaciones de campo de las plantillas de chart. Es un concepto del catálogo, y su UUID se deriva de un código: publicarlo evita que cada cliente lo copie a mano y quede clavado el día que cambie. | `00000000-0000-4000-8000-000000000001` |
+| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","required":true,"ordinal":1,"own":true}]` |
 | `fields[].assignmentId` | Sí | `string` | formato `uuid` | Identificador de la asignación (`forms.field_assignments.id`). | `00000000-0000-4000-8000-000000000001` |
 | `fields[].fieldId` | Sí | `string` | formato `uuid` | Identificador del campo (`forms.dynamic_field_definitions.id`). | `00000000-0000-4000-8000-000000000001` |
 | `fields[].code` | Sí | `string` | Sin restricción adicional declarada | Código del campo. | `CODIGO_EJEMPLO` |
@@ -2252,6 +2266,7 @@ Campos de la respuesta:
 | `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos, si el campo es de selección. | `00000000-0000-4000-8000-000000000001` |
 | `fields[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo es obligatorio al completar la plantilla. | `true` |
 | `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación del campo dentro de la plantilla. | `1` |
+| `fields[].own` | Sí | `boolean` | Sin restricción adicional declarada | ¿Es un campo propio del tenant, o del formulario estándar? | `true` |
 | `provenance` | No | `ChartTemplateProvenanceDto` | Sin restricción adicional declarada | De dónde salió la plantilla, si vino del catálogo de formularios estándar. | `{"sourceTitle":"valor-ejemplo","organization":"valor-ejemplo","url":"valor-ejemplo","license":"valor-ejemplo","sourceVersion":"valor-ejemplo","retrievedAt":"valor-ejemplo","note":"valor-ejemplo"}` |
 | `provenance.sourceTitle` | No | `string` | Sin restricción adicional declarada | Título del documento tal como lo publica el organismo. | `valor-ejemplo` |
 | `provenance.organization` | No | `string` | Sin restricción adicional declarada | Organismo que lo publica. | `valor-ejemplo` |
@@ -2269,7 +2284,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/chart/services/chart-templates.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

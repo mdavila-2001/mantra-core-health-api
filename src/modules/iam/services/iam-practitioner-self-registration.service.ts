@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
@@ -14,6 +14,7 @@ import {
   PreconditionFailedException,
   SEED,
   TokenService,
+  sniffMimeType,
   type AuthenticatedUser,
 } from '../../../common';
 // El alta administrativa deja al profesional operativo: los roles asistenciales
@@ -33,8 +34,10 @@ import {
   PersonProfilesRepository,
   PersonsRepository,
   PractitionerLanguagesRepository,
+  PractitionerSpecialtiesRepository,
   ProfessionalCredentialsRepository,
 } from '../../profiles/repositories';
+import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
 import {
   AddressesRepository,
   ContactPointsRepository,
@@ -57,8 +60,38 @@ import {
   RegisterPractitionerDto,
   RegisterPractitionerResponseDto,
 } from '../dto';
-import { createResidenceAddress } from './residence-address';
+import { createResidenceAddress } from '../../common/services/residence-address';
+import { FileUploadService } from '../../common/services/file-upload.service';
+import { FileCategory, FileSensitivity } from '../../common/dto';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+
+const DATA_URI_REGEX = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/;
+
+/** Decodifica una imagen en base64 (Data URI o base64 plano). */
+function parseBase64Image(
+  dataUri: string,
+): { buffer: Buffer; mimeType: string } | null {
+  const match = DATA_URI_REGEX.exec(dataUri);
+  if (match) {
+    try {
+      const buffer = Buffer.from(match[2], 'base64');
+      if (buffer.length > 0) {
+        return { mimeType: match[1], buffer };
+      }
+    } catch {
+      return null;
+    }
+  }
+  try {
+    const buffer = Buffer.from(dataUri, 'base64');
+    if (buffer.length > 0) {
+      return { mimeType: 'image/jpeg', buffer };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
 
 /** Vida útil del token de verificación de correo (24 h). */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
@@ -71,6 +104,86 @@ const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
  * sólo se explicarían por descuido.
  */
 const ACTIVATION_TTL_MS = 72 * 60 * 60 * 1000;
+
+/** Un punto de contacto listo para persistirse, ya resuelto su par sistema/uso. */
+interface ContactoDeclarado {
+  readonly systemConceptId: string;
+  readonly value: string;
+  readonly useConceptId: string;
+}
+
+/**
+ * Traduce los cinco campos de contacto del alta a filas de
+ * `common.contact_points`.
+ *
+ * El registro del médico pide correo y celular **personales** además de los del
+ * trabajo, y un fijo de trabajo. Cada uno se distingue por el par
+ * sistema × uso; el correo de trabajo es además la identidad de login, por eso
+ * es el único obligatorio.
+ *
+ * `dto.phone` es la forma anterior de declarar el teléfono y se grababa como
+ * `PHONE` con uso de trabajo. **Sigue cayendo exactamente ahí**: reinterpretarlo
+ * como celular cambiaría el significado de las filas ya escritas y dejaría sin
+ * teléfono a todo el que las lee hoy por sistema. Ese lugar es el mismo del
+ * fijo de trabajo, que es lo que `PHONE` significa; si llegan los dos, manda el
+ * campo nuevo.
+ *
+ * @param dto - Cuerpo del alta de profesional.
+ * @returns Los contactos declarados, sin los vacíos.
+ */
+function contactosDeclarados(
+  dto: Pick<
+    RegisterPractitionerDto,
+    | 'email'
+    | 'personalEmail'
+    | 'mobilePhone'
+    | 'workMobilePhone'
+    | 'workLandline'
+    | 'phone'
+  >,
+): readonly ContactoDeclarado[] {
+  const fijoDeTrabajo = dto.workLandline ?? dto.phone;
+
+  const candidatos: readonly (ContactoDeclarado | null)[] = [
+    {
+      systemConceptId: CONCEPTS.CONTACT_EMAIL,
+      value: dto.email,
+      useConceptId: CONCEPTS.CONTACT_USE_WORK,
+    },
+    dto.personalEmail
+      ? {
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          value: dto.personalEmail,
+          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+        }
+      : null,
+    dto.mobilePhone
+      ? {
+          systemConceptId: CONCEPTS.CONTACT_MOBILE,
+          value: dto.mobilePhone,
+          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+        }
+      : null,
+    dto.workMobilePhone
+      ? {
+          systemConceptId: CONCEPTS.CONTACT_MOBILE,
+          value: dto.workMobilePhone,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        }
+      : null,
+    fijoDeTrabajo
+      ? {
+          systemConceptId: CONCEPTS.CONTACT_PHONE,
+          value: fijoDeTrabajo,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        }
+      : null,
+  ];
+
+  return candidatos.filter(
+    (contacto): contacto is ContactoDeclarado => contacto !== null,
+  );
+}
 
 /**
  * Auto-registro público de profesionales de salud.
@@ -131,6 +244,8 @@ export class IamPractitionerSelfRegistrationService {
     private readonly personsRepo: PersonsRepository,
     private readonly personProfilesRepo: PersonProfilesRepository,
     private readonly practitionersRepo: HealthPractitionerProfilesRepository,
+    private readonly specialtiesRepo: PractitionerSpecialtiesRepository,
+    private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
     private readonly authorizationsRepo: JurisdictionAuthorizationsRepository,
     private readonly professionalCredentialsRepo: ProfessionalCredentialsRepository,
     private readonly languagesRepo: PractitionerLanguagesRepository,
@@ -143,6 +258,8 @@ export class IamPractitionerSelfRegistrationService {
     private readonly notificationsService: NotificationsService,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
+    @Optional()
+    private readonly fileUploadService?: FileUploadService,
   ) {
     this.logger.setContext(IamPractitionerSelfRegistrationService.name);
   }
@@ -329,6 +446,12 @@ export class IamPractitionerSelfRegistrationService {
         actorUserId: user.id,
       });
 
+      // 1.5) Foto de perfil (si viene en el payload y el servicio de archivos está disponible).
+      const photoFileId = await this.uploadProfilePhoto(
+        user.id,
+        dto.profilePhotoBase64,
+      );
+
       // 2) Persona con sus datos demográficos. El código legible del DTO se
       // traduce aquí al concepto de terminología que persiste la columna.
       const person = this.personsRepo.create(tx, {
@@ -346,6 +469,11 @@ export class IamPractitionerSelfRegistrationService {
         sexAtBirthConceptId: dto.sexAtBirth
           ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
           : undefined,
+        photoFileId,
+        occupationConceptId: dto.occupationConceptId,
+        occupationFreeText: dto.occupationConceptId
+          ? undefined
+          : dto.occupationFreeText,
         actorUserId: user.id,
       });
       await tx.flush();
@@ -366,6 +494,7 @@ export class IamPractitionerSelfRegistrationService {
         practitionerCategoryConceptId:
           dto.practitionerCategoryConceptId ?? PROF.PRACT_CATEGORY_GENERAL,
         professionalTitle: dto.professionalTitle,
+        photoFileId,
         // PENDIENTE de verificación: el alta declara la matrícula, no la prueba.
         verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
         practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
@@ -391,14 +520,35 @@ export class IamPractitionerSelfRegistrationService {
         stateConceptId: PROF.AUTH_PENDING,
         actorUserId: user.id,
       });
-      const credential = this.professionalCredentialsRepo.create(tx, {
-        practitionerProfileId: person.id,
-        credentialTypeConceptId:
-          dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
-        number: dto.credentialNumber,
-        stateConceptId: PROF.CRED_PENDING,
-        actorUserId: user.id,
-      });
+      // El registro del SEDES es una SEGUNDA habilitación, no un título. El
+      // SEDES autoriza a ejercer en su departamento igual que la matrícula del
+      // Ministerio autoriza en todo el país, así que va en la misma tabla y el
+      // perfil las muestra juntas. Antes entraba por `credentialNumber` y se
+      // archivaba como `CREDENTIAL_TYPE_DEGREE`: el padrón real cargaba ahí su
+      // «T.I. 538/14» y el perfil lo anunciaba como «Título universitario».
+      const sedesLicense =
+        dto.sedesLicenseNumber === undefined
+          ? undefined
+          : this.authorizationsRepo.create(tx, {
+              practitionerProfileId: person.id,
+              jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
+              licenseNumber: dto.sedesLicenseNumber,
+              stateConceptId: PROF.AUTH_PENDING,
+              actorUserId: user.id,
+            });
+      // La credencial sólo nace si se declara un título de verdad. Dejó de ser
+      // obligatoria junto con `credentialNumber`.
+      const credential =
+        dto.credentialNumber === undefined
+          ? undefined
+          : this.professionalCredentialsRepo.create(tx, {
+              practitionerProfileId: person.id,
+              credentialTypeConceptId:
+                dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
+              number: dto.credentialNumber,
+              stateConceptId: PROF.CRED_PENDING,
+              actorUserId: user.id,
+            });
       this.languagesRepo.create(tx, {
         practitionerProfileId: person.id,
         languageConceptId: dto.languageConceptId ?? PROF.LANGUAGE_SPANISH,
@@ -406,6 +556,30 @@ export class IamPractitionerSelfRegistrationService {
         clinicalInterpretationAllowed: true,
         actorUserId: user.id,
       });
+
+      // 4b) Las especialidades, elegidas EN el alta (registro del cliente,
+      // módulo Médico §1.4.2). Misma semántica que el alta administrativa: la
+      // primera es la principal, nacen pendientes de verificación, y cada
+      // concepto se valida contra el value set — la FK acepta cualquier
+      // concepto del catálogo y quién decide cuáles son especialidades es
+      // `VS_MEDICAL_SPECIALTY`, no el formato del uuid. Repetir una no crea
+      // dos filas: quien pega dos veces la misma opción declara una.
+      const especialidades = [...new Set(dto.specialtyConceptIds ?? [])];
+      for (const [orden, specialtyConceptId] of especialidades.entries()) {
+        await this.specialtyCatalog.assertIsMedicalSpecialty(
+          tx,
+          specialtyConceptId,
+        );
+        this.specialtiesRepo.create(tx, {
+          practitionerProfileId: person.id,
+          specialtyConceptId,
+          isPrimary: orden === 0,
+          boardCertified: false,
+          verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+          validFrom: new Date(),
+          actorUserId: user.id,
+        });
+      }
       await tx.flush();
 
       // 5) Vínculo cuenta-persona: el titular es él mismo.
@@ -443,22 +617,17 @@ export class IamPractitionerSelfRegistrationService {
         actorUserId: user.id,
       });
 
-      // 6) Contacto: el correo siempre, el teléfono si lo aportó.
-      this.contactPointsRepo.create(tx, {
-        ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-        ownerId: person.id,
-        systemConceptId: CONCEPTS.CONTACT_EMAIL,
-        value: dto.email,
-        useConceptId: CONCEPTS.CONTACT_USE_WORK,
-        actorUserId: user.id,
-      });
-      if (dto.phone) {
+      // 6) Contacto: el correo de trabajo siempre —es el de login—, y los
+      // demás si los aportó. Cada uno es una fila propia de
+      // `common.contact_points`, distinguida por el par sistema/uso: el modelo
+      // ya admitía N contactos por persona, lo que faltaba era pedirlos.
+      for (const contacto of contactosDeclarados(dto)) {
         this.contactPointsRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
-          systemConceptId: CONCEPTS.CONTACT_PHONE,
-          value: dto.phone,
-          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+          systemConceptId: contacto.systemConceptId,
+          value: contacto.value,
+          useConceptId: contacto.useConceptId,
           actorUserId: user.id,
         });
       }
@@ -555,7 +724,9 @@ export class IamPractitionerSelfRegistrationService {
         practitionerProfileId: practitioner.profileId,
         practitionerCode,
         licenseId: license.id,
-        credentialId: credential.id,
+        credentialId: credential?.id,
+        sedesLicenseId: sedesLicense?.id,
+        photoFileId,
         emailVerificationToken: raw,
         activacion,
         clinicalRoles: rolesConcedidos,
@@ -585,9 +756,15 @@ export class IamPractitionerSelfRegistrationService {
       practitionerProfileId: created.practitionerProfileId,
       practitionerCode: created.practitionerCode,
       licenseId: created.licenseId,
-      credentialId: created.credentialId,
+      // Ausentes, y no `undefined` explícito, cuando el alta no los declaró:
+      // el contrato dice opcionales y la respuesta no debe inventar claves.
+      ...(created.credentialId ? { credentialId: created.credentialId } : {}),
+      ...(created.sedesLicenseId
+        ? { sedesLicenseId: created.sedesLicenseId }
+        : {}),
       verificationStatus: 'PENDING',
       emailVerificationSent,
+      ...(created.photoFileId ? { photoFileId: created.photoFileId } : {}),
       ...(created.clinicalRoles.length > 0
         ? { clinicalRoles: created.clinicalRoles }
         : {}),
@@ -637,6 +814,49 @@ export class IamPractitionerSelfRegistrationService {
         'Could not enqueue the verification email; the practitioner is registered anyway',
       );
       return false;
+    }
+  }
+
+  private async uploadProfilePhoto(
+    userId: string,
+    profilePhotoBase64?: string,
+  ): Promise<string | undefined> {
+    if (!profilePhotoBase64 || !this.fileUploadService) {
+      return undefined;
+    }
+    const parsed = parseBase64Image(profilePhotoBase64);
+    if (!parsed || parsed.buffer.length === 0) {
+      return undefined;
+    }
+    const detectedMimeType = sniffMimeType(parsed.buffer) ?? parsed.mimeType;
+    const ext = detectedMimeType.split('/')[1] ?? 'jpg';
+    try {
+      const uploaded = await this.fileUploadService.upload(
+        {
+          originalname: `practitioner-photo-${userId}.${ext}`,
+          mimetype: detectedMimeType,
+          buffer: parsed.buffer,
+        },
+        {
+          category: FileCategory.IMAGE,
+          sensitivity: FileSensitivity.NORMAL,
+        },
+        {
+          id: userId,
+          roles: ['PRACTITIONER'],
+          tenantIds: [SEED.tenantId],
+        },
+      );
+      return uploaded.id;
+    } catch (err) {
+      this.logger.warn(
+        {
+          operation: 'iam.auth.register-practitioner',
+          error: (err as Error).message,
+        },
+        'Could not process practitioner profile photo; continuing registration without photo',
+      );
+      return undefined;
     }
   }
 }

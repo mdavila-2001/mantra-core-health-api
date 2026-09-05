@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 17 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 20 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `terminology`
 - **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
@@ -11,27 +11,143 @@ Referencia exhaustiva de 17 operación(es) del módulo `terminology`, derivada d
 
 ## Índice del módulo
 
-1. [POST /terminology/code-systems](#1-post-terminology-code-systems) — UC-03-01: crea un sistema de códigos y su fuente
-2. [POST /terminology/code-systems/{id}/versions](#2-post-terminology-code-systems-id-versions) — UC-03-02: crea una versión (borrador) de un sistema de códigos
-3. [GET /terminology/CodeSystem/$lookup](#3-get-terminology-codesystem-lookup) — UC-03-11: resuelve un concepto por sistema y código
-4. [POST /terminology/ConceptMap/$translate](#4-post-terminology-conceptmap-translate) — UC-03-09: cura o consulta un mapeo entre conceptos
-5. [GET /terminology/concepts](#5-get-terminology-concepts) — UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta
-6. [GET /terminology/concepts/{conceptId}](#6-get-terminology-concepts-conceptid) — Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
-7. [POST /terminology/concepts/{conceptId}/$deprecate](#7-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
-8. [POST /terminology/concepts/{conceptId}/designations](#8-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
-9. [POST /terminology/concepts/{conceptId}/properties](#9-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
-10. [POST /terminology/concepts/{conceptId}/relationships](#10-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
-11. [PUT /terminology/tenants/{tenantId}/catalog-policies](#11-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
-12. [GET /terminology/value-sets](#12-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
-13. [POST /terminology/value-sets](#13-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-14. [GET /terminology/value-sets/{id}/$expand](#14-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
-15. [POST /terminology/ValueSet/{id}/$expand](#15-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-16. [POST /terminology/versions/{versionId}/import](#16-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-17. [POST /terminology/versions/{versionId}/publish](#17-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+1. [GET /terminology/code-systems](#1-get-terminology-code-systems) — Sistemas de códigos registrados
+2. [POST /terminology/code-systems](#2-post-terminology-code-systems) — UC-03-01: crea un sistema de códigos y su fuente
+3. [GET /terminology/code-systems/{id}/versions](#3-get-terminology-code-systems-id-versions) — Versiones de un sistema de códigos
+4. [POST /terminology/code-systems/{id}/versions](#4-post-terminology-code-systems-id-versions) — UC-03-02: crea una versión (borrador) de un sistema de códigos
+5. [GET /terminology/CodeSystem/$lookup](#5-get-terminology-codesystem-lookup) — UC-03-11: resuelve un concepto por sistema y código
+6. [POST /terminology/ConceptMap/$translate](#6-post-terminology-conceptmap-translate) — UC-03-09: cura o consulta un mapeo entre conceptos
+7. [GET /terminology/concepts](#7-get-terminology-concepts) — UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta
+8. [GET /terminology/concepts/{conceptId}](#8-get-terminology-concepts-conceptid) — Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
+9. [POST /terminology/concepts/{conceptId}/$deprecate](#9-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
+10. [POST /terminology/concepts/{conceptId}/designations](#10-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
+11. [POST /terminology/concepts/{conceptId}/properties](#11-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
+12. [POST /terminology/concepts/{conceptId}/relationships](#12-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
+13. [PUT /terminology/tenants/{tenantId}/catalog-policies](#13-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
+14. [GET /terminology/value-sets](#14-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
+15. [POST /terminology/value-sets](#15-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
+16. [GET /terminology/value-sets/{id}/$expand](#16-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+17. [POST /terminology/ValueSet/{id}/$expand](#17-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+18. [POST /terminology/versions/{versionId}/import](#18-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+19. [POST /terminology/versions/{versionId}/import-file](#19-post-terminology-versions-versionid-import-file) — UC-03-03: importa conceptos desde un archivo NDJSON
+20. [POST /terminology/versions/{versionId}/publish](#20-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
-## 1. POST /terminology/code-systems
+## 1. GET /terminology/code-systems
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** Sistemas de códigos registrados
+- **Operation ID:** `TerminologyCodeSystemsController_listCodeSystems`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyCodeSystemsController.listCodeSystems](../../src/modules/terminology/controllers/terminology-code-systems.controller.ts)
+
+### Descripción de negocio
+
+Sistemas de códigos registrados. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Los sistemas de codificación registrados. Existe porque no se podían leer: sin esto, una pantalla que quiera importar conceptos no tiene forma de ofrecer a qué sistema, y el identificador había que sacarlo de la respuesta del alta y anotarlo a mano.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/code-systems` en `TerminologyCodeSystemsController_listCodeSystems`. El controlador delega en `CodeSystemsReadService.listCodeSystems`. No recibe body. El tipo de retorno estático es `Promise<ListCodeSystemsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/code-systems HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/code-systems HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListCodeSystemsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "internalCode": "icd10cm",
+      "name": "Nombre de ejemplo",
+      "canonicalUrl": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<CodeSystemListItemDto>` | Sin restricción adicional declarada | Los sistemas registrados. | `[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"icd10cm","name":"Nombre de ejemplo","canonicalUrl":"valor-ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador del sistema. | `00000000-0000-4000-8000-000000000001` |
+| `items[].internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno | `icd10cm` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre del sistema de codificación | `Nombre de ejemplo` |
+| `items[].canonicalUrl` | Sí | `string` | Sin restricción adicional declarada | URL canónica del sistema | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/code-systems"
+}
+```
+
+---
+
+## 2. POST /terminology/code-systems
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -168,7 +284,129 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /terminology/code-systems/{id}/versions
+## 3. GET /terminology/code-systems/{id}/versions
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** Versiones de un sistema de códigos
+- **Operation ID:** `TerminologyCodeSystemsController_listVersions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyCodeSystemsController.listVersions](../../src/modules/terminology/controllers/terminology-code-systems.controller.ts)
+
+### Descripción de negocio
+
+Versiones de un sistema de códigos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las versiones de un sistema de codificación. Cada una dice si **admite conceptos**, que es la pregunta que se hace quien va a importar: una versión publicada ya no los acepta.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/code-systems/{id}/versions` en `TerminologyCodeSystemsController_listVersions`. El controlador delega en `CodeSystemsReadService.listVersions`. No recibe body. El tipo de retorno estático es `Promise<ListCodeSystemVersionsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/code-systems/00000000-0000-4000-8000-000000000001/versions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/code-systems/00000000-0000-4000-8000-000000000001/versions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListCodeSystemVersionsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "version": 2026,
+      "state": "DRAFT",
+      "isDefault": true,
+      "publishedAt": "2026-07-31T12:00:00.000Z",
+      "acceptsConcepts": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<CodeSystemVersionListItemDto>` | Sin restricción adicional declarada | Las versiones del sistema. | `[{"id":"00000000-0000-4000-8000-000000000001","version":2026,"state":"DRAFT","isDefault":true,"publishedAt":"2026-07-31T12:00:00.000Z","acceptsConcepts":true}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la versión. | `00000000-0000-4000-8000-000000000001` |
+| `items[].version` | Sí | `string` | Sin restricción adicional declarada | Versión | `2026` |
+| `items[].state` | Sí | `string` | valores: `DRAFT`, `ACTIVE`, `RETIRED`, `DEPRECATED`, `UNKNOWN` | Estado, en palabra. `UNKNOWN` es el caso real de las versiones que dejaron los importadores externos sin fijar estado: no es un error, y admiten conceptos igual. `RETIRED` y `DEPRECATED` se nombran aparte porque **no** los admiten, y agruparlos bajo `UNKNOWN` los hacía pasar por el caso que sí. | `DRAFT` |
+| `items[].isDefault` | Sí | `boolean` | Sin restricción adicional declarada | Si es la versión por defecto | `true` |
+| `items[].publishedAt` | Sí | `string` | formato `date-time`; admite null | Cuándo se publicó, si se publicó. | `2026-07-31T12:00:00.000Z` |
+| `items[].acceptsConcepts` | Sí | `boolean` | Sin restricción adicional declarada | Si se le pueden importar conceptos | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/code-systems/{id}/versions"
+}
+```
+
+---
+
+## 4. POST /terminology/code-systems/{id}/versions
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -300,7 +538,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /terminology/CodeSystem/$lookup
+## 5. GET /terminology/CodeSystem/$lookup
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -442,7 +680,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /terminology/ConceptMap/$translate
+## 6. POST /terminology/ConceptMap/$translate
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -592,7 +830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /terminology/concepts
+## 7. GET /terminology/concepts
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -754,7 +992,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /terminology/concepts/{conceptId}
+## 8. GET /terminology/concepts/{conceptId}
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -962,7 +1200,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /terminology/concepts/{conceptId}/$deprecate
+## 9. POST /terminology/concepts/{conceptId}/$deprecate
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1096,7 +1334,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /terminology/concepts/{conceptId}/designations
+## 10. POST /terminology/concepts/{conceptId}/designations
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1250,7 +1488,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /terminology/concepts/{conceptId}/properties
+## 11. POST /terminology/concepts/{conceptId}/properties
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1393,7 +1631,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /terminology/concepts/{conceptId}/relationships
+## 12. POST /terminology/concepts/{conceptId}/relationships
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1534,7 +1772,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PUT /terminology/tenants/{tenantId}/catalog-policies
+## 13. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1701,7 +1939,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /terminology/value-sets
+## 14. GET /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1714,7 +1952,7 @@ Ejemplo de error normalizado:
 
 Permite resolver el uuid de un conjunto desde un código estable, sin hardcodear identificadores por entorno.
 
-Contexto declarado en el controlador: Listado de conjuntos de valores, buscable por código interno o texto libre. Va declarado **antes** que `:id/$expand` sólo por legibilidad; no compiten, porque aquél tiene dos segmentos. No pide rol, por el mismo motivo que la lectura de la expansión: un campo de formulario necesita resolver su conjunto de valores, y exigir rol de administración para eso deja el catálogo inutilizable desde el cliente.
+Contexto declarado en el controlador: Listado de conjuntos de valores, buscable por código interno o texto libre. Va declarado **antes** que `:id/$expand` sólo por legibilidad; no compiten, porque aquél tiene dos segmentos. No pide rol, por el mismo motivo que la lectura de la expansión: un campo de formulario necesita resolver su conjunto de valores, y exigir rol de administración para eso deja el catálogo inutilizable desde el cliente. Y no pide **sesión**, que es un paso más allá: el registro público es un formulario sin sesión y su desplegable de departamentos (`VS_BO_DEPARTMENT`) empieza justamente acá. Con la ruta autenticada, esa pantalla recibía 401 antes de pintar el primer campo. Es seguro porque lo que devuelve no es de nadie: `terminology.value_sets` y las tablas de su expansión no tienen `tenant_id` —son el catálogo global, fuera del alcance de las políticas RLS por tenant— y ninguna fila contiene datos de un paciente. Lo que sale de acá son códigos y nombres de catálogo.
 
 ### Descripción del sistema
 
@@ -1742,7 +1980,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- Rate limit particular: `Throttle(PUBLIC_CATALOG_READ_THROTTLE)`.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
 
@@ -1816,7 +2054,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_CATALOG_READ_THROTTLE). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
 Ejemplo de error normalizado:
@@ -1833,7 +2071,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /terminology/value-sets
+## 15. POST /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1979,7 +2217,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /terminology/value-sets/{id}/$expand
+## 16. GET /terminology/value-sets/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1992,7 +2230,7 @@ Ejemplo de error normalizado:
 
 UC-03-08: lee la expansión vigente de un conjunto de valores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: UC-03-08: lee una página de la expansión vigente del conjunto de valores. Es la contraparte de lectura del `POST ValueSet/:id/$expand`, que **materializa** los miembros y por eso exige `SECURITY_ADMIN`. Ésta sólo los devuelve, así que no pide rol de administración: un campo de formulario necesita la lista de opciones válidas, y exigir rol de seguridad para leerla dejaría el catálogo inutilizable desde el cliente. Pagina por cursor y no por página numerada: la expansión se reemplaza entera cada vez que se re-expande, y con `offset` una re-expansión a mitad de recorrido saltaría o repetiría miembros sin que el cliente se entere.
+Contexto declarado en el controlador: UC-03-08: lee una página de la expansión vigente del conjunto de valores. Es la contraparte de lectura del `POST ValueSet/:id/$expand`, que **materializa** los miembros y por eso exige `SECURITY_ADMIN`. Ésta sólo los devuelve, así que no pide rol de administración: un campo de formulario necesita la lista de opciones válidas, y exigir rol de seguridad para leerla dejaría el catálogo inutilizable desde el cliente. Tampoco pide sesión, y va en el mismo lote que el listado de arriba a propósito: resolver el conjunto y leer sus miembros son los dos pasos de una misma lectura, y abrir sólo el primero deja el formulario público con el identificador del catálogo y sin sus opciones. Pagina por cursor y no por página numerada: la expansión se reemplaza entera cada vez que se re-expande, y con `offset` una re-expansión a mitad de recorrido saltaría o repetiría miembros sin que el cliente se entere.
 
 ### Descripción del sistema
 
@@ -2021,7 +2259,7 @@ Authorization: Bearer <access_token_jwt>
 
 - Requiere `Authorization: Bearer <JWT>`.
 - Deben ser UUID válidos: `id`.
-- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- Rate limit particular: `Throttle(PUBLIC_CATALOG_READ_THROTTLE)`.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
 
@@ -2103,7 +2341,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Conjunto de valores no encontrado | Excepción explícita en src/modules/terminology/services/value-sets.service.ts |
 | 404 | `NOT_FOUND` | options.valueSetVersionId           ? 'Versión del conjunto de valores no encontrada'           : 'El conjunto de valores no tiene una versión vigente' | Excepción explícita en src/modules/terminology/services/value-sets.service.ts |
 | 409 | `CONFLICT` | La versión no pertenece a ese conjunto de valores | Excepción explícita en src/modules/terminology/services/value-sets.service.ts |
-| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_CATALOG_READ_THROTTLE). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
 Ejemplo de error normalizado:
@@ -2120,7 +2358,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /terminology/ValueSet/{id}/$expand
+## 17. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2262,7 +2500,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /terminology/versions/{versionId}/import
+## 18. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2406,7 +2644,153 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /terminology/versions/{versionId}/publish
+## 19. POST /terminology/versions/{versionId}/import-file
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** UC-03-03: importa conceptos desde un archivo NDJSON
+- **Operation ID:** `TerminologyVersionsController_importConceptsFile`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyVersionsController.importConceptsFile](../../src/modules/terminology/controllers/terminology-versions.controller.ts)
+
+### Descripción de negocio
+
+UC-03-03: importa conceptos desde un archivo NDJSON. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Importa conceptos desde un archivo NDJSON ya subido (UC-03-03, por archivo). Es la cara sin techo del import de arriba: aquél recibe los conceptos en el cuerpo, y el cuerpo está limitado a 1 MB —unos diez mil conceptos—. Un sistema de codificación real tiene cien mil. El archivo llega **acá** y no por `common/files`: aquella superficie valida el tipo por bytes mágicos y sólo admite PDF e imágenes, porque existe para evidencia clínica. Un archivo de texto no tiene firma binaria. Acá el tipo se comprueba por parseo, que para NDJSON es una prueba más fuerte. El contenido no se almacena: se convierte en filas y se descarta. Lo que queda es el lote en `terminology.catalog_import_batches`, con la huella del contenido y los contadores.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /terminology/versions/{versionId}/import-file` en `TerminologyVersionsController_importConceptsFile`. El controlador delega en `ConceptFileImportService.importFromFile`. Valida el body como `object` y consume `multipart/form-data`. El tipo de retorno estático es `Promise<ImportConceptsFileResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `versionId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `object`; los campos opcionales se omiten.
+
+```http
+POST /terminology/versions/00000000-0000-4000-8000-000000000001/import-file HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: multipart/form-data
+
+{
+  "file": "<contenido-binario>"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `versionId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `file` | Sí | `string` | formato `binary` | Sin descripción específica en el contrato OpenAPI. | `<contenido-binario>` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /terminology/versions/00000000-0000-4000-8000-000000000001/import-file HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: multipart/form-data
+
+{
+  "file": "<contenido-binario>"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImportConceptsFileResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "batchId": "00000000-0000-4000-8000-000000000001",
+  "totalRead": 1,
+  "inserted": 1,
+  "skipped": 1,
+  "errors": 1,
+  "errorSamples": [
+    {
+      "line": 1,
+      "message": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `batchId` | Sí | `string` | formato `uuid` | Lote de importación registrado | `00000000-0000-4000-8000-000000000001` |
+| `totalRead` | Sí | `number` | Sin restricción adicional declarada | Líneas con contenido leídas | `1` |
+| `inserted` | Sí | `number` | Sin restricción adicional declarada | Conceptos creados | `1` |
+| `skipped` | Sí | `number` | Sin restricción adicional declarada | Códigos que ya existían en la versión | `1` |
+| `errors` | Sí | `number` | Sin restricción adicional declarada | Líneas descartadas | `1` |
+| `errorSamples` | Sí | `array<ImportFileIssueDto>` | Sin restricción adicional declarada | Primeros errores encontrados, como muestra | `[{"line":1,"message":"valor-ejemplo"}]` |
+| `errorSamples[].line` | Sí | `number` | Sin restricción adicional declarada | Línea del archivo, empezando en 1 | `1` |
+| `errorSamples[].message` | Sí | `string` | Sin restricción adicional declarada | Motivo por el que la línea se descartó | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Versión no encontrada | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
+| 404 | `NOT_FOUND` | El sistema de codificación de la versión no existe | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El archivo llegó vacío | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
+| 422 | `PRECONDITION_FAILED` | errores.length > 0           ? 'Ninguna línea del archivo es un concepto válido: se esperaba ' +               'NDJSON con «code» y «display» por línea.'           : 'El archivo no tiene ninguna línea con contenido.' | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo se puede importar en una versión en borrador | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/versions/{versionId}/import-file"
+}
+```
+
+---
+
+## 20. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`

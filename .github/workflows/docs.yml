@@ -181,6 +181,16 @@ jobs:
       - name: Guardrails REDESA — antipatrones prohibidos por las reglas canónicas
         run: yarn redesa:guardrails
 
+      # El DDL canónico se edita en `../SQL`, fuera del repositorio, y el
+      # despliegue monta la copia versionada de `database/`. Aquí solo se clona
+      # este repositorio, así que no hay con qué comparar: lo que se comprueba
+      # es que la copia existe y tiene contenido. Sin ella, un despliegue
+      # arranca con `/init/SQL` vacío, la base queda sin una sola tabla y la
+      # aplicación devuelve 500 en la primera escritura — y lo hace en el
+      # servidor, no aquí. Ver `database/README.md`.
+      - name: DDL versionado — la copia de database/ está y no está vacía
+        run: yarn db:vendor:check
+
       - name: Pruebas unitarias
         run: yarn test
 

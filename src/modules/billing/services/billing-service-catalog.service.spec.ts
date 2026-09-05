@@ -8,9 +8,21 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { BillingServiceCatalogService } from './billing-service-catalog.service';
-import { ConflictException, encodeKeysetCursor } from '../../../common';
+import {
+  CONCEPTS,
+  ConflictException,
+  ResourceNotFoundException,
+  encodeKeysetCursor,
+  runWithTenant,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+/** Quien atiende: sin rol administrativo, con perfil profesional. */
+const medico = {
+  id: 'user-med',
+  roles: ['PRACTITIONER'],
+  practitionerProfileId: 'hp-1',
+} as any;
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -24,16 +36,38 @@ function build() {
   };
   const serviceCatalogRepo = {
     findByCode: mockFn(),
+    findById: mockFn(),
     create: mockFn(),
     searchPage: mockFn(),
+  };
+  const practiceTenantLookup = {
+    findActivePracticeIdsForPractitioner: mockFn().mockResolvedValue([]),
+    findTenantOfPractice: mockFn().mockResolvedValue(null),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new BillingServiceCatalogService(
     em as any,
     serviceCatalogRepo as any,
+    practiceTenantLookup as any,
     logger as any,
   );
-  return { service, tx, em, serviceCatalogRepo };
+  return { service, tx, em, serviceCatalogRepo, practiceTenantLookup };
+}
+
+/** Una fila editable del catálogo, con los campos que el servicio toca. */
+function fila(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 's1',
+    practiceId: 'pr1',
+    code: 'CITA_MEDICA',
+    name: 'Cita médica',
+    defaultPrice: '0.00',
+    currencyConceptId: undefined as string | undefined,
+    isActive: true,
+    updatedAt: new Date(0),
+    updatedByUserId: undefined as string | undefined,
+    ...overrides,
+  };
 }
 
 const item = {
@@ -142,6 +176,132 @@ describe('BillingServiceCatalogService', () => {
         ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * FT-22-R05. Lo que se comprueba acá no es «guarda el número», sino **quién
+   * puede guardarlo** y que un servicio ajeno responda lo mismo que uno que no
+   * existe: si el rechazo del ajeno fuera distinto, probar uuids revelaría qué
+   * servicios tiene la organización de al lado.
+   */
+  describe('update', () => {
+    it('quien atiende en esa práctica corrige el precio y su moneda', async () => {
+      const d = build();
+      const row = fila();
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['otra', 'pr1'],
+      );
+
+      const res = await d.service.update(
+        's1',
+        { defaultPrice: '150.00' },
+        medico,
+      );
+
+      expect(res.defaultPrice).toBe('150.00');
+      // Una fila sin moneda la gana en su primera edición: un importe sin
+      // unidad no es un precio.
+      expect(res.currencyConceptId).toBe(CONCEPTS.CURRENCY_BOB);
+      expect(res.currencyCode).toBe('BOB');
+      expect(row.updatedByUserId).toBe(medico.id);
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('conserva la moneda que la fila ya tenía', async () => {
+      const d = build();
+      const row = fila({ currencyConceptId: CONCEPTS.CURRENCY_USD });
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      const res = await d.service.update(
+        's1',
+        { defaultPrice: '20.00' },
+        medico,
+      );
+
+      expect(res.currencyConceptId).toBe(CONCEPTS.CURRENCY_USD);
+      expect(res.currencyCode).toBe('USD');
+    });
+
+    it('deja intacto lo que el cuerpo no menciona', async () => {
+      const d = build();
+      const row = fila({ defaultPrice: '80.00' });
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      const res = await d.service.update('s1', { isActive: false }, medico);
+
+      expect(res.isActive).toBe(false);
+      expect(res.defaultPrice).toBe('80.00');
+      expect(res.name).toBe('Cita médica');
+    });
+
+    it('un servicio inexistente es 404', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.update('s1', { defaultPrice: '10.00' }, medico),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('un servicio de una práctica ajena es el MISMO 404, no un 403', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(fila());
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['otra-practica'],
+      );
+
+      await expect(
+        d.service.update('s1', { defaultPrice: '10.00' }, medico),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('la cuenta administradora corrige lo que su organización dio de alta', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(fila());
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+        'mi-tenant',
+      );
+
+      const res = await runWithTenant('mi-tenant', () =>
+        d.service.update('s1', { defaultPrice: '90.00' }, actor),
+      );
+
+      expect(res.defaultPrice).toBe('90.00');
+    });
+
+    it('la cuenta administradora de otra organización recibe 404', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(fila());
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+        'otro-tenant',
+      );
+
+      await expect(
+        runWithTenant('mi-tenant', () =>
+          d.service.update('s1', { defaultPrice: '90.00' }, actor),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('una cuenta sin perfil profesional ni rol administrativo recibe 404', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(fila());
+
+      await expect(
+        d.service.update('s1', { defaultPrice: '10.00' }, {
+          id: 'u9',
+          roles: ['PATIENT'],
+        } as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

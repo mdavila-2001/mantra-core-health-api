@@ -67,6 +67,17 @@ export class PractitionerListItemDto {
   verificationStatusConceptId!: string;
 
   /**
+   * Si su matrícula fue verificada por la plataforma.
+   *
+   * Se resuelve en el servidor y no comparando el concepto en el cliente: el
+   * uuid del estado no debe viajar escrito en ningún front. Es lo que la guía
+   * dibuja como sello — la guía lista el padrón entero, y esto distingue a
+   * quien además probó lo que declara.
+   */
+  @ApiProperty({ description: 'Si la matrícula fue verificada' })
+  verified!: boolean;
+
+  /**
    * Si declara tomar pacientes nuevos.
    */
   @ApiProperty()
@@ -83,6 +94,21 @@ export class PractitionerListItemDto {
    */
   @ApiProperty({ type: [PractitionerListSpecialtyDto] })
   specialties!: PractitionerListSpecialtyDto[];
+
+  /**
+   * Dónde atiende, en palabras.
+   *
+   * Texto plano y no una entidad porque eso es lo que el modelo guarda: la
+   * afiliación tiene `organization_name` —donde el padrón dejó «DIRECCIÓN –
+   * CLÍNICA» en una sola línea— y casi ninguna apunta a una sede registrada.
+   * Ordenar por cercanía o agrupar por clínica exigiría normalizar eso
+   * primero; mostrar dónde trabaja, no.
+   *
+   * Sólo las **publicables**: declaradas y aprobadas. Una pendiente diría que
+   * una organización aceptó a alguien que todavía no aceptó.
+   */
+  @ApiProperty({ type: [String], description: 'Dónde atiende, en texto' })
+  workplaces!: string[];
 }
 
 /**
@@ -116,4 +142,59 @@ export class ListPractitionersResponseDto {
     description: 'Cursor opaco de la página siguiente; null si no hay más',
   })
   nextCursor!: string | null;
+}
+
+/**
+ * Cuántos profesionales visibles ejercen una especialidad.
+ */
+export class SpecialtyPractitionerCountDto {
+  /**
+   * La especialidad, como concepto de `VS_MEDICAL_SPECIALTY`.
+   */
+  @ApiProperty({ description: 'Concepto de la especialidad' })
+  specialtyConceptId!: string;
+
+  /**
+   * Profesionales distintos que la ejercen hoy y que la guía muestra.
+   */
+  @ApiProperty({ description: 'Profesionales visibles que la ejercen' })
+  practitionerCount!: number;
+}
+
+/**
+ * El recuento de la guía por especialidad.
+ *
+ * Existe para que una portada de especialidades pueda decir cuántos hay en cada
+ * una **sin traerse la guía entera**, que es lo que hacía el front: paginaba
+ * hasta agotar el cursor sólo para contar. Sale de los mismos filtros que
+ * `listPractitioners` —especialidad vigente y perfil visible—, así que el
+ * número de una tarjeta es exactamente el largo de la lista que abre.
+ */
+export class ListSpecialtyCountsResponseDto {
+  /**
+   * Una fila por especialidad con al menos un profesional. Las que no tienen a
+   * nadie **no viajan**: una tarjeta que promete y abre vacía es peor que no
+   * estar.
+   */
+  @ApiProperty({ type: [SpecialtyPractitionerCountDto] })
+  items!: SpecialtyPractitionerCountDto[];
+
+  /**
+   * Profesionales visibles en total, sin repetir a quien tiene varias
+   * especialidades. No es la suma de `items`: esa cuenta a cada uno tantas
+   * veces como especialidades ejerza.
+   */
+  @ApiProperty({ description: 'Profesionales visibles, sin repetir' })
+  practitionerTotal!: number;
+
+  /**
+   * Cuántos no declaran **ninguna** especialidad vigente.
+   *
+   * Existe porque son alcanzables sólo si la portada los ofrece: quien entra
+   * por especialidad no llega nunca a quien no tiene ninguna. Hoy son casi
+   * trescientos —todo el que se registra solo nace así— e incluyen a los
+   * médicos con cuenta, que son justamente los que atienden por la app.
+   */
+  @ApiProperty({ description: 'Visibles sin ninguna especialidad vigente' })
+  withoutSpecialtyCount!: number;
 }

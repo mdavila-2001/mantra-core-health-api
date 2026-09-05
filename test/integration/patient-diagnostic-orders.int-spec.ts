@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { bootstrapTestApp, bearer, type TestContext,
+  camposObligatoriosDePaciente,
+} from './harness';
 import { SEED } from '../../src/common';
 import { CLIN } from '../../src/modules/clinical/clinical.concepts';
 import { DIAG } from '../../src/modules/diagnostics/diagnostics.concepts';
@@ -28,6 +30,8 @@ import { DIAG } from '../../src/modules/diagnostics/diagnostics.concepts';
  */
 describe('Órdenes diagnósticas del paciente (integración)', () => {
   let ctx: TestContext;
+  /** Los campos que el alta de paciente exige; salen del arnés. */
+  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
   const u = Date.now();
 
   /** El titular de las órdenes. */
@@ -46,6 +50,7 @@ describe('Órdenes diagnósticas del paciente (integración)', () => {
     await http()
       .post('/iam/auth/register-patient')
       .send({
+        ...camposDePaciente,
         nationalId,
         password,
         displayName: `Paciente ${etiqueta}`,
@@ -88,6 +93,7 @@ describe('Órdenes diagnósticas del paciente (integración)', () => {
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
 
     tokenAna = await registrarPaciente(`ana${u}`);
     tokenBruno = await registrarPaciente(`bruno${u}`);

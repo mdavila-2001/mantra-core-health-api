@@ -5,8 +5,21 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
 } from 'class-validator';
+
+/**
+ * Importe con hasta dos decimales y sin signo.
+ *
+ * `@IsNumberString()` a secas acepta `-1` y `10.123`: el primero es un precio
+ * negativo y el segundo se redondea en silencio al llegar a `numeric(…, 2)`.
+ * Ninguno de los dos puede entrar por un endpoint que edita plata.
+ */
+const PRICE_PATTERN = /^\d+(\.\d{1,2})?$/;
+/** Mensaje del patrón de importe, en el idioma del producto. */
+const PRICE_PATTERN_MESSAGE =
+  'El precio debe ser un número positivo con hasta dos decimales';
 
 /** Cuerpo de `POST /billing/service-catalog`. */
 export class CreateServiceCatalogItemDto {
@@ -34,6 +47,28 @@ export class CreateServiceCatalogItemDto {
   name!: string;
 
   /**
+   * Valor de description text mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Descripción larga del servicio, para la tarjeta',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  descriptionText?: string;
+
+  /**
+   * Identificador asociado a image file.
+   */
+  @ApiPropertyOptional({
+    description: 'Imagen del servicio (`common.files`)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  imageFileId?: string;
+
+  /**
    * Identificador asociado a service concept.
    */
   @ApiPropertyOptional({
@@ -52,6 +87,7 @@ export class CreateServiceCatalogItemDto {
     example: '100.00',
   })
   @IsNumberString()
+  @Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })
   defaultPrice!: string;
 
   /**
@@ -95,6 +131,58 @@ export class CreateServiceCatalogItemDto {
   isActive?: boolean;
 }
 
+/**
+ * Cuerpo de `PATCH /billing/service-catalog/:id`.
+ *
+ * Es deliberadamente más chico que el alta: `practiceId` y `code` identifican al
+ * servicio dentro de su práctica y moverlos sería otra operación, no una
+ * edición. Lo que se edita es lo que el profesional decide de su propia oferta.
+ */
+export class UpdateServiceCatalogItemDto {
+  /**
+   * Valor de name mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ description: 'Nombre del servicio' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  name?: string;
+
+  /**
+   * Valor de default price mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Precio de referencia del servicio',
+    example: '150.00',
+  })
+  @IsOptional()
+  @IsNumberString()
+  @Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })
+  defaultPrice?: string;
+
+  /**
+   * Identificador asociado a currency concept.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Moneda del precio (concepto). Sólo se acepta junto con `defaultPrice`',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  currencyConceptId?: string;
+
+  /**
+   * Valor de is active mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Si el servicio sigue disponible para cotizar',
+  })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+
 /** Un servicio del catálogo maestro. */
 export class ServiceCatalogItemDto {
   /**
@@ -122,6 +210,22 @@ export class ServiceCatalogItemDto {
   name!: string;
 
   /**
+   * Valor de description text mantenido por la instancia.
+   */
+  @ApiPropertyOptional()
+  descriptionText?: string;
+
+  /**
+   * Identificador asociado a image file.
+   *
+   * Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese
+   * contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió
+   * o a un rol de revisión.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  imageFileId?: string;
+
+  /**
    * Identificador asociado a service concept.
    */
   @ApiPropertyOptional({ format: 'uuid' })
@@ -138,6 +242,20 @@ export class ServiceCatalogItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   currencyConceptId?: string;
+
+  /**
+   * Sigla de la moneda (`BOB`, `USD`), cuando el concepto es uno de los
+   * globales que el código conoce.
+   *
+   * Va junto al uuid y no en su lugar: quien muestra un importe necesita la
+   * unidad, y hoy no hay forma de resolverla en el cliente. Queda `undefined`
+   * si la fila apunta a uno de los juegos de moneda que el proyecto todavía no
+   * unificó (`PHARM_CURRENCY_*`, `PINV_CURRENCY_*`, `ACCT_*`); en ese caso el
+   * importe se muestra sin unidad, que es lo que pasa hoy, en vez de inventarle
+   * una.
+   */
+  @ApiPropertyOptional({ description: 'Sigla de la moneda', example: 'BOB' })
+  currencyCode?: string;
 
   /**
    * Identificador asociado a tax code.

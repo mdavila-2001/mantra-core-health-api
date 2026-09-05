@@ -850,6 +850,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "definitionId": "00000000-0000-4000-8000-000000000001",
   "valueSetId": "00000000-0000-4000-8000-000000000001",
   "versionId": "00000000-0000-4000-8000-000000000001",
+  "valueSetVersionId": "00000000-0000-4000-8000-000000000001",
+  "schemaVersion": "valor-ejemplo",
   "cacheToken": "valor-ejemplo",
   "allowCustomValue": true,
   "options": [
@@ -874,6 +876,8 @@ Campos de la respuesta:
 | `definitionId` | Sí | `string` | formato `uuid` | Identificador de la definición. | `00000000-0000-4000-8000-000000000001` |
 | `valueSetId` | Sí | `string` | formato `uuid` | Conjunto de valores de terminología del que sale la enumeración. | `00000000-0000-4000-8000-000000000001` |
 | `versionId` | Sí | `string` | formato `uuid` | Versión publicada de la que salen las opciones. | `00000000-0000-4000-8000-000000000001` |
+| `valueSetVersionId` | Sí | `string` | formato `uuid` | Versión del value set que la versión vigente congeló. Es lo que hay que volver a mandar para redactar la siguiente: la entidad la exige y ninguna otra lectura la exponía. | `00000000-0000-4000-8000-000000000001` |
+| `schemaVersion` | Sí | `string` | Sin restricción adicional declarada | Versión de esquema que la versión vigente declara. Se repite al redactar. | `valor-ejemplo` |
 | `cacheToken` | No | `string` | Sin restricción adicional declarada | Testigo de caché de la versión publicada. | `valor-ejemplo` |
 | `allowCustomValue` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo admite un valor fuera del conjunto. | `true` |
 | `options` | Sí | `array<DynamicEnumOptionItemDto>` | Sin restricción adicional declarada | Opciones habilitadas, en el orden en que se ofrecen. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","ordinal":1,"isDefault":true}]` |
@@ -1501,6 +1505,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
+  "valueSetVersionId": "00000000-0000-4000-8000-000000000001",
+  "schemaVersion": "valor-ejemplo",
   "options": [
     {
       "conceptId": "00000000-0000-4000-8000-000000000001",
@@ -1522,8 +1528,8 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `valueSetVersionId` | No | `string` | formato `uuid` | Versión del value set que se congela | `00000000-0000-4000-8000-000000000001` |
-| `schemaVersion` | No | `string` | longitud máxima 50 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `valueSetVersionId` | Sí | `string` | formato `uuid` | Versión del value set que se congela | `00000000-0000-4000-8000-000000000001` |
+| `schemaVersion` | Sí | `string` | longitud máxima 50 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `options` | Sí | `array<EnumOptionDto>` | mínimo 1 elemento(s) | Snapshot ordenado de las opciones | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","ordinal":1,"isDefault":false,"enabled":true,"metadataJson":{}}]` |
 | `options[].conceptId` | Sí | `string` | formato `uuid` | Concepto de terminología | `00000000-0000-4000-8000-000000000001` |
 | `options[].code` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |

@@ -51,6 +51,7 @@ function build() {
     findByCode: mockFn(),
     create: mockFn(),
     listPage: mockFn().mockResolvedValue([]),
+    findVisibleProfileIds: mockFn().mockResolvedValue([]),
   };
   const authorizationsRepo = {
     create: mockFn(),
@@ -70,6 +71,7 @@ function build() {
     findAllByPractitioner: mockFn().mockResolvedValue([]),
     findByPractitioners: mockFn().mockResolvedValue([]),
     findProfileIdsBySpecialty: mockFn().mockResolvedValue([]),
+    findCurrentSpecialtyPairs: mockFn().mockResolvedValue([]),
     demotePrimary: mockFn().mockResolvedValue(0),
   };
   const languagesRepo = {
@@ -84,6 +86,7 @@ function build() {
     findByPractitionerInStatus: mockFn().mockResolvedValue([]),
     findById: mockFn().mockResolvedValue(null),
     findBySites: mockFn().mockResolvedValue([]),
+    findByPractitioners: mockFn().mockResolvedValue([]),
     create: mockFn(),
     findOwn: mockFn().mockResolvedValue(null),
     remove: mockFn(),
@@ -152,6 +155,17 @@ function build() {
   // El contacto del profesional (`common.contact_points`). Vacío por defecto.
   const contactPointsRepo = {
     findVigentesByOwner: mockFn(() => Promise.resolve([])),
+    findVigenteByOwnerAndSystem: mockFn(() => Promise.resolve(null)),
+    closeVigente: mockFn(),
+    create: mockFn(),
+  };
+
+  // El domicilio del profesional. Sin dirección por defecto: es el caso de casi
+  // todo perfil sembrado, y quien la afirme la declara en su prueba.
+  const addressesRepo = {
+    findVigenteByOwnerAndUse: mockFn(() => Promise.resolve(null)),
+    closeVigente: mockFn(),
+    create: mockFn(),
   };
 
   const service = new ProfilesPractitionersService(
@@ -173,6 +187,7 @@ function build() {
     // Sin contactos por defecto: es el caso de casi todo perfil sembrado, y
     // las pruebas que hablan del correo lo declaran ellas.
     contactPointsRepo as any,
+    addressesRepo as any,
     accountLinksRepo as any,
     effectiveRoles as any,
     verificationBypass as any,
@@ -1217,6 +1232,41 @@ describe('ProfilesPractitionersService', () => {
       expect(practitioner.professionalBio).toBe('');
     });
 
+    /**
+     * Lo encontró una prueba de punta a punta contra la base: mandar
+     * `birthDate: null` para borrar la fecha la guardaba como **1/1/1970**,
+     * porque `new Date(null)` es la época Unix y no «sin fecha». El médico
+     * quedaba nacido en 1970 sin haber escrito eso en ningún lado.
+     */
+    it('borrar la fecha de nacimiento la deja sin valor, no en 1970', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+      const person = { id: 'per-1', displayName: 'Dr. Uno', birthDate: new Date(1979, 10, 5) };
+      d.personsRepo.findById.mockResolvedValue(person);
+
+      await d.service.updateOwnPractitionerProfile({ birthDate: null }, {
+        id: 'u-1',
+      } as any);
+
+      expect(person.birthDate).toBeUndefined();
+    });
+
+    it('y una fecha de verdad sí se guarda', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+      const person: any = { id: 'per-1', displayName: 'Dr. Uno' };
+      d.personsRepo.findById.mockResolvedValue(person);
+
+      await d.service.updateOwnPractitionerProfile({ birthDate: '1979-11-05' }, {
+        id: 'u-1',
+      } as any);
+
+      expect(person.birthDate).toBeInstanceOf(Date);
+      expect((person.birthDate as Date).getUTCFullYear()).toBe(1979);
+    });
+
     /** Igual que la lectura: sin persona vinculada no hay nada que editar. */
     it('sin persona vinculada falla con precondición', async () => {
       const d = build();
@@ -1243,6 +1293,166 @@ describe('ProfilesPractitionersService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
+  describe('dónde atiende cada uno, en la guía', () => {
+    const fila = {
+      profileId: 'per-1',
+      practitionerCode: 'MED-1',
+      professionalTitle: 'Cardióloga',
+      verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
+      acceptsNewPatients: true,
+      telehealthAvailable: false,
+    };
+
+    it('lista sus sedes en texto, sin repetir la misma dos veces', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([fila]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([['per-1', { id: 'per-1', displayName: 'Dra. Salas' }]]),
+      );
+      d.affiliationsRepo.findByPractitioners.mockResolvedValue([
+        { practitionerProfileId: 'per-1', organizationName: 'Clínica Foianini' },
+        { practitionerProfileId: 'per-1', organizationName: 'Hospital San Juan de Dios' },
+        // La misma, otra vez: el padrón repite la sede por cada especialidad.
+        { practitionerProfileId: 'per-1', organizationName: 'Clínica Foianini' },
+        // Sin nombre: no hay nada que mostrar.
+        { practitionerProfileId: 'per-1', organizationName: '  ' },
+      ]);
+
+      const pagina = await d.service.listPractitioners({ limit: 50 });
+
+      expect(pagina.items[0].workplaces).toEqual([
+        'Clínica Foianini',
+        'Hospital San Juan de Dios',
+      ]);
+    });
+
+    /**
+     * TP-2: un vínculo que la organización todavía no decidió no puede
+     * presentarse como si lo hubiera aceptado. La guía pide sólo los estados
+     * publicables, y esta prueba es la que impide que alguien agregue
+     * `PENDIENTE` a la lista sin darse cuenta.
+     */
+    it('pide sólo los vínculos publicables: declarado y aprobado', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([fila]);
+
+      await d.service.listPractitioners({ limit: 50 });
+
+      const estados = d.affiliationsRepo.findByPractitioners.mock.calls[0][2];
+      expect(estados).toEqual([PROF.AFFILIATION_DECLARED, PROF.AFFILIATION_APPROVED]);
+      expect(estados).not.toContain(PROF.AFFILIATION_PENDING);
+    });
+  });
+
+  describe('countPractitionersBySpecialty (portada de la guía)', () => {
+    it('cuenta gente sin repetir y deja fuera a quien la guía no muestra', async () => {
+      const d = build();
+      // `bal-1` no está entre los visibles: su perfil no está verificado.
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue([
+        'per-1',
+        'per-2',
+      ]);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+        { practitionerProfileId: 'per-2', specialtyConceptId: 'con-cardio' },
+        // El mismo profesional dos veces en la misma especialidad —una
+        // recertificación deja dos filas vigentes— cuenta UNA.
+        { practitionerProfileId: 'per-2', specialtyConceptId: 'con-cardio' },
+        { practitionerProfileId: 'per-2', specialtyConceptId: 'con-pediatria' },
+        { practitionerProfileId: 'bal-1', specialtyConceptId: 'con-cardio' },
+      ]);
+
+      const recuento = await d.service.countPractitionersBySpecialty();
+
+      expect(recuento.items).toEqual([
+        { specialtyConceptId: 'con-cardio', practitionerCount: 2 },
+        { specialtyConceptId: 'con-pediatria', practitionerCount: 1 },
+      ]);
+      // El total NO es la suma de las tarjetas: `per-2` ejerce dos.
+      expect(recuento.practitionerTotal).toBe(2);
+    });
+
+    it('no devuelve la especialidad en la que no queda nadie visible', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue(['per-1']);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+        { practitionerProfileId: 'bal-1', specialtyConceptId: 'con-oncologia' },
+      ]);
+
+      const recuento = await d.service.countPractitionersBySpecialty();
+
+      // Una tarjeta que promete y abre vacía es peor que no estar.
+      expect(recuento.items.map((i) => i.specialtyConceptId)).toEqual([
+        'con-cardio',
+      ]);
+    });
+
+    /**
+     * La razón de ser del endpoint: que el número de la tarjeta sea el largo de
+     * la lista que abre. El criterio de visibilidad tiene que ser el MISMO en
+     * los dos —hoy, ninguno—; si un día vuelve a haber filtro y sólo se pone en
+     * uno, esta prueba es la que lo atrapa.
+     */
+    it('usa el mismo criterio de visibilidad que el listado: sin filtro', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue([]);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([]);
+      d.practitionersRepo.listPage.mockResolvedValue([]);
+
+      await d.service.countPractitionersBySpecialty();
+      await d.service.listPractitioners({ limit: 50 });
+
+      const delRecuento = d.practitionersRepo.findVisibleProfileIds.mock.calls[0][1];
+      const delListado = d.practitionersRepo.listPage.mock.calls[0][1].verificationStatusConceptId;
+      expect(delRecuento).toBeUndefined();
+      expect(delRecuento).toBe(delListado);
+    });
+  });
+
+  describe('los que no declaran especialidad', () => {
+    it('el recuento los cuenta aparte: la portada tiene que poder ofrecerlos', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue(['per-1', 'per-2', 'per-3']);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+      ]);
+
+      const recuento = await d.service.countPractitionersBySpecialty();
+
+      // `per-2` y `per-3` no aparecen en ninguna tarjeta de especialidad: sin
+      // este número, la guía no tendría por dónde ofrecerlos.
+      expect(recuento.withoutSpecialtyCount).toBe(2);
+      expect(recuento.practitionerTotal).toBe(3);
+    });
+
+    it('el listado sabe pedirlos, y es el complemento exacto del filtro', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue(['per-1', 'per-2']);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+      ]);
+      d.practitionersRepo.listPage.mockResolvedValue([]);
+
+      await d.service.listPractitioners({ withoutSpecialty: true, limit: 50 });
+
+      expect(d.practitionersRepo.listPage.mock.calls[0][1].profileIds).toEqual(['per-2']);
+    });
+
+    it('sin nadie sin especialidad devuelve vacío sin consultar la página', async () => {
+      const d = build();
+      d.practitionersRepo.findVisibleProfileIds.mockResolvedValue(['per-1']);
+      d.specialtiesRepo.findCurrentSpecialtyPairs.mockResolvedValue([
+        { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
+      ]);
+
+      const pagina = await d.service.listPractitioners({ withoutSpecialty: true, limit: 50 });
+
+      expect(pagina.items).toEqual([]);
+      expect(d.practitionersRepo.listPage).not.toHaveBeenCalled();
+    });
+  });
+
   describe('listPractitioners (guía de profesionales, R2-1)', () => {
     const fila = {
       profileId: 'per-1',
@@ -1325,17 +1535,40 @@ describe('ProfilesPractitionersService', () => {
     });
 
     /**
-     * Corrección #12/#13: fuera del bypass, la guía solo lista verificados.
+     * Revierte la #12/#13. Un perfil nace pendiente por diseño y verificarlo
+     * exige que una autoridad valide la matrícula: filtrar dejaba la guía vacía
+     * fuera de DEV —835 de 836 pendientes— y sostenida por un bypass. Un padrón
+     * publica a quien existe; el sello distingue a quien probó lo que declara.
      */
-    it('con el bypass apagado filtra por verificado', async () => {
+    it('NO filtra por verificación: la guía lista el padrón entero', async () => {
       const d = build();
       d.practitionersRepo.listPage.mockResolvedValue([fila]);
 
       await d.service.listPractitioners({ limit: 50 });
 
-      expect(d.practitionersRepo.listPage.mock.calls[0][1]).toMatchObject({
-        verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
-      });
+      expect(
+        d.practitionersRepo.listPage.mock.calls[0][1].verificationStatusConceptId,
+      ).toBeUndefined();
+    });
+
+    it('cada fila dice si está verificada, para que la tarjeta lo muestre', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([
+        fila,
+        { ...fila, profileId: 'per-2', practitionerCode: 'MED-2', verificationStatusConceptId: 'otro' },
+      ]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([
+          ['per-1', { id: 'per-1', displayName: 'Dra. Verificada' }],
+          ['per-2', { id: 'per-2', displayName: 'Dr. Pendiente' }],
+        ]),
+      );
+
+      const pagina = await d.service.listPractitioners({ limit: 50 });
+
+      // El front no compara conceptos: el uuid del estado no viaja escrito en
+      // ningún cliente.
+      expect(pagina.items.map((i) => i.verified)).toEqual([true, false]);
     });
 
     it('con el bypass activo no filtra por verificación', async () => {
@@ -1827,4 +2060,273 @@ describe('ProfilesPractitionersService', () => {
       expect(d.em.count).not.toHaveBeenCalled();
     });
   });
+
+  /**
+   * **Los títulos propios, varios y con diploma adjunto.**
+   *
+   * El registro de procesos (MÓDULO MÉDICO §1.17 a §1.20) pide «espacio para
+   * poder subir varios diplomados», y lo mismo para maestrías, doctorados y
+   * especialidades. Hasta acá el alta creaba UNA credencial y no existía forma
+   * de agregar la segunda.
+   */
+  /**
+   * **La ficha de directorio: un profesional sin matrícula conocida.**
+   *
+   * El padrón de una aseguradora dice quién atiende, de qué y dónde, pero no
+   * publica el número de matrícula de nadie. El alta exigía los dos números, y
+   * el modelo nunca: `health_practitioner_profiles` no tiene columna ni FK que
+   * pida una autorización. Esa obligatoriedad vivía sólo en el DTO, y forzaba a
+   * inventar una credencial para 961 médicos reales.
+   */
+  describe('alta sin matrícula ni credencial', () => {
+    function prepararAlta(d: ReturnType<typeof build>) {
+      d.practitionersRepo.findByCode.mockResolvedValue(null);
+      d.personsRepo.create.mockReturnValue({ id: 'per-9' });
+      d.personProfilesRepo.create.mockReturnValue({ id: 'per-9' });
+      d.practitionersRepo.create.mockReturnValue({
+        profileId: 'per-9',
+        practitionerCode: 'DIR-1',
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+    }
+
+    const fichaDeDirectorio = {
+      practitionerCode: 'DIR-1',
+      displayName: 'ABASTO VEGA, ROSEMARY',
+    } as any;
+
+    it('da de alta la ficha sin crear matrícula ni credencial', async () => {
+      const d = build();
+      prepararAlta(d);
+
+      const creada = await d.service.onboardPractitioner(fichaDeDirectorio, actor);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+      expect(creada.licenseId).toBeUndefined();
+      expect(creada.credentialId).toBeUndefined();
+    });
+
+    /**
+     * Lo contrario también importa: quien SÍ trae los números sigue teniendo sus
+     * dos filas. Sin esta prueba, «hacerlo opcional» podría haber sido «dejar de
+     * crearlo nunca».
+     */
+    it('y las crea igual cuando el alta sí trae los números', async () => {
+      const d = build();
+      prepararAlta(d);
+      d.authorizationsRepo.create.mockReturnValue({ id: 'lic-1' });
+      d.credentialsRepo.create.mockReturnValue({ id: 'cred-1' });
+
+      const creada = await d.service.onboardPractitioner(
+        { ...fichaDeDirectorio, licenseNumber: 'MP-77', credentialNumber: 'TIT-9' },
+        actor,
+      );
+
+      expect(creada.licenseId).toBe('lic-1');
+      expect(creada.credentialId).toBe('cred-1');
+    });
+  });
+
+  describe('addOwnCredential', () => {
+    const cuerpo = {
+      credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+      number: 'DIP-2024-17',
+      issuingInstitutionText: 'Universidad Gabriel René Moreno',
+      issueDate: '2024-03-15',
+    };
+
+    it('agrega el título y lo deja PENDIENTE de verificación', async () => {
+      const d = build();
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+        number: 'DIP-2024-17',
+        stateConceptId: PROF.CRED_PENDING,
+        createdAt: new Date(),
+      });
+
+      const creada = await d.service.addOwnCredential(cuerpo as any, {
+        id: 'u-1',
+      } as any);
+
+      expect(creada.stateConceptId).toBe(PROF.CRED_PENDING);
+      const escrito = d.credentialsRepo.create.mock.calls[0][1];
+      expect(escrito.practitionerProfileId).toBe('pp1');
+      expect(escrito.credentialTypeConceptId).toBe(PROF.CREDENTIAL_TYPE_DIPLOMA);
+    });
+
+    /**
+     * La trampa del repositorio: `em.create` sólo escribe lo que el objeto
+     * NOMBRA, así que un campo que el repo no lista se descarta en silencio —
+     * compila, pasa los tests de servicio, y la columna queda en NULL. Ya pasó
+     * con el canal de teleconsulta. Esta prueba mira el borde.
+     */
+    it('el archivo del diploma llega hasta el repositorio, no se pierde', async () => {
+      const d = build();
+      // El archivo lo subió el mismo que declara el título. Decirlo explícito:
+      // el doble por defecto lo pone a nombre de otro usuario.
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'u-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        stateConceptId: PROF.CRED_PENDING,
+        fileId: 'file-1',
+        createdAt: new Date(),
+      });
+
+      await d.service.addOwnCredential({ ...cuerpo, fileId: 'file-1' } as any, {
+        id: 'u-1',
+      } as any);
+
+      expect(d.credentialsRepo.create.mock.calls[0][1].fileId).toBe('file-1');
+    });
+
+    /**
+     * La FK acepta cualquier concepto del catálogo, así que sin la lista
+     * cerrada un profesional podría declarar como «título» el concepto de un
+     * idioma o de un estado de cita.
+     */
+    it('un concepto que no es tipo de credencial se rechaza', async () => {
+      const d = build();
+
+      await expect(
+        d.service.addOwnCredential(
+          { ...cuerpo, credentialTypeConceptId: PROF.LANGUAGE_SPANISH } as any,
+          { id: 'u-1' } as any,
+        ),
+      ).rejects.toThrow(PreconditionFailedException);
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+    });
+
+    /** Un diploma en PDF: el tipo va contra la lista de DOCUMENTO, no la de imagen. */
+    it('acepta un PDF como diploma', async () => {
+      const d = build();
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'u-1',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        mimeType: 'application/pdf',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      });
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        stateConceptId: PROF.CRED_PENDING,
+        createdAt: new Date(),
+      });
+
+      await expect(
+        d.service.addOwnCredential({ ...cuerpo, fileId: 'file-1' } as any, {
+          id: 'u-1',
+        } as any),
+      ).resolves.toBeDefined();
+    });
+
+    /**
+     * Apareció al escribir las pruebas de arriba: el doble por defecto pone el
+     * archivo a nombre de otro usuario y el alta se cortó sola. Vale fijarlo —
+     * sin esto, cualquiera podría colgar su título del archivo de otro
+     * conociendo el id.
+     */
+    it('no se puede colgar el título del archivo de otro', async () => {
+      const d = build();
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'OTRO-USUARIO',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        d.service.addOwnCredential({ ...cuerpo, fileId: 'file-1' } as any, {
+          id: 'u-1',
+        } as any),
+      ).rejects.toThrow();
+      expect(d.credentialsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+
+  /**
+   * **Las fichas de directorio no pueden declarar dónde atienden.**
+   *
+   * Los profesionales que publican las redes de las aseguradoras no tienen
+   * cuenta —no traen correo—, así que `addOwnAffiliation` no les sirve: resuelve
+   * el sujeto desde la sesión. Sin una ruta administrativa, un médico con tres
+   * consultorios se veía sin ninguno, o había que cargarlo tres veces para que
+   * se notara — que es justo el duplicado que las redes ya traen y que hubo que
+   * deshacer.
+   */
+  describe('addAffiliationFor', () => {
+    const admin = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+    const cuerpo = {
+      organizationName: 'AV. IRALA 737 – CLINICA FOIANINI',
+      roleTitle: 'Consultorio de atención',
+      startDate: '2020-01-01',
+    } as any;
+
+    it('escribe la afiliación del perfil indicado, no del actor', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({ profileId: 'otro-1' });
+      d.affiliationsRepo.findSame.mockResolvedValue(null);
+      d.affiliationsRepo.create.mockReturnValue({
+        id: 'af-1',
+        practitionerProfileId: 'otro-1',
+        organizationName: cuerpo.organizationName,
+        roleTitle: cuerpo.roleTitle,
+        startDate: new Date('2020-01-01'),
+        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await d.service.addAffiliationFor('otro-1', cuerpo, admin);
+
+      const [, data] = d.affiliationsRepo.create.mock.calls[0];
+      expect(data.practitionerProfileId).toBe('otro-1');
+      // No se consultó la sesión: el sujeto vino en la ruta.
+      expect(d.ownership.requireOwnPractitionerProfileId).not.toHaveBeenCalled();
+    });
+
+    /** Un id que no existe no puede crear un vínculo colgando de la nada. */
+    it('un perfil inexistente responde no encontrado', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.addAffiliationFor('fantasma', cuerpo, admin),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.affiliationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    /** El alta propia no cambió: sigue resolviendo el sujeto desde la sesión. */
+    it('el alta propia sigue tomando el perfil de la sesión', async () => {
+      const d = build();
+      d.affiliationsRepo.findSame.mockResolvedValue(null);
+      d.affiliationsRepo.create.mockReturnValue({
+        id: 'af-2',
+        practitionerProfileId: 'pp1',
+        organizationName: cuerpo.organizationName,
+        roleTitle: cuerpo.roleTitle,
+        startDate: new Date('2020-01-01'),
+        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await d.service.addOwnAffiliation(cuerpo, { id: 'u-1' } as any);
+
+      expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalled();
+      expect(d.affiliationsRepo.create.mock.calls[0][1].practitionerProfileId).toBe('pp1');
+    });
+  });
+
 });

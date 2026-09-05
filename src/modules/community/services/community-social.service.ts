@@ -64,6 +64,13 @@ const MEDIA_ROLE_BY_CODE: Record<string, string> = {
   DOCUMENT: COMM.MEDIA_ROLE_DOCUMENT,
 };
 
+/** Roles válidos para un adjunto de comentario (REQ-01-011): sin video ni documento. */
+const COMMENT_MEDIA_ROLE_BY_CODE: Record<string, string> = {
+  IMAGE: COMM.MEDIA_ROLE_IMAGE,
+  STICKER: COMM.MEDIA_ROLE_STICKER,
+  GIF: COMM.MEDIA_ROLE_GIF,
+};
+
 const NOTIFICATION_LEVEL_BY_CODE: Record<string, string> = {
   ALL: COMM.NOTIFICATION_LEVEL_ALL,
   HIGHLIGHTS: COMM.NOTIFICATION_LEVEL_HIGHLIGHTS,
@@ -252,6 +259,7 @@ export class CommunitySocialService {
           : 'PRIVATE',
       verificationStatusConceptId: profile.verificationStatusConceptId ?? null,
       avatarFileId: profile.avatarFileId ?? null,
+      coverFileId: profile.coverFileId ?? null,
       statusConceptId: profile.statusConceptId,
     };
   }
@@ -320,6 +328,23 @@ export class CommunitySocialService {
           },
         );
       }
+      // Misma regla que el avatar, mismo servicio: la portada es un segundo
+      // archivo, no una variante del primero.
+      if (dto.coverFileId) {
+        await this.attachableFiles.assertUsableBy(
+          tx,
+          dto.coverFileId,
+          actor,
+          {
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+            operation: 'community.profile.upsertOwn',
+          },
+          {
+            subject: 'El archivo de la portada',
+            notFound: 'El archivo de la portada no existe',
+          },
+        );
+      }
 
       // Misma resolución que la lectura: si la vitrina existe a nombre de la
       // cuenta, editarla es editar la suya, no crear una segunda.
@@ -342,6 +367,9 @@ export class CommunitySocialService {
         if (dto.avatarFileId !== undefined) {
           existente.avatarFileId = dto.avatarFileId ?? undefined;
         }
+        if (dto.coverFileId !== undefined) {
+          existente.coverFileId = dto.coverFileId ?? undefined;
+        }
         touch(existente, actor.id);
       } else {
         this.profilesRepo.create(tx, {
@@ -361,6 +389,7 @@ export class CommunitySocialService {
               : PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility],
           acceptsReviews: dto.acceptsReviews,
           avatarFileId: dto.avatarFileId ?? undefined,
+          coverFileId: dto.coverFileId ?? undefined,
           actorUserId: actor.id,
         });
       }
@@ -436,12 +465,13 @@ export class CommunitySocialService {
     tx: EntityManager,
     fileId: string,
     actor: AuthenticatedUser,
+    operation: string = 'community.post.publish',
   ): Promise<void> {
     await this.attachableFiles.assertUsableBy(
       tx,
       fileId,
       actor,
-      { operation: 'community.post.publish' },
+      { operation },
       {
         subject: 'El archivo adjunto',
         notFound: 'Archivo adjunto no encontrado',
@@ -596,6 +626,27 @@ export class CommunitySocialService {
       if (!rootCommentId) {
         comment.rootCommentId = comment.id;
         rootCommentId = comment.id;
+      }
+
+      // REQ-01-011: imágenes, stickers y GIFs adjuntos. Misma comprobación de
+      // uso que `publishPost` — un `fileId` ajeno o borrado no cuelga del
+      // comentario de nadie sólo porque el cliente lo mandó.
+      for (const [i, m] of (dto.media ?? []).entries()) {
+        await this.assertMediaFileUsableBy(
+          tx,
+          m.fileId,
+          actor,
+          'community.comment.create',
+        );
+        this.commentsRepo.createMedia(tx, {
+          commentId: comment.id,
+          fileId: m.fileId,
+          mediaRoleConceptId:
+            COMMENT_MEDIA_ROLE_BY_CODE[m.mediaRole ?? 'IMAGE'],
+          altText: m.altText,
+          ordinal: m.ordinal ?? i,
+          actorUserId: actor.id,
+        });
       }
 
       for (const mention of dto.mentions ?? []) {

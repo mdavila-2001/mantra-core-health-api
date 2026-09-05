@@ -293,6 +293,69 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    PROF.RELATIONSHIP_MOTHER,
+    {
+      display: 'Madre',
+      definition:
+        'La madre del paciente. Declarar el parentesco no le otorga por sí solo la representación legal: eso es el tutor, y se acredita aparte.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_FATHER,
+    {
+      display: 'Padre',
+      definition:
+        'El padre del paciente. Igual que con la madre, el parentesco por sí solo no acredita la representación legal.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_SPOUSE,
+    {
+      display: 'Cónyuge o pareja',
+      definition:
+        'La persona con quien el paciente comparte su vida en pareja, esté o no casada con él.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_CHILD,
+    {
+      display: 'Hijo o hija',
+      definition:
+        'Un hijo o una hija del paciente. Es el contacto habitual de una persona mayor a la que acompaña su familia.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_SIBLING,
+    {
+      display: 'Hermano o hermana',
+      definition: 'Un hermano o una hermana del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_OTHER_RELATIVE,
+    {
+      display: 'Otro familiar',
+      definition:
+        'Un pariente que no es madre, padre, cónyuge, hijo ni hermano: abuela, tío, prima, sobrino.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_FRIEND,
+    {
+      display: 'Amistad',
+      definition:
+        'Alguien cercano al paciente sin vínculo de familia. Mucha gente vive lejos de la suya, y es a quien de verdad se llama.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_OTHER,
+    {
+      display: 'Otra relación',
+      definition:
+        'Cualquier otro vínculo: un vecino, el encargado del edificio, quien cuida al paciente. Existe para no obligar a declarar un parentesco falso.',
+    },
+  ],
+  [
     PROF.RELATED_ACTIVE,
     {
       display: 'Vínculo vigente',
@@ -393,9 +456,41 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     PROF.CREDENTIAL_TYPE_DEGREE,
     {
-      display: 'Título académico',
+      display: 'Título universitario',
       definition:
-        'Credencial que acredita la formación del profesional: el título expedido por la universidad.',
+        'El título de grado expedido por la universidad. Un profesional puede tener más de uno: el registro contempla a quien cursó dos carreras.',
+    },
+  ],
+  [
+    PROF.CREDENTIAL_TYPE_DIPLOMA,
+    {
+      display: 'Diplomado',
+      definition:
+        'Curso de posgrado corto. Se cargan tantos como haya cursado el profesional.',
+    },
+  ],
+  [
+    PROF.CREDENTIAL_TYPE_MASTER,
+    {
+      display: 'Maestría',
+      definition:
+        'Título de maestría. Se cargan tantos como haya obtenido el profesional.',
+    },
+  ],
+  [
+    PROF.CREDENTIAL_TYPE_DOCTORATE,
+    {
+      display: 'Doctorado',
+      definition:
+        'Título de doctorado. Se cargan tantos como haya obtenido el profesional.',
+    },
+  ],
+  [
+    PROF.CREDENTIAL_TYPE_SPECIALTY,
+    {
+      display: 'Título de especialidad',
+      definition:
+        'El diploma que respalda una especialidad. No es la especialidad que ejerce —eso lo declara practitioner_specialties— sino el documento que la acredita.',
     },
   ],
   [
@@ -911,6 +1006,13 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     {
       display: 'Domicilio particular',
       definition: 'Dirección donde vive la persona.',
+    },
+  ],
+  [
+    CONCEPTS.ADDR_USE_WORK,
+    {
+      display: 'Domicilio laboral',
+      definition: 'Dirección donde la persona trabaja.',
     },
   ],
   [

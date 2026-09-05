@@ -62,18 +62,59 @@ function buildCatalog() {
     findSlotsByTemplateInRange: mockFn(),
     findSlotsByResourceInRange: mockFn().mockResolvedValue([]),
     findOpenSlotsInWindow: mockFn(),
+    findExceptionById: mockFn(),
+    removeException: mockFn(),
+    patientHasBookingWithResource: mockFn().mockResolvedValue(false),
+    findBookingsOfTemplate: mockFn().mockResolvedValue({
+      total: 0,
+      live: 0,
+      sample: [],
+    }),
+    reactivateTemplate: mockFn(),
+    findSlotsOfResourceForUpdate: mockFn().mockResolvedValue([]),
+    findBookingsOfSlots: mockFn().mockResolvedValue([]),
+    retireTemplate: mockFn().mockResolvedValue({
+      releasedSlots: 0,
+      keptSlots: 0,
+    }),
+    findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // La regla de pertenencia vive en su propio servicio y tiene specs propios;
   // acá sólo importa qué hace el catálogo con cada veredicto.
   const vinculos = { evaluar: mockFn(async () => 'sin-vinculos') };
+  const tiempoProfesional = {
+    assertRangoLibre: mockFn(async () => undefined),
+    compromisos: mockFn(async () => []),
+    citasConfirmadas: mockFn(async () => []),
+  };
+  // Mover el horario avisa a quien tenía turno. Por omisión nadie tiene cuenta
+  // resoluble: así el camino feliz de las demás pruebas no emite nada.
+  const noticeRepo = {
+    describeBooking: mockFn().mockResolvedValue(null),
+    findAccountForProfile: mockFn().mockResolvedValue(null),
+  };
+  const notices = { emit: mockFn().mockResolvedValue({ delivered: true }) };
+
   const service = new SchedulingCatalogService(
     em as any,
     catalogRepo,
     logger as any,
     vinculos as any,
+    tiempoProfesional as any,
+    noticeRepo as any,
+    notices as any,
   );
-  return { service, tx, catalogRepo, em, vinculos };
+  return {
+    service,
+    tx,
+    catalogRepo,
+    em,
+    vinculos,
+    tiempoProfesional,
+    noticeRepo,
+    notices,
+  };
 }
 
 describe('SchedulingCatalogService', () => {
@@ -593,8 +634,10 @@ describe('SchedulingCatalogService', () => {
 
         const res = await d.service.listTemplates(RESOURCE, actor);
 
-        // Ni presentes en null ni reventando: simplemente ausentes.
+        // Ni presentes en null ni reventando: simplemente ausentes. `retired`
+        // sí viaja siempre: es un booleano derivado, no una columna anulable.
         expect(res.items[0]).toEqual({
+          retired: false,
           id: 'tpl-1',
           name: 'Horario',
           statusConceptId: 'c',
@@ -710,6 +753,10 @@ describe('SchedulingCatalogService', () => {
           exceptionTypeConceptId: 'tipo-1',
           startAt: '2026-09-10T13:00:00.000Z',
           endAt: '2026-09-10T21:00:00.000Z',
+          // Siempre presente: es una etiqueta derivada del concepto, no una
+          // columna anulable. `tipo-1` no está en el catálogo, así que cae en
+          // el respaldo en vez de mostrar el identificador.
+          reasonLabel: 'Bloqueado',
         });
       });
 
@@ -782,6 +829,1057 @@ describe('SchedulingCatalogService', () => {
           d.service.createTemplate(RESOURCE, dto, actor as any),
         ).rejects.toBeInstanceOf(ResourceNotFoundException);
       });
+
+      /**
+       * REQ-10-026 · el slot tiene que entrar en la franja.
+       *
+       * Antes de esto, un slot más largo que la franja no rechazaba nada:
+       * `generateSlots` simplemente no producía ni un turno para ese día, en
+       * silencio. Quien publicó veía «Vigente» y recién descubría el hueco al
+       * contar los turnos por semana.
+       */
+      it('rejects a slot longer than its own franja', async () => {
+        const d = buildCatalog();
+
+        await expect(
+          d.service.createTemplate(
+            RESOURCE,
+            {
+              ...dto,
+              rules: [
+                {
+                  dayOfWeek: 1,
+                  startTime: '08:00:00',
+                  endTime: '08:20:00',
+                  slotMinutes: 30,
+                },
+              ],
+            },
+            actor as any,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('accepts a slot that fills the franja exactly', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+        const res = await d.service.createTemplate(
+          RESOURCE,
+          {
+            ...dto,
+            rules: [
+              {
+                dayOfWeek: 1,
+                startTime: '08:00:00',
+                endTime: '08:30:00',
+                slotMinutes: 30,
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res.ruleCount).toBe(1);
+      });
+    });
+
+    /* --------------------------------------------------------------------
+       TAREA-10 punto 6 · borrar un horario avisa antes de romper nada
+       -------------------------------------------------------------------- */
+
+    /**
+     * REACTIVAR UN HORARIO PAUSADO — «me voy de viaje y vuelvo».
+     *
+     * Retirar era un camino de ida: volver obligaba a publicar un horario nuevo
+     * y dejar el viejo en la lista para siempre. El caso lo dijo el dueño del
+     * carril con sus palabras, y es el uso corriente de un consultorio.
+     */
+    /**
+     * LA TIPOLOGÍA RAÍZ — carril 12, y estaba bloqueado.
+     *
+     * El propietario lo pidió con ejemplos y sin lista: «con otros colores los
+     * otros procedimientos (TURNOS, OPERACIONES, ETC.) catalogado por tipología
+     * raíz». La columna `appointments.type_concept_id` existía desde siempre y
+     * **no había un solo concepto que ponerle**, así que toda actividad era
+     * indistinguible de las demás en la agenda del día.
+     */
+    /**
+     * MOVER EL HORARIO N MINUTOS — carril 12.
+     *
+     * *«Un botón que se llame mover horario, que desplace los slots N minutos
+     * después y envíe mensajes automáticos por la app de mover horarios y sea
+     * seleccionable a todos o ciertos slots en específico.»*
+     *
+     * Distinto de «avisar demora», que sólo avisa: acá el turno de la persona
+     * pasa a ser otro.
+     */
+    /**
+     * CERRAR CUPOS SUELTOS — el último punto del carril 12.
+     *
+     * *«Otro botón para cancelar cita específica o slots específicos, esto
+     * implícitamente detona un bloqueo de horario para el día de hoy únicamente
+     * (para que no genere conflictos a la hora de generar los slots disponibles
+     * en los horarios del doctor).»*
+     *
+     * Lo que está entre paréntesis es la razón de ser: cerrar un cupo SIN dejar
+     * la excepción sirve hasta que alguien regenera.
+     */
+    /**
+     * EDITAR UN BLOQUEO — AC-11-7, y resuelve la P-11-3.
+     *
+     * La pregunta era qué hace editar con los cupos. La respuesta: **agrandar
+     * cierra, achicar NO reabre**. No es una simetría rota por comodidad: las
+     * dos direcciones no tienen la misma consecuencia. Cerrar de más ofrece
+     * menos turnos y el profesional lo pidió; reabrir ofrecería turnos que
+     * nadie decidió ofrecer.
+     */
+    describe('updateException', () => {
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      function conBloqueo(
+        d: ReturnType<typeof buildCatalog>,
+        extra: Record<string, unknown> = {},
+      ) {
+        const exception = {
+          id: 'exc-1',
+          resourceId: RESOURCE,
+          startAt: new Date(2026, 8, 10, 9, 0),
+          endAt: new Date(2026, 8, 10, 13, 0),
+          reason: 'Trámite',
+          ...extra,
+        };
+        d.catalogRepo.findExceptionById.mockResolvedValue(exception);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        return exception;
+      }
+
+      it('conserva el MISMO id: editar no borra y recrea', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        const res = await d.service.updateException(
+          'exc-1',
+          { reason: 'Mudanza' },
+          duenio as never,
+        );
+
+        expect(res.id).toBe('exc-1');
+      });
+
+      it('agrandar el rango CIERRA los cupos nuevos', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([
+          {
+            statusConceptId: CONCEPTS.SLOT_OPEN,
+            remainingCapacity: 1,
+            capacity: 1,
+          },
+          {
+            statusConceptId: CONCEPTS.SLOT_OPEN,
+            remainingCapacity: 1,
+            capacity: 1,
+          },
+        ]);
+
+        const res = await d.service.updateException(
+          'exc-1',
+          { endAt: new Date(2026, 8, 10, 18, 0).toISOString() },
+          duenio as never,
+        );
+
+        expect(res.blockedSlots).toBe(2);
+      });
+
+      it('achicar el rango NO reabre ninguno', async () => {
+        // Reabrir ofrecería turnos que nadie decidió ofrecer. El módulo queda
+        // con una sola regla: los cupos sólo los crea publicar el horario.
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        const res = await d.service.updateException(
+          'exc-1',
+          { endAt: new Date(2026, 8, 10, 11, 0).toISOString() },
+          duenio as never,
+        );
+
+        expect(res.blockedSlots).toBe(0);
+        expect(d.catalogRepo.findOpenSlotsInWindow).not.toHaveBeenCalled();
+      });
+
+      it('un cupo con paciente no se cierra aunque el rango lo alcance', async () => {
+        // Misma regla que al crear: un bloqueo no cancela citas.
+        const d = buildCatalog();
+        conBloqueo(d);
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([
+          {
+            statusConceptId: CONCEPTS.SLOT_OPEN,
+            remainingCapacity: 0,
+            capacity: 1,
+          },
+        ]);
+
+        const res = await d.service.updateException(
+          'exc-1',
+          { endAt: new Date(2026, 8, 10, 18, 0).toISOString() },
+          duenio as never,
+        );
+
+        expect(res.blockedSlots).toBe(0);
+      });
+
+      it('pasar a «Otro» sin texto se rechaza, mirando lo que VA A QUEDAR', async () => {
+        // Cambiar el tipo sin tocar el texto dejaría un bloqueo sin explicar
+        // por la puerta de atrás.
+        const d = buildCatalog();
+        conBloqueo(d, { reason: undefined });
+
+        await expect(
+          d.service.updateException(
+            'exc-1',
+            { exceptionType: 'OTHER' },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('un rango al revés se rechaza', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        await expect(
+          d.service.updateException(
+            'exc-1',
+            { endAt: new Date(2026, 8, 10, 8, 0).toISOString() },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('no se edita el bloqueo de otro', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        await expect(
+          d.service.updateException('exc-1', { reason: 'x' }, {
+            ...duenio,
+            practitionerProfileId: 'hp-DE-OTRO',
+          } as never),
+        ).rejects.toBeDefined();
+      });
+    });
+
+    describe('closeSlots', () => {
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      function conRecursoPropio(d: ReturnType<typeof buildCatalog>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+      }
+
+      function cupo(id: string, hora: number) {
+        return {
+          id,
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+          startAt: new Date(2026, 8, 10, hora, 0),
+          endAt: new Date(2026, 8, 10, hora, 30),
+        };
+      }
+
+      it('cierra los cupos Y deja la excepción, en la misma operación', async () => {
+        // Una sin la otra es media operación: cerrar sin excepción dura hasta
+        // la próxima generación.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        const cupos = [cupo('s-1', 9), cupo('s-2', 10)];
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue(cupos);
+
+        const res = await d.service.closeSlots(
+          RESOURCE,
+          { exceptionType: 'ERRAND', slotIds: ['s-1', 's-2'] },
+          duenio as never,
+        );
+
+        expect(res.closedSlots).toBe(2);
+        expect(res.exceptionId).toBe('exc-1');
+        expect(cupos[0].statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+        expect(d.catalogRepo.createException).toHaveBeenCalled();
+      });
+
+      it('la excepción cubre lo cerrado, no el día entero', async () => {
+        // «Para el día de hoy únicamente» acota hacia arriba; no dice que haya
+        // que cerrar la jornada. Cerrar de más quitaría turnos que el
+        // profesional no tocó.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([
+          cupo('s-1', 9),
+          cupo('s-2', 11),
+        ]);
+
+        const res = await d.service.closeSlots(
+          RESOURCE,
+          { exceptionType: 'ERRAND', slotIds: ['s-1', 's-2'] },
+          duenio as never,
+        );
+
+        expect(new Date(res.from).getHours()).toBe(9);
+        expect(new Date(res.to).getHours()).toBe(11);
+        expect(new Date(res.to).getMinutes()).toBe(30);
+      });
+
+      it('con un paciente citado NO cierra nada y dice cuáles', async () => {
+        // Cancelar el turno de alguien exige motivo y le avisa. Hacerlo de
+        // arrastre sería decidir por quien está esperando.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([
+          cupo('s-1', 9),
+        ]);
+        d.catalogRepo.findBookingsOfSlots.mockResolvedValue([{ id: 'b-1' }]);
+
+        await expect(
+          d.service.closeSlots(
+            RESOURCE,
+            { exceptionType: 'ERRAND', slotIds: ['s-1'] },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(ConflictException);
+
+        expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+      });
+
+      it('«Otro» sin explicación se rechaza, igual que al bloquear', async () => {
+        const d = buildCatalog();
+
+        await expect(
+          d.service.closeSlots(
+            RESOURCE,
+            { exceptionType: 'OTHER', slotIds: ['s-1'] },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('cupos que no son de esa agenda: no encontrado', async () => {
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([]);
+
+        await expect(
+          d.service.closeSlots(
+            RESOURCE,
+            { exceptionType: 'ERRAND', slotIds: ['s-ajeno'] },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      });
+    });
+
+    describe('shiftSlots', () => {
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      function conRecursoPropio(d: ReturnType<typeof buildCatalog>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+      }
+
+      function cupo(hora: number) {
+        return {
+          id: `s-${hora}`,
+          startAt: new Date(2026, 8, 10, hora, 0),
+          endAt: new Date(2026, 8, 10, hora, 30),
+        };
+      }
+
+      const ventana = {
+        from: new Date(2026, 8, 10, 0, 0).toISOString(),
+        to: new Date(2026, 8, 11, 0, 0).toISOString(),
+      };
+
+      it('corre cada cupo los minutos pedidos, arranque Y fin', () => {
+        // Mover sólo el arranque alargaría la consulta en silencio: veinte
+        // minutos más tarde con el mismo fin es veinte minutos menos de
+        // atención.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        const cupos = [cupo(9), cupo(10)];
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue(cupos);
+
+        return d.service
+          .shiftSlots(
+            RESOURCE,
+            { shiftMinutes: 20, ...ventana },
+            duenio as never,
+          )
+          .then((res) => {
+            expect(res.movedSlots).toBe(2);
+            expect(cupos[0].startAt.getHours()).toBe(9);
+            expect(cupos[0].startAt.getMinutes()).toBe(20);
+            expect(cupos[0].endAt.getMinutes()).toBe(50);
+          });
+      });
+
+      it('acepta minutos negativos: adelantar es simétrico de atrasar', async () => {
+        // El profesional que termina antes quiere adelantar a los que esperan.
+        // Negarlo lo obligaría a cancelar y volver a crear.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        const cupos = [cupo(10)];
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue(cupos);
+
+        await d.service.shiftSlots(
+          RESOURCE,
+          { shiftMinutes: -30, ...ventana },
+          duenio as never,
+        );
+
+        expect(cupos[0].startAt.getHours()).toBe(9);
+        expect(cupos[0].startAt.getMinutes()).toBe(30);
+      });
+
+      it('mover CERO minutos se rechaza en vez de no hacer nada', async () => {
+        // Una operación que no cambia nada y responde «listo» hace creer que la
+        // agenda se movió.
+        const d = buildCatalog();
+
+        await expect(
+          d.service.shiftSlots(
+            RESOURCE,
+            { shiftMinutes: 0, ...ventana },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('una ventana al revés se rechaza', async () => {
+        const d = buildCatalog();
+
+        await expect(
+          d.service.shiftSlots(
+            RESOURCE,
+            { shiftMinutes: 10, from: ventana.to, to: ventana.from },
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('sólo mueve los cupos que se nombran, si se nombran', async () => {
+        // «Seleccionable a todos o ciertos slots en específico»: la lista viaja
+        // al repositorio, que es donde se acota la consulta.
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([cupo(9)]);
+
+        await d.service.shiftSlots(
+          RESOURCE,
+          { shiftMinutes: 15, ...ventana, slotIds: ['s-9'] },
+          duenio as never,
+        );
+
+        expect(d.catalogRepo.findSlotsOfResourceForUpdate).toHaveBeenCalledWith(
+          expect.anything(),
+          RESOURCE,
+          expect.any(Date),
+          expect.any(Date),
+          ['s-9'],
+        );
+      });
+
+      it('sin cupos en la ventana no avisa a nadie', async () => {
+        const d = buildCatalog();
+        conRecursoPropio(d);
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([]);
+
+        const res = await d.service.shiftSlots(
+          RESOURCE,
+          { shiftMinutes: 20, ...ventana },
+          duenio as never,
+        );
+
+        expect(res.movedSlots).toBe(0);
+        expect(res.notified).toBe(0);
+        expect(d.notices.emit).not.toHaveBeenCalled();
+      });
+
+      it('no se mueve la agenda de otro', async () => {
+        const d = buildCatalog();
+        conRecursoPropio(d);
+
+        await expect(
+          d.service.shiftSlots(RESOURCE, { shiftMinutes: 20, ...ventana }, {
+            ...duenio,
+            practitionerProfileId: 'hp-DE-OTRO',
+          } as never),
+        ).rejects.toBeDefined();
+      });
+    });
+
+    describe('listActivityTypes', () => {
+      it('publica las cinco, con su concepto y su etiqueta', () => {
+        const d = buildCatalog();
+        const res = d.service.listActivityTypes();
+
+        expect(res.items.map((i) => i.type)).toEqual([
+          'APPOINTMENT',
+          'PROCEDURE',
+          'FOLLOW_UP',
+          'TELEHEALTH',
+          'OTHER',
+        ]);
+        expect(res.items.every((i) => i.conceptId.length > 0)).toBe(true);
+        expect(res.items.find((i) => i.type === 'PROCEDURE')?.label).toBe(
+          'Operación o procedimiento',
+        );
+      });
+
+      it('NINGUNA usa el tono de error: ése es el de los bloqueos', () => {
+        // El propietario pidió los bloqueos «con rojo». Una actividad pintada
+        // igual diría que el rato está cerrado cuando no lo está — y eso hace
+        // que alguien no ofrezca un turno que sí tiene.
+        const d = buildCatalog();
+        const tonos = d.service.listActivityTypes().items.map((i) => i.tone);
+
+        expect(tonos).not.toContain('error');
+        // Y ninguna se repite: dos tipologías del mismo color no se distinguen,
+        // que es justamente lo que el pedido quiere evitar.
+        expect(new Set(tonos).size).toBe(tonos.length);
+      });
+
+      it('manda tono y NO un color: la paleta es del front', () => {
+        // Un `#RRGGBB` desde el servidor obligaría a redesplegarlo para cambiar
+        // la paleta, y rompería el tema oscuro.
+        const d = buildCatalog();
+        for (const item of d.service.listActivityTypes().items) {
+          expect(item.tone).not.toMatch(/^#/);
+        }
+      });
+    });
+
+    describe('reactivateTemplate', () => {
+      function conPlantilla(
+        d: ReturnType<typeof buildCatalog>,
+        statusConceptId: string,
+      ) {
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          statusConceptId,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+      }
+
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      it('devuelve a vigente un horario retirado', async () => {
+        const d = buildCatalog();
+        conPlantilla(d, CONCEPTS.TEMPLATE_RETIRED);
+
+        const res = await d.service.reactivateTemplate(
+          'tpl-1',
+          duenio as never,
+        );
+
+        expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_PUBLISHED);
+        expect(d.catalogRepo.reactivateTemplate).toHaveBeenCalled();
+      });
+
+      it('avisa que faltan cupos: reactivar NO los regenera', async () => {
+        // Retirar borró los libres. Sin este aviso, el horario quedaría
+        // «vigente» y sin un solo turno ofrecido, y nadie sabría por qué.
+        const d = buildCatalog();
+        conPlantilla(d, CONCEPTS.TEMPLATE_RETIRED);
+
+        const res = await d.service.reactivateTemplate(
+          'tpl-1',
+          duenio as never,
+        );
+
+        expect(res.slotsPendientes).toBe(true);
+      });
+
+      it('reactivar lo que ya está vigente no rompe ni toca nada', async () => {
+        // No es un error del que haya que avisar: es que alguien tocó dos
+        // veces. Se responde lo mismo y no se escribe.
+        const d = buildCatalog();
+        conPlantilla(d, CONCEPTS.TEMPLATE_PUBLISHED);
+
+        const res = await d.service.reactivateTemplate(
+          'tpl-1',
+          duenio as never,
+        );
+
+        expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_PUBLISHED);
+        expect(res.slotsPendientes).toBe(false);
+        expect(d.catalogRepo.reactivateTemplate).not.toHaveBeenCalled();
+      });
+
+      it('no se reactiva la agenda de otro', async () => {
+        const d = buildCatalog();
+        conPlantilla(d, CONCEPTS.TEMPLATE_RETIRED);
+
+        await expect(
+          d.service.reactivateTemplate('tpl-1', {
+            ...duenio,
+            practitionerProfileId: 'hp-DE-OTRO',
+          } as never),
+        ).rejects.toBeDefined();
+      });
+    });
+
+    describe('retireTemplate (TAREA-10, punto 6)', () => {
+      /** Deja la plantilla y su recurso al alcance del actor. */
+      function conPlantillaPropia(d: ReturnType<typeof buildCatalog>) {
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+      }
+
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      it('con citas comprometidas NO retira: avisa y nombra cuáles', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+        d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+          total: 3,
+          live: 3,
+          sample: [{ id: 'b1' }, { id: 'b2' }, { id: 'b3' }],
+        });
+
+        await expect(
+          d.service.retireTemplate('tpl-1', duenio as never),
+        ).rejects.toBeInstanceOf(ConflictException);
+
+        // Lo que importa no es el error: es que el horario siga publicado.
+        expect(d.catalogRepo.retireTemplate).not.toHaveBeenCalled();
+      });
+
+      it('el aviso trae el total y los ids, no los nombres de los pacientes', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+        d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+          total: 12,
+          live: 12,
+          sample: [{ id: 'b1' }, { id: 'b2' }],
+        });
+
+        try {
+          await d.service.retireTemplate('tpl-1', duenio as never);
+          throw new Error('tendría que haber fallado');
+        } catch (error: any) {
+          const detalle = error.details ?? error.response?.details ?? {};
+          expect(detalle.liveBookings).toBe(12);
+          expect(detalle.bookingIds).toEqual(['b1', 'b2']);
+          // Mandar nombres acá filtraría pacientes a cualquiera que administre
+          // agendas: la pantalla ya sabe pedir cada cita con su permiso.
+          expect(JSON.stringify(detalle)).not.toMatch(/name|nombre/i);
+          expect(detalle.truncated).toBe(true);
+        }
+      });
+
+      it('sin citas comprometidas retira, y dice qué soltó', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+        d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+          total: 0,
+          live: 0,
+          sample: [],
+        });
+        d.catalogRepo.retireTemplate.mockResolvedValue({
+          releasedSlots: 24,
+          keptSlots: 0,
+        });
+
+        const res = await d.service.retireTemplate('tpl-1', duenio as never);
+
+        expect(res.id).toBe('tpl-1');
+        expect(res.releasedSlots).toBe(24);
+        expect(res.keptSlots).toBe(0);
+        // El estado dice qué le pasó: la plantilla sigue existiendo.
+        expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_RETIRED);
+      });
+
+      it('el historial NO frena el retiro: sólo las citas vivas', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+        // Ninguna viva, dos históricas. Con el borrado duro esto era un muro;
+        // retirar no toca el historial, así que una cita cancelada de marzo no
+        // puede impedir que el médico deje de publicar su horario hoy.
+        d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+          total: 2,
+          live: 0,
+          sample: [{ id: 'b1' }, { id: 'b2' }],
+        });
+        d.catalogRepo.retireTemplate.mockResolvedValue({
+          releasedSlots: 5,
+          keptSlots: 2,
+        });
+
+        const res = await d.service.retireTemplate('tpl-1', duenio as never);
+
+        // Los dos cupos con historia se conservan; los otros cinco se sueltan.
+        expect(res.keptSlots).toBe(2);
+        expect(res.releasedSlots).toBe(5);
+      });
+
+      it('pide los estados vivos correctos para distinguir los dos casos', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+
+        await d.service.retireTemplate('tpl-1', duenio as never);
+
+        const [, , estados] =
+          d.catalogRepo.findBookingsOfTemplate.mock.calls[0];
+        expect(estados).toHaveLength(2);
+        expect(estados).toContain(CONCEPTS.BOOKING_CONFIRMED);
+        expect(estados).toContain(CONCEPTS.BOOKING_CHECKED_IN);
+      });
+
+      it('retirar una agenda ajena es 403, aunque esté vacía', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-ajeno',
+        });
+
+        await expect(
+          d.service.retireTemplate('tpl-1', duenio as never),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.catalogRepo.findBookingsOfTemplate).not.toHaveBeenCalled();
+      });
+
+      it('una plantilla que no existe es 404, no un retiro silencioso', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue(null);
+
+        await expect(
+          d.service.retireTemplate('tpl-inexistente', duenio as never),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      });
+    });
+
+    /* --------------------------------------------------------------------
+       TAREA-11 punto 4 · el motivo de bloqueo, catalogado
+       -------------------------------------------------------------------- */
+
+    describe('motivos de bloqueo (TAREA-11, punto 4)', () => {
+      it('publica los siete motivos con etiqueta en castellano', async () => {
+        const d = buildCatalog();
+
+        const { items } = d.service.listExceptionTypes();
+
+        expect(items).toHaveLength(7);
+        const claves = items.map((i: any) => i.type);
+        // Los tres que ya existían y los cuatro que pidió el propietario.
+        expect(claves).toEqual([
+          'ABSENCE',
+          'HOLIDAY',
+          'VACATION',
+          'CONFERENCE',
+          'ERRAND',
+          'EXTRA',
+          'OTHER',
+        ]);
+        for (const item of items) {
+          expect(item.label).toBeTruthy();
+          expect(item.conceptId).toMatch(/^[0-9a-f-]{36}$/);
+        }
+      });
+
+      it('sólo «Otro» exige texto libre', async () => {
+        const d = buildCatalog();
+
+        const { items } = d.service.listExceptionTypes();
+
+        const exigen = items.filter((i: any) => i.requiresText);
+        expect(exigen).toHaveLength(1);
+        expect(exigen[0].type).toBe('OTHER');
+      });
+
+      it('la atención extraordinaria no bloquea, y el catálogo lo dice', async () => {
+        const d = buildCatalog();
+
+        const { items } = d.service.listExceptionTypes();
+
+        // `EXTRA` abre horario en vez de cerrarlo. Viaja en la misma lista
+        // porque es una excepción más, pero la pantalla necesita distinguirlo.
+        const noBloquean = items.filter((i: any) => !i.blocks);
+        expect(noBloquean).toHaveLength(1);
+        expect(noBloquean[0].type).toBe('EXTRA');
+      });
+
+      it('elegir «Otro» sin escribir el motivo se rechaza en el servidor', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+
+        await expect(
+          d.service.createException(
+            RESOURCE,
+            {
+              exceptionType: 'OTHER',
+              startAt: '2026-06-01T08:00:00Z',
+              endAt: '2026-06-01T12:00:00Z',
+            } as never,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        // Se corta antes de tocar nada: la regla es del catálogo, no del
+        // formulario, y un formulario no es una barrera.
+        expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+      });
+
+      it('un texto en blanco tampoco cuenta como motivo', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+
+        await expect(
+          d.service.createException(
+            RESOURCE,
+            {
+              exceptionType: 'OTHER',
+              reason: '   ',
+              startAt: '2026-06-01T08:00:00Z',
+              endAt: '2026-06-01T12:00:00Z',
+            } as never,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('los otros seis motivos no exigen texto', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+
+        const res = await d.service.createException(
+          RESOURCE,
+          {
+            exceptionType: 'VACATION',
+            startAt: '2026-06-01T08:00:00Z',
+            endAt: '2026-06-01T12:00:00Z',
+          } as never,
+          actor,
+        );
+
+        expect(res.id).toBe('exc-1');
+      });
+
+      it('el motivo elegido llega a la columna como concepto, no como texto', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+
+        await d.service.createException(
+          RESOURCE,
+          {
+            exceptionType: 'CONFERENCE',
+            startAt: '2026-06-01T08:00:00Z',
+            endAt: '2026-06-01T12:00:00Z',
+          } as never,
+          actor,
+        );
+
+        const [, datos] = d.catalogRepo.createException.mock.calls[0];
+        expect(datos.exceptionTypeConceptId).toBe(
+          CONCEPTS.EXCEPTION_CONFERENCE,
+        );
+      });
+    });
+
+    /* --------------------------------------------------------------------
+       9c · el paciente ve el motivo catalogado, nunca el texto libre
+       -------------------------------------------------------------------- */
+
+    describe('quién ve el motivo de un bloqueo', () => {
+      const DESDE = new Date('2026-07-01T00:00:00.000Z');
+      const HASTA = new Date('2026-07-31T00:00:00.000Z');
+
+      const bloqueo = {
+        id: 'exc-1',
+        exceptionTypeConceptId: CONCEPTS.EXCEPTION_VACATION,
+        startAt: new Date('2026-07-01T12:00:00Z'),
+        endAt: new Date('2026-07-15T12:00:00Z'),
+        reason: 'Viaje a ver a mi madre en Cochabamba',
+        isAvailable: false,
+      };
+
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+      const paciente = {
+        id: 'u-2',
+        roles: ['PATIENT'],
+        patientProfileId: 'pp-ana',
+        tenants: [TENANT],
+      };
+
+      function conBloqueo(d: ReturnType<typeof buildCatalog>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        d.catalogRepo.findExceptionsByResourceInRange.mockResolvedValue([
+          bloqueo,
+        ]);
+      }
+
+      it('el profesional ve el texto libre, que es suyo', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+
+        const res = await d.service.listExceptions(
+          RESOURCE,
+          DESDE,
+          HASTA,
+          duenio as never,
+        );
+
+        expect(res.items[0].reasonLabel).toBe('Vacaciones');
+        expect(res.items[0].reason).toBe(bloqueo.reason);
+      });
+
+      it('un paciente CON cita ve la etiqueta y NUNCA el texto libre', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+        d.catalogRepo.patientHasBookingWithResource.mockResolvedValue(true);
+
+        const res = await d.service.listExceptions(
+          RESOURCE,
+          DESDE,
+          HASTA,
+          paciente as never,
+        );
+
+        // Le sirve para no viajar en vano.
+        expect(res.items[0].reasonLabel).toBe('Vacaciones');
+        // Y no se entera de dónde fue ni a ver a quién. El texto libre puede
+        // contener cualquier cosa, incluidos datos de terceros.
+        expect(res.items[0].reason).toBeUndefined();
+        expect(JSON.stringify(res)).not.toContain('Cochabamba');
+      });
+
+      it('un paciente SIN cita con ese médico no lee nada', async () => {
+        const d = buildCatalog();
+        conBloqueo(d);
+        d.catalogRepo.patientHasBookingWithResource.mockResolvedValue(false);
+
+        // Es la misma regla que decide qué historial ve: sólo del médico con
+        // el que tiene cita. Sin vínculo, cuándo se toma vacaciones un doctor
+        // no es información suya.
+        await expect(
+          d.service.listExceptions(RESOURCE, DESDE, HASTA, paciente as never),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      });
+
+      it('un motivo «Otro» le dice al paciente que está bloqueado, y nada más', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        d.catalogRepo.findExceptionsByResourceInRange.mockResolvedValue([
+          {
+            ...bloqueo,
+            exceptionTypeConceptId: CONCEPTS.EXCEPTION_OTHER,
+            reason: 'Junta médica por el caso de la Sra. Pérez',
+          },
+        ]);
+        d.catalogRepo.patientHasBookingWithResource.mockResolvedValue(true);
+
+        const res = await d.service.listExceptions(
+          RESOURCE,
+          DESDE,
+          HASTA,
+          paciente as never,
+        );
+
+        // «Otro» es honesto: dice que hay un bloqueo sin decir cuál. Es
+        // exactamente el caso que hacía peligroso mostrar el texto.
+        expect(res.items[0].reasonLabel).toBe('Otro');
+        expect(JSON.stringify(res)).not.toContain('Pérez');
+      });
+
+      it('un concepto fuera del catálogo no muestra un uuid ni rompe', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+        d.catalogRepo.findExceptionsByResourceInRange.mockResolvedValue([
+          { ...bloqueo, exceptionTypeConceptId: 'concepto-viejo' },
+        ]);
+
+        const res = await d.service.listExceptions(
+          RESOURCE,
+          DESDE,
+          HASTA,
+          duenio as never,
+        );
+
+        expect(res.items[0].reasonLabel).toBe('Bloqueado');
+      });
     });
 
     describe('generateSlots (UC-41-03)', () => {
@@ -812,6 +1910,180 @@ describe('SchedulingCatalogService', () => {
 
         expect(res.created).toBe(4);
         expect(res.skipped).toBe(0);
+      });
+
+      /* --------------------------------------------------------------------
+         AG-4 · el respiro entre consultas
+         -------------------------------------------------------------------- */
+
+      it('publicar persiste el respiro tal como vino, sin completarlo', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+        d.catalogRepo.createRule.mockReturnValue({ id: 'rule-1' });
+
+        await d.service.createTemplate(
+          RESOURCE,
+          {
+            name: 'Consultorio',
+            rules: [
+              {
+                dayOfWeek: 1,
+                startTime: '08:00:00',
+                endTime: '10:00:00',
+                slotMinutes: 30,
+                gapMinutes: 10,
+              },
+              // La segunda no lo declara: tiene que quedar `undefined`, no 0.
+              // «No lo dijeron» y «dijeron que no hay respiro» no son lo mismo.
+              {
+                dayOfWeek: 2,
+                startTime: '08:00:00',
+                endTime: '10:00:00',
+                slotMinutes: 30,
+              },
+            ],
+          } as never,
+          actor,
+        );
+
+        const franjas = d.catalogRepo.createRule.mock.calls.map(
+          (c: any) => c[1],
+        );
+        expect(franjas[0].gapMinutes).toBe(10);
+        expect(franjas[1].gapMinutes).toBeUndefined();
+      });
+
+      it('el respiro separa los turnos: el paso es slot + gap', async () => {
+        const d = buildCatalog();
+        // 08:00–10:00 con turnos de 30' y respiro de 10' => paso de 40':
+        // 08:00, 08:40, 09:20 caben; el de 10:00 se pasa del fin.
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 30,
+        });
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 30,
+            capacityPerSlot: 1,
+            gapMinutes: 10,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        const res = await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        // Sin respiro serían 4. Con 10' de respiro, 3.
+        expect(res.created).toBe(3);
+      });
+
+      it('el turno sigue durando slotMinutes: el respiro no alarga la consulta', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 30,
+        });
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 30,
+            capacityPerSlot: 1,
+            gapMinutes: 10,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        const creados = d.catalogRepo.createSlot.mock.calls.map(
+          (c: any) => c[1],
+        );
+        expect(creados).toHaveLength(3);
+        // Arranques cada 40 minutos…
+        expect(creados[0].startAt.toISOString()).toBe(
+          '2026-06-01T08:00:00.000Z',
+        );
+        expect(creados[1].startAt.toISOString()).toBe(
+          '2026-06-01T08:40:00.000Z',
+        );
+        // …pero cada turno dura 30, no 40. Confundirlos alargaría la consulta
+        // en vez de separarla de la siguiente.
+        for (const slot of creados) {
+          const duracion =
+            (slot.endAt.getTime() - slot.startAt.getTime()) / 60_000;
+          expect(duracion).toBe(30);
+        }
+      });
+
+      it('sin respiro declarado el generador se comporta como antes', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 30,
+        });
+        // `gapMinutes` ausente: la columna es anulable y ausente ≡ 0.
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 30,
+            capacityPerSlot: 1,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        const res = await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        expect(res.created).toBe(4);
+      });
+
+      it('un respiro nulo se lee como cero, no rompe la corrida', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 30,
+        });
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 30,
+            capacityPerSlot: 1,
+            gapMinutes: null,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        const res = await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        expect(res.created).toBe(4);
       });
 
       it('is idempotent: existing slots are skipped, not duplicated', async () => {
@@ -977,6 +2249,89 @@ describe('SchedulingCatalogService', () => {
         startAt: '2026-06-01T08:00:00Z',
         endAt: '2026-06-01T12:00:00Z',
       };
+
+      it('AG-3 · el tiempo ocupado que pisa una cita CONFIRMADA no se crea', async () => {
+        // El tiempo ocupado no desplaza pacientes en silencio: el doctor recibe
+        // el conflicto y decide — reprograma a la persona o elige otro rato.
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.tiempoProfesional.citasConfirmadas = mockFn(async () => [
+          {
+            id: 'bk-1',
+            startAt: new Date('2026-06-01T09:00:00Z'),
+            endAt: new Date('2026-06-01T09:30:00Z'),
+            resourceName: 'Consultorio Centro',
+            kind: 'cita',
+          },
+        ]);
+
+        await expect(
+          d.service.createException(RESOURCE, dto, actor),
+        ).rejects.toThrow(/cita confirmada.*Consultorio Centro/);
+        expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+      });
+
+      it('AG-3 · una reunión que pisa OTRA reunión es inofensiva y pasa', async () => {
+        // Dos rótulos del mismo doctor no son un conflicto humano. Sólo las
+        // citas con paciente frenan la creación.
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefId: 'hp-1',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        d.tiempoProfesional.citasConfirmadas = mockFn(async () => []);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+
+        const res = await d.service.createException(RESOURCE, dto, actor);
+
+        expect(res.id).toBe('exc-1');
+      });
+
+      it('AG-3 · una sala no pasa por la regla del profesional', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefId: 'sala-1',
+          resourceRefType: 'rooms',
+        });
+        d.tiempoProfesional.citasConfirmadas = mockFn(async () => []);
+        d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+        d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+
+        await d.service.createException(RESOURCE, dto, actor);
+
+        expect(d.tiempoProfesional.citasConfirmadas).not.toHaveBeenCalled();
+      });
+
+      it('AG-3 · borrar la excepción exige que el recurso sea del actor', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findExceptionById.mockResolvedValue({
+          id: 'exc-1',
+          resourceId: RESOURCE,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          tenantId: TENANT,
+          resourceRefId: 'hp-ajeno',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+
+        await expect(
+          d.service.removeException('exc-1', {
+            id: 'user-pract',
+            roles: ['PRACTITIONER'],
+            practitionerProfileId: 'hp-propio',
+            tenantIds: [TENANT],
+          } as never),
+        ).rejects.toThrow();
+        expect(d.catalogRepo.removeException).not.toHaveBeenCalled();
+      });
 
       it('blocks the untouched free slots that overlap the absence', async () => {
         const d = buildCatalog();
@@ -1340,6 +2695,61 @@ describe('SchedulingCatalogService', () => {
         expect(d.catalogRepo.findRulesByResourceOwner).not.toHaveBeenCalled();
         expect(d.catalogRepo.createTemplate).toHaveBeenCalled();
       });
+    });
+  });
+
+  /**
+   * Lo que se ofrece como disponible tiene que poder pedirse.
+   *
+   * Destapado por el journey de AG-6 midiendo la misma ventana por las dos
+   * rutas: `GET /scheduling/resources/:id/slots` devolvía **10** horarios y la
+   * hermana del portal **2**. Los ocho de diferencia eran la reunión del médico
+   * y las tres horas de una cirugía — cupos `SLOT_BLOCKED` que conservan su
+   * `remaining_capacity`, así que el filtro de capacidad no los veía.
+   *
+   * No afectaba a la web (usa la otra ruta), pero ésta declara
+   * `@Roles(…'PATIENT')` y se documenta como «la consulta que hace posible
+   * reservar desde una pantalla»: quien la siguiera ofrecía horarios muertos.
+   */
+  describe('getResourceAgenda · lo disponible tiene que poder pedirse', () => {
+    const VENTANA = {
+      from: new Date('2026-09-03T00:00:00.000Z'),
+      to: new Date('2026-09-04T00:00:00.000Z'),
+      limit: 50,
+    };
+
+    it('con onlyAvailable pide SÓLO los cupos abiertos, no sólo los que tienen lugar', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
+
+      await d.service.getResourceAgenda(RESOURCE, {
+        ...VENTANA,
+        onlyAvailable: true,
+      });
+
+      const [, , , , opciones] =
+        d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
+      expect(opciones.onlyAvailable).toBe(true);
+      // La capacidad no alcanza: un cupo bloqueado la conserva.
+      expect(opciones.openStatusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
+    it('sin onlyAvailable no impone estado: el dueño de la agenda ve su día entero', async () => {
+      // La vista del profesional necesita ver lo bloqueado —es su reunión, su
+      // cirugía—. Filtrar siempre por SLOT_OPEN le escondería su propio día.
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findSlotsByResourceInRange.mockResolvedValue([]);
+
+      await d.service.getResourceAgenda(RESOURCE, {
+        ...VENTANA,
+        onlyAvailable: false,
+      });
+
+      const [, , , , opciones] =
+        d.catalogRepo.findSlotsByResourceInRange.mock.calls[0];
+      expect(opciones.onlyAvailable).toBe(false);
     });
   });
 });

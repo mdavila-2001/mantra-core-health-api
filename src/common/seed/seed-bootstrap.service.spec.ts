@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 
-/** Los dieciséis seeds de la cadena, en el orden en que el orquestador los corre. */
+/** Los dieciocho seeds de la cadena, en el orden en que el orquestador los corre. */
 /**
  * Los pasos de la cadena, **en el orden real** de `pasosDependientes()`.
  *
@@ -15,6 +15,8 @@ const PASOS = [
   'dynamicEnums',
   'glossary',
   'boGeography',
+  'boOccupations',
+  'boEmployers',
   'boliviaFacilities',
   'boliviaInsurance',
   'boliviaFeeSchedule',
@@ -27,6 +29,7 @@ const PASOS = [
   'clinicalForms',
   'bootstrapAdmin',
   'providerAccounts',
+  'practiceDefaultServices',
 ] as const;
 
 type Paso = (typeof PASOS)[number];
@@ -42,7 +45,7 @@ function loggerFalso() {
 }
 
 /**
- * Arma el orquestador con los trece seeds mockeados.
+ * Arma el orquestador con los dieciocho seeds mockeados.
  *
  * @param fallan - Nombres de los seeds que deben lanzar en esta corrida.
  */
@@ -68,6 +71,8 @@ function armar(fallan: Paso[] = []) {
     dobles.dynamicEnums as never,
     dobles.glossary as never,
     dobles.boGeography as never,
+    dobles.boOccupations as never,
+    dobles.boEmployers as never,
     dobles.boliviaFacilities as never,
     dobles.boliviaInsurance as never,
     dobles.boliviaFeeSchedule as never,
@@ -80,6 +85,7 @@ function armar(fallan: Paso[] = []) {
     dobles.bootstrapAdmin as never,
     dobles.providerAccounts as never,
     dobles.clinicalForms as never,
+    dobles.practiceDefaultServices as never,
     logger as never,
   );
 
@@ -95,6 +101,7 @@ const CONTENIDO: readonly Paso[] = [
   'vademecum',
   'clinicalForms',
   'providerAccounts',
+  'practiceDefaultServices',
 ];
 
 /** Los pasos de núcleo, que corren siempre que la cadena corra. */
@@ -205,7 +212,7 @@ describe('SeedBootstrapService', () => {
   });
 
   describe('run', () => {
-    it('corre los trece seeds y los resume', async () => {
+    it('corre los diecisiete seeds y los resume', async () => {
       const { service } = armar();
 
       const summary = await service.run();

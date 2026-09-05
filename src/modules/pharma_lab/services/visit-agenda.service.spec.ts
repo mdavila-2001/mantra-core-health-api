@@ -17,11 +17,47 @@ const VISITOR = '33333333-3333-3333-3333-333333333333';
 const ACTOR = { id: DOCTOR } as any;
 
 /**
- * Martes 1 de septiembre de 2026, 15:00 en `America/La_Paz` (UTC-4) = 19:00 UTC.
- * Todas las pruebas de encaje usan esta fecha para que la aritmética de zona sea
- * verificable a mano.
+ * El **próximo** martes a las 15:00 de `America/La_Paz` (UTC-4, sin horario de
+ * verano) = 19:00 UTC. Todas las pruebas de encaje parten de acá, y las demás
+ * horas se expresan como desplazamientos sobre ella para que la aritmética de
+ * zona siga siendo verificable a mano.
+ *
+ * Antes era la fecha literal del martes 1 de septiembre de 2026, y eso la
+ * volvió una bomba de tiempo: el 3 de septiembre esa fecha ya era pasado, el
+ * control de antelación saltaba primero —«al menos 0 horas», que suena
+ * imposible de incumplir y se incumple con cualquier instante anterior a
+ * ahora— y **ocho pruebas de esta suite se cayeron a la vez**, todas con el
+ * mismo mensaje equivocado. La fecha se calcula al correr para que la prueba
+ * mida lo que dice medir y no el paso del tiempo.
  */
-const TUESDAY_15_LOCAL = new Date('2026-09-01T19:00:00.000Z');
+const TUESDAY_15_LOCAL = proximoMartes15Local();
+
+/** 15:00 en La Paz del primer martes estrictamente futuro. */
+function proximoMartes15Local(): Date {
+  const ahora = new Date();
+  const fecha = new Date(
+    Date.UTC(
+      ahora.getUTCFullYear(),
+      ahora.getUTCMonth(),
+      ahora.getUTCDate(),
+      19,
+      0,
+      0,
+      0,
+    ),
+  );
+  // Martes es 2. A las 19:00 UTC son las 15:00 del mismo día en La Paz, así que
+  // el día de la semana coincide en las dos zonas y no hace falta corregirlo.
+  while (fecha.getUTCDay() !== 2 || fecha.getTime() <= ahora.getTime()) {
+    fecha.setUTCDate(fecha.getUTCDate() + 1);
+  }
+  return fecha;
+}
+
+/** Un desplazamiento en minutos sobre {@link TUESDAY_15_LOCAL}. */
+function martesMas(minutos: number): Date {
+  return new Date(TUESDAY_15_LOCAL.getTime() + minutos * 60_000);
+}
 
 /** Política activa por defecto: martes de 15:00 a 17:00, presencial. */
 function policy(overrides: Record<string, unknown> = {}): Record<string, any> {
@@ -209,7 +245,7 @@ describe('VisitAgendaService', () => {
     it('rechaza un horario fuera de la ventana', async () => {
       const { service, em } = build();
       // 11:00 local del martes: la ventana empieza a las 15:00.
-      const tooEarly = new Date('2026-09-01T15:00:00.000Z');
+      const tooEarly = martesMas(-240);
 
       await expect(
         service.assertSlotAvailable(
@@ -225,7 +261,7 @@ describe('VisitAgendaService', () => {
     it('rechaza una visita que se sale del final de la ventana', async () => {
       const { service, em } = build();
       // 16:45 local + 30 minutos termina a las 17:15, y la ventana cierra a las 17:00.
-      const almostClosing = new Date('2026-09-01T20:45:00.000Z');
+      const almostClosing = martesMas(105);
 
       await expect(
         service.assertSlotAvailable(
@@ -289,7 +325,7 @@ describe('VisitAgendaService', () => {
         occupying: [
           {
             id: 'other',
-            requestedStartAt: new Date('2026-09-01T19:15:00.000Z'),
+            requestedStartAt: martesMas(15),
             durationMinutes: 30,
           },
         ],
@@ -312,7 +348,7 @@ describe('VisitAgendaService', () => {
           {
             kind: 'consultation',
             startAt: TUESDAY_15_LOCAL,
-            endAt: new Date('2026-09-01T19:30:00.000Z'),
+            endAt: martesMas(30),
           },
         ],
       });
@@ -334,7 +370,7 @@ describe('VisitAgendaService', () => {
         occupying: [
           {
             id: 'other',
-            requestedStartAt: new Date('2026-09-01T21:00:00.000Z'),
+            requestedStartAt: martesMas(120),
             durationMinutes: 30,
           },
         ],

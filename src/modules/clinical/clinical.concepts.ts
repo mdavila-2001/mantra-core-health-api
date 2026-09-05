@@ -609,6 +609,45 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
      * `booked` antes de que el profesional la acepte sería afirmar un compromiso
      * que nadie tomó. La acepta el profesional y recién ahí pasa a `booked`.
      */
+    // --- Tipología raíz de la actividad (`appointments.type_concept_id`) ----
+    //
+    // El propietario la pidió así, con ejemplos y sin lista: «con otros colores
+    // los otros procedimientos (TURNOS, OPERACIONES, ETC.) catalogado por
+    // tipología raíz». La columna existía desde siempre y **no había un solo
+    // concepto que ponerle**, así que toda actividad era indistinguible de las
+    // demás en la agenda del día.
+    //
+    // Viven acá y no en scheduling porque la columna es de `clinical`. El
+    // catálogo que las publica sí es de scheduling: es la agenda la que las
+    // pinta.
+    //
+    // Los dos primeros son los que él nombró. `FOLLOW_UP` y `TELEHEALTH` son
+    // los que la agenda ya distingue de hecho —el control y la teleconsulta
+    // aparecen en la máquina de citas y en la modalidad—, así que no se
+    // inventan: se nombran. `OTHER` va por lo mismo que en los motivos de
+    // bloqueo: una lista cerrada que se queda corta bloquea a alguien, y lo que
+    // la gente elija ahí es la mejor fuente para la lista definitiva.
+    ACTIVITY_APPOINTMENT: {
+      code: 'ACT_APPOINTMENT',
+      display: 'Consultation appointment',
+    },
+    ACTIVITY_PROCEDURE: {
+      code: 'ACT_PROCEDURE',
+      display: 'Procedure or operation',
+    },
+    ACTIVITY_FOLLOW_UP: {
+      code: 'ACT_FOLLOW_UP',
+      display: 'Follow-up visit',
+    },
+    ACTIVITY_TELEHEALTH: {
+      code: 'ACT_TELEHEALTH',
+      display: 'Telehealth consultation',
+    },
+    ACTIVITY_OTHER: {
+      code: 'ACT_OTHER',
+      display: 'Other activity',
+    },
+
     APPOINTMENT_PENDING: {
       code: 'APPT_PENDING',
       display: 'Appointment pending confirmation',
@@ -633,6 +672,41 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     APPOINTMENT_CANCELLED: {
       code: 'APPT_CANCELLED',
       display: 'Appointment cancelled',
+    },
+
+    /* --- canal de la cita: POR QUÉ MEDIO ocurre la atención --------------------
+       `clinical.appointments.channel_concept_id` existía desde el modelo y estaba
+       sin conjunto y sin usar: nadie lo leía ni lo escribía. Es la columna donde
+       vive la **modalidad**, y por no tener valores la teleconsulta no se podía
+       declarar aunque el modelo ya la admitiera.
+
+       **Canal no es tipo.** `type_concept_id`, en la misma tabla, responde *qué
+       clase de atención es* —primera consulta, control, procedimiento—; el canal
+       responde *por qué medio ocurre*. Son ejes independientes: un control puede
+       ser presencial o por video, y una cirugía es presencial siempre. Escribir
+       acá el motivo asistencial, o allá el medio, deja las dos columnas
+       peleando por el mismo significado.
+
+       **`NULL` se lee como presencial.** Es lo que fueron todas las citas hasta
+       hoy, así que el histórico no necesita backfill ni afirma algo que nadie
+       registró.
+
+       El conjunto lo declara la API y no una nota `vs_*.md` de la bóveda: con
+       nota, `gen_seeds.py` se adueñaría del conjunto con ids de otro namespace y
+       quedarían dos catálogos sobre la misma columna (el problema del módulo 64,
+       criterio fijado en v4.1.9). */
+    APPOINTMENT_CHANNEL_IN_PERSON: {
+      code: 'APPT_CH_PRESENCIAL',
+      display: 'In-person appointment',
+    },
+    APPOINTMENT_CHANNEL_TELEHEALTH: {
+      code: 'APPT_CH_TELECONSULTA',
+      display: 'Telehealth appointment',
+    },
+    /** La atención ocurre donde vive el paciente: el profesional se traslada. */
+    APPOINTMENT_CHANNEL_HOME_VISIT: {
+      code: 'APPT_CH_DOMICILIO',
+      display: 'Home visit appointment',
     },
 
     /* --- vademécum inicial de la receta ---------------------------------------

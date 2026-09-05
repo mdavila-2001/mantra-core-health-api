@@ -51,6 +51,25 @@ export class ClaimLineDto {
   billedAmount!: string;
 
   /**
+   * Documento clínico que respalda el ítem, como texto.
+   *
+   * `insurance_claim_lines.supporting_clinical_reference` existe en el modelo
+   * y **ningún endpoint podía escribirla**: la columna quedaba siempre nula,
+   * así que el ítem no tenía forma de decir de qué atención sale. Es la única
+   * referencia disponible para la solicitud de imagen, la receta y «otro
+   * procedimiento», que no tienen clave foránea propia.
+   *
+   * Es un `varchar` **sin integridad referencial**: la lectura lo devuelve con
+   * el tipo de documento sin declarar, y la pantalla dice que no está
+   * registrado en vez de adivinarlo.
+   */
+  @ApiPropertyOptional({ maxLength: 200, example: 'ENC-2026-00412' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  supportingClinicalReference?: string;
+
+  /**
    * Valor de patient responsibility amount mantenido por la instancia.
    */
   @ApiPropertyOptional({
@@ -141,6 +160,31 @@ export class LineAdjudicationDto {
   decision!: 'APPROVED' | 'DENIED';
 
   /**
+   * Motivo catalogado por el que se denegó esta línea.
+   *
+   * `claim_line_adjudications.reason_concept_id` existe en el modelo desde
+   * siempre y **ningún endpoint podía escribirlo**: la columna quedaba nula, y
+   * por eso la columna «Motivo» del detalle sale vacía en todos los rechazos.
+   * Esto abre la vía de escritura; el **contenido** del catálogo es otra cosa.
+   *
+   * Justin decidió (2026-09-04) que los motivos salen de un **catálogo interno
+   * único de MANTRA**, no de la aseguradora ni de uno por tenant. Ese catálogo
+   * **todavía no declara miembros** —la terminología sólo trae el concepto de
+   * arranque, sin lista—, y acuñar códigos «plausibles» está prohibido. Hasta
+   * que exista, el campo se acepta y se persiste tal cual: es un `uuid` de
+   * `terminology.catalog_concepts` y quien lo envía responde por él (AC-16-8).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Motivo catalogado de la denegación (concepto de terminology). El ' +
+      'catálogo interno todavía no declara sus miembros — AC-16-8.',
+  })
+  @IsOptional()
+  @IsUUID()
+  reasonConceptId?: string;
+
+  /**
    * Valor de approved amount mantenido por la instancia.
    */
   @ApiPropertyOptional({ example: '80.00' })
@@ -173,6 +217,28 @@ export class CreateAdjudicationDto {
   @ApiProperty({ enum: ['APPROVED', 'DENIED'] })
   @IsIn(['APPROVED', 'DENIED'])
   outcome!: 'APPROVED' | 'DENIED';
+
+  /**
+   * Texto de la disposición, tal cual lo emitió la aseguradora.
+   *
+   * `claim_adjudication_versions.disposition_text` existe en el modelo y
+   * **ningún endpoint podía escribirlo**: la columna quedaba siempre nula, así
+   * que el único lugar donde una aseguradora explica su decisión no tenía
+   * entrada. Es el texto que la pantalla del reclamo muestra junto al
+   * dictamen; sin él, un rechazo llega con un concepto y sin motivo redactado.
+   *
+   * Es **de la versión entera**, no del ítem: el motivo particular de un ítem
+   * va en `claim_line_adjudications.reason_concept_id`, que es un concepto y no
+   * texto libre.
+   */
+  @ApiPropertyOptional({
+    maxLength: 4000,
+    example: 'Prestaciones cubiertas por el plan familiar.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  dispositionText?: string;
 
   /**
    * Valor de total approved amount mantenido por la instancia.

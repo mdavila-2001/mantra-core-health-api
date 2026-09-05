@@ -3,11 +3,27 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import type { PublicProfiles, VerifiedBadges } from '../entities';
-import { PublicSearchRepository } from '../repositories';
+import {
+  PublicProfilesRepository,
+  PublicSearchRepository,
+} from '../repositories';
+import { FileUploadService } from '../../common/services';
+import type { FileContentDto } from '../../common/dto';
 import type {
   ProfileAffiliation,
   ProfileLocation,
+  PublicCommentRow,
+  PublicSocialActorRow,
 } from '../repositories/public-search.repository';
+// La regla de qué uuid es una especialidad médica vive en `profiles` y se
+// **reusa**, no se copia: es la misma que aplica el alta de profesional
+// (`IamPractitionerSelfRegistrationService`), y dos listas de 36 conceptos en
+// dos módulos se separan el día que el catálogo cambie. Se importa la clase y
+// no el módulo porque `ProfilesModule` importa `DirectoryModule`, que importa
+// `CommunityModule`: importarlo acá cerraría el ciclo. Es el mismo criterio con
+// el que este módulo ya provee `PersonAccountLinksRepository` suelto.
+import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
+import { CatalogConceptsRepository } from '../../terminology/repositories';
 import {
   COMMUNITY_PUBLIC_PROFILES_INDEX,
   PUBLIC_DIRECTORY_TENANT,
@@ -16,18 +32,27 @@ import {
   SearchIndexService,
   type SearchHit,
 } from '../../search_platform/services';
-import { COMM } from '../community.concepts';
+import {
+  COMM,
+  COMMENT_MEDIA_KIND_BY_CONCEPT,
+  REACTION_CODE_BY_CONCEPT,
+} from '../community.concepts';
 import {
   CommunityVerificationService,
   type VerifiedBadgeDto,
 } from './community-verification.service';
 import { CommunityProfileStatsService } from './community-profile-stats.service';
 import type {
+  PublicCommentDto,
+  PublicCommentPageDto,
   PublicDirectoryProfileDto,
+  PublicFeedPageDto,
   PublicNearbyPageDto,
+  PublicPostReactionPageDto,
   PublicResultKind,
   PublicSearchPageDto,
   PublicSearchResultDto,
+  PublicSocialActorDto,
 } from '../dto';
 
 /** Tope duro de página. Un anónimo no elige cuánto le cuesta al servidor. */
@@ -85,6 +110,14 @@ export const PUBLIC_RESULT_KEYS = [
   'verifiedBadge',
   'hasPublishedAgenda',
   'nextAvailableDate',
+  // La tarjeta del directorio se mira antes de leerse: sin portada, sin calle
+  // y sin punto, cuarenta centros de salud se ven exactamente iguales y la
+  // única forma de elegir es abrirlos de a uno. Los tres salen de datos que la
+  // página ya cargaba —`coverFileId` del perfil, `lines` y las coordenadas de
+  // `locationsByOwner`— y no cuestan una consulta más.
+  'coverUrl',
+  'address',
+  'location',
 ] as const;
 
 /** Las claves que la ficha pública puede tener. Nada más. */
@@ -110,6 +143,46 @@ export const PUBLIC_PROFILE_KEYS = [
   'nextAvailableDate',
   'posts',
   'updatedAt',
+] as const;
+
+/**
+ * Las claves que una fila de «quién reaccionó» puede tener. Nada más.
+ *
+ * Los cinco primeros son **exactamente** la proyección que `GET /public/posts`
+ * ya sirve para el autor de una publicación. Que sea la misma lista no es
+ * casualidad ni comodidad: es la promesa de que reaccionar no publica de una
+ * persona nada que publicar no publicara ya, en una red social médica donde el
+ * hecho mismo de interactuar con el contenido de un especialista dice algo.
+ *
+ * No están `actorProfileId`, `reactionTypeConceptId`, `createdAt` ni el
+ * `user_id`, que es lo que devuelve la cara con sesión.
+ */
+export const PUBLIC_REACTION_KEYS = [
+  'slug',
+  'displayName',
+  'headline',
+  'avatarUrl',
+  'kind',
+  'reactionType',
+] as const;
+
+/** Las claves que un comentario público puede tener. Nada más. */
+export const PUBLIC_COMMENT_KEYS = [
+  'id',
+  'bodyText',
+  'createdAt',
+  'replyCount',
+  'author',
+  'media',
+] as const;
+
+/** Las claves del autor de un comentario público. Nada más. */
+export const PUBLIC_COMMENT_AUTHOR_KEYS = [
+  'slug',
+  'displayName',
+  'headline',
+  'avatarUrl',
+  'kind',
 ] as const;
 
 /** Todo lo que una página de resultados necesita, resuelto en bloque. */
@@ -157,17 +230,434 @@ export class CommunityPublicService {
    *
    * @param em - Contexto de persistencia.
    * @param repo - Lecturas del directorio público.
+   * @param specialtyCatalog - Quién decide si un uuid es una especialidad médica.
+   * @param concepts - Conceptos del catálogo, para el rótulo de la especialidad.
    * @param logger - Logger estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: PublicSearchRepository,
+    private readonly profiles: PublicProfilesRepository,
+    private readonly files: FileUploadService,
     private readonly searchIndex: SearchIndexService,
     private readonly verification: CommunityVerificationService,
     private readonly stats: CommunityProfileStatsService,
+    private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
+    private readonly concepts: CatalogConceptsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityPublicService.name);
+  }
+
+  /**
+   * El feed de la portada: lo último que publicaron **todos** los
+   * profesionales, mezclado y ordenado por fecha.
+   *
+   * Es la vista por defecto de la superficie pública. Quien entra sin sesión no
+   * tiene todavía un médico en la cabeza al que buscar, así que una portada que
+   * exige elegir uno primero no le sirve de nada; un compilado de lo último
+   * escrito sí, y de ahí se llega a la ficha de quien lo escribió.
+   *
+   * @param params - Cuántas traer y desde dónde seguir.
+   * @returns Página de publicaciones con su autor.
+   */
+  async feedPublico(params: {
+    /** Tope pedido. */
+    limit?: number;
+    /** Cursor opaco de continuación. */
+    cursor?: string;
+  }): Promise<PublicFeedPageDto> {
+    const em = this.em.fork();
+    const limit = this.clampLimit(params.limit);
+
+    // Una de más para saber si hay página siguiente sin un `COUNT` aparte.
+    const filas = await this.repo.listFeedPublico(
+      em,
+      limit + 1,
+      this.decodeFeedCursor(params.cursor),
+    );
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+
+    const engagement = await this.repo.engagementByPost(
+      em,
+      pagina.map((fila) => fila.id),
+    );
+
+    const ultima = pagina.at(-1);
+    return {
+      items: pagina.map((fila) => {
+        const extra = engagement.get(fila.id);
+        return {
+          id: fila.id,
+          bodyText: fila.bodyText,
+          publishedAt: fila.publishedAt.toISOString(),
+          mediaUrls: (extra?.imageFileIds ?? [])
+            .map((fileId) => this.fileUrl(fileId))
+            .filter((url): url is string => url !== null),
+          reactionCount: extra?.reactionCount ?? 0,
+          commentCount: extra?.commentCount ?? 0,
+          authorSlug: fila.authorSlug,
+          authorDisplayName: fila.authorDisplayName,
+          authorHeadline: fila.authorHeadline,
+          authorAvatarUrl: this.fileUrl(fila.authorAvatarFileId ?? undefined),
+          authorKind:
+            KIND_BY_TARGET_CONCEPT[fila.authorKindConceptId] ?? 'PRACTITIONER',
+        };
+      }),
+      nextCursor:
+        hayMas && ultima
+          ? Buffer.from(
+              JSON.stringify({
+                p: ultima.publishedAt.toISOString(),
+                i: ultima.id,
+              }),
+            ).toString('base64url')
+          : null,
+      totalHint: null,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  /** Descompone el cursor del feed; uno corrupto se ignora, no rompe la página. */
+  private decodeFeedCursor(
+    cursor?: string,
+  ): { publishedAt: Date; id: string } | undefined {
+    if (!cursor) return undefined;
+    try {
+      const crudo: unknown = JSON.parse(
+        Buffer.from(cursor, 'base64url').toString(),
+      );
+      if (
+        typeof crudo === 'object' &&
+        crudo !== null &&
+        typeof (crudo as { p?: unknown }).p === 'string' &&
+        typeof (crudo as { i?: unknown }).i === 'string'
+      ) {
+        const fecha = new Date((crudo as { p: string }).p);
+        if (!Number.isNaN(fecha.getTime())) {
+          return { publishedAt: fecha, id: (crudo as { i: string }).i };
+        }
+      }
+    } catch {
+      // Un cursor ilegible se trata como ausente: la primera página es una
+      // respuesta razonable, un 400 por un dato que el cliente no escribió a
+      // mano no lo es.
+    }
+    return undefined;
+  }
+
+  /**
+   * Quién reaccionó a una publicación, paginado por cursor (AC-01-9).
+   *
+   * ## Por qué no alcanzaba lo que ya había
+   *
+   * `CommunitySocialReadService.getPostReactions` devuelve **recuentos por
+   * tipo**: «12 me gusta», no doce personas. El modal que pide AC-01-9 necesita
+   * las personas, y la fila que dice quién reaccionó siempre existió en
+   * `community.reactions` — lo que no existía era una lectura que la listara.
+   *
+   * ## Qué sale y qué no
+   *
+   * Sólo perfiles **públicos y activos**, con la misma proyección que
+   * `GET /public/posts` sirve para el autor de una publicación: slug, nombre
+   * visible, titular y avatar. Nunca `actor_profile_id`, `user_id`, correo ni
+   * teléfono. Quien no tiene vitrina publicada no aparece —ni siquiera contado
+   * aparte—, y eso lo resuelve el `JOIN` de la consulta, no un filtro que
+   * alguien pueda olvidar.
+   *
+   * @param postId - Publicación reaccionada.
+   * @param params - Cuántas traer y desde dónde seguir.
+   * @returns Página de personas que reaccionaron.
+   * @throws ResourceNotFoundException si la publicación no es pública.
+   */
+  async postReactions(
+    postId: string,
+    params: {
+      /** Tope pedido. */
+      limit?: number;
+      /** Cursor opaco de continuación. */
+      cursor?: string;
+    },
+  ): Promise<PublicPostReactionPageDto> {
+    const em = this.em.fork();
+    const limit = this.clampLimit(params.limit);
+    await this.assertPostPublic(em, postId);
+
+    const filas = await this.repo.listPostReactors(
+      em,
+      postId,
+      // Una de más para saber si hay página siguiente sin un `COUNT` aparte.
+      limit + 1,
+      this.decodeCreatedAtCursor(params.cursor),
+    );
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const ultima = pagina.at(-1);
+
+    return {
+      items: pagina.map((fila) => ({
+        ...this.toPublicActor(fila),
+        reactionType:
+          REACTION_CODE_BY_CONCEPT[fila.reactionTypeConceptId] ?? null,
+      })),
+      nextCursor: hayMas && ultima ? this.encodeCreatedAtCursor(ultima) : null,
+      totalHint: null,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * El hilo de comentarios raíz de una publicación, paginado por cursor
+   * (AC-01-11 y AC-01-12).
+   *
+   * Es la lectura que `GET /community/posts/:postId/comments` ya hacía **con
+   * sesión**: la superficie pública no tiene ninguna, así que la visibilidad no
+   * se puede resolver contra un lector y se resuelve contra la publicación, con
+   * el mismo predicado que sirve el feed.
+   *
+   * Las respuestas **no** vienen anidadas, a diferencia de la cara con sesión.
+   * Un hilo con doscientas respuestas cargado de una vez es exactamente lo que
+   * AC-01-11 no quiere dentro de una tarjeta; cada comentario trae su
+   * `replyCount` y las respuestas se piden aparte cuando alguien las abre.
+   *
+   * @param postId - Publicación comentada.
+   * @param params - Cuántas traer y desde dónde seguir.
+   * @returns Página de comentarios raíz.
+   * @throws ResourceNotFoundException si la publicación no es pública.
+   */
+  async postComments(
+    postId: string,
+    params: {
+      /** Tope pedido. */
+      limit?: number;
+      /** Cursor opaco de continuación. */
+      cursor?: string;
+    },
+  ): Promise<PublicCommentPageDto> {
+    const em = this.em.fork();
+    const limit = this.clampLimit(params.limit);
+    await this.assertPostPublic(em, postId);
+
+    return this.paginaDeComentarios(
+      await this.repo.listPublicRootComments(
+        em,
+        postId,
+        limit + 1,
+        this.decodeCreatedAtCursor(params.cursor),
+      ),
+      limit,
+    );
+  }
+
+  /**
+   * Las respuestas de un comentario, paginadas por cursor (AC-01-12, «Ver N
+   * respuestas»).
+   *
+   * ## Por qué es una ruta propia y no un parámetro de la anterior
+   *
+   * Porque es **otro recurso paginado**. Como parámetro de
+   * `/public/posts/:postId/comments` el `postId` de la ruta quedaría de adorno
+   * —la respuesta ya no saldría de esa publicación sino de un comentario—, y
+   * habría que comprobar además que el comentario pedido cuelga justamente de
+   * esa publicación, una condición que el cliente no tiene por qué conocer y que
+   * al fallar daría un 404 que no significa lo que dice. Con ruta propia, cada
+   * lectura tiene un sujeto y un cursor, y el desplegable puede abrir tres hilos
+   * a la vez sin que sus páginas se pisen.
+   *
+   * La visibilidad sigue siendo la de la publicación comentada: quien conoce el
+   * uuid de un comentario de un borrador no puede leer su hilo por esta puerta.
+   *
+   * @param commentId - Comentario respondido.
+   * @param params - Cuántas traer y desde dónde seguir.
+   * @returns Página de respuestas.
+   * @throws ResourceNotFoundException si el comentario o su publicación no son públicos.
+   */
+  async commentReplies(
+    commentId: string,
+    params: {
+      /** Tope pedido. */
+      limit?: number;
+      /** Cursor opaco de continuación. */
+      cursor?: string;
+    },
+  ): Promise<PublicCommentPageDto> {
+    const em = this.em.fork();
+    const limit = this.clampLimit(params.limit);
+
+    const postId = await this.repo.findPostOfPublicComment(em, commentId);
+    // Mismo 404 para «no existe», «su autor no es público» y «cuelga de algo
+    // que no es una publicación»: en esta superficie nada distingue una cosa de
+    // la otra, y distinguirlas confirmaría qué uuids son reales.
+    if (postId === null)
+      throw new ResourceNotFoundException('Comentario no encontrado', {
+        commentId,
+      });
+    await this.assertPostPublic(em, postId);
+
+    return this.paginaDeComentarios(
+      await this.repo.listPublicCommentReplies(
+        em,
+        commentId,
+        limit + 1,
+        this.decodeCreatedAtCursor(params.cursor),
+      ),
+      limit,
+    );
+  }
+
+  /**
+   * Exige que la publicación sea visible para un anónimo.
+   *
+   * Es el equivalente público de `CommunitySocialReadService.assertPostVisible`
+   * —mismo mensaje y mismo 404— con la diferencia que hace la superficie: allá
+   * la visibilidad se resuelve contra el perfil del lector, y acá no hay lector.
+   * La condición la escribe una sola vez `POST_PUBLICO_SQL`, que es literalmente
+   * la que aplica el feed público.
+   */
+  private async assertPostPublic(
+    em: EntityManager,
+    postId: string,
+  ): Promise<void> {
+    if (!(await this.repo.isPostPublic(em, postId)))
+      throw new ResourceNotFoundException('Publicación no encontrada', {
+        postId,
+      });
+  }
+
+  /** Envuelve una página de comentarios ya leída, raíces o respuestas. */
+  private paginaDeComentarios(
+    filas: PublicCommentRow[],
+    limit: number,
+  ): PublicCommentPageDto {
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const ultima = pagina.at(-1);
+    return {
+      items: pagina.map((fila) => this.toPublicComment(fila)),
+      nextCursor: hayMas && ultima ? this.encodeCreatedAtCursor(ultima) : null,
+      totalHint: null,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  /** Proyecta un comentario, con su autor acotado a lo publicable. */
+  private toPublicComment(fila: PublicCommentRow): PublicCommentDto {
+    return {
+      id: fila.id,
+      bodyText: fila.bodyText,
+      createdAt: fila.createdAt.toISOString(),
+      replyCount: fila.replyCount,
+      author: this.toPublicActor(fila),
+      // REQ-01-011: sólo la URL servida por la API y el tipo — nunca el
+      // fileId ni el mediaRoleConceptId internos (mismo criterio que
+      // `avatarUrl`, ver el encabezado de `PublicCommentMediaDto`).
+      media: (fila.media ?? [])
+        .map((adjunto) => ({
+          url: this.fileUrl(adjunto.fileId),
+          kind: COMMENT_MEDIA_KIND_BY_CONCEPT[adjunto.mediaRoleConceptId],
+          altText: adjunto.altText,
+        }))
+        .filter(
+          (
+            adjunto,
+          ): adjunto is {
+            url: string;
+            kind: 'IMAGE' | 'STICKER' | 'GIF';
+            altText: string | null;
+          } => adjunto.url !== null && adjunto.kind !== undefined,
+        ),
+    };
+  }
+
+  /**
+   * Proyecta a una persona de la superficie pública.
+   *
+   * **Enumera las claves a mano**, igual que `toResult()` y por lo mismo: un
+   * *spread* de la fila traería `actor_profile_id` o `author_profile_id` a una
+   * respuesta anónima y nadie lo notaría hasta que alguien los usara.
+   */
+  private toPublicActor(fila: PublicSocialActorRow): PublicSocialActorDto {
+    return {
+      slug: fila.authorSlug,
+      displayName: fila.authorDisplayName,
+      headline: fila.authorHeadline,
+      avatarUrl: this.fileUrl(fila.authorAvatarFileId ?? undefined),
+      kind: KIND_BY_TARGET_CONCEPT[fila.authorKindConceptId] ?? 'PRACTITIONER',
+    };
+  }
+
+  /** Cursor `(createdAt, id)` de la última fila de una página social. */
+  private encodeCreatedAtCursor(fila: {
+    /** Instante de la fila. */
+    createdAt: Date;
+    /** Identificador que desempata. */
+    id: string;
+  }): string {
+    return Buffer.from(
+      JSON.stringify({ c: fila.createdAt.toISOString(), i: fila.id }),
+    ).toString('base64url');
+  }
+
+  /**
+   * Descompone el cursor de una página social.
+   *
+   * Uno corrupto se ignora y se sirve la primera página, igual que en el feed:
+   * un 400 por un dato que el cliente no escribió a mano no es una respuesta
+   * razonable.
+   */
+  private decodeCreatedAtCursor(
+    cursor?: string,
+  ): { createdAt: string; id: string } | undefined {
+    if (!cursor) return undefined;
+    try {
+      const crudo: unknown = JSON.parse(
+        Buffer.from(cursor, 'base64url').toString(),
+      );
+      if (
+        typeof crudo === 'object' &&
+        crudo !== null &&
+        typeof (crudo as { c?: unknown }).c === 'string' &&
+        typeof (crudo as { i?: unknown }).i === 'string'
+      ) {
+        const fecha = new Date((crudo as { c: string }).c);
+        if (!Number.isNaN(fecha.getTime()))
+          return {
+            createdAt: (crudo as { c: string }).c,
+            id: (crudo as { i: string }).i,
+          };
+      }
+    } catch {
+      // Ilegible se trata como ausente. Ver `decodeFeedCursor`.
+    }
+    return undefined;
+  }
+
+  /**
+   * Sirve una imagen de la superficie pública: el avatar o la portada de una
+   * vitrina publicada, o una foto adjunta a una de sus publicaciones.
+   *
+   * No hay actor que demuestre nada —es una lectura anónima—, así que lo que
+   * autoriza es qué **es** el archivo. Un id que no pasa ninguna de las dos
+   * puertas devuelve el mismo 404 que uno inexistente: a quien prueba ids al
+   * azar no se le confirma cuáles corresponden a algo real.
+   *
+   * @param fileId - Identificador del archivo pedido.
+   * @returns Bytes y tipo MIME para servir por HTTP.
+   * @throws ResourceNotFoundException si el archivo no está colgado de nada público.
+   */
+  async getPublicMedia(fileId: string): Promise<FileContentDto> {
+    const em = this.em.fork();
+    const permitido =
+      (await this.profiles.isPublicMedia(em, fileId)) ||
+      (await this.repo.isPublicPostMedia(em, fileId)) ||
+      // REQ-01-011: la tercera clase de imagen pública, junto al avatar/portada
+      // y las fotos del cuerpo del post — un adjunto de comentario visible.
+      (await this.repo.isPublicCommentMedia(em, fileId));
+    if (!permitido) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+    }
+    return this.files.downloadPublicMedia(fileId);
   }
 
   /**
@@ -183,6 +673,13 @@ export class CommunityPublicService {
     kind?: PublicResultKind;
     /** Sólo prestadores verificados. */
     verified?: boolean;
+    /** Ciudad a la que acotar. */
+    city?: string;
+    /**
+     * Especialidad médica a la que acotar, como `concept_id` de
+     * `VS_MEDICAL_SPECIALTY`. Un uuid ajeno al conjunto da **422**.
+     */
+    specialtyConceptId?: string;
     /** Cursor opaco. */
     cursor?: string;
     /** Tope pedido. */
@@ -190,6 +687,30 @@ export class CommunityPublicService {
   }): Promise<PublicSearchPageDto> {
     const em = this.em.fork();
     const limit = this.clampLimit(filtros.limit);
+
+    // La especialidad se valida **antes que nada**: es el único parámetro de
+    // esta superficie sobre el que el cliente puede estar equivocado de forma no
+    // ambigua, igual que las coordenadas de `nearby`. El resto se recorta o se
+    // ignora; una especialidad inventada no, porque ignorarla devolvería el
+    // directorio entero y la pantalla diría, sin decirlo, que todos ésos son de
+    // la especialidad pedida (AC-02-8).
+    const specialtyConceptId = filtros.specialtyConceptId?.trim() || undefined;
+    let specialtyDisplay: string | undefined;
+    if (specialtyConceptId) {
+      await this.specialtyCatalog.assertIsMedicalSpecialty(
+        em,
+        specialtyConceptId,
+      );
+      // El índice guarda el **rótulo** de la especialidad, no su uuid
+      // (`specialtiesByPractitioner` indexa `catalog_concepts.display` a
+      // propósito: un identificador interno en una copia pública es una fuga
+      // que después no se deshace). Los dos caminos siguen filtrando por el
+      // mismo concepto: uno por su uuid contra `practitioner_specialties`, el
+      // otro por el rótulo que ese mismo uuid produjo al indexar.
+      specialtyDisplay =
+        (await this.concepts.findById(em, specialtyConceptId))?.display ??
+        undefined;
+    }
 
     const targetTypeConceptId = filtros.kind
       ? Object.keys(KIND_BY_TARGET_CONCEPT).find(
@@ -222,10 +743,15 @@ export class CommunityPublicService {
     // El índice primero; el SQL queda como red. Si OpenSearch no responde el
     // buscador **encuentra menos y peor**, que es un defecto; devolver 500
     // sería una caída de la portada pública.
+    const city = filtros.city?.trim().slice(0, MAX_QUERY_LENGTH) || undefined;
+
     const desdeIndice = await this.searchFromIndex({
       q,
       kind: filtros.kind,
       verified: filtros.verified,
+      city,
+      specialtyConceptId,
+      specialtyDisplay,
       cursor: filtros.cursor,
       limit,
     });
@@ -237,6 +763,8 @@ export class CommunityPublicService {
         q,
         targetTypeConceptId,
         verified: filtros.verified,
+        city,
+        specialtyConceptId,
         after: this.decodeSqlCursor(filtros.cursor),
       },
       limit + 1,
@@ -300,6 +828,13 @@ export class CommunityPublicService {
         ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
         : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
     ]);
+    // La interacción de cada publicación: sus imágenes, y cuántas reacciones y
+    // comentarios lleva. Un solo viaje para todo el lote.
+    const engagement = await this.repo.engagementByPost(
+      em,
+      posts.map((post) => post.id),
+    );
+
     const rating = señales.ratings.get(profile.id);
     const badge = this.verification.readBadge(
       profile,
@@ -335,14 +870,19 @@ export class CommunityPublicService {
       verifiedBadge: badge,
       hasPublishedAgenda: agenda?.hasAgenda ?? false,
       nextAvailableDate: agenda?.nextAvailableDate ?? null,
-      posts: posts.map((post) => ({
-        id: post.id,
-        bodyText: post.bodyText,
-        publishedAt: (post.publishedAt ?? post.createdAt).toISOString(),
-        mediaUrls: [],
-        reactionCount: 0,
-        commentCount: 0,
-      })),
+      posts: posts.map((post) => {
+        const extra = engagement.get(post.id);
+        return {
+          id: post.id,
+          bodyText: post.bodyText,
+          publishedAt: (post.publishedAt ?? post.createdAt).toISOString(),
+          mediaUrls: (extra?.imageFileIds ?? [])
+            .map((fileId) => this.fileUrl(fileId))
+            .filter((url): url is string => url !== null),
+          reactionCount: extra?.reactionCount ?? 0,
+          commentCount: extra?.commentCount ?? 0,
+        };
+      }),
       updatedAt: profile.updatedAt.toISOString(),
     };
   }
@@ -530,11 +1070,23 @@ export class CommunityPublicService {
     kind?: PublicResultKind;
     /** Sólo verificados. */
     verified?: boolean;
+    /** Ciudad a la que acotar. */
+    city?: string;
+    /** Especialidad pedida, ya validada contra el value set. */
+    specialtyConceptId?: string;
+    /** Rótulo de esa especialidad, que es lo que el índice guarda. */
+    specialtyDisplay?: string;
     /** Cursor opaco. */
     cursor?: string;
     /** Tope ya acotado. */
     limit: number;
   }): Promise<PublicSearchPageDto | null> {
+    // Se pidió una especialidad y no se pudo resolver su rótulo: el índice no
+    // puede acotar por ella. Degradar a SQL —que filtra por el uuid— es lo
+    // único honesto; servir la página sin el filtro sería el defecto que este
+    // carril vino a cerrar.
+    if (filtros.specialtyConceptId && !filtros.specialtyDisplay) return null;
+
     try {
       const filtrosIndice: Array<{ field: string; values: string[] }> = [];
       if (filtros.kind) {
@@ -542,6 +1094,21 @@ export class CommunityPublicService {
       }
       if (filtros.verified) {
         filtrosIndice.push({ field: 'verified', values: ['true'] });
+      }
+      // `city` está mapeada como `keyword` con el normalizador español, así
+      // que compara sin tildes ni mayúsculas — igual que el camino SQL. Que
+      // los dos acoten igual no es un detalle: si el índice se cae, la lista
+      // tiene que seguir diciendo lo mismo.
+      if (filtros.city) {
+        filtrosIndice.push({ field: 'city', values: [filtros.city] });
+      }
+      // `specialties` está mapeada como `keyword` y es filtrable desde que se
+      // creó el índice; lo que faltaba era que alguien la usara.
+      if (filtros.specialtyDisplay) {
+        filtrosIndice.push({
+          field: 'specialties',
+          values: [filtros.specialtyDisplay],
+        });
       }
 
       const result = await this.searchIndex.search(
@@ -625,6 +1192,23 @@ export class CommunityPublicService {
       validUntil: texto('validUntil'),
     };
 
+    // El punto viaja al índice como `geo_point` —`{lat, lon}`, con la `lon` que
+    // exige OpenSearch— y sale al cliente como `{lat, lng}`, que es lo que
+    // declara el contrato público. La traducción va acá, en el mismo lugar que
+    // recompone el sello, para que la fila servida desde el índice sea idéntica
+    // a la servida desde SQL.
+    const punto = source.location;
+    const location =
+      typeof punto === 'object' &&
+      punto !== null &&
+      typeof (punto as { lat?: unknown }).lat === 'number' &&
+      typeof (punto as { lon?: unknown }).lon === 'number'
+        ? {
+            lat: (punto as { lat: number }).lat,
+            lng: (punto as { lon: number }).lon,
+          }
+        : null;
+
     return {
       kind: (texto('kind') ?? 'PRACTITIONER') as PublicResultKind,
       slug: texto('slug') ?? '',
@@ -638,6 +1222,9 @@ export class CommunityPublicService {
       verifiedBadge,
       hasPublishedAgenda: source.hasPublishedAgenda === true,
       nextAvailableDate: texto('nextAvailableDate'),
+      coverUrl: texto('coverUrl'),
+      address: texto('address'),
+      location,
     };
   }
 
@@ -700,13 +1287,22 @@ export class CommunityPublicService {
       señales.badges.get(profile.id) ?? [],
     );
     const agenda = señales.agenda.get(profile.targetId);
+    const ubicacion = señales.locations.get(profile.targetId);
     return {
       kind: this.kindOf(profile),
       slug: profile.slug,
       displayName: profile.displayName,
       headline: profile.headline ?? null,
-      city: señales.locations.get(profile.targetId)?.city ?? null,
+      city: ubicacion?.city ?? null,
       avatarUrl: this.fileUrl(profile.avatarFileId),
+      coverUrl: this.fileUrl(profile.coverFileId),
+      address: ubicacion?.address ?? null,
+      // El punto sólo cuando está completo: media coordenada no ubica nada y
+      // `geo_point` la rechaza igual. Ver `locationsByOwner`.
+      location:
+        ubicacion && ubicacion.lat !== null && ubicacion.lng !== null
+          ? { lat: ubicacion.lat, lng: ubicacion.lng }
+          : null,
       // El booleano deriva del sello, no de la columna resumen: si las dos se
       // desincronizaran, manda el que tiene la evidencia detrás.
       verified: badge.status === 'VERIFIED',

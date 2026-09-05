@@ -202,4 +202,47 @@ export class ConceptDesignationsRepository {
       propertyCode,
     });
   }
+
+  /**
+   * **Todas** las propiedades de un conjunto de conceptos, en una consulta.
+   *
+   * `findPropertyForConcepts` resuelve una propiedad concreta —lo que necesita
+   * la regla `prop` de una expansión—. Esto resuelve el caso contrario: quién
+   * quiere pintar una grilla necesita todas las propiedades de cada fila y no
+   * sabe de antemano cuáles hay.
+   *
+   * ## Por qué hacía falta
+   *
+   * Hasta acá, las propiedades sólo salían por el **detalle de un concepto**.
+   * El nomenclador de procedimientos son **4 408 conceptos** con su
+   * especialidad, su precio de referencia y su unidad guardados justamente como
+   * propiedades: pintarlo obligaba a pedir 4 408 detalles, uno por fila. No es
+   * una ineficiencia, es una pantalla que no se puede construir.
+   *
+   * @param em - Contexto de persistencia.
+   * @param conceptIds - Conceptos cuyas propiedades se necesitan.
+   * @returns Mapa `conceptId -> { propertyCode: valor }`. Un concepto sin
+   * propiedades **no aparece**: quien consulta distingue «no tiene» de «no
+   * existe» por su cuenta, igual que en las demás lecturas en lote del módulo.
+   */
+  async findPropertiesForConcepts(
+    em: EntityManager,
+    conceptIds: string[],
+  ): Promise<Map<string, Record<string, unknown>>> {
+    const porConcepto = new Map<string, Record<string, unknown>>();
+    if (conceptIds.length === 0) return porConcepto;
+
+    const rows = await em.find(ConceptProperties, {
+      conceptId: { $in: conceptIds },
+    });
+    for (const row of rows) {
+      const actuales = porConcepto.get(row.conceptId) ?? {};
+      // Indexado por código y no como lista: quien lo consume lo lee por
+      // nombre (`properties.specialty`), nunca recorriéndolo. Es la misma
+      // forma que ya devuelve el detalle de un concepto.
+      actuales[row.propertyCode] = row.valueJson;
+      porConcepto.set(row.conceptId, actuales);
+    }
+    return porConcepto;
+  }
 }

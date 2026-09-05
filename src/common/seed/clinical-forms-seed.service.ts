@@ -3,7 +3,12 @@ import { MikroORM } from '@mikro-orm/postgresql';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
-import { CatalogConcepts } from '../../modules/terminology/entities';
+import {
+  CatalogConcepts,
+  ValueSetMembers,
+  ValueSets,
+  ValueSetVersions,
+} from '../../modules/terminology/entities';
 import { ValueSetsRepository } from '../../modules/terminology/repositories/value-sets.repository';
 import { SpecialtyChartTemplates } from '../../modules/chart/entities';
 import {
@@ -147,6 +152,11 @@ export class ClinicalFormsSeedService {
     const delModelo = await this.resolverEspecialidades(em);
     const specialties = await this.seedSpecialties(em, delModelo, now);
     const reasignadas = await this.reapuntarAlModelo(em, delModelo);
+    const catalogo = await this.materializarValueSetDeEspecialidades(
+      em,
+      delModelo,
+      now,
+    );
 
     const politica = await this.seedExtensionPolicy(em, now);
 
@@ -162,9 +172,14 @@ export class ClinicalFormsSeedService {
       );
     }
 
-    if (templates > 0 || specialties > 0 || reasignadas > 0) {
+    if (templates > 0 || specialties > 0 || reasignadas > 0 || catalogo > 0) {
       this.logger.info(
-        { templates, specialties, reasignadas },
+        {
+          templates,
+          specialties,
+          reasignadas,
+          especialidadesEnCatalogo: catalogo,
+        },
         'Catálogo de formularios clínicos estándar materializado',
       );
     }
@@ -213,6 +228,135 @@ export class ClinicalFormsSeedService {
     // que declaran los JSON del catálogo: el match es por código, nunca por
     // display —que lleva tildes— ni por uuid, que es derivado.
     return new Map(conceptos.map((concepto) => [concepto.code, concepto.id]));
+  }
+
+  /**
+   * Publica los conceptos acuñados acá como `VS_MEDICAL_SPECIALTY`, cuando el
+   * paquete del modelo no lo trajo.
+   *
+   * ## El agujero que tapa
+   *
+   * `MedicalSpecialtyCatalogService` valida toda especialidad declarada contra
+   * este value set, y cuando no existe **no rechaza la especialidad: rechaza la
+   * operación entera** con un 422 («El catálogo de especialidades médicas no
+   * está disponible»). Eso es lo correcto —tratar un catálogo ausente como
+   * «ninguna especialidad es válida» sería peor—, pero deja una base sin el
+   * paquete del modelo en un estado donde **ningún profesional puede declarar
+   * su especialidad**: ni al registrarse, ni después. En la guía de
+   * profesionales todos caen bajo «Sin especialidad registrada» y cada chip de
+   * especialidad queda sin nadie debajo.
+   *
+   * Este seed ya acuña los conceptos que hacían falta para colgar las
+   * plantillas ({@link seedSpecialties}); lo único que faltaba era declararlos
+   * como catálogo, que es una vuelta más de la misma decisión.
+   *
+   * ## Qué no hace
+   *
+   * **No pisa el value set del modelo.** Si `VS_MEDICAL_SPECIALTY` ya existe
+   * —porque el paquete del modelo se cargó, que es el caso normal— esto no
+   * escribe una sola fila: `delModelo` viene lleno y la función sale en la
+   * primera línea. El catálogo de verdad manda, siempre; esto es el suplente
+   * para las bases donde no llegó.
+   *
+   * `TRANSVERSAL` queda fuera a propósito: no es una especialidad médica, y
+   * meterlo en el catálogo permitiría que alguien se declarara «transversal».
+   *
+   * @returns Cuántas filas de catálogo se crearon en esta corrida.
+   */
+  private async materializarValueSetDeEspecialidades(
+    em: EntityManager,
+    delModelo: ReadonlyMap<string, string>,
+    now: Date,
+  ): Promise<number> {
+    // El modelo lo trajo: no hay nada que suplir.
+    if (delModelo.size > 0) return 0;
+
+    const existente = await this.valueSets.findByInternalCode(
+      em,
+      VALUE_SET_ESPECIALIDADES,
+    );
+    // Existe pero vino vacío o sin versión vigente: tampoco se toca. Un value
+    // set del modelo a medio cargar es un problema de datos que hay que ver, no
+    // uno que este seed deba disimular llenándolo con lo suyo.
+    if (existente !== null) return 0;
+
+    let creadas = 0;
+    const valueSetId = deterministicId(
+      `${ORIGIN}:value-set:${VALUE_SET_ESPECIALIDADES}`,
+    );
+    const versionId = deterministicId(
+      `${ORIGIN}:value-set-version:${VALUE_SET_ESPECIALIDADES}:1.0.0`,
+    );
+
+    em.create(
+      ValueSets,
+      {
+        id: valueSetId,
+        internalCode: VALUE_SET_ESPECIALIDADES,
+        name: 'Especialidades médicas',
+        canonicalUrl: `urn:mantra:value-set:${VALUE_SET_ESPECIALIDADES}`,
+        stateConceptId: CONCEPTS.TERM_ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    creadas += 1;
+    await em.flush();
+
+    em.create(
+      ValueSetVersions,
+      {
+        id: versionId,
+        valueSetId,
+        version: '1.0.0',
+        validFrom: now,
+        // Sin esta marca, `findIncludedConceptIdsByValueSet` no encuentra
+        // versión vigente y el catálogo sigue contando como ausente: el 422
+        // volvería igual, con el value set ya creado.
+        isDefault: true,
+        stateConceptId: CONCEPTS.TERM_ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    creadas += 1;
+    await em.flush();
+
+    // Los miembros: los conceptos de este mismo seed, en el orden del catálogo
+    // y sin repetir —varias formas estándar comparten especialidad—.
+    const vistas = new Set<string>();
+    let ordinal = 0;
+    for (const form of STANDARD_FORMS) {
+      const specialty = form.specialty;
+      if (specialty.code === CODIGO_TRANSVERSAL) continue;
+      const conceptId = this.specialtyConceptIdAcunado(specialty);
+      if (vistas.has(conceptId)) continue;
+      vistas.add(conceptId);
+      em.create(
+        ValueSetMembers,
+        {
+          id: deterministicId(`${ORIGIN}:value-set-member:${specialty.code}`),
+          valueSetVersionId: versionId,
+          conceptId,
+          included: true,
+          ordinal,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      ordinal += 1;
+      creadas += 1;
+    }
+    await em.flush();
+
+    this.logger.info(
+      { valueSet: VALUE_SET_ESPECIALIDADES, especialidades: vistas.size },
+      'El paquete del modelo no trajo el catálogo de especialidades: se publicó el de este seed',
+    );
+    return creadas;
   }
 
   /**

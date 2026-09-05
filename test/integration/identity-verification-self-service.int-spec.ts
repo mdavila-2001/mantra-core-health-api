@@ -1,6 +1,8 @@
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { bootstrapTestApp, bearer, type TestContext,
+  camposObligatoriosDePaciente,
+} from './harness';
 import { IDA } from '../../src/modules/identity_assurance/identity_assurance.concepts';
 import { IDENTITY_CARD_VERTICAL } from '../../src/modules/identity_assurance/identity_assurance.seed';
 
@@ -22,7 +24,11 @@ import { IDENTITY_CARD_VERTICAL } from '../../src/modules/identity_assurance/ide
  * El paso 2 exige que exista un intento COMPLETADO, y nadie completaba el del
  * paso 1: el veredicto se rechazaba con 422 en cada tick del worker, el check se
  * quedaba en curso para siempre y el caso nunca emitía aserción. El titular veía
- * «Se habilita tu acceso» y su resumen seguía en 403.
+ * «Se habilita tu acceso» y no se le habilitaba nada.
+ *
+ * Desde F-34 el resumen propio ya no está detrás del guard de identidad, así que
+ * lo que este recorrido fija a los dos extremos no es 403 → 200 sino qué trae
+ * ese 200: sin aserción llega sin código de paciente, y con ella lo suma.
  *
  * Las dos llamadas del worker se hacen aquí con el token administrativo porque
  * `/internal/identity/*` admite `SYSTEM` y `SECURITY_ADMIN`: lo que se prueba es
@@ -30,6 +36,8 @@ import { IDENTITY_CARD_VERTICAL } from '../../src/modules/identity_assurance/ide
  */
 describe('Verificación de identidad — el titular se verifica solo (integración)', () => {
   let ctx: TestContext;
+  /** Los campos que el alta de paciente exige; salen del arnés. */
+  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
 
   /** Documento con el que el paciente se registra y luego inicia sesión. */
   const nationalId = `INT-H01-${randomUUID().slice(0, 8)}`;
@@ -41,11 +49,13 @@ describe('Verificación de identidad — el titular se verifica solo (integraci�
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
 
     // Alta pública: sin token y sin que ningún admin lo dé de alta.
     await http()
       .post('/iam/auth/register-patient')
       .send({
+        ...camposDePaciente,
         nationalId,
         password,
         displayName: 'Paciente H-01',
@@ -65,15 +75,20 @@ describe('Verificación de identidad — el titular se verifica solo (integraci�
     await ctx.app.close();
   });
 
-  it('recién registrado, su resumen está cerrado hasta verificar', async () => {
+  it('recién registrado, ve su resumen sin código de paciente', async () => {
     const res = await http()
       .get('/profiles/patients/me/summary')
       .set(bearer(patientToken))
-      .expect(403);
+      .expect(200);
 
-    // No es el FORBIDDEN genérico de rol: es una puerta, no un muro, y el
-    // cliente lo distingue por este código para poder ofrecer la verificación.
-    expect(res.body.code).toBe('IDENTITY_VERIFICATION_REQUIRED');
+    // Verificarse es un trámite posterior (F-34): lo que la persona declaró al
+    // registrarse lo ve desde el primer día. Lo único que espera a la aserción
+    // es el código de paciente, y su ausencia la explica `identityVerified`.
+    expect(res.body).toMatchObject({
+      identityVerified: false,
+      displayName: 'Paciente H-01',
+    });
+    expect(res.body.patientCode).toBeUndefined();
   });
 
   it('abre su caso aportando la foto con el carnet', async () => {
@@ -145,14 +160,16 @@ describe('Verificación de identidad — el titular se verifica solo (integraci�
     expect(propio).toMatchObject({ status: IDA.CASE_ASSERTED });
   });
 
-  // El criterio de cierre de H-01: lo mismo que devolvía 403 al empezar.
-  it('y con eso su resumen se abre (403 → 200)', async () => {
+  // El criterio de cierre de H-01: lo mismo que al empezar llegaba sin código.
+  it('y con eso su resumen suma el código de paciente', async () => {
     const res = await http()
       .get('/profiles/patients/me/summary')
       .set(bearer(patientToken))
       .expect(200);
 
-    expect(res.body).toHaveProperty('profileId');
+    expect(res.body.identityVerified).toBe(true);
+    expect(res.body.patientCode).toBeDefined();
+    expect(res.body).toHaveProperty('patientProfileId');
   });
 
   /** Cliente HTTP contra la app bajo prueba. */

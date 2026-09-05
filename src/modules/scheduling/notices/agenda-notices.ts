@@ -33,6 +33,20 @@ export const RECURSO_CUPO = 'scheduling.bookable_slots';
  */
 export const RUTA_MIS_TURNOS = '/my-account/appointments';
 
+/**
+ * Ruta de la agenda donde el profesional acepta o rechaza lo que le piden.
+ *
+ * Existe porque {@link RUTA_MIS_TURNOS} es del **paciente** —lo dice su propio
+ * nombre— y los avisos dirigidos al profesional la estaban reusando: el aviso
+ * de una solicitud nueva decía «aceptala o rechazala desde tu agenda» y llevaba
+ * al portal del paciente, una pantalla a la que el profesional ni siquiera
+ * llega (su sección es `/schedule`, y el guard de roles lo devolvería).
+ *
+ * El sufijo `?vista=citas` selecciona la pestaña donde viven aceptar y
+ * rechazar; sin él caería en la pestaña por defecto, que es otra.
+ */
+export const RUTA_AGENDA_PROFESIONAL = '/schedule?vista=citas';
+
 /** El destino navegable de un aviso sobre una cita concreta. */
 export function rutaDelTurno(bookingId: string): string {
   return `${RUTA_MIS_TURNOS}?turno=${bookingId}`;
@@ -91,6 +105,113 @@ export function avisoDeCupoLiberado(
     // Un worker que reintenta el mismo lote no puede avisar dos veces del
     // mismo cupo a la misma persona.
     debounceKey: `p8:slot-released:${slot.slotId}:${patientProfileId}`,
+  };
+}
+
+/**
+ * (1b) Entró una solicitud de turno — el aviso para **el profesional**.
+ *
+ * Hasta acá pedir un turno era un hecho silencioso: `requestBooking` dejaba la
+ * cita en `PENDING_CONFIRMATION` y no avisaba a nadie. El profesional se
+ * enteraba sólo si abría la agenda, y el paciente no tenía forma de saber si su
+ * pedido había entrado.
+ *
+ * Lleva la acción en el cuerpo —aceptar o rechazar— porque una solicitud que
+ * avisa sin decir qué se espera de quien la recibe es sólo ruido.
+ *
+ * ## El lugar, que faltaba
+ *
+ * El propietario lo pide «en tal horario **en tal lugar**», y hasta acá el
+ * horario estaba y el lugar no. Este comentario decía que faltaba exponer la
+ * sede en la lectura de agenda; **ya estaba expuesta** —`ResourceSiteDto` en el
+ * listado de recursos— y lo único que faltaba era traerla al snapshot del
+ * aviso. Ahora la frase la lleva, y se omite entera cuando el recurso no
+ * declara sede: un aviso con un hueco («para el jueves en ») se lee peor que
+ * uno sin el dato.
+ *
+ * @param booking - La cita recién solicitada.
+ * @param paciente - Cómo se llama quien la pidió; `undefined` si no se resolvió.
+ * @param destinatarioUserId - Cuenta del profesional.
+ */
+/**
+ * «, en el Consultorio del Sur» — o nada, si el recurso no declara sede.
+ *
+ * Se arma como sufijo y no como campo aparte porque el aviso es una frase, y
+ * una frase con un hueco («pidió turno para el jueves en ») se lee peor que sin
+ * el dato.
+ */
+function enTalLugar(booking: BookingNoticeSnapshot): string {
+  return booking.siteLabel === undefined ? '' : `, en ${booking.siteLabel}`;
+}
+
+export function avisoDeSolicitudAlProfesional(
+  booking: BookingNoticeSnapshot,
+  paciente: string | undefined,
+  destinatarioUserId: string,
+): AgendaNotice {
+  const quien = paciente ?? 'Un paciente';
+  return {
+    kind: 'BOOKING_STATE_CHANGED',
+    recipient: { userId: destinatarioUserId },
+    tenantId: booking.tenantId,
+    subject: 'Tenés una nueva solicitud de consulta',
+    bodyText:
+      `${quien} pidió turno para el ${cuando(booking.startAt)}${enTalLugar(booking)}. ` +
+      'Aceptala o rechazala desde tu agenda.',
+    relatedResourceType: RECURSO_CITA,
+    relatedResourceId: booking.bookingId,
+    payload: {
+      // La agenda del profesional, no el portal del paciente: es donde está el
+      // «aceptala o rechazala» que promete el cuerpo de arriba.
+      route: RUTA_AGENDA_PROFESIONAL,
+      bookingId: booking.bookingId,
+      change: 'REQUESTED',
+      ...(booking.startAt === undefined
+        ? {}
+        : { startAt: booking.startAt.toISOString() }),
+    },
+    // Reintentar la materialización de la misma reserva no puede llenarle la
+    // campana al profesional con la misma solicitud.
+    debounceKey: `p8:booking-requested:pro:${booking.bookingId}`,
+  };
+}
+
+/**
+ * (1c) Entró una solicitud de turno — el acuse para **el paciente**.
+ *
+ * Es el punto 2 del pedido y el AC-15-2: los dos destinatarios, no uno. Sin
+ * este acuse, pedir un turno se siente como escribir a un buzón sin fondo —el
+ * paciente no sabe si el pedido entró, y vuelve a pedirlo.
+ *
+ * Dice explícitamente que **falta la respuesta**: un acuse que se lee como
+ * confirmación es peor que ningún acuse, porque manda a alguien al consultorio
+ * con un turno que nadie tomó.
+ *
+ * @param booking - La cita recién solicitada.
+ */
+export function avisoDeSolicitudAlPaciente(
+  booking: BookingNoticeSnapshot,
+): AgendaNotice {
+  return {
+    kind: 'BOOKING_STATE_CHANGED',
+    recipient: { patientProfileId: booking.patientProfileId },
+    tenantId: booking.tenantId,
+    subject: 'Enviamos tu solicitud de turno',
+    bodyText:
+      `Pediste turno con ${booking.resourceLabel} para el ${cuando(booking.startAt)}` +
+      `${enTalLugar(booking)}. ` +
+      'Todavía falta que lo confirmen: te avisamos apenas respondan.',
+    relatedResourceType: RECURSO_CITA,
+    relatedResourceId: booking.bookingId,
+    payload: {
+      route: rutaDelTurno(booking.bookingId),
+      bookingId: booking.bookingId,
+      change: 'REQUESTED',
+      ...(booking.startAt === undefined
+        ? {}
+        : { startAt: booking.startAt.toISOString() }),
+    },
+    debounceKey: `p8:booking-requested:pac:${booking.bookingId}`,
   };
 }
 
@@ -177,11 +298,14 @@ export function avisoDeRecordatorio(
 
 /** Los cambios de estado que el paciente tiene que enterarse. */
 export type CambioDeCita =
-  'ACCEPTED' | 'REJECTED' | 'RESCHEDULED' | 'CANCELLED';
+  'ACCEPTED' | 'ASSIGNED' | 'REJECTED' | 'RESCHEDULED' | 'CANCELLED';
 
 /** Encabezado de cada cambio, en la voz de quien lo recibe. */
 const TITULO: Readonly<Record<CambioDeCita, string>> = {
   ACCEPTED: 'Tu turno quedó confirmado',
+  // La cita puntual (AG-2): el doctor la asigna y el paciente SE ENTERA — no
+  // confirma, porque ya se acordó en el consultorio.
+  ASSIGNED: 'Te agendaron un turno',
   REJECTED: 'No se pudo tomar tu solicitud de turno',
   RESCHEDULED: 'Tu turno se movió de horario',
   CANCELLED: 'Tu turno se canceló',
@@ -206,6 +330,7 @@ export function avisoDeCambioDeCita(
   const conQuien = `con ${booking.resourceLabel}`;
   const cuerpo: Readonly<Record<CambioDeCita, string>> = {
     ACCEPTED: `Tu turno ${conQuien} del ${cuando(booking.startAt)} quedó confirmado.`,
+    ASSIGNED: `${booking.resourceLabel} te agendó para el ${cuando(booking.startAt)}. Si no podés asistir, pedí el cambio desde tus turnos.`,
     REJECTED: `Tu solicitud de turno ${conQuien} del ${cuando(booking.startAt)} no se pudo tomar.`,
     RESCHEDULED: `Tu turno ${conQuien} pasó al ${cuando(booking.startAt)}.`,
     CANCELLED: `Se canceló tu turno ${conQuien} del ${cuando(booking.startAt)}.`,
@@ -224,7 +349,13 @@ export function avisoDeCambioDeCita(
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
     payload: {
-      route: rutaDelTurno(booking.bookingId),
+      // El destino lo decide el destinatario, que es lo que este aviso ya
+      // distingue: cuando el paciente cancela, quien recibe es el profesional
+      // —llega su `userId`— y su turno no vive en el portal del paciente.
+      route:
+        destinatario.userId === undefined
+          ? rutaDelTurno(booking.bookingId)
+          : RUTA_AGENDA_PROFESIONAL,
       bookingId: booking.bookingId,
       change: cambio,
       ...(motivo === undefined ? {} : { reasonText: motivo }),
@@ -232,5 +363,53 @@ export function avisoDeCambioDeCita(
         ? {}
         : { startAt: booking.startAt.toISOString() }),
     },
+  };
+}
+
+/**
+ * «Tu turno se movió» — el aviso de mover horario (carril 12).
+ *
+ * El pedido lo llama «mensajes automáticos por la app de mover horarios».
+ *
+ * ## Por qué dice la hora nueva y no los minutos
+ *
+ * «Tu turno se movió 20 minutos» obliga a quien lo lee a hacer una cuenta con
+ * un dato que no tiene a mano: no se acuerda de a qué hora era. La hora nueva
+ * es la que va a necesitar, y es la que se dice primero.
+ *
+ * Los minutos van igual, pero después y como contexto — sirven para reconocer
+ * que es *su* turno el que se movió y no otro.
+ */
+export function avisoDeHorarioMovido(
+  booking: BookingNoticeSnapshot,
+  minutos: number,
+  destinatarioUserId: string,
+): AgendaNotice {
+  const direccion = minutos > 0 ? 'más tarde' : 'más temprano';
+  const cuantos = Math.abs(minutos);
+  return {
+    kind: 'BOOKING_STATE_CHANGED',
+    recipient: { userId: destinatarioUserId },
+    tenantId: booking.tenantId,
+    subject: 'Se movió el horario de tu turno',
+    bodyText:
+      `Tu turno con ${booking.resourceLabel} pasa a ser el ` +
+      `${cuando(booking.startAt)}${enTalLugar(booking)} — ` +
+      `${cuantos} ${cuantos === 1 ? 'minuto' : 'minutos'} ${direccion}. ` +
+      'Si no te sirve, podés pedir otro horario desde la app.',
+    relatedResourceType: RECURSO_CITA,
+    relatedResourceId: booking.bookingId,
+    payload: {
+      route: rutaDelTurno(booking.bookingId),
+      bookingId: booking.bookingId,
+      change: 'SHIFTED',
+      shiftMinutes: minutos,
+      ...(booking.startAt === undefined
+        ? {}
+        : { startAt: booking.startAt.toISOString() }),
+    },
+    // Correr la misma agenda dos veces son dos movimientos distintos y los dos
+    // hay que avisarlos: por eso la clave lleva los minutos, no sólo la cita.
+    debounceKey: `p8:booking-shifted:${booking.bookingId}:${minutos}`,
   };
 }

@@ -114,8 +114,14 @@ export class PatientProfileResponseDto {
 }
 
 /**
- * Resumen que el propio paciente ve de sí mismo, una vez verificada su
- * identidad. No incluye datos clínicos: es el patrón de acceso, no la ficha.
+ * Resumen que el propio paciente ve de sí mismo. No incluye datos clínicos: es
+ * el patrón de acceso, no la ficha.
+ *
+ * Se devuelve verificada la identidad o no: los datos de filiación son los que
+ * la propia persona declaró al registrarse, y negárselos hasta verificar no
+ * protege nada. Lo que sí depende de la verificación es el **código de
+ * paciente**, y esa decisión la toma el servidor —`patientCode` viaja o no
+ * viaja—, no el cliente ocultando un campo que ya recibió.
  */
 export class PatientSummaryResponseDto {
   /**
@@ -131,10 +137,22 @@ export class PatientSummaryResponseDto {
   patientProfileId!: string;
 
   /**
+   * Si el titular tiene una aserción de identidad vigente.
+   */
+  @ApiProperty({
+    description:
+      'Si el titular tiene una aserción de identidad vigente. Con `false` el resumen llega sin `patientCode`.',
+  })
+  identityVerified!: boolean;
+
+  /**
    * Valor de patient code mantenido por la instancia.
    */
-  @ApiProperty()
-  patientCode!: string;
+  @ApiPropertyOptional({
+    description:
+      'Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`.',
+  })
+  patientCode?: string;
 
   /**
    * Valor de display name mantenido por la instancia.

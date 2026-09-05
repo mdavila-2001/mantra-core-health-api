@@ -1,11 +1,25 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { getCurrentTenantId, ResourceNotFoundException } from '../../../common';
+import {
+  decodeKeysetCursor,
+  encodeKeysetCursor,
+  getCurrentTenantId,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
 import { Practices } from '../../practice/entities';
+import { PracticeTenantLookupService } from '../../practice/services';
 import { AccountsRepository, JournalRepository } from '../repositories';
 import { ACCT } from '../accounting.concepts';
 import type {
+  BalanceSheetResponseDto,
   ChartOfAccountsResponseDto,
+  FinancialStatementLineDto,
+  FinancialStatementQueryDto,
+  GeneralLedgerQueryDto,
+  GeneralLedgerResponseDto,
+  IncomeStatementResponseDto,
   JournalTransactionDetailDto,
   ListJournalQueryDto,
   ListJournalResponseDto,
@@ -52,12 +66,64 @@ export class LedgerReadService {
    * @param em - Contexto de persistencia.
    * @param journalRepo - Asientos y sus líneas.
    * @param accountsRepo - Plan de cuentas.
+   * @param practiceTenantLookup - Vínculo activo profesional↔práctica (Carril 18),
+   *   para las lecturas nuevas de TAREA-20 (AC-20-12). Opcional para no romper
+   *   la construcción en los specs previos que no lo necesitan.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly journalRepo: JournalRepository,
     private readonly accountsRepo: AccountsRepository,
+    private readonly practiceTenantLookup?: PracticeTenantLookupService,
   ) {}
+
+  /**
+   * Carril 18 — igual que `LedgerService.assertPractitionerOwnsPractice`
+   * (duplicado deliberado y mínimo: unificarlo en un guard compartido es
+   * refactor fuera del alcance de esta tarea). Un `PRACTITIONER` sólo puede
+   * leer los libros de una práctica a la que está vinculado con una
+   * asignación de rol ACTIVE; `SECURITY_ADMIN`/`ACCOUNTING_APPROVER` pasan
+   * sin restricción. AC-20-12: la respuesta es **422**, no una lista vacía —
+   * vacío y prohibido son cosas distintas.
+   */
+  private async assertPractitionerOwnsPractice(
+    actor: AuthenticatedUser,
+    practiceId: string,
+  ): Promise<void> {
+    if (
+      actor.roles.includes('SECURITY_ADMIN') ||
+      actor.roles.includes('ACCOUNTING_APPROVER')
+    ) {
+      return;
+    }
+    if (!actor.roles.includes('PRACTITIONER')) {
+      return;
+    }
+    if (!actor.practitionerProfileId) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene un perfil profesional asociado',
+        { actorId: actor.id },
+      );
+    }
+    // Sin lookup inyectado (specs previos), no hay forma de verificar: se
+    // deniega en vez de tratar "no puedo verificar" como "está permitido".
+    if (!this.practiceTenantLookup) {
+      throw new PreconditionFailedException(
+        'No se pudo verificar la vinculación del profesional con la práctica',
+        { practiceId },
+      );
+    }
+    const practiceIds =
+      await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
+        actor.practitionerProfileId,
+      );
+    if (!practiceIds.includes(practiceId)) {
+      throw new PreconditionFailedException(
+        'El profesional no tiene una vinculación activa con esa práctica',
+        { practiceId },
+      );
+    }
+  }
 
   /**
    * Comprueba que la práctica consultada pertenece al tenant activo.
@@ -324,6 +390,449 @@ export class LedgerReadService {
       truncated: asientos.length >= TRIAL_BALANCE_MAX_TRANSACTIONS,
     };
   }
+
+  /**
+   * Libro mayor de **una** cuenta (TAREA-20 S3): sus movimientos POSTEADOS,
+   * del más antiguo al más reciente, con saldo corrido.
+   *
+   * A diferencia del libro diario, que lista asientos completos, acá cada
+   * fila es una línea contra `accountId` — la contrapartida no aparece,
+   * exactamente como un mayor en papel: una hoja por cuenta.
+   *
+   * Pagina por **cursor** (`transactionDate`, `id`), nunca por `limit` con
+   * desplazamiento (AC-20-14): una cuenta con movimiento constante no puede
+   * ofrecer «página 5» de forma estable.
+   *
+   * @param query - Práctica y cuenta obligatorias; ventana y cursor opcionales.
+   * @returns La página pedida, con el saldo de apertura de la ventana.
+   */
+  async generalLedger(
+    query: GeneralLedgerQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<GeneralLedgerResponseDto> {
+    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
+
+    const em = this.em.fork();
+    const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
+
+    const cuenta = await this.accountsRepo.findById(em, query.accountId);
+    if (!cuenta || cuenta.practiceId !== query.practiceId) {
+      throw new ResourceNotFoundException(
+        'Cuenta no encontrada en la práctica',
+        {
+          accountId: query.accountId,
+        },
+      );
+    }
+    const deudora = cuenta.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
+
+    // Sólo lo POSTEADO: un borrador no es un hecho contable (mismo criterio
+    // que trialBalance).
+    const asientos = await this.journalRepo.findTransactions(
+      em,
+      {
+        practiceId: query.practiceId,
+        statusConceptId: ACCT.TXN_POSTED,
+        ...(query.from === undefined ? {} : { from: new Date(query.from) }),
+        ...(query.to === undefined ? {} : { to: new Date(query.to) }),
+      },
+      TRIAL_BALANCE_MAX_TRANSACTIONS,
+    );
+    const fechaPorTransaccion = new Map(
+      asientos.map((a) => [a.id, a.transactionDate] as const),
+    );
+    const numeroPorTransaccion = new Map(
+      asientos.map((a) => [a.id, a.transactionNumber ?? null] as const),
+    );
+
+    const lineas = (
+      await this.journalRepo.findEntriesByTransactions(
+        em,
+        asientos.map((a) => a.id),
+      )
+    )
+      .filter((l) => l.accountId === query.accountId)
+      .map((l) => ({
+        id: l.id,
+        transactionId: l.transactionId,
+        transactionDate: fechaPorTransaccion.get(l.transactionId) as Date,
+        directionConceptId: l.directionConceptId,
+        amount: importeEnBase(l),
+        memo: l.memo ?? null,
+      }))
+      // Cronológico, ascendente: es como se lee un mayor. `id` desempata
+      // dentro del mismo instante para que el orden sea estable entre páginas.
+      .sort((a, b) => {
+        const porFecha =
+          a.transactionDate.getTime() - b.transactionDate.getTime();
+        return porFecha !== 0 ? porFecha : a.id.localeCompare(b.id);
+      });
+
+    // Saldo corrido calculado sobre TODA la serie, desde el origen, antes de
+    // recortar la página: así el saldo de apertura de la página 2 es exacto
+    // aunque la página 1 nunca se haya pedido.
+    let acumulado = 0n;
+    const conSaldo = lineas.map((linea) => {
+      const importe = aCentimos(linea.amount);
+      acumulado +=
+        linea.directionConceptId === ACCT.DIRECTION_DEBIT
+          ? deudora
+            ? importe
+            : -importe
+          : deudora
+            ? -importe
+            : importe;
+      return { ...linea, runningBalance: acumulado };
+    });
+
+    const after = query.cursor ? decodeKeysetCursor(query.cursor) : undefined;
+    const afterFecha =
+      typeof after?.transactionDate === 'string'
+        ? new Date(after.transactionDate).getTime()
+        : undefined;
+    const afterId = typeof after?.id === 'string' ? after.id : undefined;
+
+    const inicio =
+      afterFecha === undefined
+        ? 0
+        : conSaldo.findIndex((l) => {
+            const cmp = l.transactionDate.getTime() - afterFecha;
+            return (
+              cmp > 0 ||
+              (cmp === 0 &&
+                afterId !== undefined &&
+                l.id.localeCompare(afterId) > 0)
+            );
+          });
+    const desde = inicio === -1 ? conSaldo.length : inicio;
+
+    const saldoApertura =
+      desde > 0 ? aTexto(conSaldo[desde - 1].runningBalance) : '0.00';
+    const pagina = conSaldo.slice(desde, desde + limit);
+    const ultima = pagina.at(-1);
+    const huboMas = desde + limit < conSaldo.length;
+
+    return {
+      accountId: cuenta.id,
+      code: cuenta.code,
+      name: cuenta.name,
+      normalBalanceConceptId: cuenta.normalBalanceConceptId,
+      currencyConceptId: cuenta.currencyConceptId ?? null,
+      openingBalance: saldoApertura,
+      items: pagina.map((l) => ({
+        id: l.id,
+        transactionId: l.transactionId,
+        transactionNumber: numeroPorTransaccion.get(l.transactionId) ?? null,
+        transactionDate: l.transactionDate,
+        directionConceptId: l.directionConceptId,
+        debit:
+          l.directionConceptId === ACCT.DIRECTION_DEBIT ? l.amount : '0.00',
+        credit:
+          l.directionConceptId === ACCT.DIRECTION_CREDIT ? l.amount : '0.00',
+        runningBalance: aTexto(l.runningBalance),
+        memo: l.memo,
+      })),
+      count: pagina.length,
+      limit,
+      nextCursor:
+        huboMas && ultima
+          ? encodeKeysetCursor({
+              transactionDate: ultima.transactionDate.toISOString(),
+              id: ultima.id,
+            })
+          : null,
+    };
+  }
+
+  /**
+   * Agrega las líneas POSTEADAS de una práctica por cuenta, con el
+   * `accountTypeConceptId` incluido — lo que `trialBalance` no expone porque
+   * no lo necesita, y que el estado de resultados y el balance general sí.
+   *
+   * Reutiliza la misma fuente que `trialBalance` (asientos POSTEADOS +
+   * `amount`/`amount_base`) a propósito: si este agregado y el libro mayor
+   * dieran números distintos para la misma cuenta habría dos fuentes de
+   * verdad, que es exactamente lo que AC-20-7 prohíbe.
+   */
+  private async aggregatePostedByAccount(
+    practiceId: string,
+    filtros: { fiscalPeriodId?: string; from?: Date; to?: Date },
+  ): Promise<{
+    items: Array<
+      FinancialStatementLineDto & { normalBalanceConceptId: string | null }
+    >;
+    truncated: boolean;
+  }> {
+    const em = this.em.fork();
+
+    const asientos = await this.journalRepo.findTransactions(
+      em,
+      {
+        practiceId,
+        statusConceptId: ACCT.TXN_POSTED,
+        ...filtros,
+      },
+      TRIAL_BALANCE_MAX_TRANSACTIONS,
+    );
+    const lineas = await this.journalRepo.findEntriesByTransactions(
+      em,
+      asientos.map((a) => a.id),
+    );
+    const cuentas = await this.accountsRepo.findByPractice(
+      em,
+      practiceId,
+      TRIAL_BALANCE_MAX_ACCOUNTS,
+    );
+    const porId = new Map(cuentas.map((c) => [c.id, c]));
+
+    const sumas = new Map<string, bigint>();
+    for (const linea of lineas) {
+      const cuenta = porId.get(linea.accountId);
+      const deudora = cuenta?.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
+      const importe = aCentimos(importeEnBase(linea));
+      const signo =
+        linea.directionConceptId === ACCT.DIRECTION_DEBIT
+          ? deudora
+            ? importe
+            : -importe
+          : deudora
+            ? -importe
+            : importe;
+      sumas.set(linea.accountId, (sumas.get(linea.accountId) ?? 0n) + signo);
+    }
+
+    const items = [...sumas.entries()]
+      .map(([accountId, saldo]) => {
+        const cuenta = porId.get(accountId);
+        return {
+          accountId,
+          code: cuenta?.code ?? null,
+          name: cuenta?.name ?? null,
+          accountTypeConceptId: cuenta?.accountTypeConceptId ?? '',
+          normalBalanceConceptId: cuenta?.normalBalanceConceptId ?? null,
+          amount: aTexto(saldo),
+        };
+      })
+      .sort((a, b) => (a.code ?? '￿').localeCompare(b.code ?? '￿'));
+
+    return {
+      items,
+      truncated: asientos.length >= TRIAL_BALANCE_MAX_TRANSACTIONS,
+    };
+  }
+
+  /**
+   * Estado de resultados (TAREA-20 S3): ingresos y gastos POSTEADOS de la
+   * ventana pedida. Ver AC-20-7: agrega desde la misma fuente que el libro
+   * mayor, así que no puede divergir de él para la misma cuenta y período.
+   *
+   * @param query - Práctica obligatoria; ventana, período y cursor opcionales.
+   */
+  async incomeStatement(
+    query: FinancialStatementQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<IncomeStatementResponseDto> {
+    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
+    const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
+
+    const { items, truncated } = await this.aggregatePostedByAccount(
+      query.practiceId,
+      {
+        ...(query.fiscalPeriodId === undefined
+          ? {}
+          : { fiscalPeriodId: query.fiscalPeriodId }),
+        ...(query.from === undefined ? {} : { from: new Date(query.from) }),
+        ...(query.to === undefined ? {} : { to: new Date(query.to) }),
+      },
+    );
+
+    const revenueItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE,
+    );
+    const expenseItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EXPENSE,
+    );
+
+    const { page, nextCursor } = paginarPorCodigo(
+      [...revenueItems, ...expenseItems],
+      query.cursor,
+      limit,
+    );
+    const revenuePage = page.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE,
+    );
+    const expensePage = page.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EXPENSE,
+    );
+
+    const totalRevenue = revenueItems.reduce(
+      (acc, i) => acc + aCentimos(i.amount),
+      0n,
+    );
+    const totalExpense = expenseItems.reduce(
+      (acc, i) => acc + aCentimos(i.amount),
+      0n,
+    );
+
+    return {
+      revenueItems: revenuePage.map(sinNormalBalance),
+      expenseItems: expensePage.map(sinNormalBalance),
+      totalRevenue: aTexto(totalRevenue),
+      totalExpense: aTexto(totalExpense),
+      netIncome: aTexto(totalRevenue - totalExpense),
+      count: page.length,
+      limit,
+      nextCursor,
+      truncated,
+    };
+  }
+
+  /**
+   * Balance general (TAREA-20 S3): activo, pasivo y patrimonio a una fecha
+   * de corte (`query.to`, por omisión hoy). Distinto del balance de sumas y
+   * saldos, que no clasifica por tipo de cuenta.
+   *
+   * El patrimonio incorpora el resultado del período (`netIncomeOfPeriod`)
+   * porque este módulo no tiene asiento de cierre: sin sumarlo, activo no
+   * cuadraría contra pasivo + patrimonio pese a que la partida doble esté
+   * intacta (AC-20-6).
+   *
+   * @param query - Práctica obligatoria; fecha de corte y cursor opcionales.
+   */
+  async balanceSheet(
+    query: FinancialStatementQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<BalanceSheetResponseDto> {
+    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
+    const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
+    const asOf = query.to === undefined ? undefined : new Date(query.to);
+
+    const { items, truncated } = await this.aggregatePostedByAccount(
+      query.practiceId,
+      asOf === undefined ? {} : { to: asOf },
+    );
+
+    const assetItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_ASSET,
+    );
+    const liabilityItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_LIABILITY,
+    );
+    const equityItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EQUITY,
+    );
+    const revenueTotal = items
+      .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE)
+      .reduce((acc, i) => acc + aCentimos(i.amount), 0n);
+    const expenseTotal = items
+      .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EXPENSE)
+      .reduce((acc, i) => acc + aCentimos(i.amount), 0n);
+    const netIncome = revenueTotal - expenseTotal;
+
+    const { page, nextCursor } = paginarPorCodigo(
+      [...assetItems, ...liabilityItems, ...equityItems],
+      query.cursor,
+      limit,
+    );
+
+    const totalAssets = assetItems.reduce(
+      (acc, i) => acc + aCentimos(i.amount),
+      0n,
+    );
+    const totalLiabilities = liabilityItems.reduce(
+      (acc, i) => acc + aCentimos(i.amount),
+      0n,
+    );
+    const totalEquityDeclarado = equityItems.reduce(
+      (acc, i) => acc + aCentimos(i.amount),
+      0n,
+    );
+    const totalEquity = totalEquityDeclarado + netIncome;
+    const totalLiabilitiesAndEquity = totalLiabilities + totalEquity;
+
+    return {
+      assetItems: page
+        .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_ASSET)
+        .map(sinNormalBalance),
+      liabilityItems: page
+        .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_LIABILITY)
+        .map(sinNormalBalance),
+      equityItems: page
+        .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EQUITY)
+        .map(sinNormalBalance),
+      netIncomeOfPeriod: aTexto(netIncome),
+      totalAssets: aTexto(totalAssets),
+      totalLiabilities: aTexto(totalLiabilities),
+      totalEquity: aTexto(totalEquity),
+      totalLiabilitiesAndEquity: aTexto(totalLiabilitiesAndEquity),
+      balanced: totalAssets === totalLiabilitiesAndEquity,
+      count: page.length,
+      limit,
+      nextCursor,
+      truncated,
+    };
+  }
+}
+
+/** Quita el campo interno `normalBalanceConceptId` antes de responder. */
+function sinNormalBalance(
+  item: FinancialStatementLineDto & { normalBalanceConceptId: string | null },
+): FinancialStatementLineDto {
+  const { normalBalanceConceptId: _normalBalanceConceptId, ...resto } = item;
+  return resto;
+}
+
+/**
+ * Pagina una lista ya ordenada por `code` con un cursor keyset simple.
+ *
+ * Los informes financieros agregan por cuenta (decenas, no miles): no hace
+ * falta re-consultar la base por página, alcanza con cortar el arreglo ya
+ * calculado — igual que `trialBalance` ya calcula todo de una vez.
+ */
+function paginarPorCodigo<T extends { accountId: string; code: string | null }>(
+  items: T[],
+  cursor: string | undefined,
+  limit: number,
+): { page: T[]; nextCursor: string | null } {
+  const ordenados = [...items].sort(
+    (a, b) =>
+      (a.code ?? '￿').localeCompare(b.code ?? '￿') ||
+      a.accountId.localeCompare(b.accountId),
+  );
+
+  let desde = 0;
+  if (cursor) {
+    const after = decodeKeysetCursor(cursor);
+    const afterCode = typeof after.code === 'string' ? after.code : null;
+    const afterId =
+      typeof after.accountId === 'string' ? after.accountId : undefined;
+    desde = ordenados.findIndex(
+      (i) =>
+        (i.code ?? '￿').localeCompare(afterCode ?? '￿') > 0 ||
+        ((i.code ?? '￿') === (afterCode ?? '￿') &&
+          afterId !== undefined &&
+          i.accountId.localeCompare(afterId) > 0),
+    );
+    if (desde === -1) desde = ordenados.length;
+  }
+
+  const page = ordenados.slice(desde, desde + limit);
+  const ultima = page.at(-1);
+  const hayMas = desde + limit < ordenados.length;
+
+  return {
+    page,
+    nextCursor:
+      hayMas && ultima
+        ? encodeKeysetCursor({
+            code: ultima.code ?? '',
+            accountId: ultima.accountId,
+          })
+        : null,
+  };
 }
 
 /**

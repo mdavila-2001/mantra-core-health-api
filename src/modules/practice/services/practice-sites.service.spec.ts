@@ -10,6 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PracticeSitesService } from './practice-sites.service';
 import { PRAC } from '../practice.concepts';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -40,6 +41,7 @@ function build() {
   const spacesRepo = { findBySite: mockFn().mockResolvedValue([]) };
   const servicesRepo = { findBySite: mockFn().mockResolvedValue([]) };
   const rolesRepo = { findBySite: mockFn().mockResolvedValue([]) };
+  const serviceCatalogRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new PracticeSitesService(
@@ -50,6 +52,7 @@ function build() {
     spacesRepo as any,
     servicesRepo as any,
     rolesRepo as any,
+    serviceCatalogRepo as any,
     logger as any,
   );
   return {
@@ -57,6 +60,7 @@ function build() {
     tx,
     practicesRepo,
     sitesRepo,
+    serviceCatalogRepo,
     unitsRepo,
     spacesRepo,
     servicesRepo,
@@ -88,6 +92,39 @@ describe('PracticeSitesService', () => {
         createdAt: created.createdAt,
       });
       expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    /**
+     * FT-22-R01. Una práctica que nace con el catálogo vacío le abre a quien
+     * atiende una pantalla sin nada, y la consulta es lo único que ofrecen
+     * todas. Va en la misma transacción que el alta a propósito.
+     */
+    it('la práctica nace ofreciendo una cita médica en 0.00 Bs', async () => {
+      const d = build();
+      d.practicesRepo.create.mockReturnValue({
+        id: 'p1',
+        code: 'P-1',
+        statusConceptId: PRAC.PRACTICE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await d.service.createPractice(
+        { tenantId: 't1', code: 'P-1', name: 'Acme' },
+        actor,
+      );
+
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practiceId: 'p1',
+          code: 'CITA_MEDICA',
+          name: 'Cita médica',
+          defaultPrice: '0.00',
+          currencyConceptId: CONCEPTS.CURRENCY_BOB,
+          isActive: true,
+          actorUserId: actor.id,
+        }),
+      );
     });
   });
 

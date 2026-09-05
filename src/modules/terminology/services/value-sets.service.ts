@@ -408,6 +408,14 @@ export class ValueSetsService {
       cursor?: string;
       /** Tope de miembros de la página. */
       limit: number;
+      /**
+       * Traer también las propiedades de cada concepto.
+       *
+       * Opt-in: hay catálogos cuyo dato útil vive en las propiedades —el
+       * nomenclador de procedimientos guarda ahí especialidad, precio y
+       * unidad— y sin esto pintarlos obliga a pedir un detalle por fila.
+       */
+      includeProperties?: boolean;
     },
   ): Promise<ReadValueSetExpansionResponseDto> {
     const valueSet = await this.valueSetsRepo.findById(this.em, valueSetId);
@@ -457,10 +465,18 @@ export class ValueSetsService {
     const hasMore = rows.length > options.limit;
     const page = hasMore ? rows.slice(0, options.limit) : rows;
 
-    const concepts = await this.conceptsRepo.findByIds(
-      this.em,
-      page.map((member) => member.conceptId),
-    );
+    const conceptIds = page.map((member) => member.conceptId);
+    const concepts = await this.conceptsRepo.findByIds(this.em, conceptIds);
+
+    // En lote y sólo si las piden: una consulta más para toda la página, o
+    // ninguna. Pedirlas concepto a concepto es lo que hacía imposible pintar
+    // el nomenclador.
+    const propiedades = options.includeProperties
+      ? await this.designationsRepo.findPropertiesForConcepts(
+          this.em,
+          conceptIds,
+        )
+      : new Map<string, Record<string, unknown>>();
 
     const items = page.flatMap((member) => {
       const concept = concepts.get(member.conceptId);
@@ -486,6 +502,11 @@ export class ValueSetsService {
           selectable: concept.selectable,
           codeSystemVersionId: concept.codeSystemVersionId,
           ordinal: member.ordinal,
+          // Omitido y no `{}`: un concepto sin propiedades y una expansión que
+          // no las pidió son cosas distintas, y `{}` las haría indistinguibles.
+          ...(propiedades.has(concept.id)
+            ? { properties: propiedades.get(concept.id) }
+            : {}),
         },
       ];
     });

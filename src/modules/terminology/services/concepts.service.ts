@@ -635,31 +635,62 @@ export class ConceptsService {
     // relaciones). Fuera de esta familia, ni lo uno ni lo otro cambia —sigue
     // siendo exactamente la búsqueda histórica de siempre.
     let glossaryScoped = false;
-    if (options.valueSetId !== undefined) {
+
+    // `searchGlossary` (único emisor de `includeValueSets`, ver
+    // `terminology.client.ts`) manda `valueSetId` sólo cuando el usuario ya
+    // eligió una categoría — la landing filtrada por texto, sin categoría,
+    // no lo manda. Sin este paso, esa búsqueda entraba SIN acotar al
+    // paraguas: devolvía el catálogo entero (glosario, vademécum, receta…)
+    // con la forma pelada del catálogo — sin `category`/`tags`/
+    // `relationsCount` — y el front, que asume la forma completa, revienta
+    // al pintar la primera fila (`glossary.html`, celda de etiquetas). Acá
+    // se resuelve el paraguas `glossary-all-terms` y se entra por la MISMA
+    // rama que una categoría explícita — una sola vía para «esto es una
+    // lectura del glosario», no dos con requisitos distintos.
+    const requestedValueSetId = options.valueSetId;
+    let scopingValueSetId = requestedValueSetId;
+    if (scopingValueSetId === undefined && options.includeValueSets === true) {
+      const paraguas = await this.valueSetsRepo.findByInternalCode(
+        this.em,
+        GLOSSARY_ALL_TERMS_CODE,
+      );
+      scopingValueSetId = paraguas?.id;
+    }
+
+    if (scopingValueSetId !== undefined) {
       const [miembros, valueSetRow] = await Promise.all([
         this.valueSetsRepo.findIncludedConceptIdsByValueSet(
           this.em,
-          options.valueSetId,
+          scopingValueSetId,
         ),
-        this.valueSetsRepo.findById(this.em, options.valueSetId),
+        this.valueSetsRepo.findById(this.em, scopingValueSetId),
       ]);
       if (miembros === null) {
-        throw new ResourceNotFoundException(
-          'El conjunto de valores no existe o no tiene versión vigente',
-          { valueSetId: options.valueSetId },
-        );
-      }
-      glossaryScoped =
-        valueSetRow !== null &&
-        isGlossaryValueSetCode(valueSetRow.internalCode);
-      effectiveIds =
-        ids === undefined
-          ? miembros
-          : // Con las dos listas presentes vale la intersección: cada filtro
-            // acota, ninguno amplía.
-            miembros.filter((conceptId) => ids.includes(conceptId));
-      if (effectiveIds.length === 0) {
-        return { items: [], count: 0, limit };
+        // Un `valueSetId` explícito que no resuelve es un pedido inválido de
+        // quien llama: sigue siendo 404. El paraguas resuelto acá —sin que
+        // nadie lo haya pedido— no lo es: si `glossary-all-terms` no está
+        // sembrado, no hay nada que acotar y la búsqueda sigue de largo sin
+        // forma de glosario, en vez de romper una pantalla por un catálogo
+        // que a esta búsqueda no le corresponde exigir.
+        if (requestedValueSetId !== undefined) {
+          throw new ResourceNotFoundException(
+            'El conjunto de valores no existe o no tiene versión vigente',
+            { valueSetId: requestedValueSetId },
+          );
+        }
+      } else {
+        glossaryScoped =
+          valueSetRow !== null &&
+          isGlossaryValueSetCode(valueSetRow.internalCode);
+        effectiveIds =
+          ids === undefined
+            ? miembros
+            : // Con las dos listas presentes vale la intersección: cada filtro
+              // acota, ninguno amplía.
+              miembros.filter((conceptId) => ids.includes(conceptId));
+        if (effectiveIds.length === 0) {
+          return { items: [], count: 0, limit };
+        }
       }
     }
 

@@ -54,6 +54,7 @@ function build() {
     findValueSetsByConceptIds: jest.fn(() => Promise.resolve(new Map())),
     findIncludedConceptIdsByValueSet: jest.fn(() => Promise.resolve([])),
     findById: jest.fn(() => Promise.resolve(null)),
+    findByInternalCode: jest.fn(() => Promise.resolve(null)),
   } as any;
   const codeSystemsRepo = { findByCanonicalUrl: jest.fn() } as any;
   const versionsRepo = { findDefaultActiveVersion: jest.fn() } as any;
@@ -987,6 +988,108 @@ describe('ConceptsService', () => {
           relationsCount: 0,
           status: 'active',
         });
+      });
+
+      /**
+       * Reproduce el defecto real: `searchGlossary` (única consumidora de
+       * `includeValueSets`) pide texto libre SIN categoría, así que nunca
+       * manda `valueSetId`. Antes de este cambio, `searchConcepts` entraba
+       * sin acotar y devolvía la forma pelada del catálogo — el front, que
+       * asume `category`/`tags`/`relationsCount`, revienta al pintar la
+       * primera fila.
+       */
+      it('con `includeValueSets` y SIN `valueSetId`, resuelve el paraguas del glosario y trae la forma completa', async () => {
+        const { service, conceptsRepo, valueSetsRepo, em } = build();
+        valueSetsRepo.findByInternalCode.mockResolvedValue({
+          id: 'vs-umbrella',
+          internalCode: GLOSSARY_ALL_TERMS_CODE,
+        });
+        valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue([
+          'concept-1',
+        ]);
+        valueSetsRepo.findById.mockResolvedValue({
+          internalCode: GLOSSARY_ALL_TERMS_CODE,
+        });
+        conceptsRepo.search.mockResolvedValue([
+          {
+            id: 'concept-1',
+            code: 'GLOSSARY_PARACETAMOL',
+            display: 'Paracetamol',
+            definition: undefined,
+            selectable: true,
+            codeSystemVersionId: 'v1',
+            stateConceptId: CONCEPTS.TERM_ACTIVE,
+          },
+        ]);
+
+        const result = await service.searchConcepts(
+          'paracetamol',
+          undefined,
+          200,
+          undefined,
+          { language: 'ES', includeValueSets: true },
+        );
+
+        expect(valueSetsRepo.findByInternalCode).toHaveBeenCalledWith(
+          em,
+          GLOSSARY_ALL_TERMS_CODE,
+        );
+        expect(conceptsRepo.search).toHaveBeenCalledWith(
+          em,
+          expect.objectContaining({ stateConceptId: CONCEPTS.TERM_ACTIVE }),
+          200,
+        );
+        expect(Object.keys(result.items[0])).toEqual(
+          expect.arrayContaining([
+            'category',
+            'tags',
+            'relationsCount',
+            'status',
+            'shortDefinition',
+          ]),
+        );
+      });
+
+      it('con `includeValueSets` y el paraguas sin sembrar, sigue de largo sin acotar (no lanza 404)', async () => {
+        const { service, conceptsRepo, valueSetsRepo } = build();
+        valueSetsRepo.findByInternalCode.mockResolvedValue(null);
+        conceptsRepo.search.mockResolvedValue([
+          {
+            id: 'concept-1',
+            code: 'N02BE01',
+            display: 'Paracetamol',
+            definition: undefined,
+            selectable: true,
+            codeSystemVersionId: 'v1',
+          },
+        ]);
+
+        const result = await service.searchConcepts(
+          'paracetamol',
+          undefined,
+          200,
+          undefined,
+          { language: 'ES', includeValueSets: true },
+        );
+
+        expect(valueSetsRepo.findIncludedConceptIdsByValueSet).not.toHaveBeenCalled();
+        expect(result.items[0]).not.toHaveProperty('category');
+        expect(result.items[0]).not.toHaveProperty('tags');
+      });
+
+      it('`includeValueSets` sin `valueSetId` NUNCA lanza 404: sólo un `valueSetId` explícito lo hace', async () => {
+        const { service, valueSetsRepo } = build();
+        valueSetsRepo.findByInternalCode.mockResolvedValue({
+          id: 'vs-umbrella',
+          internalCode: GLOSSARY_ALL_TERMS_CODE,
+        });
+        valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue(null);
+
+        await expect(
+          service.searchConcepts(undefined, undefined, 50, undefined, {
+            includeValueSets: true,
+          }),
+        ).resolves.toMatchObject({ count: 0 });
       });
 
       it('fuera del glosario (otro value set) no agrega ninguno de los campos nuevos ni filtra por estado', async () => {

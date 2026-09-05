@@ -77,6 +77,33 @@ export class PractitionerAffiliationsRepository {
   }
 
   /**
+   * Las afiliaciones **publicables** de varios profesionales, de una lectura.
+   *
+   * Existe para la guía: pedirlas de a uno serían tantas consultas como filas
+   * tenga la página. Devuelve las de los estados que se dejan ver —declarada y
+   * aprobada—, nunca las pendientes: un vínculo que la organización todavía no
+   * decidió no puede presentarse como si lo hubiera aceptado (TP-2).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileIds - Los profesionales de la página.
+   * @param statusConceptIds - Estados que se consideran publicables.
+   * @returns Sus afiliaciones, sin ordenar: quien las muestra decide el orden.
+   */
+  findByPractitioners(
+    em: EntityManager,
+    practitionerProfileIds: readonly string[],
+    statusConceptIds: readonly string[],
+  ): Promise<PractitionerAffiliations[]> {
+    if (practitionerProfileIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(PractitionerAffiliations, {
+      practitionerProfileId: { $in: [...practitionerProfileIds] },
+      statusConceptId: { $in: [...statusConceptIds] },
+    });
+  }
+
+  /**
    * Las afiliaciones del profesional en un estado concreto.
    *
    * Es la lectura que sostiene la regla de visibilidad de TP-2: un vínculo

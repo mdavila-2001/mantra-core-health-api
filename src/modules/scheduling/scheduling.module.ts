@@ -19,6 +19,7 @@ import {
   SchedulingAgendaNoticesService,
   SchedulingTenantAgendaService,
   PractitionerAffiliationGateService,
+  SchedulingProfessionalTimeService,
 } from './services';
 import {
   SchedulingCatalogRepository,
@@ -30,6 +31,7 @@ import {
 } from './repositories';
 import { AuditModule } from '../audit/audit.module';
 import { DirectoryModule } from '../directory/directory.module';
+import { InsuranceModule } from '../insurance/insurance.module';
 // El repositorio de citas clínicas es una clase sin estado que recibe el
 // `EntityManager` por parámetro, así que proveerlo acá no duplica nada ni crea
 // dos fuentes de verdad: evita importar el módulo clínico entero sólo para
@@ -70,6 +72,10 @@ import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice
     DirectoryModule,
     PracticeModule,
     MessagingModule,
+    // ALV-021: la lista de consultas dice «Particular» o el nombre de la
+    // aseguradora. `CoverageRepository` es de sólo lectura y ya lo consumen
+    // `iam` y `profiles` desde afuera con el mismo patrón.
+    InsuranceModule,
   ],
   controllers: [
     SchedulingController,
@@ -83,6 +89,8 @@ import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice
     // La regla de pertenencia del médico a una organización, que consultan
     // el catálogo (al publicar) y las reservas (al aceptar).
     PractitionerAffiliationGateService,
+    // La regla madre (AG-1): el tiempo del profesional, cruzando sus sedes.
+    SchedulingProfessionalTimeService,
     // Piloto de la migración a puertos (§47, Fase 5): sesión del módulo,
     // adaptador PostgreSQL y los dos puertos de la lista de espera. Ver
     // scheduling.persistence.ts y docs/data/read-write-routing.md.

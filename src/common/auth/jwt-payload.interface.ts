@@ -45,10 +45,11 @@ export interface JwtPayload {
    *
    * Existe porque el autoservicio del portal lo NECESITA para operar -
    * `POST /scheduling/holds/:token/confirm` exige `patientProfileId`- y la única
-   * lectura que lo devolvía (`GET /profiles/patients/me/summary`) está detrás de
-   * `@RequiresVerifiedIdentity`. O sea: para reservar un turno había que estar
+   * lectura que lo devolvía (`GET /profiles/patients/me/summary`) estaba detrás
+   * de `@RequiresVerifiedIdentity`: para reservar un turno había que estar
    * verificado, cuando la verificación es un trámite posterior e independiente.
-   * El paciente quedaba encerrado en un círculo.
+   * Ese gate ya no existe (F-34), pero el claim se queda: operar con el token
+   * que ya se tiene en la mano evita una lectura de más en cada confirmación.
    *
    * **No es una credencial ni participa de ninguna decisión de autorización:**
    * quién puede confirmar una cita lo siguen decidiendo `roles` y el tenant del

@@ -2,6 +2,10 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import type { AuthenticatedUser } from '../../../common';
+import { CONCEPTS } from '../../../common/constants/concepts';
+import { SCHED } from '../../scheduling/scheduling.concepts';
+import { SchedulingBookingsRepository } from '../../scheduling/repositories';
+import { diaLocalDe } from '../../scheduling/scheduling-time';
 import {
   AllergyIntolerancesRepository,
   CareEpisodesRepository,
@@ -16,9 +20,17 @@ import {
 // `EntityManager` por parámetro, así que no duplican fuente de verdad ni
 // arrastran el módulo de perfiles entero.
 import {
+  HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../profiles/repositories';
+// El permiso de lectura no puede depender sólo del turno del día: el PDP
+// (`AuthzPdpService`) ya define y evalúa esta base de acceso ("relación
+// asistencial vigente") para el resto del sistema. Se provee acá directo —y no
+// se importa `AuthzModule` entero— por el mismo criterio que el resto de este
+// archivo: es una clase sin estado que recibe el `EntityManager` por
+// parámetro, y `authz` no depende de `clinical`, así que no cierra ciclo.
+import { CareRelationshipsRepository } from '../../authz/repositories';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
 
 /**
@@ -33,6 +45,47 @@ import type { PatientClinicalSummaryResponseDto } from '../dto';
  * clínica del paciente— y porque las alergias, en particular, no deben depender
  * de que el cliente se acuerde de pedirlas en una llamada aparte.
  */
+/**
+ * Zona con la que se decide «hoy» cuando la sede no declara la suya.
+ *
+ * IANA real y no un desplazamiento fijo: `-04:00` se rompe el día que una sede opere
+ * en una zona con horario de verano, y el resto del módulo de agenda ya razona con
+ * nombres IANA. Bolivia no tiene DST, así que `America/La_Paz` ES UTC−4 todo el año —
+ * que es lo que se decidió como default.
+ *
+ * El módulo de agenda cae a `UTC` en otros contextos; acá el default es la zona del
+ * producto a propósito: equivocarse por cuatro horas en un límite de día le cierra la
+ * historia a quien está atendiendo al paciente.
+ */
+const ZONA_POR_DEFECTO = 'America/La_Paz';
+
+/**
+ * Roles que leen la historia de OTRA persona: los que atienden.
+ *
+ * Vive acá y no en el controlador porque la decisión entera vive acá: el controlador
+ * ya no ramifica. `SUPERADMIN` no está en la lista — tiene su propio camino, explícito,
+ * al principio del gate.
+ */
+const ROLES_QUE_ATIENDEN: readonly string[] = ['CLINICIAN', 'PRACTITIONER'];
+
+/**
+ * Estados de reserva que cuentan como «turno de hoy» para abrir la historia.
+ *
+ * Incluye los que ya ocurrieron (`IN_PROGRESS`, `COMPLETED`): el profesional que
+ * atendió esta mañana sigue necesitando el resumen esta tarde para escribir la
+ * evolución. Quedan afuera los que no comprometen —`REQUESTED`, `PENDING_CONFIRM`—
+ * y los que dejaron de existir: `CANCELLED` y `NO_SHOW`.
+ */
+const ESTADOS_QUE_HABILITAN: readonly string[] = [
+  CONCEPTS.BOOKING_CONFIRMED,
+  CONCEPTS.BOOKING_CHECKED_IN,
+  SCHED.BOOKING_IN_PROGRESS,
+  SCHED.BOOKING_COMPLETED,
+];
+
+/** Ventana que se mira alrededor de ahora; el día exacto lo decide la zona de la sede. */
+const VENTANA_MS = 48 * 60 * 60 * 1000;
+
 @Injectable()
 export class ClinicalReadService {
   /**
@@ -45,6 +98,7 @@ export class ClinicalReadService {
    * @param observationsRepo - Acceso a observaciones.
    * @param encountersRepo - Acceso a encuentros.
    * @param episodesRepo - Acceso a episodios de cuidado (internaciones).
+   * @param careRelationshipsRepo - Acceso a relaciones asistenciales vigentes.
    * @param logger - Registro estructurado.
    */
   constructor(
@@ -57,9 +111,242 @@ export class ClinicalReadService {
     private readonly episodesRepo: CareEpisodesRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly patientProfilesRepo: PatientProfilesRepository,
+    private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
+    private readonly bookingsRepo: SchedulingBookingsRepository,
+    private readonly careRelationshipsRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ClinicalReadService.name);
+  }
+
+  /**
+   * Decide si quien pide puede leer esta historia (v4.2.2).
+   *
+   * Es la única puerta del resumen clínico: el controlador no ramifica. Tres caminos,
+   * en este orden.
+   *
+   * ## 1 · `SUPERADMIN` pasa
+   *
+   * El `RolesGuard` ya lo trata como comodín en toda la API; negárselo acá sería
+   * contradecir al guard que lo dejó entrar. **Queda como pregunta abierta de producto**:
+   * si el soporte no debe leer PHI sin turno, se saca de acá y se decide qué lo
+   * reemplaza — hoy hay pruebas de integración que dependen de este acceso.
+   *
+   * ## 2 · Quien atiende: turno de HOY con ESE paciente, o relación asistencial vigente
+   *
+   * Antes pasaba cualquiera con el rol. El comentario que lo justificaba decía que a
+   * quién puede atender lo decide la asignación de roles «y no este endpoint» — pero esa
+   * asignación no existía: la tabla de permisos por paciente está vacía y nadie la
+   * consulta. En los hechos, cualquier médico con sesión leía la historia de cualquier
+   * persona. Esta es la regla mínima defendible mientras el grupo define el modelo de
+   * consentimiento: **nace del turno confirmado, o de una relación asistencial que
+   * `authz` ya declara vigente** (ALV-029: sin esta segunda vía, un profesional con
+   * paciente asignado pero sin cupo agendado para hoy caía en {@link assertOwnRecord}
+   * como un desconocido).
+   *
+   * «Hoy» es el día de la SEDE, no el del servidor. Un turno de las 23:30 en La Paz ya
+   * cayó en «mañana» para UTC, y con la fecha del servidor el profesional se quedaría
+   * sin la historia del paciente que tiene enfrente.
+   *
+   * ## 3 · El resto, y el profesional sin turno: titularidad
+   *
+   * Cae en {@link assertOwnRecord}, que responde el **mismo 403 con el mismo texto** a
+   * un paciente ajeno, a un uuid inventado y a un profesional sin turno. Que sean
+   * indistinguibles es deliberado: un mensaje que diferenciara «no es tuya» de «no la
+   * atendés hoy» confirmaría la existencia del paciente a quien sólo probó un uuid.
+   * Sirve además de red para el profesional que pide su PROPIA historia.
+   *
+   * ## La identidad se resuelve una sola vez
+   *
+   * `uq_person_account_links_active_user` vive comentado en el DDL (su predicado usa
+   * funciones que el modelo nunca definió), así que la base **no garantiza** un solo
+   * vínculo activo por cuenta y `findActiveByUser` devolvería una fila arbitraria si
+   * hubiera dos. Resolver dos veces en la misma petición podría dar dos personas
+   * distintas, así que se resuelve una y se reutiliza.
+   *
+   * @param patientProfileId - La historia que se quiere leer.
+   * @param actor - Quién la pide.
+   * @throws ForbiddenException si no la atiende hoy ni es su titular.
+   */
+  async assertPuedeLeerHistoria(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (actor.roles.includes('SUPERADMIN')) return;
+
+    if (!actor.roles.some((rol) => ROLES_QUE_ATIENDEN.includes(rol))) {
+      await this.assertOwnRecord(patientProfileId, actor);
+      return;
+    }
+
+    const em = this.em.fork();
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    const perfilProfesional = link
+      ? await this.practitionerProfilesRepo.findById(em, link.personId)
+      : null;
+
+    if (
+      perfilProfesional &&
+      (await this.estaAtendiendo(
+        em,
+        perfilProfesional.profileId,
+        patientProfileId,
+      ))
+    ) {
+      return;
+    }
+
+    // Sin turno hoy no alcanza el rol; queda la titularidad, que además cubre al
+    // profesional que lee su propia historia.
+    await this.assertOwnRecord(patientProfileId, actor, link);
+  }
+
+  /**
+   * ¿Está este profesional atendiendo a esta persona?
+   *
+   * Tres caminos, y el orden importa porque el barato va primero:
+   *
+   * 1. **Hay una consulta en curso.** Sin mirar el calendario. Que el
+   *    profesional haya apretado «Iniciar consulta» es la afirmación más fuerte
+   *    que el sistema tiene de que está atendiendo a esa persona **ahora**; la
+   *    fecha del cupo sólo dice cuándo se pensaba que iba a atenderla.
+   * 2. **Hay una reserva viva que cae hoy**, que es la regla de siempre.
+   * 3. **Hay una relación asistencial vigente** (`authz.care_relationships`,
+   *    ACTIVA y dentro de su ventana `valid_from`/`valid_to`) — el paciente
+   *    asignado al profesional aunque hoy no tenga cupo agendado con él
+   *    (ALV-029). Es la misma base de acceso que ya evalúa el PDP
+   *    (`AuthzPdpService`) para el resto del sistema; acá se reusa el mismo
+   *    criterio, no uno nuevo.
+   *
+   * ## Por qué se agregó el primero
+   *
+   * Porque las dos reglas del producto se contradecían, y se midió en un
+   * recorrido real. La agenda deja **empezar una cita confirmada cuando el
+   * profesional decide, no cuando el reloj lo permite** —corrección #15, pedido
+   * explícito del propietario, con casos reales detrás: la teleconsulta, el
+   * consultorio de una sola persona, el paciente que llegó antes—. Y el
+   * expediente exigía que el cupo fuera de hoy. El resultado era que se podía
+   * iniciar la consulta y no leer la historia de quien estaba enfrente.
+   *
+   * ## Qué ensancha, dicho sin adornos
+   *
+   * Un profesional con una cita **de otro día** puede iniciarla y leer el
+   * expediente ese día. Se aceptó con tres razones: la cita con ese paciente
+   * sigue siendo el filtro —nadie llega a alguien con quien no tiene turno—;
+   * iniciar **deja rastro firmado** en el historial de la reserva, con quién y
+   * cuándo, cosa que una lectura no deja; y ya había una puerta igual de ancha
+   * en el otro eje, porque una cita `COMPLETED` de hace meses habilita el
+   * expediente el día en que ocurrió.
+   *
+   * La alternativa era la contraria —prohibir iniciar una cita que no sea de
+   * hoy—, y se descartó porque deshacía la corrección #15.
+   */
+  private async estaAtendiendo(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    if (
+      await this.bookingsRepo.tieneConsultaEnCurso(
+        em,
+        practitionerProfileId,
+        patientProfileId,
+        SCHED.BOOKING_IN_PROGRESS,
+      )
+    ) {
+      return true;
+    }
+    if (await this.atiendeHoy(em, practitionerProfileId, patientProfileId)) {
+      return true;
+    }
+    return this.tieneRelacionAsistencialVigente(
+      em,
+      practitionerProfileId,
+      patientProfileId,
+    );
+  }
+
+  /**
+   * ¿Hay una relación asistencial ACTIVA, vigente y SIN acotar a un propósito
+   * distinto, entre ambos? (ALV-029)
+   *
+   * `findActiveForPractitionerPatient` sólo filtra por `status_concept_id`: la
+   * ventana temporal (`valid_from`/`valid_to`) se comprueba acá, con el mismo
+   * criterio que ya usa `AuthzPdpService.isWithinWindow` — reusar la tabla sin
+   * reusar la ventana habilitaría una relación ya vencida.
+   *
+   * ## Por qué se descarta una relación con `purposeConceptId`
+   *
+   * El PDP (`AuthzPdpService`, caso 6c) exige que una relación acotada a un
+   * propósito sólo habilite acciones que declaren ESE mismo propósito. Este
+   * endpoint no recibe ningún propósito de uso —es el resumen clínico
+   * completo, no una acción puntual—, así que no hay con qué comparar. Tratar
+   * una relación acotada como si abriera el resumen entero sería darle más
+   * alcance del que su propio propósito le fija: fail-closed, igual que el PDP.
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileId - El profesional que pide.
+   * @param patientProfileId - El paciente cuya historia se pide.
+   * @returns `true` si hay una relación activa, sin propósito acotado, cuya
+   *          ventana cubre este instante.
+   */
+  private async tieneRelacionAsistencialVigente(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    const ahora = Date.now();
+    const relaciones =
+      await this.careRelationshipsRepo.findActiveForPractitionerPatient(
+        em,
+        practitionerProfileId,
+        patientProfileId,
+      );
+    return relaciones.some((relacion) => {
+      if (relacion.purposeConceptId) return false;
+      if (relacion.validFrom.getTime() > ahora) return false;
+      if (relacion.validTo && relacion.validTo.getTime() <= ahora) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  /**
+   * ¿Tiene el profesional una reserva viva con ese paciente, hoy en la sede?
+   *
+   * Se traen las reservas de una ventana amplia alrededor de ahora y se compara el día
+   * **fila por fila** con la zona de su recurso: dos sedes del mismo profesional pueden
+   * estar en zonas distintas, así que no hay una sola ventana UTC que sirva para todas.
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileId - El profesional que pide.
+   * @param patientProfileId - El paciente cuya historia se pide.
+   * @returns `true` si alguna reserva viva cae hoy en la zona de su sede.
+   */
+  private async atiendeHoy(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    const ahora = new Date();
+    const reservas = await this.bookingsRepo.findConfirmadasConPacienteEntre(
+      em,
+      practitionerProfileId,
+      patientProfileId,
+      new Date(ahora.getTime() - VENTANA_MS),
+      new Date(ahora.getTime() + VENTANA_MS),
+      ESTADOS_QUE_HABILITAN,
+    );
+
+    return reservas.some((reserva) => {
+      const zona = reserva.timeZone ?? ZONA_POR_DEFECTO;
+      const hoy = diaLocalDe(ahora, zona);
+      const dia = diaLocalDe(reserva.startAt, zona);
+      return (
+        dia.year === hoy.year && dia.month === hoy.month && dia.day === hoy.day
+      );
+    });
   }
 
   /**
@@ -102,9 +389,18 @@ export class ClinicalReadService {
   async assertOwnRecord(
     patientProfileId: string,
     actor: AuthenticatedUser,
+    linkResuelto?: Awaited<
+      ReturnType<PersonAccountLinksRepository['findActiveByUser']>
+    >,
   ): Promise<void> {
     const em = this.em.fork();
-    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    // El vínculo puede venir ya resuelto del gate: la base no garantiza que sea
+    // único (su índice vive comentado), así que resolverlo dos veces en la misma
+    // petición podría devolver personas distintas.
+    const link =
+      linkResuelto !== undefined
+        ? linkResuelto
+        : await this.accountLinksRepo.findActiveByUser(em, actor.id);
     const perfil = await this.patientProfilesRepo.findById(
       em,
       patientProfileId,

@@ -373,7 +373,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil de paciente asociado | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
+| 403 | `FORBIDDEN` | Solo un paciente puede ver sus cuestionarios | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -501,8 +501,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Solo un paciente puede ver sus cuestionarios | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 404 | `NOT_FOUND` | Cuestionario no encontrado | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
-| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil de paciente asociado | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -644,11 +644,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Solo un paciente puede ver sus cuestionarios | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 404 | `NOT_FOUND` | Cuestionario no encontrado | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 409 | `CONFLICT` | Este cuestionario ya fue respondido | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El plazo para responder este cuestionario venció | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
-| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil de paciente asociado | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 422 | `PRECONDITION_FAILED` | Hay más de una respuesta para la misma pregunta | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 422 | `PRECONDITION_FAILED` | La respuesta no corresponde a una pregunta de este cuestionario | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 422 | `PRECONDITION_FAILED` | Faltan respuestas a preguntas obligatorias | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |

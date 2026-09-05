@@ -1,10 +1,13 @@
 import {
+  avisoDeSolicitudAlPaciente,
+  avisoDeSolicitudAlProfesional,
   avisoDeCambioDeCita,
   avisoDeCupoLiberado,
   avisoDeDemora,
   avisoDeRecordatorio,
   RECURSO_CITA,
   RECURSO_CUPO,
+  RUTA_AGENDA_PROFESIONAL,
   rutaDelTurno,
 } from './agenda-notices';
 import type {
@@ -17,6 +20,8 @@ const CUPO = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 const PACIENTE = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 const RECURSO = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 const TENANT = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
+/** La cuenta del profesional: los avisos que le llegan la llevan como destinatario. */
+const USUARIO = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 
 const cita: BookingNoticeSnapshot = {
   bookingId: CITA,
@@ -118,6 +123,39 @@ describe('redacción de los avisos de agenda (P8)', () => {
     });
   });
 
+  /**
+   * El destino del aviso depende de a quién se le escribe, y hasta ahora no:
+   * los dos avisos dirigidos al profesional viajaban con la ruta del portal del
+   * paciente. Ninguna prueba lo miraba, por eso pasó.
+   */
+  describe('a dónde lleva cada aviso', () => {
+    it('la solicitud al profesional lleva a SU agenda, no al portal del paciente', () => {
+      const aviso = avisoDeSolicitudAlProfesional(cita, 'Ana Quispe', USUARIO);
+
+      expect(aviso.payload?.route).toBe(RUTA_AGENDA_PROFESIONAL);
+      // La comprobación que habría atrapado el defecto: el cuerpo promete
+      // «aceptala o rechazala desde tu agenda», y esa agenda no es /my-account.
+      expect(aviso.payload?.route).not.toContain('/my-account');
+    });
+
+    it('el acuse al paciente sigue llevando a su turno', () => {
+      const aviso = avisoDeSolicitudAlPaciente(cita);
+      expect(aviso.payload?.route).toBe(rutaDelTurno(CITA));
+    });
+
+    it('el cambio de cita elige el destino según a quién avisa', () => {
+      const alProfesional = avisoDeCambioDeCita(cita, 'CANCELLED', undefined, {
+        userId: USUARIO,
+      });
+      const alPaciente = avisoDeCambioDeCita(cita, 'ACCEPTED', undefined, {
+        patientProfileId: PACIENTE,
+      });
+
+      expect(alProfesional.payload?.route).toBe(RUTA_AGENDA_PROFESIONAL);
+      expect(alPaciente.payload?.route).toBe(rutaDelTurno(CITA));
+    });
+  });
+
   describe('cambio de estado', () => {
     it('rechazar no se anuncia con el texto de cancelar', () => {
       const rechazo = avisoDeCambioDeCita(cita, 'REJECTED', 'Sin cupo', {
@@ -155,5 +193,39 @@ describe('redacción de los avisos de agenda (P8)', () => {
       });
       expect(aviso.recipient).toEqual({ userId: 'user-1' });
     });
+  });
+});
+
+/**
+ * «EN TAL LUGAR» — lo que el propietario pidió y el aviso no decía.
+ *
+ * El pedido es «tenés una nueva solicitud de consulta en tal horario **en tal
+ * lugar**». El horario estaba desde el principio; el lugar no viajaba en el
+ * snapshot, y el comentario del módulo decía que faltaba exponer la sede en la
+ * lectura de agenda. Ya estaba expuesta: lo único que faltaba era traerla.
+ */
+describe('el lugar en los avisos de solicitud', () => {
+  const conSede: BookingNoticeSnapshot = {
+    ...cita,
+    siteLabel: 'Consultorio del Sur',
+  };
+
+  it('el aviso al profesional dice dónde', () => {
+    const aviso = avisoDeSolicitudAlProfesional(conSede, 'Ana Quispe', USUARIO);
+    expect(aviso.bodyText).toContain('en Consultorio del Sur');
+  });
+
+  it('el aviso al paciente dice dónde', () => {
+    const aviso = avisoDeSolicitudAlPaciente(conSede);
+    expect(aviso.bodyText).toContain('en Consultorio del Sur');
+  });
+
+  it('sin sede la frase se omite ENTERA, no queda un hueco', () => {
+    // «pidió turno para el jueves en .» se lee peor que sin el dato. Un recurso
+    // sin sede declarada es corriente, no un error.
+    const aviso = avisoDeSolicitudAlProfesional(cita, 'Ana Quispe', USUARIO);
+    expect(aviso.bodyText).not.toContain(' en .');
+    expect(aviso.bodyText).not.toContain('undefined');
+    expect(aviso.bodyText).toContain('pidió turno para el');
   });
 });

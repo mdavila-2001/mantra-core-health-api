@@ -124,6 +124,15 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
       code: 'MEDIA_ROLE_DOCUMENT',
       display: 'Document media',
     },
+    // REQ-01-011: adjuntos de comentario. Un sticker es una imagen chica
+    // subida con este rol (no hay catálogo curado que reutilizar, así que no
+    // se inventa uno); un GIF es un archivo `image/gif` normal, subido con el
+    // rol que dice qué es para que la tarjeta lo pinte sin bordes de "imagen".
+    MEDIA_ROLE_STICKER: {
+      code: 'MEDIA_ROLE_STICKER',
+      display: 'Sticker media',
+    },
+    MEDIA_ROLE_GIF: { code: 'MEDIA_ROLE_GIF', display: 'Animated GIF media' },
 
     // --- Moderation lifecycle applied to content (posts/comments/reviews) ---
     MODERATION_PENDING: {
@@ -523,6 +532,21 @@ export const REACTION_CODE_BY_CONCEPT: Record<string, string> =
       code,
     ]),
   );
+
+/**
+ * Concept id → código de rol de adjunto de comentario. Es la inversa de
+ * {@link COMM}`.MEDIA_ROLE_IMAGE/STICKER/GIF` (REQ-01-011): la lectura pública
+ * resuelve el uuid a `'IMAGE' | 'STICKER' | 'GIF'` para no exponer un concept
+ * id interno a un anónimo, mismo criterio que {@link REACTION_CODE_BY_CONCEPT}.
+ */
+export const COMMENT_MEDIA_KIND_BY_CONCEPT: Record<
+  string,
+  'IMAGE' | 'STICKER' | 'GIF'
+> = {
+  [COMM.MEDIA_ROLE_IMAGE]: 'IMAGE',
+  [COMM.MEDIA_ROLE_STICKER]: 'STICKER',
+  [COMM.MEDIA_ROLE_GIF]: 'GIF',
+};
 
 /** Reactable/commentable/bookmarkable object type enum → concept id. */
 export const SOCIAL_OBJECT_CONCEPT_BY_CODE: Record<string, string> = {

@@ -34,6 +34,10 @@ export interface CreatePractitionerProfileData {
    */
   professionalBio?: string;
   /**
+   * Identificador de foto de perfil (FK → common.files).
+   */
+  photoFileId?: string;
+  /**
    * Valor de accepts new patients mantenido por la instancia.
    */
   acceptsNewPatients?: boolean;
@@ -115,6 +119,32 @@ export class HealthPractitionerProfilesRepository {
   }
 
   /**
+   * Los perfiles que la guía muestra, sólo sus ids.
+   *
+   * Mismo filtro que {@link listPage} —de ahí que reciba el mismo
+   * `verificationStatusConceptId`, `undefined` cuando el bypass está activo—:
+   * es lo que hace que un recuento por especialidad no pueda discrepar de la
+   * lista que abre esa especialidad.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param verificationStatusConceptId - Estado exigido, o `undefined` para no exigir ninguno.
+   * @returns Los ids de perfil visibles.
+   */
+  async findVisibleProfileIds(
+    em: EntityManager,
+    verificationStatusConceptId?: string,
+  ): Promise<string[]> {
+    const where: Record<string, unknown> = {};
+    if (verificationStatusConceptId !== undefined) {
+      where.verificationStatusConceptId = verificationStatusConceptId;
+    }
+    const rows = await em.find(HealthPractitionerProfiles, where, {
+      fields: ['profileId'],
+    });
+    return rows.map((row) => row.profileId);
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -133,6 +163,7 @@ export class HealthPractitionerProfilesRepository {
         practitionerCategoryConceptId: data.practitionerCategoryConceptId,
         professionalTitle: data.professionalTitle,
         professionalBio: data.professionalBio,
+        photoFileId: data.photoFileId,
         verificationStatusConceptId: data.verificationStatusConceptId,
         practiceStatusConceptId: data.practiceStatusConceptId,
         acceptsNewPatients: data.acceptsNewPatients ?? false,
