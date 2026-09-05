@@ -2,7 +2,7 @@ import * as Joi from 'joi';
 
 const INSECURE_MFA_SECRET = 'dev-only-mfa-key-change-me';
 const INSECURE_WEBHOOK_SECRET = 'dev-only-insecure-webhook-key-change-me';
-const INSECURE_DOWNLOAD_SECRET = 'redesa-dev-download-secret';
+const INSECURE_DOWNLOAD_SECRET = 'alovida-dev-download-secret';
 
 /**
  * Secretos transversales usados por la API. En producción se validan durante el

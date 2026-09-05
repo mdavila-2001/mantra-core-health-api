@@ -45,7 +45,7 @@ export interface SamplerConfig {
 export interface TelemetryConfig {
   /** Interruptor maestro. Con `false` no se crea SDK ni se abre conexión. */
   readonly enabled: boolean;
-  /** `service.name`, p. ej. `redesa-api` o `redesa-worker-messaging`. */
+  /** `service.name`, p. ej. `alovida-api` o `alovida-worker-messaging`. */
   readonly serviceName: string;
   /** `service.namespace`. */
   readonly serviceNamespace: string;

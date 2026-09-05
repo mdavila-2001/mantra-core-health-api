@@ -1,6 +1,6 @@
 # Profiles Module (05)
 
-Persons, patients and health workforce for the REDESA Health API: person master
+Persons, patients and health workforce for the ALOVIDA Health API: person master
 data, patient profiles, portal-account linking, practitioner onboarding
 (generalist rule), jurisdiction licences, credential verification, specialties,
 external identity linking (MPI), patient merge/reversal, related persons, portal

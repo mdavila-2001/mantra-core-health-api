@@ -1,4 +1,4 @@
-# Informe de cobertura REDESA (estático)
+# Informe de cobertura ALOVIDA (estático)
 
 - Entidades (tablas mapeadas): **1190**
 - Endpoints declarados: **916** en 198 controllers

@@ -30,7 +30,7 @@ abierta.
 | Proveedor mock                    | **REMEDIADO EN CÓDIGO**                       | `MOCK_PROVIDER_BASE_URL` solo admite vacío bajo `NODE_ENV=production`                                                                                            |
 | Health/readiness                  | **REMEDIADO EN CÓDIGO**                       | liveness separado y readiness con PostgreSQL, MongoDB, Redis y OpenSearch, timeout y 503                                                                         |
 | RLS versionado                    | **APROBADO EN ENTORNO LOCAL DESECHABLE: 6/6** | fail-closed sin GUC; rol `NOLOGIN` al terminar, sin superuser/`BYPASSRLS`; lectura aislada, `WITH CHECK`, elevación `SYSTEM` explícita y `FORCE RLS` verificados |
-| Cobertura y guardrails REDESA     | **APROBADO: 0 hallazgos**                     | 0 tablas huérfanas, 0 endpoints huérfanos, 0 accesos directos cross-domain y 0 violaciones de guardrails                                                         |
+| Cobertura y guardrails ALOVIDA     | **APROBADO: 0 hallazgos**                     | 0 tablas huérfanas, 0 endpoints huérfanos, 0 accesos directos cross-domain y 0 violaciones de guardrails                                                         |
 | Portal documental                 | **APROBADO**                                  | 183 páginas, 60 módulos, 565 enlaces internos sin roturas y MkDocs estricto correcto                                                                             |
 
 El veredicto continúa siendo **NO-GO para un entorno productivo real** hasta
@@ -81,7 +81,7 @@ probada de producción.
 | Pruebas focales de seguridad/error | 2 suites, 18 pruebas, todas correctas                                | APROBADO             |
 | Auditoría de dependencias runtime  | 1 vulnerabilidad `high` (`js-yaml` 5.2.1)                            | FALLIDO              |
 | Auditoría completa de dependencias | 61 hallazgos: 2 critical, 21 high, 35 moderate, 3 low                | FALLIDO              |
-| Guardrails estáticos REDESA        | 4 avisos informativos en autoservicio de identidad                   | REVISAR              |
+| Guardrails estáticos ALOVIDA        | 4 avisos informativos en autoservicio de identidad                   | REVISAR              |
 | Cobertura estática                 | 1.185 entidades, 865 decoradores de endpoint, 193 controllers        | INFORMATIVO          |
 | Links documentales                 | 565 links internos, 0 rotos y 0 páginas huérfanas tras la corrección | APROBADO             |
 | `yarn docs:build`                  | MkDocs estricto completó sin warnings de contenido                   | APROBADO             |
@@ -121,7 +121,7 @@ probada de producción.
    en lugar de etiquetarse erróneamente como `INTERNAL`.
 9. El workflow documental ahora regenera el catálogo de endpoints y falla si
    OpenAPI o la documentación generada difieren de lo versionado.
-10. Se actualizó `REDESA-COBERTURA.md` con los conteos estáticos actuales.
+10. Se actualizó `ALOVIDA-COBERTURA.md` con los conteos estáticos actuales.
 
 Estas correcciones reducen riesgo, pero no convierten por sí solas el sistema en
 apto para producción.

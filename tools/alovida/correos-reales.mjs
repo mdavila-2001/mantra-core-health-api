@@ -38,7 +38,7 @@ export const CORREOS_DEL_EQUIPO = [
   'pabliarca@gmail.com',
   'cpacentropreparacionacademica@gmail.com',
   'justinsaldiasn@gmail.com',
-  'redesa77@gmail.com',
+  'alovida77@gmail.com',
   // Institucional: no se le ponen etiquetas `+`, porque no todo servidor de
   // correo universitario las entrega.
   'a2020115468@estudiantes.upsa.edu.bo',
@@ -64,7 +64,7 @@ export const CORREOS = {
   /** El paciente de las altas asistidas. */
   paciente: 'justinsaldiasn@gmail.com',
   /** El segundo profesional, para las pruebas de dos sesiones. */
-  segundoDoctor: 'redesa77@gmail.com',
+  segundoDoctor: 'alovida77@gmail.com',
   /**
    * Cuenta institucional. Sin etiqueta y de un solo uso por corrida: se le da
    * el papel que se crea una vez.

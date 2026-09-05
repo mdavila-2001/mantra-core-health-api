@@ -20,8 +20,8 @@ cambio de variable de entorno, no de código.
 
 ```mermaid
 flowchart LR
-  API["api<br/>redesa-api"] -->|OTLP http/protobuf :4318| J
-  W1["worker-messaging<br/>redesa-worker-messaging"] -->|OTLP| J
+  API["api<br/>alovida-api"] -->|OTLP http/protobuf :4318| J
+  W1["worker-messaging<br/>alovida-worker-messaging"] -->|OTLP| J
   W2["worker-scheduling<br/>…"] -->|OTLP| J
   W3["…18 workers más"] -->|OTLP| J
   J["jaeger all-in-one<br/>memoria"] --> UI["UI :16686"]
@@ -32,8 +32,8 @@ flowchart LR
 ```mermaid
 flowchart LR
   subgraph app["Red privada de aplicación"]
-    API[redesa-api] -->|OTLP| COL
-    WK[redesa-worker-*] -->|OTLP| COL
+    API[alovida-api] -->|OTLP| COL
+    WK[alovida-worker-*] -->|OTLP| COL
     COL["OpenTelemetry Collector<br/>memory_limiter · batch · redaction · tail sampling"]
   end
   COL -->|OTLP| JC[Jaeger Collector]
@@ -73,16 +73,16 @@ corresponden a tecnologías realmente presentes (§5).
 
 | Proceso | `service.name` |
 | --- | --- |
-| API | `redesa-api` |
-| Workers | `redesa-worker-<dominio>` (p. ej. `redesa-worker-messaging`) |
+| API | `alovida-api` |
+| Workers | `alovida-worker-<dominio>` (p. ej. `alovida-worker-messaging`) |
 
-- `service.namespace` = `redesa`
+- `service.namespace` = `alovida`
 - `service.version` = versión de `package.json` (`OTEL_SERVICE_VERSION`)
 - `deployment.environment.name` = `development` | `test` | `staging` | `production`
 
 El nombre **se deriva del entrypoint en ejecución** (`resolveServiceName`), no de 21 variables de
-entorno distintas: `dist/src/main.js` → `redesa-api`, `dist/src/worker-messaging.js` →
-`redesa-worker-messaging`. Es lo único que distingue a los 21 procesos, que comparten imagen y
+entorno distintas: `dist/src/main.js` → `alovida-api`, `dist/src/worker-messaging.js` →
+`alovida-worker-messaging`. Es lo único que distingue a los 21 procesos, que comparten imagen y
 `.env`, y evita el error operativo clásico: veinte workers exportando bajo el nombre de la API.
 `OTEL_SERVICE_NAME`, si está presente, gana (permite sobreescribir por contenedor).
 
@@ -166,9 +166,9 @@ publicado dos veces generara claves distintas y rompiera la idempotencia del out
 ```mermaid
 sequenceDiagram
   participant C as Cliente
-  participant A as redesa-api
+  participant A as alovida-api
   participant DB as PostgreSQL (outbox)
-  participant W as redesa-worker-messaging
+  participant W as alovida-worker-messaging
   C->>A: POST /... (traza T)
   A->>A: span 'messaging.outbox publish' (PRODUCER)
   A->>DB: INSERT domain_events { metadata_json: { _trace: { traceparent } } }
@@ -274,7 +274,7 @@ este backend.
 | --- | --- | --- |
 | `OTEL_ENABLED` | `false` | Interruptor maestro. Apagado por defecto: activar telemetría no debe ser un efecto secundario de actualizar el repo |
 | `OTEL_SERVICE_NAME` | derivado del proceso | Sobreescritura por contenedor |
-| `OTEL_SERVICE_NAMESPACE` | `redesa` | Agrupación en la UI |
+| `OTEL_SERVICE_NAMESPACE` | `alovida` | Agrupación en la UI |
 | `OTEL_SERVICE_VERSION` | versión de `package.json` | `service.version` |
 | `OTEL_DEPLOYMENT_ENVIRONMENT` | valor de `NODE_ENV` | `deployment.environment.name` |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` | Único valor aceptado: es el exportador instalado. Cambiar a gRPC exige añadir su paquete, así que se valida en vez de aceptarse en silencio |

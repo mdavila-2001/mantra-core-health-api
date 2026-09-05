@@ -1,5 +1,5 @@
 # =========================================================================
-# Mantra Core Technologies · REDESA Health Ecosystem
+# Mantra Core Technologies · ALOVIDA Health Ecosystem
 # Jaeger para DESARROLLO LOCAL. Archivo aparte del `docker-compose.yml`
 # principal a propósito: la observabilidad es opcional y no debe alargar el
 # arranque ni el consumo de memoria de quien solo quiere levantar el backend.

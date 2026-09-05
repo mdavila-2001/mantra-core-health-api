@@ -18,7 +18,7 @@ import {
 } from '../dto';
 
 /**
- * Administración de la política PARAMETRIZABLE de firma de receta (REDESA D-05 /
+ * Administración de la política PARAMETRIZABLE de firma de receta (ALOVIDA D-05 /
  * CAN-RX). Alta, listado y desactivación (sin borrado duro). La resolución en el
  * flujo de emisión es FAIL-SAFE: sin política vigente aplicable no se exige firma.
  */

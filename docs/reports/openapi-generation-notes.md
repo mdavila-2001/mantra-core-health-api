@@ -30,7 +30,7 @@ active limitación de tasa.
 | Errores de `redocly lint` | **0** |
 | Warnings de `redocly lint` | 1542 (ver §6) |
 
-**Nota sobre el conteo de 841 vs. las 850 operaciones que reporta `tools/redesa/coverage-report.mjs`:**
+**Nota sobre el conteo de 841 vs. las 850 operaciones que reporta `tools/alovida/coverage-report.mjs`:**
 ambos analizadores miden cosas ligeramente distintas (parseo de decoradores por regex vs.
 introspección real del `Reflector` de Nest en runtime); la diferencia de 9 no se investigó a fondo
 en esta fase — se registra como nota, no como blocker, porque ninguna de las dos cifras es

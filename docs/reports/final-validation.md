@@ -5,7 +5,7 @@
 
 ## 1. Resumen ejecutivo
 
-Se ejecutaron las 18 fases del plan maestro de principio a fin sobre el backend REDESA Health:
+Se ejecutaron las 18 fases del plan maestro de principio a fin sobre el backend ALOVIDA Health:
 60 módulos de dominio, 1184 entidades, 841 operaciones HTTP reales, 20 procesos worker, 79 eventos
 de dominio y 5 almacenes de datos. El resultado es un portal de documentación técnica (170
 páginas, MkDocs Material, compilación estricta sin errores) respaldado por un contrato OpenAPI y
@@ -147,7 +147,7 @@ workflow.
 (13/14 suites, 90/95 tests, 1 opt-in), `yarn docs:openapi:lint` (0 errores), `yarn
 docs:asyncapi:validate` (0 errores), `node tools/docs/check-doc-coverage.mjs` (limpio), `node
 tools/docs/check-doc-links.mjs` (0 rotos), `yarn docs:build` (mkdocs --strict, limpio), `yarn
-audit` (16 high, dev-only, aceptado), `node tools/redesa/coverage-report.mjs` (1184 entidades,
+audit` (16 high, dev-only, aceptado), `node tools/alovida/coverage-report.mjs` (1184 entidades,
 852 endpoints estáticos, 0 huérfanos, 1 cross-domain aceptado).
 
 ## 16. Riesgos residuales

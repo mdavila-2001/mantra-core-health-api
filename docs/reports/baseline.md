@@ -3,7 +3,7 @@
 > Fase 0 del Plan Maestro de Documentación. Fotografía reproducible del estado real del
 > backend antes de construir documentación definitiva. Fecha: **2026-07-29**.
 > Commit evaluado: `15c132d3348cb9f668f8fd3eb1b156169d2ea130` (rama
-> `redesa/auditoria-correccion-integral`).
+> `alovida/auditoria-correccion-integral`).
 
 ## 1. Identificación del sistema
 
@@ -20,11 +20,11 @@
 | Autenticación | JWT propio (`@nestjs/jwt`), `TokenService`, roles vía `authz` (RBAC + PDP clínico aditivo) | `src/common/auth`, `src/modules/authz` |
 | Infraestructura / despliegue | Docker Compose multiservicio (api + 20 workers + postgres + mongodb + redis + opensearch + minio) | `docker-compose.yml`, `Dockerfile` |
 | Documentación de API existente | `@nestjs/swagger@^11.4.6` montado en `/docs`, **solo fuera de `NODE_ENV=production`**; sin `redocly.yaml`, sin Scalar, sin `openapi/openapi.yaml` versionado | `src/main.ts` |
-| Módulos de dominio | **57** módulos bajo `src/modules/*` | `ls src/modules`, confirmado por `tools/redesa/coverage-report.mjs` |
-| Controllers / endpoints declarados | **191 controllers**, **850 endpoints** (estático, `tools/redesa/coverage-report.mjs`) | ver §4 |
+| Módulos de dominio | **57** módulos bajo `src/modules/*` | `ls src/modules`, confirmado por `tools/alovida/coverage-report.mjs` |
+| Controllers / endpoints declarados | **191 controllers**, **850 endpoints** (estático, `tools/alovida/coverage-report.mjs`) | ver §4 |
 | Entidades mapeadas | **1184** tablas/entidades | ver §4 |
 | Herramientas de pruebas | Jest (unitarias e integración, configs separadas `test/jest-integration.json`, `test/jest-smoke.json`, `test/jest-e2e.json`), Testcontainers para Postgres real en integración | `package.json`, `test/` |
-| Analizador propio de reglas de negocio | `tools/redesa/guardrails.mjs` y `tools/redesa/coverage-report.mjs` (REDESA: gobierno de dominios, huérfanos, cross-domain access) | `tools/redesa/` |
+| Analizador propio de reglas de negocio | `tools/alovida/guardrails.mjs` y `tools/alovida/coverage-report.mjs` (ALOVIDA: gobierno de dominios, huérfanos, cross-domain access) | `tools/alovida/` |
 | Catálogo ORM propio | `tools/catalog/generate-catalog.mjs`, `tools/catalog/audit-fidelity.mjs` contra `graphify-out/fidelity-audit.json` | `tools/catalog/` |
 
 No existen previamente: OpenAPI versionado en `openapi/`, `redocly.yaml`, integración Scalar, portal MkDocs, `structurizr/workspace.dsl`, ADRs, AsyncAPI, catálogo de datos, modelo de amenazas formal o runbooks. Este plan los crea desde cero sobre este sistema real.
@@ -37,7 +37,7 @@ No existen previamente: OpenAPI versionado en `openapi/`, `redocly.yaml`, integr
 | `yarn lint` (`eslint ... --fix`) | ❌ Falla (exit 1) | **28117 problemas** (22495 errores, 5622 warnings) tras autofix. Ver §3 — es deuda preexistente, no introducida por esta iniciativa documental. |
 | `yarn test` (unitarias, Jest) | ⏳ Ver actualización — comando de larga duración, resultado se añade cuando termina la ejecución en curso. | — |
 | `yarn audit` (dependencias) | ⚠️ 16 vulnerabilidades **high**, 0 critical/moderate/low, sobre 1073 dependencias totales | Ver §3.3 |
-| `node tools/redesa/coverage-report.mjs` | ✅ Éxito | 1184 entidades, 850 endpoints/191 controllers, 57 módulos, 0 `ORPHAN_TABLE`, 0 `ORPHAN_ENDPOINT`, **1** `DIRECT_CROSS_DOMAIN_ACCESS` (ver §3.4) |
+| `node tools/alovida/coverage-report.mjs` | ✅ Éxito | 1184 entidades, 850 endpoints/191 controllers, 57 módulos, 0 `ORPHAN_TABLE`, 0 `ORPHAN_ENDPOINT`, **1** `DIRECT_CROSS_DOMAIN_ACCESS` (ver §3.4) |
 | Generación OpenAPI actual | ⚠️ Existe (`SwaggerModule` en `/docs`), pero **no versionada como contrato** (`openapi/openapi.yaml` no existe) y **deshabilitada en producción** | `src/main.ts:76-84` |
 
 ## 3. Hallazgos de línea base — bloqueos y riesgos
@@ -77,7 +77,7 @@ Todas las 16 advertencias `high` provienen de la misma causa raíz: `brace-expan
 
 **Impacto real:** bajo — el vector de explotación requiere pasar entrada de atacante a `expand()`/patrones glob de `minimatch`, algo que no ocurre en el runtime de producción (herramientas de build/test, no código servido). **Riesgo residual aceptado para el propósito de este informe**; se documenta en `docs/security/dependency-security.md` (Fase 12) con recomendación de actualizar `brace-expansion` a `>=5.0.8` en el próximo mantenimiento de dependencias.
 
-### 3.4 REDESA guardrails — 1 acceso cross-domain directo
+### 3.4 ALOVIDA guardrails — 1 acceso cross-domain directo
 
 `src/modules/billing/repositories/practices-lookup.repository.ts` importa una entidad del dominio `practice` directamente, violando la regla de aislamiento de dominios (cada módulo debe leer otros dominios vía servicio/puerto, no repositorio ajeno).
 

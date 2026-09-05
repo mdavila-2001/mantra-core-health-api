@@ -19,7 +19,7 @@ export const INSURANCE_SMOKE: SmokeCase[] = [
     body: (c) => ({
       tenantId: c.tenantId,
       carrierCode: `CAR-${c.u}`,
-      legalName: 'Aseguradora Redesa',
+      legalName: 'Aseguradora Alovida',
       regulatorIdentifier: `REG-${c.u}`,
     }),
     expectedStatus: 201,
@@ -133,7 +133,7 @@ export const INSURANCE_SMOKE: SmokeCase[] = [
     body: (c) => ({
       tenantId: c.tenantId,
       brokerCode: `BRK-${c.u}`,
-      legalName: 'Corredora Redesa',
+      legalName: 'Corredora Alovida',
       licenseNumber: `LIC-${c.u}`,
     }),
     expectedStatus: 201,
@@ -164,7 +164,7 @@ export const INSURANCE_SMOKE: SmokeCase[] = [
     body: (c) => ({
       tenantId: c.tenantId,
       groupCode: `EMP-${c.u}`,
-      legalName: 'Empresa Redesa SAC',
+      legalName: 'Empresa Alovida SAC',
     }),
     expectedStatus: 201,
   },

@@ -1,6 +1,6 @@
-# Matriz de trazabilidad REDESA — Regla → Implementación → Prueba
+# Matriz de trazabilidad ALOVIDA — Regla → Implementación → Prueba
 
-Cumple la exigencia §6/§12 del informe REDESA: cada regla canónica (`CAN-*`) y cada contradicción
+Cumple la exigencia §6/§12 del informe ALOVIDA: cada regla canónica (`CAN-*`) y cada contradicción
 crítica/alta (`C-*`) mapeada a su módulo, tabla(s), endpoint(s) y estado de prueba en este backend.
 Estado: ✅ implementado y probado · 🟡 parcial/base · 🔵 decisión de negocio (parametrizable).
 
@@ -17,9 +17,9 @@ Estado: ✅ implementado y probado · 🟡 parcial/base · 🔵 decisión de neg
 | CAN-RX-001..004 receta: draft editable, emitida inmutable, invalidar/reemplazar/renovar | clinical.medication_requests | issue/invalidate/replace/renew (comandos, no CRUD) | medications.service.spec | ✅ |
 | CAN-NOTE-001 notas: borrador editable, firmada inmutable, adenda | chart.clinical_note_versions + signatures | signVersion/cosign/amend | chart-notes.spec | ✅ |
 | CAN-INT-001 cambio de paciente solo en borrador | procedures_perioperative.procedure_cases | guarda por estado (DRAFT-only) | periop-cases.spec | 🟡→✅ (Fase E) |
-| CAN-INT-002 credenciales del equipo vigentes antes de confirmar | procedures_perioperative team | aceptación del integrante + credencial vigente real antes de confirmar | periop-cases.spec, `yarn redesa:personas` | ✅ (2026-08-12: era inalcanzable — ver nota) |
+| CAN-INT-002 credenciales del equipo vigentes antes de confirmar | procedures_perioperative team | aceptación del integrante + credencial vigente real antes de confirmar | periop-cases.spec, `yarn alovida:personas` | ✅ (2026-08-12: era inalcanzable — ver nota) |
 | CAN-SURVEY-001 encuestas privadas ≠ reseñas públicas | community.service_reviews + qa/encuestas | entidades separadas; agregados anonimizados | community smoke | 🟡 (umbral por afinar) |
-| CAN-DELETE-001 sin hard-delete de datos protegidos | transversal | guardrail `HARD_DELETE_RESTRICTED_DATA` bloquea CI | redesa:guardrails | ✅ |
+| CAN-DELETE-001 sin hard-delete de datos protegidos | transversal | guardrail `HARD_DELETE_RESTRICTED_DATA` bloquea CI | alovida:guardrails | ✅ |
 | CAN-AUDIT-001 auditoría append-only con hash | audit.audit_log (WORM, previous_hash/record_hash) | append serializado por tenant (advisory lock) | audit-log.repository.spec | ✅ |
 | CAN-FIN-001 contabilidad: reversión, aprobaciones | accounting.journal_transactions | DRAFT→…→APPROVED→POSTED→REVERSED; assertTransition | ledger.service.spec | ✅ |
 | CAN-ADV-001 crédito publicitario | ads / payments.wallets | saldo prepago (decisión D-04) | — | 🔵 decisión negocio |
@@ -56,7 +56,7 @@ Estado: ✅ implementado y probado · 🟡 parcial/base · 🔵 decisión de neg
 
 ## Cobertura por actor clínico (2026-08-12)
 
-`yarn redesa:personas` (`tools/redesa/exercise-clinical-personas.mjs`) recorre la
+`yarn alovida:personas` (`tools/alovida/exercise-clinical-personas.mjs`) recorre la
 API real dando de alta un usuario por actor, verificando su matrícula e
 iniciando sesión con **su propio** token. Es la contraparte de
 `exercise-front-flows.mjs`, que recorre los mismos caminos con el administrador:
@@ -89,8 +89,8 @@ y `practice` no exponían ni una sola lectura.
 
 ## Guardrails de CI (criterios de rechazo §9)
 
-`yarn redesa:guardrails` (bloqueante): `HARD_DELETE_RESTRICTED_DATA`, `GENERIC_CRUD_ON_IMMUTABLE`,
+`yarn alovida:guardrails` (bloqueante): `HARD_DELETE_RESTRICTED_DATA`, `GENERIC_CRUD_ON_IMMUTABLE`,
 `UNSCOPED_MUTATION`, `CASCADE_ON_RESTRICTED`, `TENANT_SCOPE_MISSING` (2026-07-30: listado/conteo
 sobre entidad con `tenant_id` sin acotar por tenant ni por id de principal/recurso puntual — ver
-`ESTADO-Y-PENDIENTES.md`). `yarn redesa:coverage` (informe): `ORPHAN_TABLE`, `ORPHAN_ENDPOINT`,
-`DIRECT_CROSS_DOMAIN_ACCESS`. Ver `REDESA-COBERTURA.md`.
+`ESTADO-Y-PENDIENTES.md`). `yarn alovida:coverage` (informe): `ORPHAN_TABLE`, `ORPHAN_ENDPOINT`,
+`DIRECT_CROSS_DOMAIN_ACCESS`. Ver `ALOVIDA-COBERTURA.md`.

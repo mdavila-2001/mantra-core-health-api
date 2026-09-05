@@ -42,7 +42,7 @@ export const { seeds: ACCOUNTING_CONCEPT_SEEDS, ids: ACCT } =
     },
 
     // --- Estado de la transacción (journal_transactions.status_concept_id) ---
-    // Máquina de estados canónica REDESA C-17:
+    // Máquina de estados canónica ALOVIDA C-17:
     //   DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED → REVERSED
     // El asiento efectivo en el mayor solo ocurre al pasar a POSTED (comando `post`
     // desde APPROVED). Un asiento POSTED se corrige por reversión, nunca se edita.

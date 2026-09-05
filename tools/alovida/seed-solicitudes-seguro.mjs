@@ -48,8 +48,8 @@
  *
  * ## Uso
  *
- *   node tools/redesa/seed-solicitudes-seguro.mjs
- *   node tools/redesa/seed-solicitudes-seguro.mjs --base-url http://localhost:3001
+ *   node tools/alovida/seed-solicitudes-seguro.mjs
+ *   node tools/alovida/seed-solicitudes-seguro.mjs --base-url http://localhost:3001
  *
  * Requiere una API levantada con el administrador de arranque
  * (`BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`).

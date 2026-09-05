@@ -38,7 +38,7 @@ const RX_HISTORY_ENTITY = 'medication_requests';
 
 /**
  * UC-08-10 (prescribir) y UC-08-11 (administrar/registrar) de medicación, más la
- * máquina de estados e inmutabilidad de receta de REDESA (CAN-RX-001..004):
+ * máquina de estados e inmutabilidad de receta de ALOVIDA (CAN-RX-001..004):
  *
  *   DRAFT ──edit──▶ DRAFT ──issue──▶ ISSUED ──administer(final)──▶ COMPLETED
  *                                       │
@@ -272,7 +272,7 @@ export class MedicationsService {
   }
 
   /**
-   * REDESA D-05 / CAN-RX: firma una receta en borrador (DRAFT). Aditivo: registra
+   * ALOVIDA D-05 / CAN-RX: firma una receta en borrador (DRAFT). Aditivo: registra
    * quién firma y cuándo, sin alterar la máquina de estados. Firmar es idempotente
    * (no re-firma si ya está firmada) y solo se permite antes de emitir.
    */
@@ -312,7 +312,7 @@ export class MedicationsService {
    * CAN-RX: emite la receta (DRAFT → ISSUED) y SELLA su contenido. A partir de
    * aquí es inmutable; toda corrección pasa por invalidate/replace.
    *
-   * REDESA D-05: si la política PARAMETRIZABLE de firma vigente exige firma para
+   * ALOVIDA D-05: si la política PARAMETRIZABLE de firma vigente exige firma para
    * esta receta y aún no está firmada, se rechaza. FAIL-SAFE: sin política
    * aplicable, `isSignatureRequired` es `false` y la emisión no cambia.
    */

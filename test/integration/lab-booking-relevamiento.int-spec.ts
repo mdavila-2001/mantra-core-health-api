@@ -79,7 +79,7 @@ describe('J2 · relevamiento: reservar en un laboratorio con el motor existente'
         resourceType: 'ROOM',
         resourceRefType: 'diagnostic_unit_sites',
         resourceRefId: siteId,
-        name: `Laboratorio Redesa ${u}`,
+        name: `Laboratorio Alovida ${u}`,
         timeZone: 'America/La_Paz',
         capacity: 2,
       })

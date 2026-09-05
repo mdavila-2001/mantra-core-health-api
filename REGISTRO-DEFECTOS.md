@@ -351,7 +351,7 @@ bóveda—. Evidencia: `grep -rn clinical_course_concept_id` daba **0 aciertos**
 mientras que `clinical_status_concept_id`, que sí es del modelo, aparece en todas. Contra una
 base reconstruida es `columna-ausente`: MikroORM la proyecta en el `SELECT` y **toda lectura de
 `clinical.conditions` falla**, no sólo la que use el campo nuevo. El rótulo del PR además chocaba
-con el **v4.0.8 real** (promoción REDESA del 30/07); la promoción va como **v4.1.2**.
+con el **v4.0.8 real** (promoción ALOVIDA del 30/07); la promoción va como **v4.1.2**.
 
 Cerrado por el camino canónico (nadie tocó `SQL/` a mano):
 
@@ -632,8 +632,8 @@ Quedan **25 módulos** en esa situación; el siguiente grande es `procedures_per
 
 ## Sistema de diseño (repo del front)
 
-- **Dos sistemas conviviendo sin solape**: `src/styles.css` (REDSAT v1.0, Inter,
-  `<app-card>`, 132 pantallas) contra `src/styles/redsat.css` (v1.1, Nunito Sans,
+- **Dos sistemas conviviendo sin solape**: `src/styles.css` (ALOVIDA v1.0, Inter,
+  `<app-card>`, 132 pantallas) contra `src/styles/alovida.css` (v1.1, Nunito Sans,
   `class="app-card"`, 141 pantallas). Se navega de uno a otro sin cambiar de ruta.
 - **Contradicción tipográfica sin resolver**: la fuente normativa fija Poppins + Inter; la
   hoja de la bóveda fija Poppins + Nunito Sans.

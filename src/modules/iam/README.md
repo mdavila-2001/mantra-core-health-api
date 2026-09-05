@@ -1,6 +1,6 @@
 # IAM Module
 
-Identity & Access Management for the REDESA Health API: users, credentials
+Identity & Access Management for the ALOVIDA Health API: users, credentials
 (password + federated), sessions and refresh-token rotation, MFA factors, devices,
 global roles, account lockouts and an append-only security-event trail.
 

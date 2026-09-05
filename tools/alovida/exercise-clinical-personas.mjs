@@ -10,8 +10,8 @@
  * su matrícula, inicia sesión y ejecuta su parte del circuito.
  *
  * Uso:
- *   node tools/redesa/exercise-clinical-personas.mjs
- *   BASE=http://localhost:3000 node tools/redesa/exercise-clinical-personas.mjs
+ *   node tools/alovida/exercise-clinical-personas.mjs
+ *   BASE=http://localhost:3000 node tools/alovida/exercise-clinical-personas.mjs
  *
  * Requiere una API levantada con administrador de arranque
  * (`BOOTSTRAP_ADMIN_EMAIL`/`BOOTSTRAP_ADMIN_PASSWORD`). Escribe datos con sufijo

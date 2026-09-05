@@ -1,14 +1,14 @@
 # Dependencias entre módulos
 
 > Deriva de `docs/reports/graphify-audit.md` (Fase 1). Fuente: `graphify-out/graph.json`
-> (contraste dominio-a-dominio, excluyendo núcleo `common`/`orm`) y `tools/redesa/coverage-report.mjs`
+> (contraste dominio-a-dominio, excluyendo núcleo `common`/`orm`) y `tools/alovida/coverage-report.mjs`
 > (analizador de aislamiento de dominios).
 
 ## 1. Modelo de dependencias
 
 El backend es un monolito modular de **57 módulos de dominio** (`src/modules/*`) más un núcleo
 compartido (`src/common`, `src/orm`). La regla de aislamiento vigente (verificada por
-`yarn redesa:guardrails` y `tools/redesa/coverage-report.mjs`) es: **un módulo no importa
+`yarn alovida:guardrails` y `tools/alovida/coverage-report.mjs`) es: **un módulo no importa
 repositorios ni entidades de otro dominio directamente**; el acceso cruzado debe pasar por un
 servicio expuesto del dominio propietario, o por eventos de dominio vía `messaging`.
 
@@ -75,7 +75,7 @@ Consumo real de eventos, en detalle: `docs/architecture/integration-map.md`.
 **`billing → practice`** (`src/modules/billing/repositories/practices-lookup.repository.ts`):
 importa una entidad del dominio `practice` directamente desde un repositorio de `billing`,
 violando la regla de aislamiento. Es el **único** caso detectado por
-`tools/redesa/coverage-report.mjs` (`DIRECT_CROSS_DOMAIN_ACCESS: 1`).
+`tools/alovida/coverage-report.mjs` (`DIRECT_CROSS_DOMAIN_ACCESS: 1`).
 
 - **Clasificación:** `HIGH` (arquitectural).
 - **Estado:** conocido, no remediado en esta iteración documental — requiere diseñar un puerto de
@@ -86,7 +86,7 @@ violando la regla de aislamiento. Es el **único** caso detectado por
 
 ## 6. Ausencia de ciclos de imports
 
-Ni el analizador de graphify (`## Import Cycles` → "None detected.") ni `tools/redesa/guardrails.mjs`
+Ni el analizador de graphify (`## Import Cycles` → "None detected.") ni `tools/alovida/guardrails.mjs`
 reportan dependencias circulares entre módulos. No se requiere acción.
 
 ## 7. Volumen por módulo (top 10, núcleo excluido)

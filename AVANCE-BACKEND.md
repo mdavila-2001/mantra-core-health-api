@@ -26,7 +26,7 @@ producción y proveedores externos reales, no funcionalidad.**
 | --- | --- | --- |
 | Módulos NestJS | **60** (57 con entidades propias) | `docs/modules/index.md`, generado |
 | Endpoints HTTP | **876** decoradores en **194** controllers | `grep` sobre `*.controller.ts` |
-| Entidades mapeadas (tablas) | **1.185** | `yarn redesa:coverage` |
+| Entidades mapeadas (tablas) | **1.185** | `yarn alovida:coverage` |
 | Servicios / repositorios / DTO | **261 / 352 / 370** | catálogo generado |
 | Archivos TypeScript | **3.514** (~515.000 líneas) | `find` + `wc` |
 | Pruebas unitarias | **409/409 suites y 4.048/4.048 pruebas en verde** (corrida del 2026-08-01, 170 s) | `yarn test` |
@@ -35,7 +35,7 @@ producción y proveedores externos reales, no funcionalidad.**
 | Procesos worker independientes | **20** | `src/worker-*.ts` |
 | Jobs de fondo | **29** | `src/worker/jobs/` |
 | Páginas de documentación | **183** (60 módulos + 20 ADR) | `yarn docs:build` |
-| Hallazgos de guardrails REDESA | **0** | `yarn redesa:guardrails` |
+| Hallazgos de guardrails ALOVIDA | **0** | `yarn alovida:guardrails` |
 
 ---
 
@@ -160,7 +160,7 @@ verificado del actor; eso cierra los 453 sitios sin reescribir ninguno. El detal
 resuelto: los tenants de *contraparte* (`insurerTenantId`, `supplierTenantId`, …) quedan
 deliberadamente fuera de la comprobación, porque referencian legítimamente a otra organización.
 
-**Capa 3 — Guardrail estático `TENANT_SCOPE_MISSING`** (`tools/redesa/guardrails.mjs`).
+**Capa 3 — Guardrail estático `TENANT_SCOPE_MISSING`** (`tools/alovida/guardrails.mjs`).
 Detecta en tiempo de análisis un `em.find`/`em.count` sobre una entidad con `tenant_id` que no acota
 por tenant ni por un identificador puntual. Nació de un bug real y, al escribirse, encontró **tres
 fugas más** que nadie había visto: suscripciones de webhook en `messaging`, catálogo de hitos en
@@ -381,14 +381,14 @@ Se sustituyó `ts-jest` por **SWC**: la peor suite en frío bajó de **59,5 s a 
 de proceso con efecto diario — una suite que tarda tres cuartos de minuto en una sola prueba no se
 ejecuta, y una que tarda uno se ejecuta siempre.
 
-### Análisis estático propio (`tools/redesa/`)
+### Análisis estático propio (`tools/alovida/`)
 
 Además de ESLint type-aware (0 errores, 0 advertencias) y `tsc` (0 diagnósticos), hay dos
 herramientas escritas para este proyecto:
 
-- **`yarn redesa:coverage`** — informe estático que reporta entidades sin consumidor, endpoints
+- **`yarn alovida:coverage`** — informe estático que reporta entidades sin consumidor, endpoints
   mutantes sin política y accesos directos cross-domain. Hoy: **0, 0 y 0**.
-- **`yarn redesa:guardrails`** — cinco reglas que rompen el build ante los antipatrones prohibidos
+- **`yarn alovida:guardrails`** — cinco reglas que rompen el build ante los antipatrones prohibidos
   (§4.4 y §4.1). Hoy: **0 hallazgos**.
 
 Estas dos herramientas son, probablemente, el activo de calidad más subestimado del repositorio:
@@ -505,7 +505,7 @@ proyecto sigue siendo manejable con 3.514 archivos:
    tiene worker, por qué la retención de series temporales es opt-in, por qué Swagger no se publica
    en producción, por qué la primera tanda de benchmarks se descartó).
 
-5. **Herramienta propia donde la genérica no llega**: los guardrails REDESA codifican reglas de este
+5. **Herramienta propia donde la genérica no llega**: los guardrails ALOVIDA codifican reglas de este
    dominio que ningún linter de mercado conoce.
 
 6. **Autocrítica registrada.** Los documentos del repositorio marcan explícitamente lo que *no* se
@@ -521,10 +521,10 @@ Nada de lo anterior pide fe. Los comandos:
 
 ```bash
 # Inventario y límites de dominio (entidades, endpoints, huérfanos, cross-domain)
-yarn redesa:coverage        # → REDESA-COBERTURA.md
+yarn alovida:coverage        # → ALOVIDA-COBERTURA.md
 
 # Antipatrones prohibidos (borrado duro, CRUD sobre inmutables, tenant sin acotar…)
-yarn redesa:guardrails
+yarn alovida:guardrails
 
 # Compilación, tipos y estilo
 yarn build && yarn typecheck && yarn lint --max-warnings=0

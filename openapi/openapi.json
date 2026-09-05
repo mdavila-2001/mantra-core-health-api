@@ -71627,8 +71627,8 @@
     }
   },
   "info": {
-    "title": "REDESA Health API",
-    "description": "API del ecosistema de salud REDESA (Mantra Core Technologies). Contrato generado automáticamente desde los decoradores `@nestjs/swagger` reales de los controllers y DTO del backend — no es un documento mantenido a mano. Regenerar con `yarn docs:openapi:generate` tras cualquier cambio de contrato.",
+    "title": "ALOVIDA Health API",
+    "description": "API del ecosistema de salud ALOVIDA (Mantra Core Technologies). Contrato generado automáticamente desde los decoradores `@nestjs/swagger` reales de los controllers y DTO del backend — no es un documento mantenido a mano. Regenerar con `yarn docs:openapi:generate` tras cualquier cambio de contrato.",
     "version": "0.0.1",
     "contact": {}
   },

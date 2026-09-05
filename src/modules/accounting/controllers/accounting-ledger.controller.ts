@@ -187,7 +187,7 @@ export class AccountingLedgerController {
   }
 
   /**
-   * REDESA C-17 — crea el asiento en estado DRAFT (sin postear). Punto de entrada
+   * ALOVIDA C-17 — crea el asiento en estado DRAFT (sin postear). Punto de entrada
    * del flujo canónico DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED.
    */
   @Post('journal-transactions/drafts')
@@ -205,7 +205,7 @@ export class AccountingLedgerController {
     return this.ledgerService.createDraft(dto, actor);
   }
 
-  /** REDESA C-17 — DRAFT → AUTO_CLASSIFIED. */
+  /** ALOVIDA C-17 — DRAFT → AUTO_CLASSIFIED. */
   @Post('journal-transactions/:id/classify')
   @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -218,7 +218,7 @@ export class AccountingLedgerController {
     return this.ledgerService.classify(id, dto, actor);
   }
 
-  /** REDESA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
+  /** ALOVIDA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
   @Post('journal-transactions/:id/submit-review')
   @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -231,7 +231,7 @@ export class AccountingLedgerController {
     return this.ledgerService.submitForReview(id, dto, actor);
   }
 
-  /** REDESA C-17 — PENDING_REVIEW → APPROVED (exige rol de aprobación). */
+  /** ALOVIDA C-17 — PENDING_REVIEW → APPROVED (exige rol de aprobación). */
   @Post('journal-transactions/:id/approve')
   @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER')
   @HttpCode(HttpStatus.OK)
@@ -244,7 +244,7 @@ export class AccountingLedgerController {
     return this.ledgerService.approve(id, dto, actor);
   }
 
-  /** REDESA C-17 — APPROVED → POSTED (posteo efectivo en el mayor). */
+  /** ALOVIDA C-17 — APPROVED → POSTED (posteo efectivo en el mayor). */
   @Post('journal-transactions/:id/post')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

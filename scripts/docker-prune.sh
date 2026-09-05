@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =========================================================================
-# Mantra Core Technologies · REDESA Health Ecosystem
+# Mantra Core Technologies · ALOVIDA Health Ecosystem
 # Limpieza de caché de build de Docker.
 #
 # Por qué existe: en una Dell de desarrollo la caché de build llegó a pesar

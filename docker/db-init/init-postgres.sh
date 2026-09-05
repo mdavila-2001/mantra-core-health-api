@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =========================================================================
-# Mantra Core Technologies · REDESA Health Ecosystem
+# Mantra Core Technologies · ALOVIDA Health Ecosystem
 # postgres-init: aplica el DDL relacional (SQL/) y los stores PG de NoSQL/
 # (58 TimescaleDB, 59 pgvector) si aún no existen. Idempotente.
 #

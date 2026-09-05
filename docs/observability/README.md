@@ -57,8 +57,8 @@ ninguna conexión y sin crear el SDK.
 | --- | --- |
 | Un usuario reportó un fallo | Pedirle la cabecera `x-trace-id` → `http://localhost:16686/trace/<id>` |
 | Una línea de log | El campo `trace_id` del JSON → misma URL |
-| Un endpoint lento | UI → servicio `redesa-api` → operación `POST /iam/auth/login` → ordenar por duración |
-| Un job de worker | UI → servicio `redesa-worker-messaging` → operación `worker.messaging.outbox-relay` |
+| Un endpoint lento | UI → servicio `alovida-api` → operación `POST /iam/auth/login` → ordenar por duración |
+| Un job de worker | UI → servicio `alovida-worker-messaging` → operación `worker.messaging.outbox-relay` |
 | Todos los logs de una operación | `grep '"trace_id":"<id>"'` sobre los logs de la API **y** de los workers |
 
 ## 4. Crear un span manual
@@ -139,7 +139,7 @@ span.
 **No hay que hacer nada.** Los 20 workers ya están cubiertos:
 
 - El SDK arranca en `src/worker/bootstrap.ts`, que los 20 entrypoints importan primero.
-- El nombre del servicio (`redesa-worker-<dominio>`) se deriva del entrypoint en ejecución.
+- El nombre del servicio (`alovida-worker-<dominio>`) se deriva del entrypoint en ejecución.
 - Los 30 jobs programados pasan por `runTick`, que crea la traza raíz de cada ejecución.
 - `ObservabilityModule` es global también en el worker: cualquier job inyecta `TracingService`.
 
@@ -208,7 +208,7 @@ partida. Valores por entorno en [03-production-topology.md](03-production-topolo
 | Aparecen spans de negocio pero no de HTTP ni SQL | Alguien puso un `import` **antes** del bootstrap de telemetría en `main.ts` o en `worker/bootstrap.ts` |
 | `ECONNREFUSED :4318` | Jaeger apagado, o endpoint `localhost` desde dentro de Docker |
 | La traza no aparece pero no hay errores | Muestreo por debajo de 1.0; subirlo para verificar |
-| El worker no aparece | Se está buscando bajo `redesa-api` en vez de `redesa-worker-<dominio>` |
+| El worker no aparece | Se está buscando bajo `alovida-api` en vez de `alovida-worker-<dominio>` |
 | Los logs no llevan `trace_id` | Código fuera de todo contexto de traza (arranque, `void promesa`) |
 
 Diagnóstico completo en el [runbook operativo](06-operational-runbook.md).

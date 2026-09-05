@@ -178,8 +178,8 @@ jobs:
       - name: Auditoría de dependencias runtime — sin vulnerabilidades conocidas
         run: yarn npm audit --all --recursive --environment production
 
-      - name: Guardrails REDESA — antipatrones prohibidos por las reglas canónicas
-        run: yarn redesa:guardrails
+      - name: Guardrails ALOVIDA — antipatrones prohibidos por las reglas canónicas
+        run: yarn alovida:guardrails
 
       # El DDL canónico se edita en `../SQL`, fuera del repositorio, y el
       # despliegue monta la copia versionada de `database/`. Aquí solo se clona

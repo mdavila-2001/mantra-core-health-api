@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 // =============================================================================
-// REDESA — informe de cobertura y huérfanos (estático).
+// ALOVIDA — informe de cobertura y huérfanos (estático).
 // =============================================================================
-// Implementa el primer entregable que pide el informe REDESA (§6/§12):
+// Implementa el primer entregable que pide el informe ALOVIDA (§6/§12):
 //   - Inventario de entidades (tablas) y su consumo por repos/servicios.
 //   - `ORPHAN_TABLE`: entidad sin ningún consumidor fuera de `entities/`.
 //   - Inventario de endpoints y `ORPHAN_ENDPOINT` heurístico (mutante sin @Roles
 //     ni @Public → sin actor/autorización declarada).
 //   - `DIRECT_CROSS_DOMAIN_ACCESS`: repositorio que importa entidades de OTRO módulo.
-// No arranca la app ni toca la BD. Uso: `node tools/redesa/coverage-report.mjs`.
+// No arranca la app ni toca la BD. Uso: `node tools/alovida/coverage-report.mjs`.
 // =============================================================================
 import {
   readFileSync,
@@ -215,7 +215,7 @@ for (const f of allFiles.filter((f) => /\/repositories\//.test(f))) {
 // --- Reporte -----------------------------------------------------------------
 const lines = [];
 const p = (s = '') => lines.push(s);
-p('# Informe de cobertura REDESA (estático)');
+p('# Informe de cobertura ALOVIDA (estático)');
 p('');
 p(`- Entidades (tablas mapeadas): **${entities.length}**`);
 p(
@@ -247,7 +247,7 @@ for (const c of crossDomain.slice(0, 60)) p(`- ${c.file} → \`${c.imports}\``);
 if (crossDomain.length > 60) p(`- … +${crossDomain.length - 60} más`);
 
 const report = lines.join('\n') + '\n';
-writeFileSync(join(ROOT, 'REDESA-COBERTURA.md'), report);
+writeFileSync(join(ROOT, 'ALOVIDA-COBERTURA.md'), report);
 console.log(report);
 console.log(
   `\nResumen: entidades=${entities.length} orphan_table=${orphanTables.length} orphan_endpoint=${orphanEndpoints.length} cross_domain=${crossDomain.length}`,

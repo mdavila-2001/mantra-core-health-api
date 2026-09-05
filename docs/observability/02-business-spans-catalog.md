@@ -180,7 +180,7 @@ especial para mensajes antiguos.
 | | |
 | --- | --- |
 | **Archivo** | [src/worker/jobs/messaging/notification-delivery.job.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/worker/jobs/messaging/notification-delivery.job.ts) |
-| **Módulo** | `messaging` (proceso `redesa-worker-messaging`) |
+| **Módulo** | `messaging` (proceso `alovida-worker-messaging`) |
 | **Operación** | Intento de entrega contra el proveedor externo (UC-35-11) |
 | **Kind** | `INTERNAL` |
 
@@ -226,9 +226,9 @@ proceso—, así que el span se marca explícitamente antes de absorber el error
 tick fallido aparecería como exitoso en Jaeger.
 
 **Evidencia real.** Verificado contra Jaeger: una traza rooteada en
-`worker.messaging.outbox-relay` (servicio `redesa-worker-messaging`) contiene, en la misma traza,
+`worker.messaging.outbox-relay` (servicio `alovida-worker-messaging`) contiene, en la misma traza,
 `POST /internal/outbox/relay/run`, `MessagingInternalController.runRelay` y sus consultas SQL del
-servicio `redesa-api`.
+servicio `alovida-api`.
 
 ---
 

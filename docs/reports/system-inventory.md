@@ -1,7 +1,7 @@
 # Inventario del sistema
 
 > Fase 2 del Plan Maestro de Documentación. Inventario estructural completo por módulo, contrastado
-> entre el árbol real del repositorio, el analizador REDESA (`tools/redesa/coverage-report.mjs`) y
+> entre el árbol real del repositorio, el analizador ALOVIDA (`tools/alovida/coverage-report.mjs`) y
 > el grafo de Graphify (`docs/reports/graphify-audit.md`). Fecha: 2026-07-29, commit `15c132d3`.
 
 ## 1. Método
@@ -9,7 +9,7 @@
 Conteo por `find` sobre `src/modules/*/` (convención de nombres de archivo NestJS/MikroORM
 estándar del proyecto), contrastado contra:
 
-- `tools/redesa/coverage-report.mjs` (fuente de verdad para endpoints y entidades — parsea
+- `tools/alovida/coverage-report.mjs` (fuente de verdad para endpoints y entidades — parsea
   decoradores HTTP y mapeo ORM real, no solo nombres de archivo);
 - `graphify-out/graph.json` (fuente de verdad para topología de dependencias, no para conteo de
   endpoints).
@@ -17,7 +17,7 @@ estándar del proyecto), contrastado contra:
 ## 2. Reconciliación de conteo de módulos: 60 directorios, 57 "módulos de negocio"
 
 `src/modules/` contiene **60 directorios**, cada uno con su propio `*.module.ts`. El analizador
-REDESA reporta **57 módulos** porque cuenta módulos que poseen al menos una entidad ORM
+ALOVIDA reporta **57 módulos** porque cuenta módulos que poseen al menos una entidad ORM
 (`Set` de `module` sobre las 1184 entidades). Los 3 directorios sin entidad propia son módulos de
 infraestructura de datos que envuelven un almacén distinto a PostgreSQL, no dominios de negocio:
 
@@ -109,7 +109,7 @@ del plan maestro, en vez de reescribirlo.
 
 ## 4. Totales verificados cruzando ambas fuentes
 
-| Métrica | `find` sobre árbol | `tools/redesa/coverage-report.mjs` | Diferencia explicada |
+| Métrica | `find` sobre árbol | `tools/alovida/coverage-report.mjs` | Diferencia explicada |
 |---|---:|---:|---|
 | Controllers | 191 | 191 (191 controllers, 850 endpoints) | Coincide exacto |
 | Entities | 1184 | 1184 | Coincide exacto |
@@ -143,7 +143,7 @@ sin broker de mensajería externo, outbox propio sobre Postgres).
 
 ## 7. Brechas de inventario detectadas
 
-- Ninguna: la reconciliación entre árbol de código, analizador REDESA y grafo de Graphify no
+- Ninguna: la reconciliación entre árbol de código, analizador ALOVIDA y grafo de Graphify no
   arrojó discrepancias sin explicar (ver §2 y §4).
 - Pendiente para Fase 10: revisar los 17 repositorios con baja/nula conectividad en el grafo
   (§4) uno por uno, clasificándolos como catálogo cargado indirectamente, reservado para fase

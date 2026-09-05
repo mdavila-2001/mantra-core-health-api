@@ -119,7 +119,7 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
       disableForeignKeys: false,
     },
 
-    // Espejo de versionado (REDESA §2): puebla `audit.<tabla>_history` en cada
+    // Espejo de versionado (ALOVIDA §2): puebla `audit.<tabla>_history` en cada
     // flush para todo agregado con tabla de historial, dentro de su transacción.
     subscribers: [new HistoryMirrorSubscriber()],
 

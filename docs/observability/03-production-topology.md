@@ -20,8 +20,8 @@
 ```mermaid
 flowchart TB
   subgraph app["Red privada de aplicación"]
-    API["redesa-api<br/>(N réplicas)"]
-    WK["redesa-worker-*<br/>(20 procesos)"]
+    API["alovida-api<br/>(N réplicas)"]
+    WK["alovida-worker-*<br/>(20 procesos)"]
     COL["OpenTelemetry Collector<br/>DaemonSet / sidecar"]
     API -->|OTLP http/protobuf| COL
     WK -->|OTLP http/protobuf| COL

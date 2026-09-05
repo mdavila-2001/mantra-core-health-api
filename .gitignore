@@ -60,7 +60,7 @@ tools/e2e/seed-manifest.json
 # La caché de `faker-worker.mjs`: los correos de la última tanda generada
 # contra cada target. Se regenera sola; versionarla prometería una cuenta que
 # en otra máquina, o contra otra base, no existe.
-tools/redesa/.faker-cache/
+tools/alovida/.faker-cache/
 
 # temp directory
 .temp

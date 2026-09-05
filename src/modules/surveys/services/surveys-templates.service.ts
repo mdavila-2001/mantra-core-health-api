@@ -300,7 +300,7 @@ export class SurveysTemplatesService {
    *
    * No borra nada: las invitaciones ya emitidas siguen siendo contestables y
    * las respuestas dadas siguen siendo legibles. Lo que se corta es la emisión
-   * de invitaciones nuevas — que es lo que REDESA pide con «modificar o
+   * de invitaciones nuevas — que es lo que ALOVIDA pide con «modificar o
    * desactivar encuestas».
    */
   async deactivateTemplate(
