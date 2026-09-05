@@ -9,7 +9,16 @@ import {
   BrokerClients,
   CoverageEligibilityRequests,
   CoverageEligibilityResponses,
+  InsurancePlans,
+  InsuranceProducts,
+  InsuranceCarriers,
 } from '../entities';
+
+/** La aseguradora de un paciente, tal como la necesita quien lista consultas. */
+export interface PatientCarrier {
+  readonly patientProfileId: string;
+  readonly carrierLegalName: string;
+}
 
 /**
  * Acceso a datos de coberturas de paciente, dependientes, coordinación de
@@ -89,6 +98,71 @@ export class CoverageRepository {
     statusConceptId: string,
   ): Promise<number> {
     return em.count(PatientCoverages, { patientProfileId, statusConceptId });
+  }
+
+  /**
+   * La aseguradora activa (orden 1, la privada) de cada paciente de la lista.
+   *
+   * ALV-021 — la agenda necesita decir «Particular» o el nombre de la
+   * aseguradora en cada fila. **En lote**, como el resto de las lecturas de
+   * página de este proyecto: con cien citas en pantalla, resolverlo cita por
+   * cita son cien viajes a la base para pintar una columna.
+   *
+   * Sólo la cobertura de orden 1: es la misma que ya usa `claims-read` para
+   * decidir qué mostrar como «la» aseguradora del paciente, y coincide con lo
+   * que pide el criterio de ALV-021 — decir SI tiene o no, no enumerar las dos
+   * que alguien puede declarar (privada + Caja).
+   *
+   * Un paciente sin fila en `patient_coverages`, o con la única activa dada de
+   * baja, no aparece en el mapa: quien llama lo lee como `Particular`, que es
+   * la ausencia de seguro y no un error de la consulta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileIds - Los pacientes de la página.
+   * @returns Un mapa `patientProfileId → nombre legal de la aseguradora`.
+   */
+  async findActiveCarriersByPatients(
+    em: EntityManager,
+    patientProfileIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const porPaciente = new Map<string, string>();
+    if (patientProfileIds.length === 0) return porPaciente;
+
+    const coberturas = await em.find(PatientCoverages, {
+      patientProfileId: { $in: [...patientProfileIds] },
+      coverageOrder: 1,
+      statusConceptId: INS.COVERAGE_ACTIVE,
+    });
+    if (coberturas.length === 0) return porPaciente;
+
+    const planIds = [...new Set(coberturas.map((c) => c.insurancePlanId))];
+    const planes = await em.find(InsurancePlans, { id: { $in: planIds } });
+    const planById = new Map(planes.map((p) => [p.id, p]));
+
+    const productIds = [...new Set(planes.map((p) => p.insuranceProductId))];
+    const productos = await em.find(InsuranceProducts, {
+      id: { $in: productIds },
+    });
+    const carrierIdByProductId = new Map(
+      productos.map((p) => [p.id, p.insuranceCarrierId]),
+    );
+
+    const carrierIds = [...new Set(productos.map((p) => p.insuranceCarrierId))];
+    const carriers = await em.find(InsuranceCarriers, {
+      id: { $in: carrierIds },
+    });
+    const nameByCarrierId = new Map(carriers.map((c) => [c.id, c.legalName]));
+
+    for (const cobertura of coberturas) {
+      const plan = planById.get(cobertura.insurancePlanId);
+      if (!plan) continue;
+      const carrierId = carrierIdByProductId.get(plan.insuranceProductId);
+      if (!carrierId) continue;
+      const nombre = nameByCarrierId.get(carrierId);
+      if (!nombre) continue;
+      porPaciente.set(cobertura.patientProfileId, nombre);
+    }
+    return porPaciente;
   }
 
   /**
