@@ -298,7 +298,80 @@ que ninguna otra cosa.
 
 ---
 
-## 7 · Qué mirar cuando algo falla
+## 7 · Acceso remoto a PostgreSQL para testers de datos
+
+El servicio `postgres` del compose publica el puerto **5432 del host** hacia
+internet (`POSTGRES_PUBLIC_PORT`, por defecto `5432`). Es la **única** base del
+stack que se expone: Mongo, Redis, OpenSearch y MinIO siguen solo en la red
+interna `alovida`.
+
+### Lo que hay que hacer una sola vez en el servidor
+
+1. **Abrir el puerto en el firewall** del servidor. En Ubuntu con `ufw`:
+
+   ```bash
+   sudo ufw allow 5432/tcp
+   ```
+
+   Sin esto el contenedor publica el puerto pero nadie llega.
+
+2. **Crear el rol de solo lectura.** El rol `alovida` (`POSTGRES_USER`) es el
+   dueño del esquema y **no se reparte**. Desde el contenedor:
+
+   ```bash
+   docker exec -it <contenedor-postgres> psql -U alovida -d alovida_health
+   ```
+
+   ```sql
+   -- Generar la contraseña aparte: openssl rand -base64 18
+   CREATE ROLE alovida_reader LOGIN PASSWORD '<PASSWORD_LECTOR>'
+     NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+   GRANT CONNECT ON DATABASE alovida_health TO alovida_reader;
+
+   -- SELECT sobre todos los esquemas de la aplicación, presentes y futuros.
+   DO $$
+   DECLARE s text;
+   BEGIN
+     FOR s IN
+       SELECT nspname FROM pg_namespace
+       WHERE nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
+         AND nspname NOT LIKE 'pg_temp%' AND nspname NOT LIKE '_timescaledb%'
+     LOOP
+       EXECUTE format('GRANT USAGE ON SCHEMA %I TO alovida_reader', s);
+       EXECUTE format('GRANT SELECT ON ALL TABLES IN SCHEMA %I TO alovida_reader', s);
+       EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE alovida IN SCHEMA %I GRANT SELECT ON TABLES TO alovida_reader', s);
+     END LOOP;
+   END $$;
+   ```
+
+   `scripts/postgres/provision-roles.sql` hace lo mismo esquema por esquema y
+   además retira privilegios sobrantes; usarlo si un DBA va a mantener los
+   roles.
+
+### Lo que se entrega a los testers
+
+```
+postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health
+```
+
+Comprobación desde fuera:
+
+```bash
+psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health" \
+  -c 'select count(*) from information_schema.tables'
+```
+
+### Para volver a cerrarlo
+
+Cambiar `POSTGRES_PUBLIC_PORT` no basta: hay que dejar el puerto atado al
+loopback del servidor. En `docker-compose.coolify.yml`, en el servicio
+`postgres`, poner `"127.0.0.1:5432:5432"`, redesplegar y cerrar el puerto en el
+firewall (`sudo ufw delete allow 5432/tcp`). Desde ese momento se entra por
+túnel SSH: `ssh -L 5432:localhost:5432 usuario@servidor`.
+
+---
+
+## 8 · Qué mirar cuando algo falla
 
 | Síntoma | Causa casi segura |
 |---|---|
@@ -316,7 +389,7 @@ que ninguna otra cosa.
 
 ---
 
-## 8 · Copias de seguridad
+## 9 · Copias de seguridad
 
 Lo único que no se puede reconstruir son los volúmenes. `postgres_data` es el
 crítico:
