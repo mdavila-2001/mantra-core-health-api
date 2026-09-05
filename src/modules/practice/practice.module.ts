@@ -35,6 +35,19 @@ import {
   PracticeOrganizationReadRepository,
 } from './repositories';
 import { ServiceCatalogRepository } from '../billing/repositories';
+import { AddressesRepository } from '../common/repositories';
+// ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
+// quién es la sesión (`ProfileOwnershipService`) y crear la dirección de la
+// sede (`AddressesRepository`). Mismo criterio que `ServiceCatalogRepository`
+// arriba: se registran las clases puntuales, no `ProfilesModule`/`CommonModule`
+// enteros — evita el ciclo (`profiles` ya lee lo que `practice` expone) y no
+// duplica fuente de verdad.
+import { ProfileOwnershipService } from '../profiles/services/profile-ownership.service';
+import {
+  PersonAccountLinksRepository,
+  HealthPractitionerProfilesRepository,
+  PatientProfilesRepository,
+} from '../profiles/repositories';
 
 /**
  * Módulo Practice (14): organizaciones de atención, sitios, unidades clínicas,
@@ -71,6 +84,11 @@ import { ServiceCatalogRepository } from '../billing/repositories';
     // e importarlo cerraría el ciclo. El repositorio no guarda estado —recibe el
     // `em` en cada llamada—, así que una segunda instancia es la misma cosa.
     ServiceCatalogRepository,
+    AddressesRepository,
+    PersonAccountLinksRepository,
+    HealthPractitionerProfilesRepository,
+    PatientProfilesRepository,
+    ProfileOwnershipService,
     // Servicios
     PracticeSitesService,
     PracticeAccreditationsService,

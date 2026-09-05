@@ -763,3 +763,98 @@ node dist/src/main.js          # :3000
 # 3. Ciclo de H-01 de punta a punta
 #    (script en el scratchpad de la sesión: h01-verify.ps1)
 ```
+
+---
+
+## TAREA-15 · Notificaciones de agenda — el correo con enlace real y el chat de `SupportAdmin`
+
+**Rama:** `justin/t15-notificaciones-agenda` (API) · **Fecha:** 05/09/2026.
+
+### Punto de partida: la ficha estaba desactualizada
+
+Al abrir TAREA-15 el correo y el aviso a las dos partes (S1 y S2 del plan por
+slices) **ya estaban en `dev`** — mergeados en los días previos sin que la
+ficha se actualizara. Verificado leyendo `messaging-agenda-notice.adapter.ts`
+y `avisarSolicitud()` en `scheduling-bookings.service.ts` antes de escribir
+nada, para no reconstruir lo que ya existía (regla 00 §2). Lo que quedaba
+realmente abierto:
+
+1. El correo no llevaba ningún enlace ni botón: era el mismo texto de la
+   campana, sin manera de actuar sin abrir la app a mano.
+2. `SupportAdmin` no existía en ningún repo (`grep` a cero, confirmado dos
+   veces con `rg` y con `grep` nativo).
+
+### Decisiones tomadas (P-15-1 a P-15-7, sin bloquear el carril)
+
+- **P-15-2 (la que manda) — sin token de acción.** El correo lleva un enlace
+  absoluto a la misma pantalla que ya resuelve el in-app
+  (`payload.route`), donde la sesión autenticada decide. Se descartó el token
+  de propósito limitado sin sesión que pedía literalmente el punto 1: es la
+  opción que la propia ficha marca como «mucho más barata y mucho más
+  segura», y evita inventar una credencial que viaja por correo para mutar
+  una cita clínica. Esto resuelve de paso **P-15-3** (no hace falta tabla de
+  token) y **P-15-4** (no hay `GET` que mute nada).
+- **P-15-1 — `SupportAdmin` es una cuenta de servicio, no un tenant ni un tipo
+  de conversación nuevo.** Fila real en `iam.users`
+  (`SEED.supportAdminUserId`, mismo patrón que `systemWorkerUserId`) con una
+  vitrina en `community.public_profiles` (`PROFILE_TARGET_ORGANIZATION`). El
+  chat se manda con `CommunityMessagingService.createConversation` +
+  `sendMessage` tal cual «Escribir al doctor» — cero mensajería nueva.
+- **P-15-6 — a las dos partes.** Ya resuelto por `avisarSolicitud()` (S2,
+  visto en `dev` antes de tocar nada).
+- **P-15-7 — el motivo no viaja en el correo.** Ya era así (AC-15-5); no se
+  tocó.
+- **P-15-5 — la preferencia manda.** No se fuerza el envío del correo o del
+  chat ignorando el opt-out; cambiarlo es una decisión legal que no toca a
+  este carril.
+- **P-15-8 (push/móvil) — declarado fuera de alcance**, como ya decía la
+  ficha.
+
+### Lo que se escribió
+
+| Pieza | Dónde |
+|---|---|
+| Enlace real en el correo (botón «Ver en AloVida») | `messaging-agenda-notice.adapter.ts` — `cuerpoHtmlDelCorreo()`, sólo cuando el aviso trae `payload.route`; `bodyHtml` se agrega al `payloadJson` del canal `EMAIL` sin tocar el in-app |
+| Base pública configurable | `notices/agenda-notices.env.ts` — `WEB_APP_BASE_URL`, default `http://localhost:4200` |
+| `SupportAdmin` (usuario + vitrina) | `SEED.supportAdminUserId/DisplayName/ProfileSlug` en `common/constants/concepts.ts`; seed idempotente junto a `systemWorkerUserId` en `terminology-seed.service.ts` |
+| El emisor del chat | `scheduling/adapters/support-admin-notice.adapter.ts` — get-or-create de la vitrina de SupportAdmin y de la del destinatario (`PublicProfileProjectionService.projectOrganization`, reusado tal cual — es idempotente **por `targetId`**, así que un profesional con vitrina propia la conserva), conversación directa + mensaje vía `CommunityMessagingService` |
+| Wiring | `MessagingAgendaNoticeAdapter.enviarPorChat()`, sólo para `kind === 'BOOKING_STATE_CHANGED'` (nueva solicitud a ambas partes, aceptar, rechazar, mover, cancelar) — cupo liberado, demora y recordatorio **no** lo pide la ficha y no se inventó; `CommunityModule` exporta ahora `CommunityMessagingService` para que `scheduling` lo inyecte (sin ciclo: `community` no importa `scheduling`) |
+| Puerto | `AgendaNoticeResult` suma `chatDelivered`/`chatSkippedReason`, opcionales — no rompe ningún consumidor existente |
+
+### Por qué nunca rompe la agenda
+
+El chat corre **después** del in-app y del correo, en su propio `try/catch`
+(`SupportAdminNoticeAdapter.notify` nunca lanza), y no participa de la
+preferencia de canal de M35 —no es uno de sus dos canales— por diseño: es un
+efecto de `community`, igual que «Escribir al doctor».
+
+### Pendiente para cerrar el carril del todo
+
+- Falta correr `yarn typecheck` / `yarn test src/modules/scheduling
+  src/modules/messaging` de punta a punta contra el stack levantado (en curso
+  al cerrar esta nota) y `yarn lint`/`yarn test --watch=false` del front — no
+  hubo cambios de front en este carril, pero corresponde confirmarlo.
+- **AC-15-6/-7/-8/-14 (comportamiento del token) quedan explícitamente fuera**
+  por la decisión de P-15-2: no hay token que probar. Si el propietario
+  insiste en un enlace que actúe sin sesión, es una decisión de seguridad
+  suya y necesita pasar por `atlas-security-review` antes de escribirse.
+- El spec de contrato de `carril-15-notificaciones-agenda.spec.ts` (Playwright)
+  que pide la sección 7 de la ficha no se escribió todavía — evidencia visual
+  de la campana y el chat quedan pendientes contra el stack local vivo.
+- **Simplificación conocida (no bug):** `getOrCreateRecipientProfile` usa
+  `userId` como `targetId` de la vitrina del destinatario. Para un paciente
+  coincide con su propia vitrina (`CommunitySocialService.sujetoDe`); para un
+  **profesional**, cuya vitrina usa `practitionerProfileId`, esto crea una
+  vitrina mínima aparte sólo para este chat en vez de reusar la suya. El
+  mensaje llega igual; documentado en el JSDoc del método por si alguien
+  quiere resolverlo mejor después.
+- **Cerrado, actualización:** los tests de concurrencia de TAREA-12/13/14 sí
+  existen — `test/integration/fx9-carreras-de-la-agenda.int-spec.ts`
+  (`FX-9 · las carreras de la agenda (H-1)`) trae exactamente los tres, con
+  sus AC en el nombre: `AC-14-10` (dos citas puntuales que se pisan),
+  `AC-13-6` (dos aceptaciones que se pisan) y `AC-12-9` (mover el horario
+  mientras alguien toma el destino). No los corrí en vivo contra el stack
+  local en esta pasada —exige la base levantada (`_e2e`, API en 3001, ver
+  memoria del stack)—, pero su existencia con esos nombres tan precisos ya
+  cierra la duda que había quedado abierta: no era sólo una rama mergeada sin
+  evidencia.

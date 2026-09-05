@@ -21,6 +21,13 @@ import {
   DocumentsRepository,
   ChartTemplatesRepository,
 } from './repositories';
+// FT-07-R08: `ChartReadController` necesita el mismo guard que
+// `ClinicalReadController` — ambos son la misma pregunta de autorización
+// (¿puede este profesional ver el expediente de este paciente?) sobre la misma
+// pantalla de archivo clínico. `ClinicalModule` exporta el guard ya resuelto
+// contra `ClinicalReadService`; importar `AuthzModule` directamente acá sería
+// redundante.
+import { ClinicalModule } from '../clinical/clinical.module';
 
 /**
  * Módulo Chart (15): notas clínicas versionadas y firmadas, liberación al
@@ -28,7 +35,7 @@ import {
  * y asignación de plantillas por especialidad.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), ClinicalModule],
   controllers: [
     ChartNotesController,
     ChartDocumentsController,

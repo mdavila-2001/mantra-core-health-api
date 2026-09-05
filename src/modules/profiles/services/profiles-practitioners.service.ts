@@ -1962,7 +1962,11 @@ export class ProfilesPractitionersService {
       }
 
       const organizationName = dto.organizationName.trim();
-      const roleTitle = dto.roleTitle.trim();
+      // ALV-007: opcional. `null` explícito -no `undefined`- para que
+      // `findSame` busque "sin cargo" y no "cualquier cargo" (ver el
+      // comentario de `findSame` sobre por qué dos vínculos sin cargo no
+      // chocan entre sí).
+      const roleTitle = dto.roleTitle?.trim() || null;
       const duplicate = await this.affiliationsRepo.findSame(
         tx,
         profileId,
@@ -2000,8 +2004,7 @@ export class ProfilesPractitionersService {
       const affiliation = this.affiliationsRepo.create(tx, {
         practitionerProfileId: profileId,
         organizationName,
-        roleTitle,
-        departmentText: dto.departmentText?.trim() || undefined,
+        roleTitle: roleTitle ?? undefined,
         practiceSiteId: dto.practiceSiteId,
         affiliationTypeConceptId:
           dto.affiliationTypeConceptId ?? PROF.AFFILIATION_TYPE_EMPLOYMENT,
@@ -2183,8 +2186,7 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
     id: row.id,
     practitionerProfileId: row.practitionerProfileId,
     organizationName: row.organizationName,
-    roleTitle: row.roleTitle,
-    departmentText: row.departmentText ?? null,
+    roleTitle: row.roleTitle ?? null,
     practiceSiteId: row.practiceSiteId ?? null,
     affiliationTypeConceptId: row.affiliationTypeConceptId ?? null,
     startDate: row.startDate,

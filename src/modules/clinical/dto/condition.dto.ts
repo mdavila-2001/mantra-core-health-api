@@ -192,3 +192,18 @@ export class ConditionResponseDto {
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
 }
+
+/**
+ * Cuerpo de `POST /clinical/conditions/:id/attachments` (ALV-033, reemplazo
+ * de ALV-032). El archivo ya tiene que existir —se sube antes con
+ * `POST /common/files`—; esto sólo lo liga a ESTE diagnóstico puntual, no al
+ * paciente en general.
+ */
+export class AttachFileToConditionDto {
+  /**
+   * El archivo ya subido (`common.files.id`), pendiente de vincular.
+   */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  fileId!: string;
+}

@@ -499,6 +499,28 @@ export class SchedulingCatalogRepository {
   }
 
   /**
+   * Borra el conjunto de franjas vigente de una plantilla, para editarla
+   * (TAREA-10, punto 16).
+   *
+   * `nativeDelete` y no `em.remove` por fila: son huérfanas de nadie —ningún
+   * `bookable_slot` referencia `schedule_rules`, sólo `schedule_template_id`—
+   * así que no hay nada que desligar antes. El reemplazo (borrar + crear) es
+   * más simple que diferenciar cuál franja cambió, y el costo es el mismo:
+   * de todos modos hay que reescribir el conjunto entero, porque el pedido no
+   * distingue franjas por identidad propia, sólo por día de la semana.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param scheduleTemplateId - Plantilla cuyas franjas se reemplazan.
+   * @returns Cuántas se borraron.
+   */
+  deleteRulesByTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+  ): Promise<number> {
+    return em.nativeDelete(ScheduleRules, { scheduleTemplateId });
+  }
+
+  /**
    * Las franjas vigentes del profesional en **todos** sus recursos.
    *
    * Existe para poder rechazar un solape antes de publicarlo: un médico con dos

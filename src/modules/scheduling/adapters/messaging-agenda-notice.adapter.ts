@@ -6,12 +6,24 @@ import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
 import { NotificationsService } from '../../messaging/services';
 import { SCHED } from '../scheduling.concepts';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
+import { SupportAdminNoticeAdapter } from './support-admin-notice.adapter';
+import { loadAgendaNoticesEnv } from '../notices/agenda-notices.env';
 import type {
   AgendaNotice,
   AgendaNoticeKind,
   AgendaNoticePort,
   AgendaNoticeResult,
 } from '../ports/agenda-notice.port';
+
+/** Escapa lo que un texto redactado por el sistema puede llevar (nombres) antes de meterlo en HTML. */
+function escaparHtml(texto: string): string {
+  return texto
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 /** Categoría de catálogo de cada aviso, para que la preferencia pueda nombrarla. */
 const CATEGORIA: Readonly<Record<AgendaNoticeKind, string>> = {
@@ -103,10 +115,17 @@ const REBOTE_CORREO = ':email';
  */
 @Injectable()
 export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
+  /** Avisos que además tocan el chat de `SupportAdmin` (TAREA-15, puntos 1 y 3). */
+  private static readonly KINDS_CON_CHAT: ReadonlySet<AgendaNoticeKind> =
+    new Set(['BOOKING_STATE_CHANGED']);
+
+  private readonly env = loadAgendaNoticesEnv();
+
   constructor(
     private readonly em: EntityManager,
     private readonly notifications: NotificationsService,
     private readonly noticeRepo: SchedulingNoticeRepository,
+    private readonly supportAdmin: SupportAdminNoticeAdapter,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(MessagingAgendaNoticeAdapter.name);
@@ -198,8 +217,8 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
     );
 
     // La preferencia se guarda por (usuario, canal, categoría): que la campana
-    // esté silenciada no dice nada del correo. Por eso estos dos caminos
-    // igualmente intentan el correo en vez de cortar la emisión entera.
+    // esté silenciada no dice nada del correo ni del chat. Por eso este camino
+    // igualmente los intenta en vez de cortar la emisión entera.
     if (request.suppressed) {
       return {
         delivered: false,
@@ -208,6 +227,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
           request.suppressionReason ??
           'El destinatario no acepta este aviso por el canal in-app',
         ...(await this.encolarCorreo(notice, recipientUserId, actor)),
+        ...(await this.enviarPorChat(notice, recipientUserId)),
       };
     }
 
@@ -235,6 +255,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
     );
 
     const correo = await this.encolarCorreo(notice, recipientUserId, actor);
+    const chat = await this.enviarPorChat(notice, recipientUserId);
 
     return {
       delivered: delivery.inAppNotificationId !== undefined,
@@ -246,7 +267,27 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
         ? { skippedReason: 'La entrega no produjo bandeja in-app' }
         : {}),
       ...correo,
+      ...chat,
     };
+  }
+
+  /**
+   * Manda el mismo aviso al chat de `SupportAdmin`, sólo para los avisos que
+   * el pedido cubre (TAREA-15, puntos 1 y 3): nueva solicitud, aceptar,
+   * rechazar, mover y cancelar. Los otros tres avisos (cupo liberado, demora,
+   * recordatorio) no lo pide la ficha y no se inventan.
+   *
+   * Corre después del in-app y del correo, y no cambia lo que devuelven: es
+   * información adicional, no una condición para el resto.
+   */
+  private async enviarPorChat(
+    notice: AgendaNotice,
+    recipientUserId: string,
+  ): Promise<Pick<AgendaNoticeResult, 'chatDelivered' | 'chatSkippedReason'>> {
+    if (!MessagingAgendaNoticeAdapter.KINDS_CON_CHAT.has(notice.kind)) {
+      return {};
+    }
+    return this.supportAdmin.notify(notice, recipientUserId);
   }
 
   /**
@@ -264,6 +305,40 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
    * @param recipientUserId - Cuenta destinataria, ya resuelta para el in-app.
    * @param actor - Con quién se firma la solicitud.
    */
+  /**
+   * El «botón integrado» que pide el punto 1 y 2 del pedido (P-15-2, decidido).
+   *
+   * No es un enlace de un solo uso que muta estado sin sesión — eso es lo que
+   * `agenda-notices.env.ts` explica que se descartó por seguridad—: es un
+   * enlace absoluto a la misma pantalla que ya resuelve el in-app
+   * (`notice.payload.route`), donde la sesión ya autenticada decide. Sin
+   * `route` no hay botón que ofrecer y el correo queda sólo con el texto.
+   */
+  private cuerpoHtmlDelCorreo(
+    notice: AgendaNotice,
+  ): { bodyHtml: string } | Record<string, never> {
+    const route = notice.payload?.route;
+    if (typeof route !== 'string' || route === '') return {};
+
+    const href = `${this.env.webAppBaseUrl}${route}`;
+    const parrafos = escaparHtml(notice.bodyText)
+      .split('\n')
+      .map((linea) => `<p style="margin:0 0 12px">${linea}</p>`)
+      .join('');
+
+    return {
+      bodyHtml:
+        `${parrafos}` +
+        `<p style="margin:20px 0">` +
+        `<a href="${href}" ` +
+        'style="display:inline-block;padding:10px 20px;border-radius:6px;' +
+        'background:#0f6ab4;color:#ffffff;text-decoration:none;font-weight:600">' +
+        'Ver en AloVida' +
+        '</a>' +
+        '</p>',
+    };
+  }
+
   private async encolarCorreo(
     notice: AgendaNotice,
     recipientUserId: string,
@@ -294,6 +369,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
             kind: notice.kind,
             subject: notice.subject,
             bodyText: notice.bodyText,
+            ...this.cuerpoHtmlDelCorreo(notice),
             ...(notice.payload ?? {}),
           },
           ...(notice.debounceKey === undefined

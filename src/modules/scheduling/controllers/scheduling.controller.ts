@@ -37,6 +37,7 @@ import {
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   CreateTemplateDto,
+  UpdateTemplateDto,
   AvailabilityExceptionListDto,
   RetireTemplateResponseDto,
   ReactivateTemplateResponseDto,
@@ -245,6 +246,29 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ReactivateTemplateResponseDto> {
     return this.catalogService.reactivateTemplate(id, actor);
+  }
+
+  /**
+   * Editar un horario publicado (TAREA-10, punto 16 — `/schedule/edit`).
+   *
+   * `PATCH` y no `POST`: es la edición de campos de una plantilla que ya
+   * existe, no un acto con nombre propio como `reactivate`. Todo opcional;
+   * omitir un campo lo conserva. Si `rules` viene, reemplaza el conjunto
+   * entero — no hay «agregar una franja» sola.
+   */
+  @Patch('templates/:id')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Editar una plantilla de agenda ya publicada',
+    description:
+      'Todo opcional; lo que no se manda se conserva. `rules`, si viene, reemplaza el conjunto entero y no toca los cupos ya materializados.',
+  })
+  updateTemplate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateTemplateDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TemplateResponseDto> {
+    return this.catalogService.updateTemplate(id, dto, actor);
   }
 
   /**

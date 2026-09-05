@@ -89,6 +89,17 @@ export class SurveysTemplatesController {
     return this.templatesService.addQuestion(id, dto, actor);
   }
 
+  /** Abre una versión nueva en borrador, para corregir una plantilla ya publicada (FT-31). */
+  @Post(':id/versions')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Abrir una versión nueva del cuestionario' })
+  createNextVersion(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TemplateCreatedDto> {
+    return this.templatesService.createNextVersion(id, actor);
+  }
+
   /** Publica la versión y le fija vigencia. */
   @Post(':id/versions/:versionNumber/publish')
   @HttpCode(HttpStatus.OK)

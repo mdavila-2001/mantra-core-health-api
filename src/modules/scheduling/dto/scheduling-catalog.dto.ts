@@ -399,6 +399,66 @@ export class CreateTemplateDto {
 }
 
 /**
+ * Cuerpo de `PATCH /scheduling/templates/{id}` (TAREA-10, punto 16).
+ *
+ * Mismo criterio que `PUT /community/profiles/me` y `UpdateExceptionDto`:
+ * **todo opcional, y omitir un campo lo conserva**. `null` no existe acá
+ * porque ningún campo de la plantilla es anulable por decisión del usuario
+ * (una plantilla sin `validTo` significa `HORARIO PERMANENTE`, y para volver
+ * a serlo el contrato es no declarar el campo, no mandar `null`).
+ *
+ * `rules`, si viene, **reemplaza el conjunto entero** — no hay «agregar una
+ * franja»: es la misma forma que ya publica el alta, y la pantalla la
+ * reenvía completa porque ya la tiene completa en el formulario. No toca los
+ * cupos ya materializados (`bookable_slots` no referencia `schedule_rules`);
+ * afecta sólo a la próxima vez que se llame `generate-slots`, igual que
+ * cualquier otro cambio de esta plantilla.
+ */
+@ApiSchema({ name: 'SchedulingUpdateTemplateDto' })
+export class UpdateTemplateDto {
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  name?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Franjas semanales de la plantilla. Si viene, reemplaza TODAS las existentes.',
+    type: [ScheduleRuleDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ScheduleRuleDto)
+  rules?: ScheduleRuleDto[];
+
+  @ApiPropertyOptional({
+    description: 'Duración por defecto del slot, en minutos',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(5)
+  slotMinutes?: number;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  bookingPolicyId?: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  validFrom?: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  validTo?: string;
+}
+
+/**
  * Una franja de una plantilla, como la lee la pantalla del médico.
  *
  * Va la hora de pared tal como se declaró —`09:00:00`—, no un instante: la

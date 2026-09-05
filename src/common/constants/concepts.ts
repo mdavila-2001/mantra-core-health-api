@@ -92,6 +92,16 @@ export const SEED = {
    */
   systemWorkerUserId: deterministicId('seed:user:system-worker'),
   systemWorkerDisplayName: 'System Worker',
+  /**
+   * `SupportAdmin`: la cuenta con la que la empresa escribe en el chat de
+   * agenda (TAREA-15, P-15-1). Mismo patrón que `systemWorkerUserId` — fila
+   * real en `iam.users` porque es quien firma (`created_by_user_id`) la
+   * conversación y el mensaje —, y sin credencial de login: nadie inicia
+   * sesión como la empresa.
+   */
+  supportAdminUserId: deterministicId('seed:user:support-admin'),
+  supportAdminDisplayName: 'AloVida · Soporte',
+  supportAdminProfileSlug: 'soporte-alovida',
 };
 
 /**
@@ -352,6 +362,14 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // paciente declara en su alta. Reutilizar OWNER_PATIENT para ella envenenaría
   // toda consulta futura que asuma "OWNER_PATIENT ⇒ titular con perfil".
   OWNER_PERSON: def('common:owner-type:person', 'OWNER_PERSON', 'Person'),
+  // Un archivo ligado a UN diagnóstico puntual (`clinical.conditions`), no al
+  // paciente en general: reemplaza al «Adjuntos» genérico del expediente
+  // (ALV-032), que no decía a qué diagnóstico correspondía cada archivo.
+  OWNER_CONDITION: def(
+    'common:owner-type:condition',
+    'OWNER_CONDITION',
+    'Condition',
+  ),
 
   // --- Common: identificadores oficiales ---
   ID_TYPE_NATIONAL: def(
