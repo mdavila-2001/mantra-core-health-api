@@ -7,6 +7,12 @@ import { AuditModule } from '../audit/audit.module';
 // porque `MessagingModule` ya exporta `NotificationsService` justamente para
 // esto, y no hay ciclo: `messaging` no sabe nada de `clinical`.
 import { MessagingModule } from '../messaging/messaging.module';
+// ALV-033 (reemplazo de ALV-032) — adjuntar un archivo a un diagnóstico liga
+// contra `FilesService.createLink`, que trae sus propios repos de `common`
+// (versiones, derivados, vínculos): se importa el módulo entero en vez de
+// proveer el servicio suelto, mismo criterio que ya usan `community`, `iam` y
+// `profiles`. `common` no depende de `clinical`, así que no cierra ciclo.
+import { CommonModule } from '../common/common.module';
 import {
   ClinicalEncountersController,
   ClinicalObservationsController,
@@ -79,6 +85,7 @@ import { CareRelationshipsRepository } from '../authz/repositories';
     MikroOrmModule.forFeature(Object.values(entities)),
     AuditModule,
     MessagingModule,
+    CommonModule,
   ],
   controllers: [
     ClinicalEncountersController,

@@ -75,6 +75,10 @@ import {
     // necesita `downloadPublicMedia` —que autoriza por lo que el archivo es, no
     // por quién lo pide—.
     FileUploadService,
+    // `clinical` liga un archivo ya subido a un diagnóstico puntual
+    // (ALV-033/reemplazo de ALV-032): reusa el `createLink` genérico en vez de
+    // reimplementar el vínculo polimórfico dentro de su propio módulo.
+    FilesService,
   ],
 })
 export class CommonModule {}
