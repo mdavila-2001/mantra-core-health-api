@@ -12,6 +12,7 @@ import { ReconciliationController } from './reconciliation.controller';
 import { AppealsController } from './appeals.controller';
 import { BrokerCommissionController } from './broker-commission.controller';
 import { InsuranceReadController } from './insurance-read.controller';
+import { ClaimsReadController } from './claims-read.controller';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as never;
 const dto = {} as never;
@@ -41,6 +42,19 @@ describe('Insurance controllers (delegación)', () => {
     await c.reverse(ID, dto, actor);
     await c.openDispute(ID, dto, actor);
     expect(service.openDispute).toHaveBeenCalledWith(ID, dto, actor);
+  });
+
+  it('ClaimsReadController delega en ClaimsReadService', async () => {
+    const service = {
+      listClaims: mockFn().mockResolvedValue({ items: [], nextCursor: null }),
+      getClaim: mockFn().mockResolvedValue({ header: {} }),
+    };
+    const c = new ClaimsReadController(service as never);
+    const query = {} as never;
+    expect(await c.listClaims(query)).toEqual({ items: [], nextCursor: null });
+    expect(service.listClaims).toHaveBeenCalledWith(query);
+    await c.getClaim(ID);
+    expect(service.getClaim).toHaveBeenCalledWith(ID);
   });
 
   it('CoverageController delega en CoverageService', async () => {
@@ -163,5 +177,42 @@ describe('Insurance controllers (delegación)', () => {
       );
       expect(roles).toBeUndefined();
     }
+  });
+
+  /**
+   * TAREA-16 · D1.b (Justin, 2026-09-04): la lectura de solicitudes **sí**
+   * exige rol, y es el del prestador que las envió.
+   */
+  it('la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN', () => {
+    const roles = Reflect.getMetadata('requiredRoles', ClaimsReadController);
+    expect(roles).toEqual(['BILLING_OPERATOR', 'SECURITY_ADMIN']);
+  });
+
+  /**
+   * El rol nuevo alcanza **sólo** a reclamar. Adjudicar, publicar EOB, revertir
+   * y enviar son decisiones de quien paga: si alguien las abriera al operador de
+   * facturación del prestador, los dos lados volverían a la misma pantalla —
+   * que es justo lo que corrigió D1.a.
+   */
+  it('reclamar cambia de rol; el resto del ciclo conserva el suyo', () => {
+    const metodo = (nombre: string): string[] | undefined =>
+      Reflect.getMetadata(
+        'requiredRoles',
+        (ClaimsController.prototype as never as Record<string, object>)[nombre],
+      );
+
+    expect(metodo('openDispute')).toEqual([
+      'BILLING_OPERATOR',
+      'SECURITY_ADMIN',
+    ]);
+
+    // Sin `@Roles` propio heredan el de la clase, que no cambió.
+    for (const escritura of ['submit', 'adjudicate', 'publishEob', 'reverse']) {
+      expect(metodo(escritura)).toBeUndefined();
+    }
+    expect(Reflect.getMetadata('requiredRoles', ClaimsController)).toEqual([
+      'BILLING',
+      'FINANCE',
+    ]);
   });
 });

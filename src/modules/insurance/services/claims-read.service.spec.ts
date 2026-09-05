@@ -1,6 +1,8 @@
 import { jest } from '@jest/globals';
-import { ResourceNotFoundException, runWithTenant } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
+import { runWithTenant } from '../../../common';
 import { ClaimsReadService } from './claims-read.service';
+import { INS } from '../insurance.concepts';
 
 /**
  * Mock sin tipar, como en el resto de los specs del módulo.
@@ -19,6 +21,7 @@ const COVERAGE = '44444444-4444-4444-4444-444444444444';
 const PERSON = '55555555-5555-5555-5555-555555555555';
 const MONEDA = '66666666-6666-6666-6666-666666666666';
 const ESTADO = '77777777-7777-7777-7777-777777777777';
+const PRACTICE = '88888888-8888-8888-8888-888888888888';
 
 /** Un reclamo mínimo, con lo que la lectura mira de verdad. */
 function reclamo(over: Record<string, unknown> = {}) {
@@ -27,6 +30,8 @@ function reclamo(over: Record<string, unknown> = {}) {
     claimIdentifier: 'CLM-1',
     insuranceCarrierId: CARRIER,
     patientCoverageId: COVERAGE,
+    billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
+    billingProviderEntityId: PRACTICE,
     statusConceptId: ESTADO,
     currencyConceptId: MONEDA,
     totalAmount: '1615.125',
@@ -41,7 +46,6 @@ function reclamo(over: Record<string, unknown> = {}) {
  */
 function repo(over: Record<string, unknown> = {}) {
   return {
-    findCarrierIdsByTenant: mockFn().mockResolvedValue([CARRIER]),
     findClaimsPage: mockFn().mockResolvedValue([reclamo()]),
     findClaimInScope: mockFn().mockResolvedValue(reclamo()),
     findCarriersByIds: mockFn().mockResolvedValue([
@@ -64,6 +68,18 @@ function repo(over: Record<string, unknown> = {}) {
   };
 }
 
+/**
+ * Doble del puerto de `practice`: qué prácticas tiene la organización activa.
+ *
+ * Es la raíz del alcance desde TAREA-16 · D1.a — la pantalla es la del
+ * prestador que envió la solicitud, no la de la aseguradora que la recibió.
+ */
+function practiceLookup(practiceIds: string[] = [PRACTICE]) {
+  return {
+    findActivePracticeIdsForTenant: mockFn().mockResolvedValue(practiceIds),
+  };
+}
+
 /** Doble del `EntityManager`: sólo hace falta `fork` y `find`. */
 function em(porEntidad: (nombre: string) => unknown[] = () => []) {
   const fork = {
@@ -74,6 +90,18 @@ function em(porEntidad: (nombre: string) => unknown[] = () => []) {
   return { fork: () => fork } as never;
 }
 
+/** Arma el servicio con sus tres dependencias dobladas. */
+function servicioCon(
+  r: Record<string, unknown>,
+  practicas: string[] = [PRACTICE],
+) {
+  return new ClaimsReadService(
+    em(),
+    r as never,
+    practiceLookup(practicas) as never,
+  );
+}
+
 /**
  * Corre dentro de un contexto de tenant: `requireTenantId()` lanza sin él, que
  * es exactamente lo que tiene que pasar y no lo que se está probando acá.
@@ -82,22 +110,66 @@ function conTenant<T>(fn: () => Promise<T>): Promise<T> {
   return runWithTenant(TENANT, fn);
 }
 
+/**
+ * Captura el rechazo para poder compararlo entero.
+ *
+ * `rejects.toThrow` comprueba el tipo; acá hace falta el objeto para verificar
+ * que dos rechazos distintos producen **el mismo cuerpo** (AC-16-14).
+ */
+async function rechazoDe(
+  fn: () => Promise<unknown>,
+): Promise<ForbiddenException> {
+  let capturado: unknown;
+  try {
+    await fn();
+  } catch (error) {
+    capturado = error;
+  }
+  expect(capturado).toBeInstanceOf(ForbiddenException);
+  return capturado as ForbiddenException;
+}
+
 describe('ClaimsReadService', () => {
-  describe('listClaims', () => {
-    it('sin aseguradoras del tenant no consulta solicitudes', async () => {
-      const r = repo({
-        findCarrierIdsByTenant: mockFn().mockResolvedValue([]),
-      });
-      const servicio = new ClaimsReadService(em(), r as never);
+  describe('alcance del prestador (TAREA-16 · D1.a)', () => {
+    it('acota el listado a las prácticas de la organización, no a sus aseguradoras', async () => {
+      const r = repo();
 
-      const pagina = await conTenant(() => servicio.listClaims({}));
+      await conTenant(() => servicioCon(r).listClaims({}));
 
-      expect(pagina).toEqual({ items: [], nextCursor: null });
-      // El alcance vacío corta antes de pedir nada: no es un filtro en
-      // memoria, es no preguntar.
+      // La lista que llega al repositorio son PRÁCTICAS. Antes eran las
+      // aseguradoras del tenant, que es el otro lado del mismo dato: desde un
+      // consultorio el listado salía siempre vacío.
+      expect(r.findClaimsPage).toHaveBeenCalledWith(
+        expect.anything(),
+        [PRACTICE],
+        expect.anything(),
+        expect.any(Number),
+        null,
+      );
+    });
+
+    it('sin prácticas activas responde 403, no una lista vacía', async () => {
+      const r = repo();
+
+      // Una organización sin prácticas no envió ninguna solicitud: la pantalla
+      // no es suya. Una lista vacía se leería como «no hay solicitudes».
+      await expect(
+        conTenant(() => servicioCon(r, []).listClaims({})),
+      ).rejects.toThrow(ForbiddenException);
       expect(r.findClaimsPage).not.toHaveBeenCalled();
     });
 
+    it('el detalle también exige prácticas antes de consultar', async () => {
+      const r = repo();
+
+      await expect(
+        conTenant(() => servicioCon(r, []).getClaim(CLAIM)),
+      ).rejects.toThrow(ForbiddenException);
+      expect(r.findClaimInScope).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listClaims', () => {
     it('descarta la fila de sondeo y emite cursor sólo si hay más', async () => {
       const filas = Array.from({ length: 3 }, (_, i) =>
         reclamo({
@@ -106,16 +178,17 @@ describe('ClaimsReadService', () => {
         }),
       );
       const r = repo({ findClaimsPage: mockFn().mockResolvedValue(filas) });
-      const servicio = new ClaimsReadService(em(), r as never);
 
-      const pagina = await conTenant(() => servicio.listClaims({ limit: 2 }));
+      const pagina = await conTenant(() =>
+        servicioCon(r).listClaims({ limit: 2 }),
+      );
 
       expect(pagina.items).toHaveLength(2);
       expect(pagina.nextCursor).not.toBeNull();
       // Se pide una de más: es lo que responde «hay siguiente» sin un COUNT.
       expect(r.findClaimsPage).toHaveBeenCalledWith(
         expect.anything(),
-        [CARRIER],
+        [PRACTICE],
         expect.anything(),
         2,
         null,
@@ -126,17 +199,26 @@ describe('ClaimsReadService', () => {
       const r = repo({
         findClaimsPage: mockFn().mockResolvedValue([reclamo()]),
       });
-      const servicio = new ClaimsReadService(em(), r as never);
 
-      const pagina = await conTenant(() => servicio.listClaims({ limit: 25 }));
+      const pagina = await conTenant(() =>
+        servicioCon(r).listClaims({ limit: 25 }),
+      );
 
       expect(pagina.nextCursor).toBeNull();
     });
 
-    it('deja el total aprobado en null cuando no hay dictamen', async () => {
-      const servicio = new ClaimsReadService(em(), repo() as never);
+    it('la página vacía es una lista vacía, no un rechazo', async () => {
+      // Tener prácticas y no tener solicitudes es un estado legítimo: la
+      // pantalla es suya y todavía no presentó nada.
+      const r = repo({ findClaimsPage: mockFn().mockResolvedValue([]) });
 
-      const pagina = await conTenant(() => servicio.listClaims({}));
+      const pagina = await conTenant(() => servicioCon(r).listClaims({}));
+
+      expect(pagina).toEqual({ items: [], nextCursor: null });
+    });
+
+    it('deja el total aprobado en null cuando no hay dictamen', async () => {
+      const pagina = await conTenant(() => servicioCon(repo()).listClaims({}));
 
       // No es cero: «todavía no contestaron» y «denegaron todo» son cosas
       // distintas, y esta es la línea que lo fija.
@@ -149,27 +231,54 @@ describe('ClaimsReadService', () => {
           { id: 'd1', insuranceClaimId: CLAIM, statusConceptId: 'abierta' },
         ]),
       });
-      const servicio = new ClaimsReadService(em(), r as never);
 
-      const pagina = await conTenant(() => servicio.listClaims({}));
+      const pagina = await conTenant(() => servicioCon(r).listClaims({}));
 
       expect(pagina.items[0].hasOpenDispute).toBe(true);
     });
   });
 
   describe('getClaim', () => {
-    it('responde 404 sin detalles cuando la solicitud no está en el alcance', async () => {
+    it('responde 403 sin detalles cuando la solicitud no está en el alcance', async () => {
       const r = repo({ findClaimInScope: mockFn().mockResolvedValue(null) });
-      const servicio = new ClaimsReadService(em(), r as never);
 
-      // Sin `details`: si el id viajara ahí, «no es tuya» y «no existe»
-      // dejarían de ser indistinguibles.
-      await expect(conTenant(() => servicio.getClaim(CLAIM))).rejects.toThrow(
-        ResourceNotFoundException,
+      // AC-16-14: 403, y sin `details` — si el id viajara ahí, «no es tuya» y
+      // «no existe» dejarían de ser indistinguibles. Se mira el cuerpo que el
+      // filtro va a serializar, no la instancia.
+      const rechazo = await rechazoDe(() =>
+        conTenant(() => servicioCon(r).getClaim(CLAIM)),
       );
-      await expect(
-        conTenant(() => servicio.getClaim(CLAIM)),
-      ).rejects.toMatchObject({ details: undefined });
+
+      expect(rechazo.getStatus()).toBe(403);
+      expect(rechazo.getResponse()).not.toHaveProperty('details');
+      expect(JSON.stringify(rechazo.getResponse())).not.toContain(CLAIM);
+    });
+
+    it('el rechazo de una ajena y el de una inexistente son el mismo cuerpo', async () => {
+      // Los dos casos llegan igual al servicio —el repositorio devuelve `null`
+      // por alcance o por inexistencia— y tienen que salir igual. Se comparan
+      // status y mensaje, que es lo que el cliente puede observar.
+      const ajena = repo({
+        findClaimInScope: mockFn().mockResolvedValue(null),
+      });
+      const inexistente = repo({
+        findClaimInScope: mockFn().mockResolvedValue(null),
+      });
+
+      const una = await rechazoDe(() =>
+        conTenant(() => servicioCon(ajena).getClaim(CLAIM)),
+      );
+      const otra = await rechazoDe(() =>
+        conTenant(() =>
+          servicioCon(inexistente).getClaim(
+            '99999999-9999-9999-9999-999999999999',
+          ),
+        ),
+      );
+
+      expect(una.getStatus()).toBe(otra.getStatus());
+      expect(una.message).toBe(otra.message);
+      expect(una.getResponse()).toEqual(otra.getResponse());
     });
 
     it('suma los ítems en el servidor y no toca el total declarado', async () => {
@@ -195,9 +304,8 @@ describe('ClaimsReadService', () => {
           },
         ]),
       });
-      const servicio = new ClaimsReadService(em(), r as never);
 
-      const detalle = await conTenant(() => servicio.getClaim(CLAIM));
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
 
       // Igualdad de cadena, no de número: es el contrato de AC-16-6.
       expect(detalle.lineBilledTotal.amount).toBe('1615.125');
@@ -229,9 +337,8 @@ describe('ClaimsReadService', () => {
           },
         ]),
       });
-      const servicio = new ClaimsReadService(em(), r as never);
 
-      const detalle = await conTenant(() => servicio.getClaim(CLAIM));
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
 
       expect(detalle.adjudication?.id).toBe('v2');
       expect(detalle.adjudicationHistory).toHaveLength(2);
@@ -249,9 +356,8 @@ describe('ClaimsReadService', () => {
           },
         ]),
       });
-      const servicio = new ClaimsReadService(em(), r as never);
 
-      const detalle = await conTenant(() => servicio.getClaim(CLAIM));
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
 
       expect(detalle.lines[0].reference).toBe('ORD-2026-77');
       // `supporting_clinical_reference` es un varchar sin integridad
@@ -271,9 +377,8 @@ describe('ClaimsReadService', () => {
           },
         ]),
       });
-      const servicio = new ClaimsReadService(em(), r as never);
 
-      const detalle = await conTenant(() => servicio.getClaim(CLAIM));
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
 
       expect(detalle.lines[0].referenceType).toBe('DIAGNOSTIC_STUDY');
       expect(detalle.lines[0].reference).toBe('off-1');
