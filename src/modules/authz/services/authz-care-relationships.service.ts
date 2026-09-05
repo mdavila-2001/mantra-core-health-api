@@ -383,6 +383,38 @@ export class AuthzCareRelationshipsService {
     });
   }
 
+  /**
+   * FT-07-R06: lo que el paciente logueado tiene pendiente de decidir.
+   *
+   * Sólo las `PENDING` y sólo las suyas: el sujeto sale de la sesión
+   * (`actor.patientProfileId`), nunca de un parámetro, así que un paciente no
+   * puede listar la bandeja de otro adivinando un id. Sin perfil de paciente
+   * la respuesta es una lista vacía, no un error — el aviso de la campana
+   * puede llegar a una cuenta que todavía no completó su alta.
+   *
+   * @param actor - El paciente que consulta su bandeja.
+   */
+  async listMyPendingCareRelationshipRequests(
+    actor: AuthenticatedUser,
+  ): Promise<CareRelationshipView[]> {
+    if (!actor.patientProfileId) return [];
+    const em = this.em.fork();
+    const rows = await this.careRepo.findPendingByPatient(
+      em,
+      actor.patientProfileId,
+    );
+    return rows.map((r) => ({
+      id: r.id,
+      patientProfileId: r.patientProfileId,
+      practitionerProfileId: r.practitionerProfileId,
+      relationshipTypeConceptId: r.relationshipTypeConceptId,
+      statusConceptId: r.statusConceptId,
+      purposeConceptId: r.purposeConceptId,
+      validFrom: r.validFrom,
+      validTo: r.validTo,
+    }));
+  }
+
   /** Lista las relaciones asistenciales de un paciente (scoping por tenant). */
   async listCareRelationshipsByPatient(
     tenantId: string,

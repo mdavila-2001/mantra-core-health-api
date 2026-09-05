@@ -248,6 +248,53 @@ describe('AuthzCareRelationshipsService', () => {
     });
   });
 
+  describe('listMyPendingCareRelationshipRequests (FT-07-R06)', () => {
+    it('lista sólo lo PENDING del paciente de la sesión', async () => {
+      const d = build();
+      d.careRepo.findPendingByPatient.mockResolvedValue([
+        {
+          id: 'cr-9',
+          patientProfileId: 'pat-1',
+          practitionerProfileId: 'pro-2',
+          relationshipTypeConceptId: 'type-1',
+          statusConceptId: CONCEPTS.STATE_PENDING,
+          validFrom: future,
+        },
+      ]);
+      const paciente = {
+        id: 'u-pat-1',
+        roles: ['PATIENT'],
+        patientProfileId: 'pat-1',
+      } as any;
+
+      const res =
+        await d.service.listMyPendingCareRelationshipRequests(paciente);
+
+      expect(d.careRepo.findPendingByPatient).toHaveBeenCalledWith(
+        expect.anything(),
+        'pat-1',
+      );
+      expect(res).toEqual([
+        expect.objectContaining({
+          id: 'cr-9',
+          practitionerProfileId: 'pro-2',
+          statusConceptId: CONCEPTS.STATE_PENDING,
+        }),
+      ]);
+    });
+
+    it('sin perfil de paciente devuelve vacío sin consultar la base', async () => {
+      const d = build();
+      const cuentaSinPerfil = { id: 'u-x', roles: ['PATIENT'] } as any;
+
+      const res =
+        await d.service.listMyPendingCareRelationshipRequests(cuentaSinPerfil);
+
+      expect(res).toEqual([]);
+      expect(d.careRepo.findPendingByPatient).not.toHaveBeenCalled();
+    });
+  });
+
   describe('respondToCareRelationshipRequest (FT-07-R06/R07)', () => {
     const patientActor = {
       id: 'u-pat-1',

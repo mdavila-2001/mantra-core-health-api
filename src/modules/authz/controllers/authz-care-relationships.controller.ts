@@ -104,6 +104,23 @@ export class AuthzCareRelationshipsController {
   }
 
   /**
+   * FT-07-R06: la bandeja del paciente — sus solicitudes de vínculo que
+   * siguen `PENDING`. El sujeto sale de la sesión, no de la ruta.
+   *
+   * @param actor - El paciente logueado.
+   */
+  @Get('care-relationships/requests/mine')
+  @Roles('PATIENT')
+  @ApiOperation({
+    summary: 'Mis solicitudes de relación asistencial pendientes de decidir',
+  })
+  listMyPendingCareRelationshipRequests(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CareRelationshipView[]> {
+    return this.service.listMyPendingCareRelationshipRequests(actor);
+  }
+
+  /**
    * FT-07-R05: un practicante que encontró al paciente por búsqueda pide su
    * autorización — la relación nace `PENDING` y no concede ningún acceso
    * hasta que el paciente responda.

@@ -53,4 +53,22 @@ describe('AuthzCareRelationshipsController (thin delegation)', () => {
       actor,
     );
   });
+  it('listMyPendingCareRelationshipRequests delega en el service con el actor', async () => {
+    const service = {
+      listMyPendingCareRelationshipRequests: mockFn().mockResolvedValue([]),
+    };
+    const controller = new AuthzCareRelationshipsController(service as any);
+    const actor = {
+      id: 'u3',
+      roles: ['PATIENT'],
+      patientProfileId: 'pat-1',
+    } as any;
+
+    const res = await controller.listMyPendingCareRelationshipRequests(actor);
+
+    expect(res).toEqual([]);
+    expect(service.listMyPendingCareRelationshipRequests).toHaveBeenCalledWith(
+      actor,
+    );
+  });
 });
