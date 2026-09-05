@@ -1,4 +1,14 @@
-import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
@@ -11,6 +21,8 @@ import {
   PracticeWorkforceService,
 } from '../services';
 import {
+  CreateOwnSiteDto,
+  PractitionerSiteDto,
   PractitionerSitesResponseDto,
   MyRoleAssignmentResponseDto,
 } from '../dto';
@@ -87,5 +99,39 @@ export class PractitionerSitesController {
       requireTenantId(),
     );
     return { items, count: items.length };
+  }
+
+  /**
+   * ALV-005/006 — autoservicio: el profesional da de alta su propio
+   * consultorio, sin depender de que una organización lo afilie primero.
+   */
+  @Post('me/sites')
+  @Roles('PRACTITIONER', 'CLINICIAN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrar un consultorio propio',
+    description:
+      'Crea (o reutiliza) la práctica personal del profesional, la sede y la vinculación que la conecta con su agenda.',
+  })
+  createOwnSite(
+    @Body() dto: CreateOwnSiteDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerSiteDto> {
+    return this.sitesService.createOwnSite(actor, dto);
+  }
+
+  /**
+   * ALV-005 — retira un consultorio propio (no lo borra: cierra la
+   * vinculación vigente con esa sede).
+   */
+  @Delete('me/sites/:siteId')
+  @Roles('PRACTITIONER', 'CLINICIAN')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Retirar un consultorio propio' })
+  deleteOwnSite(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.sitesService.deleteOwnSite(actor, siteId);
   }
 }

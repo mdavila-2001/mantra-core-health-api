@@ -180,6 +180,30 @@ export class PractitionerRoleAssignmentsRepository {
   }
 
   /**
+   * La asignación vigente de un profesional sobre una sede puntual.
+   *
+   * ALV-005: es lo que `DELETE /practitioners/me/sites/:siteId` necesita para
+   * confirmar que la sede es realmente del profesional antes de cerrarla —
+   * cerrar la vinculación de otro por adivinar un `siteId` sería IDOR.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - Profesional consultado.
+   * @param practiceSiteId - Sede consultada.
+   * @returns La asignación vigente (`valid_to IS NULL`), o `null`.
+   */
+  findCurrentBySite(
+    em: EntityManager,
+    practitionerProfileId: string,
+    practiceSiteId: string,
+  ): Promise<PractitionerRoleAssignments | null> {
+    return em.findOne(PractitionerRoleAssignments, {
+      practitionerProfileId,
+      practiceSiteId,
+      validTo: null,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
