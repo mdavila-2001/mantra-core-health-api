@@ -226,7 +226,6 @@ export class SurveysResponsesService {
     return responses.map((response) => ({
       id: response.id,
       invitationId: response.surveyInvitationId,
-      patientProfileId: response.patientProfileId,
       appointmentBookingId:
         invitationById.get(response.surveyInvitationId)?.appointmentBookingId ??
         '',
