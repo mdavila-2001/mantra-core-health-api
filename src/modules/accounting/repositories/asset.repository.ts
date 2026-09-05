@@ -57,6 +57,38 @@ export class AssetRepository {
   }
 
   /**
+   * Los activos de una práctica (FT-26: auto-servicio del doctor), del más
+   * reciente al más antiguo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Identificador de practice.
+   * @returns Resultado de list by practice conforme al contrato `Promise<Assets[]>`.
+   */
+  listByPractice(em: EntityManager, practiceId: string): Promise<Assets[]> {
+    return em.find(Assets, { practiceId }, { orderBy: { createdAt: 'DESC' } });
+  }
+
+  /**
+   * Enciende o apaga la automatización de un activo (FT-26).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del activo.
+   * @param automated - El nuevo valor del interruptor.
+   */
+  async setAutomated(
+    em: EntityManager,
+    id: string,
+    automated: boolean,
+  ): Promise<Assets | null> {
+    const asset = await em.findOne(Assets, { id });
+    if (!asset) return null;
+    asset.automated = automated;
+    asset.updatedAt = new Date();
+    await em.flush();
+    return asset;
+  }
+
+  /**
    * Crea create asset.
    *
    * @param em - Contexto de persistencia o transacción activa.
