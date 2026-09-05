@@ -13,9 +13,9 @@ import {
   CareRelationshipsRepository,
   PatientLegalRepresentationsRepository,
 } from '../repositories';
-import { DataAccessLogRepository } from '../../audit/repositories';
 import { AuditTrailService } from '../../audit/services';
-import { OutboxService } from '../../messaging/services';
+import { NotificationsService, OutboxService } from '../../messaging/services';
+import { PersonAccountLinksRepository } from '../../profiles/repositories';
 import {
   CreateCareRelationshipDto,
   CreateLegalRepresentationDto,
@@ -30,10 +30,6 @@ import {
   type LegalRepresentationType,
 } from '../dto';
 import { AUTHZ } from '../authz.concepts';
-
-/** Techo de vigencia cuando el paciente acepta sin fijar un `validTo`: la
- * relación queda abierta y se revoca explícitamente, nunca vence sola. */
-const NO_EXPIRY = undefined;
 
 const CARE_REL_TYPE_CONCEPT: Record<CareRelationshipType, string> = {
   TREATING: AUTHZ.CARE_REL_TREATING,
@@ -69,15 +65,224 @@ export class AuthzCareRelationshipsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param careRepo - Valor de care repo requerido por la operación.
    * @param legalRepo - Valor de legal repo requerido por la operación.
+   * @param accountLinksRepo - Resuelve el usuario dueño de un perfil de paciente, para notificarlo (FT-07-R05).
+   * @param auditTrail - Deja constancia WORM de la solicitud/respuesta.
+   * @param notifications - Emite el aviso in-app al paciente.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly careRepo: CareRelationshipsRepository,
     private readonly legalRepo: PatientLegalRepresentationsRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
+    private readonly auditTrail: AuditTrailService,
+    private readonly outbox: OutboxService,
+    private readonly notifications: NotificationsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AuthzCareRelationshipsService.name);
+  }
+
+  /**
+   * FT-07-R05: un practicante que encontró al paciente por búsqueda pide
+   * autorización para verlo — no queda ninguna relación ACTIVA hasta que el
+   * paciente responda. Notifica al titular; no lanza si la notificación
+   * falla (`emitInApp` ya absorbe ese error).
+   */
+  async requestCareRelationship(
+    dto: RequestCareRelationshipDto,
+    actor: AuthenticatedUser,
+  ): Promise<AuthzIdResponseDto> {
+    if (!actor.practitionerProfileId) {
+      throw new PreconditionFailedException(
+        'Sólo un practicante con perfil propio puede solicitar acceso a un expediente',
+        {},
+      );
+    }
+    const practitionerProfileId = actor.practitionerProfileId;
+    this.logger.info(
+      {
+        operation: 'authz.care-relationship.request',
+        patientProfileId: dto.patientProfileId,
+        practitionerProfileId,
+      },
+      'Requesting care relationship',
+    );
+
+    const { relId, tenantId } = await this.em.transactional(async (tx) => {
+      const activa = await this.careRepo.findActive(
+        tx,
+        dto.patientProfileId,
+        practitionerProfileId,
+      );
+      if (activa) {
+        throw new ConflictException(
+          'Ya existe una relación asistencial activa con ese paciente',
+          { patientProfileId: dto.patientProfileId, practitionerProfileId },
+        );
+      }
+      const pendiente = await this.careRepo.findPending(
+        tx,
+        dto.patientProfileId,
+        practitionerProfileId,
+      );
+      if (pendiente) {
+        throw new ConflictException(
+          'Ya hay una solicitud pendiente de respuesta para ese paciente',
+          { patientProfileId: dto.patientProfileId, practitionerProfileId },
+        );
+      }
+
+      const rel = this.careRepo.create(tx, {
+        tenantId: dto.tenantId,
+        patientProfileId: dto.patientProfileId,
+        practitionerProfileId,
+        relationshipTypeConceptId:
+          CARE_REL_TYPE_CONCEPT[dto.relationshipType ?? 'TREATING'],
+        validFrom: new Date(),
+        actorUserId: actor.id,
+        statusConceptId: CONCEPTS.STATE_PENDING,
+      });
+      await tx.flush();
+
+      await this.auditTrail.record(tx, actor, {
+        action: 'CARE_RELATIONSHIP_REQUESTED',
+        entity: 'care_relationship',
+        entityId: rel.id,
+        tenantId: dto.tenantId,
+      });
+
+      return { relId: rel.id, tenantId: dto.tenantId };
+    });
+
+    const recipientUserId = await this.resolvePatientUserId(
+      dto.patientProfileId,
+    );
+    if (recipientUserId) {
+      await this.notifications.emitInApp({
+        recipientUserId,
+        category: 'CLINICAL',
+        subject: 'Un profesional pide ver tu historia clínica',
+        bodyText:
+          dto.reasonText ??
+          'Un profesional te encontró en la red y pide tu autorización para ver tu expediente. Podés elegir qué áreas autorizar, o rechazarlo.',
+        destination: { type: 'CARE_RELATIONSHIP_REQUEST', id: relId },
+        tenantId,
+        actorUserId: actor.id,
+      });
+    } else {
+      this.logger.warn(
+        {
+          operation: 'authz.care-relationship.request.notify-missing',
+          patientProfileId: dto.patientProfileId,
+        },
+        'No se encontró cuenta activa del paciente: la solicitud queda creada sin notificación',
+      );
+    }
+
+    return { id: relId, status: CONCEPTS.STATE_PENDING, createdAt: new Date() };
+  }
+
+  /**
+   * FT-07-R06/R07: el paciente responde su propia solicitud. `ACCEPT` activa
+   * la relación (con las especialidades que el paciente declara autorizar,
+   * si las hay); `REJECT` la cierra sin conceder nada. Ambas quedan
+   * auditadas.
+   */
+  async respondToCareRelationshipRequest(
+    id: string,
+    dto: RespondCareRelationshipDto,
+    actor: AuthenticatedUser,
+  ): Promise<AuthzStatusResultDto> {
+    this.logger.info(
+      { operation: 'authz.care-relationship.respond', id, decision: dto.decision },
+      'Responding to care relationship request',
+    );
+    return this.em.transactional(async (tx) => {
+      const rel = await this.careRepo.findById(tx, id);
+      if (!rel) {
+        throw new ResourceNotFoundException('Solicitud no encontrada', { id });
+      }
+      // Sólo el paciente titular puede responder su propia solicitud — no el
+      // practicante que la envió, ni otro paciente que adivine el id.
+      if (
+        !actor.patientProfileId ||
+        actor.patientProfileId !== rel.patientProfileId
+      ) {
+        throw new PreconditionFailedException(
+          'Sólo el paciente titular puede responder esta solicitud',
+          { id },
+        );
+      }
+      if (rel.statusConceptId !== CONCEPTS.STATE_PENDING) {
+        throw new PreconditionFailedException(
+          'La solicitud ya fue respondida o ya no está pendiente',
+          { id, status: rel.statusConceptId },
+        );
+      }
+
+      if (dto.decision === 'ACCEPT') {
+        rel.statusConceptId = CONCEPTS.STATE_ACTIVE;
+        // `validFrom` se refija al momento de la aceptación: la solicitud pudo
+        // quedar pendiente varios días, y la vigencia real de la relación
+        // empieza cuando el paciente autoriza, no cuando el practicante pidió.
+        rel.validFrom = new Date();
+      } else {
+        rel.statusConceptId = CONCEPTS.STATE_REVOKED;
+        rel.validTo = new Date();
+      }
+      touch(rel, actor.id);
+      await tx.flush();
+
+      await this.auditTrail.record(tx, actor, {
+        action:
+          dto.decision === 'ACCEPT'
+            ? 'CARE_RELATIONSHIP_ACCEPTED'
+            : 'CARE_RELATIONSHIP_REJECTED',
+        entity: 'care_relationship',
+        entityId: rel.id,
+        tenantId: rel.tenantId,
+      });
+
+      // El sello WORM de arriba prueba QUÉ pasó y CUÁNDO; el detalle de QUÉ
+      // especialidades autorizó exactamente (FT-07-R06) viaja acá, en la misma
+      // transacción, porque `care_relationships` no modela ese campo — el
+      // dominio ya usa el outbox para el detalle estructurado de una decisión
+      // de acceso (ver `AuthzClinicalService.breakTheGlass`).
+      await this.outbox.publishDomainEvent(tx, {
+        tenantId: rel.tenantId,
+        eventType: 'authz.care_relationship.responded',
+        aggregateType: 'care_relationship',
+        aggregateId: rel.id,
+        payloadJson: {
+          decision: dto.decision,
+          patientProfileId: rel.patientProfileId,
+          practitionerProfileId: rel.practitionerProfileId,
+          authorizedSpecialtyConceptIds:
+            dto.decision === 'ACCEPT'
+              ? (dto.authorizedSpecialtyConceptIds ?? [])
+              : [],
+        },
+        actorUserId: actor.id,
+      });
+
+      return { ok: true, affected: 1 };
+    });
+  }
+
+  /** Resuelve el `userId` de la cuenta activa de un perfil de paciente. */
+  private async resolvePatientUserId(
+    patientProfileId: string,
+  ): Promise<string | undefined> {
+    const em = this.em.fork();
+    // `patient_profiles.profile_id` ES el id de la persona (una persona tiene
+    // a lo sumo un perfil de paciente, con la misma clave) — el mismo supuesto
+    // que ya usa `ClinicalReadService` para resolver en la otra dirección.
+    const link = await this.accountLinksRepo.findActiveByPerson(
+      em,
+      patientProfileId,
+    );
+    return link?.userId;
   }
 
   /** Establece una relación asistencial practicante↔paciente. */

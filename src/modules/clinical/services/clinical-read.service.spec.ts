@@ -126,6 +126,7 @@ function build() {
   };
 
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const pdp = { evaluate: mockFn().mockResolvedValue({ decision: 'DENY' }) };
 
   const service = new ClinicalReadService(
     em as any,
@@ -139,6 +140,7 @@ function build() {
     patientProfilesRepo as any,
     practitionerProfilesRepo as any,
     bookingsRepo as any,
+    pdp as any,
     logger as any,
   );
 
@@ -148,6 +150,7 @@ function build() {
     patientProfilesRepo,
     practitionerProfilesRepo,
     bookingsRepo,
+    pdp,
     darDeAltaPaciente,
     darDeAltaProfesional,
     agendar,
@@ -357,6 +360,62 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     await expect(
       c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  describe('sin turno hoy, autorización explícita vía PDP (FT-07-R05/R06/R08)', () => {
+    const actorAutorizado = () =>
+      ({
+        id: 'u',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: MEDICO,
+        tenantIds: ['t1'],
+      }) as any;
+
+    it('pasa cuando el PDP concede (relación asistencial/grant vigente)', async () => {
+      const c = build();
+      c.darDeAltaProfesional(MEDICO);
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+      c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
+
+      await expect(
+        c.service.assertPuedeLeerHistoria(PACIENTE, actorAutorizado()),
+      ).resolves.toBeUndefined();
+      expect(c.pdp.evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patientProfileId: PACIENTE,
+          practitionerProfileId: MEDICO,
+          action: 'READ',
+          purposeOfUse: 'TREATMENT',
+        }),
+        expect.anything(),
+      );
+    });
+
+    it('sigue rechazando cuando el PDP también deniega', async () => {
+      const c = build();
+      c.darDeAltaProfesional(MEDICO);
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+      c.pdp.evaluate.mockResolvedValue({ decision: 'DENY' });
+
+      await expect(
+        c.service.assertPuedeLeerHistoria(PACIENTE, actorAutorizado()),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('no consulta el PDP sin tenant en el actor', async () => {
+      const c = build();
+      c.darDeAltaProfesional(MEDICO);
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+
+      await expect(
+        c.service.assertPuedeLeerHistoria(PACIENTE, {
+          id: 'u',
+          roles: ['PRACTITIONER'],
+          practitionerProfileId: MEDICO,
+        } as any),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(c.pdp.evaluate).not.toHaveBeenCalled();
+    });
   });
 
   /**

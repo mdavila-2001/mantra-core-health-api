@@ -122,15 +122,16 @@ import {
   // una reseña sólo vale si hubo atención real, y comprobarlo es leer el
   // encuentro. El repositorio ya estaba en `providers`; sin exportarlo, el
   // módulo que lo inyecta no puede verlo.
-  // `AppointmentsRepository` y `ClinicalRecordAccessGuard` se exportan para que
-  // `ChartModule` aplique el mismo guard sobre `GET /charts/patients/:id/chart`
-  // (FT-07-R08): es la misma pregunta de autorización sobre la misma persona.
+  // `ClinicalRecordAccessGuard` se exporta para que `ChartModule` aplique el
+  // mismo guard sobre `GET /charts/patients/:id/chart` (FT-07-R08): es la
+  // misma pregunta de autorización sobre la misma persona. Sus dependencias
+  // (`ClinicalReadService`) ya son providers de este módulo, así que Nest las
+  // resuelve acá sin que `ChartModule` necesite conocerlas.
   exports: [
     ConditionsService,
     ProceduresService,
     ServiceRequestsService,
     EncountersRepository,
-    AppointmentsRepository,
     ClinicalRecordAccessGuard,
   ],
 })

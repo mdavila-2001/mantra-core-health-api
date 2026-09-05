@@ -24,9 +24,9 @@ import {
 // FT-07-R08: `ChartReadController` necesita el mismo guard que
 // `ClinicalReadController` — ambos son la misma pregunta de autorización
 // (¿puede este profesional ver el expediente de este paciente?) sobre la misma
-// pantalla de archivo clínico. `ClinicalModule` ya lo expone junto con el
-// `AppointmentsRepository` que el guard necesita; importar `AuthzModule`
-// directamente acá sería redundante (el guard ya lo trae resuelto).
+// pantalla de archivo clínico. `ClinicalModule` exporta el guard ya resuelto
+// contra `ClinicalReadService`; importar `AuthzModule` directamente acá sería
+// redundante.
 import { ClinicalModule } from '../clinical/clinical.module';
 import { ClinicalRecordAccessGuard } from '../clinical/guards';
 

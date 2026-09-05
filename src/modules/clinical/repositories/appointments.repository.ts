@@ -92,32 +92,4 @@ export class AppointmentsRepository {
   findById(em: EntityManager, id: string): Promise<Appointments | null> {
     return em.findOne(Appointments, { id });
   }
-
-  /**
-   * Comprueba si existe (o existió) un turno entre este profesional y este
-   * paciente, en cualquier estado.
-   *
-   * La usa {@link ClinicalRecordAccessGuard} como base legítima de acceso al
-   * expediente: quien atendió (o tiene programado atender) a una persona puede
-   * abrir su historia por el identificador que trae su propia agenda, sin
-   * necesitar además un `care_relationship`/`clinical_access_grant` explícito
-   * para ese mismo vínculo. No sustituye esas dos vías — es una tercera, más
-   * barata de comprobar y ya presente en el dominio.
-   *
-   * @param em - Contexto de persistencia o transacción activa.
-   * @param practitionerProfileId - Profesional que pide ver el expediente.
-   * @param patientProfileId - Paciente cuyo expediente se pide.
-   * @returns `true` si existe al menos una cita entre ambos.
-   */
-  async existsForPractitionerAndPatient(
-    em: EntityManager,
-    practitionerProfileId: string,
-    patientProfileId: string,
-  ): Promise<boolean> {
-    const count = await em.count(Appointments, {
-      practitionerProfileId,
-      patientProfileId,
-    });
-    return count > 0;
-  }
 }

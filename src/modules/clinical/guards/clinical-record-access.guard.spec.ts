@@ -19,104 +19,49 @@ function buildContext(user: any, patientProfileId = 'patient-1'): ExecutionConte
   } as any;
 }
 
-/**
- * Construye el sistema bajo prueba con dependencias controladas.
- * @returns Resultado de build.
- */
-function build() {
-  const forkEm = {};
-  const em = { fork: mockFn(() => forkEm) };
-  const appointmentsRepo = {
-    existsForPractitionerAndPatient: mockFn().mockResolvedValue(false),
-  };
-  const pdp = { evaluate: mockFn().mockResolvedValue({ decision: 'DENY' }) };
-  const guard = new ClinicalRecordAccessGuard(
-    em as any,
-    appointmentsRepo as any,
-    pdp as any,
-  );
-  return { guard, em, appointmentsRepo, pdp };
-}
-
 describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
-  it('deja pasar a SUPERADMIN sin evaluar nada más', async () => {
-    const { guard, appointmentsRepo, pdp } = build();
-    const actor = { id: 'u1', roles: ['SUPERADMIN'] };
-    await expect(guard.canActivate(buildContext(actor))).resolves.toBe(true);
-    expect(appointmentsRepo.existsForPractitionerAndPatient).not.toHaveBeenCalled();
-    expect(pdp.evaluate).not.toHaveBeenCalled();
+  it('deja pasar sin evaluar cuando no hay sujeto o no hay paciente en la ruta', async () => {
+    const readService = { assertPuedeLeerHistoria: mockFn() };
+    const guard = new ClinicalRecordAccessGuard(readService as any);
+
+    await expect(
+      guard.canActivate(buildContext(undefined, 'patient-1')),
+    ).resolves.toBe(true);
+    // '' y no `undefined`: un parámetro con valor por defecto trata el
+    // `undefined` explícito como "usar el default" (`'patient-1'`), lo que
+    // haría que este caso pruebe justo lo que NO queremos — string vacío es
+    // igual de falsy para el guard y no dispara el default.
+    await expect(
+      guard.canActivate(buildContext({ id: 'u1', roles: ['PATIENT'] }, '' as any)),
+    ).resolves.toBe(true);
+    expect(readService.assertPuedeLeerHistoria).not.toHaveBeenCalled();
   });
 
-  it('deja pasar a quien no ejerce (p. ej. PATIENT) para que el controlador resuelva titularidad', async () => {
-    const { guard, appointmentsRepo, pdp } = build();
-    const actor = { id: 'u1', roles: ['PATIENT'] };
-    await expect(guard.canActivate(buildContext(actor))).resolves.toBe(true);
-    expect(appointmentsRepo.existsForPractitionerAndPatient).not.toHaveBeenCalled();
-    expect(pdp.evaluate).not.toHaveBeenCalled();
-  });
-
-  it('permite al practicante con una cita registrada con ese paciente, sin llamar al PDP', async () => {
-    const { guard, appointmentsRepo, pdp } = build();
-    appointmentsRepo.existsForPractitionerAndPatient.mockResolvedValue(true);
-    const actor = {
-      id: 'u1',
-      roles: ['PRACTITIONER'],
-      practitionerProfileId: 'pr-1',
-      tenantIds: ['t1'],
+  it('permite cuando assertPuedeLeerHistoria resuelve sin lanzar', async () => {
+    const readService = {
+      assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
     };
+    const guard = new ClinicalRecordAccessGuard(readService as any);
+    const actor = { id: 'u1', roles: ['PRACTITIONER'] };
+
     await expect(
       guard.canActivate(buildContext(actor, 'patient-1')),
     ).resolves.toBe(true);
-    expect(appointmentsRepo.existsForPractitionerAndPatient).toHaveBeenCalledWith(
-      {},
-      'pr-1',
+    expect(readService.assertPuedeLeerHistoria).toHaveBeenCalledWith(
       'patient-1',
-    );
-    expect(pdp.evaluate).not.toHaveBeenCalled();
-  });
-
-  it('permite al clínico sin cita cuando el PDP concede por relación asistencial/grant vigente', async () => {
-    const { guard, pdp } = build();
-    pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
-    const actor = {
-      id: 'u1',
-      roles: ['CLINICIAN'],
-      practitionerProfileId: 'pr-1',
-      tenantIds: ['t1'],
-    };
-    await expect(
-      guard.canActivate(buildContext(actor, 'patient-1')),
-    ).resolves.toBe(true);
-    expect(pdp.evaluate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        userId: 'u1',
-        tenantId: 't1',
-        action: 'READ',
-        patientProfileId: 'patient-1',
-        practitionerProfileId: 'pr-1',
-        purposeOfUse: 'TREATMENT',
-      }),
       actor,
     );
   });
 
-  it('rechaza con 403 sin cita, sin tenant y sin grant — cierra CAN-AUTH-001', async () => {
-    const { guard } = build();
-    const actor = { id: 'u1', roles: ['PRACTITIONER'], practitionerProfileId: 'pr-1' };
-    await expect(
-      guard.canActivate(buildContext(actor, 'patient-1')),
-    ).rejects.toBeInstanceOf(ForbiddenException);
-  });
-
-  it('rechaza cuando el PDP deniega explícitamente (sin base legítima de acceso)', async () => {
-    const { guard, pdp } = build();
-    pdp.evaluate.mockResolvedValue({ decision: 'DENY' });
-    const actor = {
-      id: 'u1',
-      roles: ['PRACTITIONER'],
-      practitionerProfileId: 'pr-1',
-      tenantIds: ['t1'],
+  it('propaga el 403 de assertPuedeLeerHistoria sin envolverlo', async () => {
+    const readService = {
+      assertPuedeLeerHistoria: mockFn().mockRejectedValue(
+        new ForbiddenException('no autorizado'),
+      ),
     };
+    const guard = new ClinicalRecordAccessGuard(readService as any);
+    const actor = { id: 'u1', roles: ['PRACTITIONER'] };
+
     await expect(
       guard.canActivate(buildContext(actor, 'patient-1')),
     ).rejects.toBeInstanceOf(ForbiddenException);

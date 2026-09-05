@@ -22,10 +22,11 @@ import type { PatientChartResponseDto } from '../dto';
  * parámetros y delega en `ChartReadService`.
  *
  * Mismos roles que la escritura del módulo: el expediente es PHI y lo consulta
- * quien lo redacta. El acceso por relación asistencial concreta
- * (`authz.care_relationships`/`clinical_access_grants`) o por cita registrada
- * lo impone `ClinicalRecordAccessGuard` (FT-07-R08) — antes ningún endpoint
- * clínico lo hacía y el rol solo ya bastaba para leer cualquier expediente.
+ * quien lo redacta. `ClinicalRecordAccessGuard` (FT-07-R08) exige además un
+ * turno de HOY con ese paciente o una relación asistencial/acceso clínico
+ * vigente que el paciente autorizó (`authz.care_relationships`/
+ * `clinical_access_grants`, PDP) — antes ningún endpoint clínico lo hacía y el
+ * rol solo ya bastaba para leer cualquier expediente.
  */
 @ApiTags('chart-read')
 @ApiBearerAuth()
