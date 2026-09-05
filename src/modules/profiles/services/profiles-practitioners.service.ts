@@ -2082,7 +2082,14 @@ export class ProfilesPractitionersService {
 
       const organizationName =
         dto.organizationName?.trim() ?? affiliation.organizationName;
-      const roleTitle = dto.roleTitle?.trim() ?? affiliation.roleTitle;
+      // Mismo criterio que el alta (línea ~1970): `''` colapsa a `null`, no se
+      // conserva como cadena vacía — así una corrección que borra el cargo no
+      // evade los dos índices únicos parciales de ALV-007 (`WHERE role_title
+      // IS [NOT] NULL`), y el resultado calza con `findSame(string | null)`.
+      const roleTitle =
+        dto.roleTitle !== undefined
+          ? dto.roleTitle.trim() || null
+          : (affiliation.roleTitle ?? null);
       const startDate =
         dto.startDate !== undefined
           ? new Date(dto.startDate)
@@ -2118,7 +2125,10 @@ export class ProfilesPractitionersService {
       }
 
       affiliation.organizationName = organizationName;
-      affiliation.roleTitle = roleTitle;
+      // La entidad tipa la columna `nullable: true` como `string | undefined`
+      // (mismo criterio que el alta, línea ~2005): `null` es «sin cargo» para
+      // `findSame`/el DTO, `undefined` es lo que la propiedad ORM acepta.
+      affiliation.roleTitle = roleTitle ?? undefined;
       affiliation.startDate = startDate;
       affiliation.endDate = endDate;
       if (dto.affiliationTypeConceptId !== undefined) {
