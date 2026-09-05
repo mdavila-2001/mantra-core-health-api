@@ -301,7 +301,7 @@ export class ProfilesAffiliationsService {
           practitionerName: quien?.nombre ?? null,
           practitionerLicense: quien?.matricula ?? null,
           organizationName: fila.organizationName,
-          roleTitle: fila.roleTitle,
+          roleTitle: fila.roleTitle ?? null,
           practiceSiteId: fila.practiceSiteId ?? null,
           startDate: fila.startDate,
           statusConceptId: fila.statusConceptId,
