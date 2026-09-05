@@ -15,7 +15,14 @@
 
 /** Tipos MIME que esta capa sabe reconocer por firma binaria. */
 export type SniffedMimeType =
-  'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif' | 'application/pdf';
+  | 'image/jpeg'
+  | 'image/png'
+  | 'image/webp'
+  | 'image/gif'
+  | 'application/pdf'
+  | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  | 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  | 'text/plain';
 
 /** Firma binaria que identifica un formato. */
 interface ContentSignature {
@@ -31,6 +38,16 @@ interface ContentSignature {
   confirm?: (buffer: Buffer) => boolean;
 }
 
+/**
+ * Los `.docx`/`.xlsx` son contenedores ZIP: la firma sola sólo dice "es un
+ * ZIP", no cuál Office. Se confirma buscando el archivo interno que cada
+ * formato siempre incluye (`word/document.xml`, `xl/workbook.xml`) — entrar
+ * a descomprimir de verdad sería reimplementar una librería de ZIP para un
+ * chequeo de pertenencia.
+ */
+const hasZipMember = (buffer: Buffer, member: string): boolean =>
+  buffer.toString('latin1').includes(member);
+
 const SIGNATURES: readonly ContentSignature[] = [
   { mimeType: 'image/jpeg', magic: [0xff, 0xd8, 0xff] },
   {
@@ -44,7 +61,51 @@ const SIGNATURES: readonly ContentSignature[] = [
     magic: [0x52, 0x49, 0x46, 0x46],
     confirm: (buffer) => buffer.subarray(8, 12).toString('ascii') === 'WEBP',
   },
+  {
+    mimeType:
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    magic: [0x50, 0x4b, 0x03, 0x04],
+    confirm: (buffer) => hasZipMember(buffer, 'word/document.xml'),
+  },
+  {
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    magic: [0x50, 0x4b, 0x03, 0x04],
+    confirm: (buffer) => hasZipMember(buffer, 'xl/workbook.xml'),
+  },
 ];
+
+/**
+ * Heurística para texto plano y CSV: no tienen firma binaria, así que se
+ * aceptan cuando el contenido no trae bytes de control propios de un
+ * binario. El tipo detectado es siempre `text/plain` — nunca se atribuye
+ * `text/html`, así que aunque el contenido tenga forma de HTML se sirve
+ * después con un `Content-Type` que el navegador no ejecuta.
+ */
+function looksLikePlainText(buffer: Buffer): boolean {
+  if (buffer.byteLength === 0) return false;
+  let index = 0;
+  while (index < buffer.byteLength) {
+    const byte = buffer[index];
+    const isTabOrLineBreak = byte === 0x09 || byte === 0x0a || byte === 0x0d;
+    const isPrintableAscii = byte >= 0x20 && byte <= 0x7e;
+    if (isTabOrLineBreak || isPrintableAscii) {
+      index += 1;
+      continue;
+    }
+    // Bytes de encabezado de una secuencia UTF-8 multi-byte (2, 3 o 4 bytes).
+    const continuationBytes =
+      (byte & 0xe0) === 0xc0 ? 1 : (byte & 0xf0) === 0xe0 ? 2 : (byte & 0xf8) === 0xf0 ? 3 : -1;
+    if (continuationBytes === -1) return false;
+    for (let offset = 1; offset <= continuationBytes; offset += 1) {
+      const continuation = buffer[index + offset];
+      if (continuation === undefined || (continuation & 0xc0) !== 0x80) {
+        return false;
+      }
+    }
+    index += continuationBytes + 1;
+  }
+  return true;
+}
 
 /**
  * Tipos aceptados por categoría funcional del archivo.
@@ -63,6 +124,9 @@ export const UPLOAD_MIME_ALLOWLIST: Readonly<
     'image/png',
     'image/webp',
     'image/gif',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain',
   ],
 };
 
@@ -82,6 +146,7 @@ export function sniffMimeType(buffer: Buffer): SniffedMimeType | undefined {
     if (signature.confirm && !signature.confirm(buffer)) continue;
     return signature.mimeType;
   }
+  if (looksLikePlainText(buffer)) return 'text/plain';
   return undefined;
 }
 
