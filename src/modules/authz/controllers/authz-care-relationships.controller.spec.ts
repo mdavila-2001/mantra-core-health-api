@@ -12,7 +12,9 @@ import { AuthzCareRelationshipsController } from './authz-care-relationships.con
 
 describe('AuthzCareRelationshipsController (thin delegation)', () => {
   it('requestCareRelationship delega en el service con el actor', async () => {
-    const service = { requestCareRelationship: mockFn().mockResolvedValue({ id: 'cr-1' }) };
+    const service = {
+      requestCareRelationship: mockFn().mockResolvedValue({ id: 'cr-1' }),
+    };
     const controller = new AuthzCareRelationshipsController(service as any);
     const actor = { id: 'u1', roles: ['PRACTITIONER'] } as any;
     const dto = { tenantId: 't1', patientProfileId: 'pat-1' } as any;
@@ -25,13 +27,24 @@ describe('AuthzCareRelationshipsController (thin delegation)', () => {
 
   it('respondToCareRelationshipRequest delega en el service con id, dto y actor', async () => {
     const service = {
-      respondToCareRelationshipRequest: mockFn().mockResolvedValue({ ok: true, affected: 1 }),
+      respondToCareRelationshipRequest: mockFn().mockResolvedValue({
+        ok: true,
+        affected: 1,
+      }),
     };
     const controller = new AuthzCareRelationshipsController(service as any);
-    const actor = { id: 'u2', roles: ['PATIENT'], patientProfileId: 'pat-1' } as any;
+    const actor = {
+      id: 'u2',
+      roles: ['PATIENT'],
+      patientProfileId: 'pat-1',
+    } as any;
     const dto = { decision: 'ACCEPT' } as any;
 
-    const res = await controller.respondToCareRelationshipRequest('cr-1', dto, actor);
+    const res = await controller.respondToCareRelationshipRequest(
+      'cr-1',
+      dto,
+      actor,
+    );
 
     expect(res).toEqual({ ok: true, affected: 1 });
     expect(service.respondToCareRelationshipRequest).toHaveBeenCalledWith(

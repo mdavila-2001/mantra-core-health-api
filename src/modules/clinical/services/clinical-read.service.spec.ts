@@ -407,7 +407,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     it('pasa cuando el PDP concede (relación asistencial/grant vigente)', async () => {
       const c = build();
       c.darDeAltaProfesional(MEDICO);
-      c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: MEDICO,
+      });
       c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
 
       await expect(
@@ -427,7 +429,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     it('sigue rechazando cuando el PDP también deniega', async () => {
       const c = build();
       c.darDeAltaProfesional(MEDICO);
-      c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: MEDICO,
+      });
       c.pdp.evaluate.mockResolvedValue({ decision: 'DENY' });
 
       await expect(
@@ -438,7 +442,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     it('no consulta el PDP sin tenant en el actor', async () => {
       const c = build();
       c.darDeAltaProfesional(MEDICO);
-      c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: MEDICO,
+      });
 
       await expect(
         c.service.assertPuedeLeerHistoria(PACIENTE, {

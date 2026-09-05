@@ -195,7 +195,11 @@ export class AuthzCareRelationshipsService {
     actor: AuthenticatedUser,
   ): Promise<AuthzStatusResultDto> {
     this.logger.info(
-      { operation: 'authz.care-relationship.respond', id, decision: dto.decision },
+      {
+        operation: 'authz.care-relationship.respond',
+        id,
+        decision: dto.decision,
+      },
       'Responding to care relationship request',
     );
     return this.em.transactional(async (tx) => {

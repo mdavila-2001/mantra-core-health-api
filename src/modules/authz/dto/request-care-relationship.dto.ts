@@ -1,6 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
-import { CARE_RELATIONSHIP_TYPES, type CareRelationshipType } from './create-care-relationship.dto';
+import {
+  CARE_RELATIONSHIP_TYPES,
+  type CareRelationshipType,
+} from './create-care-relationship.dto';
 
 /**
  * Cuerpo de `POST /authz/care-relationships/request` (FT-07-R05).

@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ArrayMaxSize, IsArray, IsIn, IsOptional, IsUUID } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsIn,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 
 /** Decisión del paciente sobre una solicitud de relación asistencial. */
 export const CARE_RELATIONSHIP_DECISIONS = ['ACCEPT', 'REJECT'] as const;

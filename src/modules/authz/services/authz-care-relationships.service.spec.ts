@@ -43,10 +43,14 @@ function build() {
     findByPatient: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
-  const accountLinksRepo = { findActiveByPerson: mockFn().mockResolvedValue(null) };
+  const accountLinksRepo = {
+    findActiveByPerson: mockFn().mockResolvedValue(null),
+  };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const outbox = { publishDomainEvent: mockFn().mockResolvedValue(undefined) };
-  const notifications = { emitInApp: mockFn().mockResolvedValue({ suppressed: false }) };
+  const notifications = {
+    emitInApp: mockFn().mockResolvedValue({ suppressed: false }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuthzCareRelationshipsService(
     em as any,
@@ -169,7 +173,9 @@ describe('AuthzCareRelationshipsService', () => {
       d.careRepo.findActive.mockResolvedValue(null);
       d.careRepo.findPending.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
-      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({ userId: 'u-pat-1' });
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'u-pat-1',
+      });
 
       const res = await d.service.requestCareRelationship(
         { tenantId: 't1', patientProfileId: 'pat-1' } as any,
@@ -243,7 +249,11 @@ describe('AuthzCareRelationshipsService', () => {
   });
 
   describe('respondToCareRelationshipRequest (FT-07-R06/R07)', () => {
-    const patientActor = { id: 'u-pat-1', roles: ['PATIENT'], patientProfileId: 'pat-1' } as any;
+    const patientActor = {
+      id: 'u-pat-1',
+      roles: ['PATIENT'],
+      patientProfileId: 'pat-1',
+    } as any;
 
     it('ACCEPT activa la relación y registra las especialidades autorizadas', async () => {
       const d = build();
@@ -258,7 +268,10 @@ describe('AuthzCareRelationshipsService', () => {
 
       const res = await d.service.respondToCareRelationshipRequest(
         'cr-1',
-        { decision: 'ACCEPT', authorizedSpecialtyConceptIds: ['spec-1'] } as any,
+        {
+          decision: 'ACCEPT',
+          authorizedSpecialtyConceptIds: ['spec-1'],
+        } as any,
         patientActor,
       );
 

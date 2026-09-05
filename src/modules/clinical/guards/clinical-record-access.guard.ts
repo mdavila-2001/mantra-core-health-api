@@ -25,7 +25,10 @@ export class ClinicalRecordAccessGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const actor = request.user;
-    const patientProfileId = request.params?.patientProfileId;
+    const parametro = request.params?.patientProfileId;
+    const patientProfileId = Array.isArray(parametro)
+      ? parametro[0]
+      : parametro;
 
     if (!actor || !patientProfileId) {
       // Sin sujeto o sin paciente en la ruta: no es de la incumbencia de este

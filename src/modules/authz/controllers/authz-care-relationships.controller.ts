@@ -115,7 +115,8 @@ export class AuthzCareRelationshipsController {
   @Roles('CLINICIAN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Solicitar autorización del paciente para una relación asistencial',
+    summary:
+      'Solicitar autorización del paciente para una relación asistencial',
   })
   requestCareRelationship(
     @Body() dto: RequestCareRelationshipDto,
@@ -138,7 +139,8 @@ export class AuthzCareRelationshipsController {
   @Roles('PATIENT')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Responder (aceptar/rechazar) una solicitud de relación asistencial',
+    summary:
+      'Responder (aceptar/rechazar) una solicitud de relación asistencial',
   })
   respondToCareRelationshipRequest(
     @Param('id', ParseUUIDPipe) id: string,

@@ -28,7 +28,6 @@ import {
 // contra `ClinicalReadService`; importar `AuthzModule` directamente acá sería
 // redundante.
 import { ClinicalModule } from '../clinical/clinical.module';
-import { ClinicalRecordAccessGuard } from '../clinical/guards';
 
 /**
  * Módulo Chart (15): notas clínicas versionadas y firmadas, liberación al
@@ -36,10 +35,7 @@ import { ClinicalRecordAccessGuard } from '../clinical/guards';
  * y asignación de plantillas por especialidad.
  */
 @Module({
-  imports: [
-    MikroOrmModule.forFeature(Object.values(entities)),
-    ClinicalModule,
-  ],
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), ClinicalModule],
   controllers: [
     ChartNotesController,
     ChartDocumentsController,

@@ -11,7 +11,10 @@ import { ClinicalRecordAccessGuard } from './clinical-record-access.guard';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-function buildContext(user: any, patientProfileId = 'patient-1'): ExecutionContext {
+function buildContext(
+  user: any,
+  patientProfileId = 'patient-1',
+): ExecutionContext {
   return {
     switchToHttp: () => ({
       getRequest: () => ({ user, params: { patientProfileId } }),
@@ -32,7 +35,9 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
     // haría que este caso pruebe justo lo que NO queremos — string vacío es
     // igual de falsy para el guard y no dispara el default.
     await expect(
-      guard.canActivate(buildContext({ id: 'u1', roles: ['PATIENT'] }, '' as any)),
+      guard.canActivate(
+        buildContext({ id: 'u1', roles: ['PATIENT'] }, '' as any),
+      ),
     ).resolves.toBe(true);
     expect(readService.assertPuedeLeerHistoria).not.toHaveBeenCalled();
   });
