@@ -60,6 +60,17 @@ import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../profiles/repositories';
+// v4.2.2 — el permiso de lectura de la historia nace del turno, así que la lectura
+// clínica necesita preguntarle a la agenda. Mismo criterio de arriba: es una clase
+// sin estado que recibe el `EntityManager` por parámetro. El cruce inverso ya
+// existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
+// tampoco acá se importa el módulo entero ni se cierra un ciclo.
+import { SchedulingBookingsRepository } from '../scheduling/repositories';
+// ALV-029 — el permiso de lectura también nace de una relación asistencial
+// vigente (no sólo del turno de hoy), y esa tabla vive en `authz`. Mismo
+// criterio de arriba: repo sin estado por `EntityManager`, sin importar el
+// módulo entero ni cerrar ciclo (`authz` no depende de `clinical`).
+import { CareRelationshipsRepository } from '../authz/repositories';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -86,6 +97,9 @@ import {
     // Repositorios
     PersonAccountLinksRepository,
     PatientProfilesRepository,
+    HealthPractitionerProfilesRepository,
+    SchedulingBookingsRepository,
+    CareRelationshipsRepository,
     CareEpisodesRepository,
     AppointmentsRepository,
     EncountersRepository,

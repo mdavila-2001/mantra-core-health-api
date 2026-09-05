@@ -47,6 +47,7 @@ lerna-debug.log*
 # ignorarlo a él y no a su copia deja la puerta abierta por el costado; apareció
 # uno suelto en `git status` el 24/08/2026.
 .env.bak*
+.env.backup
 # El entorno del seed E2E lleva contraseñas de cuentas reales de la máquina que
 # lo corre: se versiona el ejemplo (`.env.e2e.example`), nunca el archivo.
 .env.e2e
