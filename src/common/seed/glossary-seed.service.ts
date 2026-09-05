@@ -3,16 +3,23 @@ import { MikroORM } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CatalogConcepts,
+  CodeSystems,
+  CodeSystemVersions,
   ConceptDesignations,
   ConceptProperties,
   ConceptRelationships,
+  TerminologySources,
   ValueSetMembers,
   ValueSets,
   ValueSetVersions,
 } from '../../modules/terminology/entities';
-import { CONCEPTS, SEED } from '../constants/concepts';
+import { CONCEPTS } from '../constants/concepts';
 import {
   GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
+  GLOSSARY_DRUG_ACTIVE_INGREDIENTS_PROPERTY_CODE,
+  GLOSSARY_DRUG_DOSAGE_FORM_PROPERTY_CODE,
+  GLOSSARY_DRUG_MANUFACTURER_PROPERTY_CODE,
+  GLOSSARY_DRUG_ROUTE_PROPERTY_CODE,
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
   GLOSSARY_SLUG_PROPERTY_CODE,
   glossaryRelationTypeConceptId,
@@ -20,11 +27,18 @@ import {
 } from '../../modules/terminology/glossary.constants';
 import {
   GLOSSARY_ALL_TERMS,
+  GLOSSARY_CODE_SYSTEM_CANONICAL_URL,
+  GLOSSARY_CODE_SYSTEM_INTERNAL_CODE,
+  GLOSSARY_CODE_SYSTEM_VERSION,
+  GLOSSARY_SOURCE_CODE,
   GLOSSARY_TAXONOMY,
   glossaryCategoryByKey,
+  glossaryCodeSystemId,
+  glossaryCodeSystemVersionId,
   glossaryPreferredDesignationId,
   glossaryPropertyId,
   glossaryRelationshipId,
+  glossarySourceId,
   glossarySynonymDesignationId,
   glossaryTagByKey,
   glossaryTermConceptId,
@@ -64,8 +78,13 @@ function glossaryConceptCode(slug: string): string {
  * Idempotente por el mismo mecanismo que el resto del seed: todo id es
  * determinista (UUIDv5 sobre una clave estable), así que una corrida repetida
  * compara por id e inserta sólo lo que falta. Corre **después** de
- * `TerminologySeedService` (necesita `SEED.codeSystemVersionId` ya
- * materializado) — el orquestador (`SeedBootstrapService`) impone ese orden.
+ * `TerminologySeedService` (necesita `CONCEPTS.TERM_ACTIVE` y el resto de los
+ * conceptos de estado ya materializados) — el orquestador
+ * (`SeedBootstrapService`) impone ese orden. Desde FND-25-03 este servicio ya
+ * no cuelga sus conceptos de término del `SEED.codeSystemVersionId` genérico
+ * (`mantra-core`): sigue dependiendo de sus conceptos de estado, pero siembra
+ * su propio `terminology_sources`/`code_systems` (Nivel 0, ver
+ * `seedOwnCodeSystem`).
  */
 @Injectable()
 export class GlossarySeedService {
@@ -101,6 +120,8 @@ export class GlossarySeedService {
     relationships: number;
     /** Relaciones declaradas cuyo slug destino no resuelve; se omiten con advertencia. */
     orphanRelationships: number;
+    /** Conceptos de término migrados de `mantra-core` al code system propio del glosario (FND-25-03). */
+    codeSystemBackfilled: number;
   }> {
     this.assertUniqueSlugs();
 
@@ -114,7 +135,11 @@ export class GlossarySeedService {
       memberships: 0,
       relationships: 0,
       orphanRelationships: 0,
+      codeSystemBackfilled: 0,
     };
+
+    // --- Nivel 0: procedencia propia del catálogo curado (FND-25-03) ---
+    await this.seedOwnCodeSystem(em, now);
 
     // --- Nivel 1: value sets de la taxonomía (paraguas + categorías + etiquetas) ---
     const existingValueSets = await this.existingIds(
@@ -183,7 +208,7 @@ export class GlossarySeedService {
         CatalogConcepts,
         {
           id,
-          codeSystemVersionId: SEED.codeSystemVersionId,
+          codeSystemVersionId: glossaryCodeSystemVersionId,
           code: glossaryConceptCode(term.slug),
           display: term.enDisplay,
           abstract: false,
@@ -199,6 +224,17 @@ export class GlossarySeedService {
       counters.terms += 1;
     }
     await em.flush();
+
+    // Corridas anteriores a FND-25-03 sembraron estos mismos conceptos bajo
+    // `mantra-core` (el code system genérico de estados/enums operativos, ver
+    // `glossary-taxonomy.ts`). Se corrige acá, no en una migración aparte: es
+    // la única escritora de estas filas, y el criterio es idempotente (un
+    // concepto que ya cuelga del code system propio no se vuelve a tocar).
+    counters.codeSystemBackfilled = await this.backfillTermCodeSystem(
+      em,
+      existingConcepts,
+      now,
+    );
 
     // --- Nivel 4: designaciones (preferida ES + sinónimos) ---
     counters.designations += await this.seedDesignations(em, now);
@@ -220,7 +256,8 @@ export class GlossarySeedService {
         counters.designations +
         counters.properties +
         counters.memberships +
-        counters.relationships >
+        counters.relationships +
+        counters.codeSystemBackfilled >
       0
     ) {
       this.logger.info(
@@ -320,9 +357,18 @@ export class GlossarySeedService {
       GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
       GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
     ];
-    const ids = GLOSSARY_TERMS.flatMap((term) =>
-      propertyCodes.map((code) => glossaryPropertyId(term.slug, code)),
-    );
+    const drugFactPropertyCodes = [
+      GLOSSARY_DRUG_ACTIVE_INGREDIENTS_PROPERTY_CODE,
+      GLOSSARY_DRUG_DOSAGE_FORM_PROPERTY_CODE,
+      GLOSSARY_DRUG_ROUTE_PROPERTY_CODE,
+      GLOSSARY_DRUG_MANUFACTURER_PROPERTY_CODE,
+    ];
+    const ids = GLOSSARY_TERMS.flatMap((term) => [
+      ...propertyCodes.map((code) => glossaryPropertyId(term.slug, code)),
+      ...(term.drugFacts !== undefined
+        ? drugFactPropertyCodes.map((code) => glossaryPropertyId(term.slug, code))
+        : []),
+    ]);
     const existing = await this.existingIds(em, ConceptProperties, ids);
 
     let created = 0;
@@ -397,8 +443,79 @@ export class GlossarySeedService {
         );
         created += 1;
       }
+
+      // Ficha de medicamento (FND-25-02): mismos 4 códigos que escribe el
+      // importador NDC, sólo en los términos que declaran `drugFacts`.
+      if (term.drugFacts !== undefined) {
+        created += this.seedDrugFactProperties(
+          em,
+          conceptId,
+          term.slug,
+          term.drugFacts,
+          existing,
+          now,
+        );
+      }
     }
     await em.flush();
+    return created;
+  }
+
+  /** Las 4 propiedades de la ficha de medicamento de un término (FND-25-02). */
+  private seedDrugFactProperties(
+    em: ReturnType<MikroORM['em']['fork']>,
+    conceptId: string,
+    slug: string,
+    drugFacts: NonNullable<GlossaryTermSeed['drugFacts']>,
+    existing: Set<string>,
+    now: Date,
+  ): number {
+    const rows: readonly {
+      readonly code: string;
+      readonly dataType: string;
+      readonly valueJson: unknown;
+    }[] = [
+      {
+        code: GLOSSARY_DRUG_ACTIVE_INGREDIENTS_PROPERTY_CODE,
+        dataType: JSON_DATA_TYPE,
+        valueJson: drugFacts.activeIngredients,
+      },
+      {
+        code: GLOSSARY_DRUG_DOSAGE_FORM_PROPERTY_CODE,
+        dataType: STRING_DATA_TYPE,
+        valueJson: drugFacts.dosageForm,
+      },
+      {
+        code: GLOSSARY_DRUG_ROUTE_PROPERTY_CODE,
+        dataType: JSON_DATA_TYPE,
+        valueJson: drugFacts.route,
+      },
+      {
+        code: GLOSSARY_DRUG_MANUFACTURER_PROPERTY_CODE,
+        dataType: STRING_DATA_TYPE,
+        valueJson: drugFacts.manufacturer,
+      },
+    ];
+
+    let created = 0;
+    for (const row of rows) {
+      const id = glossaryPropertyId(slug, row.code);
+      if (existing.has(id)) continue;
+      em.create(
+        ConceptProperties,
+        {
+          id,
+          conceptId,
+          propertyCode: row.code,
+          dataType: row.dataType,
+          valueJson: row.valueJson,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      created += 1;
+    }
     return created;
   }
 
@@ -551,6 +668,118 @@ export class GlossarySeedService {
     }
     await em.flush();
     return { created, orphans };
+  }
+
+  /**
+   * Fuente + code system + versión propios del catálogo curado (FND-25-03).
+   *
+   * Mismo patrón que `VademecumSeedService.seedSources`/`seedCodeSystem`/
+   * `seedVersion`: una fila de `terminology_sources` describe honestamente de
+   * dónde sale este contenido —autoría clínica interna, no una importación—,
+   * y `code_systems`/`code_system_versions` cuelgan de ella. A diferencia del
+   * vademécum no hay un dataset externo con ids propios que traducir: los tres
+   * ids son deterministas (`glossary-taxonomy.ts`), así que el upsert es por
+   * id como el resto de este archivo.
+   */
+  private async seedOwnCodeSystem(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+  ): Promise<void> {
+    const existing = await this.existingIds(em, TerminologySources, [
+      glossarySourceId,
+    ]);
+    if (!existing.has(glossarySourceId)) {
+      em.create(
+        TerminologySources,
+        {
+          id: glossarySourceId,
+          code: GLOSSARY_SOURCE_CODE,
+          name: 'Glosario médico curado (AloVida)',
+          owner: 'AloVida — equipo clínico',
+          // No hay una URL pública que citar: es contenido de autoría propia,
+          // no una nomenclatura externa publicada. Se documenta acá, no se
+          // inventa un enlace para llenar el campo.
+          license:
+            'Contenido original de AloVida (definición clínica y resumen llano ' +
+            'escritos y revisados internamente); nomenclatura cotejada contra ' +
+            'CIE-10-ES (enfermedades), DCI/ATC (principios activos) y HL7 FHIR ' +
+            '(modelado de relaciones). No es una importación de esos sistemas.',
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+    }
+
+    const existingCodeSystem = await this.existingIds(em, CodeSystems, [
+      glossaryCodeSystemId,
+    ]);
+    if (!existingCodeSystem.has(glossaryCodeSystemId)) {
+      em.create(
+        CodeSystems,
+        {
+          id: glossaryCodeSystemId,
+          sourceId: glossarySourceId,
+          internalCode: GLOSSARY_CODE_SYSTEM_INTERNAL_CODE,
+          name: 'Glosario médico curado (AloVida) — ES',
+          canonicalUrl: GLOSSARY_CODE_SYSTEM_CANONICAL_URL,
+          caseSensitive: false,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+    }
+
+    const existingVersion = await this.existingIds(em, CodeSystemVersions, [
+      glossaryCodeSystemVersionId,
+    ]);
+    if (!existingVersion.has(glossaryCodeSystemVersionId)) {
+      em.create(
+        CodeSystemVersions,
+        {
+          id: glossaryCodeSystemVersionId,
+          codeSystemId: glossaryCodeSystemId,
+          version: GLOSSARY_CODE_SYSTEM_VERSION,
+          publishedAt: now,
+          validFrom: now,
+          isDefault: true,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+    }
+    await em.flush();
+  }
+
+  /**
+   * Repunta a `glossaryCodeSystemVersionId` los conceptos de término que ya
+   * existían en la base bajo `mantra-core` (corridas anteriores a FND-25-03).
+   *
+   * No es una migración aparte porque `GlossarySeedService` es la única
+   * escritora de estas filas y el criterio es el mismo que el resto del
+   * archivo: comparar contra lo que ya hay y tocar sólo lo que falta —acá,
+   * "falta" es "todavía apunta al code system genérico".
+   */
+  private async backfillTermCodeSystem(
+    em: ReturnType<MikroORM['em']['fork']>,
+    existingConceptIds: Set<string>,
+    now: Date,
+  ): Promise<number> {
+    if (existingConceptIds.size === 0) return 0;
+    // `nativeUpdate` en vez de leer+mutar+flushear: es un `UPDATE ... WHERE`
+    // de una sola sentencia, así que en una base ya migrada (todo apunta al
+    // code system propio) la condición no matchea nada y el conteo es 0 —
+    // la propiedad de idempotencia se sostiene sin tener que traer las filas.
+    return em.nativeUpdate(
+      CatalogConcepts,
+      {
+        id: { $in: [...existingConceptIds] },
+        codeSystemVersionId: { $ne: glossaryCodeSystemVersionId },
+      },
+      { codeSystemVersionId: glossaryCodeSystemVersionId, updatedAt: now },
+    );
   }
 
   /**

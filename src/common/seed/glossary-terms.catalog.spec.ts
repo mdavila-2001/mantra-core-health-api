@@ -13,12 +13,12 @@ describe('Catálogo curado del glosario médico', () => {
   const categoryKeys = new Set(GLOSSARY_CATEGORIES.map((entry) => entry.key));
   const tagKeys = new Set(GLOSSARY_TAGS.map((entry) => entry.key));
 
-  it('declara exactamente 64 términos', () => {
-    expect(GLOSSARY_TERMS).toHaveLength(64);
+  it('declara exactamente 69 términos', () => {
+    expect(GLOSSARY_TERMS).toHaveLength(69);
   });
 
-  it('declara exactamente 11 categorías y 15 etiquetas', () => {
-    expect(GLOSSARY_CATEGORIES).toHaveLength(11);
+  it('declara exactamente 12 categorías y 15 etiquetas', () => {
+    expect(GLOSSARY_CATEGORIES).toHaveLength(12);
     expect(GLOSSARY_TAGS).toHaveLength(15);
   });
 
