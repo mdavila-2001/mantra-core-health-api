@@ -5,6 +5,7 @@ export {
   BookingPolicyResponseDto,
   ScheduleRuleDto,
   CreateTemplateDto,
+  UpdateTemplateDto,
   TemplateResponseDto,
   TemplateRuleDto,
   TemplateDetailDto,
