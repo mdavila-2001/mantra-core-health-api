@@ -18,6 +18,37 @@ export class FiscalRepository {
   }
 
   /**
+   * El período fiscal ABIERTO de la práctica que cubre una fecha (FT-26).
+   *
+   * Existe para que el auto-servicio del doctor —"registrar avance" de una
+   * depreciación o de una cuota— pueda resolver el período por sí solo:
+   * `RunDepreciationDto`/`PostJournalDto` exigen un `fiscalPeriodId`, y hoy
+   * sólo `SECURITY_ADMIN` puede listarlos (`accounting-fiscal.controller.ts`)
+   * — sin este método, el `PRACTITIONER` no tendría cómo conseguir ese dato.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Identificador de practice.
+   * @param onDate - La fecha que el período debe cubrir.
+   * @param openStatusConceptId - El concepto de estado "abierto".
+   * @returns El período abierto que cubre esa fecha, o `null` si no hay ninguno.
+   */
+  async findOpenPeriodForPractice(
+    em: EntityManager,
+    practiceId: string,
+    onDate: Date,
+    openStatusConceptId: string,
+  ): Promise<FiscalPeriods | null> {
+    const years = await em.find(FiscalYears, { practiceId });
+    if (years.length === 0) return null;
+    return em.findOne(FiscalPeriods, {
+      fiscalYearId: { $in: years.map((y) => y.id) },
+      statusConceptId: openStatusConceptId,
+      startDate: { $lte: onDate },
+      endDate: { $gte: onDate },
+    });
+  }
+
+  /**
    * Obtiene find year by code.
    *
    * @param em - Contexto de persistencia o transacción activa.
