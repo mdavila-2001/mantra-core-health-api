@@ -63,6 +63,7 @@ import {
   CreateAffiliationDto,
   AffiliationResponseDto,
   ListAffiliationsResponseDto,
+  UpdateAffiliationDto,
   PractitionerProfileSummaryDto,
   PractitionerActivityDto,
   UpdateOwnPractitionerProfileDto,
@@ -2045,6 +2046,157 @@ export class ProfilesPractitionersService {
       await this.avisarDelPedido(dto.practiceSiteId, creado);
     }
     return creado;
+  }
+
+  /**
+   * Corrige una afiliación del historial propio (UC-05-16·E).
+   *
+   * Las mismas dos reglas del alta, aplicadas al resultado de la mezcla y no
+   * al parche suelto: un `endDate` nuevo se compara con el `startDate` que
+   * quede, y el trío institución/cargo/inicio resultante no puede coincidir
+   * con **otra** línea del mismo historial.
+   *
+   * La sede no se toca —el DTO no la trae— porque de ella depende el estado
+   * del vínculo y ese estado lo decide la organización, no el editor.
+   *
+   * @param affiliationId - La línea a corregir.
+   * @param dto - Los campos que cambian; lo omitido se conserva.
+   * @param actor - El profesional titular del historial.
+   * @returns La afiliación ya corregida.
+   */
+  async updateOwnAffiliation(
+    affiliationId: string,
+    dto: UpdateAffiliationDto,
+    actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    this.logger.info(
+      {
+        operation: 'profiles.affiliation.update',
+        affiliationId,
+        actorId: actor.id,
+      },
+      'Updating practitioner affiliation',
+    );
+    return this.em.transactional(async (tx) => {
+      const affiliation = await this.propiaONada(tx, affiliationId, actor);
+
+      const organizationName =
+        dto.organizationName?.trim() ?? affiliation.organizationName;
+      const roleTitle = dto.roleTitle?.trim() ?? affiliation.roleTitle;
+      const startDate =
+        dto.startDate !== undefined
+          ? new Date(dto.startDate)
+          : affiliation.startDate;
+      // `endDate` distingue tres casos: ausente (se conserva), `null` (vuelve
+      // a estar vigente) y una fecha (nuevo fin).
+      const endDate =
+        dto.endDate === undefined
+          ? affiliation.endDate
+          : dto.endDate === null
+            ? undefined
+            : new Date(dto.endDate);
+
+      if (endDate && endDate < startDate) {
+        throw new PreconditionFailedException(
+          'El fin del vínculo no puede ser anterior a su inicio',
+          { startDate, endDate },
+        );
+      }
+
+      const igual = await this.affiliationsRepo.findSame(
+        tx,
+        affiliation.practitionerProfileId,
+        organizationName,
+        roleTitle,
+        startDate,
+      );
+      if (igual && igual.id !== affiliation.id) {
+        throw new ConflictException(
+          'Ese vínculo ya está en el historial laboral',
+          { organizationName, roleTitle, startDate },
+        );
+      }
+
+      affiliation.organizationName = organizationName;
+      affiliation.roleTitle = roleTitle;
+      affiliation.startDate = startDate;
+      affiliation.endDate = endDate;
+      if (dto.affiliationTypeConceptId !== undefined) {
+        affiliation.affiliationTypeConceptId = dto.affiliationTypeConceptId;
+      }
+      touch(affiliation, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        { operation: 'profiles.affiliation.update', affiliationId },
+        'Practitioner affiliation updated',
+      );
+      return toAffiliation(affiliation);
+    });
+  }
+
+  /**
+   * Quita una afiliación del historial propio (UC-05-16·B).
+   *
+   * Borrado físico: es una línea de currículum escrita por su dueño. Si el
+   * vínculo estaba aprobado por una organización, la membresía que se concedió
+   * al aprobarlo **no** se toca acá —eso es de la organización y se revoca
+   * desde su bandeja—.
+   *
+   * @param affiliationId - La línea a quitar.
+   * @param actor - El profesional titular del historial.
+   */
+  async removeOwnAffiliation(
+    affiliationId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const affiliation = await this.propiaONada(tx, affiliationId, actor);
+      this.affiliationsRepo.remove(tx, affiliation);
+      await tx.flush();
+      this.logger.info(
+        {
+          operation: 'profiles.affiliation.remove',
+          affiliationId,
+          actorId: actor.id,
+          statusConceptId: affiliation.statusConceptId,
+        },
+        'Practitioner affiliation removed',
+      );
+    });
+  }
+
+  /**
+   * La afiliación si es del profesional de la sesión; `404` si no.
+   *
+   * Un id ajeno y un id inexistente responden igual a propósito: distinguirlos
+   * le diría a quien tantea ids cuáles existen.
+   *
+   * @param tx - La transacción del caso de uso.
+   * @param affiliationId - La afiliación pedida.
+   * @param actor - Quien la pide.
+   * @returns La fila, garantizada propia.
+   */
+  private async propiaONada(
+    tx: EntityManager,
+    affiliationId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerAffiliations> {
+    const profileId = await this.ownership.requireOwnPractitionerProfileId(
+      tx,
+      actor,
+    );
+    const affiliation = await this.affiliationsRepo.findOwn(
+      tx,
+      affiliationId,
+      profileId,
+    );
+    if (!affiliation) {
+      throw new ResourceNotFoundException('Afiliación no encontrada', {
+        affiliationId,
+      });
+    }
+    return affiliation;
   }
 
   /**

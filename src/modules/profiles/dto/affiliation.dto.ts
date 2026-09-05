@@ -1,4 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  OmitType,
+  PartialType,
+} from '@nestjs/swagger';
 import {
   IsDateString,
   IsOptional,
@@ -88,6 +93,30 @@ export class CreateAffiliationDto {
 }
 
 /** Una afiliación tal como la devuelven la lectura y el alta. */
+/**
+ * Lo que se puede corregir de una afiliación ya cargada.
+ *
+ * Es `CreateAffiliationDto` con todo opcional **menos la sede**: la sede decide
+ * el estado del vínculo —pendiente, aprobado, declarado— y cambiarla desde la
+ * edición sería colarse en una organización sin pasar por su bandeja de
+ * solicitudes. Para vincularse a otra sede se carga otra afiliación.
+ *
+ * `endDate: null` vuelve vigente el vínculo; omitirlo lo deja como estaba.
+ */
+export class UpdateAffiliationDto extends PartialType(
+  OmitType(CreateAffiliationDto, ['practiceSiteId', 'endDate'] as const),
+) {
+  @ApiPropertyOptional({
+    description:
+      'Fin del vínculo. `null` lo vuelve vigente; omitido, se conserva',
+    format: 'date',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsDateString()
+  endDate?: string | null;
+}
+
 export class AffiliationResponseDto {
   /**
    * Identificador único de la instancia.

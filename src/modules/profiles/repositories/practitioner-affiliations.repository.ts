@@ -190,6 +190,40 @@ export class PractitionerAffiliationsRepository {
   }
 
   /**
+   * Una afiliación **del propio profesional**, o nada.
+   *
+   * El dueño va en el `where` y no en un `if` después: así el id de otro
+   * historial responde lo mismo que un id inexistente, y quien tantea ids no
+   * se entera de cuáles existen.
+   *
+   * @param em - Contexto de persistencia.
+   * @param id - La afiliación buscada.
+   * @param practitionerProfileId - El perfil que tiene que ser su dueño.
+   * @returns La fila si existe y es suya; `null` en cualquier otro caso.
+   */
+  findOwn(
+    em: EntityManager,
+    id: string,
+    practitionerProfileId: string,
+  ): Promise<PractitionerAffiliations | null> {
+    return em.findOne(PractitionerAffiliations, { id, practitionerProfileId });
+  }
+
+  /**
+   * Marca la fila para borrarla en el próximo `flush`.
+   *
+   * Borrado físico a propósito: es una línea de currículum que el propio
+   * profesional escribió, no un vínculo decidido por una organización, y no
+   * hay a quién rendirle cuentas de que existió.
+   *
+   * @param em - Contexto de persistencia (la transacción del caso de uso).
+   * @param row - La afiliación a borrar.
+   */
+  remove(em: EntityManager, row: PractitionerAffiliations): void {
+    em.remove(row);
+  }
+
+  /**
    * Afiliación duplicada: misma institución, mismo cargo y mismo inicio.
    *
    * Es lo que distingue «trabajé dos veces ahí» —que es cierto y se registra—
