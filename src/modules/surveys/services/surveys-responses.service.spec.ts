@@ -491,6 +491,10 @@ describe('SurveysResponsesService', () => {
           valueText: 'Bien',
         }),
       );
+      // FT-29: la encuesta de satisfacción es anónima para el profesional a
+      // propósito — de quién es la respuesta no debe cruzar hacia el DTO,
+      // aunque la fila de la base sí lo guarde para trazabilidad interna.
+      expect(res[0]).not.toHaveProperty('patientProfileId');
     });
   });
 });

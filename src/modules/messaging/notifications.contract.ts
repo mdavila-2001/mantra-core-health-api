@@ -95,7 +95,13 @@ export type NotificationDestinationType =
    * union es puramente de tipos (se guarda en `related_resource_type`,
    * varchar); el `switch` exhaustivo del front debe sumar su ruta al conectar.
    */
-  | 'PHARMACY_ORDER';
+  | 'PHARMACY_ORDER'
+  /**
+   * Una solicitud de relación asistencial (FT-07-R05): un practicante pide
+   * autorización para ver el expediente de un paciente que encontró por
+   * búsqueda. Aditivo, mismo criterio que `PHARMACY_ORDER`.
+   */
+  | 'CARE_RELATIONSHIP_REQUEST';
 
 /**
  * A dónde lleva la notificación al abrirla.

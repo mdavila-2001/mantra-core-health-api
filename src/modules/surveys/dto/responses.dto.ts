@@ -301,10 +301,11 @@ export class AnswerDto {
 /**
  * Una respuesta completa, tal como la lee el profesional dueño.
  *
- * Lleva `patientProfileId` porque el dueño del instrumento tiene derecho a ver
- * de quién es la respuesta —REDESA lo llama «consultar resultados individuales
- * cuando corresponda»—; lo que no existe en ningún lado es una versión pública
- * de esto.
+ * **Sin `patientProfileId` a propósito** (FT-29): la encuesta de satisfacción
+ * es anónima para el profesional por diseño del negocio — puede leer lo que
+ * respondió cada paciente, pero no quién lo respondió. Devolver acá el
+ * identificador, aunque no sea el nombre, deshace esa anonimidad: alcanza con
+ * cruzarlo contra `appointmentBookingId` para identificar al paciente.
  */
 export class SurveyResponseDto {
   /**
@@ -318,12 +319,6 @@ export class SurveyResponseDto {
    */
   @ApiProperty({ format: 'uuid' })
   invitationId!: string;
-
-  /**
-   * Identificador asociado a patient profile.
-   */
-  @ApiProperty({ format: 'uuid' })
-  patientProfileId!: string;
 
   /**
    * Identificador asociado a appointment booking.

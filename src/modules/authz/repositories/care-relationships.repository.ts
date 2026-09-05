@@ -37,6 +37,12 @@ export interface CreateCareRelationshipData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /**
+   * Estado inicial del registro. Por defecto `STATE_ACTIVE` (alta directa por
+   * `CLINICIAN`/`SECURITY_ADMIN`); FT-07 lo crea en `STATE_PENDING` cuando la
+   * relación nace de una solicitud que el paciente todavía no respondió.
+   */
+  statusConceptId?: string;
 }
 
 /** Acceso a datos de `authz.care_relationships`. */
@@ -79,6 +85,31 @@ export class CareRelationshipsRepository {
     });
   }
 
+  /** Solicitud PENDIENTE concreta (paciente, practicante), evita duplicados. */
+  findPending(
+    em: EntityManager,
+    patientProfileId: string,
+    practitionerProfileId: string,
+  ): Promise<CareRelationships | null> {
+    return em.findOne(CareRelationships, {
+      patientProfileId,
+      practitionerProfileId,
+      statusConceptId: CONCEPTS.STATE_PENDING,
+    });
+  }
+
+  /** Solicitudes PENDIENTES de un paciente (para su bandeja de aprobaciones). */
+  findPendingByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<CareRelationships[]> {
+    return em.find(
+      CareRelationships,
+      { patientProfileId, statusConceptId: CONCEPTS.STATE_PENDING },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
   /** Todas las relaciones de un paciente (scoping por tenant). */
   findByPatient(
     em: EntityManager,
@@ -111,7 +142,7 @@ export class CareRelationshipsRepository {
         practitionerProfileId: data.practitionerProfileId,
         relationshipTypeConceptId: data.relationshipTypeConceptId,
         purposeConceptId: data.purposeConceptId,
-        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        statusConceptId: data.statusConceptId ?? CONCEPTS.STATE_ACTIVE,
         validFrom: data.validFrom,
         validTo: data.validTo,
         establishedByUserId: data.actorUserId,

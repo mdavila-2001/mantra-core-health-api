@@ -319,6 +319,12 @@ export class PractitionerSiteDto {
   /** Dirección en una línea, o `null` si la sede no tiene ninguna cargada. */
   @ApiPropertyOptional({ nullable: true, example: 'Av. Brasil 1234, La Paz' })
   addressText!: string | null;
+  /** Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). */
+  @ApiPropertyOptional({ nullable: true })
+  latitude!: number | null;
+  /** Longitud del punto de la sede. Va siempre junto a `latitude`. */
+  @ApiPropertyOptional({ nullable: true })
+  longitude!: number | null;
   /** Concepto de estado. */
   @ApiProperty({ format: 'uuid' }) status!: string;
 }

@@ -24,6 +24,9 @@ import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../profiles/repositories';
+// FT-07-R05/R08: el PDP resuelve si hay grant/relación/representación vigente
+// más allá del turno de hoy. `AuthzModule` lo exporta justamente para esto.
+import { AuthzPdpService } from '../../authz/services';
 // El permiso de lectura no puede depender sólo del turno del día: el PDP
 // (`AuthzPdpService`) ya define y evalúa esta base de acceso ("relación
 // asistencial vigente") para el resto del sistema. Se provee acá directo —y no
@@ -113,6 +116,7 @@ export class ClinicalReadService {
     private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
     private readonly bookingsRepo: SchedulingBookingsRepository,
+    private readonly pdp: AuthzPdpService,
     private readonly careRelationshipsRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
   ) {
@@ -196,9 +200,51 @@ export class ClinicalReadService {
       return;
     }
 
-    // Sin turno hoy no alcanza el rol; queda la titularidad, que además cubre al
-    // profesional que lee su propia historia.
+    // FT-07-R05/R06/R07/R08: sin turno hoy, todavía puede haber una relación
+    // asistencial o un acceso clínico que el paciente autorizó explícitamente
+    // —el flujo de `POST /authz/care-relationships/request` +
+    // `.../respond`— o una representación legal vigente. El PDP de `authz` ya
+    // resuelve exactamente esa pregunta; se consulta acá para no reimplementar
+    // la evaluación (deny-overrides, vigencia, propósito) en dos lugares.
+    if (
+      actor.practitionerProfileId &&
+      (await this.tieneAccesoAutorizado(patientProfileId, actor))
+    ) {
+      return;
+    }
+
+    // Sin turno hoy ni autorización vigente no alcanza el rol; queda la
+    // titularidad, que además cubre al profesional que lee su propia historia.
     await this.assertOwnRecord(patientProfileId, actor, link);
+  }
+
+  /**
+   * ¿Hay una base legítima de acceso más allá del turno de hoy?
+   *
+   * Consulta el PDP de `authz` (`clinical_access_grants` / `care_relationships`
+   * / representación legal) para el propósito `TREATMENT`. Nunca lanza: un
+   * `DENY` del PDP simplemente deja que {@link assertPuedeLeerHistoria} siga a
+   * `assertOwnRecord`, que es quien decide el mensaje final.
+   */
+  private async tieneAccesoAutorizado(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
+    const tenantId = actor.tenantIds?.[0];
+    if (!tenantId) return false;
+    const decision = await this.pdp.evaluate(
+      {
+        userId: actor.id,
+        tenantId,
+        resource: 'clinical.patient_record',
+        action: 'READ',
+        patientProfileId,
+        practitionerProfileId: actor.practitionerProfileId,
+        purposeOfUse: 'TREATMENT',
+      },
+      actor,
+    );
+    return decision.decision === 'PERMIT';
   }
 
   /**

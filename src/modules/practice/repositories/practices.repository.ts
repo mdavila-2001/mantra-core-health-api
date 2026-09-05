@@ -93,6 +93,33 @@ export class PracticesRepository {
   }
 
   /**
+   * La práctica personal del profesional dentro del tenant, si ya la tiene.
+   *
+   * ALV-005: un profesional puede tener varios consultorios propios, pero
+   * todos cuelgan de la MISMA práctica (`admin_user_id` = el propio usuario,
+   * `type_concept_id` = consultorio). Buscarla antes de crear evita una
+   * práctica nueva por cada sede que el profesional agregue.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant del actor.
+   * @param adminUserId - El propio usuario, dueño de su práctica personal.
+   * @param officeTypeConceptId - Concepto de "consultorio" (`PRAC.PRACTICE_TYPE_OFFICE`).
+   * @returns Su práctica personal, o `null` si todavía no tiene ninguna.
+   */
+  findOwnOffice(
+    em: EntityManager,
+    tenantId: string,
+    adminUserId: string,
+    officeTypeConceptId: string,
+  ): Promise<Practices | null> {
+    return em.findOne(Practices, {
+      tenantId,
+      adminUserId,
+      typeConceptId: officeTypeConceptId,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

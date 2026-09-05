@@ -29,7 +29,12 @@ const medico = {
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  // Sin vinculaciones activas por defecto: sin `runWithTenant` de por medio,
+  // `attachDefaultSatisfactionSurvey` corta antes de pedir el tenant.
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    find: mockFn().mockResolvedValue([]),
+  };
   const em = {
     fork: mockFn().mockReturnValue({}),
     transactional: mockFn((cb: any) => cb(tx)),
@@ -44,14 +49,31 @@ function build() {
     findActivePracticeIdsForPractitioner: mockFn().mockResolvedValue([]),
     findTenantOfPractice: mockFn().mockResolvedValue(null),
   };
+  const templatesRepo = {
+    createTemplate: mockFn(),
+    createVersion: mockFn(),
+    createQuestion: mockFn(),
+  };
+  const assignmentsRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new BillingServiceCatalogService(
     em as any,
     serviceCatalogRepo as any,
     practiceTenantLookup as any,
+    templatesRepo as any,
+    assignmentsRepo as any,
     logger as any,
   );
-  return { service, tx, em, serviceCatalogRepo, practiceTenantLookup };
+  return {
+    service,
+    tx,
+    em,
+    serviceCatalogRepo,
+    practiceTenantLookup,
+    templatesRepo,
+    assignmentsRepo,
+    logger,
+  };
 }
 
 /** Una fila editable del catálogo, con los campos que el servicio toca. */
@@ -158,6 +180,112 @@ describe('BillingServiceCatalogService', () => {
         }),
       );
       expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    /**
+     * FT-31: ningún servicio médico nuevo debería quedar sin forma de medir
+     * la atención. Estos tres casos son la regla completa: quien da de alta
+     * es un profesional, quien da de alta es un admin puro con alguien a
+     * quien atribuirle la plantilla, y quien da de alta es un admin puro sin
+     * nadie —el único caso donde de verdad no hay encuesta.
+     */
+    describe('encuesta de satisfacción por defecto', () => {
+      it('un profesional que da de alta su propio servicio queda como dueño de la encuesta', async () => {
+        const d = build();
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+        d.templatesRepo.createTemplate.mockReturnValue({
+          id: 'tpl-1',
+          statusConceptId: 'draft',
+        });
+        d.templatesRepo.createVersion.mockReturnValue({
+          id: 'ver-1',
+          publicationStatusConceptId: 'draft',
+        });
+
+        await runWithTenant('tenant-1', () =>
+          d.service.create(
+            {
+              practiceId: 'pr1',
+              code: 'CONS-01',
+              name: 'Consulta general',
+              defaultPrice: '100.00',
+            },
+            medico,
+          ),
+        );
+
+        expect(d.templatesRepo.createTemplate).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            ownerPractitionerId: medico.practitionerProfileId,
+            title: expect.stringContaining('Consulta general'),
+          }),
+        );
+        expect(d.templatesRepo.createQuestion).toHaveBeenCalled();
+        expect(d.assignmentsRepo.create).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            surveyVersionId: 'ver-1',
+            targetTypeConceptId: expect.any(String),
+            targetId: item.id,
+            active: true,
+          }),
+        );
+        // Con perfil profesional propio, ni hace falta buscar a quién
+        // atribuírsela: no consulta las vinculaciones de la práctica.
+        expect(d.tx.find).not.toHaveBeenCalled();
+      });
+
+      it('un admin sin perfil se la atribuye al profesional activo más antiguo de la práctica', async () => {
+        const d = build();
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+        d.tx.find.mockResolvedValue([
+          { practitionerProfileId: 'hp-nueva', isPrimary: false, createdAt: new Date('2026-02-01') },
+          { practitionerProfileId: 'hp-vieja', isPrimary: false, createdAt: new Date('2026-01-01') },
+        ]);
+        d.templatesRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+        d.templatesRepo.createVersion.mockReturnValue({ id: 'ver-1' });
+
+        await runWithTenant('tenant-1', () =>
+          d.service.create(
+            {
+              practiceId: 'pr1',
+              code: 'CONS-01',
+              name: 'Consulta general',
+              defaultPrice: '100.00',
+            },
+            actor,
+          ),
+        );
+
+        expect(d.templatesRepo.createTemplate).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ ownerPractitionerId: 'hp-vieja' }),
+        );
+      });
+
+      it('sin nadie a quien atribuirle la plantilla, el servicio se crea igual, sin encuesta', async () => {
+        const d = build();
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+        d.tx.find.mockResolvedValue([]);
+
+        const res = await d.service.create(
+          {
+            practiceId: 'pr1',
+            code: 'CONS-01',
+            name: 'Consulta general',
+            defaultPrice: '100.00',
+          },
+          actor,
+        );
+
+        expect(res).toEqual(item);
+        expect(d.templatesRepo.createTemplate).not.toHaveBeenCalled();
+        expect(d.logger.warn).toHaveBeenCalled();
+      });
     });
 
     it('rejects a duplicate code within the same practice', async () => {

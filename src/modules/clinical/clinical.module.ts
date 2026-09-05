@@ -7,6 +7,16 @@ import { AuditModule } from '../audit/audit.module';
 // porque `MessagingModule` ya exporta `NotificationsService` justamente para
 // esto, y no hay ciclo: `messaging` no sabe nada de `clinical`.
 import { MessagingModule } from '../messaging/messaging.module';
+// ALV-033 (reemplazo de ALV-032) — adjuntar un archivo a un diagnóstico liga
+// contra `FilesService.createLink`, que trae sus propios repos de `common`
+// (versiones, derivados, vínculos): se importa el módulo entero en vez de
+// proveer el servicio suelto, mismo criterio que ya usan `community`, `iam` y
+// `profiles`. `common` no depende de `clinical`, así que no cierra ciclo.
+import { CommonModule } from '../common/common.module';
+// FT-07-R08: `ClinicalRecordAccessGuard` evalúa relación asistencial/acceso
+// clínico contra el PDP de `authz` antes de servir PHI. Import unidireccional
+// (`clinical` → `authz`); `authz` no conoce `clinical`, así que no hay ciclo.
+import { AuthzModule } from '../authz/authz.module';
 import {
   ClinicalEncountersController,
   ClinicalObservationsController,
@@ -15,6 +25,7 @@ import {
   ClinicalRecordsController,
   ClinicalReadController,
 } from './controllers';
+import { ClinicalRecordAccessGuard } from './guards';
 import {
   CareEpisodesService,
   EncountersService,
@@ -79,6 +90,8 @@ import { CareRelationshipsRepository } from '../authz/repositories';
     MikroOrmModule.forFeature(Object.values(entities)),
     AuditModule,
     MessagingModule,
+    CommonModule,
+    AuthzModule,
   ],
   controllers: [
     ClinicalEncountersController,
@@ -122,6 +135,7 @@ import { CareRelationshipsRepository } from '../authz/repositories';
     ImmunizationsService,
     ClinicalReadService,
     ClinicalNotificationsService,
+    ClinicalRecordAccessGuard,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:
@@ -130,11 +144,22 @@ import { CareRelationshipsRepository } from '../authz/repositories';
   // una reseña sólo vale si hubo atención real, y comprobarlo es leer el
   // encuentro. El repositorio ya estaba en `providers`; sin exportarlo, el
   // módulo que lo inyecta no puede verlo.
+  // `ClinicalRecordAccessGuard` se exporta para que `ChartModule` aplique el
+  // mismo guard sobre `GET /charts/patients/:id/chart` (FT-07-R08): es la
+  // misma pregunta de autorización sobre la misma persona. Exportar el guard
+  // NO alcanza: `@UseGuards(ClinicalRecordAccessGuard)` hace que Nest lo
+  // resuelva en el contenedor de `ChartModule`, y ahí necesita a
+  // `ClinicalReadService` visible como export propio — no como provider
+  // interno de este módulo. Sin esto, el arranque revienta con
+  // `UnknownDependenciesException` apenas `ChartModule` intenta instanciar el
+  // guard (confirmado reproduciendo el arranque real, no sólo leyendo el DI).
   exports: [
     ConditionsService,
     ProceduresService,
     ServiceRequestsService,
     EncountersRepository,
+    ClinicalReadService,
+    ClinicalRecordAccessGuard,
   ],
 })
 export class ClinicalModule {}

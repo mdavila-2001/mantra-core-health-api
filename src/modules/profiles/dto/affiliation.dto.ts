@@ -35,24 +35,20 @@ export class CreateAffiliationDto {
 
   /**
    * Cargo ejercido.
-   */
-  @ApiProperty({ description: 'Cargo ejercido', example: 'Médico de planta' })
-  @IsString()
-  @MinLength(2)
-  @MaxLength(200)
-  roleTitle!: string;
-
-  /**
-   * Servicio o departamento.
+   *
+   * Opcional desde ALV-007: un vínculo de "atiende en su propio consultorio"
+   * no tiene un cargo dentro de una jerarquía, y exigirlo bloqueaba el
+   * guardado. Si viene, se usa en perfil/trayectoria; ausente no dibuja hueco.
    */
   @ApiPropertyOptional({
-    description: 'Servicio o departamento dentro de la institución',
-    example: 'Cardiología',
+    description: 'Cargo ejercido, cuando aplica',
+    example: 'Médico de planta',
   })
   @IsOptional()
   @IsString()
+  @MinLength(2)
   @MaxLength(200)
-  departmentText?: string;
+  roleTitle?: string;
 
   /**
    * Sede de la plataforma que corresponde a la institución, si la hay.
@@ -141,16 +137,10 @@ export class AffiliationResponseDto {
   organizationName!: string;
 
   /**
-   * Cargo.
-   */
-  @ApiProperty()
-  roleTitle!: string;
-
-  /**
-   * Servicio o departamento.
+   * Cargo, cuando el vínculo lo declara.
    */
   @ApiPropertyOptional({ nullable: true })
-  departmentText!: string | null;
+  roleTitle!: string | null;
 
   /**
    * Sede de la plataforma, si la institución está dentro.
