@@ -9,10 +9,16 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
   getCurrentTenantId,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { PracticeTenantLookupService } from '../../practice/services';
+import { PractitionerRoleAssignments } from '../../practice/entities';
+import { PRAC } from '../../practice/practice.concepts';
+import { AssignmentsRepository, TemplatesRepository } from '../../surveys/repositories';
+import { SURVEYS } from '../../surveys/surveys.concepts';
+import type { ServiceCatalog } from '../entities';
 import { ServiceCatalogRepository } from '../repositories';
 import {
   CreateServiceCatalogItemDto,
@@ -20,6 +26,9 @@ import {
   ServiceCatalogItemDto,
   UpdateServiceCatalogItemDto,
 } from '../dto';
+
+/** Plazo por defecto para responder la encuesta de satisfacción que se auto-crea (FT-31). */
+const DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS = 30;
 
 /** Tope de servicios por página cuando el cliente no pide uno. */
 const DEFAULT_PAGE_SIZE = 50;
@@ -55,6 +64,8 @@ export class BillingServiceCatalogService {
     private readonly em: EntityManager,
     private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
+    private readonly templatesRepo: TemplatesRepository,
+    private readonly assignmentsRepo: AssignmentsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(BillingServiceCatalogService.name);
@@ -163,6 +174,8 @@ export class BillingServiceCatalogService {
       });
       await tx.flush();
 
+      await this.attachDefaultSatisfactionSurvey(tx, item, actor);
+
       this.logger.info(
         {
           operation: 'billing.service-catalog.create',
@@ -172,6 +185,125 @@ export class BillingServiceCatalogService {
       );
       return toItemDto(item);
     });
+  }
+
+  /**
+   * FT-31: todo servicio médico nuevo sale con su encuesta de satisfacción ya
+   * activa, para que ningún servicio quede sin forma de medir la atención.
+   *
+   * Se crea, publica y asocia dentro de la misma transacción que el alta del
+   * servicio: si algo de esto falla, el servicio tampoco se crea — es una
+   * garantía del alta, no un agregado best-effort.
+   *
+   * **Dueño de la plantilla.** `survey_templates.owner_practitioner_id` no
+   * admite nulo, pero quien da de alta un servicio es siempre `SECURITY_ADMIN`
+   * (ver el guard del controlador) y casi nunca tiene perfil profesional. Se
+   * atribuye entonces al profesional activo más antiguo de la práctica —el
+   * primero en el tiempo, o el marcado principal si hay varios— porque en la
+   * enorme mayoría de las prácticas (una o pocas personas atendiendo) es
+   * exactamente la persona a la que le importa esta encuesta. El resto de la
+   * práctica igual la ve entre las respuestas del servicio; sólo la edición
+   * del cuestionario queda del lado de quien figura como dueño.
+   *
+   * Si la práctica todavía no tiene ningún profesional vinculado y activo
+   * (una organización recién creada, antes de que se una el primer doctor), el
+   * servicio se crea igual y queda sin encuesta — no hay a quién atribuírsela.
+   * No hay retro-alta cuando se una el primero: es la misma limitación que ya
+   * acepta el resto del catálogo con datos que faltan.
+   */
+  private async attachDefaultSatisfactionSurvey(
+    tx: EntityManager,
+    item: ServiceCatalog,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const ownerPractitionerId =
+      actor.practitionerProfileId ??
+      (await this.findDefaultSurveyOwner(tx, item.practiceId));
+    if (!ownerPractitionerId) {
+      this.logger.warn(
+        {
+          operation: 'billing.service-catalog.create',
+          serviceCatalogId: item.id,
+          practiceId: item.practiceId,
+        },
+        'Sin profesional activo en la práctica: el servicio queda sin encuesta de satisfacción automática',
+      );
+      return;
+    }
+
+    const tenantId = requireTenantId();
+    const template = this.templatesRepo.createTemplate(tx, {
+      tenantId,
+      ownerPractitionerId,
+      title: `Satisfacción — ${item.name}`,
+      statusConceptId: SURVEYS.TEMPLATE_DRAFT,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+
+    const version = this.templatesRepo.createVersion(tx, {
+      surveyTemplateId: template.id,
+      versionNumber: 1,
+      publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
+      responseWindowDays: DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+
+    this.templatesRepo.createQuestion(tx, {
+      surveyVersionId: version.id,
+      position: 1,
+      questionText: '¿Qué tan satisfecho quedaste con la atención?',
+      answerTypeConceptId: SURVEYS.ANSWER_TYPE_SCALE,
+      required: true,
+      scaleMin: 1,
+      scaleMax: 5,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+
+    // Publicar acá mismo, no dejarla en borrador: un servicio nuevo sin
+    // encuesta *utilizable* deja el requisito a medias — nadie la publicaría
+    // por su cuenta si ni siquiera sabe que se creó sola.
+    version.publicationStatusConceptId = SURVEYS.VERSION_PUBLISHED;
+    version.effectiveFrom = new Date();
+    version.publishedAt = new Date();
+    touch(version, actor.id);
+    template.statusConceptId = SURVEYS.TEMPLATE_ACTIVE;
+    touch(template, actor.id);
+
+    this.assignmentsRepo.create(tx, {
+      surveyVersionId: version.id,
+      tenantId,
+      targetTypeConceptId: SURVEYS.TARGET_SERVICE,
+      targetId: item.id,
+      active: true,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+  }
+
+  /**
+   * El profesional activo más antiguo de la práctica, o el marcado principal
+   * si hay varios — ver la nota de {@link attachDefaultSatisfactionSurvey}.
+   */
+  private async findDefaultSurveyOwner(
+    tx: EntityManager,
+    practiceId: string,
+  ): Promise<string | null> {
+    const candidatos = await tx.find(PractitionerRoleAssignments, {
+      practiceId,
+      statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      validTo: null,
+    });
+    if (candidatos.length === 0) return null;
+    candidatos.sort((a, b) => {
+      if (Boolean(a.isPrimary) !== Boolean(b.isPrimary)) {
+        return Number(b.isPrimary ?? false) - Number(a.isPrimary ?? false);
+      }
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    });
+    return candidatos[0].practitionerProfileId;
   }
 
   /**

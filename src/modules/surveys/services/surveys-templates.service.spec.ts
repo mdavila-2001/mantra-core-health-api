@@ -331,6 +331,74 @@ describe('SurveysTemplatesService', () => {
     });
   });
 
+  describe('createNextVersion (FT-31)', () => {
+    it('abre la versión 2 en borrador cuando la 1 ya está publicada', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+      d.templatesRepo.findLatestVersion.mockResolvedValue({
+        id: 'ver-1',
+        versionNumber: 1,
+        publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED,
+        responseWindowDays: 45,
+      });
+      d.templatesRepo.createVersion.mockReturnValue({
+        id: 'ver-2',
+        versionNumber: 2,
+      });
+
+      const res = await withTenant(() =>
+        d.service.createNextVersion('tpl-1', actor),
+      );
+
+      expect(res).toEqual({ id: 'tpl-1', versionId: 'ver-2', versionNumber: 2 });
+      expect(d.templatesRepo.createVersion).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          versionNumber: 2,
+          publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
+          // Hereda el plazo de la versión anterior en vez de volver al default.
+          responseWindowDays: 45,
+        }),
+      );
+    });
+
+    it('no abre una segunda versión en borrador si ya hay una sin publicar', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+      d.templatesRepo.findLatestVersion.mockResolvedValue({
+        id: 'ver-1',
+        versionNumber: 1,
+        publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
+      });
+
+      await expect(
+        withTenant(() => d.service.createNextVersion('tpl-1', actor)),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.templatesRepo.createVersion).not.toHaveBeenCalled();
+    });
+
+    it('una plantilla sin ninguna versión es 404', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+      d.templatesRepo.findLatestVersion.mockResolvedValue(null);
+
+      await expect(
+        withTenant(() => d.service.createNextVersion('tpl-1', actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('una plantilla ajena es 404, igual que en el resto del servicio', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(
+        ownedTemplate({ ownerPractitionerId: OTHER_OWNER }),
+      );
+
+      await expect(
+        withTenant(() => d.service.createNextVersion('tpl-1', actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('deactivateTemplate', () => {
     it('desactiva la plantilla', async () => {
       const d = build();
