@@ -20,7 +20,7 @@ import {
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
-import { QuotationsService } from '../services';
+import { QuotationsService, toInstallmentPreviewDto } from '../services';
 import {
   CreateQuotationDto,
   QuotationResponseDto,
@@ -63,7 +63,11 @@ export class QuotationsController {
   simulate(
     @Body() dto: SimulatePaymentPlanDto,
   ): SimulatePaymentPlanResponseDto {
-    return { installments: this.quotationsService.simulatePaymentPlan(dto) };
+    return {
+      installments: toInstallmentPreviewDto(
+        this.quotationsService.simulatePaymentPlan(dto),
+      ),
+    };
   }
 
   /**

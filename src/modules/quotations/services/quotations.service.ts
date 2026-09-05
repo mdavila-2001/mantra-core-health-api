@@ -29,6 +29,20 @@ function toIsoDate(date: Date): string {
 }
 
 /**
+ * Convierte la previsualización del simulador (fechas como `Date`, uso
+ * interno) a la forma que expone el contrato HTTP (fechas como `string`
+ * ISO). Un solo punto de conversión para `/simulate` y `createQuotation`.
+ */
+export function toInstallmentPreviewDto(
+  installments: InstallmentPreview[],
+): InstallmentPreviewDto[] {
+  return installments.map((installment) => ({
+    ...installment,
+    dueDate: toIsoDate(installment.dueDate),
+  }));
+}
+
+/**
  * FT-24 — Creación de cotizaciones: presupuesto ofrecido a un paciente sobre
  * un servicio del catálogo (`billing.service_catalog`), con un plan de pagos
  * simulado (FLAT o FRANCÉS) y las condiciones ofertadas congeladas (snapshot)
@@ -85,7 +99,11 @@ export class QuotationsService {
     dto: CreateQuotationDto,
     actor: AuthenticatedUser,
   ): Promise<QuotationResponseDto> {
-    if (!actor.practitionerProfileId) {
+    // Se copia a una constante porque la narrowing de `actor.practitionerProfileId`
+    // no cruza el cierre de `em.transactional` de abajo (TS no la retiene para
+    // una propiedad `readonly` de un parámetro capturado por una función anidada).
+    const practitionerProfileId = actor.practitionerProfileId;
+    if (!practitionerProfileId) {
       throw new PreconditionFailedException(
         'Se requiere un perfil profesional para crear una cotización',
       );
@@ -134,7 +152,7 @@ export class QuotationsService {
       const quotation = this.quotationsRepo.create(tx, {
         practiceId: dto.practiceId,
         patientProfileId: dto.patientProfileId,
-        createdByPractitionerProfileId: actor.practitionerProfileId,
+        createdByPractitionerProfileId: practitionerProfileId,
         attentionDate,
         appointmentId: dto.appointmentId,
         serviceCatalogId: dto.serviceCatalogId,
