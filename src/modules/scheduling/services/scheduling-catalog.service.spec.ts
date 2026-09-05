@@ -56,7 +56,8 @@ function buildCatalog() {
     findRulesByTemplates: mockFn().mockResolvedValue([]),
     findExceptionsByResourceInRange: mockFn().mockResolvedValue([]),
     createRule: mockFn(),
-    findRulesByTemplate: mockFn(),
+    findRulesByTemplate: mockFn().mockResolvedValue([]),
+    deleteRulesByTemplate: mockFn().mockResolvedValue(0),
     createException: mockFn(),
     createSlot: mockFn(),
     findSlotsByTemplateInRange: mockFn(),
@@ -1381,6 +1382,129 @@ describe('SchedulingCatalogService', () => {
         for (const item of d.service.listActivityTypes().items) {
           expect(item.tone).not.toMatch(/^#/);
         }
+      });
+    });
+
+    describe('updateTemplate (TAREA-10, punto 16)', () => {
+      function conPlantillaPropia(d: ReturnType<typeof buildCatalog>) {
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          name: 'Agenda vieja',
+          slotMinutes: 30,
+          statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
+        });
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-propio',
+        });
+      }
+
+      const duenio = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'hp-propio',
+        tenants: [TENANT],
+      };
+
+      it('sin `rules`, deja las franjas intactas y sólo cambia lo que llega', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+
+        const res = await d.service.updateTemplate(
+          'tpl-1',
+          { name: 'Agenda nueva' },
+          duenio as never,
+        );
+
+        expect(res.name).toBe('Agenda nueva');
+        expect(d.catalogRepo.deleteRulesByTemplate).not.toHaveBeenCalled();
+        expect(d.catalogRepo.createRule).not.toHaveBeenCalled();
+      });
+
+      it('con `rules`, reemplaza el conjunto entero: borra y vuelve a crear', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+
+        const res = await d.service.updateTemplate(
+          'tpl-1',
+          {
+            rules: [
+              { dayOfWeek: 2, startTime: '09:00', endTime: '12:00' },
+              { dayOfWeek: 4, startTime: '14:00', endTime: '17:00' },
+            ],
+          } as never,
+          duenio as never,
+        );
+
+        expect(d.catalogRepo.deleteRulesByTemplate).toHaveBeenCalledWith(
+          d.tx,
+          'tpl-1',
+        );
+        expect(d.catalogRepo.createRule).toHaveBeenCalledTimes(2);
+        expect(res.ruleCount).toBe(2);
+      });
+
+      it('rechaza una franja donde el turno no entra', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+
+        await expect(
+          d.service.updateTemplate(
+            'tpl-1',
+            {
+              rules: [
+                {
+                  dayOfWeek: 2,
+                  startTime: '09:00',
+                  endTime: '09:10',
+                  slotMinutes: 30,
+                },
+              ],
+            } as never,
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.catalogRepo.deleteRulesByTemplate).not.toHaveBeenCalled();
+      });
+
+      it('rechaza una franja que empieza después de terminar', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+
+        await expect(
+          d.service.updateTemplate(
+            'tpl-1',
+            {
+              rules: [{ dayOfWeek: 2, startTime: '12:00', endTime: '09:00' }],
+            } as never,
+            duenio as never,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('editar una agenda ajena es 403', async () => {
+        const d = buildCatalog();
+        conPlantillaPropia(d);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: RESOURCE,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: 'hp-de-otro-medico',
+        });
+
+        await expect(
+          d.service.updateTemplate('tpl-1', { name: 'x' }, duenio as never),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      });
+
+      it('una plantilla inexistente es 404', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findTemplateById.mockResolvedValue(null);
+
+        await expect(
+          d.service.updateTemplate('tpl-x', { name: 'x' }, duenio as never),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
       });
     });
 

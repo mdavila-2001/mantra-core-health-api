@@ -92,6 +92,16 @@ export const SEED = {
    */
   systemWorkerUserId: deterministicId('seed:user:system-worker'),
   systemWorkerDisplayName: 'System Worker',
+  /**
+   * `SupportAdmin`: la cuenta con la que la empresa escribe en el chat de
+   * agenda (TAREA-15, P-15-1). Mismo patrón que `systemWorkerUserId` — fila
+   * real en `iam.users` porque es quien firma (`created_by_user_id`) la
+   * conversación y el mensaje —, y sin credencial de login: nadie inicia
+   * sesión como la empresa.
+   */
+  supportAdminUserId: deterministicId('seed:user:support-admin'),
+  supportAdminDisplayName: 'AloVida · Soporte',
+  supportAdminProfileSlug: 'soporte-alovida',
 };
 
 /**
