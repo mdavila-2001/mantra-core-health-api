@@ -62,6 +62,11 @@ import {
 // existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
 // tampoco acá se importa el módulo entero ni se cierra un ciclo.
 import { SchedulingBookingsRepository } from '../scheduling/repositories';
+// ALV-029 — el permiso de lectura también nace de una relación asistencial
+// vigente (no sólo del turno de hoy), y esa tabla vive en `authz`. Mismo
+// criterio de arriba: repo sin estado por `EntityManager`, sin importar el
+// módulo entero ni cerrar ciclo (`authz` no depende de `clinical`).
+import { CareRelationshipsRepository } from '../authz/repositories';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -89,6 +94,7 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
     PatientProfilesRepository,
     HealthPractitionerProfilesRepository,
     SchedulingBookingsRepository,
+    CareRelationshipsRepository,
     CareEpisodesRepository,
     AppointmentsRepository,
     EncountersRepository,
