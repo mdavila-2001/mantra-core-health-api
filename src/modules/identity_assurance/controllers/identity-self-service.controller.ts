@@ -16,6 +16,7 @@ import {
   RequestVerificationDto,
   VerificationRequestResponseDto,
   VerificationStatusResponseDto,
+  VerificationTypesResponseDto,
 } from '../dto';
 
 /**
@@ -86,6 +87,20 @@ export class IdentitySelfServiceController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<VerificationRequestResponseDto> {
     return this.selfService.requestTenantVerification(tenantId, dto, actor);
+  }
+
+  /**
+   * Catálogo de "mis verificaciones" (FT-32-R09/R11): qué tipos de solicitud
+   * puede iniciar el titular y cuáles ya tienen una en curso.
+   */
+  @Get('verification-types')
+  @ApiOperation({
+    summary: 'Listar los tipos de solicitud de verificación disponibles',
+  })
+  listAvailableTypes(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<VerificationTypesResponseDto> {
+    return this.selfService.listAvailableTypes(actor);
   }
 
   /** Estado del caso propio, para esperar el veredicto de la autoridad. */

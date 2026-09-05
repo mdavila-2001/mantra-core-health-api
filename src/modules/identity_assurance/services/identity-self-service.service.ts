@@ -23,16 +23,42 @@ import {
   type IdentityVerificationVertical,
 } from '../identity_assurance.seed';
 import {
+  IdentityCheckResultsRepository,
   IdentityChecksRepository,
   IdentityEvidenceRecordsRepository,
+  IdentityManualReviewCasesRepository,
   IdentityVerificationCasesRepository,
 } from '../repositories';
+import type { IdentityVerificationCases } from '../entities';
 import type {
+  CaseCheckDto,
   RequestLicenseVerificationDto,
   RequestVerificationDto,
   VerificationRequestResponseDto,
   VerificationStatusResponseDto,
+  VerificationTypeDto,
+  VerificationTypesResponseDto,
 } from '../dto';
+
+/**
+ * Código de tipo de solicitud (catálogo de autoservicio) por sujeto del caso.
+ * Es lo que distingue en la lista/detalle una verificación de identidad
+ * profesional de una de matrícula — ambas comparten check y hasta política en
+ * el caso de identidad, y sólo el `subjectTypeConceptId` las separa.
+ */
+const TYPE_CODE_BY_SUBJECT: Readonly<Record<string, string>> = {
+  [IDA.SUBJECT_PRACTITIONER_IDENTITY]: 'PRACTITIONER_IDENTITY',
+  [IDA.SUBJECT_PRACTITIONER_LICENSE]: 'PRACTITIONER_LICENSE',
+  [IDA.SUBJECT_PATIENT_IDENTITY]: 'PATIENT_IDENTITY',
+  [IDA.SUBJECT_TENANT_IDENTITY]: 'TENANT_VERIFICATION',
+};
+
+const UNKNOWN_TYPE_CODE = 'UNKNOWN';
+
+/** El código de tipo de solicitud a partir del sujeto del caso. */
+function typeCodeForSubject(subjectTypeConceptId: string): string {
+  return TYPE_CODE_BY_SUBJECT[subjectTypeConceptId] ?? UNKNOWN_TYPE_CODE;
+}
 
 /** Vigencia de un caso de verificación abierto por autoservicio (72 h). */
 const CASE_TTL_HOURS = 72;
@@ -73,6 +99,8 @@ export class IdentitySelfServiceService {
    * @param practitionersRepo - Valor de practitioners repo requerido por la operación.
    * @param authorizationsRepo - Valor de authorizations repo requerido por la operación.
    * @param membershipsRepo - Valor de memberships repo requerido por la operación.
+   * @param manualReviewRepo - De dónde sale el motivo cuando el caso escaló a revisión manual.
+   * @param checkResultsRepo - Resultados de los checks, para el trace de la ficha.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -84,6 +112,8 @@ export class IdentitySelfServiceService {
     private readonly practitionersRepo: HealthPractitionerProfilesRepository,
     private readonly authorizationsRepo: JurisdictionAuthorizationsRepository,
     private readonly membershipsRepo: TenantMembershipsRepository,
+    private readonly manualReviewRepo: IdentityManualReviewCasesRepository,
+    private readonly checkResultsRepo: IdentityCheckResultsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentitySelfServiceService.name);
@@ -235,12 +265,7 @@ export class IdentitySelfServiceService {
       throw new ResourceNotFoundException('Caso no encontrado', { caseId });
     }
 
-    return {
-      id: kase.id,
-      status: kase.statusConceptId,
-      openedAt: kase.openedAt,
-      completedAt: kase.completedAt,
-    };
+    return this.toStatusResponse(em, kase, /* detailed */ true);
   }
 
   /**
@@ -276,12 +301,136 @@ export class IdentitySelfServiceService {
     ];
 
     const cases = await this.casesRepo.findBySubjects(em, subjects);
-    return cases.map((kase) => ({
+    // Sin `checks`/`reasonText`: la lista es la tabla de FT-32-R01..R04, no la
+    // ficha de detalle. Traerlos acá pagaría un N+1 (evidencia + revisión +
+    // checks + resultado por check) por cada fila que nadie va a abrir.
+    return Promise.all(
+      cases.map((kase) =>
+        this.toStatusResponse(em, kase, /* detailed */ false),
+      ),
+    );
+  }
+
+  /**
+   * Los tipos de solicitud de verificación que el titular puede iniciar, con
+   * si cada uno ya tiene una solicitud viva (FT-32-R09/R11).
+   *
+   * Acotado a lo que compete al módulo Doctor: identidad profesional y cada
+   * matrícula propia. `hasPendingRequest` es sólo lo que deja a la pantalla no
+   * ofrecer un envío que el backend va a rechazar de todas formas —el rechazo
+   * real sigue viviendo en `openVerification`, que es lo único que un bypass
+   * directo a la API no puede saltear.
+   *
+   * @param actor - Titular autenticado.
+   * @returns El catálogo de tipos disponibles para su cuenta.
+   */
+  async listAvailableTypes(
+    actor: AuthenticatedUser,
+  ): Promise<VerificationTypesResponseDto> {
+    const em = this.em.fork();
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) return { types: [] };
+
+    const practitioner = await this.practitionersRepo.findById(
+      em,
+      link.personId,
+    );
+    if (!practitioner) return { types: [] };
+
+    const types: VerificationTypeDto[] = [];
+
+    const identityLive = await this.casesRepo.countLiveForSubject(
+      em,
+      PRACTITIONER_IDENTITY_VERTICAL.subjectTypeConceptId,
+      link.personId,
+      LIVE_CASE_STATES,
+    );
+    types.push({
+      code: 'PRACTITIONER_IDENTITY',
+      label: 'Verificación de identidad profesional',
+      hasPendingRequest: identityLive > 0,
+    });
+
+    const authorizations = await this.authorizationsRepo.findByPractitioner(
+      em,
+      link.personId,
+    );
+    for (const authorization of authorizations) {
+      const licenseLive = await this.casesRepo.countLiveForSubject(
+        em,
+        MEDICAL_LICENSE_VERTICAL.subjectTypeConceptId,
+        authorization.id,
+        LIVE_CASE_STATES,
+      );
+      types.push({
+        code: 'PRACTITIONER_LICENSE',
+        label:
+          authorizations.length > 1
+            ? `Verificación de matrícula (${authorization.licenseNumber})`
+            : 'Verificación de matrícula profesional',
+        jurisdictionAuthorizationId: authorization.id,
+        hasPendingRequest: licenseLive > 0,
+      });
+    }
+
+    return { types };
+  }
+
+  /**
+   * Arma la respuesta de estado de un caso propio.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param kase - Caso ya resuelto y comprobado como propio.
+   * @param detailed - `true` para la ficha (agrega motivo y trace de checks).
+   * @returns El caso en el contrato `VerificationStatusResponseDto`.
+   */
+  private async toStatusResponse(
+    em: EntityManager,
+    kase: IdentityVerificationCases,
+    detailed: boolean,
+  ): Promise<VerificationStatusResponseDto> {
+    const evidence = await this.evidenceRepo.findLatestByCase(em, kase.id);
+
+    const base: VerificationStatusResponseDto = {
       id: kase.id,
       status: kase.statusConceptId,
-      openedAt: kase.openedAt,
-      completedAt: kase.completedAt,
-    }));
+      type: typeCodeForSubject(kase.subjectTypeConceptId),
+      ...(kase.openedAt ? { openedAt: kase.openedAt } : {}),
+      ...(kase.completedAt ? { completedAt: kase.completedAt } : {}),
+      ...(evidence?.evidenceFileId
+        ? { evidenceFileId: evidence.evidenceFileId }
+        : {}),
+    };
+    if (!detailed) return base;
+
+    const review = await this.manualReviewRepo.findLatestDecidedByCase(
+      em,
+      kase.id,
+    );
+    const checks = await this.checksRepo.findRequiredByCase(em, kase.id);
+    const checkDtos: CaseCheckDto[] = [];
+    for (const check of checks) {
+      const result = await this.checkResultsRepo.findLatestByCheck(
+        em,
+        check.id,
+      );
+      checkDtos.push({
+        checkTypeConceptId: check.checkTypeConceptId,
+        status: check.statusConceptId,
+        ...(result
+          ? {
+              resultConceptId: result.resultConceptId,
+              checkedAt: result.checkedAt,
+            }
+          : {}),
+      });
+    }
+
+    return {
+      ...base,
+      ...(review?.decisionReason ? { reasonText: review.decisionReason } : {}),
+      checks: checkDtos,
+    };
   }
 
   // --- Apoyo ---

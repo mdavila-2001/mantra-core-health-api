@@ -85,4 +85,26 @@ export class IdentityEvidenceRecordsRepository {
       { partial: true },
     );
   }
+
+  /**
+   * La evidencia más reciente aportada para el caso.
+   *
+   * El autoservicio abre exactamente un registro de evidencia por caso
+   * (`openVerification`), pero esto trae "la más reciente" y no "la única"
+   * porque nada en el esquema lo garantiza a nivel de constraint.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param caseId - Caso al que pertenece la evidencia.
+   * @returns La evidencia más reciente del caso, o `null` si no aportó ninguna.
+   */
+  findLatestByCase(
+    em: EntityManager,
+    caseId: string,
+  ): Promise<IdentityEvidenceRecords | null> {
+    return em.findOne(
+      IdentityEvidenceRecords,
+      { identityVerificationCaseId: caseId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
 }
