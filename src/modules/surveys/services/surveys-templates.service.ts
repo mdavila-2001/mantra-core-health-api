@@ -113,6 +113,64 @@ export class SurveysTemplatesService {
     });
   }
 
+  /**
+   * Abre una versión nueva, en borrador, para corregir el cuestionario de una
+   * plantilla ya publicada (FT-31).
+   *
+   * Publicar congela a propósito (ver la nota de la clase): esta es la única
+   * puerta para volver a tocar las preguntas sin desconocer lo que respondió
+   * alguien con la versión anterior. La versión vieja no se toca — sigue
+   * siendo la que interpretan sus respuestas ya guardadas — y la asignación al
+   * servicio/consulta actual sigue apuntando a ella hasta que la nueva versión
+   * se publique y alguien la vuelva a asociar; no se reasigna sola.
+   */
+  async createNextVersion(
+    templateId: string,
+    actor: AuthenticatedUser,
+  ): Promise<TemplateCreatedDto> {
+    return this.em.transactional(async (tx) => {
+      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const latest = await this.templatesRepo.findLatestVersion(
+        tx,
+        template.id,
+      );
+      if (!latest) {
+        throw new ResourceNotFoundException('La plantilla no tiene versiones', {
+          templateId,
+        });
+      }
+      if (latest.publicationStatusConceptId === SURVEYS.VERSION_DRAFT) {
+        throw new ConflictException(
+          'Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra',
+          { templateId, versionNumber: latest.versionNumber },
+        );
+      }
+
+      const version = this.templatesRepo.createVersion(tx, {
+        surveyTemplateId: template.id,
+        versionNumber: latest.versionNumber + 1,
+        publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
+        responseWindowDays: latest.responseWindowDays,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'surveys.version.createNext',
+          templateId,
+          versionNumber: version.versionNumber,
+        },
+        'Survey next version opened as draft',
+      );
+      return {
+        id: template.id,
+        versionId: version.id,
+        versionNumber: version.versionNumber,
+      };
+    });
+  }
+
   /** Agrega una pregunta a la versión en borrador de la plantilla. */
   async addQuestion(
     templateId: string,
