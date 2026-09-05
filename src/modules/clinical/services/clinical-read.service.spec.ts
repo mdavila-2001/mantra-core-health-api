@@ -132,7 +132,7 @@ function build() {
    */
   const relacionesAsistenciales = new Map<
     string,
-    { validFrom: Date; validTo?: Date }[]
+    { validFrom: Date; validTo?: Date; purposeConceptId?: string }[]
   >();
   const careRelationshipsRepo = {
     findActiveForPractitionerPatient: mockFn(
@@ -146,11 +146,12 @@ function build() {
     pac: string,
     validFrom: Date = new Date(Date.now() - 86_400_000),
     validTo?: Date,
+    purposeConceptId?: string,
   ) => {
     const previas = relacionesAsistenciales.get(clave(pro, pac)) ?? [];
     relacionesAsistenciales.set(clave(pro, pac), [
       ...previas,
-      { validFrom, validTo },
+      { validFrom, validTo, purposeConceptId },
     ]);
   };
 
@@ -567,6 +568,30 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     c.darDeAltaProfesional(MEDICO);
     c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
     c.vincular(MEDICO, PACIENTE, new Date(Date.now() + 86_400_000));
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  /**
+   * Espejo del caso 6c del PDP (`AuthzPdpService`): una relación acotada a un
+   * propósito sólo habilita acciones que declaren ese mismo propósito. Este
+   * endpoint no pide propósito de uso —es el resumen completo—, así que una
+   * relación acotada no debe abrirlo: sería darle más alcance del que su
+   * propio propósito le fija.
+   */
+  it('una relación asistencial ACOTADA A UN PROPÓSITO no abre el resumen completo', async () => {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.vincular(
+      MEDICO,
+      PACIENTE,
+      new Date(Date.now() - 86_400_000),
+      undefined,
+      'purpose:second-opinion',
+    );
 
     await expect(
       c.service.assertPuedeLeerHistoria(PACIENTE, actorCon('u', 'CLINICIAN')),

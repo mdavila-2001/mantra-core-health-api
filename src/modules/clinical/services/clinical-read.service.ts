@@ -267,17 +267,28 @@ export class ClinicalReadService {
   }
 
   /**
-   * ¿Hay una relación asistencial ACTIVA y vigente entre ambos? (ALV-029)
+   * ¿Hay una relación asistencial ACTIVA, vigente y SIN acotar a un propósito
+   * distinto, entre ambos? (ALV-029)
    *
    * `findActiveForPractitionerPatient` sólo filtra por `status_concept_id`: la
    * ventana temporal (`valid_from`/`valid_to`) se comprueba acá, con el mismo
    * criterio que ya usa `AuthzPdpService.isWithinWindow` — reusar la tabla sin
    * reusar la ventana habilitaría una relación ya vencida.
    *
+   * ## Por qué se descarta una relación con `purposeConceptId`
+   *
+   * El PDP (`AuthzPdpService`, caso 6c) exige que una relación acotada a un
+   * propósito sólo habilite acciones que declaren ESE mismo propósito. Este
+   * endpoint no recibe ningún propósito de uso —es el resumen clínico
+   * completo, no una acción puntual—, así que no hay con qué comparar. Tratar
+   * una relación acotada como si abriera el resumen entero sería darle más
+   * alcance del que su propio propósito le fija: fail-closed, igual que el PDP.
+   *
    * @param em - Contexto de persistencia.
    * @param practitionerProfileId - El profesional que pide.
    * @param patientProfileId - El paciente cuya historia se pide.
-   * @returns `true` si hay una relación activa cuya ventana cubre este instante.
+   * @returns `true` si hay una relación activa, sin propósito acotado, cuya
+   *          ventana cubre este instante.
    */
   private async tieneRelacionAsistencialVigente(
     em: EntityManager,
@@ -292,6 +303,7 @@ export class ClinicalReadService {
         patientProfileId,
       );
     return relaciones.some((relacion) => {
+      if (relacion.purposeConceptId) return false;
       if (relacion.validFrom.getTime() > ahora) return false;
       if (relacion.validTo && relacion.validTo.getTime() <= ahora) {
         return false;
