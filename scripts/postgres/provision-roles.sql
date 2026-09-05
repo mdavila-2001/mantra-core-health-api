@@ -23,17 +23,22 @@
 \set ON_ERROR_STOP on
 
 -- 1. Roles. `IF NOT EXISTS` no existe para CREATE ROLE en todas las versiones
--- soportadas, así que se consulta el catálogo. El bloque es reejecutable.
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'role_writer') THEN
-    EXECUTE format('CREATE ROLE %I LOGIN', :'role_writer');
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'role_reader') THEN
-    EXECUTE format('CREATE ROLE %I LOGIN', :'role_reader');
-  END IF;
-END
-$$;
+-- soportadas, así que se consulta el catálogo. La consulta no devuelve ninguna
+-- fila si el rol ya está, y `\gexec` sobre cero filas no ejecuta nada.
+--
+-- POR QUÉ `\gexec` Y NO UN BLOQUE `DO $$`: psql NO sustituye `:'variable'`
+-- dentro de una cadena entre dólares — la pasa literal, y el servidor recibe
+-- los dos puntos y responde `syntax error at or near ":"`. Este archivo llevaba
+-- esa forma desde que se escribió, así que NUNCA se pudo ejecutar; se descubrió
+-- el 05/09/2026 al correrlo por primera vez de verdad. En una consulta normal
+-- psql sí interpola, y `\gexec` ejecuta cada fila que devuelve.
+SELECT format('CREATE ROLE %I LOGIN', :'role_writer')
+WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'role_writer')
+\gexec
+
+SELECT format('CREATE ROLE %I LOGIN', :'role_reader')
+WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'role_reader')
+\gexec
 
 -- 2. Atributos inseguros. Se aplican SIEMPRE, no solo al crear: un rol que
 -- alguien elevó a mano vuelve aquí a su sitio en la siguiente ejecución. Sin
@@ -43,18 +48,15 @@ $$;
 -- NOBYPASSRLS es el atributo crítico de este backend: con BYPASSRLS, el rol
 -- ignora las políticas de aislamiento por tenant de las 288 tablas que las
 -- tienen, y el aislamiento multi-tenant a nivel de base deja de existir.
-DO $$
-BEGIN
-  EXECUTE format(
-    'ALTER ROLE %I NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS INHERIT LOGIN',
-    :'role_writer'
-  );
-  EXECUTE format(
-    'ALTER ROLE %I NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS INHERIT LOGIN',
-    :'role_reader'
-  );
-END
-$$;
+SELECT format(
+  'ALTER ROLE %I NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS INHERIT LOGIN',
+  :'role_writer')
+\gexec
+
+SELECT format(
+  'ALTER ROLE %I NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS INHERIT LOGIN',
+  :'role_reader')
+\gexec
 
 -- 3. Conexión a la base.
 GRANT CONNECT ON DATABASE :"database" TO :"role_writer";

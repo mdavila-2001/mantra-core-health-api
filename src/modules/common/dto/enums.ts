@@ -9,6 +9,8 @@ export enum OwnerType {
   USER = 'USER',
   PATIENT = 'PATIENT',
   TENANT = 'TENANT',
+  /** Un diagnóstico puntual (`clinical.conditions`), no el paciente entero. */
+  CONDITION = 'CONDITION',
 }
 
 /** Tipo de identificador oficial. */

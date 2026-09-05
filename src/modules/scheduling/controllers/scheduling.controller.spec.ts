@@ -25,6 +25,7 @@ describe('SchedulingController', () => {
       createResource: mockFn(),
       createPolicy: mockFn(),
       createTemplate: mockFn(),
+      updateTemplate: mockFn(),
       generateSlots: mockFn(),
       createException: mockFn(),
     };
@@ -113,6 +114,20 @@ describe('SchedulingController', () => {
     await d.controller.createTemplate(ID, dto, actor);
 
     expect(d.catalogService.createTemplate).toHaveBeenCalledWith(
+      ID,
+      dto,
+      actor,
+    );
+  });
+
+  it('delega la edición de una plantilla (TAREA-10, punto 16)', async () => {
+    const d = build();
+    const dto = { name: 'Mañanas (nuevo)' } as any;
+    d.catalogService.updateTemplate.mockResolvedValue({ id: 'tpl-1' });
+
+    await d.controller.updateTemplate(ID, dto, actor);
+
+    expect(d.catalogService.updateTemplate).toHaveBeenCalledWith(
       ID,
       dto,
       actor,

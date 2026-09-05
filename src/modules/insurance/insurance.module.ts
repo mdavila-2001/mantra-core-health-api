@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { PracticeModule } from '../practice/practice.module';
 import * as entities from './entities';
 import {
   InsuranceBackboneController,
@@ -42,7 +43,15 @@ import {
  * conciliación y comisiones de broker. Repos stateless + servicios transaccionales.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // TAREA-16 — la lectura de solicitudes es la cara del prestador que las
+    // envió, y el reclamo cuelga de `billing_provider_entity_id`, que es una
+    // `practice.practices`. `PracticeModule` expone el puerto que traduce la
+    // organización activa a sus prácticas; sin él, `insurance` tendría que
+    // importar la entidad persistente de otro dominio.
+    PracticeModule,
+  ],
   controllers: [
     InsuranceBackboneController,
     CoverageController,

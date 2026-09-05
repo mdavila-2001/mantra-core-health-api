@@ -107,6 +107,14 @@ export interface AgendaNoticeResult {
   readonly emailRequestId?: string;
   /** Por qué no se encoló el correo: sin dirección, preferencia en contra. */
   readonly emailSkippedReason?: string;
+  /**
+   * Si el aviso llegó también al chat de `SupportAdmin` (TAREA-15, punto 1 y
+   * 3 del pedido). Ausente para los avisos que esta tarea no manda por chat
+   * (cupo liberado, demora, recordatorio) — ver `messaging-agenda-notice.adapter.ts`.
+   */
+  readonly chatDelivered?: boolean;
+  /** Por qué no llegó al chat: sin perfil social, conversación no creada. */
+  readonly chatSkippedReason?: string;
 }
 
 /** Emisor de avisos de agenda. */

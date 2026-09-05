@@ -230,6 +230,9 @@ CREATE TABLE IF NOT EXISTS "accounting"."assets" (
     "accumulated_depreciation" numeric,
     "book_value" numeric,
     "status_concept_id" uuid NOT NULL,
+    -- FT-26: si un worker programado puede depreciarlo solo, o si sólo avanza
+    -- cuando alguien llama al auto-servicio a mano.
+    "automated" boolean NOT NULL DEFAULT true,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
@@ -267,6 +270,8 @@ CREATE TABLE IF NOT EXISTS "accounting"."liabilities" (
     "due_date" date,
     "creditor_name" varchar,
     "status_concept_id" uuid NOT NULL,
+    -- FT-26: mismo interruptor que `assets.automated`, para el pago de cuota.
+    "automated" boolean NOT NULL DEFAULT true,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,

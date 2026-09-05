@@ -50,5 +50,10 @@ import {
     SurveysAssignmentsService,
     SurveysResponsesService,
   ],
+  // `billing` los reutiliza para auto-crear la encuesta de satisfacción por
+  // defecto de un servicio médico nuevo (FT-31), en la misma transacción que
+  // lo da de alta — no vale la pena un segundo viaje HTTP a este módulo para
+  // algo que puede ser una escritura más dentro de la misma.
+  exports: [TemplatesRepository, AssignmentsRepository],
 })
 export class SurveysModule {}

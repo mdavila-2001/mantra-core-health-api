@@ -19,6 +19,7 @@ import {
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   CreateTemplateDto,
+  UpdateTemplateDto,
   AvailabilityExceptionListDto,
   RetireTemplateResponseDto,
   ReactivateTemplateResponseDto,
@@ -403,6 +404,138 @@ export class SchedulingCatalogService {
         name: dto.name,
         ruleCount: dto.rules.length,
         statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
+      };
+    });
+  }
+
+  /**
+   * Edita una plantilla ya publicada (TAREA-10, punto 16 — `/schedule/edit`).
+   *
+   * ## Qué cambia y qué no
+   *
+   * Los campos escalares (nombre, duración por defecto, política, vigencia) se
+   * escriben tal cual llegan; los que no vienen **se conservan**, mismo
+   * criterio que `PUT /community/profiles/me`. Si `rules` viene, **reemplaza
+   * el conjunto entero** — no hay «agregar una franja» —, con la misma
+   * validación de `createTemplate`: la franja tiene que empezar antes de
+   * terminar y el turno tiene que entrar en ella.
+   *
+   * ## Por qué no toca los cupos ya materializados
+   *
+   * `bookable_slots.schedule_template_id` es la única referencia entre las dos
+   * tablas; ningún cupo apunta a una fila de `schedule_rules`. Cambiar las
+   * franjas no puede, entonces, invalidar un cupo que ya existe — sólo cambia
+   * lo que `generate-slots` va a producir la próxima vez que se llame. Mismo
+   * principio que ya usa `retireTemplate`: la plantilla es la fuente de verdad
+   * para el futuro, no una llave que reescribe el pasado.
+   *
+   * ## Por qué no hay comprobación de citas comprometidas
+   *
+   * A diferencia de retirar, editar no le quita nada a nadie: los cupos ya
+   * reservados siguen existiendo con su horario propio
+   * (`bookable_slots.start_at`/`end_at`), que esta operación no toca.
+   *
+   * ## La concurrencia la resuelve `row_version`
+   *
+   * `ScheduleTemplates` declara `@Version()`; si dos ediciones chocan, el
+   * segundo `flush()` lanza `OptimisticLockError` y el filtro global de
+   * excepciones ya lo traduce a la respuesta correcta — no hay nada que
+   * capturar acá (AC-10-16).
+   */
+  async updateTemplate(
+    templateId: string,
+    dto: UpdateTemplateDto,
+    actor: AuthenticatedUser,
+  ): Promise<TemplateResponseDto> {
+    this.logger.info(
+      { operation: 'scheduling.template.update', templateId },
+      'Updating schedule template',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const template = await this.catalogRepo.findTemplateById(tx, templateId);
+      if (!template) {
+        throw new ResourceNotFoundException('Plantilla no encontrada', {
+          templateId,
+        });
+      }
+      const resource = await this.catalogRepo.findResourceById(
+        tx,
+        template.resourceId,
+      );
+      if (!resource) {
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId: template.resourceId,
+        });
+      }
+      this.assertRecursoDelActor(resource, actor);
+
+      if (dto.name !== undefined) template.name = dto.name;
+      if (dto.slotMinutes !== undefined) {
+        template.slotMinutes = dto.slotMinutes;
+      }
+      if (dto.bookingPolicyId !== undefined) {
+        template.bookingPolicyId = dto.bookingPolicyId;
+      }
+      if (dto.validFrom !== undefined) {
+        template.validFrom = new Date(dto.validFrom);
+      }
+      if (dto.validTo !== undefined) template.validTo = new Date(dto.validTo);
+
+      let ruleCount = (
+        await this.catalogRepo.findRulesByTemplate(tx, templateId)
+      ).length;
+
+      if (dto.rules !== undefined) {
+        const slotMinutesEfectivo =
+          dto.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
+
+        for (const rule of dto.rules) {
+          if (rule.startTime >= rule.endTime) {
+            throw new PreconditionFailedException(
+              'La franja debe empezar antes de terminar',
+              { dayOfWeek: rule.dayOfWeek },
+            );
+          }
+          const slotMinutesDeLaFranja = rule.slotMinutes ?? slotMinutesEfectivo;
+          const duracionFranja =
+            minutosDelDia(rule.endTime) - minutosDelDia(rule.startTime);
+          if (slotMinutesDeLaFranja > duracionFranja) {
+            throw new PreconditionFailedException(
+              `El turno de ${slotMinutesDeLaFranja} min no entra en la franja de ${rule.startTime} a ${rule.endTime} (${duracionFranja} min)`,
+              {
+                dayOfWeek: rule.dayOfWeek,
+                slotMinutesDeLaFranja,
+                duracionFranja,
+              },
+            );
+          }
+        }
+
+        await this.catalogRepo.deleteRulesByTemplate(tx, templateId);
+        for (const rule of dto.rules) {
+          this.catalogRepo.createRule(tx, {
+            scheduleTemplateId: templateId,
+            dayOfWeek: rule.dayOfWeek,
+            startTime: rule.startTime,
+            endTime: rule.endTime,
+            slotMinutes: rule.slotMinutes ?? slotMinutesEfectivo,
+            capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
+            gapMinutes: rule.gapMinutes,
+            actorUserId: actor.id,
+          });
+        }
+        ruleCount = dto.rules.length;
+      }
+
+      touch(template, actor.id);
+      await tx.flush();
+
+      return {
+        id: template.id,
+        name: template.name,
+        ruleCount,
+        statusConceptId: template.statusConceptId,
       };
     });
   }

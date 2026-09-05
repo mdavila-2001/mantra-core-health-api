@@ -292,6 +292,26 @@ export class TerminologySeedService {
       await em.flush();
     }
 
+    // `SupportAdmin` (TAREA-15, P-15-1): la cuenta con la que la empresa firma
+    // el chat de agenda. Sin credencial de login — nadie entra como la
+    // empresa —, y real en `iam.users` por la misma razón que el worker: es
+    // quien queda como `created_by_user_id` de la conversación y del mensaje.
+    if (!(await em.findOne(Users, { id: SEED.supportAdminUserId }))) {
+      em.create(
+        Users,
+        {
+          id: SEED.supportAdminUserId,
+          statusConceptId: CONCEPTS.USER_ACTIVE,
+          displayName: SEED.supportAdminDisplayName,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      inserted++;
+      await em.flush();
+    }
+
     if (inserted > 0) {
       this.logger.info(
         { inserted },

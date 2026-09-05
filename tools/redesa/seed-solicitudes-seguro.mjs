@@ -74,6 +74,16 @@ const ADMIN_PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd'
 /** Contraseña de las cuentas sembradas. Fija y conocida: son de demostración. */
 const CLAVE = 'D3mo-passw0rd!';
 
+/**
+ * Cuenta con la que se mira la pantalla de solicitudes.
+ *
+ * Fija —no lleva el sufijo de la corrida— para que el E2E y quien revise a
+ * mano sepan de antemano con qué entrar, y para que dos siembras no dejen dos
+ * operadores distintos.
+ */
+const OPERADOR_EMAIL =
+  process.env.T16_BILLING_OPERATOR_EMAIL ?? 'facturacion.demo@alovida.test';
+
 /** Sufijo de la corrida, para que dos pasadas no choquen por código único. */
 const TANDA = Date.now().toString(36).slice(-5);
 
@@ -269,6 +279,45 @@ async function main() {
     return;
   }
 
+  /* ---- la práctica que presenta las solicitudes -------------------------- */
+
+  // TAREA-16 · D1.a: el listado es la cara del **prestador que envió** el
+  // reclamo, y acota por `billing_provider_entity_id` contra las prácticas
+  // activas de la organización. Sin una práctica real acá, todo lo que siembre
+  // esta corrida quedaría fuera de alcance y la pantalla se vería vacía.
+  console.log('· Práctica que presenta las solicitudes…');
+
+  const practicas = await call('prácticas del tenant', 'GET', '/practices', {
+    expect: 200,
+  });
+  const listaPracticas = practicas.ok
+    ? (Array.isArray(practicas.body) ? practicas.body : (practicas.body.items ?? []))
+    : [];
+  let practiceId = listaPracticas[0]?.id ?? null;
+
+  if (practiceId === null) {
+    const practica = await call('alta de práctica', 'POST', '/practices', {
+      body: {
+        tenantId,
+        code: `PRAC-${TANDA}`,
+        name: `Consultorio de demostración ${TANDA}`,
+      },
+      expect: 201,
+    });
+    if (!practica.ok) return fallar();
+    practiceId = practica.body.id;
+    console.log(`    práctica creada: ${practiceId}`);
+  } else {
+    console.log(`    práctica reutilizada: ${practiceId}`);
+  }
+
+  /* ---- el operador de facturación que va a mirar la pantalla ------------- */
+
+  // D1.b: ver y reclamar es de `BILLING_OPERATOR`. El administrador entra por
+  // el comodín `SUPERADMIN`, así que sin esta cuenta el E2E probaría un rol
+  // que ningún usuario real tiene — que es justo el defecto que T16 corrige.
+  await asegurarOperadorDeFacturacion(tenantId);
+
   /* ---- aseguradora, producto y plan del tenant del administrador --------- */
 
   // Reejecutable: `insurance.insurance_carriers` y `insurance_brokers` tienen
@@ -451,10 +500,10 @@ async function main() {
         body: {
           insuranceCarrierId: carrierId,
           patientCoverageId: cobertura.id,
-          // La entidad facturadora: la aseguradora de demostración se factura
-          // a sí misma en esta corrida. No hay práctica sembrada a la que
-          // apuntar, y poner un uuid al azar dejaría una FK que no resuelve.
-          billingProviderEntityId: carrierId,
+          // La entidad facturadora es **la práctica que presenta el reclamo**
+          // (TAREA-16 · D1.a). Antes acá iba la aseguradora, que se facturaba a
+          // sí misma: con el alcance del prestador esa fila no la ve nadie.
+          billingProviderEntityId: practiceId,
           claimIdentifier: identificador,
           idempotencyKey: `${TANDA}-${indice}`,
           lines: receta.lineas.map((linea, orden) => ({
@@ -561,6 +610,68 @@ async function main() {
 function ceroComo(referencia) {
   const decimales = String(referencia).split('.')[1]?.length ?? 0;
   return decimales === 0 ? '0' : `0.${'0'.repeat(decimales)}`;
+}
+
+/**
+ * Deja lista la cuenta con la que se mira la pantalla: `BILLING_OPERATOR`.
+ *
+ * TAREA-16 · D1.b (Justin, 2026-09-04): ver el listado, abrir el detalle y
+ * reclamar es del operador de facturación **del prestador**. El administrador
+ * de arranque llega igual, pero por el comodín `SUPERADMIN`: certificar sólo
+ * con él dejaría sin probar el único rol que un usuario real va a tener.
+ *
+ * Idempotente: si la cuenta ya existe se reutiliza, y la asignación de rol se
+ * repite sin duplicar (el servicio de `authz` devuelve la vigente).
+ *
+ * @param tenantId - Organización del administrador, la misma de las solicitudes.
+ * @returns Nada; informa por consola y no interrumpe la siembra si falla.
+ */
+async function asegurarOperadorDeFacturacion(tenantId) {
+  console.log('· Operador de facturación (BILLING_OPERATOR)…');
+
+  const alta = await call('alta del operador', 'POST', '/iam/users', {
+    body: {
+      displayName: 'Operadora de facturación (demo)',
+      email: OPERADOR_EMAIL,
+      password: CLAVE,
+      // `initialRole` sólo admite roles **globales** de plataforma; el de
+      // dominio vive en `authz` y se asigna abajo, acotado al tenant.
+      initialRole: 'USER',
+    },
+    expect: [201, 409],
+  });
+
+  let userId = alta.status === 201 ? alta.body.id : null;
+  if (userId === null) {
+    const existentes = await call('búsqueda del operador', 'GET', `/iam/users?q=${encodeURIComponent(OPERADOR_EMAIL)}`, {
+      expect: 200,
+    });
+    userId = existentes.ok ? (existentes.body.items?.[0]?.id ?? null) : null;
+  }
+  if (userId === null) {
+    console.log('    ⚠ no se pudo crear ni encontrar la cuenta: seguí con el admin');
+    return;
+  }
+
+  // Sin membresía la sesión entra pero no tiene organización activa, y toda
+  // pantalla que dependa del tenant queda pidiendo una que la cuenta no tiene.
+  await call('membresía del operador', 'POST', `/tenants/${tenantId}/memberships`, {
+    body: { userId, role: 'STAFF', accessScope: 'ALL_TENANT' },
+    expect: [201, 409],
+  });
+
+  const rol = await call(
+    'rol BILLING_OPERATOR',
+    'POST',
+    `/authz/users/${userId}/role-assignments`,
+    { body: { roleCode: 'BILLING_OPERATOR', tenantId }, expect: [201, 409] },
+  );
+
+  if (rol.ok || rol.status === 409) {
+    console.log(`    ${OPERADOR_EMAIL} / ${CLAVE}`);
+  } else {
+    console.log('    ⚠ la cuenta existe pero no se le pudo asignar el rol');
+  }
 }
 
 /**

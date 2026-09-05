@@ -60,14 +60,18 @@ function build() {
     warn: mockFn(),
     error: mockFn(),
   };
+  const supportAdmin = {
+    notify: mockFn().mockResolvedValue({ chatDelivered: true }),
+  };
 
   const adapter = new MessagingAgendaNoticeAdapter(
     em as any,
     notifications as any,
     noticeRepo as any,
+    supportAdmin as any,
     logger as any,
   );
-  return { adapter, notifications, noticeRepo, logger };
+  return { adapter, notifications, noticeRepo, logger, supportAdmin };
 }
 
 describe('MessagingAgendaNoticeAdapter (P8)', () => {
@@ -282,6 +286,68 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
     expect(resultado.delivered).toBe(false);
     expect(resultado.skippedReason).toMatch(/falló/i);
     expect(d.logger.error).toHaveBeenCalled();
+  });
+
+  it('el correo lleva un enlace real a la app cuando el aviso trae ruta', async () => {
+    const d = build();
+
+    await d.adapter.emit(aviso);
+
+    const [correo] = d.notifications.createRequest.mock.calls[1];
+    expect(correo.payloadJson.bodyHtml).toContain(
+      'http://localhost:4200/my-account/appointments?turno=booking-1',
+    );
+    expect(correo.payloadJson.bodyHtml).toContain('<a href=');
+  });
+
+  it('sin ruta en el aviso, el correo no lleva bodyHtml (no hay a dónde llevar)', async () => {
+    const d = build();
+
+    await d.adapter.emit({ ...aviso, payload: undefined });
+
+    const [correo] = d.notifications.createRequest.mock.calls[1];
+    expect(correo.payloadJson.bodyHtml).toBeUndefined();
+  });
+
+  it('BOOKING_STATE_CHANGED también avisa por el chat de SupportAdmin', async () => {
+    const d = build();
+    const cambio: AgendaNotice = {
+      ...aviso,
+      kind: 'BOOKING_STATE_CHANGED',
+      recipient: { userId: 'user-medico' },
+    };
+
+    const resultado = await d.adapter.emit(cambio);
+
+    expect(d.supportAdmin.notify).toHaveBeenCalledWith(cambio, 'user-medico');
+    expect(resultado.chatDelivered).toBe(true);
+  });
+
+  it('los avisos que la ficha no pide por chat (demora, recordatorio, cupo) no tocan SupportAdmin', async () => {
+    const d = build();
+
+    await d.adapter.emit(aviso); // PRACTITIONER_DELAY
+
+    expect(d.supportAdmin.notify).not.toHaveBeenCalled();
+  });
+
+  it('un chat suprimido no rompe nada: el resto de la entrega sigue devolviendo lo suyo', async () => {
+    const d = build();
+    d.supportAdmin.notify.mockResolvedValue({
+      chatDelivered: false,
+      chatSkippedReason: 'No se pudo entregar el aviso por chat',
+    });
+    const cambio: AgendaNotice = {
+      ...aviso,
+      kind: 'BOOKING_STATE_CHANGED',
+      recipient: { userId: 'user-medico' },
+    };
+
+    const resultado = await d.adapter.emit(cambio);
+
+    expect(resultado.delivered).toBe(true);
+    expect(resultado.chatDelivered).toBe(false);
+    expect(resultado.chatSkippedReason).toMatch(/no se pudo entregar/i);
   });
 
   it('un lote sigue adelante aunque uno falle', async () => {

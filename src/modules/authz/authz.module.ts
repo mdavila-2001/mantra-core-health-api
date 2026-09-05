@@ -39,6 +39,11 @@ import {
 import { DataAccessLogRepository } from '../audit/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { MessagingModule } from '../messaging/messaging.module';
+// Igual que `clinical` la provee bare (sin importar `ProfilesModule` entero):
+// es una clase sin estado que recibe el `EntityManager` por parámetro.
+// `AuthzCareRelationshipsService` la usa para notificar al paciente titular
+// de una solicitud de acceso (FT-07-R05).
+import { PersonAccountLinksRepository } from '../profiles/repositories';
 
 /**
  * Módulo 06 — Authorization, Purpose of Use and Field Masking.
@@ -81,6 +86,7 @@ import { MessagingModule } from '../messaging/messaging.module';
     AuthzServicePrincipalsRepository,
     // Repositorio de auditoría reutilizado para el evento de acceso de emergencia
     DataAccessLogRepository,
+    PersonAccountLinksRepository,
     // Servicios
     AuthzCatalogService,
     AuthzPoliciesService,
@@ -96,6 +102,13 @@ import { MessagingModule } from '../messaging/messaging.module';
   // `diagnostics` para compartir un resultado con un profesional por un plazo:
   // el grant vive acá, en la única tabla de grants del producto, y no se
   // reimplementa del lado del que comparte.
-  exports: [AuthzEffectiveRolesService, ResourceScopeGrantsRepository],
+  // `AuthzPdpService` se exporta para que otros módulos clínicos (`clinical`,
+  // `chart`) puedan evaluar la decisión efectiva de acceso a PHI sin duplicar
+  // la lógica del PDP — ver `ClinicalRecordAccessGuard` (FT-07-R08).
+  exports: [
+    AuthzEffectiveRolesService,
+    ResourceScopeGrantsRepository,
+    AuthzPdpService,
+  ],
 })
 export class AuthzModule {}
