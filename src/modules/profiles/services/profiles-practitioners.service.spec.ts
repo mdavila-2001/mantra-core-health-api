@@ -703,7 +703,6 @@ describe('ProfilesPractitionersService', () => {
         {
           organizationName: '  Hospital Obrero N.º 1  ',
           roleTitle: '  Médico de planta ',
-          departmentText: '   ',
           startDate: '2020-03-01',
         } as any,
         actor,
@@ -715,12 +714,44 @@ describe('ProfilesPractitionersService', () => {
           practitionerProfileId: 'pp1',
           organizationName: 'Hospital Obrero N.º 1',
           roleTitle: 'Médico de planta',
-          departmentText: undefined,
           affiliationTypeConceptId: PROF.AFFILIATION_TYPE_EMPLOYMENT,
           statusConceptId: PROF.AFFILIATION_ACTIVE,
         }),
       );
       expect(res).toMatchObject({ id: 'af-9', current: true });
+    });
+
+    // ALV-007: un vínculo de "atiende en su propio consultorio" no tiene un
+    // cargo dentro de una jerarquía, y exigirlo bloqueaba el guardado.
+    it('allows an affiliation without roleTitle (own-office link)', async () => {
+      const d = build();
+      d.affiliationsRepo.create.mockReturnValue(
+        fila({ id: 'af-10', roleTitle: undefined }),
+      );
+
+      const res = await d.service.addOwnAffiliation(
+        {
+          organizationName: 'Mi consultorio',
+          startDate: '2020-03-01',
+        } as any,
+        actor,
+      );
+
+      expect(d.affiliationsRepo.findSame).toHaveBeenCalledWith(
+        d.tx,
+        'pp1',
+        'Mi consultorio',
+        null,
+        new Date('2020-03-01'),
+      );
+      expect(d.affiliationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          organizationName: 'Mi consultorio',
+          roleTitle: undefined,
+        }),
+      );
+      expect(res).toMatchObject({ id: 'af-10' });
     });
   });
 

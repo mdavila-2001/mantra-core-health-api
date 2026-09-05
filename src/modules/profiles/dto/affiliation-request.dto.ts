@@ -47,9 +47,14 @@ export class AffiliationRequestDto {
   @ApiProperty()
   organizationName!: string;
 
-  /** Cargo declarado. */
-  @ApiProperty()
-  roleTitle!: string;
+  /**
+   * Cargo declarado, cuando el vínculo lo tiene.
+   *
+   * Opcional desde ALV-007: un pedido de "atiendo en mi propio consultorio"
+   * no tiene cargo dentro de una jerarquía.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  roleTitle!: string | null;
 
   /** Sede de la organización a la que apunta el pedido. */
   @ApiProperty({ format: 'uuid', nullable: true })

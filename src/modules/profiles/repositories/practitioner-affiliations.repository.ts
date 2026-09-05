@@ -14,13 +14,9 @@ export interface CreateAffiliationData {
    */
   organizationName: string;
   /**
-   * Valor de role title mantenido por la instancia.
+   * Cargo ejercido, cuando el vínculo lo declara (ALV-007: opcional).
    */
-  roleTitle: string;
-  /**
-   * Valor de department text mantenido por la instancia.
-   */
-  departmentText?: string;
+  roleTitle?: string;
   /**
    * Identificador asociado a practice site.
    */
@@ -202,7 +198,11 @@ export class PractitionerAffiliationsRepository {
    * @param em - Contexto de persistencia o transacción activa.
    * @param practitionerProfileId - Profesional consultado.
    * @param organizationName - Institución declarada.
-   * @param roleTitle - Cargo declarado.
+   * @param roleTitle - Cargo declarado, o `null` si el vínculo no lo tiene.
+   *   Dos vínculos sin cargo NO se consideran iguales entre sí por esta
+   *   comparación (Postgres trata cada `NULL` como distinto; ver la nota de
+   *   la entidad en la bóveda) — es la misma deuda documentada de los dos
+   *   índices únicos parciales, aceptada en ALV-007.
    * @param startDate - Inicio declarado.
    * @returns La fila existente, o `null`.
    */
@@ -210,7 +210,7 @@ export class PractitionerAffiliationsRepository {
     em: EntityManager,
     practitionerProfileId: string,
     organizationName: string,
-    roleTitle: string,
+    roleTitle: string | null,
     startDate: Date,
   ): Promise<PractitionerAffiliations | null> {
     return em.findOne(PractitionerAffiliations, {
@@ -238,7 +238,6 @@ export class PractitionerAffiliationsRepository {
         practitionerProfileId: data.practitionerProfileId,
         organizationName: data.organizationName,
         roleTitle: data.roleTitle,
-        departmentText: data.departmentText,
         practiceSiteId: data.practiceSiteId,
         affiliationTypeConceptId: data.affiliationTypeConceptId,
         startDate: data.startDate,
