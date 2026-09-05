@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import type { FileLinkResponseDto } from '../../common/dto';
 import {
   AllergyIntolerancesService,
   ConditionsService,
@@ -19,6 +20,7 @@ import {
 } from '../services';
 import {
   AllergyIntoleranceResponseDto,
+  AttachFileToConditionDto,
   ChangeConditionClinicalStatusDto,
   ConditionResponseDto,
   CreateAllergyIntoleranceDto,
@@ -84,6 +86,21 @@ export class ClinicalRecordsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ConditionResponseDto> {
     return this.conditionsService.changeClinicalStatus(id, dto, actor);
+  }
+
+  /**
+   * ALV-033 (reemplazo de ALV-032): liga un archivo ya subido a este
+   * diagnóstico puntual. Subí el archivo antes con `POST /common/files`.
+   */
+  @Post('conditions/:id/attachments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adjuntar un archivo ya subido a una condición' })
+  attachFileToCondition(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AttachFileToConditionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    return this.conditionsService.attachFile(id, dto, actor);
   }
 
   /** UC-08-09. */
