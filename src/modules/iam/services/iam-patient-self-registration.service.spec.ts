@@ -33,9 +33,10 @@ const dto: RegisterPatientDto = {
   birthDate: '1990-05-17',
   phone: '+591 70012345',
   sexAtBirth: 'FEMALE',
-  // Un municipio REAL del catálogo: `writeAddress` lo comprueba contra
-  // `VS_BO_MUNICIPALITY` y rechaza con 400 el que no pertenece
-  // (`common/services/residence-address.ts`). 030301 es Sacaba, Cochabamba.
+  // `writeAddress` valida el municipio contra la base, con
+  // `CatalogConceptsRepository.findById` (`common/services/residence-address.ts`,
+  // ALV-009-bis) — el `build()` de este archivo mockea ese id como Sacaba,
+  // Cochabamba. El uuid en sí no importa: es sólo la llave del mock.
   residenceMunicipalityConceptId: boMunicipalityConceptId('030301'),
 };
 
@@ -79,9 +80,18 @@ describe('IamPatientSelfRegistrationService', () => {
     const identifiersRepo = { create: fn() };
     const contactPointsRepo = { create: fn() };
     const addressesRepo = { create: fn() };
-    // El municipio no se valida contra el catálogo estático: se busca en la
-    // base real. Sin municipio por defecto, `findById` no se llama.
-    const catalogConceptsRepo = { findById: fn().mockResolvedValue(null) };
+    // El municipio del `dto` por defecto (Sacaba, Cochabamba) es el único
+    // sembrado en este doble: cualquier otro id responde `null`, como haría
+    // la base real con un uuid que no pertenece a `VS_BO_MUNICIPALITY`.
+    const catalogConceptsRepo = {
+      findById: fn((_tx: any, id: string) =>
+        Promise.resolve(
+          id === dto.residenceMunicipalityConceptId
+            ? { code: 'CB-SACABA', display: 'Sacaba' }
+            : null,
+        ),
+      ),
+    };
     const notificationsService = {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
     };
