@@ -118,7 +118,10 @@
     "db:vendor": "bash scripts/db/vendor-ddl.sh",
     "db:vendor:check": "bash scripts/db/vendor-ddl.sh --check",
     "start:worker:audio-assets": "node dist/src/worker-audio-assets",
-    "start:worker:audio-assets:dev": "nest start --watch --entryFile worker-audio-assets"
+    "start:worker:audio-assets:dev": "nest start --watch --entryFile worker-audio-assets",
+    "infra:up": "docker compose up -d redis opensearch opensearch-init minio mock-provider-server",
+    "infra:down": "docker compose --profile \"*\" down",
+    "infra:purge": "docker compose --profile \"*\" down -v --remove-orphans"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",
