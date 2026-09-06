@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =========================================================================
-# Mantra Core Technologies · REDESA Health Ecosystem
+# Mantra Core Technologies · ALOVIDA Health Ecosystem
 # Instala un cron diario que corre scripts/docker-prune.sh, sin depender de
 # que alguien recuerde usar `yarn docker:up` o `yarn docker:api:refresh`.
 # Es el respaldo para cuando alguien levanta el stack con

@@ -45,7 +45,7 @@ Decisiones secundarias, con sus alternativas evaluadas, en
    activas, las que corresponden a tecnologías realmente presentes.
 4. **Arranque en la primera línea del proceso** (`src/main.ts`, `src/worker/bootstrap.ts`), porque
    la instrumentación automática parchea módulos en el momento en que Node los carga.
-5. **Nombre de servicio derivado del entrypoint** (`redesa-api`, `redesa-worker-<dominio>`), para
+5. **Nombre de servicio derivado del entrypoint** (`alovida-api`, `alovida-worker-<dominio>`), para
    no depender de declarar 21 variables de entorno correctamente.
 6. **Propagación por outbox en `metadata_json._trace`**, nunca en el payload: el payload alimenta
    la clave de idempotencia del outbox, y un `traceparent` distinto por petición la rompería.

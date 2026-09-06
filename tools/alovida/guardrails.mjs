@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // =============================================================================
-// Guardrails REDESA — checks estáticos de los criterios de rechazo técnico.
+// Guardrails ALOVIDA — checks estáticos de los criterios de rechazo técnico.
 // =============================================================================
 // Convierte en un check de CI (rompe el build) los antipatrones que las reglas
 // canónicas prohíben. Es estático (no arranca la app ni toca la BD): analiza los
-// controladores y el catálogo ORM. Uso: `node tools/redesa/guardrails.mjs`.
+// controladores y el catálogo ORM. Uso: `node tools/alovida/guardrails.mjs`.
 //
 // Criterios implementados:
 //   - HARD_DELETE_RESTRICTED_DATA      @Delete sobre dominios inmutables
@@ -508,7 +508,7 @@ for (const file of repoFiles) {
 const byCode = {};
 for (const v of violations) (byCode[v.code] ??= []).push(v);
 
-console.log('== Guardrails REDESA ==');
+console.log('== Guardrails ALOVIDA ==');
 for (const code of Object.keys(byCode)) {
   console.log(`\n[${code}] ${byCode[code].length} hallazgo(s):`);
   for (const v of byCode[code].slice(0, 40))

@@ -29,7 +29,7 @@ const { BootstrapAdminSeedService } = await import(
 // Invocado a mano, el operador ya decidió: se acepta ADMIN_* además de BOOTSTRAP_ADMIN_*, y se
 // autoriza producción, porque correr este script ES el permiso explícito que el seed automático
 // pide por variable. Al arranque desatendido de la API esa autorización no se le regala.
-// Buzón real por defecto (ver `tools/redesa/correos-reales.mjs`): con
+// Buzón real por defecto (ver `tools/alovida/correos-reales.mjs`): con
 // `@redesa.test` el correo de verificación no llegaba a ninguna parte.
 const email =
   process.env.ADMIN_EMAIL ??

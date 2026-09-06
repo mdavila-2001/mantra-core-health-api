@@ -29,7 +29,7 @@ export const PRACTICE_SMOKE: SmokeCase[] = [
     body: (c) => ({
       tenantId: c.tenantId,
       code: `PRAC-${c.u}`,
-      name: 'Clínica Redesa',
+      name: 'Clínica Alovida',
     }),
     expectedStatus: 201,
     capture: (b, c) => {

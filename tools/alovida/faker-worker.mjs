@@ -37,10 +37,10 @@
  *
  * Uso
  * ---
- *   node tools/redesa/faker-worker.mjs
- *   FAKER_SCALE=small node tools/redesa/faker-worker.mjs
- *   FAKER_DOCTORS=5 FAKER_PATIENTS=20 FAKER_POSTS_PER_DOCTOR=2 node tools/redesa/faker-worker.mjs
- *   FAKER_API_BASE_URL=http://localhost:3040 FAKER_FORCE=1 node tools/redesa/faker-worker.mjs
+ *   node tools/alovida/faker-worker.mjs
+ *   FAKER_SCALE=small node tools/alovida/faker-worker.mjs
+ *   FAKER_DOCTORS=5 FAKER_PATIENTS=20 FAKER_POSTS_PER_DOCTOR=2 node tools/alovida/faker-worker.mjs
+ *   FAKER_API_BASE_URL=http://localhost:3040 FAKER_FORCE=1 node tools/alovida/faker-worker.mjs
  */
 import 'dotenv/config';
 import { createHash } from 'node:crypto';

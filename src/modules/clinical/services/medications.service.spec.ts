@@ -338,7 +338,7 @@ describe('MedicationsService', () => {
     });
   });
 
-  describe('sign (REDESA D-05, additive)', () => {
+  describe('sign (ALOVIDA D-05, additive)', () => {
     it('stamps signedAt/signedByUserId on a draft', async () => {
       const d = build();
       const request = {

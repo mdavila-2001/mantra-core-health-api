@@ -1979,7 +1979,7 @@ Ejemplo de error normalizado:
 
 Aprobar el asiento (rol de aprobación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: REDESA C-17 — PENDING_REVIEW → APPROVED (exige rol de aprobación).
+Contexto declarado en el controlador: ALOVIDA C-17 — PENDING_REVIEW → APPROVED (exige rol de aprobación).
 
 ### Descripción del sistema
 
@@ -2113,7 +2113,7 @@ Ejemplo de error normalizado:
 
 Clasificar automáticamente el asiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: REDESA C-17 — DRAFT → AUTO_CLASSIFIED.
+Contexto declarado en el controlador: ALOVIDA C-17 — DRAFT → AUTO_CLASSIFIED.
 
 ### Descripción del sistema
 
@@ -2374,7 +2374,7 @@ Ejemplo de error normalizado:
 
 Postear el asiento aprobado (efecto en el mayor). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: REDESA C-17 — APPROVED → POSTED (posteo efectivo en el mayor).
+Contexto declarado en el controlador: ALOVIDA C-17 — APPROVED → POSTED (posteo efectivo en el mayor).
 
 ### Descripción del sistema
 
@@ -2641,7 +2641,7 @@ Ejemplo de error normalizado:
 
 Enviar el asiento a revisión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: REDESA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW.
+Contexto declarado en el controlador: ALOVIDA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW.
 
 ### Descripción del sistema
 
@@ -2775,7 +2775,7 @@ Ejemplo de error normalizado:
 
 Un PRACTITIONER solo puede crear borradores en una práctica a la que esté vinculado con una asignación de rol activa (Carril 18); el servicio lo verifica y responde 422 si no.
 
-Contexto declarado en el controlador: REDESA C-17 — crea el asiento en estado DRAFT (sin postear). Punto de entrada del flujo canónico DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED.
+Contexto declarado en el controlador: ALOVIDA C-17 — crea el asiento en estado DRAFT (sin postear). Punto de entrada del flujo canónico DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED.
 
 ### Descripción del sistema
 

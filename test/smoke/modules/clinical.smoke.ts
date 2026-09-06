@@ -337,7 +337,7 @@ export const CLINICAL_SMOKE: SmokeCase[] = [
     expectedStatus: 400,
   },
 
-  // ---- REDESA D-05: política de firma de recetas ----------------------------
+  // ---- ALOVIDA D-05: política de firma de recetas ----------------------------
   // El harness trunca los datos de negocio, así que la política sembrada por el
   // paquete no existe en este contexto: se crea una comodín propia para ejercitar
   // la regla y se desactiva al terminar (los smokes posteriores emiten sin firmar).

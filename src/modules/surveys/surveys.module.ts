@@ -30,7 +30,7 @@ import {
  * encuestas sociales de una publicación; el segundo es un motor EAV para
  * extender entidades con campos a medida. Ninguno modela un instrumento
  * dirigido a un destinatario con ventana de respuesta y respuestas privadas,
- * que es exactamente lo que REDESA pide y lo que hay acá.
+ * que es exactamente lo que ALOVIDA pide y lo que hay acá.
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],

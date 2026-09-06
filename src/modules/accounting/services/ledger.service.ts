@@ -51,7 +51,7 @@ const NORMAL_BALANCE_CONCEPT: Record<NormalBalance, string> = {
 };
 
 /**
- * Máquina de estados canónica del asiento (REDESA C-17). Cada estado declara sus
+ * Máquina de estados canónica del asiento (ALOVIDA C-17). Cada estado declara sus
  * transiciones válidas; cualquier otra combinación la rechaza `assertTransition`
  * con 422 (PreconditionFailed). El efecto en el mayor (sellado de `postedAt`) solo
  * ocurre en la transición APPROVED → POSTED.
@@ -160,7 +160,7 @@ export class LedgerService {
    * UC-16-01 / atajo directo (crear+postear). Registra un asiento balanceado y lo
    * deja POSTEADO en un solo paso, saltándose el flujo de revisión/aprobación.
    *
-   * DECISIÓN DE COMPATIBILIDAD (REDESA C-17): el flujo canónico es
+   * DECISIÓN DE COMPATIBILIDAD (ALOVIDA C-17): el flujo canónico es
    * `createDraft → classify → submitForReview → approve → post`. Este atajo se
    * conserva para no romper integraciones/tests existentes y está controlado por:
    *   - ROL: el controlador lo restringe a `SECURITY_ADMIN` (`@Roles`), el mismo
@@ -277,7 +277,7 @@ export class LedgerService {
   }
 
   /**
-   * REDESA C-17 — estado inicial DRAFT. Registra el asiento y sus líneas del mayor
+   * ALOVIDA C-17 — estado inicial DRAFT. Registra el asiento y sus líneas del mayor
    * SIN postearlo: queda en DRAFT (`postedAt` nulo). El efecto en el mayor se aplaza
    * al comando `post`. Se valida la partida doble por adelantado para no aceptar un
    * borrador estructuralmente inválido; el periodo ABIERTO se valida en `post`.
@@ -342,7 +342,7 @@ export class LedgerService {
   }
 
   /**
-   * REDESA C-17 — DRAFT → AUTO_CLASSIFIED. Clasificación automática por reglas.
+   * ALOVIDA C-17 — DRAFT → AUTO_CLASSIFIED. Clasificación automática por reglas.
    * PLACEHOLDER determinista y documentado: en ausencia de un motor de reglas de
    * clasificación, se marca el asiento como auto-clasificado conservando su tipo
    * STANDARD. Punto de extensión: aquí se resolvería `transactionTypeConceptId`
@@ -356,7 +356,7 @@ export class LedgerService {
     return this.transition(id, ACCT.TXN_AUTO_CLASSIFIED, actor, 'classify');
   }
 
-  /** REDESA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
+  /** ALOVIDA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
   submitForReview(
     id: string,
     _dto: JournalTransitionDto,
@@ -366,7 +366,7 @@ export class LedgerService {
   }
 
   /**
-   * REDESA C-17 — PENDING_REVIEW → APPROVED. Exige rol de aprobación y sella
+   * ALOVIDA C-17 — PENDING_REVIEW → APPROVED. Exige rol de aprobación y sella
    * quién/ cuándo aprobó (segregación de funciones respecto al posteo).
    */
   async approve(
@@ -382,7 +382,7 @@ export class LedgerService {
   }
 
   /**
-   * REDESA C-17 — APPROVED → POSTED. ES el posteo efectivo en el mayor: valida la
+   * ALOVIDA C-17 — APPROVED → POSTED. ES el posteo efectivo en el mayor: valida la
    * partida doble (recalculada desde las líneas persistidas) y que el periodo esté
    * ABIERTO, y sella `postedAt`/`postedByUserId`. Solo transita desde APPROVED.
    */
@@ -483,7 +483,7 @@ export class LedgerService {
           transactionId,
         });
       }
-      // REDESA C-17: la reversa es la única transición desde POSTED (POSTED→REVERSED);
+      // ALOVIDA C-17: la reversa es la única transición desde POSTED (POSTED→REVERSED);
       // `assertTransition` rechaza (422) reversar un asiento en cualquier otro estado.
       this.assertTransition(original.statusConceptId, ACCT.TXN_REVERSED);
       const existingLink = await this.journalRepo.findLink(

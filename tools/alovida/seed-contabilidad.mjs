@@ -37,8 +37,8 @@
  *
  * ## Uso
  *
- *   node tools/redesa/seed-contabilidad.mjs
- *   node tools/redesa/seed-contabilidad.mjs --base-url http://localhost:3001
+ *   node tools/alovida/seed-contabilidad.mjs
+ *   node tools/alovida/seed-contabilidad.mjs --base-url http://localhost:3001
  *
  * Requiere una API levantada con el administrador de arranque
  * (`BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`). El alta de cuentas y

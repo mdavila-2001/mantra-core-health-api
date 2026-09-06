@@ -39,10 +39,10 @@
  *
  * ## Uso
  *
- *   node tools/redesa/completar-vitrinas-centros.mjs
- *   node tools/redesa/completar-vitrinas-centros.mjs --base-url http://localhost:3011
- *   node tools/redesa/completar-vitrinas-centros.mjs --sin-imagenes
- *   node tools/redesa/completar-vitrinas-centros.mjs --rehacer   (pisa las ya completas)
+ *   node tools/alovida/completar-vitrinas-centros.mjs
+ *   node tools/alovida/completar-vitrinas-centros.mjs --base-url http://localhost:3011
+ *   node tools/alovida/completar-vitrinas-centros.mjs --sin-imagenes
+ *   node tools/alovida/completar-vitrinas-centros.mjs --rehacer   (pisa las ya completas)
  *
  * No es un mock: escribe por la API real, con sus guards y validaciones.
  */

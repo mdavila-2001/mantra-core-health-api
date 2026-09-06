@@ -7,7 +7,7 @@
 //
 // También genera docs/modules/index.md: catálogo dinámico de módulos con sus
 // métricas reales (controllers/services/repos/entities/dto), cruzado contra
-// tools/redesa/coverage-report.mjs.
+// tools/alovida/coverage-report.mjs.
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';

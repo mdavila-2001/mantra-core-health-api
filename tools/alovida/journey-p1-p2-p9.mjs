@@ -232,7 +232,7 @@ const main = async () => {
     token: TOKEN_DOC,
     body: {
       tenantId,
-      displayName: 'Dra. Demo Redesa',
+      displayName: 'Dra. Demo Alovida',
       slug: `dra-demo-${U}`,
       headline: 'Medicina general',
     },

@@ -149,7 +149,7 @@ export class ClinicalRecordsController {
     return this.medicationsService.editDraft(id, dto, actor);
   }
 
-  /** REDESA D-05: firma la receta en borrador (aditivo; habilita emitir bajo política). */
+  /** ALOVIDA D-05: firma la receta en borrador (aditivo; habilita emitir bajo política). */
   @Post('medication-requests/:id/sign')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Firmar una receta en borrador (DRAFT)' })

@@ -3,9 +3,9 @@
 > Fase 9. Síntesis a partir de `src/modules/README.md`, `ESTADO-Y-PENDIENTES.md` y el inventario
 > real de 60 módulos / 1184 entidades / 878 operaciones (`docs/reports/system-inventory.md`).
 
-## Qué es REDESA Health
+## Qué es ALOVIDA Health
 
-REDESA es el backend de un ecosistema de salud operado por Mantra Core Technologies: una única
+ALOVIDA es el backend de un ecosistema de salud operado por Mantra Core Technologies: una única
 API que sostiene la operación clínica, administrativa y financiera de una red de práctica médica
 (clínicas, consultorios, centros quirúrgicos, farmacias) — no un producto de nicho, sino una
 plataforma horizontal que cubre desde el registro de un paciente hasta la contabilidad de la
@@ -15,7 +15,7 @@ analítica.
 El modelo de datos ("modelo canónico SALUD v4.0.x", según `src/modules/README.md`) organiza el
 dominio en **60 schemas PostgreSQL**, cada uno con su módulo NestJS 1:1 — el límite de módulo en
 código *es* el límite de schema en base de datos, una decisión de diseño deliberada que hace el
-límite de dominio verificable mecánicamente (`tools/redesa/coverage-report.mjs`,
+límite de dominio verificable mecánicamente (`tools/alovida/coverage-report.mjs`,
 `DIRECT_CROSS_DOMAIN_ACCESS`).
 
 ## Por qué existe cada gran bloque

@@ -20,9 +20,9 @@
  * el fallo.
  *
  * Uso:
- *   node tools/redesa/seed-dev-data.mjs
- *   node tools/redesa/seed-dev-data.mjs --doctors 10 --patients 40 --weeks 4
- *   node tools/redesa/seed-dev-data.mjs --base-url http://localhost:3001
+ *   node tools/alovida/seed-dev-data.mjs
+ *   node tools/alovida/seed-dev-data.mjs --doctors 10 --patients 40 --weeks 4
+ *   node tools/alovida/seed-dev-data.mjs --base-url http://localhost:3001
  *
  * Requiere una API levantada con el administrador de arranque
  * (`BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`).
@@ -696,7 +696,7 @@ const practice = await call(
     body: {
       tenantId,
       code: `PRACTICA-${U}`,
-      name: `Clínica Redesa — corrida ${U}`,
+      name: `Clínica Alovida — corrida ${U}`,
     },
     expect: [200, 201],
   },

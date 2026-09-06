@@ -163,7 +163,7 @@ export class IamMfaService {
         secret = generateSecret();
         factor.secretEncrypted = encryptSecret(secret);
         otpauthUri = generateURI({
-          issuer: 'REDESA Health',
+          issuer: 'ALOVIDA Health',
           label: user.displayName ?? userId,
           secret,
         });

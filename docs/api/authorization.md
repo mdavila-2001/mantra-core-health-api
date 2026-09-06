@@ -56,7 +56,7 @@ propiedad del código — ver `SEC-001` en `docs/governance/traceability-matrix.
 
 ## Convención de mutaciones sin política explícita
 
-El analizador `tools/redesa/coverage-report.mjs` (regla `ORPHAN_ENDPOINT`) exige que todo endpoint
+El analizador `tools/alovida/coverage-report.mjs` (regla `ORPHAN_ENDPOINT`) exige que todo endpoint
 mutante (POST/PUT/PATCH/DELETE) declare explícitamente `@Roles(...)` o `@Public()` — no puede
 quedar en la ambigüedad de "protegido solo por estar autenticado". Estado actual: **0** endpoints
 mutantes sin esa política explícita (verificado en Fase 0, `docs/reports/baseline.md`).

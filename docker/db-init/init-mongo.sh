@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =========================================================================
-# Mantra Core Technologies · REDESA Health Ecosystem
+# Mantra Core Technologies · ALOVIDA Health Ecosystem
 # mongo-init: crea las colecciones del módulo 55 document_store
 # (validadores $jsonSchema + índices) si aún no existen. Idempotente.
 # =========================================================================

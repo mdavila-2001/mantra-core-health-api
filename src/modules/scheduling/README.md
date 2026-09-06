@@ -111,7 +111,7 @@ Tres cosas que el arreglo tuvo que resolver, y que conviene no deshacer:
 Como el barrido de días locales se ensancha un día por lado, los cupos se recortan a la ventana
 pedida: sin ese recorte, una zona al oeste de UTC materializaría cupos del día anterior.
 
-**Pendiente relacionado:** `tools/redesa/seed-dev-data.mjs` declara sus franjas ya convertidas con
+**Pendiente relacionado:** `tools/alovida/seed-dev-data.mjs` declara sus franjas ya convertidas con
 `horaUtcDeLocal`, una compensación deliberada de cuando el generador era incorrecto. Ahora que
 `generateSlots` lee `time_zone`, esa función sobra y las franjas deberían volver a declararse en
 hora local — vive en `salud-db`/`tools`, fuera del alcance de este cambio.

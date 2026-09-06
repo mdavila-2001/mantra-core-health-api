@@ -36,7 +36,7 @@ import type { AnswerTypeCode } from '../surveys.concepts';
  * El lado de las respuestas: el paciente contesta, el profesional dueño lee.
  *
  * **La privacidad es el requisito central de este servicio**, no un añadido.
- * REDESA lo fija en dos frases —«solo podrán ser consultadas por el profesional
+ * ALOVIDA lo fija en dos frases —«solo podrán ser consultadas por el profesional
  * o la organización autorizada» y «no deberán mostrarse públicamente»— y la
  * decisión D-08 del proyecto la confirma. Acá eso se traduce en dos reglas que
  * no tienen excepción: un paciente solo alcanza sus propias invitaciones, y una

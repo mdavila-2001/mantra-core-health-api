@@ -24,7 +24,7 @@
  *
  * ## Uso
  *
- *   node tools/redesa/retirar-practitioner-specialty.mjs [--base-url http://localhost:3000]
+ *   node tools/alovida/retirar-practitioner-specialty.mjs [--base-url http://localhost:3000]
  *
  * Es idempotente: si la enumeración ya no responde, sale sin hacer nada.
  */

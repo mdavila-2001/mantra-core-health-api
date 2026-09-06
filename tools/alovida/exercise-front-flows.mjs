@@ -11,7 +11,7 @@
  * la documentación no se desincronice del código sin que nadie lo note.
  *
  * Uso:
- *   node tools/redesa/exercise-front-flows.mjs [--base-url http://localhost:3000]
+ *   node tools/alovida/exercise-front-flows.mjs [--base-url http://localhost:3000]
  *
  * Requiere una API levantada con un administrador de arranque
  * (`BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`). Escribe datos de
@@ -588,7 +588,7 @@ const failures = log.filter(
 const lines = [
   '# Catálogo de flujos verificados para el frontend',
   '',
-  '> Generado por `node tools/redesa/exercise-front-flows.mjs`. **No se edita a mano**:',
+  '> Generado por `node tools/alovida/exercise-front-flows.mjs`. **No se edita a mano**:',
   '> se regenera contra una API real y cada cuerpo de abajo es la respuesta literal',
   '> que devolvió. Si el contrato cambia, vuelva a ejecutarlo.',
   '',

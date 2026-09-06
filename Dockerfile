@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # =========================================================================
-# Mantra Core Technologies · REDESA Health Ecosystem
+# Mantra Core Technologies · ALOVIDA Health Ecosystem
 # Imagen única para la API (`dist/src/main.js`) y los 20 procesos worker
 # (`dist/src/worker-<dominio>.js`). Todos comparten el mismo código y las mismas
 # dependencias — lo que cambia entre servicios de docker-compose es el

@@ -1,4 +1,4 @@
-# Postman — REDESA Health API (878 endpoints)
+# Postman — ALOVIDA Health API (878 endpoints)
 
 Colección y entorno para ejercer **todos** los endpoints del contrato, generados desde
 `openapi/openapi.json` con `yarn postman:generate`.

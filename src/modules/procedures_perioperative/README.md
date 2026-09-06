@@ -129,7 +129,7 @@ cancelar un caso. Nunca se loguean datos clínicos del paciente más allá del i
 Hasta esta fecha el módulo **no funcionaba contra una base real**, y ninguna
 prueba lo veía porque las unitarias simulan el `EntityManager`. Cuatro fallos
 encadenados, todos corregidos y verificados con
-`yarn redesa:personas` (cada actor con su propio rol, no con el del
+`yarn alovida:personas` (cada actor con su propio rol, no con el del
 administrador):
 
 1. **`POST /procedure-cases` fallaba siempre.** Las cuatro filas hijas del caso

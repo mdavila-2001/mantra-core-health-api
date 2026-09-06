@@ -9,7 +9,7 @@ Qué prueba cada archivo de esta carpeta.
 
 Corrido contra la API arrancada desde el fuente en `:3030` (ver
 [[api-desde-el-fuente-en-3010]]) y el front en `:4230`, con
-`FAKER_SCALE=small node tools/redesa/faker-worker.mjs`.
+`FAKER_SCALE=small node tools/alovida/faker-worker.mjs`.
 
 ## Lo que costó hacer andar
 

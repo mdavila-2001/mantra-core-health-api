@@ -24,8 +24,8 @@ logs por `aggregateId`/`domainEventId`.
 
 ```mermaid
 flowchart LR
-  API["redesa-api"] -->|OTLP http/protobuf| J
-  W["redesa-worker-*<br/>(20 procesos)"] -->|OTLP| J
+  API["alovida-api"] -->|OTLP http/protobuf| J
+  W["alovida-worker-*<br/>(20 procesos)"] -->|OTLP| J
   J["Jaeger<br/>(desarrollo: all-in-one)"] --> UI["UI :16686"]
 ```
 
@@ -60,7 +60,7 @@ Los eventos anteriores a esta iniciativa se procesan igual, sin ninguna rama esp
 
 Las llamadas `/internal/*` de los workers a la API sí llevan ya cabecera `traceparent`: verificado
 contra Jaeger, una traza rooteada en `worker.messaging.outbox-relay` contiene los spans de
-`redesa-worker-messaging` y los de `redesa-api` en la misma traza.
+`alovida-worker-messaging` y los de `alovida-api` en la misma traza.
 
 ## Uso
 

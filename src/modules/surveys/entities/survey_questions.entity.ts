@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
  *
  * La pregunta pertenece a una **versión**, no a la plantilla: es lo que hace
  * que publicar congele el cuestionario. `required` cubre el requisito de
- * REDESA «definir si una pregunta es obligatoria u opcional».
+ * ALOVIDA «definir si una pregunta es obligatoria u opcional».
  */
 @Entity({ schema: 'surveys', tableName: 'survey_questions' })
 export class SurveyQuestions {

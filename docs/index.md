@@ -1,6 +1,6 @@
-# REDESA Health API
+# ALOVIDA Health API
 
-Backend del ecosistema de salud REDESA (Mantra Core Technologies): una API NestJS modular de
+Backend del ecosistema de salud ALOVIDA (Mantra Core Technologies): una API NestJS modular de
 **61 módulos de negocio documentados** (más el grupo raíz `app`), **915 operaciones HTTP**
 documentadas en OpenAPI, sobre PostgreSQL con aislamiento por tenant, complementada por MongoDB,
 Redis, OpenSearch, MinIO y **21 procesos

@@ -1,6 +1,6 @@
 # =========================================================================
 # Mantra Core Technologies
-# Product: REDESA Health Ecosystem
+# Product: ALOVIDA Health Ecosystem
 # Footprint: Infrastructure Configuration (desarrollo local)
 # -------------------------------------------------------------------------
 # Portabilidad (Mac / Windows / Linux):
@@ -261,10 +261,10 @@ x-app-env: &app-env
   # esta misma red y por eso se alcanza por su nombre de servicio y no por
   # localhost. `OTEL_SERVICE_NAME` NO se declara aquí a propósito: cada
   # contenedor deriva el suyo del entrypoint que ejecuta
-  # (`redesa-api`, `redesa-worker-messaging`, …); fijarlo aquí haría que los 21
+  # (`alovida-api`, `alovida-worker-messaging`, …); fijarlo aquí haría que los 21
   # procesos exportaran bajo el mismo nombre. Ver `docs/observability/`.
   OTEL_ENABLED: ${OTEL_ENABLED:-false}
-  OTEL_SERVICE_NAMESPACE: ${OTEL_SERVICE_NAMESPACE:-redesa}
+  OTEL_SERVICE_NAMESPACE: ${OTEL_SERVICE_NAMESPACE:-alovida}
   OTEL_SERVICE_VERSION: ${OTEL_SERVICE_VERSION:-}
   OTEL_DEPLOYMENT_ENVIRONMENT: ${OTEL_DEPLOYMENT_ENVIRONMENT:-}
   OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}
@@ -1185,7 +1185,7 @@ services:
 #
 # ¿Quieres los datos en una carpeta concreta del host en lugar del área de
 # Docker? Descomenta driver/driver_opts en el volumen deseado y crea la carpeta
-# (en Windows usa una ruta tipo //c/Users/tu-usuario/redesa-data/postgres):
+# (en Windows usa una ruta tipo //c/Users/tu-usuario/alovida-data/postgres):
 #
 #   postgres_data:
 #     name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_postgres_data

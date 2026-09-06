@@ -17,13 +17,13 @@
  * ```
  *
  * Uso:
- *   node tools/redesa/p8-avisos-agenda.mjs
- *   node tools/redesa/p8-avisos-agenda.mjs --base-url http://localhost:3010
- *   node tools/redesa/p8-avisos-agenda.mjs --out evidencias/p8/recorrido.json
+ *   node tools/alovida/p8-avisos-agenda.mjs
+ *   node tools/alovida/p8-avisos-agenda.mjs --base-url http://localhost:3010
+ *   node tools/alovida/p8-avisos-agenda.mjs --out evidencias/p8/recorrido.json
  *
  * Requiere una API levantada con el administrador de arranque
  * (`BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`) y con agenda publicada
- * — `tools/redesa/seed-dev-data.mjs` la deja lista.
+ * — `tools/alovida/seed-dev-data.mjs` la deja lista.
  *
  * Termina en rojo si un paso no responde lo que declara esperar: el recorrido
  * vale como evidencia sólo si distingue «pasó» de «no falló».
