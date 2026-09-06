@@ -61,6 +61,7 @@ import {
   CatalogRepository,
   CoverageRepository,
 } from '../../insurance/repositories';
+import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
@@ -122,6 +123,7 @@ export class IamPatientSelfRegistrationService {
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly catalogConceptsRepo: CatalogConceptsRepository,
     private readonly relatedPersonsRepo: RelatedPersonsRepository,
     private readonly insuranceCatalogRepo: CatalogRepository,
     private readonly coverageRepo: CoverageRepository,
@@ -359,7 +361,7 @@ export class IamPatientSelfRegistrationService {
 
       // Domicilio: el municipio elegido en el alta. El departamento lo deriva
       // el ayudante del código del INE, no viene del cliente.
-      createResidenceAddress(this.addressesRepo, tx, {
+      await createResidenceAddress(this.addressesRepo, tx, this.catalogConceptsRepo, {
         personId: person.id,
         municipalityConceptId: dto.residenceMunicipalityConceptId,
         lines: dto.homeAddressLines,
@@ -370,7 +372,7 @@ export class IamPatientSelfRegistrationService {
 
       // El trabajo es una segunda dirección de la misma persona, distinguida
       // por su uso: quien lleva un medicamento necesita saber a cuál ir.
-      createWorkAddress(this.addressesRepo, tx, {
+      await createWorkAddress(this.addressesRepo, tx, this.catalogConceptsRepo, {
         personId: person.id,
         municipalityConceptId: dto.workMunicipalityConceptId,
         lines: dto.workAddressLines,

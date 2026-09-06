@@ -28,6 +28,7 @@ import {
   createResidenceAddress,
   createWorkAddress,
 } from '../../common/services/residence-address';
+import { CatalogConceptsRepository } from '../../terminology/repositories';
 import {
   BIRTH_SEX_CODE_BY_CONCEPT,
   BIRTH_SEX_CONCEPT_BY_CODE,
@@ -372,6 +373,7 @@ export class ProfilesPatientsService {
     // para que quien da de alta a la persona los escriba en su transacción.
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly catalogConceptsRepo: CatalogConceptsRepository,
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly ownership: ProfileOwnershipService,
     private readonly attachableFiles: AttachableFileService,
@@ -1284,7 +1286,7 @@ export class ProfilesPatientsService {
       usoConceptId === CONCEPTS.ADDR_USE_WORK
         ? createWorkAddress
         : createResidenceAddress;
-    escribir(this.addressesRepo, tx, {
+    await escribir(this.addressesRepo, tx, this.catalogConceptsRepo, {
       personId,
       municipalityConceptId: municipio,
       lines,

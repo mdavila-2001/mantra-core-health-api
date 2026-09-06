@@ -46,6 +46,7 @@ así que volver a correrlo no duplica.
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import re
 import sys
@@ -104,24 +105,45 @@ class Api:
         self.pausa_entre_altas = 0.25
         self.pausa_por_429 = 62.0
 
+    # Mismo defecto que `load_people.py`: Neon corta la conexión del backend a
+    # mitad de una ráfaga («Connection terminated unexpectedly» del pooler) y
+    # eso tumba el proceso de Nest. Son fallos de SOCKET
+    # (`http.client.HTTPException`/`TimeoutError`/`ConnectionError`), no de
+    # protocolo HTTP — `URLError` no los atrapa, y sin este segundo `except`
+    # uno solo tumbaba el cargador entero a mitad de las 763 fichas.
+    REINTENTOS_POR_CAIDA = 3
+    ESPERA_ENTRE_REINTENTOS = 15.0
+
     def _peticion(self, metodo: str, ruta: str, cuerpo: dict | None) -> tuple[int, dict]:
         datos = json.dumps(cuerpo).encode("utf-8") if cuerpo is not None else None
-        peticion = urllib.request.Request(f"{self.base}{ruta}", data=datos, method=metodo)
-        peticion.add_header("Content-Type", "application/json")
-        if self.token:
-            peticion.add_header("Authorization", f"Bearer {self.token}")
-        try:
-            with urllib.request.urlopen(peticion, timeout=30) as respuesta:
-                texto = respuesta.read().decode("utf-8") or "{}"
-                return respuesta.status, json.loads(texto)
-        except urllib.error.HTTPError as error:
-            texto = error.read().decode("utf-8") or "{}"
+        for intento in range(1, self.REINTENTOS_POR_CAIDA + 1):
+            peticion = urllib.request.Request(f"{self.base}{ruta}", data=datos, method=metodo)
+            peticion.add_header("Content-Type", "application/json")
+            if self.token:
+                peticion.add_header("Authorization", f"Bearer {self.token}")
             try:
-                return error.code, json.loads(texto)
-            except json.JSONDecodeError:
-                return error.code, {"message": texto[:200]}
-        except urllib.error.URLError as error:
-            return 0, {"message": str(error.reason)}
+                with urllib.request.urlopen(peticion, timeout=30) as respuesta:
+                    texto = respuesta.read().decode("utf-8") or "{}"
+                    return respuesta.status, json.loads(texto)
+            except urllib.error.HTTPError as error:
+                texto = error.read().decode("utf-8") or "{}"
+                try:
+                    return error.code, json.loads(texto)
+                except json.JSONDecodeError:
+                    return error.code, {"message": texto[:200]}
+            except urllib.error.URLError as error:
+                return 0, {"message": str(error.reason)}
+            except (http.client.HTTPException, TimeoutError, ConnectionError, OSError) as error:
+                if intento == self.REINTENTOS_POR_CAIDA:
+                    return 0, {"message": f"{type(error).__name__}: {error}"}
+                print(
+                    f"    aviso: {type(error).__name__} ({error}) — "
+                    f"reintento {intento}/{self.REINTENTOS_POR_CAIDA} en "
+                    f"{self.ESPERA_ENTRE_REINTENTOS:.0f}s",
+                    file=sys.stderr,
+                )
+                time.sleep(self.ESPERA_ENTRE_REINTENTOS)
+        return 0, {"message": "sin respuesta tras los reintentos"}
 
     def login(self, email: str, password: str) -> None:
         estado, cuerpo = self._peticion(
