@@ -77,6 +77,9 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const identifiersRepo = { create: fn() };
     const contactPointsRepo = { create: fn() };
     const addressesRepo = { create: fn() };
+    // El municipio no se valida contra el catálogo estático: se busca en la
+    // base real. Sin municipio por defecto, `findById` no se llama.
+    const catalogConceptsRepo = { findById: fn().mockResolvedValue(null) };
     const tenantMembershipsRepo = { create: fn() };
     const notificationsService = {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
@@ -113,6 +116,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       identifiersRepo as never,
       contactPointsRepo as never,
       addressesRepo as never,
+      catalogConceptsRepo as never,
       tenantMembershipsRepo as never,
       effectiveRoles as never,
       notificationsService as never,

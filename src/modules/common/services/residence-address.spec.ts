@@ -9,10 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
-import {
-  boDepartmentConceptId,
-  boMunicipalityConceptId,
-} from '../../../common/seed/bo-geography.catalog';
+import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
 import { createResidenceAddress } from './residence-address';
 
 /** Repositorio de direcciones reducido a lo único que el ayudante usa. */
@@ -24,15 +21,28 @@ function buildRepo() {
   };
 }
 
+/**
+ * Repositorio de conceptos reducido a `findById`, con un único municipio
+ * sembrado: el esquema real de `terminology.catalog_concepts` (código
+ * `SIGLA-NOMBRE`), no el del catálogo estático retirado.
+ */
+function buildConcepts(municipios: Record<string, { code: string; display: string }> = {}) {
+  return {
+    findById: mockFn((_tx: any, id: string) => municipios[id] ?? null),
+  } as any;
+}
+
 describe('createResidenceAddress', () => {
   const tx = {} as any;
 
-  it('deriva el departamento del municipio, sin recibirlo', () => {
+  it('deriva el departamento del municipio, sin recibirlo', async () => {
     const { repo, rows } = buildRepo();
+    const sacaba = 'concept-sacaba';
+    const concepts = buildConcepts({
+      [sacaba]: { code: 'CB-SACABA', display: 'Sacaba' },
+    });
 
-    // Sacaba es de Cochabamba: su código del INE empieza en 03.
-    const sacaba = boMunicipalityConceptId('031001');
-    const escribio = createResidenceAddress(repo, tx, {
+    const escribio = await createResidenceAddress(repo, tx, concepts, {
       personId: 'person-1',
       municipalityConceptId: sacaba,
       actorUserId: 'user-1',
@@ -50,10 +60,11 @@ describe('createResidenceAddress', () => {
     });
   });
 
-  it('sin municipio no escribe nada: el domicilio es opcional', () => {
+  it('sin municipio no escribe nada: el domicilio es opcional', async () => {
     const { repo, rows } = buildRepo();
+    const concepts = buildConcepts();
 
-    const escribio = createResidenceAddress(repo, tx, {
+    const escribio = await createResidenceAddress(repo, tx, concepts, {
       personId: 'person-1',
       actorUserId: 'user-1',
     });
@@ -63,20 +74,20 @@ describe('createResidenceAddress', () => {
     expect(rows).toHaveLength(0);
   });
 
-  it('rechaza un uuid que no sea de un municipio del catálogo', () => {
+  it('rechaza un uuid que no exista en el catálogo de municipios', async () => {
     const { repo, rows } = buildRepo();
+    // Forma de uuid válida —pasa el `@IsUUID` del DTO— pero no está sembrado.
+    const concepts = buildConcepts();
 
-    // Forma de uuid válida —pasa el `@IsUUID` del DTO— pero es un departamento.
-    expect(
-      () =>
-        createResidenceAddress(repo, tx, {
-          personId: 'person-1',
-          municipalityConceptId: boDepartmentConceptId('SC'),
-          actorUserId: 'user-1',
-        }),
+    await expect(
+      createResidenceAddress(repo, tx, concepts, {
+        personId: 'person-1',
+        municipalityConceptId: 'concept-inexistente',
+        actorUserId: 'user-1',
+      }),
       // Sin esta comprobación el `INSERT` reventaría por integridad referencial,
       // con un error que no le dice nada a quien se está registrando.
-    ).toThrow(/no pertenece al catálogo/);
+    ).rejects.toThrow(/no pertenece al catálogo/);
     expect(rows).toHaveLength(0);
   });
 });

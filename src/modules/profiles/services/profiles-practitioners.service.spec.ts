@@ -169,6 +169,12 @@ function build() {
     create: mockFn(),
   };
 
+  // El municipio elegido no se valida contra el catálogo estático: se busca
+  // en la base real. Sin municipio por defecto, `findById` no se llama.
+  const catalogConceptsRepo = {
+    findById: mockFn(() => Promise.resolve(null)),
+  };
+
   const service = new ProfilesPractitionersService(
     em as any,
     personsRepo,
@@ -189,6 +195,7 @@ function build() {
     // las pruebas que hablan del correo lo declaran ellas.
     contactPointsRepo as any,
     addressesRepo as any,
+    catalogConceptsRepo as any,
     accountLinksRepo as any,
     effectiveRoles as any,
     verificationBypass as any,
@@ -217,6 +224,7 @@ function build() {
     filesRepo,
     fileVersionsRepo,
     addressesRepo,
+    catalogConceptsRepo,
   };
 }
 

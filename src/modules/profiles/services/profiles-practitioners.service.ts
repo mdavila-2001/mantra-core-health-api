@@ -79,6 +79,7 @@ import {
   ContactPointsRepository,
 } from '../../common/repositories';
 import { Identifiers } from '../../common/entities';
+import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { composeAccountDisplayName } from '../person-name';
 import {
   replaceResidenceAddress,
@@ -189,6 +190,7 @@ export class ProfilesPractitionersService {
     private readonly attachableFiles: AttachableFileService,
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly catalogConceptsRepo: CatalogConceptsRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly verificationBypass: VerificationBypassService,
@@ -764,6 +766,7 @@ export class ProfilesPractitionersService {
     await replaceResidenceAddress(
       this.addressesRepo,
       tx,
+      this.catalogConceptsRepo,
       {
         personId,
         useConceptId: CONCEPTS.ADDR_USE_HOME,
