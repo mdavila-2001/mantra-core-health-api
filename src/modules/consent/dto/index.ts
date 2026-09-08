@@ -10,3 +10,6 @@ export * from './create-processing-legal-basis.dto';
 export * from './create-treatment-informed-consent.dto';
 export * from './create-consent-evidence.dto';
 export * from './responses.dto';
+export * from './request-practitioner-access.dto';
+export * from './decide-practitioner-access-request.dto';
+export * from './practitioner-access-request-response.dto';

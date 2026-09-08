@@ -6,3 +6,4 @@ export * from './processing-legal-bases.service';
 export * from './treatment-informed-consents.service';
 export * from './consent-evidence.service';
 export * from './consent-sweep.service';
+export * from './practitioner-access-requests.service';

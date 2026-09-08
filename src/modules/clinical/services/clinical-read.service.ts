@@ -5,6 +5,7 @@ import type { AuthenticatedUser } from '../../../common';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import { SCHED } from '../../scheduling/scheduling.concepts';
 import { SchedulingBookingsRepository } from '../../scheduling/repositories';
+import { ClinicalAccessGrantsRepository } from '../../authz/repositories';
 import { diaLocalDe } from '../../scheduling/scheduling-time';
 import {
   AllergyIntolerancesRepository,
@@ -105,6 +106,7 @@ export class ClinicalReadService {
     private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
     private readonly bookingsRepo: SchedulingBookingsRepository,
+    private readonly clinicalAccessGrantsRepo: ClinicalAccessGrantsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ClinicalReadService.name);
@@ -123,20 +125,24 @@ export class ClinicalReadService {
    * si el soporte no debe leer PHI sin turno, se saca de acá y se decide qué lo
    * reemplaza — hoy hay pruebas de integración que dependen de este acceso.
    *
-   * ## 2 · Quien atiende: sólo con turno de HOY con ESE paciente
+   * ## 2 · Quien atiende: turno de HOY con ESE paciente, O vínculo por consentimiento
    *
-   * Antes pasaba cualquiera con el rol. El comentario que lo justificaba decía que a
-   * quién puede atender lo decide la asignación de roles «y no este endpoint» — pero esa
-   * asignación no existía: la tabla de permisos por paciente está vacía y nadie la
-   * consulta. En los hechos, cualquier médico con sesión leía la historia de cualquier
-   * persona. Esta es la regla mínima defendible mientras el grupo define el modelo de
-   * consentimiento: **nace del turno confirmado y dura el día del turno**.
+   * Antes pasaba cualquiera con el rol. Después (v4.2.2) se acotó a que **nace del
+   * turno confirmado y dura el día del turno** — la regla mínima defendible mientras
+   * el grupo definía el modelo de consentimiento.
+   *
+   * FT-07-R05/R06/R07 es ese modelo: el paciente puede aceptar a un profesional como
+   * el suyo, eligiendo qué especialidades le autoriza
+   * (`PractitionerAccessRequestsService`, módulo `consent`), sin depender de que haya
+   * un turno vigente. Se agrega como una vía MÁS, no en reemplazo — un turno de hoy
+   * sigue alcanzando aunque el paciente nunca haya aceptado un vínculo, que es
+   * exactamente el caso de la primera consulta.
    *
    * «Hoy» es el día de la SEDE, no el del servidor. Un turno de las 23:30 en La Paz ya
    * cayó en «mañana» para UTC, y con la fecha del servidor el profesional se quedaría
    * sin la historia del paciente que tiene enfrente.
    *
-   * ## 3 · El resto, y el profesional sin turno: titularidad
+   * ## 3 · El resto, y el profesional sin turno ni vínculo: titularidad
    *
    * Cae en {@link assertOwnRecord}, que responde el **mismo 403 con el mismo texto** a
    * un paciente ajeno, a un uuid inventado y a un profesional sin turno. Que sean
@@ -184,8 +190,25 @@ export class ClinicalReadService {
       return;
     }
 
-    // Sin turno hoy no alcanza el rol; queda la titularidad, que además cubre al
-    // profesional que lee su propia historia.
+    // FT-07-R05/R06/R07: además del turno de hoy, un vínculo por
+    // consentimiento (`PractitionerAccessRequestsService`, `consent` module)
+    // también habilita la lectura. Es la vía pensada para «acepté a este
+    // médico como el mío» — no atada a una cita puntual, y es justamente lo
+    // que este comentario de la clase venía señalando como pendiente.
+    // `findActive` sólo mira `state_concept_id`; `validTo` se revisa acá
+    // porque el barrido de expiración es asíncrono y no puede ser la única
+    // barrera para leer PHI.
+    const grant = await this.clinicalAccessGrantsRepo.findActive(
+      em,
+      patientProfileId,
+      actor.id,
+    );
+    if (grant && grant.validTo.getTime() > Date.now()) {
+      return;
+    }
+
+    // Ni turno hoy ni vínculo por consentimiento alcanzan el rol; queda la
+    // titularidad, que además cubre al profesional que lee su propia historia.
     await this.assertOwnRecord(patientProfileId, actor, link);
   }
 

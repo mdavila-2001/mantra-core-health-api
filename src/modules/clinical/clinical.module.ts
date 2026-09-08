@@ -62,6 +62,10 @@ import {
 // existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
 // tampoco acá se importa el módulo entero ni se cierra un ciclo.
 import { SchedulingBookingsRepository } from '../scheduling/repositories';
+// FT-07-R05/R06/R07: además del turno de hoy, `assertPuedeLeerHistoria` ahora
+// también acepta un vínculo por consentimiento. Mismo criterio que el resto
+// de este bloque: es un repositorio sin estado, no un ciclo con `authz`.
+import { ClinicalAccessGrantsRepository } from '../authz/repositories';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -89,6 +93,7 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
     PatientProfilesRepository,
     HealthPractitionerProfilesRepository,
     SchedulingBookingsRepository,
+    ClinicalAccessGrantsRepository,
     CareEpisodesRepository,
     AppointmentsRepository,
     EncountersRepository,

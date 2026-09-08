@@ -71,6 +71,46 @@ export const { seeds: CONSENT_CONCEPT_SEEDS, ids: CONS } = defineModuleConcepts(
     },
     STATUS_NONE: { code: 'STATUS_NONE', display: 'No prior status' },
 
+    // --- FT-07: vínculo médico-paciente por consentimiento ---
+    // El médico busca por nombre/CI (TAREA-07 S1+S3, ya en dev) pero eso sólo
+    // encuentra a la persona: todavía no le da acceso al expediente. Estos tres
+    // estados son el ciclo de la solicitud que falta — pedida, y las dos
+    // resoluciones posibles — antes de que `capture()` la deje ACTIVE.
+    ACCESS_REQUEST_PENDING: {
+      code: 'PRACTITIONER_ACCESS_PENDING',
+      display: 'Practitioner access requested, awaiting patient decision',
+    },
+    ACCESS_REQUEST_DECLINED: {
+      code: 'PRACTITIONER_ACCESS_DECLINED',
+      display: 'Practitioner access declined by patient',
+    },
+    // Provisión "pedida, todavía no autorizada ni negada": distinto de
+    // ACTION_PERMIT/ACTION_DENY, que son la decisión ya tomada del paciente.
+    ACTION_REQUESTED: {
+      code: 'CONSENT_ACTION_REQUESTED',
+      display: 'Requested, decision pending',
+    },
+    CATEGORY_PRACTITIONER_ACCESS: {
+      code: 'CONSENT_CAT_PRACTITIONER_ACCESS',
+      display: 'Practitioner record-access consent',
+    },
+    EVENT_ACCESS_REQUESTED: {
+      code: 'EVENT_ACCESS_REQUESTED',
+      display: 'Practitioner access requested',
+    },
+    EVENT_ACCESS_DECLINED: {
+      code: 'EVENT_ACCESS_DECLINED',
+      display: 'Practitioner access declined',
+    },
+    NOTICE_ACCESS_REQUESTED: {
+      code: 'CONSENT_NOTICE_ACCESS_REQUESTED',
+      display: 'Notice: practitioner access requested',
+    },
+    NOTICE_ACCESS_DECIDED: {
+      code: 'CONSENT_NOTICE_ACCESS_DECIDED',
+      display: 'Notice: practitioner access request decided',
+    },
+
     // --- Categorías / tipos de directiva ---
     CATEGORY_PRIVACY: {
       code: 'CONSENT_CAT_PRIVACY',
