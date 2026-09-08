@@ -710,6 +710,15 @@ export class GlossarySeedService {
         { partial: true },
       );
     }
+    // Los tres niveles se vacían por separado y no en un `flush()` final.
+    // `code_systems.source_id` y `code_system_versions.code_system_id` son
+    // `@Property` escalares, no relaciones —así los emite el modelo—, así que
+    // MikroORM no tiene arista de dependencia con la que ordenar los inserts:
+    // en un flush único mandaba la versión antes que el sistema y la FK
+    // reventaba (`fk_code_system_versions_code_system_id`), dejando el glosario
+    // sin sembrar en toda base donde estas filas no existieran ya. Mismo
+    // remedio que `VademecumSeedService`, que vacía nivel por nivel.
+    await em.flush();
 
     const existingCodeSystem = await this.existingIds(em, CodeSystems, [
       glossaryCodeSystemId,
@@ -730,6 +739,7 @@ export class GlossarySeedService {
         { partial: true },
       );
     }
+    await em.flush();
 
     const existingVersion = await this.existingIds(em, CodeSystemVersions, [
       glossaryCodeSystemVersionId,

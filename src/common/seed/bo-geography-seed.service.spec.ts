@@ -26,6 +26,18 @@ import {
   boMunicipalityVersionId,
 } from './bo-geography.catalog';
 
+/** Id determinista de cada conjunto, por su clave natural. */
+const ID_POR_CODIGO: Record<string, string> = {
+  [BO_DEPARTMENT_VALUE_SET]: boDepartmentValueSetId(),
+  [BO_MUNICIPALITY_VALUE_SET]: boMunicipalityValueSetId(),
+};
+
+/** Id determinista de la versión de cada conjunto, por el id del conjunto. */
+const VERSION_POR_CONJUNTO: Record<string, string> = {
+  [boDepartmentValueSetId()]: boDepartmentVersionId(),
+  [boMunicipalityValueSetId()]: boMunicipalityVersionId(),
+};
+
 /** Cuántos municipios declara el catálogo; el resto de las cuentas sale de acá. */
 const MUNICIPIOS = BO_MUNICIPALITIES.length;
 
@@ -35,9 +47,18 @@ const MUNICIPIOS = BO_MUNICIPALITIES.length;
  * `find`/`create`/`flush` sin tocar una base real.
  *
  * @param existing - Identificadores que la base ya tiene.
+ * @param valueSetsPorCodigo - Conjuntos que ya están, por `internal_code`, con
+ *   el id REAL que tienen en la base. Sirve para el caso en que el conjunto
+ *   llegó antes desde el paquete de seeds del modelo con otro id.
+ * @param versionesPorConjunto - Versiones que ya están, por el id del conjunto
+ *   al que pertenecen, con el id REAL que tienen en la base.
  * @returns Servicio, filas creadas y utilidades de lectura.
  */
-function build(existing: Set<string> = new Set()) {
+function build(
+  existing: Set<string> = new Set(),
+  valueSetsPorCodigo: Map<string, string> = new Map(),
+  versionesPorConjunto: Map<string, string> = new Map(),
+) {
   const created: { entity: string; data: any }[] = [];
 
   const em = {
@@ -46,6 +67,38 @@ function build(existing: Set<string> = new Set()) {
       return Promise.resolve(
         ids.filter((id) => existing.has(id)).map((id) => ({ id })),
       );
+    }),
+    // Una fila que existe, existe por su id Y por su clave natural. El doble
+    // resuelve las dos claves naturales que el seed consulta: el `internal_code`
+    // del conjunto y el par `(value_set_id, version)` de su versión. En ambos
+    // casos gana el id ajeno declarado, y si no lo hay se responde con el
+    // determinista sólo cuando `existing` dice que está.
+    findOne: mockFn((entity: any, where: any) => {
+      if (entity?.name === 'ValueSets') {
+        const codigo: string | undefined = where?.internalCode;
+        if (!codigo) return Promise.resolve(null);
+        const ajeno = valueSetsPorCodigo.get(codigo);
+        if (ajeno) return Promise.resolve({ id: ajeno });
+        const determinista = ID_POR_CODIGO[codigo];
+        return Promise.resolve(
+          determinista && existing.has(determinista)
+            ? { id: determinista }
+            : null,
+        );
+      }
+      if (entity?.name === 'ValueSetVersions') {
+        const conjunto: string | undefined = where?.valueSetId;
+        if (!conjunto) return Promise.resolve(null);
+        const ajena = versionesPorConjunto.get(conjunto);
+        if (ajena) return Promise.resolve({ id: ajena });
+        const determinista = VERSION_POR_CONJUNTO[conjunto];
+        return Promise.resolve(
+          determinista && existing.has(determinista)
+            ? { id: determinista }
+            : null,
+        );
+      }
+      return Promise.resolve(null);
     }),
     create: mockFn((entity: any, data: any) => {
       created.push({ entity: entity.name, data });
@@ -230,6 +283,60 @@ describe('BoGeographySeedService', () => {
       expect(counters.memberships).toBe(9 + MUNICIPIOS);
       expect(rowsOf('ValueSets')).toHaveLength(1);
       expect(rowsOf('ValueSetVersions')).toHaveLength(1);
+    });
+
+    it('un conjunto que ya está con OTRO id no se vuelve a crear', async () => {
+      // El defecto que rompía el arranque contra la base de la nube: el
+      // conjunto había llegado antes desde el paquete de seeds del modelo con
+      // un id distinto del determinista. La comprobación por id decía «no
+      // está», el insert chocaba con `uq_value_sets_internal_code` y el paso
+      // entero quedaba omitido — sin departamentos ni municipios.
+      const idAjeno = '11111111-2222-5333-8444-555555555555';
+      const { service, rowsOf } = build(
+        new Set(),
+        new Map([[BO_MUNICIPALITY_VALUE_SET, idAjeno]]),
+      );
+
+      const counters = await service.run();
+
+      // Se crea el de departamentos y NO el de municipios.
+      expect(counters.valueSets).toBe(1);
+      const conjuntos = rowsOf('ValueSets');
+      expect(conjuntos).toHaveLength(1);
+      expect(conjuntos[0].internalCode).toBe(BO_DEPARTMENT_VALUE_SET);
+
+      // Y la versión de municipios cuelga del id que la base tiene de verdad,
+      // no del determinista: si apuntara al otro, la FK no resolvería.
+      const versionMunicipios = rowsOf('ValueSetVersions').find(
+        (fila) => fila.id === boMunicipalityVersionId(),
+      );
+      expect(versionMunicipios.valueSetId).toBe(idAjeno);
+    });
+
+    it('una versión que ya está con OTRO id tampoco se duplica', async () => {
+      // El segundo choque, un nivel más abajo: resuelto el conjunto por su
+      // clave natural, su versión «1.0.0» ya existía con otro id y el insert
+      // moría contra `uq_value_set_versions_value_set_id_version`.
+      const conjuntoAjeno = '11111111-2222-5333-8444-555555555555';
+      const versionAjena = '66666666-7777-5888-8999-aaaaaaaaaaaa';
+      const { service, rowsOf } = build(
+        new Set(),
+        new Map([[BO_MUNICIPALITY_VALUE_SET, conjuntoAjeno]]),
+        new Map([[conjuntoAjeno, versionAjena]]),
+      );
+
+      const counters = await service.run();
+
+      // Sólo se crea la versión de departamentos.
+      expect(counters.versions).toBe(1);
+      expect(rowsOf('ValueSetVersions')).toHaveLength(1);
+
+      // Y los 340 municipios se afilian a la versión que existe de verdad.
+      const miembros = rowsOf('ValueSetMembers').slice(9);
+      expect(miembros).toHaveLength(MUNICIPIOS);
+      expect(
+        miembros.every((fila) => fila.valueSetVersionId === versionAjena),
+      ).toBe(true);
     });
   });
 
