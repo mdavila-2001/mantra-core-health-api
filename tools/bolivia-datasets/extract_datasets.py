@@ -618,7 +618,13 @@ def extraer_redes(fuente: Path) -> dict:
                 "carrierCode": carrier,
                 "aseguradora": etiqueta,
                 "planes": sorted(planes),
-                "profesionales": sorted(profesionales.values(), key=lambda p: p["nombre"]),
+                # Ordena ignorando la caja: con el orden natural de Python las
+                # minúsculas van después de TODAS las mayúsculas, así que
+                # «Alvarez de Pardo» caería detrás de «Alvarez Oliva» sólo por
+                # la «d». El padrón cambió de MAYÚSCULAS a capital inicial y el
+                # orden no tiene por qué moverse con él.
+                "profesionales": sorted(profesionales.values(),
+                                        key=lambda p: p["nombre"].upper()),
             }
         )
     return {"redes": redes}
@@ -776,9 +782,12 @@ def escribir(salida: Path, nombre: str, contenido, nota: str) -> int:
     salida.mkdir(parents=True, exist_ok=True)
     cuerpo = {"_nota": nota, "datos": contenido}
     ruta = salida / nombre
-    ruta.write_text(
-        json.dumps(cuerpo, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    # `newline=""` porque en Windows la traducción por defecto convierte cada
+    # «\n» en CRLF, y `.gitattributes` declara `*.json text eol=lf`: sin esto,
+    # regenerar desde Windows deja los cinco datasets modificados en `git
+    # status` sin que haya cambiado un solo dato.
+    with open(ruta, "w", encoding="utf-8", newline="") as fh:
+        fh.write(json.dumps(cuerpo, ensure_ascii=False, indent=2) + "\n")
     n = contar(contenido)
     print(f"  {nombre:38s} {n:5d} registros")
     return n
