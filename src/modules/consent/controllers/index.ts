@@ -6,3 +6,4 @@ export * from './processing-legal-bases.controller';
 export * from './treatment-informed-consents.controller';
 export * from './consent-evidence.controller';
 export * from './consent-sweep.controller';
+export * from './practitioner-access-requests.controller';
