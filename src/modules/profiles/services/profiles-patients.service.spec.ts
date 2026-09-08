@@ -134,6 +134,15 @@ function build() {
   };
   // El NIT vive en `common.identifiers` como un tipo más, igual que el CI.
   const identifiersRepo = { create: mockFn() };
+  // El municipio se valida contra la base, no contra el catálogo estático:
+  // cualquier id que llegue acá se resuelve como sembrado, salvo que la
+  // prueba lo pise explícitamente — las pruebas de `reemplazarDireccion` no
+  // hablan de qué municipio es, sólo de que se conserva o cambia.
+  const catalogConceptsRepo = {
+    findById: mockFn(() =>
+      Promise.resolve({ code: 'CB-SACABA', display: 'Sacaba' }),
+    ),
+  };
   // La propiedad del perfil se prueba en `profile-ownership.service.spec.ts`; aquí el
   // doble deja pasar para no mezclar el permiso con la lógica del servicio.
   const ownership = {
@@ -197,6 +206,7 @@ function build() {
     portalProxiesRepo,
     contactPointsRepo,
     addressesRepo,
+    catalogConceptsRepo as never,
     identifiersRepo as never,
     ownership as never,
     attachableFiles,
@@ -220,6 +230,7 @@ function build() {
     coverageRepo,
     contactPointsRepo,
     addressesRepo,
+    catalogConceptsRepo,
     identifiersRepo,
     administrativeAreas,
     filesRepo,

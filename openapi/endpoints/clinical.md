@@ -2431,7 +2431,7 @@ Ejemplo de error normalizado:
 
 Firmar una receta en borrador (DRAFT). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: REDESA D-05: firma la receta en borrador (aditivo; habilita emitir bajo política).
+Contexto declarado en el controlador: ALOVIDA D-05: firma la receta en borrador (aditivo; habilita emitir bajo política).
 
 ### Descripción del sistema
 

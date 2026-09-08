@@ -33,7 +33,7 @@ const BANNER = `
  | |  | | (_| | | | | |_| | | (_| | |__| (_) | | |  __/    | |  __/ (__| | | |
  |_|  |_|\\__,_|_| |_|\\__|_|  \\__,_|\\____\\___/|_|  \\___|    |_|\\___|\\___|_| |_|
  =============================================================================
-  MANTRA CORE TECHNOLOGIES - REDSAT HEALTH API
+  MANTRA CORE TECHNOLOGIES - ALOVIDA HEALTH API
  =============================================================================
 `;
 
@@ -172,8 +172,8 @@ async function bootstrap() {
   // `docs/governance/traceability-matrix.md` y `docs/api/conventions.md`.
   if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('REDSAT Health API')
-      .setDescription('Mantra Core Technologies - REDSAT Health Ecosystem')
+      .setTitle('ALOVIDA Health API')
+      .setDescription('Mantra Core Technologies - ALOVIDA Health Ecosystem')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
@@ -188,10 +188,10 @@ async function bootstrap() {
         ) => (req: unknown, res: unknown) => void
       )({
         content: document,
-        pageTitle: 'REDSAT Health API — Referencia',
+        pageTitle: 'ALOVIDA Health API — Referencia',
         theme: 'default',
         metaData: {
-          title: 'REDSAT Health API',
+          title: 'ALOVIDA Health API',
           description:
             'Referencia interactiva del contrato OpenAPI real, generado desde los decoradores del backend.',
         },

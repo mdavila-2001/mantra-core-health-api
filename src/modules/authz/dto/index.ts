@@ -9,6 +9,8 @@ export * from './create-clinical-access-grant.dto';
 export * from './create-care-relationship.dto';
 export * from './create-legal-representation.dto';
 export * from './care-relationship-responses.dto';
+export * from './request-care-relationship.dto';
+export * from './respond-care-relationship.dto';
 export * from './break-the-glass.dto';
 export * from './set-field-permissions.dto';
 export * from './create-resource-scope-grant.dto';

@@ -10,8 +10,17 @@ import {
   ProceduresRepository,
   ServiceRequestsRepository,
 } from '../repositories';
-import { CreateProcedureDto, ProcedureResponseDto } from '../dto';
+import {
+  AttachFileToProcedureDto,
+  CreateProcedureDto,
+  ProcedureResponseDto,
+} from '../dto';
 import { CLIN } from '../clinical.concepts';
+// ALV-033 (odontología): un archivo se liga a ESTE procedimiento —incluidos
+// los odontológicos, que son procedimientos con categoría dental (ver
+// `PeriopDentalService`)—, mismo criterio que `ConditionsService.attachFile`.
+import { FilesService } from '../../common/services';
+import { OwnerType, type FileLinkResponseDto } from '../../common/dto';
 
 /** UC-08-12: registro de procedimientos completados; cierra la orden si aplica. */
 @Injectable()
@@ -22,12 +31,14 @@ export class ProceduresService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param proceduresRepo - Valor de procedures repo requerido por la operación.
    * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
+   * @param filesService - Vincula archivos ya subidos a un procedimiento puntual.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly proceduresRepo: ProceduresRepository,
     private readonly serviceRequestsRepo: ServiceRequestsRepository,
+    private readonly filesService: FilesService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProceduresService.name);
@@ -115,5 +126,39 @@ export class ProceduresService {
         createdAt: procedure.createdAt,
       };
     });
+  }
+
+  /**
+   * Liga un archivo ya subido a un procedimiento puntual (ALV-033, odontología).
+   *
+   * Un tratamiento odontológico es un `clinical.procedures` con categoría
+   * dental (`PeriopDentalService`): no hace falta un endpoint propio en ese
+   * módulo, este mismo sirve a cualquier procedimiento por id, incluidos los
+   * odontológicos.
+   */
+  async attachFile(
+    procedureId: string,
+    dto: AttachFileToProcedureDto,
+    actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    const procedure = await this.proceduresRepo.findById(this.em, procedureId);
+    if (!procedure) {
+      throw new ResourceNotFoundException('Procedimiento no encontrado', {
+        procedureId,
+      });
+    }
+    this.logger.info(
+      {
+        operation: 'clinical.procedure.attach_file',
+        procedureId,
+        fileId: dto.fileId,
+      },
+      'Attaching file to procedure',
+    );
+    return this.filesService.createLink(
+      dto.fileId,
+      { ownerType: OwnerType.PROCEDURE, ownerId: procedure.id },
+      actor,
+    );
   }
 }

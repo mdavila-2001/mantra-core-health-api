@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
  *
  * Es el reparto del instrumento a una persona concreta por una atención
  * concreta. Existe como entidad propia —y no como un campo en la respuesta—
- * porque REDESA condiciona el derecho a responder: *«solo responden usuarios
+ * porque ALOVIDA condiciona el derecho a responder: *«solo responden usuarios
  * con atención registrada y completada»*. La invitación **es** esa prueba: se
  * emite contra una reserva completada y no hay forma de responder sin una.
  *

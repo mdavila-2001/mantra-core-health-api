@@ -1,17 +1,20 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  CurrentUser,
-  ParseOptionalLimitPipe,
-  Roles,
-  type AuthenticatedUser,
-} from '../../../common';
+import { ParseOptionalLimitPipe, Roles } from '../../../common';
 import { ClinicalReadService } from '../services';
+import { ClinicalRecordAccessGuard } from '../guards';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
 
 /**
@@ -26,17 +29,20 @@ import type { PatientClinicalSummaryResponseDto } from '../dto';
  * tenía de dónde leerla, y esa es justamente la última pieza del recorrido que
  * el cliente pidió ver funcionando.
  *
- * ## El aislamiento es del servidor, no de la pantalla
+ * ## El controlador no ramifica (FT-07-R08 / CAN-AUTH-001)
  *
- * Un paciente lee **su** historia y ninguna otra: {@link asegurarTitularidad}
- * compara el perfil del token con el que se pide y responde 403 ante cualquier
- * otro. No alcanza con que la interfaz mande siempre el propio identificador —el
- * endpoint es público para cualquiera con sesión— y el bypass de verificación de
- * DEV **no toca esto**: bypass de verificación no es bypass de aislamiento.
+ * `ClinicalRecordAccessGuard` delega la decisión entera en
+ * `ClinicalReadService.assertPuedeLeerHistoria`: SUPERADMIN pasa; el paciente
+ * lee sólo la propia (`assertOwnRecord`); quien atiende pasa con un turno de
+ * HOY con esa persona, o —sin turno— con una relación asistencial/acceso
+ * clínico vigente que el propio paciente autorizó (PDP de `authz`,
+ * `POST /authz/care-relationships/request` + `.../respond`). Antes el rol solo
+ * ya bastaba para leer el expediente de cualquier paciente adivinando su UUID.
  */
 @ApiTags('clinical-read')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
+@UseGuards(ClinicalRecordAccessGuard)
 @Controller('clinical/patients')
 export class ClinicalReadController {
   /**
@@ -63,15 +69,10 @@ export class ClinicalReadController {
     required: false,
     description: 'Tope aplicado a cada bloque (por defecto 50)',
   })
-  async getPatientSummary(
+  getPatientSummary(
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
-    @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PatientClinicalSummaryResponseDto> {
-    // Quién puede leer esta historia lo decide el servicio, entero: el titular
-    // siempre, y quien atiende **sólo si hoy tiene turno con esta persona**. Antes
-    // bastaba el rol, y en los hechos eso era cualquier médico leyendo a cualquiera.
-    await this.readService.assertPuedeLeerHistoria(patientProfileId, actor);
     return this.readService.getPatientSummary(patientProfileId, limit ?? 50);
   }
 }

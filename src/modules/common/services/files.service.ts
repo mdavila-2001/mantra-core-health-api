@@ -92,7 +92,7 @@ function sensitivityFromConcept(conceptId: string): FileSensitivity {
  * cualquiera puede forjar una URL firmada para un archivo clínico arbitrario. Por
  * eso `resolveSecret` aborta si `NODE_ENV==='production'` y no hay uno propio.
  */
-const INSECURE_DEV_DOWNLOAD_SECRET = 'redesa-dev-download-secret';
+const INSECURE_DEV_DOWNLOAD_SECRET = 'alovida-dev-download-secret';
 
 /**
  * Resuelve el secreto en cada uso, no al importar el módulo: así el corte por

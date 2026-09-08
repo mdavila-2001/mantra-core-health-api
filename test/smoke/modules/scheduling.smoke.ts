@@ -16,7 +16,7 @@ import { UUID_ABSENT, UUID_BAD } from '../smoke-kit';
  *   400, porque `offsetsMinutes` no llevaba decorador de class-validator y el
  *   pipe global lo trataba como propiedad ajena al DTO.
  *
- * Ambos los descubrió `tools/redesa/seed-dev-data.mjs` al poblar un entorno de
+ * Ambos los descubrió `tools/alovida/seed-dev-data.mjs` al poblar un entorno de
  * desarrollo, no la batería. Estos casos existen para que la próxima vez la
  * descubra la batería.
  *

@@ -29,7 +29,7 @@ completa en `CARRIL_REPORT-marcelo.md`.
   y sus 8 índices en `SALUD/Entidades/E profiles.idxset_practitioner_affiliations.md`, así que
   el generador ya no infiere ninguno. **Ningún cambio de código hizo falta**: regenerar el
   módulo 05 completo reproduce las 19 entidades byte a byte, incluida la que estaba escrita a
-  mano. De paso se eliminó `tools/redesa/2026-08-15_c05_practitioner_affiliations.sql`, que
+  mano. De paso se eliminó `tools/alovida/2026-08-15_c05_practitioner_affiliations.sql`, que
   declaraba la misma tabla **fuera de `SQL/`** y por eso hacía fallar el paso 0/4 de
   `rebuild_stack.py` (`check_ddl_sources.py`) **para todo el equipo** desde el 15/08.
   Evidencia de la reconstrucción en `CARRIL_REPORT-marcelo.md`.
@@ -131,7 +131,7 @@ completa en `CARRIL_REPORT-marcelo.md`.
   matrícula concede `PRACTITIONER`. **Nota de vigencia**:
   `findActiveForUser` filtraba sólo por estado, así que un rol con `valid_to`
   vencido seguía concediendo acceso —también en el PDP—; ahora respeta la
-  ventana. Verificado con `yarn redesa:personas`, que recorre el flujo de cada
+  ventana. Verificado con `yarn alovida:personas`, que recorre el flujo de cada
   actor con **su propio** token.
 
 - **El circuito quirúrgico no funcionaba contra una base real (2026-08-12).**
@@ -189,14 +189,14 @@ completa en `CARRIL_REPORT-marcelo.md`.
   compartido para multi-réplica. Ver `docs/resilience/06-checklists.md`.
 
 - La API está organizada en 57 módulos NestJS y expone 852 endpoints detectados por el analizador
-  REDESA (cifra anterior a las 17 rutas de lectura de Community del 2026-08-13; el
+  ALOVIDA (cifra anterior a las 17 rutas de lectura de Community del 2026-08-13; el
   arranque real mapea **952**).
-- La trazabilidad canónica y las remediaciones verificadas viven en `REDESA-TRAZABILIDAD.md`.
+- La trazabilidad canónica y las remediaciones verificadas viven en `ALOVIDA-TRAZABILIDAD.md`.
 - El informe estático actual registra 0 endpoints mutantes sin política explícita y 0 entidades
   huérfanas; queda 1 acceso directo entre repositorios de dominios distintos, justificado
   (`billing/repositories/practices-lookup.repository.ts` lee `practice.practices` de solo lectura
   porque `invoices` no tiene `tenant_id` propio — ver `dunning.service.ts`).
-- **Guardrail nuevo (2026-07-30): `TENANT_SCOPE_MISSING`** en `tools/redesa/guardrails.mjs`. Detecta
+- **Guardrail nuevo (2026-07-30): `TENANT_SCOPE_MISSING`** en `tools/alovida/guardrails.mjs`. Detecta
   estáticamente un `em.find`/`em.count` sobre una entidad con `tenant_id` que no acota ni por
   `tenantId` ni por un id de principal/recurso puntual — el patrón exacto del bug real de
   `promotions-loyalty.repository.ts:findActivePrograms` (sesión 2026-07-29). Trae una allowlist
@@ -292,8 +292,8 @@ completa en `CARRIL_REPORT-marcelo.md`.
 - Hay pruebas unitarias, de integración y smoke; los cambios sobre persistencia deben validarse
   contra una base real, no sólo con `EntityManager` simulado.
 
-Las cifras anteriores son una fotografía. Regenerar `REDESA-COBERTURA.md` con
-`yarn redesa:coverage` cuando cambien controllers, entidades o límites de dominio.
+Las cifras anteriores son una fotografía. Regenerar `ALOVIDA-COBERTURA.md` con
+`yarn alovida:coverage` cuando cambien controllers, entidades o límites de dominio.
 
 ## Cambios transversales ya incorporados
 
@@ -313,7 +313,7 @@ Las cifras anteriores son una fotografía. Regenerar `REDESA-COBERTURA.md` con
   módulos 55/56/57 reconectados a `AppModule` — ver detalle arriba.
 
 El detalle comprobable de cada punto, con archivos y pruebas, está en
-`REDESA-TRAZABILIDAD.md`; las reglas propias de cada dominio están en
+`ALOVIDA-TRAZABILIDAD.md`; las reglas propias de cada dominio están en
 `src/modules/<modulo>/README.md`.
 
 ## Pendientes priorizados
@@ -363,7 +363,7 @@ Lo que sigue siendo una decisión de despliegue, no de código:
 ### P1 · Cerrado — lectura del flujo asistencial y actores restantes (2026-08-12)
 
 Los diez actores clínicos completan su flujo de punta a punta con **su propio
-rol**, verificado con `yarn redesa:personas`. Lo que faltaba y se añadió:
+rol**, verificado con `yarn alovida:personas`. Lo que faltaba y se añadió:
 
 - **Lecturas del circuito quirúrgico.** `procedures_perioperative` no tenía ni
   un `@Get`: un caso creado sólo era accesible por el uuid que devolvía su
@@ -469,7 +469,7 @@ por producto**, y la anotación queda acá para que lo sea a la vista y no por o
 
 ### P2 · Cerrar decisiones funcionales parametrizadas
 
-Continúan abiertas las decisiones marcadas con 🔵 en `REDESA-TRAZABILIDAD.md`, incluyendo crédito
+Continúan abiertas las decisiones marcadas con 🔵 en `ALOVIDA-TRAZABILIDAD.md`, incluyendo crédito
 publicitario y valores de negocio configurables. Confirmarlas con producto/compliance y convertir
 la decisión en configuración validada, prueba y documentación del módulo.
 
@@ -479,7 +479,7 @@ Una corrección se considera terminada cuando:
 
 - compila y tiene pruebas del comportamiento normal, error y reintento;
 - conserva tenant, autorización, auditoría e idempotencia;
-- pasa `yarn redesa:guardrails`;
+- pasa `yarn alovida:guardrails`;
 - actualiza trazabilidad o documentación del módulo si cambia el contrato;
 - para persistencia o concurrencia, tiene evidencia de integración contra el almacén real.
 
@@ -489,10 +489,10 @@ Una corrección se considera terminada cuando:
 | --- | --- | --- |
 | `README.md` | Arranque, arquitectura y operación | Manual, cuando cambia el proyecto |
 | `ESTADO-Y-PENDIENTES.md` | Foto vigente y backlog transversal | Manual; reemplaza planes fechados |
-| `REDESA-TRAZABILIDAD.md` | Reglas, implementación y pruebas | Manual, junto al cambio funcional |
-| `REDESA-COBERTURA.md` | Hallazgos estáticos | Generado con `yarn redesa:coverage` |
+| `ALOVIDA-TRAZABILIDAD.md` | Reglas, implementación y pruebas | Manual, junto al cambio funcional |
+| `ALOVIDA-COBERTURA.md` | Hallazgos estáticos | Generado con `yarn alovida:coverage` |
 | `docs/frontend/CATALOGO-FLUJOS-VERIFICADOS.md` | Cuerpos reales para el frontend | Generado con `exercise-front-flows.mjs` (token de administrador) |
-| Cobertura por actor clínico (en `REDESA-TRAZABILIDAD.md`) | Qué puede hacer cada rol médico | Verificado con `yarn redesa:personas` (token de cada actor) |
+| Cobertura por actor clínico (en `ALOVIDA-TRAZABILIDAD.md`) | Qué puede hacer cada rol médico | Verificado con `yarn alovida:personas` (token de cada actor) |
 | `src/modules/*/README.md` | Contrato por dominio | Manual, junto al módulo |
 
 No crear documentos de sesión en la raíz. Si una investigación no se convierte en una decisión

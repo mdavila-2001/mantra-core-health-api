@@ -1,0 +1,527 @@
+#!/usr/bin/env node
+// =============================================================================
+// Guardrails ALOVIDA — checks estáticos de los criterios de rechazo técnico.
+// =============================================================================
+// Convierte en un check de CI (rompe el build) los antipatrones que las reglas
+// canónicas prohíben. Es estático (no arranca la app ni toca la BD): analiza los
+// controladores y el catálogo ORM. Uso: `node tools/alovida/guardrails.mjs`.
+//
+// Criterios implementados:
+//   - HARD_DELETE_RESTRICTED_DATA      @Delete sobre dominios inmutables
+//   - GENERIC_CRUD_ON_IMMUTABLE        @Patch/@Put sobre recursos inmutables
+//   - UNSCOPED_MUTATION                endpoint mutante sin @Roles y sin @Public
+//   - CASCADE_ON_RESTRICTED            ON DELETE CASCADE hacia dominios protegidos
+//   - TENANT_SCOPE_MISSING             listado/conteo de entidad con tenant_id
+//                                      sin ningún rastro de `tenantId` cerca
+// =============================================================================
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+
+const ROOT = process.cwd();
+const SRC = join(ROOT, 'src');
+
+/** Dominios cuyos datos son inmutables/protegidos (clínico, legal, financiero, auditoría). */
+const RESTRICTED_DOMAINS = [
+  'clinical',
+  'clinical_ext',
+  'chart',
+  'audit',
+  'accounting',
+];
+
+/** Recursos inmutables: no admiten edición/borrado directo (solo comandos de negocio). */
+const IMMUTABLE_RESOURCE =
+  /(medication|prescription|clinical-?note|chart-note|journal|ledger|audit)/i;
+
+/** Verbos de negocio permitidos sobre recursos inmutables (no son CRUD genérico). */
+const ALLOWED_COMMANDS =
+  /(amend|addend|invalidate|replace|renew|reverse|sign|cosign|finalize|release|issue|deprecate|version|dsar)/i;
+
+/**
+ * Controladores cuyos endpoints mutantes están autenticados por el `JwtAuthGuard`
+ * GLOBAL (APP_GUARD en common/auth) y autorizados a nivel de RECURSO en el servicio
+ * (pertenencia/propiedad), no por `@Roles`. El analizador es estático y no ve el
+ * guard global ni la autorización de recurso, así que sin esta allowlist los marca
+ * como UNSCOPED_MUTATION (falso positivo, verificado en el triage 2026-07):
+ *   - telemetry: ingesta autenticada por diseño (SDK/portal), no scoping por rol.
+ *   - community: features sociales peer-to-peer (mensajería, reseñas, encuestas,
+ *     grupos) gobernadas por participación/propiedad en el servicio.
+ *   - common: recursos propios del actor (archivos, direcciones, identificadores)
+ *     con `actorUserId` en el servicio.
+ *   - identity-self-service: el sujeto se deriva del actor autenticado y la
+ *     pertenencia de tenant se valida en el servicio, no por rol global.
+ *   - audio_assets: `resolve` es el flujo del propio usuario (pide el audio de su
+ *     onboarding) y no admite texto libre — sólo plantillas registradas. El
+ *     alcance lo pone el tenant del contexto, que entra en la identidad del asset,
+ *     y el cupo diario se imputa al sujeto del token; exigir un rol global
+ *     obligaría a inventar uno que todo usuario tendría. Las operaciones que sí
+ *     gastan cuota o tocan el catálogo viven en `internal/audio-assets` con
+ *     `@Roles('SYSTEM')`.
+ * NO exime del requisito de autenticación (el guard global lo garantiza).
+ */
+const AUTHN_NON_ROLE_ALLOWLIST =
+  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/controllers\/audio-assets\.controller\.ts/;
+
+/** ¿Existe un JwtAuthGuard registrado como APP_GUARD global? (defensa por defecto) */
+function hasGlobalJwtGuard() {
+  try {
+    const authModule = readFileSync(
+      join(SRC, 'common', 'auth', 'auth.module.ts'),
+      'utf8',
+    );
+    return /APP_GUARD/.test(authModule) && /JwtAuthGuard/.test(authModule);
+  } catch {
+    return false;
+  }
+}
+const GLOBAL_JWT_GUARD = hasGlobalJwtGuard();
+
+function walk(dir) {
+  const out = [];
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name);
+    const s = statSync(p);
+    if (s.isDirectory()) out.push(...walk(p));
+    else if (name.endsWith('.ts') && !name.endsWith('.spec.ts')) out.push(p);
+  }
+  return out;
+}
+
+const rel = (p) => p.replace(ROOT + '/', '');
+const violations = [];
+const add = (code, file, line, msg) =>
+  violations.push({ code, file: rel(file), line, msg });
+
+// --- Controladores -----------------------------------------------------------
+const controllers = walk(join(SRC, 'modules')).filter((f) =>
+  f.endsWith('.controller.ts'),
+);
+
+for (const file of controllers) {
+  const text = readFileSync(file, 'utf8');
+  const lines = text.split(/\r?\n/);
+  const domain = file.match(/modules\/([^/]+)\//)?.[1] ?? '';
+  const classHasRoles = /@Roles\(/.test(text);
+  const isImmutableCtrl = IMMUTABLE_RESOURCE.test(file);
+
+  // Bloque por método: acumula decoradores hasta el nombre del handler.
+  let pendingDecorators = [];
+  lines.forEach((raw, i) => {
+    const l = raw.trim();
+    const mhttp = l.match(/@(Get|Post|Put|Patch|Delete)\(([^)]*)\)/);
+    if (l.startsWith('@')) pendingDecorators.push({ text: l, line: i + 1 });
+    if (!mhttp) return;
+
+    const verb = mhttp[1];
+    const path = mhttp[2] || '';
+    const near = lines.slice(i, i + 6).join(' ');
+    const hasPublic =
+      pendingDecorators.some((d) => /@Public\(/.test(d.text)) ||
+      /@Public\(/.test(near);
+    const hasRolesHere =
+      classHasRoles ||
+      pendingDecorators.some((d) => /@Roles\(/.test(d.text)) ||
+      /@Roles\(/.test(near);
+
+    // HARD_DELETE sobre dominio protegido.
+    if (verb === 'Delete' && RESTRICTED_DOMAINS.includes(domain)) {
+      add(
+        'HARD_DELETE_RESTRICTED_DATA',
+        file,
+        i + 1,
+        `@Delete en dominio protegido '${domain}': ${path}`,
+      );
+    }
+    // CRUD genérico sobre recurso inmutable (Patch/Put/Delete sin verbo de negocio).
+    if (
+      isImmutableCtrl &&
+      ['Put', 'Patch', 'Delete'].includes(verb) &&
+      !ALLOWED_COMMANDS.test(path)
+    ) {
+      add(
+        'GENERIC_CRUD_ON_IMMUTABLE',
+        file,
+        i + 1,
+        `@${verb} sobre recurso inmutable sin comando de negocio: ${path}`,
+      );
+    }
+    // Endpoint mutante sin autorización por rol y sin ser público. Con guard JWT
+    // global, "sin @Roles" NO significa "sin autenticación"; se exime a los
+    // controladores autenticados+autorizados a nivel de recurso (allowlist).
+    if (
+      ['Post', 'Put', 'Patch', 'Delete'].includes(verb) &&
+      !hasRolesHere &&
+      !hasPublic &&
+      !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(file))
+    ) {
+      add(
+        'UNSCOPED_MUTATION',
+        file,
+        i + 1,
+        `@${verb} mutante sin @Roles ni @Public: ${path}`,
+      );
+    }
+    pendingDecorators = [];
+  });
+}
+
+// --- Catálogo ORM: ON DELETE CASCADE hacia dominios protegidos ---------------
+const fkDir = join(SRC, 'orm', 'catalog', 'foreign-keys');
+try {
+  for (const file of walk(fkDir)) {
+    const text = readFileSync(file, 'utf8');
+    if (
+      /CASCADE/.test(text) &&
+      RESTRICTED_DOMAINS.some((d) => text.includes(`${d}.`))
+    ) {
+      text.split(/\r?\n/).forEach((l, i) => {
+        if (
+          /CASCADE/i.test(l) &&
+          RESTRICTED_DOMAINS.some((d) => l.includes(`${d}.`))
+        )
+          add('CASCADE_ON_RESTRICTED', file, i + 1, l.trim().slice(0, 100));
+      });
+    }
+  }
+} catch {
+  // Sin catálogo de FKs: se omite este check.
+}
+
+// --- Aislamiento por tenant: listados/conteos sin filtro tenantId -----------
+// Reproduce estáticamente el patrón encontrado tres veces en revisión manual
+// (2026-07-29): un repositorio para una entidad con `tenant_id` expone
+// `em.find`/`em.count` (plural — a diferencia de `findOne` por PK, donde el
+// servicio puede verificar pertenencia post-fetch) sin acotar por tenant. La
+// primera vez fue `promotions-loyalty.repository.ts:findActivePrograms`
+// (expuesto sin filtro a roles de negocio no-SYSTEM); la segunda, 10
+// repositorios de solo lectura nuevos que nunca declaraban `tenantId` en
+// ningún método. Ver ESTADO-Y-PENDIENTES.md.
+const TENANT_ENTITY_CLASSES = new Set();
+try {
+  for (const f of walk(join(SRC, 'modules')).filter((f) =>
+    /\/entities\//.test(f),
+  )) {
+    const text = readFileSync(f, 'utf8');
+    if (!/fieldName:\s*'tenant_id'/.test(text)) continue;
+    for (const m of text.matchAll(/export class (\w+)/g))
+      TENANT_ENTITY_CLASSES.add(m[1]);
+  }
+} catch {
+  // Sin entidades: se omite este check.
+}
+
+/**
+ * Módulos deliberadamente globales/cross-tenant por diseño de arquitectura
+ * (barrido SYSTEM/SECURITY_ADMIN o atribución sin ser límite de acceso, ver
+ * ESTADO-Y-PENDIENTES.md): su `tenant_id` no es un perímetro de autorización,
+ * así que un repositorio entero sin `tenantId` ahí es esperado, no un hallazgo.
+ * `consent` queda FUERA de esta lista a propósito: mezcla barridos globales
+ * con operaciones tenant-scoped reales en el mismo módulo.
+ */
+const GLOBAL_DOMAIN_MODULES = new Set([
+  'identity_assurance',
+  'delegated_access',
+  'pharmacy_inventory',
+  'time_series',
+]);
+
+/**
+ * Texto del **segundo argumento** de `em.find(Entity, criterio, opciones)`.
+ *
+ * Hace falta parsear la lista de argumentos en vez de buscar el primer `{`: si el
+ * criterio se pasa en una variable (`em.find(X, where, { orderBy, limit })`), ese
+ * primer `{` es el de las **opciones**, y evaluar `orderBy`/`limit` como si fueran
+ * el criterio produce un falso positivo garantizado —y, al revés, un
+ * `orderBy: { patientProfileId: 'ASC' }` exoneraría una consulta sin acotar—. El
+ * fallo iba en las dos direcciones.
+ *
+ * @param from índice del `(` de la llamada.
+ * @returns el argumento tal cual (literal `{...}` o el nombre de la variable), o
+ *          `''` si no hay segundo argumento.
+ */
+function secondArgumentText(text, from) {
+  const open = text.indexOf('(', from);
+  if (open === -1) return '';
+  let depth = 0;
+  let argStart = -1;
+  for (let i = open; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '(' || ch === '{' || ch === '[') depth++;
+    else if (ch === ')' || ch === '}' || ch === ']') {
+      depth--;
+      // Cierre de la propia llamada. Si ya se vio la coma, el criterio es el
+      // último argumento y acaba aquí; si no, la llamada tenía uno solo.
+      if (depth === 0) {
+        return argStart === -1 ? '' : text.slice(argStart, i).trim();
+      }
+    } else if (ch === ',' && depth === 1) {
+      if (argStart === -1) {
+        argStart = i + 1;
+      } else {
+        return text.slice(argStart, i).trim();
+      }
+    }
+  }
+  return argStart === -1 ? '' : text.slice(argStart).trim();
+}
+
+/**
+ * Claves del criterio, resolviendo la variable cuando el criterio no es literal.
+ *
+ * Un criterio construido por acumulación (`const where = {}; if (…)
+ * where.patientProfileId = …`) es el idioma normal de una búsqueda con filtros
+ * opcionales, y sus claves están en el cuerpo del método, no en la llamada.
+ * Se recogen del inicializador y de las asignaciones `variable.clave = …`.
+ */
+function criteriaKeys(argument, methodBody) {
+  const literalKeys = (source) =>
+    [...source.matchAll(/[{,]\s*([A-Za-z]\w*)\s*[,:}]/g)].map((k) => k[1]);
+
+  if (argument.startsWith('{')) return literalKeys(argument);
+
+  const name = argument.match(/^[A-Za-z_$][\w$]*/)?.[0];
+  if (!name) return [];
+
+  const keys = [];
+  const declaration = methodBody.match(
+    new RegExp(
+      `\\b(?:const|let|var)\\s+${name}\\b[^=]*=\\s*(\\{[\\s\\S]*?\\n\\s*\\}|\\{[^}]*\\})`,
+    ),
+  );
+  if (declaration) keys.push(...literalKeys(declaration[1]));
+  for (const m of methodBody.matchAll(
+    new RegExp(`\\b${name}\\.([A-Za-z]\\w*)\\s*=`, 'g'),
+  ))
+    keys.push(m[1]);
+  return keys;
+}
+
+/** Extrae el objeto `{ ... }` balanceado que arranca en el primer `{` a partir de `from`. */
+function extractBalancedBraces(text, from) {
+  const start = text.indexOf('{', from);
+  if (start === -1) return '';
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}') {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return text.slice(start);
+}
+
+// Claves como `userId`/`patientProfileId`/`consentId`/`resourceId` ya acotan la
+// consulta a un principal o recurso puntual (no a "todo el tenant"); el
+// servicio que las llama las deriva del actor autenticado o de un recurso ya
+// verificado, no de un listado abierto. `stateConceptId`/`...ConceptId` NO
+// cuentan: son categorías amplias (terminología), igual que el
+// `stateConceptId` suelto que sí causó el bug original de loyalty.
+const SPECIFIC_ID_KEY = /(?<!Concept)Id\b/;
+
+/**
+ * `em.count(Entity, {})` con criterio vacío: idioma reconocido de generación
+ * de correlativo legible (`ENV-000123`, `DEP-000045`, `DEF-00012`) — cuenta
+ * TODAS las filas a propósito para obtener un candidato, y la unicidad real
+ * la valida el `findByNumber` inmediato después contra ese mismo correlativo.
+ * No filtra ni expone datos de ningún tenant, así que no es un hallazgo de
+ * aislamiento (verificado en el triage 2026-07-30: `tracking.countShipments`,
+ * `ops-releases.countDeployments`, `qa-runs.countDefects`).
+ */
+const isEmptyCriteria = (criteria) => /^\{\s*\}$/.test(criteria.trim());
+
+/**
+ * Métodos de repositorio que SÍ cruzan tenants a propósito: descubrimiento de
+ * un worker SYSTEM (barridos de vencidos, colas reclamables) donde ningún rol
+ * de negocio los alcanza directamente — el propio método ya lo documenta en
+ * un comentario. Confirmados uno por uno en el triage 2026-07-30 leyendo cada
+ * caller; si agregas uno nuevo, define primero por qué el barrido no puede
+ * acotarse por tenant (normalmente: "no se sabe de antemano qué tenants
+ * tienen algo vencido").
+ */
+const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
+  // Mantenimiento del catálogo de audio, `@Roles('SYSTEM')` a nivel de
+  // controlador (`internal/audio-assets`): verificar checksums y recolectar
+  // objetos deprecados no se puede acotar por tenant porque no se sabe de
+  // antemano qué tenants tienen un asset corrupto o deprecado — y el asset
+  // compartido (`tenant_id IS NULL`) no pertenece a ninguno. Aparecieron al
+  // añadir `tenant_id` al módulo (2026-08-11): antes la entidad no tenía
+  // columna de tenant y la regla no aplicaba.
+  'src/modules/audio_assets/repositories/audio-maintenance.repository.ts#listReady',
+  'src/modules/audio_assets/repositories/audio-maintenance.repository.ts#listGarbageCandidates',
+  'src/modules/automation/repositories/automation-governance.repository.ts#findEnabledCalendarTriggers',
+  'src/modules/practice/repositories/practices.repository.ts#findActive',
+  'src/modules/consent/repositories/consents.repository.ts#findExpirable',
+  'src/modules/consent/repositories/hipaa-authorizations.repository.ts#findExpirable',
+  'src/modules/consent/repositories/privacy-restrictions.repository.ts#findExpirable',
+  'src/modules/messaging/repositories/notifications.repository.ts#findClaimableRequests',
+  'src/modules/messaging/repositories/outbox.repository.ts#claimPendingOutbox',
+  'src/modules/qa_lab/repositories/qa-catalog.repository.ts#claimDueSchedules',
+  'src/modules/reporting/repositories/reporting-runs.repository.ts#findDueSchedules',
+  'src/modules/tracking/repositories/tracking.repository.ts#findOpenSubjectsForScan',
+  'src/modules/vector_rag/repositories/vector-catalog.repository.ts#findQueuedJobs',
+  'src/modules/workflow/repositories/workflow-runtime.repository.ts#findDueInstancesForUpdate',
+  // Directorio público (P10, 2026-08-18): `community.public_profiles` es la
+  // vitrina que se sirve **sin sesión y a través de todos los tenants** —nadie
+  // busca «un cardiólogo dentro de la clínica X» sin saber que X existe—, así
+  // que acotar por tenant devolvería un directorio vacío. La barrera acá no es
+  // el tenant sino el par `visibility = PUBLIC AND status = ACTIVE`, que las
+  // dos consultas aplican y el propio repositorio documenta arriba de todo.
+  // `countIndexable` es el denominador de «indexados N de N» del reindexado,
+  // que corre como SYSTEM desde `internal/community/search/reindex`.
+  'src/modules/community/repositories/public-search.repository.ts#countIndexable',
+]);
+
+/**
+ * Lecturas de **directorio público**: cruzan tenants a propósito porque la
+ * superficie que sirven es anónima y transversal — nadie busca «un cardiólogo
+ * dentro de la clínica X» sin saber que X existe, y acotar por tenant
+ * devolvería un directorio vacío.
+ *
+ * Es una lista aparte de la de barridos del worker y no un apéndice suyo: la
+ * justificación es distinta y hay que poder revisarlas por separado. En un
+ * barrido SYSTEM, el motivo es que no se sabe de antemano qué tenants tienen
+ * algo pendiente. Acá el motivo es que **la barrera no es el tenant**: es el
+ * par publicación/estado que cada consulta aplica por su cuenta
+ * (`visibility = PUBLIC AND status = ACTIVE` en community; `ACTIVE` +
+ * `VERIFIED` en unidades diagnósticas).
+ *
+ * Antes de agregar una entrada acá, comprobá las dos cosas: que la lectura la
+ * sirva un endpoint declarado `@Public()` o `@TenantAgnostic()` —o sea, que la
+ * superficie ya renuncie al tenant a la vista de todos—, y que su `where`
+ * traiga ese par por igualdad, no como «distinto de privado». Si falta
+ * cualquiera de las dos, lo que hay es una fuga, no una excepción.
+ */
+const PUBLIC_DIRECTORY_ALLOWLIST = new Set([
+  // Buscador público del directorio de la red social (P4/P10). El repositorio
+  // documenta el par de condiciones arriba de todo, y la proyección enumera
+  // campos a mano para que no se escape ningún identificador interno.
+  'src/modules/community/repositories/public-search.repository.ts#searchProfiles',
+  // Denominador de «indexados N de N» del reindexado del mismo directorio, que
+  // corre como SYSTEM desde `internal/community/search/reindex`.
+  'src/modules/community/repositories/public-search.repository.ts#countIndexable',
+  // Buscador público de unidades diagnósticas: `searchWhere` exige
+  // `UNIT_ACTIVE` + `VERIFICATION_VERIFIED` y acepta `tenantId` como filtro
+  // opcional, no como límite de acceso.
+  'src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts#searchVisible',
+  'src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts#countVisible',
+]);
+
+/** Nombre del método de clase que contiene la línea `atLine` (busca hacia atrás). */
+function enclosingMethodName(lines, atLine) {
+  for (let i = atLine; i >= 0; i--) {
+    const m = lines[i].match(/^\s{2}(?:async\s+)?([a-zA-Z_]\w*)\s*\(/);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+/** Patrón de la línea que abre un método de clase (dos espacios de indentación). */
+const METHOD_OPENING = /^\s{2}(?:async\s+)?[a-zA-Z_]\w*\s*\(/;
+
+/**
+ * Cuerpo del método que contiene `atLine`, para resolver ahí la variable del
+ * criterio. Se acota entre la línea que abre el método y la que abre el
+ * siguiente: buscar en todo el archivo confundiría una variable homónima de otro
+ * método (`where` se llama igual en media docena de ellos).
+ */
+function enclosingMethodBody(lines, atLine) {
+  let start = 0;
+  for (let i = atLine; i >= 0; i--) {
+    if (METHOD_OPENING.test(lines[i])) {
+      start = i;
+      break;
+    }
+  }
+  let end = lines.length;
+  for (let i = atLine + 1; i < lines.length; i++) {
+    if (METHOD_OPENING.test(lines[i])) {
+      end = i;
+      break;
+    }
+  }
+  return lines.slice(start, end).join('\n');
+}
+
+const repoFiles = walk(join(SRC, 'modules')).filter((f) =>
+  /\/repositories\//.test(f),
+);
+for (const file of repoFiles) {
+  const mod = file.match(/modules\/([^/]+)\//)?.[1] ?? '';
+  if (GLOBAL_DOMAIN_MODULES.has(mod)) continue;
+  const text = readFileSync(file, 'utf8');
+  const lines = text.split(/\r?\n/);
+
+  for (const m of text.matchAll(/em\.(find|count)\(\s*([A-Z]\w*)\b/g)) {
+    const [, verb, cls] = m;
+    if (!TENANT_ENTITY_CLASSES.has(cls)) continue;
+
+    const i = text.slice(0, m.index).split(/\r?\n/).length - 1;
+
+    const criteria = secondArgumentText(text, m.index);
+    if (verb === 'count' && (criteria === '' || isEmptyCriteria(criteria)))
+      continue;
+
+    const method = enclosingMethodName(lines, i);
+    const qualified = method ? `${rel(file)}#${method}` : null;
+    if (
+      qualified &&
+      (TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST.has(qualified) ||
+        PUBLIC_DIRECTORY_ALLOWLIST.has(qualified))
+    )
+      continue;
+
+    // Se busca `tenantId` en el MÉTODO ENTERO, no en una ventana de líneas
+    // alrededor de la llamada. La ventana de ±20 era una aproximación al
+    // método, y fallaba justo donde el método es largo: `listQueuePage` de
+    // `moderation.repository.ts` arma `const where = { tenantId }` veinti**una**
+    // líneas antes del `em.find`, así que la consulta —que sí está acotada—
+    // se reportaba como bloqueante por una línea de diferencia. Un límite
+    // arbitrario que depende de cuántos filtros opcionales tenga el método no
+    // distingue una fuga de tenant de una firma con JSDoc largo.
+    const methodBody = enclosingMethodBody(lines, i);
+    if (/\btenantId\b/.test(methodBody)) continue;
+
+    // El criterio ya acota por un id de principal/recurso puntual (patrón PDP:
+    // userId, patientProfileId, consentId, resourceId, ...) — no es un listado
+    // abierto de todo el tenant. `id` cuenta como el más puntual de todos: una
+    // consulta por clave primaria devuelve filas concretas ya identificadas, no un
+    // listado del tenant.
+    const keys = criteriaKeys(criteria, enclosingMethodBody(lines, i));
+    if (
+      keys.some(
+        (k) => k !== 'tenantId' && (k === 'id' || SPECIFIC_ID_KEY.test(k)),
+      )
+    )
+      continue;
+
+    add(
+      'TENANT_SCOPE_MISSING',
+      file,
+      i + 1,
+      `em.${verb}(${cls}, ...) sin 'tenantId' ni un id de principal/recurso puntual en el criterio (tenant_id es límite de acceso en este módulo)`,
+    );
+  }
+}
+
+// --- Reporte -----------------------------------------------------------------
+const byCode = {};
+for (const v of violations) (byCode[v.code] ??= []).push(v);
+
+console.log('== Guardrails ALOVIDA ==');
+for (const code of Object.keys(byCode)) {
+  console.log(`\n[${code}] ${byCode[code].length} hallazgo(s):`);
+  for (const v of byCode[code].slice(0, 40))
+    console.log(`  ${v.file}:${v.line} — ${v.msg}`);
+  if (byCode[code].length > 40)
+    console.log(`  … +${byCode[code].length - 40} más`);
+}
+if (violations.length === 0) console.log('Sin violaciones. ✓');
+
+// UNSCOPED_MUTATION es informativo (puede haber excepciones legítimas); los demás
+// rompen el build.
+const blocking = violations.filter((v) => v.code !== 'UNSCOPED_MUTATION');
+console.log(
+  `\nTotal: ${violations.length} (bloqueantes: ${blocking.length}, informativos: ${violations.length - blocking.length})`,
+);
+process.exit(blocking.length > 0 ? 1 : 0);

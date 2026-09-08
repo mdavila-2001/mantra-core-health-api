@@ -15,7 +15,7 @@ describe('LocalDiskFileStorageAdapter', () => {
   let adapter: LocalDiskFileStorageAdapter;
 
   beforeEach(async () => {
-    root = await mkdtemp(join(tmpdir(), 'redesa-storage-'));
+    root = await mkdtemp(join(tmpdir(), 'alovida-storage-'));
     // El adaptador fija su raíz al construirse, así que la variable de entorno
     // debe estar puesta antes de instanciarlo (no al importar el módulo).
     process.env.FILE_STORAGE_LOCAL_DIR = root;

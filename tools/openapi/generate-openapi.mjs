@@ -312,9 +312,9 @@ async function main() {
   const pkg = await import('../../package.json', { with: { type: 'json' } });
 
   const config = new DocumentBuilder()
-    .setTitle('REDESA Health API')
+    .setTitle('ALOVIDA Health API')
     .setDescription(
-      'API del ecosistema de salud REDESA (Mantra Core Technologies). ' +
+      'API del ecosistema de salud ALOVIDA (Mantra Core Technologies). ' +
         'Contrato generado automáticamente desde los decoradores `@nestjs/swagger` ' +
         'reales de los controllers y DTO del backend — no es un documento mantenido a mano. ' +
         'Regenerar con `yarn docs:openapi:generate` tras cualquier cambio de contrato.',

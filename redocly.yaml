@@ -3,7 +3,7 @@
 # decoradores @nestjs/swagger reales del código — este archivo evita que se
 # degrade con cambios futuros sin gobierno.
 apis:
-  redesa-health@v1:
+  alovida-health@v1:
     root: openapi/openapi.yaml
 
 extends:

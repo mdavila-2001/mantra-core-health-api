@@ -60,7 +60,7 @@ describe('AccountingLedgerController', () => {
     expect(d.ledgerService.postJournal).toHaveBeenCalledWith(dto, actor);
   });
 
-  it('delega el flujo de estados (REDESA C-17)', async () => {
+  it('delega el flujo de estados (ALOVIDA C-17)', async () => {
     const d = build();
     await d.controller.createDraft(
       { practiceId: 'p', lines: [] } as any,

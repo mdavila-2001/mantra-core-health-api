@@ -1,14 +1,15 @@
 import type { GlossaryRelationType } from '../../modules/terminology/glossary.constants';
 
 /**
- * El catálogo curado del glosario médico (v1) — 64 términos.
+ * El catálogo curado del glosario médico (v1) — 69 términos (64 + 5 de
+ * FND-25-01, categoría `other`).
  *
  * > Este es un catálogo inicial, curado y revisado médicamente a mano, no una
  * > importación de una nomenclatura externa (no hubo para este carril una carga
  * > masiva de CIE-10/SNOMED/LOINC disponible). Cada término se eligió por ser un
  * > concepto de alta frecuencia que un clínico o un paciente buscarían
  * > razonablemente en un consultorio ambulatorio / atención primaria, repartido
- * > deliberadamente entre las 11 categorías exigidas para que ninguna quede vacía
+ * > deliberadamente entre las 12 categorías exigidas para que ninguna quede vacía
  * > en el grid. Toda definición es texto original, no extraído de otra fuente. El
  * > texto en inglés sólo se escribió donde efectivamente se produjo una
  * > traducción de calidad de revisor (ver notas por término más abajo) — el
@@ -20,6 +21,28 @@ import type { GlossaryRelationType } from '../../modules/terminology/glossary.co
  * > una vez que cada subconjunto haya sido revisado clínicamente — el modelo de
  * > datos de acá no necesita cambiar para absorberlos, sólo el paso de
  * > seed/import.
+ *
+ * ## FND-25-01 — categoría `other` («Otros términos»)
+ *
+ * El pedido literal del carril («PROCEDIMIENTOS MÉDICOS, TRATAMIENTOS,
+ * ENFERMEDADES, OTROS TÉRMINOS, MEDICAMENTOS») no tenía equivalente para
+ * «OTROS TÉRMINOS» en las 11 categorías clínicas que trajo la reconstrucción
+ * de esta pantalla — un vacío de fidelidad al spec. Se agregaron 5 términos
+ * administrativos/legales de la atención (consentimiento informado, historia
+ * clínica, alta médica, receta médica, interconsulta): no son clínicos en sí
+ * mismos —no llevan dosis, diagnóstico ni indicación— así que no encajaban en
+ * ninguna de las 11, y son terminología real y de uso corriente en salud, no
+ * inventada para llenar un cupo.
+ *
+ * ## FND-25-02 — ficha de medicamento con datos reales
+ *
+ * Los 6 términos de `pharmacology` ahora declaran `drugFacts`: principios
+ * activos, forma farmacéutica, vía y fabricante copiados verbatim de un
+ * producto real del FDA NDC Directory ya importado (135 002 filas,
+ * `code_system=ndc`). Ver el docblock de `GlossaryTermSeed.drugFacts` para la
+ * regla de selección determinista. Posología, dosis y contraindicaciones
+ * siguen sin aparecer, a propósito — ninguna fuente importada las cubre
+ * (P-25-1, ver `glossary-drug-facts.ts` en el frontend).
  *
  * ## Nota de transcripción — una relación huérfana en la fuente
  *
@@ -74,6 +97,59 @@ export interface GlossaryTermSeed {
     readonly type: GlossaryRelationType;
     readonly targetSlug: string;
   }[];
+  /**
+   * Ficha de medicamento (FND-25-02), sólo en los 6 términos de
+   * `pharmacology`. Los cuatro campos son texto **verbatim** de un producto
+   * real del FDA National Drug Code (NDC) Directory ya importado
+   * (`code_system=ndc`, `tools/terminology-import/import-ndc.mjs`) — no texto
+   * de autor como el resto de este catálogo.
+   *
+   * ## Regla de selección (determinista, no editorial)
+   *
+   * Para cada principio activo se buscó, entre los productos NDC con
+   * `active_ingredients` de **un solo** componente cuyo nombre coincide
+   * (case-insensitive) con el nombre genérico/DCI del término, y cuyo
+   * `display` también contiene ese nombre (i.e. comercializado bajo su
+   * nombre genérico, no una marca), el de **código NDC alfabéticamente
+   * menor**. Es una regla mecánica y reproducible — no "cuál fabricante
+   * representa mejor a este genérico", que sí sería una decisión editorial
+   * (la que la ronda anterior de este carril evitó tomar):
+   *
+   * ```sql
+   * SELECT cc.code, cc.display, cp.value_json, cp2.value_json AS manufacturer,
+   *        cp3.value_json AS dosage_form, cp4.value_json AS route
+   * FROM terminology.catalog_concepts cc
+   * JOIN terminology.code_system_versions v ON v.id = cc.code_system_version_id
+   * JOIN terminology.code_systems cs ON cs.id = v.code_system_id
+   * JOIN terminology.concept_properties cp
+   *   ON cp.concept_id = cc.id AND cp.property_code = 'active_ingredients'
+   * LEFT JOIN terminology.concept_properties cp2
+   *   ON cp2.concept_id = cc.id AND cp2.property_code = 'manufacturer'
+   * LEFT JOIN terminology.concept_properties cp3
+   *   ON cp3.concept_id = cc.id AND cp3.property_code = 'dosage_form'
+   * LEFT JOIN terminology.concept_properties cp4
+   *   ON cp4.concept_id = cc.id AND cp4.property_code = 'route'
+   * WHERE cs.internal_code = 'ndc'
+   *   AND jsonb_array_length(cp.value_json) = 1
+   *   AND lower(cp.value_json->0->>'name') = lower(:genericName)
+   *   AND position(lower(:genericNameFirstWord) IN lower(cc.display)) > 0
+   *   AND cp4.value_json IS NOT NULL
+   * ORDER BY cc.code
+   * LIMIT 1;
+   * ```
+   *
+   * corrida el 2026-09-05 contra `mantra_redesa_health_e2e` para cada uno de
+   * los 6 principios activos; el `sourceNdc` de cada término de abajo es el
+   * `cc.code` que devolvió.
+   */
+  readonly drugFacts?: {
+    /** `product_ndc` real del producto elegido, para trazabilidad. */
+    readonly sourceNdc: string;
+    readonly activeIngredients: readonly string[];
+    readonly dosageForm: string;
+    readonly route: readonly string[];
+    readonly manufacturer: string;
+  };
 }
 
 /** Los 64 términos curados, en el orden del catálogo fuente. */
@@ -785,6 +861,13 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es el medicamento más usado para controlar el azúcar en la diabetes tipo 2.',
     relations: [{ type: 'DISEASE', targetSlug: 'diabetes-mellitus-tipo-2' }],
+    drugFacts: {
+      sourceNdc: '0378-6001',
+      activeIngredients: ['METFORMIN HYDROCHLORIDE 1000 mg/1'],
+      dosageForm: 'TABLET, FILM COATED, EXTENDED RELEASE',
+      route: ['ORAL'],
+      manufacturer: 'Mylan Pharmaceuticals Inc.',
+    },
   },
   {
     key: 'losartan',
@@ -797,6 +880,13 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       'Antagonista del receptor de angiotensina II (ARA-II) indicado en el tratamiento de la hipertensión arterial y en la nefroprotección de pacientes diabéticos.',
     plainSummaryEs: 'Es un medicamento para bajar la presión arterial.',
     relations: [{ type: 'DISEASE', targetSlug: 'hipertension-arterial' }],
+    drugFacts: {
+      sourceNdc: '0615-7958',
+      activeIngredients: ['LOSARTAN POTASSIUM 25 mg/1'],
+      dosageForm: 'TABLET, FILM COATED',
+      route: ['ORAL'],
+      manufacturer: 'NCS HealthCare of KY, LLC dba Vangard Labs',
+    },
   },
   {
     key: 'salbutamol',
@@ -811,6 +901,16 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es el inhalador que se usa para abrir rápido los bronquios cuando cuesta respirar.',
     relations: [{ type: 'DISEASE', targetSlug: 'asma-bronquial' }],
+    drugFacts: {
+      // El NDC estadounidense nombra este principio activo por su DCI/USAN
+      // "albuterol" (no "salbutamol", el nombre DCI usado fuera de EE. UU.
+      // para la misma molécula) — ver `esSynonyms` arriba.
+      sourceNdc: '0054-0742',
+      activeIngredients: ['ALBUTEROL SULFATE 90 ug/1'],
+      dosageForm: 'AEROSOL, METERED',
+      route: ['RESPIRATORY (INHALATION)'],
+      manufacturer: 'Hikma Pharmaceuticals USA Inc.',
+    },
   },
   {
     key: 'amoxicilina',
@@ -824,6 +924,13 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es un antibiótico muy usado para tratar infecciones bacterianas.',
     relations: [{ type: 'DISEASE', targetSlug: 'neumonia' }],
+    drugFacts: {
+      sourceNdc: '0093-2263',
+      activeIngredients: ['AMOXICILLIN 500 mg/1'],
+      dosageForm: 'TABLET, FILM COATED',
+      route: ['ORAL'],
+      manufacturer: 'Teva Pharmaceuticals USA, Inc.',
+    },
   },
   {
     key: 'paracetamol',
@@ -838,6 +945,13 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es el medicamento más común para bajar la fiebre y calmar el dolor.',
     relations: [{ type: 'DISEASE', targetSlug: 'fiebre' }],
+    drugFacts: {
+      sourceNdc: '0121-0657',
+      activeIngredients: ['ACETAMINOPHEN 160 mg/5mL'],
+      dosageForm: 'SOLUTION',
+      route: ['ORAL'],
+      manufacturer: 'PAI Holdings, LLC dba PAI Pharma',
+    },
   },
   {
     key: 'warfarina',
@@ -853,6 +967,13 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     relations: [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'tiempo-de-protrombina' },
     ],
+    drugFacts: {
+      sourceNdc: '0093-1712',
+      activeIngredients: ['WARFARIN SODIUM 1 mg/1'],
+      dosageForm: 'TABLET',
+      route: ['ORAL'],
+      manufacturer: 'Teva Pharmaceuticals USA, Inc.',
+    },
   },
 
   // --- Laboratorio (glossary-category-lab) ------------------------------------
@@ -1098,5 +1219,83 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     relations: [
       { type: 'RELATED_TERM', targetSlug: 'diabetes-mellitus-tipo-2' },
     ],
+  },
+
+  // --- Otros términos (glossary-category-other) — FND-25-01 -------------------
+  // Terminología general de la atención en salud que no es en sí misma
+  // clínica —es administrativa o legal del proceso de atención— y por eso no
+  // encaja en ninguna de las 11 categorías clínicas de arriba. Mismo criterio
+  // de autoría que el resto del catálogo (texto original, no extraído de otra
+  // fuente); ninguno es un dato clínico (dosis, contraindicación, etc.), así
+  // que no aplica la restricción de "fuente evidenciada por dato" de
+  // farmacología.
+  {
+    key: 'consentimiento-informado',
+    slug: 'consentimiento-informado',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Informed consent',
+    esName: 'Consentimiento informado',
+    esSynonyms: ['Consentimiento del paciente'],
+    clinicalDefinitionEs:
+      'Proceso por el cual una persona autoriza un procedimiento, estudio o tratamiento después de haber recibido información comprensible sobre su naturaleza, beneficios, riesgos y alternativas, y de haber tenido oportunidad de resolver sus dudas.',
+    plainSummaryEs:
+      'Es cuando el equipo de salud te explica bien un estudio o tratamiento, y vos decidís si lo aceptás después de entenderlo.',
+    relations: [],
+  },
+  {
+    key: 'historia-clinica',
+    slug: 'historia-clinica',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Medical record',
+    esName: 'Historia clínica',
+    esSynonyms: ['Expediente clínico', 'Ficha clínica'],
+    clinicalDefinitionEs:
+      'Documento —físico o electrónico— que reúne de forma cronológica los datos clínicos, diagnósticos, tratamientos y evolución de una persona a lo largo de su atención en salud.',
+    plainSummaryEs:
+      'Es el registro donde queda anotado todo lo que te atendieron: consultas, diagnósticos y tratamientos.',
+    relations: [],
+  },
+  {
+    key: 'alta-medica',
+    slug: 'alta-medica',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Medical discharge',
+    esName: 'Alta médica',
+    clinicalDefinitionEs:
+      'Decisión clínica que da por finalizada una internación o un episodio de atención, porque el estado del paciente ya no requiere ese nivel de cuidado.',
+    plainSummaryEs:
+      'Es cuando el médico determina que ya podés irte del hospital o terminar un tratamiento.',
+    relations: [],
+  },
+  {
+    key: 'receta-medica',
+    slug: 'receta-medica',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Medical prescription',
+    esName: 'Receta médica',
+    esSynonyms: ['Prescripción médica'],
+    clinicalDefinitionEs:
+      'Documento emitido por un profesional habilitado que indica el medicamento, la dosis y la duración del tratamiento que una persona debe seguir.',
+    plainSummaryEs:
+      'Es el papel (o mensaje digital) donde el médico te indica qué medicamento tomar y cómo.',
+    relations: [{ type: 'RELATED_TERM', targetSlug: 'paracetamol' }],
+  },
+  {
+    key: 'interconsulta',
+    slug: 'interconsulta',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Referral (specialist consultation)',
+    esName: 'Interconsulta',
+    esSynonyms: ['Referencia médica', 'Segunda opinión médica'],
+    clinicalDefinitionEs:
+      'Solicitud que hace un profesional de salud para que otra especialidad evalúe a un paciente y aporte su criterio sobre el diagnóstico o el tratamiento.',
+    plainSummaryEs:
+      'Es cuando tu médico te deriva a otro especialista para que también te revise.',
+    relations: [],
   },
 ];

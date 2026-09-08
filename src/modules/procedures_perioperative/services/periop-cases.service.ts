@@ -122,7 +122,7 @@ const CANCELLABLE_CASE_STATES: readonly string[] = [
 
 /**
  * C-13 (CAN-INT-001): estado "borrador" del caso. Es el único en el que el
- * modelo REDESA todavía permite corregir el paciente de la intervención. El
+ * modelo ALOVIDA todavía permite corregir el paciente de la intervención. El
  * sistema no tiene un estado DRAFT propio: el caso nace ya `CASE_SCHEDULED`, que
  * es su estado editable inicial (antes de que verificación de órdenes /
  * confirmación lo fijen). `CASE_READY_FOR_SURGERY` equivale a

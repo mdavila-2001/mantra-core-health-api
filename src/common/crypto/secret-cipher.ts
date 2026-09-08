@@ -36,7 +36,7 @@ const INSECURE_DEV_KEY = 'dev-only-insecure-mfa-key-change-me';
  * un secreto cifrado hoy se pueda descifrar mañana). La entropía la aporta la
  * passphrase, no la sal.
  */
-const KEY_SALT = 'redesa.mfa.totp.v1';
+const KEY_SALT = 'alovida.mfa.totp.v1';
 
 /**
  * Deriva una clave AES de 32 bytes a partir de `MFA_ENCRYPTION_KEY`.

@@ -31,7 +31,7 @@ Registrado como `TEST-002` en `docs/governance/traceability-matrix.md`; investig
 Además de Jest, el repositorio tiene analizadores estáticos propios:
 
 ```bash
-yarn redesa:guardrails   # gobierno de dominios: aislamiento, huérfanos, políticas de acceso
-yarn redesa:coverage     # inventario cuantitativo: entidades, endpoints, controllers
+yarn alovida:guardrails   # gobierno de dominios: aislamiento, huérfanos, políticas de acceso
+yarn alovida:coverage     # inventario cuantitativo: entidades, endpoints, controllers
 yarn orm:audit           # fidelidad del catálogo ORM contra graphify-out/fidelity-audit.json
 ```

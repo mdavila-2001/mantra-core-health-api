@@ -534,7 +534,7 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     ALLERGY_CRITICALITY_HIGH: { code: 'ALG_HIGH', display: 'High criticality' },
 
     // --- medication_requests / records -----------------------------------------
-    // Máquina de estados canónica (REDESA CAN-RX-001..004):
+    // Máquina de estados canónica (ALOVIDA CAN-RX-001..004):
     // DRAFT (editable/eliminable por el autor) → ISSUED (inmutable, sellada) →
     // dispensación (administer → COMPLETED). Una receta emitida NUNCA se edita:
     // corrección = REPLACED (+ nueva receta relacionada) o INVALIDATED; renovar =

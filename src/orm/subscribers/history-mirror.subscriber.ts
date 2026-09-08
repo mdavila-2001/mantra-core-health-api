@@ -51,7 +51,7 @@ interface HistoryRegistryColumn {
 }
 
 /**
- * Espejo append-only de versionado (REDESA §2: toda tabla `*_history` con un
+ * Espejo append-only de versionado (ALOVIDA §2: toda tabla `*_history` con un
  * consumidor/escritor verificable). En cada `flush`, por cada CREATE/UPDATE de un
  * agregado que tenga su tabla `audit.<tabla>_history`, cierra la revisión vigente
  * y sella una nueva con un snapshot del estado, DENTRO de la transacción del

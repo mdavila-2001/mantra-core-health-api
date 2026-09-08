@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =========================================================================
-# Mantra Core Technologies · REDESA Health Ecosystem
+# Mantra Core Technologies · ALOVIDA Health Ecosystem
 # Verificación extremo a extremo de la trazabilidad distribuida.
 #
 # Comprueba, contra servicios REALES y sin simular nada, que:
@@ -20,7 +20,7 @@
 # Variables:
 #   API_BASE_URL     (por defecto http://localhost:3000)
 #   JAEGER_BASE_URL  (por defecto http://localhost:16686)
-#   SERVICE_NAME     (por defecto redesa-api)
+#   SERVICE_NAME     (por defecto alovida-api)
 #
 # Dependencias: bash, curl y jq. `jq` no viene de serie en todos los sistemas:
 #   macOS: brew install jq   ·   Debian/Ubuntu: apt-get install -y jq
@@ -29,7 +29,7 @@ set -euo pipefail
 
 API_BASE_URL="${API_BASE_URL:-http://localhost:3000}"
 JAEGER_BASE_URL="${JAEGER_BASE_URL:-http://localhost:16686}"
-SERVICE_NAME="${SERVICE_NAME:-redesa-api}"
+SERVICE_NAME="${SERVICE_NAME:-alovida-api}"
 # Las trazas se exportan por lotes: hay que darle al BatchSpanProcessor tiempo
 # de vaciar antes de preguntar por ellas. No es una carrera, es el diseño.
 MAX_WAIT_SECONDS="${MAX_WAIT_SECONDS:-30}"

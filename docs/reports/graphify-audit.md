@@ -7,7 +7,7 @@
 
 - Grafo construido a partir del commit `15c132d3348cb9f668f8fd3eb1b156169d2ea130` (`built_at_commit` en `graph.json`).
 - Fecha de generación del reporte: 2026-07-29 (`graphify-out/GRAPH_REPORT.md`, cabecera).
-- Rama actual: `redesa/auditoria-correccion-integral`, commit vigente `15c132d3` → **el grafo está actualizado con el HEAD analizado en esta auditoría** (`git rev-parse HEAD` coincide con `built_at_commit`).
+- Rama actual: `alovida/auditoria-correccion-integral`, commit vigente `15c132d3` → **el grafo está actualizado con el HEAD analizado en esta auditoría** (`git rev-parse HEAD` coincide con `built_at_commit`).
 
 ## 2. Archivos Graphify consultados
 
@@ -107,7 +107,7 @@ El núcleo compartido (`src/common`) tiene 213 nodos propios pero es el nodo de 
 
 ## 6. Dependencias circulares
 
-**Ninguna detectada** por el analizador de graphify (`## Import Cycles` → "None detected." en `GRAPH_REPORT.md`). Coincide con el hallazgo del analizador propio REDESA (`tools/redesa/coverage-report.mjs`), que tampoco reporta ciclos entre dominios.
+**Ninguna detectada** por el analizador de graphify (`## Import Cycles` → "None detected." en `GRAPH_REPORT.md`). Coincide con el hallazgo del analizador propio ALOVIDA (`tools/alovida/coverage-report.mjs`), que tampoco reporta ciclos entre dominios.
 
 ## 7. Componentes con mayor centralidad (God Nodes)
 
@@ -130,7 +130,7 @@ El núcleo compartido (`src/common`) tiene 213 nodos propios pero es el nodo de 
 
 El grafo reporta **89 nodos con grado 0** (sin ninguna arista entrante ni saliente). Al inspeccionarlos, **no son componentes de negocio huérfanos**: son mayoritariamente identificadores de decoradores de `@nestjs/common`/`class-validator` (`Roles`, `CurrentUser`, `Query`, `Get`, `Patch`, `IsIn`, `IsArray`, etc.) capturados como nodos AST individuales en puntos donde la herramienta no pudo resolver una arista de "uso" distinta a la ya contabilizada en el nodo canónico del mismo nombre — es decir, **duplicados de identificador, no huérfanos reales**. Un caso aislado con nombre propio de negocio: `TRAVERSAL_NODE_LIMIT` (`src/modules/graph_intelligence/dto/graph-intelligence.dto.ts`), una constante de límite que sí parece sin consumidores directos en el grafo (posible candidato a revisión, no una alerta crítica).
 
-**Contraste con el analizador REDESA propio:** `tools/redesa/coverage-report.mjs` reporta **0** `ORPHAN_TABLE` y **0** `ORPHAN_ENDPOINT` sobre las 1184 entidades y 850 endpoints — el analizador de dominio, más preciso para este propósito que la heurística de grado-0 de graphify, confirma que no hay entidades ni endpoints huérfanos reales.
+**Contraste con el analizador ALOVIDA propio:** `tools/alovida/coverage-report.mjs` reporta **0** `ORPHAN_TABLE` y **0** `ORPHAN_ENDPOINT` sobre las 1184 entidades y 850 endpoints — el analizador de dominio, más preciso para este propósito que la heurística de grado-0 de graphify, confirma que no hay entidades ni endpoints huérfanos reales.
 
 ## 9. Flujos principales (por relación entre módulos)
 
@@ -145,13 +145,13 @@ Excluyendo el núcleo compartido (`common`, `orm`), las relaciones cruzadas domi
 
 | Elemento | Grafo | Código real | Diferencia |
 |---|---|---|---|
-| Endpoints | No cuenta rutas HTTP explícitamente (cuenta símbolos, no decoradores de ruta agregados) | 850 (via `tools/redesa/coverage-report.mjs`, que sí parsea decoradores HTTP) | El analizador REDESA es la fuente de verdad para conteo de endpoints; graphify es la fuente de verdad para topología de dependencias. Se usan de forma complementaria en el resto del plan. |
+| Endpoints | No cuenta rutas HTTP explícitamente (cuenta símbolos, no decoradores de ruta agregados) | 850 (via `tools/alovida/coverage-report.mjs`, que sí parsea decoradores HTTP) | El analizador ALOVIDA es la fuente de verdad para conteo de endpoints; graphify es la fuente de verdad para topología de dependencias. Se usan de forma complementaria en el resto del plan. |
 | Migraciones | 0 nodos (DDL vive fuera de `src/`, en `database/SQL/99_migrations`) | Existen migraciones SQL reales | Brecha de cobertura del grafo, no del sistema — se documenta explícitamente para que Fase 10 (catálogo de datos) no asuma ausencia de control de esquema. |
 | Workers | Los 17 `src/worker-*.ts` sí aparecen como archivos código pero sin relación `imports`/`calls` agregada visible en los god nodes (volumen bajo por archivo, son entrypoints delgados) | 20 procesos worker reales, orquestados en `docker-compose.yml` | Confirmado por inspección directa de `src/worker-*.ts` y `docker-compose.yml`, no solo por el grafo — ver `docs/architecture/integration-map.md`. |
 
 ## 11. Riesgos documentales
 
-- El grafo no captura **rutas HTTP** ni **catálogo de eventos** con granularidad suficiente para servir como única fuente para OpenAPI/AsyncAPI (Fases 5 y 11) — se combina con lectura directa de controllers/DTOs y con `tools/redesa/coverage-report.mjs`.
+- El grafo no captura **rutas HTTP** ni **catálogo de eventos** con granularidad suficiente para servir como única fuente para OpenAPI/AsyncAPI (Fases 5 y 11) — se combina con lectura directa de controllers/DTOs y con `tools/alovida/coverage-report.mjs`.
 - 1731 comunidades detectadas es un nivel de granularidad **casi a nivel de archivo** (cohesión baja, 0.03–0.33 en las primeras), no de dominio de negocio; para arquitectura (Fase 8, C4) se usa la agrupación real por `src/modules/<dominio>` (57 módulos), no las comunidades de graphify directamente.
 
 ## 12. Riesgos arquitectónicos
@@ -169,5 +169,5 @@ Excluyendo el núcleo compartido (`common`, `orm`), las relaciones cruzadas domi
 
 - `graphify-out/graph.json` (consultas programáticas registradas en esta sesión).
 - `graphify-out/GRAPH_REPORT.md` líneas 1–70 (Corpus Check, Summary, Community Hubs) y 1746–1810 (God Nodes, Surprising Connections, Import Cycles, primeras comunidades).
-- `tools/redesa/coverage-report.mjs` (salida: 1184 entidades, 850 endpoints/191 controllers, 57 módulos, 0 huérfanos, 1 cross-domain).
+- `tools/alovida/coverage-report.mjs` (salida: 1184 entidades, 850 endpoints/191 controllers, 57 módulos, 0 huérfanos, 1 cross-domain).
 - `docker-compose.yml`, `src/worker-*.ts` (inventario de workers, contrastado manualmente contra el grafo).

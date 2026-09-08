@@ -83,6 +83,7 @@ import { PracticeModule } from './modules/practice/practice.module';
 import { ProceduresPerioperativeModule } from './modules/procedures_perioperative/procedures_perioperative.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
 import { QaLabModule } from './modules/qa_lab/qa_lab.module';
+import { QuotationsModule } from './modules/quotations/quotations.module';
 import { ReadModelsModule } from './modules/read_models/read_models.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
@@ -218,6 +219,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ProceduresPerioperativeModule,
     PromotionsModule,
     QaLabModule,
+    QuotationsModule,
     ReadModelsModule,
     ReportingModule,
     SchedulingModule,

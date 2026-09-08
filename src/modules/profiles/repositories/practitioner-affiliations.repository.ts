@@ -14,13 +14,9 @@ export interface CreateAffiliationData {
    */
   organizationName: string;
   /**
-   * Valor de role title mantenido por la instancia.
+   * Cargo ejercido, cuando el vínculo lo declara (ALV-007: opcional).
    */
-  roleTitle: string;
-  /**
-   * Valor de department text mantenido por la instancia.
-   */
-  departmentText?: string;
+  roleTitle?: string;
   /**
    * Identificador asociado a practice site.
    */
@@ -194,6 +190,40 @@ export class PractitionerAffiliationsRepository {
   }
 
   /**
+   * Una afiliación **del propio profesional**, o nada.
+   *
+   * El dueño va en el `where` y no en un `if` después: así el id de otro
+   * historial responde lo mismo que un id inexistente, y quien tantea ids no
+   * se entera de cuáles existen.
+   *
+   * @param em - Contexto de persistencia.
+   * @param id - La afiliación buscada.
+   * @param practitionerProfileId - El perfil que tiene que ser su dueño.
+   * @returns La fila si existe y es suya; `null` en cualquier otro caso.
+   */
+  findOwn(
+    em: EntityManager,
+    id: string,
+    practitionerProfileId: string,
+  ): Promise<PractitionerAffiliations | null> {
+    return em.findOne(PractitionerAffiliations, { id, practitionerProfileId });
+  }
+
+  /**
+   * Marca la fila para borrarla en el próximo `flush`.
+   *
+   * Borrado físico a propósito: es una línea de currículum que el propio
+   * profesional escribió, no un vínculo decidido por una organización, y no
+   * hay a quién rendirle cuentas de que existió.
+   *
+   * @param em - Contexto de persistencia (la transacción del caso de uso).
+   * @param row - La afiliación a borrar.
+   */
+  remove(em: EntityManager, row: PractitionerAffiliations): void {
+    em.remove(row);
+  }
+
+  /**
    * Afiliación duplicada: misma institución, mismo cargo y mismo inicio.
    *
    * Es lo que distingue «trabajé dos veces ahí» —que es cierto y se registra—
@@ -202,7 +232,11 @@ export class PractitionerAffiliationsRepository {
    * @param em - Contexto de persistencia o transacción activa.
    * @param practitionerProfileId - Profesional consultado.
    * @param organizationName - Institución declarada.
-   * @param roleTitle - Cargo declarado.
+   * @param roleTitle - Cargo declarado, o `null` si el vínculo no lo tiene.
+   *   Dos vínculos sin cargo NO se consideran iguales entre sí por esta
+   *   comparación (Postgres trata cada `NULL` como distinto; ver la nota de
+   *   la entidad en la bóveda) — es la misma deuda documentada de los dos
+   *   índices únicos parciales, aceptada en ALV-007.
    * @param startDate - Inicio declarado.
    * @returns La fila existente, o `null`.
    */
@@ -210,7 +244,7 @@ export class PractitionerAffiliationsRepository {
     em: EntityManager,
     practitionerProfileId: string,
     organizationName: string,
-    roleTitle: string,
+    roleTitle: string | null,
     startDate: Date,
   ): Promise<PractitionerAffiliations | null> {
     return em.findOne(PractitionerAffiliations, {
@@ -238,7 +272,6 @@ export class PractitionerAffiliationsRepository {
         practitionerProfileId: data.practitionerProfileId,
         organizationName: data.organizationName,
         roleTitle: data.roleTitle,
-        departmentText: data.departmentText,
         practiceSiteId: data.practiceSiteId,
         affiliationTypeConceptId: data.affiliationTypeConceptId,
         startDate: data.startDate,

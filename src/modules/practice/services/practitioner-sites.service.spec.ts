@@ -10,7 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PractitionerSitesService } from './practitioner-sites.service';
 import { PRAC } from '../practice.concepts';
-import { ResourceNotFoundException } from '../../../common';
+import { ResourceNotFoundException, runWithTenant } from '../../../common';
 
 const TENANT = 'tenant-1';
 const OTRO_TENANT = 'tenant-2';
@@ -20,14 +20,43 @@ const OTRO_TENANT = 'tenant-2';
  * @returns Resultado de build.
  */
 function build() {
-  const fork = { findOne: mockFn().mockResolvedValue(null) };
-  const em = { fork: mockFn(() => fork) };
+  const fork = {
+    findOne: mockFn().mockResolvedValue(null),
+    flush: mockFn().mockResolvedValue(undefined),
+  };
+  const em = {
+    fork: mockFn(() => fork),
+    transactional: mockFn((cb: any) => cb(fork)),
+  };
   const practicesRepo = {
     findById: mockFn().mockResolvedValue({ id: 'pr-1', tenantId: TENANT }),
+    findOwnOffice: mockFn().mockResolvedValue(null),
+    create: mockFn().mockReturnValue({ id: 'pr-own-1' }),
   };
-  const sitesRepo = { findById: mockFn().mockResolvedValue(null) };
+  const sitesRepo = {
+    findById: mockFn().mockResolvedValue(null),
+    findByPracticeAndCode: mockFn().mockResolvedValue(null),
+    create: mockFn().mockReturnValue({
+      id: 'site-own-1',
+      practiceId: 'pr-own-1',
+      code: 'MI-CONSULTORIO',
+      name: 'Mi consultorio',
+      timeZone: undefined,
+      statusConceptId: PRAC.SITE_ACTIVE,
+    }),
+  };
   const spacesRepo = { findById: mockFn().mockResolvedValue(null) };
-  const rolesRepo = { findCurrentWithSite: mockFn().mockResolvedValue([]) };
+  const rolesRepo = {
+    findCurrentWithSite: mockFn().mockResolvedValue([]),
+    findCurrentBySite: mockFn().mockResolvedValue(null),
+    create: mockFn().mockReturnValue({ id: 'role-1' }),
+  };
+  const addressesRepo = {
+    create: mockFn().mockReturnValue({ id: 'addr-1' }),
+  };
+  const ownership = {
+    requireOwnPractitionerProfileId: mockFn().mockResolvedValue('prac-1'),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new PractitionerSitesService(
@@ -36,15 +65,20 @@ function build() {
     sitesRepo as any,
     spacesRepo as any,
     rolesRepo as any,
+    addressesRepo as any,
+    ownership as any,
     logger as any,
   );
   return {
     service,
     fork,
+    em,
     practicesRepo,
     sitesRepo,
     spacesRepo,
     rolesRepo,
+    addressesRepo,
+    ownership,
     logger,
   };
 }
@@ -196,6 +230,125 @@ describe('PractitionerSitesService', () => {
       await expect(d.service.getSite('site-1', TENANT)).rejects.toBeInstanceOf(
         ResourceNotFoundException,
       );
+    });
+  });
+
+  describe('createOwnSite (ALV-005/006)', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    it('creates a new personal practice, the site and the role assignment', async () => {
+      const d = build();
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.createOwnSite(actor, {
+          name: 'Mi consultorio',
+          address: {
+            lines: ['Av. Brasil 1234'],
+            city: 'La Paz',
+            latitude: -16.5,
+            longitude: -68.15,
+          },
+        } as any),
+      );
+
+      expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalledWith(
+        d.fork,
+        actor,
+      );
+      // Sin práctica personal previa: se crea una nueva de tipo consultorio.
+      expect(d.practicesRepo.create).toHaveBeenCalledWith(
+        d.fork,
+        expect.objectContaining({
+          tenantId: TENANT,
+          typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+          adminUserId: actor.id,
+        }),
+      );
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.fork,
+        expect.objectContaining({ ownerId: actor.id, latitude: '-16.5' }),
+      );
+      expect(d.sitesRepo.create).toHaveBeenCalledWith(
+        d.fork,
+        expect.objectContaining({
+          practiceId: 'pr-own-1',
+          siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,
+          addressId: 'addr-1',
+        }),
+      );
+      expect(d.rolesRepo.create).toHaveBeenCalledWith(
+        d.fork,
+        expect.objectContaining({
+          practitionerProfileId: 'prac-1',
+          practiceId: 'pr-own-1',
+          practiceSiteId: 'site-own-1',
+          statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+        }),
+      );
+      expect(res).toMatchObject({ id: 'site-own-1', name: 'Mi consultorio' });
+    });
+
+    it('reuses the existing personal practice for a second site', async () => {
+      const d = build();
+      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
+
+      await runWithTenant(TENANT, () =>
+        d.service.createOwnSite(actor, { name: 'Segundo consultorio' } as any),
+      );
+
+      expect(d.practicesRepo.create).not.toHaveBeenCalled();
+      expect(d.sitesRepo.create).toHaveBeenCalledWith(
+        d.fork,
+        expect.objectContaining({
+          practiceId: 'pr-own-1',
+          addressId: undefined,
+        }),
+      );
+    });
+
+    it('resolves a code clash by appending a numeric suffix', async () => {
+      const d = build();
+      d.sitesRepo.findByPracticeAndCode
+        .mockResolvedValueOnce({ id: 'existing' })
+        .mockResolvedValueOnce(null);
+
+      await runWithTenant(TENANT, () =>
+        d.service.createOwnSite(actor, { name: 'Mi Consultorio' } as any),
+      );
+
+      expect(d.sitesRepo.create).toHaveBeenCalledWith(
+        d.fork,
+        expect.objectContaining({ code: 'MI-CONSULTORIO-2' }),
+      );
+    });
+  });
+
+  describe('deleteOwnSite (ALV-005)', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    it('ends the current assignment for that site', async () => {
+      const d = build();
+      const assignment = {
+        statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      } as any;
+      d.rolesRepo.findCurrentBySite.mockResolvedValue(assignment);
+
+      await d.service.deleteOwnSite(actor, 'site-own-1');
+
+      expect(d.rolesRepo.findCurrentBySite).toHaveBeenCalledWith(
+        d.fork,
+        'prac-1',
+        'site-own-1',
+      );
+      expect(assignment.statusConceptId).toBe(PRAC.ROLE_ASSIGNMENT_ENDED);
+      expect(assignment.validTo).toBeInstanceOf(Date);
+    });
+
+    it('fails with not found when there is no current assignment for that site', async () => {
+      const d = build();
+      await expect(
+        d.service.deleteOwnSite(actor, 'site-ajeno'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

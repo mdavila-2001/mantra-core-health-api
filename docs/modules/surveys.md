@@ -22,11 +22,11 @@ del paciente con lectura para el profesional dueño.
 
 Cubre el carril 10 y las nueve reglas `DOC-ENC-001` … `DOC-ENC-009` del actor
 doctor, más `PAC-CAL-008` y `PAC-DIAG-014` del actor paciente, que el
-diagnóstico REDESA marcaba **todas `AUSENTE`**.
+diagnóstico ALOVIDA marcaba **todas `AUSENTE`**.
 
 ## Por qué es un módulo nuevo y no `forms` ni `community.polls`
 
-`redesa-gap-map` registra esto como decisión de arquitectura abierta; se resolvió
+`alovida-gap-map` registra esto como decisión de arquitectura abierta; se resolvió
 por dominio propio.
 
 - `community.polls` / `poll_options` / `poll_votes` son **encuestas sociales de
@@ -71,7 +71,7 @@ por dominio propio.
   incontestables.
 - **Solo responde quien tuvo atención completada.** La invitación se emite contra
   una `scheduling.appointment_bookings` en `BOOKING_COMPLETED`; sin invitación no
-  hay forma de responder. Es la regla que REDESA fija explícitamente.
+  hay forma de responder. Es la regla que ALOVIDA fija explícitamente.
 - **Emisión idempotente.** Único por `(reserva, versión)`, sostenido además por
   índice en la base: cerrar dos veces la misma cita no reclama dos veces el mismo
   cuestionario.
@@ -87,7 +87,7 @@ por dominio propio.
 
 ## Privacidad — el requisito central
 
-REDESA lo fija en dos frases: las respuestas *«solo podrán ser consultadas por el
+ALOVIDA lo fija en dos frases: las respuestas *«solo podrán ser consultadas por el
 profesional o la organización autorizada»* y *«no deberán mostrarse
 públicamente»*. La decisión **D-08** del proyecto lo confirma y agrega que la
 calificación pública es una entidad distinta (`community.service_reviews`).
@@ -140,7 +140,7 @@ contrato anterior cambia de comportamiento.
 
 ### 3. Tipo de atención sin resolver desde la reserva — DEUDA
 
-El modelo admite asignar por `CARE_TYPE` porque REDESA lo pide, pero ni
+El modelo admite asignar por `CARE_TYPE` porque ALOVIDA lo pide, pero ni
 `scheduling.appointment_bookings` ni `scheduling.bookable_slots` llevan
 referencia al tipo de atención (solo `service_concept_id`). Una asignación así
 nunca emitiría nada, así que **se rechaza al crearla**, con el motivo explícito,
@@ -149,9 +149,9 @@ incorpore el campo.
 
 ### 4. Indicadores agregados y exportación anonimizada — FUERA DE ALCANCE
 
-REDESA los pide (`DOC-ENC-008`, `DOC-ENC-009`), pero la decisión **D-13**
+ALOVIDA los pide (`DOC-ENC-008`, `DOC-ENC-009`), pero la decisión **D-13**
 —cuál es el umbral mínimo de participantes para publicar un agregado— está
-**abierta**, y `redesa-blocked-decisions` dice literalmente que congela la parte
+**abierta**, y `alovida-blocked-decisions` dice literalmente que congela la parte
 de agregación: *«se puede modelar la encuesta sin el umbral, pero no se puede
 publicar ningún agregado sin él»*. El carril 10 ya lo acota a «si ya existe
 soporte». Se implementa cuando D-13 se resuelva.

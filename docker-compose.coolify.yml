@@ -331,6 +331,16 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Puerto PUBLICADO EN EL HOST para que los testers de datos entren desde
+    # fuera con un cliente SQL. Es la ÚNICA base del stack que se expone: Mongo,
+    # Redis, OpenSearch y MinIO siguen solo en la red interna `alovida`.
+    # Postgres exige contraseña (scram-sha-256) a toda conexión que no sea
+    # local, así que el rol `alovida` NO se comparte: a los testers se les da
+    # el rol de solo lectura de `scripts/postgres/provision-roles.sql`.
+    # Cambiar a `127.0.0.1:5432:5432` para volver a cerrarlo y entrar por
+    # túnel SSH. Ver docs/operations/coolify.md § 7.
+    ports:
+      - "${POSTGRES_PUBLIC_PORT:-5432}:5432"
     volumes:
       # `timescaledb-ha` usa PGDATA=/home/postgres/pgdata/data, NO la ruta de la
       # imagen oficial de postgres. Montado en /var/lib/postgresql/data el

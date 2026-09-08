@@ -10,7 +10,7 @@ import { randomUUID } from 'node:crypto';
  * nueva, no editar la vigente.
  *
  * La vigencia (`effectiveFrom` / `effectiveTo`) es el requisito «configurar la
- * vigencia de la encuesta» de REDESA: fuera de esa ventana no se emiten
+ * vigencia de la encuesta» de ALOVIDA: fuera de esa ventana no se emiten
  * invitaciones nuevas, pero las ya emitidas siguen siendo contestables hasta
  * que expire su propia ventana.
  */

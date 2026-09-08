@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 /**
- * Cuerpo de `POST /clinical/prescription-signature-policies` (REDESA D-05).
+ * Cuerpo de `POST /clinical/prescription-signature-policies` (ALOVIDA D-05).
  * Las dimensiones opcionales (jurisdicción, tipo de medicamento, canal) son
  * comodines cuando se omiten: la política aplica a todo lo no acotado.
  */

@@ -223,7 +223,7 @@ export class PostJournalDto {
 }
 
 /**
- * Cuerpo común de los comandos de transición del asiento (REDESA C-17):
+ * Cuerpo común de los comandos de transición del asiento (ALOVIDA C-17):
  * `classify`, `submit-review`, `approve`, `post`. Todos los campos son opcionales;
  * cada comando usa los que le apliquen (p. ej. `post` puede enlazar el periodo
  * fiscal si el borrador no lo fijó; `approve`/`post` admiten una nota de auditoría).

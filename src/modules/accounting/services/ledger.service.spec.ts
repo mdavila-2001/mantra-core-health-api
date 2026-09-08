@@ -228,7 +228,7 @@ describe('LedgerService', () => {
     });
   });
 
-  describe('máquina de estados del asiento (REDESA C-17)', () => {
+  describe('máquina de estados del asiento (ALOVIDA C-17)', () => {
     const balanced = {
       practiceId: 'p1',
       transactionDate: '2026-01-31',

@@ -61,6 +61,15 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
       code: 'SITE_TYPE_HOSPITAL',
       display: 'Hospital site type',
     },
+    // ALV-005/006: hasta acá el único tipo de sitio sembrado era HOSPITAL y
+    // `createSite` lo usaba de default para cualquier sede. Un consultorio
+    // propio no es un hospital; el consultorio de un profesional que "atiende
+    // en su propio consultorio" necesita su propio concepto, mismo patrón que
+    // `PRACTICE_TYPE_OFFICE` arriba.
+    SITE_TYPE_OFFICE: {
+      code: 'SITE_TYPE_OFFICE',
+      display: 'Medical office (consultorio) site type',
+    },
     SITE_PHYSICAL_BUILDING: {
       code: 'SITE_PHYS_BUILDING',
       display: 'Building physical type',

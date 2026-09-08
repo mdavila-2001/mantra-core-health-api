@@ -314,7 +314,7 @@ upsert en vez de tirar el índice y dejar el buscador a oscuras.
 | [#155](https://github.com/mdavila-2001/mantra-core-health-api/pull/155) | `pablo/p13-confianza-senales` | #154 | P13 |
 
 Están encadenados y no los tres contra `dev` a propósito: P13 necesita el índice de P10 para que el
-sello viaje también ahí, y los dos necesitan #156 para que `redesa:guardrails` —que es un gate duro
+sello viaje también ahí, y los dos necesitan #156 para que `alovida:guardrails` —que es un gate duro
 del CI— salga con 0. Cada PR se retarguetea solo a `dev` cuando el de abajo mergee.
 
 **Orden de merge: #156 → #154 → #155.**

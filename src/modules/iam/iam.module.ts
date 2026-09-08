@@ -11,6 +11,7 @@ import { AuthzModule } from '../authz/authz.module';
 // El alta de paciente anota el seguro declarado; `insurance` no importa `iam`,
 // así que la dependencia no cierra ciclo.
 import { InsuranceModule } from '../insurance/insurance.module';
+import { TerminologyModule } from '../terminology/terminology.module';
 import { IamUsersController, IamAuthController } from './controllers';
 import {
   IamUsersService,
@@ -61,6 +62,7 @@ import {
     DirectoryModule,
     AuthzModule,
     InsuranceModule,
+    TerminologyModule,
   ],
   controllers: [IamUsersController, IamAuthController],
   providers: [

@@ -30,7 +30,7 @@ export interface SignaturePolicyCriteria {
 }
 
 /**
- * Política PARAMETRIZABLE de firma de receta (REDESA D-05 / CAN-RX).
+ * Política PARAMETRIZABLE de firma de receta (ALOVIDA D-05 / CAN-RX).
  *
  * Administra las políticas (alta, listado y desactivación SIN borrado duro) y
  * resuelve, para una receta, si la firma es obligatoria. Diseño FAIL-SAFE: si un

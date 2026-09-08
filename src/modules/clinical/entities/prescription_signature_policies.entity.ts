@@ -2,7 +2,7 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Política PARAMETRIZABLE de firma de receta (REDESA D-05 / CAN-RX). Define, por
+ * Política PARAMETRIZABLE de firma de receta (ALOVIDA D-05 / CAN-RX). Define, por
  * tenant, si la firma es obligatoria en función de la jurisdicción, el tipo de
  * medicamento y el canal de emisión. Las dimensiones nulas actúan como comodín
  * ("aplica a todo"). Se resuelve la política vigente MÁS ESPECÍFICA; si ninguna

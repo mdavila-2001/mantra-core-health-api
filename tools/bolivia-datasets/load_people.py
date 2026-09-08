@@ -39,17 +39,33 @@ para que alguien pruebe, por ejemplo— en una filtración de datos de terceros.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import time
 import re
+import http.client
 import sys
 import unicodedata
 import urllib.error
 import urllib.request
+import uuid
 from pathlib import Path
 from typing import Iterable, Iterator
 
 RAIZ_API = Path(__file__).resolve().parents[2]
+
+# Mismo namespace y algoritmo que `deterministicId()` en
+# `src/common/constants/concepts.ts` (UUIDv5 local: sha1(namespace + clave),
+# RFC 4122 §4.3) — reimplementado acá porque este script no corre bajo Node.
+_SALUD_UUID_NAMESPACE = uuid.UUID("3f2b6c14-9d5e-5a41-b7c2-0a1e9f4d8b60")
+
+
+def deterministic_id(key: str) -> str:
+    digest = hashlib.sha1(_SALUD_UUID_NAMESPACE.bytes + key.encode("utf-8")).digest()
+    b = bytearray(digest[:16])
+    b[6] = (b[6] & 0x0F) | 0x50
+    b[8] = (b[8] & 0x3F) | 0x80
+    return str(uuid.UUID(bytes=bytes(b)))
 # Los padrones viven en el repositorio del modelo, que se clona como hermano de
 # este. Se reapunta con `--fuente` si están en otro lado.
 FUENTE_POR_DEFECTO = RAIZ_API.parent / "mantra-core-health-model" / "markdown_convertidos"
@@ -137,24 +153,49 @@ class Api:
         self.pausa_entre_altas = 7.0
         self.pausa_por_429 = 62.0
 
+    # Neon corta la conexión del backend a mitad de una ráfaga de altas (visto
+    # en producción: `Connection terminated unexpectedly` del lado del pooler),
+    # y eso tumba el proceso de Nest — la próxima petición llega a un puerto
+    # que ya no escucha. Son fallos de SOCKET, no de protocolo HTTP, así que
+    # `URLError` no los atrapa: `RemoteDisconnected`/`BadStatusLine` cuelgan de
+    # `http.client.HTTPException`, y un timeout de lectura es `TimeoutError`
+    # a secas. Sin este segundo `except`, uno solo de estos tumbaba el
+    # cargador entero a mitad de padrón, con altas ya confirmadas y el resto
+    # sin ni intentar.
+    REINTENTOS_POR_CAIDA = 3
+    ESPERA_ENTRE_REINTENTOS = 15.0
+
     def _peticion(self, metodo: str, ruta: str, cuerpo: dict | None) -> tuple[int, dict]:
         datos = json.dumps(cuerpo).encode("utf-8") if cuerpo is not None else None
-        peticion = urllib.request.Request(f"{self.base}{ruta}", data=datos, method=metodo)
-        peticion.add_header("Content-Type", "application/json")
-        if self.token:
-            peticion.add_header("Authorization", f"Bearer {self.token}")
-        try:
-            with urllib.request.urlopen(peticion, timeout=30) as respuesta:
-                texto = respuesta.read().decode("utf-8") or "{}"
-                return respuesta.status, json.loads(texto)
-        except urllib.error.HTTPError as error:
-            texto = error.read().decode("utf-8") or "{}"
+        for intento in range(1, self.REINTENTOS_POR_CAIDA + 1):
+            peticion = urllib.request.Request(f"{self.base}{ruta}", data=datos, method=metodo)
+            peticion.add_header("Content-Type", "application/json")
+            if self.token:
+                peticion.add_header("Authorization", f"Bearer {self.token}")
             try:
-                return error.code, json.loads(texto)
-            except json.JSONDecodeError:
-                return error.code, {"message": texto[:200]}
-        except urllib.error.URLError as error:
-            return 0, {"message": str(error.reason)}
+                with urllib.request.urlopen(peticion, timeout=30) as respuesta:
+                    texto = respuesta.read().decode("utf-8") or "{}"
+                    return respuesta.status, json.loads(texto)
+            except urllib.error.HTTPError as error:
+                texto = error.read().decode("utf-8") or "{}"
+                try:
+                    return error.code, json.loads(texto)
+                except json.JSONDecodeError:
+                    return error.code, {"message": texto[:200]}
+            except urllib.error.URLError as error:
+                return 0, {"message": str(error.reason)}
+            except (http.client.HTTPException, TimeoutError, ConnectionError, OSError) as error:
+                if intento == self.REINTENTOS_POR_CAIDA:
+                    return 0, {"message": f"{type(error).__name__}: {error}"}
+                print(
+                    f"    aviso: {type(error).__name__} ({error}) — "
+                    f"reintento {intento}/{self.REINTENTOS_POR_CAIDA} en "
+                    f"{self.ESPERA_ENTRE_REINTENTOS:.0f}s",
+                    file=sys.stderr,
+                )
+                time.sleep(self.ESPERA_ENTRE_REINTENTOS)
+        # Inalcanzable: el bucle siempre retorna o agota los reintentos.
+        return 0, {"message": "sin respuesta tras los reintentos"}
 
     def login(self, email: str, password: str) -> None:
         estado, cuerpo = self._peticion(
@@ -207,11 +248,56 @@ def mapa_de_departamentos(api: Api) -> dict[str, str]:
     return mapa
 
 
+_INE_LINE_RE = re.compile(r"\{\s*ine:\s*'(\d+)',\s*name:\s*'([^']+)'")
+
+
+def mapa_de_municipios() -> dict[str, str]:
+    """Nombre del municipio, en mayúsculas → id del concepto que lo representa.
+
+    `RegisterPatientDto.residenceMunicipalityConceptId` es **obligatorio**
+    (`FT-03-R03`, "el alta de paciente exige correo, sexo, teléfono, nacimiento
+    y localidad"): sin esto, cada alta de paciente responde `400
+    VALIDATION_FAILED` sin importar qué más traiga la fila.
+
+    ## Por qué NO se resuelve contra `/terminology/value-sets`
+
+    Se probó primero por ahí —es como se resuelve el departamento, un poco
+    más abajo— y **cada alta volvía `400 El municipio indicado no pertenece
+    al catálogo de municipios de Bolivia`**. La razón: hay dos catálogos de
+    municipios con el mismo código `VS_BO_MUNICIPALITY` y **uuids distintos**
+    para el mismo municipio real. `/terminology/value-sets` expone el que
+    sembró el generador del modelo (código `SC-SANTA_CRUZ_DE_LA_SIERRA`,
+    conceptId derivado de ESE código); pero `residenceMunicipalityConceptId`
+    lo valida `createResidenceAddress` (`common/services/residence-address.ts`)
+    contra `boMunicipalityByConceptId()`, que resuelve sobre el catálogo
+    ESTÁTICO de `src/common/seed/bo-geography.catalog.ts`
+    (`deterministicId('geo:bo:municipality:<ine>')`) — un namespace y una
+    clave distintos. Los dos catálogos declaran los mismos 340 municipios,
+    pero con dos juegos de uuids que no se cruzan.
+
+    Por eso este mapa se arma leyendo `bo-geography.catalog.ts` **directo del
+    disco** y recalculando el mismo hash que usa el backend, en vez de
+    preguntarle a la API — es el único camino que produce el uuid que
+    `residenceMunicipalityConceptId` de verdad acepta.
+    """
+    ruta = RAIZ_API / "src" / "common" / "seed" / "bo-geography.catalog.ts"
+    if not ruta.is_file():
+        print(f"  aviso: no se encontró {ruta}; el alta de paciente fallará sin municipio")
+        return {}
+    texto = ruta.read_text(encoding="utf-8")
+    mapa: dict[str, str] = {}
+    for ine, nombre in _INE_LINE_RE.findall(texto):
+        mapa[nombre.strip().upper()] = deterministic_id(f"geo:bo:municipality:{ine}")
+    return mapa
+
+
 # --------------------------------------------------------------------------- #
 #  Altas
 # --------------------------------------------------------------------------- #
 
-def cuerpo_comun(cabecera: list[str], fila: list[str], deptos: dict[str, str]) -> dict:
+def cuerpo_comun(
+    cabecera: list[str], fila: list[str], deptos: dict[str, str], municipios: dict[str, str]
+) -> dict:
     """Lo que médicos y pacientes comparten: nombre, documento y contacto.
 
     Las cuatro partes del nombre van separadas porque el registro de procesos lo
@@ -220,6 +306,7 @@ def cuerpo_comun(cabecera: list[str], fila: list[str], deptos: dict[str, str]) -
     el modelo las tiene desde v4.0.11.
     """
     emitido = columna(cabecera, fila, "EMITIDO").strip().upper()
+    municipio = opcional(columna(cabecera, fila, "MUNICIPIO"))
     cuerpo: dict = {
         "name": opcional(columna(cabecera, fila, "NOMBRE")),
         "middleName": opcional(columna(cabecera, fila, "NOMBRE 2")),
@@ -230,11 +317,50 @@ def cuerpo_comun(cabecera: list[str], fila: list[str], deptos: dict[str, str]) -
     }
     if emitido in deptos:
         cuerpo["issuerAdministrativeAreaConceptId"] = deptos[emitido]
+    if municipio and municipio.upper() in municipios:
+        cuerpo["residenceMunicipalityConceptId"] = municipios[municipio.upper()]
     return {k: v for k, v in cuerpo.items() if v is not None}
 
 
+# El sexo asignado al nacer, por cédula. `USUARIO_PACIENTES_1.md` no trae esa
+# columna —el padrón no la declara para nadie— y `RegisterPatientDto.sexAtBirth`
+# es obligatorio: sin este mapa, ninguna de las 85 personas puede darse de alta.
+# Se llenó a mano, nombre por nombre, y lo confirmó quien conoce a esta gente —
+# no es una inferencia del script. Dos casos (Yony, Darling) no eran obvios por
+# el nombre solo y se confirmaron por separado.
+SEXO_POR_CEDULA: dict[str, str] = {
+    "7678614": "FEMALE", "2979363": "FEMALE", "6241281": "FEMALE", "4579338": "MALE",
+    "14162271": "MALE", "9013389": "FEMALE", "9013388": "MALE", "12890772": "FEMALE",
+    "3896477": "FEMALE", "3911972": "MALE", "4627480": "FEMALE", "13720992": "MALE",
+    "5870098": "FEMALE", "4579339": "MALE", "14589559": "MALE", "4579340": "MALE",
+    "5414404": "FEMALE", "14313263": "MALE", "3191976": "FEMALE", "5375443": "MALE",
+    "3262218": "FEMALE", "1998655": "MALE", "5344230": "MALE", "3925540": "FEMALE",
+    "9797933": "FEMALE", "12356310": "FEMALE", "13242050": "FEMALE", "3917534": "FEMALE",
+    "4616699": "MALE", "76664729": "MALE", "9585923": "FEMALE", "13243289": "FEMALE",
+    "8862862": "FEMALE", "5857998": "MALE", "6339033": "FEMALE", "13338616": "FEMALE",
+    "17093063": "FEMALE", "3201042": "FEMALE", "13076828": "FEMALE", "4579489": "FEMALE",
+    "1983826": "MALE", "11341822": "FEMALE", "11341818": "FEMALE", "3888449": "FEMALE",
+    "3888052": "MALE", "6289187": "MALE", "7701116": "MALE", "6289185": "FEMALE",
+    "16454581": "FEMALE", "2939625": "FEMALE", "3888046": "MALE", "11387113": "FEMALE",
+    "17293863": "FEMALE", "5414405": "FEMALE", "15931208": "FEMALE", "4583390": "MALE",
+    "3257233": "FEMALE", "6203122": "FEMALE", "5864864": "MALE", "14871092": "MALE",
+    "6203121": "MALE", "7734229": "FEMALE", "8239873": "MALE", "14871880": "MALE",
+    "16927193": "MALE", "17651163": "FEMALE", "5846151": "MALE", "6310835": "FEMALE",
+    "6226130": "MALE", "8117953": "FEMALE", "8199470": "FEMALE", "8199297": "FEMALE",
+    "15202749": "FEMALE", "5874625": "MALE", "9684803": "FEMALE", "3945305": "FEMALE",
+    "16684842": "FEMALE", "14473393": "MALE", "3945303": "MALE", "3943926": "MALE",
+    "5330937": "FEMALE", "8199296": "MALE", "9644905": "FEMALE", "15203081": "MALE",
+    "9802542": "FEMALE",
+}
+
+
 def alta_de_pacientes(
-    api: Api, fuente: Path, password: str, deptos: dict[str, str], aplicar: bool
+    api: Api,
+    fuente: Path,
+    password: str,
+    deptos: dict[str, str],
+    municipios: dict[str, str],
+    aplicar: bool,
 ) -> tuple[int, int, list[str]]:
     """Da de alta a los pacientes del padrón. Entra con su cédula."""
     creados = existentes = 0
@@ -248,9 +374,17 @@ def alta_de_pacientes(
         if not aplicar:
             creados += 1
             continue
-        cuerpo = cuerpo_comun(cabecera, fila, deptos)
+        # `sexAtBirth` es obligatorio y el padrón no lo declara: sin una
+        # confirmación explícita en `SEXO_POR_CEDULA`, no se inventa — se
+        # informa y se sigue con el resto.
+        sexo = SEXO_POR_CEDULA.get(ci)
+        if sexo is None:
+            problemas.append(f"CI {ci}: sin sexo confirmado, no se intenta el alta")
+            continue
+        cuerpo = cuerpo_comun(cabecera, fila, deptos, municipios)
         cuerpo["nationalId"] = ci
         cuerpo["password"] = password
+        cuerpo["sexAtBirth"] = sexo
         correo = opcional(columna(cabecera, fila, "CORREO ELECTRONICO"))
         if correo:
             cuerpo["email"] = correo
@@ -273,7 +407,12 @@ def alta_de_pacientes(
 
 
 def alta_de_medicos(
-    api: Api, fuente: Path, password: str, deptos: dict[str, str], aplicar: bool
+    api: Api,
+    fuente: Path,
+    password: str,
+    deptos: dict[str, str],
+    municipios: dict[str, str],
+    aplicar: bool,
 ) -> tuple[int, int, list[str]]:
     """Da de alta a los médicos del padrón. Entra con su correo.
 
@@ -316,7 +455,7 @@ def alta_de_medicos(
             creados += 1
             continue
 
-        cuerpo = cuerpo_comun(cabecera, fila, deptos)
+        cuerpo = cuerpo_comun(cabecera, fila, deptos, municipios)
         cuerpo["email"] = correo
         cuerpo["password"] = password
         cuerpo["nationalId"] = ci
@@ -366,20 +505,22 @@ def main() -> int:
     api = Api(args.api)
     api.login(args.admin_email, args.admin_password)
     deptos = mapa_de_departamentos(api)
+    municipios = mapa_de_municipios()
 
     modo = "ALTA REAL" if args.yes else "SIMULACIÓN (agregá --yes para dar de alta)"
     print(f"Origen : {args.fuente}")
     print(f"API    : {args.api}")
     print(f"Modo   : {modo}")
-    print(f"Departamentos resueltos: {len(deptos)}\n")
+    print(f"Departamentos resueltos: {len(deptos)}")
+    print(f"Municipios resueltos: {len(municipios)}\n")
 
     pac_creados, pac_existentes, pac_problemas = alta_de_pacientes(
-        api, args.fuente, args.password or "", deptos, args.yes
+        api, args.fuente, args.password or "", deptos, municipios, args.yes
     )
     print(f"  pacientes  creados {pac_creados:4d} · ya existían {pac_existentes:4d}")
 
     med_creados, med_existentes, med_problemas = alta_de_medicos(
-        api, args.fuente, args.password or "", deptos, args.yes
+        api, args.fuente, args.password or "", deptos, municipios, args.yes
     )
     print(f"  médicos    creados {med_creados:4d} · ya existían {med_existentes:4d}")
 

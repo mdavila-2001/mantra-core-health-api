@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import type { FileLinkResponseDto } from '../../common/dto';
 import {
   AllergyIntolerancesService,
   ConditionsService,
@@ -19,6 +20,8 @@ import {
 } from '../services';
 import {
   AllergyIntoleranceResponseDto,
+  AttachFileToConditionDto,
+  AttachFileToProcedureDto,
   ChangeConditionClinicalStatusDto,
   ConditionResponseDto,
   CreateAllergyIntoleranceDto,
@@ -86,6 +89,21 @@ export class ClinicalRecordsController {
     return this.conditionsService.changeClinicalStatus(id, dto, actor);
   }
 
+  /**
+   * ALV-033 (reemplazo de ALV-032): liga un archivo ya subido a este
+   * diagnóstico puntual. Subí el archivo antes con `POST /common/files`.
+   */
+  @Post('conditions/:id/attachments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adjuntar un archivo ya subido a una condición' })
+  attachFileToCondition(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AttachFileToConditionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    return this.conditionsService.attachFile(id, dto, actor);
+  }
+
   /** UC-08-09. */
   @Post('allergy-intolerances')
   @HttpCode(HttpStatus.CREATED)
@@ -131,7 +149,7 @@ export class ClinicalRecordsController {
     return this.medicationsService.editDraft(id, dto, actor);
   }
 
-  /** REDESA D-05: firma la receta en borrador (aditivo; habilita emitir bajo política). */
+  /** ALOVIDA D-05: firma la receta en borrador (aditivo; habilita emitir bajo política). */
   @Post('medication-requests/:id/sign')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Firmar una receta en borrador (DRAFT)' })
@@ -203,6 +221,23 @@ export class ClinicalRecordsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ProcedureResponseDto> {
     return this.proceduresService.create(dto, actor);
+  }
+
+  /**
+   * ALV-033 (odontología): liga un archivo ya subido a este procedimiento
+   * puntual. Sirve también a los tratamientos odontológicos —son
+   * `clinical.procedures` con categoría dental, ver `PeriopDentalService`—,
+   * así que no hace falta un endpoint propio en ese módulo.
+   */
+  @Post('procedures/:id/attachments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adjuntar un archivo ya subido a un procedimiento' })
+  attachFileToProcedure(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AttachFileToProcedureDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    return this.proceduresService.attachFile(id, dto, actor);
   }
 
   /** UC-08-13. */

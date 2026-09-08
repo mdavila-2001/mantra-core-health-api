@@ -1,6 +1,6 @@
 # Catálogo de flujos verificados para el frontend
 
-> Generado por `node tools/redesa/exercise-front-flows.mjs`. **No se edita a mano**:
+> Generado por `node tools/alovida/exercise-front-flows.mjs`. **No se edita a mano**:
 > se regenera contra una API real y cada cuerpo de abajo es la respuesta literal
 > que devolvió. Si el contrato cambia, vuelva a ejecutarlo.
 

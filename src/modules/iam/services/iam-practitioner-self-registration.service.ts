@@ -63,6 +63,7 @@ import {
 import { createResidenceAddress } from '../../common/services/residence-address';
 import { FileUploadService } from '../../common/services/file-upload.service';
 import { FileCategory, FileSensitivity } from '../../common/dto';
+import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 const DATA_URI_REGEX = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/;
@@ -253,6 +254,7 @@ export class IamPractitionerSelfRegistrationService {
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly catalogConceptsRepo: CatalogConceptsRepository,
     private readonly tenantMembershipsRepo: TenantMembershipsRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly notificationsService: NotificationsService,
@@ -611,7 +613,7 @@ export class IamPractitionerSelfRegistrationService {
 
       // Domicilio: el municipio elegido en el alta. El departamento lo deriva
       // el ayudante del código del INE, no viene del cliente.
-      createResidenceAddress(this.addressesRepo, tx, {
+      await createResidenceAddress(this.addressesRepo, tx, this.catalogConceptsRepo, {
         personId: person.id,
         municipalityConceptId: dto.residenceMunicipalityConceptId,
         actorUserId: user.id,

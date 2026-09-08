@@ -38,6 +38,7 @@ import {
   OwnCredentialResponseDto,
   SpecialtyResponseDto,
   CreateAffiliationDto,
+  UpdateAffiliationDto,
   AffiliationResponseDto,
   ListAffiliationsResponseDto,
   PractitionerProfileSummaryDto,
@@ -397,6 +398,48 @@ export class ProfilesPractitionersController {
   }
 
   /**
+   * UC-05-16·E: corregir una línea del historial propio.
+   *
+   * El sujeto sigue saliendo de la sesión: el id de una afiliación ajena
+   * responde `404`, igual que uno inexistente.
+   */
+  @Patch('practitioners/me/affiliations/:affiliationId')
+  @ApiOperation({
+    summary: 'Corregir una afiliación del historial laboral propio',
+    description:
+      'Sólo el titular edita su historial; la sede no se cambia desde acá. ' +
+      '`409` si la corrección la vuelve idéntica a otra línea; `422` si el fin ' +
+      'queda antes del inicio.',
+  })
+  updateOwnAffiliation(
+    @Param('affiliationId', ParseUUIDPipe) affiliationId: string,
+    @Body() dto: UpdateAffiliationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    return this.practitionersService.updateOwnAffiliation(
+      affiliationId,
+      dto,
+      actor,
+    );
+  }
+
+  /** UC-05-16·B: quitar una línea del historial propio. */
+  @Delete('practitioners/me/affiliations/:affiliationId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Quitar una afiliación del historial laboral propio',
+    description:
+      'Borrado físico de una línea de currículum del titular. `404` si no ' +
+      'existe o es de otro profesional.',
+  })
+  removeOwnAffiliation(
+    @Param('affiliationId', ParseUUIDPipe) affiliationId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionersService.removeOwnAffiliation(affiliationId, actor);
+  }
+
+  /**
    * Los títulos propios, uno por llamada.
    *
    * Va bajo `practitioners/me` y no bajo `practitioners/:profileId` porque el
@@ -415,6 +458,28 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<OwnCredentialResponseDto> {
     return this.practitionersService.addOwnCredential(dto, actor);
+  }
+
+  /**
+   * Retirar un título propio cargado por error.
+   *
+   * Sólo mientras está **pendiente**: uno ya verificado o rechazado es un
+   * hecho de la autoridad que lo revisó, no algo que el titular deshace
+   * borrándolo. `404` si no existe o es de otro profesional —indistinguible,
+   * como el resto del módulo—.
+   */
+  @Delete('practitioners/me/credentials/:credentialId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Retirar un título propio pendiente',
+    description:
+      '`404` si no existe o es de otro profesional. `422` si ya fue verificado o rechazado.',
+  })
+  removeOwnCredential(
+    @Param('credentialId', ParseUUIDPipe) credentialId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionersService.removeOwnCredential(credentialId, actor);
   }
 
   /**

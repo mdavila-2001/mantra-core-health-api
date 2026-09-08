@@ -63,6 +63,7 @@ import {
   CreateAffiliationDto,
   AffiliationResponseDto,
   ListAffiliationsResponseDto,
+  UpdateAffiliationDto,
   PractitionerProfileSummaryDto,
   PractitionerActivityDto,
   UpdateOwnPractitionerProfileDto,
@@ -78,8 +79,13 @@ import {
   ContactPointsRepository,
 } from '../../common/repositories';
 import { Identifiers } from '../../common/entities';
+import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { composeAccountDisplayName } from '../person-name';
-import { createResidenceAddress } from '../../common/services/residence-address';
+import {
+  replaceResidenceAddress,
+  summarizeAddress,
+  type AddressSummary,
+} from '../../common/services/residence-address';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
 
@@ -184,6 +190,7 @@ export class ProfilesPractitionersService {
     private readonly attachableFiles: AttachableFileService,
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly catalogConceptsRepo: CatalogConceptsRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly verificationBypass: VerificationBypassService,
@@ -736,37 +743,46 @@ export class ProfilesPractitionersService {
   }
 
   /**
-   * Deja vigente el domicilio nuevo y cierra el anterior.
+   * Corrige el domicilio: municipio, calle y coordenadas, lo que haya venido
+   * en el `PATCH`. Cierra la fila vigente y abre otra —o no hace nada si, tras
+   * mezclar con lo vigente, nada cambió—.
    *
-   * Mismo criterio de vigencia que el teléfono, y misma función que usa el alta
-   * (`createResidenceAddress`) para derivar ciudad y departamento del municipio:
-   * si la derivación viviera en dos lados, una mudanza escribiría una fila con
-   * otra forma que la del registro.
+   * ALV-009: antes sólo tocaba el municipio (`createResidenceAddress` del
+   * alta no admite corregir); ahora delega en `replaceResidenceAddress`,
+   * mismo criterio que ya tenía `ProfilesPatientsService.reemplazarDireccion`.
    */
   private async reemplazarDomicilio(
     tx: EntityManager,
     personId: string,
-    municipalityConceptId: string,
+    cambios: {
+      municipalityConceptId?: string;
+      lines?: string;
+      latitude?: number;
+      longitude?: number;
+    },
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
-    const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
+    await replaceResidenceAddress(
+      this.addressesRepo,
       tx,
-      personId,
-      CONCEPTS.ADDR_USE_HOME,
+      this.catalogConceptsRepo,
+      {
+        personId,
+        useConceptId: CONCEPTS.ADDR_USE_HOME,
+        municipalityConceptId: cambios.municipalityConceptId,
+        lines: cambios.lines,
+        latitude: cambios.latitude,
+        longitude: cambios.longitude,
+        actorUserId,
+      },
+      ahora,
     );
-    if (vigente?.municipalityConceptId === municipalityConceptId) return;
-    if (vigente) this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
-
-    createResidenceAddress(this.addressesRepo, tx, {
-      personId,
-      municipalityConceptId,
-      actorUserId,
-    });
   }
 
   /**
-   * El documento de identidad y el municipio del domicilio.
+   * El documento de identidad y el domicilio completo (municipio, calle y
+   * coordenadas si las declaró).
    *
    * Los dos los escribe el alta y ninguno volvía en la ficha. Van juntos en una
    * lectura porque se piden a la vez y ninguno depende del otro; y devuelve un
@@ -780,6 +796,7 @@ export class ProfilesPractitionersService {
     nationalId?: string;
     issuerArea?: string;
     municipio?: string;
+    homeAddress?: AddressSummary;
   }> {
     const [documentos, domicilio] = await Promise.all([
       em.find(Identifiers, { ownerId: personId, validTo: null }),
@@ -796,6 +813,7 @@ export class ProfilesPractitionersService {
       nationalId: documento?.value,
       issuerArea: documento?.issuerAdministrativeAreaConceptId,
       municipio: domicilio?.municipalityConceptId,
+      homeAddress: summarizeAddress(domicilio),
     };
   }
 
@@ -979,6 +997,7 @@ export class ProfilesPractitionersService {
       nationalId: filiacion.nationalId,
       issuerAdministrativeAreaConceptId: filiacion.issuerArea,
       residenceMunicipalityConceptId: filiacion.municipio,
+      homeAddress: filiacion.homeAddress,
       practitionerCategoryConceptId: practitioner.practitionerCategoryConceptId,
       verificationStatusConceptId: practitioner.verificationStatusConceptId,
       practiceStatusConceptId: practitioner.practiceStatusConceptId,
@@ -1166,11 +1185,20 @@ export class ProfilesPractitionersService {
             par,
           );
         }
-        if (dto.residenceMunicipalityConceptId !== undefined) {
+        if (
+          dto.residenceMunicipalityConceptId !== undefined ||
+          dto.homeAddressLines !== undefined ||
+          dto.homeLatitude !== undefined
+        ) {
           await this.reemplazarDomicilio(
             tx,
             person.id,
-            dto.residenceMunicipalityConceptId,
+            {
+              municipalityConceptId: dto.residenceMunicipalityConceptId,
+              lines: dto.homeAddressLines,
+              latitude: dto.homeLatitude,
+              longitude: dto.homeLongitude,
+            },
             actor.id,
             ahora,
           );
@@ -1962,7 +1990,11 @@ export class ProfilesPractitionersService {
       }
 
       const organizationName = dto.organizationName.trim();
-      const roleTitle = dto.roleTitle.trim();
+      // ALV-007: opcional. `null` explícito -no `undefined`- para que
+      // `findSame` busque "sin cargo" y no "cualquier cargo" (ver el
+      // comentario de `findSame` sobre por qué dos vínculos sin cargo no
+      // chocan entre sí).
+      const roleTitle = dto.roleTitle?.trim() || null;
       const duplicate = await this.affiliationsRepo.findSame(
         tx,
         profileId,
@@ -2000,8 +2032,7 @@ export class ProfilesPractitionersService {
       const affiliation = this.affiliationsRepo.create(tx, {
         practitionerProfileId: profileId,
         organizationName,
-        roleTitle,
-        departmentText: dto.departmentText?.trim() || undefined,
+        roleTitle: roleTitle ?? undefined,
         practiceSiteId: dto.practiceSiteId,
         affiliationTypeConceptId:
           dto.affiliationTypeConceptId ?? PROF.AFFILIATION_TYPE_EMPLOYMENT,
@@ -2042,6 +2073,167 @@ export class ProfilesPractitionersService {
       await this.avisarDelPedido(dto.practiceSiteId, creado);
     }
     return creado;
+  }
+
+  /**
+   * Corrige una afiliación del historial propio (UC-05-16·E).
+   *
+   * Las mismas dos reglas del alta, aplicadas al resultado de la mezcla y no
+   * al parche suelto: un `endDate` nuevo se compara con el `startDate` que
+   * quede, y el trío institución/cargo/inicio resultante no puede coincidir
+   * con **otra** línea del mismo historial.
+   *
+   * La sede no se toca —el DTO no la trae— porque de ella depende el estado
+   * del vínculo y ese estado lo decide la organización, no el editor.
+   *
+   * @param affiliationId - La línea a corregir.
+   * @param dto - Los campos que cambian; lo omitido se conserva.
+   * @param actor - El profesional titular del historial.
+   * @returns La afiliación ya corregida.
+   */
+  async updateOwnAffiliation(
+    affiliationId: string,
+    dto: UpdateAffiliationDto,
+    actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    this.logger.info(
+      {
+        operation: 'profiles.affiliation.update',
+        affiliationId,
+        actorId: actor.id,
+      },
+      'Updating practitioner affiliation',
+    );
+    return this.em.transactional(async (tx) => {
+      const affiliation = await this.propiaONada(tx, affiliationId, actor);
+
+      const organizationName =
+        dto.organizationName?.trim() ?? affiliation.organizationName;
+      // Mismo criterio que el alta (línea ~1970): `''` colapsa a `null`, no se
+      // conserva como cadena vacía — así una corrección que borra el cargo no
+      // evade los dos índices únicos parciales de ALV-007 (`WHERE role_title
+      // IS [NOT] NULL`), y el resultado calza con `findSame(string | null)`.
+      const roleTitle =
+        dto.roleTitle !== undefined
+          ? dto.roleTitle.trim() || null
+          : (affiliation.roleTitle ?? null);
+      const startDate =
+        dto.startDate !== undefined
+          ? new Date(dto.startDate)
+          : affiliation.startDate;
+      // `endDate` distingue tres casos: ausente (se conserva), `null` (vuelve
+      // a estar vigente) y una fecha (nuevo fin).
+      const endDate =
+        dto.endDate === undefined
+          ? affiliation.endDate
+          : dto.endDate === null
+            ? undefined
+            : new Date(dto.endDate);
+
+      if (endDate && endDate < startDate) {
+        throw new PreconditionFailedException(
+          'El fin del vínculo no puede ser anterior a su inicio',
+          { startDate, endDate },
+        );
+      }
+
+      const igual = await this.affiliationsRepo.findSame(
+        tx,
+        affiliation.practitionerProfileId,
+        organizationName,
+        roleTitle ?? null,
+        startDate,
+      );
+      if (igual && igual.id !== affiliation.id) {
+        throw new ConflictException(
+          'Ese vínculo ya está en el historial laboral',
+          { organizationName, roleTitle, startDate },
+        );
+      }
+
+      affiliation.organizationName = organizationName;
+      // La entidad tipa la columna `nullable: true` como `string | undefined`
+      // (mismo criterio que el alta, línea ~2005): `null` es «sin cargo» para
+      // `findSame`/el DTO, `undefined` es lo que la propiedad ORM acepta.
+      affiliation.roleTitle = roleTitle ?? undefined;
+      affiliation.startDate = startDate;
+      affiliation.endDate = endDate;
+      if (dto.affiliationTypeConceptId !== undefined) {
+        affiliation.affiliationTypeConceptId = dto.affiliationTypeConceptId;
+      }
+      touch(affiliation, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        { operation: 'profiles.affiliation.update', affiliationId },
+        'Practitioner affiliation updated',
+      );
+      return toAffiliation(affiliation);
+    });
+  }
+
+  /**
+   * Quita una afiliación del historial propio (UC-05-16·B).
+   *
+   * Borrado físico: es una línea de currículum escrita por su dueño. Si el
+   * vínculo estaba aprobado por una organización, la membresía que se concedió
+   * al aprobarlo **no** se toca acá —eso es de la organización y se revoca
+   * desde su bandeja—.
+   *
+   * @param affiliationId - La línea a quitar.
+   * @param actor - El profesional titular del historial.
+   */
+  async removeOwnAffiliation(
+    affiliationId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const affiliation = await this.propiaONada(tx, affiliationId, actor);
+      this.affiliationsRepo.remove(tx, affiliation);
+      await tx.flush();
+      this.logger.info(
+        {
+          operation: 'profiles.affiliation.remove',
+          affiliationId,
+          actorId: actor.id,
+          statusConceptId: affiliation.statusConceptId,
+        },
+        'Practitioner affiliation removed',
+      );
+    });
+  }
+
+  /**
+   * La afiliación si es del profesional de la sesión; `404` si no.
+   *
+   * Un id ajeno y un id inexistente responden igual a propósito: distinguirlos
+   * le diría a quien tantea ids cuáles existen.
+   *
+   * @param tx - La transacción del caso de uso.
+   * @param affiliationId - La afiliación pedida.
+   * @param actor - Quien la pide.
+   * @returns La fila, garantizada propia.
+   */
+  private async propiaONada(
+    tx: EntityManager,
+    affiliationId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerAffiliations> {
+    const profileId = await this.ownership.requireOwnPractitionerProfileId(
+      tx,
+      actor,
+    );
+    const affiliation = await this.affiliationsRepo.findOwn(
+      tx,
+      affiliationId,
+      profileId,
+    );
+    if (!affiliation) {
+      throw new ResourceNotFoundException('Afiliación no encontrada', {
+        affiliationId,
+      });
+    }
+    return affiliation;
   }
 
   /**
@@ -2169,6 +2361,58 @@ export class ProfilesPractitionersService {
       createdAt: creada.createdAt,
     };
   }
+
+  /**
+   * Retira un título propio cargado por error (ALV-009/formación).
+   *
+   * Sólo mientras está PENDIENTE: uno ya verificado o rechazado es un hecho
+   * de la autoridad que lo revisó —`POST /profiles/credentials/{id}/verify`,
+   * `SECURITY_ADMIN`—, no algo que el titular deshace borrándolo. Un id ajeno
+   * y uno inexistente responden igual (`404`), mismo criterio que
+   * `propiaONada` para las afiliaciones: no hay tabla `state=WITHDRAWN`, así
+   * que es borrado físico, como el resto de las altas «solo se agrega» de
+   * este perfil (matrícula, especialidad).
+   *
+   * @param credentialId - El título a retirar.
+   * @param actor - El profesional titular.
+   * @throws ResourceNotFoundException si no existe o es de otro profesional.
+   * @throws PreconditionFailedException si ya no está pendiente.
+   */
+  async removeOwnCredential(
+    credentialId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+      const credencial = await this.credentialsRepo.findById(tx, credentialId);
+      if (!credencial || credencial.practitionerProfileId !== profileId) {
+        throw new ResourceNotFoundException('Título no encontrado', {
+          credentialId,
+        });
+      }
+      if (credencial.stateConceptId !== PROF.CRED_PENDING) {
+        throw new PreconditionFailedException(
+          'Ese título ya fue verificado o rechazado; no se puede retirar',
+          { credentialId, stateConceptId: credencial.stateConceptId },
+        );
+      }
+
+      this.credentialsRepo.remove(tx, credencial);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.credential.removeOwn',
+          credentialId,
+          actorId: actor.id,
+        },
+        'Own professional credential removed',
+      );
+    });
+  }
 }
 
 /**
@@ -2183,8 +2427,7 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
     id: row.id,
     practitionerProfileId: row.practitionerProfileId,
     organizationName: row.organizationName,
-    roleTitle: row.roleTitle,
-    departmentText: row.departmentText ?? null,
+    roleTitle: row.roleTitle ?? null,
     practiceSiteId: row.practiceSiteId ?? null,
     affiliationTypeConceptId: row.affiliationTypeConceptId ?? null,
     startDate: row.startDate,
