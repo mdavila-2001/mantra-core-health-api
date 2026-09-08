@@ -361,25 +361,35 @@ export class IamPatientSelfRegistrationService {
 
       // Domicilio: el municipio elegido en el alta. El departamento lo deriva
       // el ayudante del código del INE, no viene del cliente.
-      await createResidenceAddress(this.addressesRepo, tx, this.catalogConceptsRepo, {
-        personId: person.id,
-        municipalityConceptId: dto.residenceMunicipalityConceptId,
-        lines: dto.homeAddressLines,
-        latitude: dto.homeLatitude,
-        longitude: dto.homeLongitude,
-        actorUserId: user.id,
-      });
+      await createResidenceAddress(
+        this.addressesRepo,
+        tx,
+        this.catalogConceptsRepo,
+        {
+          personId: person.id,
+          municipalityConceptId: dto.residenceMunicipalityConceptId,
+          lines: dto.homeAddressLines,
+          latitude: dto.homeLatitude,
+          longitude: dto.homeLongitude,
+          actorUserId: user.id,
+        },
+      );
 
       // El trabajo es una segunda dirección de la misma persona, distinguida
       // por su uso: quien lleva un medicamento necesita saber a cuál ir.
-      await createWorkAddress(this.addressesRepo, tx, this.catalogConceptsRepo, {
-        personId: person.id,
-        municipalityConceptId: dto.workMunicipalityConceptId,
-        lines: dto.workAddressLines,
-        latitude: dto.workLatitude,
-        longitude: dto.workLongitude,
-        actorUserId: user.id,
-      });
+      await createWorkAddress(
+        this.addressesRepo,
+        tx,
+        this.catalogConceptsRepo,
+        {
+          personId: person.id,
+          municipalityConceptId: dto.workMunicipalityConceptId,
+          lines: dto.workAddressLines,
+          latitude: dto.workLatitude,
+          longitude: dto.workLongitude,
+          actorUserId: user.id,
+        },
+      );
 
       // El tutor o persona autorizada, si lo declaró.
       await createGuardianRelatedPerson(

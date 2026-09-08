@@ -350,7 +350,11 @@ describe('SurveysTemplatesService', () => {
         d.service.createNextVersion('tpl-1', actor),
       );
 
-      expect(res).toEqual({ id: 'tpl-1', versionId: 'ver-2', versionNumber: 2 });
+      expect(res).toEqual({
+        id: 'tpl-1',
+        versionId: 'ver-2',
+        versionNumber: 2,
+      });
       expect(d.templatesRepo.createVersion).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({

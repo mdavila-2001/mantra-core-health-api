@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext,
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
   camposObligatoriosDePaciente,
 } from './harness';
 
@@ -37,7 +40,9 @@ import { bootstrapTestApp, bearer, type TestContext,
 describe('FX-4 · retirar un horario publicado', () => {
   let ctx: TestContext;
   /** Los campos que el alta de paciente exige; salen del arnés. */
-  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
+  let camposDePaciente: Awaited<
+    ReturnType<typeof camposObligatoriosDePaciente>
+  >;
   const http = () => request(ctx.app.getHttpServer());
 
   const sufijo = randomUUID().slice(0, 8);

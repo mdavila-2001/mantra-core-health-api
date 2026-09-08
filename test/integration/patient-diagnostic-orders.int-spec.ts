@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext,
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
   camposObligatoriosDePaciente,
 } from './harness';
 import { SEED } from '../../src/common';
@@ -31,7 +34,9 @@ import { DIAG } from '../../src/modules/diagnostics/diagnostics.concepts';
 describe('Órdenes diagnósticas del paciente (integración)', () => {
   let ctx: TestContext;
   /** Los campos que el alta de paciente exige; salen del arnés. */
-  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
+  let camposDePaciente: Awaited<
+    ReturnType<typeof camposObligatoriosDePaciente>
+  >;
   const u = Date.now();
 
   /** El titular de las órdenes. */

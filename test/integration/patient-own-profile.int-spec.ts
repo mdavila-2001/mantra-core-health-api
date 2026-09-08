@@ -42,7 +42,7 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
       .post('/iam/auth/register-patient')
       .send({
         nationalId,
-        email: `own-profile-${Date.now()}-${Math.random().toString(36).slice(2,8)}@example.test`,
+        email: `own-profile-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.test`,
         password,
         name: 'Ada',
         middleName: 'Augusta',
@@ -385,7 +385,7 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
         .post('/iam/auth/register-patient')
         .send({
           nationalId: otroDocumento,
-          email: `own-profile-${Date.now()}-${Math.random().toString(36).slice(2,8)}@example.test`,
+          email: `own-profile-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.test`,
           password,
           name: 'Otro',
           lastName: 'Paciente',

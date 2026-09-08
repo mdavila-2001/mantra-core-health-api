@@ -130,7 +130,8 @@ export class CreateOwnLiabilityDto {
   startDate!: string;
 
   @ApiPropertyOptional({
-    description: 'Si un proceso automático puede pagar sus cuotas solo (por omisión, sí)',
+    description:
+      'Si un proceso automático puede pagar sus cuotas solo (por omisión, sí)',
   })
   @IsOptional()
   @IsBoolean()
@@ -175,11 +176,17 @@ export class LiabilityCreatedResponseDto {
 
 /** Cuerpo de `POST /accounting/practitioner/assets/:id/progress`. */
 export class RegisterAssetProgressDto {
-  @ApiProperty({ description: 'Cuenta de gasto por depreciación (débito)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta de gasto por depreciación (débito)',
+    format: 'uuid',
+  })
   @IsUUID()
   depreciationExpenseAccountId!: string;
 
-  @ApiProperty({ description: 'Cuenta de depreciación acumulada (crédito)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta de depreciación acumulada (crédito)',
+    format: 'uuid',
+  })
   @IsUUID()
   accumulatedDepreciationAccountId!: string;
 
@@ -194,11 +201,17 @@ export class RegisterAssetProgressDto {
 
 /** Cuerpo de `POST /accounting/practitioner/liabilities/:id/progress`. */
 export class RegisterLiabilityProgressDto {
-  @ApiProperty({ description: 'Cuenta banco/tesorería (crédito)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta banco/tesorería (crédito)',
+    format: 'uuid',
+  })
   @IsUUID()
   bankAccountId!: string;
 
-  @ApiProperty({ description: 'Cuenta de gasto por interés (débito)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta de gasto por interés (débito)',
+    format: 'uuid',
+  })
   @IsUUID()
   interestExpenseAccountId!: string;
 }

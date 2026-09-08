@@ -114,9 +114,7 @@ describe('BoEmployersSeedService', () => {
         conceptos.every((fila) => String(fila.code).startsWith('employer:bo:')),
       ).toBe(true);
       expect(
-        conceptos.some(
-          (fila) => fila.code === boEmployerConceptCode('ENTEL'),
-        ),
+        conceptos.some((fila) => fila.code === boEmployerConceptCode('ENTEL')),
       ).toBe(true);
     });
 

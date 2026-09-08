@@ -38,7 +38,12 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
   const sufijo = randomUUID().slice(0, 8);
   const PASSWORD = 'S3cret-passw0rd';
 
-  const medico = { email: `fx9-med-${sufijo}@example.test`, token: '', hpid: '', tenantId: '' };
+  const medico = {
+    email: `fx9-med-${sufijo}@example.test`,
+    token: '',
+    hpid: '',
+    tenantId: '',
+  };
   const ana = { nationalId: `FX9A${sufijo}`, token: '', pid: '' };
   const beto = { nationalId: `FX9B${sufijo}`, token: '', pid: '' };
 
@@ -89,12 +94,21 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
           and c.code in (?, ?)
           and a.start_at < ?
           and coalesce(a.end_at, a.start_at) > ?`,
-      [medico.hpid, ...ESTADOS_COMPROMETIDOS, hasta.toISOString(), desde.toISOString()],
+      [
+        medico.hpid,
+        ...ESTADOS_COMPROMETIDOS,
+        hasta.toISOString(),
+        desde.toISOString(),
+      ],
     );
     return Number(filas[0]?.n ?? '0');
   }
 
-  async function altaPaciente(quien: { nationalId: string; token: string; pid: string }): Promise<void> {
+  async function altaPaciente(quien: {
+    nationalId: string;
+    token: string;
+    pid: string;
+  }): Promise<void> {
     const alta = await http()
       .post('/iam/auth/register-patient')
       .send({
@@ -233,15 +247,20 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
       })
       .expect(201);
 
-    const cupo = await ctx.orm.em.getConnection().execute<{ id: string; start_at: Date }[]>(
-      `select id, start_at from scheduling.bookable_slots
+    const cupo = await ctx.orm.em
+      .getConnection()
+      .execute<{ id: string; start_at: Date }[]>(
+        `select id, start_at from scheduling.bookable_slots
         where schedule_template_id = ? order by start_at limit 1`,
-      [plantilla.body.id],
-    );
+        [plantilla.body.id],
+      );
     const slotId = cupo[0].id;
 
     /** Pide turno en ese cupo y devuelve el id de la solicitud. */
-    async function pedirTurno(quien: { token: string; pid: string }): Promise<string> {
+    async function pedirTurno(quien: {
+      token: string;
+      pid: string;
+    }): Promise<string> {
       const hold = await http()
         .post(`/scheduling/slots/${slotId}/holds`)
         .set(bearer(quien.token))
@@ -264,9 +283,15 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
     const otraSolicitud = await pedirTurno(beto);
 
     const aceptar = (id: string) =>
-      http().post(`/scheduling/bookings/${id}/accept`).set(bearer(medico.token)).send({});
+      http()
+        .post(`/scheduling/bookings/${id}/accept`)
+        .set(bearer(medico.token))
+        .send({});
 
-    const [uno, dos] = await Promise.all([aceptar(unaSolicitud), aceptar(otraSolicitud)]);
+    const [uno, dos] = await Promise.all([
+      aceptar(unaSolicitud),
+      aceptar(otraSolicitud),
+    ]);
 
     const aceptadas = [uno, dos].filter((r) => r.status === 200);
     expect(aceptadas).toHaveLength(1);

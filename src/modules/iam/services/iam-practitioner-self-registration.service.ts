@@ -613,11 +613,16 @@ export class IamPractitionerSelfRegistrationService {
 
       // Domicilio: el municipio elegido en el alta. El departamento lo deriva
       // el ayudante del código del INE, no viene del cliente.
-      await createResidenceAddress(this.addressesRepo, tx, this.catalogConceptsRepo, {
-        personId: person.id,
-        municipalityConceptId: dto.residenceMunicipalityConceptId,
-        actorUserId: user.id,
-      });
+      await createResidenceAddress(
+        this.addressesRepo,
+        tx,
+        this.catalogConceptsRepo,
+        {
+          personId: person.id,
+          municipalityConceptId: dto.residenceMunicipalityConceptId,
+          actorUserId: user.id,
+        },
+      );
 
       // 6) Contacto: el correo de trabajo siempre —es el de login—, y los
       // demás si los aportó. Cada uno es una fila propia de

@@ -242,8 +242,16 @@ describe('BillingServiceCatalogService', () => {
         d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
         d.serviceCatalogRepo.create.mockReturnValue(item);
         d.tx.find.mockResolvedValue([
-          { practitionerProfileId: 'hp-nueva', isPrimary: false, createdAt: new Date('2026-02-01') },
-          { practitionerProfileId: 'hp-vieja', isPrimary: false, createdAt: new Date('2026-01-01') },
+          {
+            practitionerProfileId: 'hp-nueva',
+            isPrimary: false,
+            createdAt: new Date('2026-02-01'),
+          },
+          {
+            practitionerProfileId: 'hp-vieja',
+            isPrimary: false,
+            createdAt: new Date('2026-01-01'),
+          },
         ]);
         d.templatesRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
         d.templatesRepo.createVersion.mockReturnValue({ id: 'ver-1' });

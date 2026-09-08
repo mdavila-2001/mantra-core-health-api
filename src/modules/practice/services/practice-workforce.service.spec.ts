@@ -29,7 +29,11 @@ function build() {
   };
   const practicesRepo = { findById: mockFn() };
   const sitesRepo = { findById: mockFn() };
-  const rolesRepo = { findById: mockFn(), create: mockFn(), findByPractitioner: mockFn() };
+  const rolesRepo = {
+    findById: mockFn(),
+    create: mockFn(),
+    findByPractitioner: mockFn(),
+  };
   const supportRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PracticeWorkforceService(
@@ -40,7 +44,15 @@ function build() {
     supportRepo as any,
     logger as any,
   );
-  return { service, tx, forked, practicesRepo, sitesRepo, rolesRepo, supportRepo };
+  return {
+    service,
+    tx,
+    forked,
+    practicesRepo,
+    sitesRepo,
+    rolesRepo,
+    supportRepo,
+  };
 }
 
 describe('PracticeWorkforceService', () => {

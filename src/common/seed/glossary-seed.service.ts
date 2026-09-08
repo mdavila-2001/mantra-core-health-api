@@ -366,7 +366,9 @@ export class GlossarySeedService {
     const ids = GLOSSARY_TERMS.flatMap((term) => [
       ...propertyCodes.map((code) => glossaryPropertyId(term.slug, code)),
       ...(term.drugFacts !== undefined
-        ? drugFactPropertyCodes.map((code) => glossaryPropertyId(term.slug, code))
+        ? drugFactPropertyCodes.map((code) =>
+            glossaryPropertyId(term.slug, code),
+          )
         : []),
     ]);
     const existing = await this.existingIds(em, ConceptProperties, ids);
