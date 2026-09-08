@@ -2,7 +2,7 @@
 /dist
 /node_modules
 /build
-/.claude
+/.claude/*
 
 # Logs
 logs
@@ -80,9 +80,10 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /graphify-out/
 src/graphify-out/
 
-# Claude Code — configuración y skills locales por usuario. Cada desarrollador usa
-# las suyas; no se versionan para no chocar con las de otros devs.
-.claude/
+# Claude Code — configuración local por usuario: cada dev usa la suya.
+# Excepción: settings.json sí se versiona — declara los plugins/skills del equipo.
+.claude/*
+!.claude/settings.json
 CLAUDE.md
 
 # Caché de metadata de MikroORM (valor por defecto: <cwd>/temp)
