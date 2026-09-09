@@ -620,8 +620,10 @@ export class IamPractitionerSelfRegistrationService {
         });
       }
 
-      // Domicilio: el municipio elegido en el alta. El departamento lo deriva
-      // el ayudante del código del INE, no viene del cliente.
+      // Domicilio: municipio, calle y coordenadas elegidas en el alta (P19).
+      // El departamento lo deriva el ayudante del código del INE, no viene
+      // del cliente. Mismos tres campos y mismo destino que en el alta de
+      // paciente (`IamPatientSelfRegistrationService`).
       await createResidenceAddress(
         this.addressesRepo,
         tx,
@@ -629,6 +631,9 @@ export class IamPractitionerSelfRegistrationService {
         {
           personId: person.id,
           municipalityConceptId: dto.residenceMunicipalityConceptId,
+          lines: dto.homeAddressLines,
+          latitude: dto.homeLatitude,
+          longitude: dto.homeLongitude,
           actorUserId: user.id,
         },
       );

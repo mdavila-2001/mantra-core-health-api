@@ -6,11 +6,14 @@ import {
   IsEmail,
   IsIn,
   IsISO8601,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   Matches,
+  Max,
   MaxLength,
+  Min,
   MinLength,
   ValidateIf,
   ValidateNested,
@@ -322,6 +325,53 @@ export class RegisterPractitionerDto {
   @IsOptional()
   @IsUUID()
   residenceMunicipalityConceptId?: string;
+
+  /**
+   * Calle y número del domicilio particular, tal como la persona lo escribe.
+   *
+   * La columna `common.addresses.lines` es un varchar único, no un arreglo:
+   * acá viaja el texto entero, sin partirlo en líneas. Mismo campo, mismo
+   * catálogo y mismo destino que en `RegisterPatientDto`.
+   */
+  @ApiPropertyOptional({
+    maxLength: 500,
+    description: 'Calle y número del domicilio particular',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  homeAddressLines?: string;
+
+  /**
+   * Latitud del domicilio personal.
+   *
+   * El par de coordenadas es **ambos o ninguno**: el `ValidateIf` mira las dos
+   * propiedades (sin `@IsOptional()`, que anularía la condición), así que
+   * mandar una sola hace caer a la que falta en su `@IsNumber` y la petición
+   * termina en 400. Media coordenada no ubica nada. En la rama `mockup` del
+   * front esto no se nota: el simulador contesta todo y no valida.
+   */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: RegisterPractitionerDto) =>
+      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  homeLatitude?: number;
+
+  /** Longitud del domicilio personal. Ver {@link RegisterPractitionerDto.homeLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: RegisterPractitionerDto) =>
+      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  homeLongitude?: number;
 
   /**
    * Forma anterior de declarar el teléfono del trabajo.
