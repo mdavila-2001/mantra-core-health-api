@@ -30,29 +30,33 @@ function build() {
   };
   const practicesRepo = {
     findById: mockFn().mockResolvedValue({ id: 'pr-1', tenantId: TENANT }),
-    findOwnOffice: mockFn().mockResolvedValue(null),
-    create: mockFn().mockReturnValue({ id: 'pr-own-1' }),
   };
   const sitesRepo = {
     findById: mockFn().mockResolvedValue(null),
-    findByPracticeAndCode: mockFn().mockResolvedValue(null),
-    create: mockFn().mockReturnValue({
-      id: 'site-own-1',
-      practiceId: 'pr-own-1',
-      code: 'MI-CONSULTORIO',
-      name: 'Mi consultorio',
-      timeZone: undefined,
-      statusConceptId: PRAC.SITE_ACTIVE,
-    }),
   };
   const spacesRepo = { findById: mockFn().mockResolvedValue(null) };
   const rolesRepo = {
     findCurrentWithSite: mockFn().mockResolvedValue([]),
     findCurrentBySite: mockFn().mockResolvedValue(null),
-    create: mockFn().mockReturnValue({ id: 'role-1' }),
   };
-  const addressesRepo = {
-    create: mockFn().mockReturnValue({ id: 'addr-1' }),
+  // El alta transaccional del consultorio propio (ALV-005/006) vive en
+  // `OwnSiteProvisioningService`; acá se mockea como colaborador y sus
+  // propios casos (práctica reutilizada, dirección, sufijo de código) están
+  // en `own-site-provisioning.service.spec.ts`.
+  const provisioning = {
+    provision: mockFn().mockResolvedValue({
+      practiceId: 'pr-own-1',
+      siteId: 'site-own-1',
+      addressId: undefined,
+      site: {
+        id: 'site-own-1',
+        practiceId: 'pr-own-1',
+        code: 'MI-CONSULTORIO',
+        name: 'Mi consultorio',
+        timeZone: undefined,
+        statusConceptId: PRAC.SITE_ACTIVE,
+      },
+    }),
   };
   const ownership = {
     requireOwnPractitionerProfileId: mockFn().mockResolvedValue('prac-1'),
@@ -65,7 +69,7 @@ function build() {
     sitesRepo as any,
     spacesRepo as any,
     rolesRepo as any,
-    addressesRepo as any,
+    provisioning as any,
     ownership as any,
     logger as any,
   );
@@ -77,7 +81,7 @@ function build() {
     sitesRepo,
     spacesRepo,
     rolesRepo,
-    addressesRepo,
+    provisioning,
     ownership,
     logger,
   };
@@ -236,90 +240,53 @@ describe('PractitionerSitesService', () => {
   describe('createOwnSite (ALV-005/006)', () => {
     const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
 
-    it('creates a new personal practice, the site and the role assignment', async () => {
+    it('resolves tenant and profile and delegates provisioning', async () => {
       const d = build();
+      const dto = {
+        name: 'Mi consultorio',
+        address: {
+          lines: ['Av. Brasil 1234'],
+          city: 'La Paz',
+          latitude: -16.5,
+          longitude: -68.15,
+        },
+      } as any;
 
       const res = await runWithTenant(TENANT, () =>
-        d.service.createOwnSite(actor, {
-          name: 'Mi consultorio',
-          address: {
-            lines: ['Av. Brasil 1234'],
-            city: 'La Paz',
-            latitude: -16.5,
-            longitude: -68.15,
-          },
-        } as any),
+        d.service.createOwnSite(actor, dto),
       );
 
       expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalledWith(
         d.fork,
         actor,
       );
-      // Sin práctica personal previa: se crea una nueva de tipo consultorio.
-      expect(d.practicesRepo.create).toHaveBeenCalledWith(
+      expect(d.provisioning.provision).toHaveBeenCalledWith(
         d.fork,
-        expect.objectContaining({
-          tenantId: TENANT,
-          typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
-          adminUserId: actor.id,
-        }),
+        { tenantId: TENANT, userId: actor.id, practitionerProfileId: 'prac-1' },
+        dto,
+        actor.id,
       );
-      expect(d.addressesRepo.create).toHaveBeenCalledWith(
-        d.fork,
-        expect.objectContaining({ ownerId: actor.id, latitude: '-16.5' }),
-      );
-      expect(d.sitesRepo.create).toHaveBeenCalledWith(
-        d.fork,
-        expect.objectContaining({
-          practiceId: 'pr-own-1',
-          siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,
-          addressId: 'addr-1',
-        }),
-      );
-      expect(d.rolesRepo.create).toHaveBeenCalledWith(
-        d.fork,
-        expect.objectContaining({
-          practitionerProfileId: 'prac-1',
-          practiceId: 'pr-own-1',
-          practiceSiteId: 'site-own-1',
-          statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
-        }),
-      );
-      expect(res).toMatchObject({ id: 'site-own-1', name: 'Mi consultorio' });
+      expect(res).toMatchObject({
+        id: 'site-own-1',
+        name: 'Mi consultorio',
+        addressText: 'Av. Brasil 1234, La Paz',
+        latitude: -16.5,
+        longitude: -68.15,
+      });
     });
 
-    it('reuses the existing personal practice for a second site', async () => {
+    it('responds with null address fields when no address was declared', async () => {
       const d = build();
-      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
 
-      await runWithTenant(TENANT, () =>
+      const res = await runWithTenant(TENANT, () =>
         d.service.createOwnSite(actor, { name: 'Segundo consultorio' } as any),
       );
 
-      expect(d.practicesRepo.create).not.toHaveBeenCalled();
-      expect(d.sitesRepo.create).toHaveBeenCalledWith(
-        d.fork,
-        expect.objectContaining({
-          practiceId: 'pr-own-1',
-          addressId: undefined,
-        }),
-      );
-    });
-
-    it('resolves a code clash by appending a numeric suffix', async () => {
-      const d = build();
-      d.sitesRepo.findByPracticeAndCode
-        .mockResolvedValueOnce({ id: 'existing' })
-        .mockResolvedValueOnce(null);
-
-      await runWithTenant(TENANT, () =>
-        d.service.createOwnSite(actor, { name: 'Mi Consultorio' } as any),
-      );
-
-      expect(d.sitesRepo.create).toHaveBeenCalledWith(
-        d.fork,
-        expect.objectContaining({ code: 'MI-CONSULTORIO-2' }),
-      );
+      expect(res).toMatchObject({
+        addressText: null,
+        latitude: null,
+        longitude: null,
+      });
     });
   });
 

@@ -94,6 +94,17 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const fileUploadService = {
       upload: fn().mockResolvedValue({ id: 'file-foto-123' }),
     };
+    // P20: el consultorio propio declarado en `ownSite` se provisiona con
+    // este colaborador. Por defecto resuelve algo (no importa qué): el caso
+    // interesante es que no se llame cuando el alta no declara `ownSite`.
+    const ownSiteProvisioning = {
+      provision: fn().mockResolvedValue({
+        practiceId: 'pr-own-1',
+        siteId: 'site-own-1',
+        addressId: undefined,
+        site: { id: 'site-own-1' },
+      }),
+    };
 
     const service = new IamPractitionerSelfRegistrationService(
       em as never,
@@ -122,6 +133,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       notificationsService as never,
       logger as never,
       new TracingService(),
+      ownSiteProvisioning as never,
       fileUploadService as never,
     );
     return {
@@ -141,9 +153,12 @@ describe('IamPractitionerSelfRegistrationService', () => {
       identifiersRepo,
       contactPointsRepo,
       tenantMembershipsRepo,
+      emailVerificationsRepo,
+      eventsRepo,
       notificationsService,
       activationsRepo,
       fileUploadService,
+      ownSiteProvisioning,
     };
   }
 
@@ -817,6 +832,107 @@ describe('IamPractitionerSelfRegistrationService', () => {
           photoFileId: undefined,
         }),
       );
+    });
+  });
+
+  /**
+   * El consultorio propio declarado en el alta (ALV-005/006 · P20). El
+   * caso de uso lo resuelve `OwnSiteProvisioningService`; acá se prueba que
+   * el alta lo llama con los datos correctos, en el orden correcto dentro
+   * de la transacción, y que un fallo suyo tumba el alta entera.
+   */
+  describe('ownSite en el alta (P20)', () => {
+    const ownSite = {
+      name: 'Consultorio Rojas',
+      address: { lines: [], latitude: -17.78, longitude: -63.18 },
+    } as never;
+
+    it('con ownSite: provisiona el consultorio y lo devuelve en la respuesta', async () => {
+      const d = build();
+
+      const res = await d.service.registerPractitioner({ ...dto, ownSite });
+
+      expect(d.ownSiteProvisioning.provision).toHaveBeenCalledWith(
+        d.tx,
+        {
+          tenantId: SEED.tenantId,
+          userId: 'user-1',
+          practitionerProfileId: 'person-1',
+        },
+        ownSite,
+        'user-1',
+      );
+      expect(res).toMatchObject({
+        ownPracticeId: 'pr-own-1',
+        ownSiteId: 'site-own-1',
+      });
+    });
+
+    it('sin ownSite: no provisiona nada y la respuesta no inventa las claves', async () => {
+      const d = build();
+
+      const res = await d.service.registerPractitioner(dto);
+
+      expect(d.ownSiteProvisioning.provision).not.toHaveBeenCalled();
+      expect(res).not.toHaveProperty('ownPracticeId');
+      expect(res).not.toHaveProperty('ownSiteId');
+    });
+
+    it('provisiona después de la membresía y antes de la verificación de correo', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({ ...dto, ownSite });
+
+      const ordenMembresia =
+        d.tenantMembershipsRepo.create.mock.invocationCallOrder[0];
+      const ordenProvision =
+        d.ownSiteProvisioning.provision.mock.invocationCallOrder[0];
+      const ordenVerificacion =
+        d.emailVerificationsRepo.create.mock.invocationCallOrder[0];
+      expect(ordenMembresia).toBeLessThan(ordenProvision);
+      expect(ordenProvision).toBeLessThan(ordenVerificacion);
+    });
+
+    it('si el provisioning falla, el alta entera no ocurre', async () => {
+      const d = build();
+      d.ownSiteProvisioning.provision.mockRejectedValue(
+        new Error('own site failed'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({ ...dto, ownSite }),
+      ).rejects.toThrow('own site failed');
+
+      // Lo que va después del punto de fallo, dentro y fuera de la
+      // transacción, no debe haber ocurrido.
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+      expect(d.eventsRepo.record).not.toHaveBeenCalled();
+      expect(d.notificationsService.createRequest).not.toHaveBeenCalled();
+    });
+
+    it('en el alta asistida, el autor de las filas es el administrador (C-18)', async () => {
+      const d = build();
+      const admin = { id: 'admin-1' } as never;
+
+      const res = await d.service.assistedRegisterPractitioner(
+        { ...dto, reason: 'Alta de plantel', ownSite } as never,
+        admin,
+      );
+
+      expect(d.ownSiteProvisioning.provision).toHaveBeenCalledWith(
+        d.tx,
+        {
+          tenantId: SEED.tenantId,
+          userId: 'user-1',
+          practitionerProfileId: 'person-1',
+        },
+        ownSite,
+        'admin-1',
+      );
+      expect(res).toMatchObject({
+        ownPracticeId: 'pr-own-1',
+        ownSiteId: 'site-own-1',
+      });
     });
   });
 });
