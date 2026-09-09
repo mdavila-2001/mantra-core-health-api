@@ -22,7 +22,10 @@ import {
   type AdministrativeGenderCode,
   type BirthSexCode,
 } from '../../profiles/profiles.concepts';
-import { OCCUPATION_FREE_TEXT_MAX_LENGTH } from './register-patient.dto';
+import {
+  EMPLOYER_FREE_TEXT_MAX_LENGTH,
+  OCCUPATION_FREE_TEXT_MAX_LENGTH,
+} from './register-patient.dto';
 // Import de valor (no `import type`): `@Type(() => CreateOwnSiteDto)` necesita
 // la clase en runtime para instanciar el anidado antes de validarlo. Se
 // importa el archivo hoja, no el barrel de `practice/dto`, para no arrastrar
@@ -479,6 +482,31 @@ export class RegisterPractitionerDto {
   @IsString()
   @MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)
   occupationFreeText?: string;
+
+  /**
+   * Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)',
+  })
+  @IsOptional()
+  @IsUUID()
+  workEmployerConceptId?: string;
+
+  /**
+   * Empresa en texto libre, para cuando no está en el catálogo. Se ignora
+   * si viene `workEmployerConceptId`. Con la salida «Otra empresa»
+   * (`employer:bo:OTRA`) del catálogo, el cliente manda sólo este campo.
+   */
+  @ApiPropertyOptional({
+    maxLength: EMPLOYER_FREE_TEXT_MAX_LENGTH,
+    description: 'Empresa en texto libre, para cuando no está en el catálogo',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)
+  workEmployerFreeText?: string;
 
   /**
    * Zona horaria IANA.

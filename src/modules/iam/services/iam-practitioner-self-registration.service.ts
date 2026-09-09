@@ -485,6 +485,10 @@ export class IamPractitionerSelfRegistrationService {
         occupationFreeText: dto.occupationConceptId
           ? undefined
           : dto.occupationFreeText,
+        workEmployerConceptId: dto.workEmployerConceptId,
+        workEmployerFreeText: dto.workEmployerConceptId
+          ? undefined
+          : dto.workEmployerFreeText,
         actorUserId: user.id,
       });
       await tx.flush();
