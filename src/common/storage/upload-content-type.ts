@@ -68,7 +68,8 @@ const SIGNATURES: readonly ContentSignature[] = [
     confirm: (buffer) => hasZipMember(buffer, 'word/document.xml'),
   },
   {
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    mimeType:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     magic: [0x50, 0x4b, 0x03, 0x04],
     confirm: (buffer) => hasZipMember(buffer, 'xl/workbook.xml'),
   },
@@ -94,7 +95,13 @@ function looksLikePlainText(buffer: Buffer): boolean {
     }
     // Bytes de encabezado de una secuencia UTF-8 multi-byte (2, 3 o 4 bytes).
     const continuationBytes =
-      (byte & 0xe0) === 0xc0 ? 1 : (byte & 0xf0) === 0xe0 ? 2 : (byte & 0xf8) === 0xf0 ? 3 : -1;
+      (byte & 0xe0) === 0xc0
+        ? 1
+        : (byte & 0xf0) === 0xe0
+          ? 2
+          : (byte & 0xf8) === 0xf0
+            ? 3
+            : -1;
     if (continuationBytes === -1) return false;
     for (let offset = 1; offset <= continuationBytes; offset += 1) {
       const continuation = buffer[index + offset];

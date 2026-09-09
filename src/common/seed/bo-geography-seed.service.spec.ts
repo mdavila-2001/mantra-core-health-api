@@ -407,9 +407,9 @@ describe('BoGeographySeedService', () => {
       const siglas = new Set(BO_DEPARTMENTS.map((d) => d.code));
       for (const municipality of BO_MUNICIPALITIES) {
         expect(siglas.has(municipality.department)).toBe(true);
-        expect(BO_DEPARTMENT_BY_INE_PREFIX.get(municipality.ine.slice(0, 2))).toBe(
-          municipality.department,
-        );
+        expect(
+          BO_DEPARTMENT_BY_INE_PREFIX.get(municipality.ine.slice(0, 2)),
+        ).toBe(municipality.department);
       }
     });
 
@@ -423,11 +423,19 @@ describe('BoGeographySeedService', () => {
     });
 
     it('el camino inverso resuelve el municipio desde el uuid de su concepto', () => {
-      const sucre = boMunicipalityByConceptId(boMunicipalityConceptId('010101'));
-      expect(sucre).toMatchObject({ ine: '010101', name: 'Sucre', department: 'CH' });
+      const sucre = boMunicipalityByConceptId(
+        boMunicipalityConceptId('010101'),
+      );
+      expect(sucre).toMatchObject({
+        ine: '010101',
+        name: 'Sucre',
+        department: 'CH',
+      });
       // Un uuid que no es de un municipio no resuelve: es lo que impide escribir
       // una FK colgando en `common.addresses`.
-      expect(boMunicipalityByConceptId(boDepartmentConceptId('CH'))).toBeUndefined();
+      expect(
+        boMunicipalityByConceptId(boDepartmentConceptId('CH')),
+      ).toBeUndefined();
     });
 
     it('los ids son deterministas: dos derivaciones dan el mismo uuid', () => {

@@ -14,7 +14,11 @@ import { AssetService } from './asset.service';
 import { LiabilityService } from './liability.service';
 import { buildAmortizationSchedule } from './liability-amortization';
 import { ACCT } from '../accounting.concepts';
-import { AssetRepository, LiabilityRepository, FiscalRepository } from '../repositories';
+import {
+  AssetRepository,
+  LiabilityRepository,
+  FiscalRepository,
+} from '../repositories';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { LedgerService as BillingLedgerService } from '../../billing/services';
 import { NotificationsService } from '../../messaging/services';
@@ -431,7 +435,9 @@ export class PractitionerAccountingService {
     actor: AuthenticatedUser,
   ): Promise<ProgressRegisteredResponseDto> {
     const { practiceId } = await this.assertOwnsAsset(actor, assetId);
-    const postingDate = dto.postingDate ? new Date(dto.postingDate) : new Date();
+    const postingDate = dto.postingDate
+      ? new Date(dto.postingDate)
+      : new Date();
 
     const em = this.em.fork();
     const period = await this.fiscalRepo.findOpenPeriodForPractice(
@@ -623,7 +629,9 @@ export class PractitionerAccountingService {
 
     const principalComponent = schedule.principalDue ?? '0.00';
     const interestComponent = schedule.interestDue ?? '0.00';
-    const amount = (Number(principalComponent) + Number(interestComponent)).toFixed(2);
+    const amount = (
+      Number(principalComponent) + Number(interestComponent)
+    ).toFixed(2);
 
     const resultado = await this.liabilityService.payLiability(
       liabilityId,

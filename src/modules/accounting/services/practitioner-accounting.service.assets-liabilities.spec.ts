@@ -5,7 +5,10 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PractitionerAccountingService } from './practitioner-accounting.service';
 import { ACCT } from '../accounting.concepts';
-import { PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = {
   id: 'user-1',
@@ -20,7 +23,10 @@ const actor = {
  * mockeados directo, así que a `em` nunca le preguntan nada de verdad.
  */
 function build() {
-  const tx = { findOne: mockFn().mockResolvedValue(null), flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    findOne: mockFn().mockResolvedValue(null),
+    flush: mockFn().mockResolvedValue(undefined),
+  };
   const em = {
     fork: mockFn(() => ({})),
     transactional: mockFn((cb: any) => cb(tx)),
@@ -29,27 +35,65 @@ function build() {
     findActivePracticeIdsForPractitioner: mockFn().mockResolvedValue(['p1']),
   };
   const assetService = {
-    capitalize: mockFn().mockResolvedValue({ id: 'as1', code: 'AST-1', status: ACCT.ASSET_ACTIVE, bookValue: '100.00', transactionId: 'tx1' }),
-    runDepreciation: mockFn().mockResolvedValue({ depreciatedAssets: 1, transactionIds: ['tx-dep-1'] }),
+    capitalize: mockFn().mockResolvedValue({
+      id: 'as1',
+      code: 'AST-1',
+      status: ACCT.ASSET_ACTIVE,
+      bookValue: '100.00',
+      transactionId: 'tx1',
+    }),
+    runDepreciation: mockFn().mockResolvedValue({
+      depreciatedAssets: 1,
+      transactionIds: ['tx-dep-1'],
+    }),
   };
   const liabilityService = {
-    payLiability: mockFn().mockResolvedValue({ id: 'pay1', transactionId: 'tx-pay-1', liabilityStatus: ACCT.LIABILITY_ACTIVE, outstandingAmount: '583.33' }),
+    payLiability: mockFn().mockResolvedValue({
+      id: 'pay1',
+      transactionId: 'tx-pay-1',
+      liabilityStatus: ACCT.LIABILITY_ACTIVE,
+      outstandingAmount: '583.33',
+    }),
   };
   const assetRepo = {
     findById: mockFn().mockResolvedValue({ id: 'as1', practiceId: 'p1' }),
     listByPractice: mockFn().mockResolvedValue([
-      { id: 'as1', code: 'AST-1', name: 'Silla', statusConceptId: ACCT.ASSET_ACTIVE, bookValue: '900.00', acquisitionCost: '1000.00', automated: true },
+      {
+        id: 'as1',
+        code: 'AST-1',
+        name: 'Silla',
+        statusConceptId: ACCT.ASSET_ACTIVE,
+        bookValue: '900.00',
+        acquisitionCost: '1000.00',
+        automated: true,
+      },
     ]),
     setAutomated: mockFn().mockResolvedValue({ id: 'as1', automated: false }),
     findDepreciation: mockFn().mockResolvedValue({ amount: '16.67' }),
   };
   const liabilityRepo = {
-    findById: mockFn().mockResolvedValue({ id: 'liab1', practiceId: 'p1', code: 'LIAB-1' }),
+    findById: mockFn().mockResolvedValue({
+      id: 'liab1',
+      practiceId: 'p1',
+      code: 'LIAB-1',
+    }),
     listByPractice: mockFn().mockResolvedValue([
-      { id: 'liab1', code: 'LIAB-1', name: 'Préstamo equipo', creditorName: 'Banco X', principalAmount: '1200.00', outstandingAmount: '1200.00', statusConceptId: ACCT.LIABILITY_ACTIVE, automated: true },
+      {
+        id: 'liab1',
+        code: 'LIAB-1',
+        name: 'Préstamo equipo',
+        creditorName: 'Banco X',
+        principalAmount: '1200.00',
+        outstandingAmount: '1200.00',
+        statusConceptId: ACCT.LIABILITY_ACTIVE,
+        automated: true,
+      },
     ]),
     setAutomated: mockFn().mockResolvedValue({ id: 'liab1', automated: false }),
-    createLiability: mockFn((_tx: any, d: any) => ({ id: 'liab1', code: d.code })),
+    createLiability: mockFn((_tx: any, d: any) => ({
+      id: 'liab1',
+      code: d.code,
+    })),
     createSchedule: mockFn((_tx: any, d: any) => ({
       id: `sched-${d.installmentNumber}`,
       installmentNumber: d.installmentNumber,
@@ -85,14 +129,26 @@ function build() {
     logger as any,
   );
 
-  return { service, em, tx, assetService, liabilityService, assetRepo, liabilityRepo, fiscalRepo, practiceTenantLookup };
+  return {
+    service,
+    em,
+    tx,
+    assetService,
+    liabilityService,
+    assetRepo,
+    liabilityRepo,
+    fiscalRepo,
+    practiceTenantLookup,
+  };
 }
 
 describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
   describe('listAssets / listLiabilities', () => {
     it('rechaza si el profesional no tiene vinculación activa con la práctica', async () => {
       const d = build();
-      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue([]);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        [],
+      );
       await expect(d.service.listAssets('p1', actor)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
@@ -102,14 +158,26 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
       const d = build();
       const items = await d.service.listAssets('p1', actor);
       expect(items).toEqual([
-        { id: 'as1', code: 'AST-1', name: 'Silla', statusConceptId: ACCT.ASSET_ACTIVE, bookValue: '900.00', acquisitionCost: '1000.00', automated: true },
+        {
+          id: 'as1',
+          code: 'AST-1',
+          name: 'Silla',
+          statusConceptId: ACCT.ASSET_ACTIVE,
+          bookValue: '900.00',
+          acquisitionCost: '1000.00',
+          automated: true,
+        },
       ]);
     });
 
     it('lista los pasivos de la práctica, ya mapeados a resumen', async () => {
       const d = build();
       const items = await d.service.listLiabilities('p1', actor);
-      expect(items[0]).toMatchObject({ id: 'liab1', code: 'LIAB-1', automated: true });
+      expect(items[0]).toMatchObject({
+        id: 'liab1',
+        code: 'LIAB-1',
+        automated: true,
+      });
     });
   });
 
@@ -134,8 +202,13 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
 
     it('rechaza un activo de una práctica ajena', async () => {
       const d = build();
-      d.assetRepo.findById.mockResolvedValue({ id: 'as1', practiceId: 'otra-practica' });
-      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(['p1']);
+      d.assetRepo.findById.mockResolvedValue({
+        id: 'as1',
+        practiceId: 'otra-practica',
+      });
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['p1'],
+      );
       await expect(
         d.service.setAssetAutomation('as1', { automated: false }, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -143,8 +216,16 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
 
     it('apaga la automatización de un pasivo propio', async () => {
       const d = build();
-      await d.service.setLiabilityAutomation('liab1', { automated: false }, actor);
-      expect(d.liabilityRepo.setAutomated).toHaveBeenCalledWith(expect.anything(), 'liab1', false);
+      await d.service.setLiabilityAutomation(
+        'liab1',
+        { automated: false },
+        actor,
+      );
+      expect(d.liabilityRepo.setAutomated).toHaveBeenCalledWith(
+        expect.anything(),
+        'liab1',
+        false,
+      );
     });
   });
 
@@ -153,7 +234,10 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
       const d = build();
       const res = await d.service.registerAssetProgress(
         'as1',
-        { depreciationExpenseAccountId: 'acc-exp', accumulatedDepreciationAccountId: 'acc-dep' },
+        {
+          depreciationExpenseAccountId: 'acc-exp',
+          accumulatedDepreciationAccountId: 'acc-dep',
+        },
         actor,
       );
       expect(d.assetService.runDepreciation).toHaveBeenCalledWith(
@@ -169,7 +253,10 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
       await expect(
         d.service.registerAssetProgress(
           'as1',
-          { depreciationExpenseAccountId: 'acc-exp', accumulatedDepreciationAccountId: 'acc-dep' },
+          {
+            depreciationExpenseAccountId: 'acc-exp',
+            accumulatedDepreciationAccountId: 'acc-dep',
+          },
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -177,11 +264,17 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
 
     it('rechaza si el activo no tenía depreciación pendiente en el período', async () => {
       const d = build();
-      d.assetService.runDepreciation.mockResolvedValue({ depreciatedAssets: 0, transactionIds: [] });
+      d.assetService.runDepreciation.mockResolvedValue({
+        depreciatedAssets: 0,
+        transactionIds: [],
+      });
       await expect(
         d.service.registerAssetProgress(
           'as1',
-          { depreciationExpenseAccountId: 'acc-exp', accumulatedDepreciationAccountId: 'acc-dep' },
+          {
+            depreciationExpenseAccountId: 'acc-exp',
+            accumulatedDepreciationAccountId: 'acc-dep',
+          },
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -271,7 +364,11 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
         }),
         actor,
       );
-      expect(res).toEqual({ transactionId: 'tx-pay-1', installmentNumber: 1, amount: '112.00' });
+      expect(res).toEqual({
+        transactionId: 'tx-pay-1',
+        installmentNumber: 1,
+        amount: '112.00',
+      });
     });
 
     it('rechaza si el pasivo no tiene cuotas pendientes', async () => {

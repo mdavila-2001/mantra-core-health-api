@@ -16,10 +16,7 @@ describe('el padrón de establecimientos', () => {
 
   /** Cómo se decide que dos nombres son el mismo lugar. */
   function clave(nombre: string): string {
-    const sinTildes = nombre
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .toUpperCase();
+    const sinTildes = nombre.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
     return sinTildes
       .replace(
         /\b(CLINICA|CENTRO|MEDICO|MEDICA|HOSPITAL|INSTITUTO|SRL|SA|LTDA|DE|DEL|LA|EL|LOS|LAS|Y)\b/g,
@@ -30,8 +27,12 @@ describe('el padrón de establecimientos', () => {
   }
 
   it('trae el listado oficial y los consultorios de las redes', () => {
-    const oficiales = facilities.filter((f) => f.naturaleza !== 'RED_ASEGURADORA');
-    const deRedes = facilities.filter((f) => f.naturaleza === 'RED_ASEGURADORA');
+    const oficiales = facilities.filter(
+      (f) => f.naturaleza !== 'RED_ASEGURADORA',
+    );
+    const deRedes = facilities.filter(
+      (f) => f.naturaleza === 'RED_ASEGURADORA',
+    );
 
     expect(oficiales).toHaveLength(523);
     expect(deRedes.length).toBeGreaterThan(100);
@@ -62,7 +63,9 @@ describe('el padrón de establecimientos', () => {
    */
   it('ningún consultorio de red repite un lugar del listado oficial', () => {
     const oficiales = new Set(
-      facilities.filter((f) => f.naturaleza !== 'RED_ASEGURADORA').map((f) => clave(f.nombre)),
+      facilities
+        .filter((f) => f.naturaleza !== 'RED_ASEGURADORA')
+        .map((f) => clave(f.nombre)),
     );
     const repetidos = facilities
       .filter((f) => f.naturaleza === 'RED_ASEGURADORA')

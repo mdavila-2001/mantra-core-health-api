@@ -142,7 +142,11 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
     name: 'Banco Fortaleza',
     sector: 'Banca y finanzas',
   },
-  { code: 'BANCO_GANADERO', name: 'Banco Ganadero', sector: 'Banca y finanzas' },
+  {
+    code: 'BANCO_GANADERO',
+    name: 'Banco Ganadero',
+    sector: 'Banca y finanzas',
+  },
   {
     code: 'BANCO_MERCANTIL_SANTA_CRUZ',
     name: 'Banco Mercantil Santa Cruz (BMSC)',
@@ -215,7 +219,11 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
   { code: 'VIVA', name: 'Viva (Nuevatel)', sector: 'Telecomunicaciones' },
 
   /* --- Hidrocarburos --- */
-  { code: 'PETROBRAS_BOLIVIA', name: 'Petrobras Bolivia', sector: 'Hidrocarburos' },
+  {
+    code: 'PETROBRAS_BOLIVIA',
+    name: 'Petrobras Bolivia',
+    sector: 'Hidrocarburos',
+  },
   { code: 'REPSOL_BOLIVIA', name: 'Repsol Bolivia', sector: 'Hidrocarburos' },
   {
     code: 'TOTALENERGIES_BOLIVIA',
@@ -374,7 +382,11 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
 
   /* --- Comercio y retail --- */
   { code: 'CASA_IDEAL', name: 'Casa Ideal', sector: 'Comercio y retail' },
-  { code: 'FARMACIAS_CHAVEZ', name: 'Farmacias Chávez', sector: 'Comercio y retail' },
+  {
+    code: 'FARMACIAS_CHAVEZ',
+    name: 'Farmacias Chávez',
+    sector: 'Comercio y retail',
+  },
   { code: 'FARMACORP', name: 'Farmacorp', sector: 'Comercio y retail' },
   { code: 'FIDALGA', name: 'Fidalga', sector: 'Comercio y retail' },
   { code: 'HIPERMAXI', name: 'Hipermaxi', sector: 'Comercio y retail' },
@@ -537,8 +549,16 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
   { code: 'ADUANA_NACIONAL', name: 'Aduana Nacional', sector: 'Estado' },
   { code: 'AGETIC', name: 'AGETIC', sector: 'Estado' },
   { code: 'ASFI', name: 'ASFI', sector: 'Estado' },
-  { code: 'ATT', name: 'ATT (Autoridad de Telecomunicaciones y Transportes)', sector: 'Estado' },
-  { code: 'CONTRALORIA', name: 'Contraloría General del Estado', sector: 'Estado' },
+  {
+    code: 'ATT',
+    name: 'ATT (Autoridad de Telecomunicaciones y Transportes)',
+    sector: 'Estado',
+  },
+  {
+    code: 'CONTRALORIA',
+    name: 'Contraloría General del Estado',
+    sector: 'Estado',
+  },
   { code: 'EPSAS', name: 'EPSAS', sector: 'Estado' },
   {
     code: 'FUERZAS_ARMADAS',
@@ -555,8 +575,16 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
     name: 'Gobierno Autónomo Municipal (Alcaldía)',
     sector: 'Estado',
   },
-  { code: 'IMPUESTOS_NACIONALES', name: 'Impuestos Nacionales (SIN)', sector: 'Estado' },
-  { code: 'INE', name: 'INE (Instituto Nacional de Estadística)', sector: 'Estado' },
+  {
+    code: 'IMPUESTOS_NACIONALES',
+    name: 'Impuestos Nacionales (SIN)',
+    sector: 'Estado',
+  },
+  {
+    code: 'INE',
+    name: 'INE (Instituto Nacional de Estadística)',
+    sector: 'Estado',
+  },
   { code: 'MINISTERIO_PUBLICO', name: 'Ministerio Público', sector: 'Estado' },
   { code: 'ORGANO_JUDICIAL', name: 'Órgano Judicial', sector: 'Estado' },
   { code: 'POLICIA_BOLIVIANA', name: 'Policía Boliviana', sector: 'Estado' },

@@ -26,7 +26,9 @@ function buildRepo() {
  * sembrado: el esquema real de `terminology.catalog_concepts` (código
  * `SIGLA-NOMBRE`), no el del catálogo estático retirado.
  */
-function buildConcepts(municipios: Record<string, { code: string; display: string }> = {}) {
+function buildConcepts(
+  municipios: Record<string, { code: string; display: string }> = {},
+) {
   return {
     findById: mockFn((_tx: any, id: string) => municipios[id] ?? null),
   } as any;

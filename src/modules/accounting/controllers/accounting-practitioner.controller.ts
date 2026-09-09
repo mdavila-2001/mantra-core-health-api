@@ -191,6 +191,10 @@ export class AccountingPractitionerController {
     @Body() dto: RegisterLiabilityProgressDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ProgressRegisteredResponseDto> {
-    return this.practitionerAccounting.registerLiabilityProgress(id, dto, actor);
+    return this.practitionerAccounting.registerLiabilityProgress(
+      id,
+      dto,
+      actor,
+    );
   }
 }

@@ -110,7 +110,8 @@ export class AccountingLedgerController {
   @Get('general-ledger')
   @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
   @ApiOperation({
-    summary: 'Libro mayor de una cuenta (movimientos posteados, con saldo corrido)',
+    summary:
+      'Libro mayor de una cuenta (movimientos posteados, con saldo corrido)',
   })
   generalLedger(
     @Query() query: GeneralLedgerQueryDto,
@@ -142,7 +143,9 @@ export class AccountingLedgerController {
    */
   @Get('balance-sheet')
   @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
-  @ApiOperation({ summary: 'Balance general de una práctica a una fecha de corte' })
+  @ApiOperation({
+    summary: 'Balance general de una práctica a una fecha de corte',
+  })
   balanceSheet(
     @Query() query: FinancialStatementQueryDto,
     @CurrentUser() actor: AuthenticatedUser,

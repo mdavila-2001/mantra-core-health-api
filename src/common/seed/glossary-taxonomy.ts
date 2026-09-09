@@ -289,7 +289,9 @@ export function glossaryPropertyId(slug: string, propertyCode: string): string {
 export const GLOSSARY_SOURCE_CODE = 'GLOSSARY_CURATED_ES';
 
 /** Id determinista de la fila de `terminology_sources` del catálogo curado. */
-export const glossarySourceId = deterministicId('seed:source:glossary-curated-es');
+export const glossarySourceId = deterministicId(
+  'seed:source:glossary-curated-es',
+);
 
 /** `code_systems.internal_code` del catálogo curado del glosario. */
 export const GLOSSARY_CODE_SYSTEM_INTERNAL_CODE = 'glossary-curated-es';

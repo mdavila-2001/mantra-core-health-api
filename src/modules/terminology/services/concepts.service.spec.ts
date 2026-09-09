@@ -1072,7 +1072,9 @@ describe('ConceptsService', () => {
           { language: 'ES', includeValueSets: true },
         );
 
-        expect(valueSetsRepo.findIncludedConceptIdsByValueSet).not.toHaveBeenCalled();
+        expect(
+          valueSetsRepo.findIncludedConceptIdsByValueSet,
+        ).not.toHaveBeenCalled();
         expect(result.items[0]).not.toHaveProperty('category');
         expect(result.items[0]).not.toHaveProperty('tags');
       });

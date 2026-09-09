@@ -380,12 +380,10 @@ export async function camposObligatoriosDePaciente(ctx: TestContext): Promise<{
   sexAtBirth: string;
   residenceMunicipalityConceptId: string;
 }> {
-  const municipios = await ctx.orm.em
-    .getConnection()
-    .execute<{ id: string }[]>(
-      `select id from terminology.catalog_concepts
+  const municipios = await ctx.orm.em.getConnection().execute<{ id: string }[]>(
+    `select id from terminology.catalog_concepts
         where code like 'geo:bo:municipality:%' order by code limit 1`,
-    );
+  );
 
   return {
     birthDate: '1990-01-01',

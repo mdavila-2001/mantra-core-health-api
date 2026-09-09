@@ -44,8 +44,15 @@ export class LiabilityRepository {
    * @param practiceId - Identificador de practice.
    * @returns Resultado de list by practice conforme al contrato `Promise<Liabilities[]>`.
    */
-  listByPractice(em: EntityManager, practiceId: string): Promise<Liabilities[]> {
-    return em.find(Liabilities, { practiceId }, { orderBy: { createdAt: 'DESC' } });
+  listByPractice(
+    em: EntityManager,
+    practiceId: string,
+  ): Promise<Liabilities[]> {
+    return em.find(
+      Liabilities,
+      { practiceId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
   }
 
   /**

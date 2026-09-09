@@ -292,7 +292,9 @@ export async function replaceResidenceAddress(
         ? undefined
         : data.lines.trim();
   const tieneGps = data.latitude !== undefined && data.longitude !== undefined;
-  const latitude = tieneGps ? data.latitude : numeroDeColumna(vigente?.latitude);
+  const latitude = tieneGps
+    ? data.latitude
+    : numeroDeColumna(vigente?.latitude);
   const longitude = tieneGps
     ? data.longitude
     : numeroDeColumna(vigente?.longitude);

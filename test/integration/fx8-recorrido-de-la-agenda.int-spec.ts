@@ -31,7 +31,12 @@ describe('FX-8 · el recorrido de la agenda, de punta a punta', () => {
   const sufijo = randomUUID().slice(0, 8);
   const PASSWORD = 'S3cret-passw0rd';
 
-  const medico = { email: `fx8-${sufijo}@example.test`, token: '', hpid: '', tenantId: '' };
+  const medico = {
+    email: `fx8-${sufijo}@example.test`,
+    token: '',
+    hpid: '',
+    tenantId: '',
+  };
   let resourceId = '';
   let templateId = '';
 
@@ -138,7 +143,9 @@ describe('FX-8 · el recorrido de la agenda, de punta a punta', () => {
     expect(res.body.items).toHaveLength(5);
     // `error` es el de los bloqueos: una actividad pintada de rojo diría que el
     // rato está cerrado cuando no lo está.
-    expect(res.body.items.map((i: { tone: string }) => i.tone)).not.toContain('error');
+    expect(res.body.items.map((i: { tone: string }) => i.tone)).not.toContain(
+      'error',
+    );
   });
 
   it('4 · mover el horario 20 minutos corre los cupos de verdad', async () => {
@@ -178,7 +185,11 @@ describe('FX-8 · el recorrido de la agenda, de punta a punta', () => {
     await http()
       .post(`/scheduling/resources/${resourceId}/shift-slots`)
       .set(bearer(medico.token))
-      .send({ shiftMinutes: 0, from: lunes.toISOString(), to: finDelLunes.toISOString() })
+      .send({
+        shiftMinutes: 0,
+        from: lunes.toISOString(),
+        to: finDelLunes.toISOString(),
+      })
       .expect(422);
   });
 
@@ -208,9 +219,11 @@ describe('FX-8 · el recorrido de la agenda, de punta a punta', () => {
       )
       .set(bearer(medico.token))
       .expect(200);
-    expect(bloqueos.body.items.some((x: { id: string }) => x.id === res.body.exceptionId)).toBe(
-      true,
-    );
+    expect(
+      bloqueos.body.items.some(
+        (x: { id: string }) => x.id === res.body.exceptionId,
+      ),
+    ).toBe(true);
   });
 
   it('7 · bloquear con motivo catalogado, y el motivo viaja con su etiqueta', async () => {
@@ -232,7 +245,9 @@ describe('FX-8 · el recorrido de la agenda, de punta a punta', () => {
       .set(bearer(medico.token))
       .expect(200);
 
-    const mio = lista.body.items.find((x: { id: string }) => x.id === creado.body.id);
+    const mio = lista.body.items.find(
+      (x: { id: string }) => x.id === creado.body.id,
+    );
     // La etiqueta la manda el servidor: la pantalla no traduce estados.
     expect(mio.reasonLabel).toBe('Vacaciones');
     // Y la descripción es un campo APARTE del motivo, como pidió el original.
@@ -253,7 +268,9 @@ describe('FX-8 · el recorrido de la agenda, de punta a punta', () => {
     const res = await http()
       .patch(`/scheduling/exceptions/${vacaciones.id}`)
       .set(bearer(medico.token))
-      .send({ endAt: new Date(lunes.getTime() + 16 * 3600 * 1000).toISOString() })
+      .send({
+        endAt: new Date(lunes.getTime() + 16 * 3600 * 1000).toISOString(),
+      })
       .expect(200);
 
     // AC-11-7: el mismo id antes y después. Editar no borra y recrea.
@@ -293,7 +310,11 @@ describe('FX-8 · el recorrido de la agenda, de punta a punta', () => {
     await http()
       .post(`/scheduling/resources/${ajeno}/shift-slots`)
       .set(bearer(medico.token))
-      .send({ shiftMinutes: 10, from: lunes.toISOString(), to: finDelLunes.toISOString() })
+      .send({
+        shiftMinutes: 10,
+        from: lunes.toISOString(),
+        to: finDelLunes.toISOString(),
+      })
       .expect(404);
   });
 });

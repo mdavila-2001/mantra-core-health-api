@@ -157,9 +157,7 @@ describe('FX-2 · aprobar el vínculo habilita la agenda multi-sede', () => {
     medico.hpid = alta.body.practitionerProfileId;
     medico.token = await login(medico.email);
     medico.tokenAntesDeAprobar = medico.token;
-    medico.consultorioPropio = (
-      claims(medico.token)['tenants'] as string[]
-    )[0];
+    medico.consultorioPropio = (claims(medico.token)['tenants'] as string[])[0];
   });
 
   afterAll(async () => {

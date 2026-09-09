@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { io, type Socket } from 'socket.io-client';
-import { bootstrapTestApp, bearer, type TestContext,
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
   camposObligatoriosDePaciente,
 } from './harness';
 
@@ -28,7 +31,9 @@ import { bootstrapTestApp, bearer, type TestContext,
 describe('Mensajería en tiempo real — gateway WS (integración)', () => {
   let ctx: TestContext;
   /** Los campos que el alta de paciente exige; salen del arnés. */
-  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
+  let camposDePaciente: Awaited<
+    ReturnType<typeof camposObligatoriosDePaciente>
+  >;
   const http = () => request(ctx.app.getHttpServer());
 
   let doctorToken: string;
