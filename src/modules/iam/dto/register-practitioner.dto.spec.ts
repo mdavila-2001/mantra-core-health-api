@@ -68,6 +68,50 @@ async function propiedadesConError(
   return rutasConError(errores);
 }
 
+/**
+ * El empleador (1.3): mismo par catálogo/texto libre que ya tenía
+ * `occupationConceptId`/`occupationFreeText`, con la misma regla de forma
+ * (uuid o texto de hasta 200 caracteres) — la exclusión mutua la aplica el
+ * servicio, no el DTO.
+ */
+describe('RegisterPractitionerDto · ocupación y empresa (1.3)', () => {
+  it('acepta un empleador del catálogo', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workEmployerConceptId: '36c99f5d-9417-51e8-89d2-4f54138bb323',
+      }),
+    ).toEqual([]);
+  });
+
+  it('acepta un empleador en texto libre', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workEmployerFreeText: 'Consultores Médicos Asociados S.R.L.',
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un empleador que no es un uuid', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workEmployerConceptId: 'employer:bo:BANCO_UNION',
+      }),
+    ).toEqual(['workEmployerConceptId']);
+  });
+
+  it('rechaza un empleador en texto libre demasiado largo', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workEmployerFreeText: 'A'.repeat(201),
+      }),
+    ).toEqual(['workEmployerFreeText']);
+  });
+});
+
 describe('RegisterPractitionerDto · ownSite (P20)', () => {
   it('acepta el alta sin ownSite: el campo es opcional', async () => {
     expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
