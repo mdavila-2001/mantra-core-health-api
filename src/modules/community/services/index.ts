@@ -11,6 +11,7 @@ export * from './community-engagement.service';
 export * from './community-social-read.service';
 export * from './community-timeline-read.service';
 export * from './community-messaging-read.service';
+export * from './community-presence.service';
 export * from './community-groups-read.service';
 export * from './community-polls-read.service';
 export * from './community-reviews-read.service';

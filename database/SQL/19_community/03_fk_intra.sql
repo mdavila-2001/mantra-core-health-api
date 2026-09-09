@@ -183,6 +183,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "community"."conversations"
+        ADD CONSTRAINT "fk_conversations_pinned_message_id" FOREIGN KEY ("pinned_message_id")
+        REFERENCES "community"."direct_messages" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "community"."conversation_participants"
         ADD CONSTRAINT "fk_conversation_participants_conversation_id" FOREIGN KEY ("conversation_id")
         REFERENCES "community"."conversations" ("id");

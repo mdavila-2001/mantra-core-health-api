@@ -40,6 +40,18 @@ function build() {
     assertOwnProfile: mockFn().mockResolvedValue(undefined),
     isBlockedBetween: mockFn().mockResolvedValue(false),
   };
+  // F4.2: la presencia se dobla; por defecto nadie está en línea.
+  const presence = {
+    presenciaDe: mockFn((ids: string[]) =>
+      Promise.resolve(
+        ids.map((profileId) => ({
+          profileId,
+          online: false,
+          lastSeenAt: null,
+        })),
+      ),
+    ),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new CommunityMessagingReadService(
@@ -47,9 +59,72 @@ function build() {
     conversationsRepo as any,
     profilesRepo as any,
     visibility as any,
+    presence as any,
     logger as any,
   );
-  return { service, conversationsRepo, profilesRepo, visibility };
+  return { service, conversationsRepo, profilesRepo, visibility, presence };
+}
+
+/** Una bandeja de tres conversaciones, para las pruebas de F4.3/F4.4. */
+function conTresConversaciones(d: ReturnType<typeof build>) {
+  d.conversationsRepo.listActiveParticipationsOf.mockResolvedValue([
+    {
+      conversationId: 'c-1',
+      lastReadMessageId: 'm-1',
+      isFavorite: true,
+      isPinned: false,
+      archivedAt: null,
+    },
+    {
+      conversationId: 'c-2',
+      lastReadMessageId: 'm-2',
+      isFavorite: false,
+      isPinned: true,
+      archivedAt: null,
+    },
+    {
+      conversationId: 'c-3',
+      lastReadMessageId: 'm-3',
+      isFavorite: false,
+      isPinned: false,
+      archivedAt: new Date('2026-09-01T00:00:00Z'),
+    },
+  ]);
+  // Ya ordenadas por último mensaje, como las devuelve el repositorio.
+  d.conversationsRepo.listConversationsByIds.mockResolvedValue([
+    { id: 'c-1', conversationTypeConceptId: COMM.CONVERSATION_DIRECT },
+    { id: 'c-2', conversationTypeConceptId: COMM.CONVERSATION_DIRECT },
+    {
+      id: 'c-3',
+      conversationTypeConceptId: COMM.CONVERSATION_DIRECT,
+      pinnedMessageId: 'm-pin',
+    },
+  ]);
+  d.conversationsRepo.findParticipants.mockImplementation(
+    (_em: unknown, conversationId: string) =>
+      Promise.resolve([
+        { participantProfileId: 'p-1' },
+        {
+          participantProfileId: `peer-${conversationId}`,
+          lastReadMessageId: `m-${conversationId.slice(-1)}`,
+        },
+      ]),
+  );
+  d.profilesRepo.listByIds.mockResolvedValue([
+    { id: 'peer-c-1', displayName: 'Andrea Peña' },
+    { id: 'peer-c-2', displayName: 'Marisol Quispe' },
+    { id: 'peer-c-3', displayName: 'Ender Rosales' },
+  ]);
+  d.conversationsRepo.findLastMessage.mockImplementation(
+    (_em: unknown, conversationId: string) =>
+      Promise.resolve({
+        id: `m-${conversationId.slice(-1)}`,
+        senderProfileId:
+          conversationId === 'c-1' ? 'p-1' : `peer-${conversationId}`,
+        bodyText: conversationId === 'c-2' ? 'receta lista' : 'hola',
+        contentTypeConceptId: 'ct-text',
+      }),
+  );
 }
 
 describe('CommunityMessagingReadService', () => {
@@ -69,7 +144,9 @@ describe('CommunityMessagingReadService', () => {
       });
       d.conversationsRepo.countUnread.mockResolvedValue(3);
 
-      const res = await d.service.listConversations('p-1', actor, 20);
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
 
       expect(res.items[0].lastMessage?.bodyText).toBe('hola');
       expect(res.items[0].unreadCount).toBe(3);
@@ -91,7 +168,9 @@ describe('CommunityMessagingReadService', () => {
         { id: 'p-2', displayName: 'Andrea Peña', avatarFileId: 'file-9' },
       ]);
 
-      const res = await d.service.listConversations('p-1', actor, 20);
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
 
       expect(res.items[0].peers).toEqual([
         {
@@ -118,7 +197,9 @@ describe('CommunityMessagingReadService', () => {
         { id: 'p-2', displayName: 'Andrea Peña' },
       ]);
 
-      const res = await d.service.listConversations('p-1', actor, 20);
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
 
       expect(res.items[0].peers[0].avatarUrl).toBeNull();
     });
@@ -137,7 +218,7 @@ describe('CommunityMessagingReadService', () => {
         { id: 'c-1', conversationTypeConceptId: 'ct' },
       ]);
 
-      await d.service.listConversations('p-1', actor, 20);
+      await d.service.listConversations('p-1', actor, { limit: 20 });
 
       expect(d.conversationsRepo.countUnread).toHaveBeenCalledWith(
         expect.anything(),
@@ -151,8 +232,185 @@ describe('CommunityMessagingReadService', () => {
       const d = build();
       d.visibility.assertOwnProfile.mockRejectedValue(new Error('prohibido'));
       await expect(
-        d.service.listConversations('p-ajeno', actor, 20),
+        d.service.listConversations('p-ajeno', actor, { limit: 20 }),
       ).rejects.toThrow('prohibido');
+    });
+
+    /* --- F4.3 / F4.4 -------------------------------------------------------- */
+
+    it('las fijadas van primero y cada fila trae lo que el actor marcó', async () => {
+      const d = build();
+      conTresConversaciones(d);
+
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
+
+      expect(res.items.map((item) => item.id)).toEqual(['c-2', 'c-1', 'c-3']);
+      expect(res.items[1]).toMatchObject({
+        id: 'c-1',
+        isFavorite: true,
+        isPinned: false,
+        archivedAt: null,
+      });
+      // La archivada viaja igual, con su fecha: el cliente la separa.
+      expect(res.items[2].archivedAt).toEqual(new Date('2026-09-01T00:00:00Z'));
+      expect(res.items[2].pinnedMessageId).toBe('m-pin');
+      expect(res.nextCursor).toBeNull();
+    });
+
+    it('la vista previa dice de qué tipo era el último mensaje', async () => {
+      const d = build();
+      conTresConversaciones(d);
+      d.conversationsRepo.findLastMessage.mockResolvedValue({
+        id: 'm-9',
+        senderProfileId: 'peer-c-1',
+        bodyText: null,
+        contentTypeConceptId: 'ct-media',
+        attachmentFileId: 'file-1',
+      });
+
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
+
+      expect(res.items[0].lastMessage).toMatchObject({
+        contentTypeConceptId: 'ct-media',
+        attachmentFileId: 'file-1',
+      });
+    });
+
+    it('dice si el otro leyó el último mensaje sólo cuando es propio y directo', async () => {
+      const d = build();
+      conTresConversaciones(d);
+
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
+      const porId = new Map(res.items.map((item) => [item.id, item]));
+
+      // c-1: último propio y el peer tiene lastReadMessageId = m-1 → leído.
+      expect(porId.get('c-1')?.lastMessageReadByPeer).toBe(true);
+      // c-2: último ajeno → no aplica.
+      expect(porId.get('c-2')?.lastMessageReadByPeer).toBeNull();
+    });
+
+    it('recorta por nombre del otro lado o por texto del último mensaje, sin acentos', async () => {
+      const d = build();
+      conTresConversaciones(d);
+
+      const porNombre = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+        q: 'PENA',
+      });
+      expect(porNombre.items.map((item) => item.id)).toEqual(['c-1']);
+
+      const porTexto = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+        q: 'receta',
+      });
+      expect(porTexto.items.map((item) => item.id)).toEqual(['c-2']);
+    });
+
+    it('pagina con cursor dentro del mismo recorte', async () => {
+      const d = build();
+      conTresConversaciones(d);
+
+      const primera = await d.service.listConversations('p-1', actor, {
+        limit: 2,
+      });
+      expect(primera.items.map((item) => item.id)).toEqual(['c-2', 'c-1']);
+      expect(primera.nextCursor).not.toBeNull();
+
+      const segunda = await d.service.listConversations('p-1', actor, {
+        limit: 2,
+        cursor: primera.nextCursor!,
+      });
+      expect(segunda.items.map((item) => item.id)).toEqual(['c-3']);
+      expect(segunda.nextCursor).toBeNull();
+    });
+  });
+
+  describe('conversationPresence (F4.2)', () => {
+    it('pregunta la presencia de los otros, nunca la propia', async () => {
+      const d = build();
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p-1' },
+        { participantProfileId: 'p-2' },
+      ]);
+      d.presence.presenciaDe.mockResolvedValue([
+        { profileId: 'p-2', online: true, lastSeenAt: null },
+      ]);
+
+      const res = await d.service.conversationPresence('c-1', 'p-1', actor);
+
+      expect(d.presence.presenciaDe).toHaveBeenCalledWith(['p-2']);
+      expect(res.peers[0].online).toBe(true);
+    });
+
+    it('404 si no participa', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue(null);
+      await expect(
+        d.service.conversationPresence('c-1', 'p-1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('mensajes eliminados y fijado (F4.5 / F4.6)', () => {
+    it('un mensaje eliminado viaja sin cuerpo ni adjunto, con deletedAt', async () => {
+      const d = build();
+      d.conversationsRepo.listMessagesPage.mockResolvedValue([
+        {
+          id: 'm-1',
+          conversationId: 'c-1',
+          senderProfileId: 'p-2',
+          contentTypeConceptId: 'ct',
+          bodyText: 'esto no debería verse',
+          attachmentFileId: 'file-1',
+          deletedAt: new Date('2026-09-09T10:00:00Z'),
+          sentAt: new Date('2026-09-09T09:00:00Z'),
+        },
+      ]);
+
+      const res = await d.service.listMessages('c-1', 'p-1', actor, {
+        limit: 10,
+      });
+
+      expect(res.items[0]).toMatchObject({
+        id: 'm-1',
+        bodyText: null,
+        attachmentFileId: null,
+        deletedAt: new Date('2026-09-09T10:00:00Z'),
+      });
+    });
+
+    it('la primera página trae el mensaje fijado completo; las siguientes no', async () => {
+      const d = build();
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'c-1',
+        conversationTypeConceptId: 'ct-group',
+        pinnedMessageId: 'm-pin',
+      });
+      d.conversationsRepo.findMessageById.mockResolvedValue({
+        id: 'm-pin',
+        conversationId: 'c-1',
+        senderProfileId: 'p-2',
+        contentTypeConceptId: 'ct',
+        bodyText: 'Turno: martes 10:00',
+      });
+
+      const primera = await d.service.listMessages('c-1', 'p-1', actor, {
+        limit: 10,
+      });
+      expect(primera.pinnedMessage?.bodyText).toBe('Turno: martes 10:00');
+
+      const siguiente = await d.service.listMessages('c-1', 'p-1', actor, {
+        limit: 10,
+        cursor:
+          'eyJzZW50QXQiOiIyMDI2LTA5LTA5VDA5OjAwOjAwLjAwMFoiLCJpZCI6Im0tMSJ9',
+      });
+      expect(siguiente.pinnedMessage).toBeUndefined();
     });
   });
 
