@@ -20,6 +20,14 @@ export interface SlotCapacitySnapshot {
   readonly resourceId: string;
   /** Plazas libres restantes. */
   readonly remainingCapacity: number;
+  /**
+   * Cuándo empieza el turno que se liberó.
+   *
+   * La promoción lo necesita para no avisarle a quien pedía otra fecha: sin
+   * esto, quien espera un turno de octubre queda marcado como cubierto por un
+   * cupo que se libera mañana.
+   */
+  readonly startAt: Date;
 }
 
 /** Candidato de la lista de espera. */
@@ -47,6 +55,16 @@ export interface WaitlistEntryView {
   readonly priority: number;
   readonly statusConceptId: string;
   readonly createdAt: Date;
+  /**
+   * Quién espera, por su nombre.
+   *
+   * **Sólo lo trae la lectura por agenda**, que es la de quien atiende: la
+   * lectura por paciente no lo necesita —el titular ya sabe cómo se llama— y
+   * añadirlo ahí sería mandar un dato de más sin motivo. Se omite, en vez de
+   * llegar vacío, cuando la persona no tiene nombre registrado: un `''` diría
+   * que se llama así.
+   */
+  readonly patientName?: string;
 }
 
 /** Cita y hora de inicio de su slot, para calcular los recordatorios. */
@@ -123,6 +141,41 @@ export interface WaitlistReadPort {
     limit: number,
     context?: ReadContext,
   ): Promise<readonly WaitlistEntryView[]>;
+
+  /**
+   * Quiénes esperan en una agenda — la vista de quien atiende.
+   *
+   * El módulo sólo sabía responder «¿en qué listas está este paciente?», que es
+   * la pregunta del paciente. La del profesional es la contraria, y sin ella la
+   * lista de espera existía sin que su dueño pudiera verla: promovía sola y
+   * avisaba sola, y el médico no tenía forma de saber cuánta gente esperaba su
+   * agenda ni desde cuándo.
+   *
+   * Trae el nombre del paciente porque quien la pide es quien lo va a atender.
+   *
+   * @param resourceId - La agenda.
+   * @param statusConceptIds - Estados a incluir; `undefined` los trae todos.
+   * @param limit - Tope de filas.
+   */
+  findEntriesForResource(
+    resourceId: string,
+    statusConceptIds: readonly string[] | undefined,
+    limit: number,
+    context?: ReadContext,
+  ): Promise<readonly WaitlistEntryView[]>;
+
+  /**
+   * El perfil profesional detrás de una agenda, o `null` si no cuelga de uno.
+   *
+   * Es lo que permite comprobar que quien pide la lista de espera de una agenda
+   * atiende en ella. Vive en el puerto y no en un `EntityManager` inyectado
+   * porque este servicio ya no conoce entidades (§47, fase 5): traerlo de
+   * vuelta para una comprobación de permiso desharía la migración.
+   */
+  findResourcePractitioner(
+    resourceId: string,
+    context?: ReadContext,
+  ): Promise<string | null>;
 }
 
 /**
@@ -145,10 +198,23 @@ export interface WaitlistWritePort {
     context: WriteContext,
   ): Promise<SlotCapacitySnapshot | null>;
 
-  /** Candidatos activos de un recurso, por prioridad y antigüedad. */
+  /**
+   * Candidatos activos de un recurso **que querían ese momento**, por prioridad
+   * y antigüedad.
+   *
+   * `slotStartAt` no es un adorno: `waitlist_entries` guarda `desired_from` y
+   * `desired_to` desde siempre, y hasta que este parámetro existió nadie los
+   * miraba. La consecuencia era doble y silenciosa: el que esperaba para
+   * octubre recibía el aviso de un turno de mañana, y su entrada quedaba
+   * marcada como cubierta —así que perdía el lugar sin haber conseguido nada—.
+   *
+   * Una entrada sin ventana declarada entra siempre: no haber acotado fechas es
+   * «cualquiera me sirve», no «ninguna».
+   */
   findActiveCandidates(
     resourceId: string,
     statusConceptId: string,
+    slotStartAt: Date,
     limit: number,
     context: WriteContext,
   ): Promise<WaitlistCandidateSnapshot[]>;

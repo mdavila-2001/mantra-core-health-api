@@ -77,6 +77,8 @@ export interface WaitlistEntrySnapshot {
   readonly priority: number;
   readonly statusConceptId: string;
   readonly createdAt: Date;
+  /** Quién espera. Sólo la lectura por agenda lo resuelve. */
+  readonly patientName?: string;
 }
 
 /**
@@ -378,6 +380,90 @@ export class SchedulingNoticeRepository {
       });
     }
     return snapshots;
+  }
+
+  /**
+   * Quiénes esperan en una agenda, del más prioritario al más antiguo.
+   *
+   * El orden es el **mismo que usa la promoción** (`findWaitlistCandidates`):
+   * prioridad descendente y después antigüedad. Una lista que se lee en un
+   * orden y se promueve en otro haría que el médico viera primero a alguien que
+   * no va a ser el primero en recibir el aviso.
+   *
+   * Resuelve el nombre del paciente en **una** consulta para todas las filas,
+   * no una por fila: la lista de espera de una agenda ocupada tiene decenas de
+   * entradas y el nombre sale todo de `persons`.
+   */
+  async findWaitlistByResource(
+    em: EntityManager,
+    resourceId: string,
+    statusConceptIds: readonly string[] | undefined,
+    limit: number,
+  ): Promise<readonly WaitlistEntrySnapshot[]> {
+    const rows = await em.find(
+      WaitlistEntries,
+      {
+        resourceId,
+        ...(statusConceptIds === undefined || statusConceptIds.length === 0
+          ? {}
+          : { statusConceptId: { $in: [...statusConceptIds] } }),
+      },
+      { orderBy: { priority: 'DESC', createdAt: 'ASC' }, limit },
+    );
+    if (rows.length === 0) return [];
+
+    // El nombre sale de `persons` por el mismo camino que en la agenda de la
+    // organización: `patient_profiles.profile_id` referencia a `persons(id)`.
+    const personas = await em.find(Persons, {
+      id: { $in: [...new Set(rows.map((row) => row.patientProfileId))] },
+    });
+    const nombrePorPersona = new Map(
+      personas
+        .filter((persona) => (persona.displayName ?? '') !== '')
+        .map((persona) => [persona.id, persona.displayName as string]),
+    );
+
+    // Una sola agenda: su rótulo se resuelve una vez, no una por fila.
+    const resourceLabel = await this.describeResource(em, resourceId);
+
+    return rows.map((row) => {
+      const patientName = nombrePorPersona.get(row.patientProfileId);
+      return {
+        id: row.id,
+        tenantId: row.tenantId,
+        patientProfileId: row.patientProfileId,
+        ...(row.resourceId === undefined ? {} : { resourceId: row.resourceId }),
+        resourceLabel,
+        ...(row.desiredFrom === undefined
+          ? {}
+          : { desiredFrom: row.desiredFrom }),
+        ...(row.desiredTo === undefined ? {} : { desiredTo: row.desiredTo }),
+        priority: row.priority,
+        statusConceptId: row.statusConceptId,
+        createdAt: row.createdAt,
+        // Se OMITE cuando la persona no tiene nombre registrado: mandar `''`
+        // diría que se llama así.
+        ...(patientName === undefined ? {} : { patientName }),
+      };
+    });
+  }
+
+  /**
+   * El perfil profesional detrás de una agenda, o `null`.
+   *
+   * `null` tiene dos causas que acá son la misma: el recurso no existe, o
+   * existe y no cuelga de un profesional —una sala, un equipo—. En los dos
+   * casos la respuesta a «¿es tu agenda?» es que no.
+   */
+  async findResourcePractitionerProfileId(
+    em: EntityManager,
+    resourceId: string,
+  ): Promise<string | null> {
+    const recurso = await em.findOne(SchedulableResources, { id: resourceId });
+    if (!recurso) return null;
+    return TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType)
+      ? recurso.resourceRefId
+      : null;
   }
 
   /**

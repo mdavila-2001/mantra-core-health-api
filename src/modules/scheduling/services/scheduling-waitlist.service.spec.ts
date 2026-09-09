@@ -14,6 +14,15 @@ import { CONCEPTS } from '../../../common';
 const SLOT_ID = '11111111-1111-1111-1111-111111111111';
 
 /**
+ * Cuándo empieza el cupo que se libera.
+ *
+ * Deja de ser un detalle desde que la promoción compara la ventana deseada del
+ * candidato contra la hora del turno: un doble sin `startAt` haría pasar la
+ * prueba con `undefined` viajando hasta la consulta.
+ */
+const INICIO_DEL_CUPO = new Date('2026-10-15T14:00:00.000Z');
+
+/**
  * Construye el sistema bajo prueba con dependencias controladas.
  *
  * Tras la migración a puertos, los dobles ya no imitan al `EntityManager` sino
@@ -33,6 +42,10 @@ function build() {
   const reader = {
     findSlotsWithActiveCandidates: mockFn(),
     findEntriesForPatient: mockFn().mockResolvedValue([]),
+    findEntriesForResource: mockFn().mockResolvedValue([]),
+    // Por omisión la agenda es de otro: así, una prueba que olvide declarar de
+    // quién es falla con el 403 en vez de pasar por accidente.
+    findResourcePractitioner: mockFn().mockResolvedValue('otro-profesional'),
   };
   const writer = {
     enroll: mockFn(),
@@ -110,6 +123,7 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 3,
+        startAt: INICIO_DEL_CUPO,
       });
       d.writer.findActiveCandidates.mockResolvedValue([
         { id: 'c1', priority: 5 },
@@ -133,6 +147,7 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 0,
+        startAt: INICIO_DEL_CUPO,
       });
 
       const res = await d.service.promoteWaitlist(SLOT_ID);
@@ -147,6 +162,7 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 2,
+        startAt: INICIO_DEL_CUPO,
       });
       d.writer.findActiveCandidates.mockResolvedValue([]);
       d.writer.markCandidatesFulfilled.mockResolvedValue(0);
@@ -156,9 +172,40 @@ describe('SchedulingWaitlistService', () => {
       expect(d.writer.findActiveCandidates).toHaveBeenCalledWith(
         'res-1',
         CONCEPTS.WAITLIST_ACTIVE,
+        INICIO_DEL_CUPO,
         2,
         { transaction: d.transaction },
       );
+    });
+
+    /**
+     * El defecto que este parámetro corrige.
+     *
+     * `waitlist_entries` guarda `desired_from` y `desired_to` desde que existe,
+     * y la promoción no los miraba: acotaba por recurso y estado y nada más.
+     * El que esperaba un turno para octubre recibía el aviso de un cupo que se
+     * liberaba mañana **y su entrada quedaba marcada como cubierta**, así que
+     * perdía el lugar sin haber conseguido la cita.
+     *
+     * La prueba no puede mirar el `WHERE` —eso vive en el repositorio— pero sí
+     * que la hora del cupo llegue hasta el puerto: sin ese dato, la consulta no
+     * puede filtrar por más que quiera.
+     */
+    it('le pasa al puerto la hora del cupo, que es lo que acota a quién le sirve', async () => {
+      const d = build();
+      d.writer.findSlotCapacity.mockResolvedValue({
+        id: SLOT_ID,
+        resourceId: 'res-1',
+        remainingCapacity: 1,
+        startAt: INICIO_DEL_CUPO,
+      });
+      d.writer.findActiveCandidates.mockResolvedValue([]);
+      d.writer.markCandidatesFulfilled.mockResolvedValue(0);
+
+      await d.service.promoteWaitlist(SLOT_ID);
+
+      const [, , horaDelCupo] = d.writer.findActiveCandidates.mock.calls[0];
+      expect(horaDelCupo).toEqual(INICIO_DEL_CUPO);
     });
 
     /* P8 · el cupo liberado deja de ser un dato interno --------------------- */
@@ -169,6 +216,7 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 3,
+        startAt: INICIO_DEL_CUPO,
       });
       d.writer.findActiveCandidates.mockResolvedValue([
         { id: 'c1', priority: 5 },
@@ -192,6 +240,7 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 0,
+        startAt: INICIO_DEL_CUPO,
       });
 
       await d.service.promoteWaitlist(SLOT_ID);
@@ -318,10 +367,20 @@ describe('SchedulingWaitlistService', () => {
   });
 
   describe('listForPatient (UC-41-11, lectura — P8)', () => {
+    /** El titular de la lista: mira la suya. */
+    const titular = {
+      id: 'user-1',
+      roles: [] as string[],
+      patientProfileId: 'paciente-1',
+    } as any;
+
     it('por omisión trae sólo las esperas activas', async () => {
       const d = build();
 
-      await d.service.listForPatient({ patientProfileId: 'paciente-1' });
+      await d.service.listForPatient(
+        { patientProfileId: 'paciente-1' },
+        titular,
+      );
 
       expect(d.reader.findEntriesForPatient).toHaveBeenCalledWith(
         'paciente-1',
@@ -333,11 +392,10 @@ describe('SchedulingWaitlistService', () => {
     it('con includeClosed las trae todas', async () => {
       const d = build();
 
-      await d.service.listForPatient({
-        patientProfileId: 'paciente-1',
-        includeClosed: 'true',
-        limit: 10,
-      });
+      await d.service.listForPatient(
+        { patientProfileId: 'paciente-1', includeClosed: 'true', limit: 10 },
+        titular,
+      );
 
       expect(d.reader.findEntriesForPatient).toHaveBeenCalledWith(
         'paciente-1',
@@ -361,13 +419,134 @@ describe('SchedulingWaitlistService', () => {
         },
       ]);
 
-      const res = await d.service.listForPatient({
-        patientProfileId: 'paciente-1',
-      });
+      const res = await d.service.listForPatient(
+        { patientProfileId: 'paciente-1' },
+        titular,
+      );
 
       expect(res.items).toHaveLength(1);
       expect(res.items[0].resourceLabel).toBe('Dra. Rivas');
       expect(res.items[0].statusConceptId).toBe(CONCEPTS.WAITLIST_ACTIVE);
+    });
+
+    /**
+     * El IDOR que esta lectura tenía abierto.
+     *
+     * El endpoint recibía `patientProfileId` por query, admitía el rol
+     * `PATIENT` y no miraba de quién era el perfil: cambiando un uuid en la URL
+     * cualquiera leía con qué profesional espera otra persona y para qué
+     * fechas. La comprobación vive en el servidor porque es la única que no se
+     * saltea con `curl`.
+     */
+    it('un paciente no puede leer la lista de espera de otro', async () => {
+      const d = build();
+      const otro = {
+        id: 'user-2',
+        roles: [],
+        patientProfileId: 'paciente-2',
+      } as any;
+
+      await expect(
+        d.service.listForPatient({ patientProfileId: 'paciente-1' }, otro),
+      ).rejects.toThrow(/titular/i);
+
+      expect(d.reader.findEntriesForPatient).not.toHaveBeenCalled();
+    });
+
+    it('el personal de agenda sí puede leer la de cualquiera', async () => {
+      // Es su trabajo: quien atiende el mostrador reacomoda turnos ajenos.
+      const d = build();
+      const agente = {
+        id: 'user-3',
+        roles: ['SCHEDULING_AGENT'],
+      } as any;
+
+      await d.service.listForPatient(
+        { patientProfileId: 'paciente-1' },
+        agente,
+      );
+
+      expect(d.reader.findEntriesForPatient).toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * La pregunta del profesional, que el módulo no sabía responder: la lista de
+   * espera promovía sola y avisaba sola, y el dueño de la agenda no tenía forma
+   * de ver la cola.
+   */
+  describe('listForResource — quiénes esperan mi agenda (P8)', () => {
+    /** La profesional que atiende en `res-1`. */
+    const suya = {
+      id: 'user-9',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'prof-1',
+    } as any;
+
+    it('trae la cola de la agenda con el nombre de quien espera', async () => {
+      const d = build();
+      d.reader.findResourcePractitioner.mockResolvedValue('prof-1');
+      d.reader.findEntriesForResource.mockResolvedValue([
+        {
+          id: 'entry-1',
+          tenantId: 'tenant-1',
+          patientProfileId: 'paciente-1',
+          resourceId: 'res-1',
+          resourceLabel: 'Dra. Rivas',
+          priority: 0,
+          statusConceptId: CONCEPTS.WAITLIST_ACTIVE,
+          createdAt: new Date('2026-08-18T10:00:00.000Z'),
+          patientName: 'Ana Paz',
+        },
+      ]);
+
+      const res = await d.service.listForResource('res-1', {}, suya);
+
+      expect(res.items[0].patientName).toBe('Ana Paz');
+      expect(d.reader.findEntriesForResource).toHaveBeenCalledWith(
+        'res-1',
+        [CONCEPTS.WAITLIST_ACTIVE],
+        50,
+      );
+    });
+
+    it('un profesional no puede ver quién espera la agenda de otro', async () => {
+      const d = build();
+      d.reader.findResourcePractitioner.mockResolvedValue('prof-2');
+
+      await expect(
+        d.service.listForResource('res-1', {}, suya),
+      ).rejects.toThrow(/otro profesional/i);
+
+      expect(d.reader.findEntriesForResource).not.toHaveBeenCalled();
+    });
+
+    it('una agenda que no cuelga de un profesional no es de nadie', async () => {
+      // Una sala o un equipo: `findResourcePractitioner` devuelve `null` y la
+      // respuesta a «¿es tu agenda?» es que no, para todos menos el personal.
+      const d = build();
+      d.reader.findResourcePractitioner.mockResolvedValue(null);
+
+      await expect(
+        d.service.listForResource('res-1', {}, suya),
+      ).rejects.toThrow(/otro profesional/i);
+    });
+
+    it('con includeClosed trae también las cubiertas', async () => {
+      const d = build();
+      d.reader.findResourcePractitioner.mockResolvedValue('prof-1');
+
+      await d.service.listForResource(
+        'res-1',
+        { includeClosed: 'true', limit: 10 },
+        suya,
+      );
+
+      expect(d.reader.findEntriesForResource).toHaveBeenCalledWith(
+        'res-1',
+        undefined,
+        10,
+      );
     });
   });
 });

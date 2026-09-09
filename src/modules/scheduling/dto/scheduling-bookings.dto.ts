@@ -878,6 +878,44 @@ export class WaitlistEntryItemDto {
 
   @ApiProperty({ format: 'date-time' })
   createdAt!: Date;
+
+  /**
+   * Quién espera, por su nombre.
+   *
+   * Sólo viaja en `GET /scheduling/resources/{id}/waitlist` —la lectura de
+   * quien atiende esa agenda—. En la lectura por paciente se omite: el titular
+   * ya sabe cómo se llama, y mandarlo sería exponer un dato sin motivo.
+   */
+  @ApiPropertyOptional({ description: 'Nombre del paciente que espera' })
+  patientName?: string;
+}
+
+/**
+ * Query de `GET /scheduling/resources/{id}/waitlist`.
+ *
+ * No lleva `patientProfileId`: la agenda viaja en la ruta y el sujeto de la
+ * lectura son **todos** los que esperan en ella. Filtrar además por paciente
+ * sería otra pregunta, y la responde el endpoint del paciente.
+ */
+export class ListResourceWaitlistQueryDto {
+  /**
+   * `true` para incluir también las entradas ya cubiertas o canceladas.
+   */
+  @ApiPropertyOptional({
+    description: 'Incluye las entradas ya cubiertas (por omisión, no)',
+  })
+  @IsOptional()
+  @IsString()
+  includeClosed?: string;
+
+  /**
+   * Tope de filas.
+   */
+  @ApiPropertyOptional({ default: 50 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  limit?: number;
 }
 
 /** Respuesta de `GET /scheduling/waitlist`. */

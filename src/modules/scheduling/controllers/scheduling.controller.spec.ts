@@ -52,14 +52,19 @@ describe('SchedulingController', () => {
   it('expone la lectura de la lista de espera de un paciente (P8)', async () => {
     const d = build();
     d.waitlistService.listForPatient.mockResolvedValue({ items: [] });
+    // El actor viaja hasta el servicio desde que la lectura comprueba de quién
+    // es el perfil: sin él, cualquiera leía la lista de espera de cualquiera.
+    const actor = { id: 'user-1', roles: [], patientProfileId: 'paciente-1' };
 
-    const res = await d.controller.listWaitlist({
-      patientProfileId: 'paciente-1',
-    } as any);
+    const res = await d.controller.listWaitlist(
+      { patientProfileId: 'paciente-1' } as any,
+      actor as any,
+    );
 
-    expect(d.waitlistService.listForPatient).toHaveBeenCalledWith({
-      patientProfileId: 'paciente-1',
-    });
+    expect(d.waitlistService.listForPatient).toHaveBeenCalledWith(
+      { patientProfileId: 'paciente-1' },
+      actor,
+    );
     expect(res).toEqual({ items: [] });
   });
 

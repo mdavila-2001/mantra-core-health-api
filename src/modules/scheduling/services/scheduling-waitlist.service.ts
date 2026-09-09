@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
@@ -21,6 +21,7 @@ import {
   CreateWaitlistEntryDto,
   WaitlistEntryResponseDto,
   ListWaitlistQueryDto,
+  ListResourceWaitlistQueryDto,
   ListWaitlistResponseDto,
   ScheduleRemindersDto,
   ScheduleRemindersResponseDto,
@@ -33,6 +34,20 @@ const DEFAULT_PRIORITY = 0;
 
 /** Tope por omisión de la lectura de la lista de espera de un paciente. */
 const DEFAULT_LIST_LIMIT = 50;
+
+/**
+ * Roles que operan cualquier agenda, no sólo la propia.
+ *
+ * Los mismos tres que `SchedulingDelayService`: quien puede avisar la demora de
+ * una agenda ajena puede ver quién la espera. Repetir la lista en vez de
+ * compartirla es deliberado por ahora — son dos servicios y una constante de
+ * cuatro líneas—, pero si aparece un tercero conviene subirla al módulo.
+ */
+const ROLES_DE_AGENDA: readonly string[] = [
+  'SCHEDULING_ADMIN',
+  'SCHEDULING_AGENT',
+  'SUPERADMIN',
+];
 
 /**
  * Lista de espera y recordatorios de cita (UC-41-11/12/13/14).
@@ -110,7 +125,10 @@ export class SchedulingWaitlistService {
    */
   async listForPatient(
     query: ListWaitlistQueryDto,
+    actor: AuthenticatedUser,
   ): Promise<ListWaitlistResponseDto> {
+    this.assertPuedeVerAlPaciente(query.patientProfileId, actor);
+
     const estados =
       query.includeClosed === 'true' ? undefined : [CONCEPTS.WAITLIST_ACTIVE];
 
@@ -120,23 +138,126 @@ export class SchedulingWaitlistService {
       query.limit ?? DEFAULT_LIST_LIMIT,
     );
 
+    return { items: items.map((item) => this.aItem(item)) };
+  }
+
+  /**
+   * Quiénes esperan en una agenda — la vista de quien atiende (P8).
+   *
+   * ## Por qué es otro endpoint y no un filtro del anterior
+   *
+   * Porque son dos preguntas con dos sujetos y dos permisos. «¿En qué listas
+   * estoy?» la hace el paciente sobre sí mismo; «¿quién espera mi agenda?» la
+   * hace el profesional sobre su recurso. Meter las dos en una consulta con un
+   * parámetro opcional habría dejado una bandera decidiendo **qué se
+   * autoriza**, que es exactamente donde no debe vivir una bandera.
+   *
+   * ## Por qué el orden importa
+   *
+   * Es el mismo que usa la promoción: prioridad y después antigüedad. El médico
+   * tiene que ver la lista en el orden en que se van a repartir los cupos, no
+   * en el orden en que se anotaron.
+   */
+  async listForResource(
+    resourceId: string,
+    query: ListResourceWaitlistQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<ListWaitlistResponseDto> {
+    await this.assertOperaLaAgenda(resourceId, actor);
+
+    const estados =
+      query.includeClosed === 'true' ? undefined : [CONCEPTS.WAITLIST_ACTIVE];
+
+    const items = await this.reader.findEntriesForResource(
+      resourceId,
+      estados,
+      query.limit ?? DEFAULT_LIST_LIMIT,
+    );
+
+    return { items: items.map((item) => this.aItem(item)) };
+  }
+
+  /**
+   * Una entrada del puerto, tal como sale por la API.
+   *
+   * Los opcionales se **omiten** en vez de viajar como `undefined`: el contrato
+   * distingue «no lo declaró» de «no me lo dijeron», y las dos lecturas de la
+   * lista de espera comparten esta forma.
+   */
+  private aItem(
+    item: Awaited<
+      ReturnType<WaitlistReadPort['findEntriesForPatient']>
+    >[number],
+  ) {
     return {
-      items: items.map((item) => ({
-        id: item.id,
-        patientProfileId: item.patientProfileId,
-        ...(item.resourceId === undefined
-          ? {}
-          : { resourceId: item.resourceId }),
-        resourceLabel: item.resourceLabel,
-        ...(item.desiredFrom === undefined
-          ? {}
-          : { desiredFrom: item.desiredFrom }),
-        ...(item.desiredTo === undefined ? {} : { desiredTo: item.desiredTo }),
-        priority: item.priority,
-        statusConceptId: item.statusConceptId,
-        createdAt: item.createdAt,
-      })),
+      id: item.id,
+      patientProfileId: item.patientProfileId,
+      ...(item.resourceId === undefined ? {} : { resourceId: item.resourceId }),
+      resourceLabel: item.resourceLabel,
+      ...(item.desiredFrom === undefined
+        ? {}
+        : { desiredFrom: item.desiredFrom }),
+      ...(item.desiredTo === undefined ? {} : { desiredTo: item.desiredTo }),
+      priority: item.priority,
+      statusConceptId: item.statusConceptId,
+      createdAt: item.createdAt,
+      ...(item.patientName === undefined
+        ? {}
+        : { patientName: item.patientName }),
     };
+  }
+
+  /**
+   * Comprueba que quien pregunta puede ver la lista de espera de ese paciente.
+   *
+   * ## El agujero que cierra
+   *
+   * El endpoint recibía `patientProfileId` por query, admitía el rol `PATIENT`
+   * y **no miraba de quién era el perfil**: cualquier paciente podía leer las
+   * esperas de cualquier otro cambiando un uuid en la URL, y con ellas con qué
+   * profesional espera y para qué fechas. Es un IDOR sobre dato de salud.
+   *
+   * El personal de agenda sigue viendo cualquiera —es su trabajo—; el resto,
+   * sólo lo suyo. Un profesional que quiera saber quién espera **su** agenda no
+   * pasa por acá: para eso está `listForResource`, que autoriza por el recurso.
+   */
+  private assertPuedeVerAlPaciente(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): void {
+    if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return;
+    if (actor.patientProfileId === patientProfileId) return;
+
+    throw new ForbiddenException(
+      'Sólo el titular y el personal de agenda pueden ver esta lista de espera.',
+    );
+  }
+
+  /**
+   * Comprueba que quien pregunta atiende en esa agenda.
+   *
+   * Misma regla que la demora (`SchedulingDelayService.assertOperaLaAgenda`) y
+   * por el mismo motivo: la lista de espera de una agenda dice quién quiere
+   * turno con **ese** profesional, y eso lo ve quien atiende ahí.
+   */
+  private async assertOperaLaAgenda(
+    resourceId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return;
+
+    const profesional = await this.reader.findResourcePractitioner(resourceId);
+    if (
+      profesional !== null &&
+      actor.practitionerProfileId !== undefined &&
+      profesional === actor.practitionerProfileId
+    ) {
+      return;
+    }
+
+    throw new ForbiddenException(
+      'Esta agenda es de otro profesional: sólo ve quién la espera quien atiende en ella.',
+    );
   }
 
   /**
@@ -162,9 +283,12 @@ export class SchedulingWaitlistService {
           return { processed: 0, promotedIds: [] as string[] };
         }
 
+        // La hora del cupo decide a quién le sirve: acotar sólo por recurso
+        // avisaba a quien pedía otro mes y le consumía la entrada.
         const candidates = await this.writer.findActiveCandidates(
           slot.resourceId,
           CONCEPTS.WAITLIST_ACTIVE,
+          slot.startAt,
           Math.min(limit, slot.remainingCapacity),
           context,
         );

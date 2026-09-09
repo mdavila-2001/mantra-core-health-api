@@ -1160,15 +1160,40 @@ export class SchedulingBookingsRepository {
    * Candidatos de la lista de espera para un slot liberado, por prioridad y
    * antigüedad: a igual prioridad, primero quien esperaba hace más tiempo.
    */
+  /**
+   * Candidatos activos de un recurso cuya ventana deseada contiene el turno.
+   *
+   * `desired_from` y `desired_to` son `timestamptz` —no fechas sueltas—, así
+   * que comparar contra el `start_at` del cupo es exacto y no hay que decidir
+   * en qué zona empieza el día.
+   *
+   * **Una ventana sin declarar no excluye.** Los dos extremos son `nullable`, y
+   * un nulo significa «por ese lado no puse límite»: anotarse sin decir cuándo
+   * es decir «cualquier turno me sirve». Filtrar con un `$lte` a secas dejaría
+   * fuera justo a quien no puso condiciones, que es el caso más frecuente.
+   */
   findWaitlistCandidates(
     em: EntityManager,
     resourceId: string,
     activeStatusConceptId: string,
+    slotStartAt: Date,
     limit: number,
   ): Promise<WaitlistEntries[]> {
     return em.find(
       WaitlistEntries,
-      { resourceId, statusConceptId: activeStatusConceptId },
+      {
+        resourceId,
+        statusConceptId: activeStatusConceptId,
+        $and: [
+          {
+            $or: [
+              { desiredFrom: null },
+              { desiredFrom: { $lte: slotStartAt } },
+            ],
+          },
+          { $or: [{ desiredTo: null }, { desiredTo: { $gte: slotStartAt } }] },
+        ],
+      },
       { orderBy: { priority: 'DESC', createdAt: 'ASC' }, limit },
     );
   }

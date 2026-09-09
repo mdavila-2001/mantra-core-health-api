@@ -72,6 +72,37 @@ export class PostgresWaitlistAdapter
     );
   }
 
+  findEntriesForResource(
+    resourceId: string,
+    statusConceptIds: readonly string[] | undefined,
+    limit: number,
+    context: ReadContext = {},
+  ): Promise<readonly WaitlistEntryView[]> {
+    return this.session.read(
+      'waitlist.findEntriesForResource',
+      (em) =>
+        this.noticeRepository.findWaitlistByResource(
+          em,
+          resourceId,
+          statusConceptIds,
+          limit,
+        ),
+      context,
+    );
+  }
+
+  findResourcePractitioner(
+    resourceId: string,
+    context: ReadContext = {},
+  ): Promise<string | null> {
+    return this.session.read(
+      'waitlist.findResourcePractitioner',
+      (em) =>
+        this.noticeRepository.findResourcePractitionerProfileId(em, resourceId),
+      context,
+    );
+  }
+
   findEntriesForPatient(
     patientProfileId: string,
     statusConceptIds: readonly string[] | undefined,
@@ -133,6 +164,7 @@ export class PostgresWaitlistAdapter
               id: slot.id,
               resourceId: slot.resourceId,
               remainingCapacity: slot.remainingCapacity,
+              startAt: slot.startAt,
             }
           : null;
       },
@@ -143,6 +175,7 @@ export class PostgresWaitlistAdapter
   async findActiveCandidates(
     resourceId: string,
     statusConceptId: string,
+    slotStartAt: Date,
     limit: number,
     context: WriteContext,
   ): Promise<WaitlistCandidateSnapshot[]> {
@@ -153,6 +186,7 @@ export class PostgresWaitlistAdapter
           em,
           resourceId,
           statusConceptId,
+          slotStartAt,
           limit,
         );
         return candidates.map((candidate) => ({

@@ -14,6 +14,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -64,6 +65,7 @@ import {
   WaitlistEntryResponseDto,
   ResourceAgendaResponseDto,
   ListWaitlistQueryDto,
+  ListResourceWaitlistQueryDto,
   ListWaitlistResponseDto,
   DelayResourceDto,
   DelayNoticeResponseDto,
@@ -643,8 +645,41 @@ export class SchedulingController {
   @ApiQuery({ name: 'limit', required: false })
   listWaitlist(
     @Query() query: ListWaitlistQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ListWaitlistResponseDto> {
-    return this.waitlistService.listForPatient(query);
+    return this.waitlistService.listForPatient(query, actor);
+  }
+
+  /**
+   * P8 · quiénes esperan una agenda — la vista de quien atiende.
+   *
+   * La contraria de la de arriba, y la que faltaba: la lista de espera promovía
+   * sola y avisaba sola, y el profesional dueño de la agenda no tenía forma de
+   * saber cuánta gente la esperaba ni desde cuándo. Sin esto, la pantalla del
+   * médico sólo podía mostrar el resultado de la promoción, nunca la cola.
+   *
+   * La agenda va en la ruta —igual que en `POST resources/{id}/delay`— porque
+   * es el sujeto de la lectura y **de la autorización**: quien no atiende en
+   * ella recibe 403, tenga el rol que tenga.
+   */
+  @Get('resources/:resourceId/waitlist')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Listar quiénes esperan turno en una agenda',
+  })
+  @ApiParam({ name: 'resourceId', format: 'uuid' })
+  @ApiQuery({
+    name: 'includeClosed',
+    required: false,
+    description: 'Incluye las cubiertas y canceladas (por omisión, no)',
+  })
+  @ApiQuery({ name: 'limit', required: false })
+  listResourceWaitlist(
+    @Param('resourceId', ParseUUIDPipe) resourceId: string,
+    @Query() query: ListResourceWaitlistQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ListWaitlistResponseDto> {
+    return this.waitlistService.listForResource(resourceId, query, actor);
   }
 
   /**
