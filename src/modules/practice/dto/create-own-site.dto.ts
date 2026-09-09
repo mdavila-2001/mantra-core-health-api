@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  ArrayNotEmpty,
   IsArray,
   IsNumber,
   IsOptional,
@@ -10,6 +9,7 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -22,11 +22,21 @@ import { Type } from 'class-transformer';
  * cliente, y `country` no se ofrece porque el único sembrado es Bolivia.
  */
 export class OwnSiteAddressDto {
-  /** Líneas de la dirección (calle, número, referencia). */
-  @ApiProperty({ type: [String], description: 'Líneas de la dirección' })
+  /**
+   * Líneas de la dirección (calle, número, referencia).
+   *
+   * Puede ir vacía: una sede se puede ubicar sólo por municipio o por el
+   * punto del mapa, sin que el profesional escriba la calle. Vacía no es
+   * «sin dirección» —eso es no mandar `address`—, es una dirección sin calle.
+   */
+  @ApiProperty({
+    type: [String],
+    description:
+      'Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas',
+  })
   @IsArray()
-  @ArrayNotEmpty()
   @IsString({ each: true })
+  @MaxLength(500, { each: true })
   lines!: string[];
 
   /** Ciudad, en texto libre. */
@@ -53,17 +63,28 @@ export class OwnSiteAddressDto {
    *
    * Sin ella, la sede sigue sirviendo por texto (calle, ciudad); con ella, el
    * perfil público y la reserva pueden dibujar el punto en Leaflet.
+   *
+   * El par es **ambos o ninguno**: el `ValidateIf` mira las dos propiedades
+   * (no lleva `@IsOptional()`, que anularía la condición), así que mandar
+   * una sola hace caer a la que falta en su `@IsNumber` y la petición
+   * termina en 400. Media coordenada no ubica nada.
    */
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
-  @IsOptional()
+  @ValidateIf(
+    (dto: OwnSiteAddressDto) =>
+      dto.latitude !== undefined || dto.longitude !== undefined,
+  )
   @IsNumber()
   @Min(-90)
   @Max(90)
   latitude?: number;
 
-  /** Longitud del punto. Va siempre junto a `latitude`. */
+  /** Longitud del punto. Ver {@link OwnSiteAddressDto.latitude}. */
   @ApiPropertyOptional({ minimum: -180, maximum: 180 })
-  @IsOptional()
+  @ValidateIf(
+    (dto: OwnSiteAddressDto) =>
+      dto.latitude !== undefined || dto.longitude !== undefined,
+  )
   @IsNumber()
   @Min(-180)
   @Max(180)

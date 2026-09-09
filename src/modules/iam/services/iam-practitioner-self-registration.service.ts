@@ -65,6 +65,10 @@ import { FileUploadService } from '../../common/services/file-upload.service';
 import { FileCategory, FileSensitivity } from '../../common/dto';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+// P20: el consultorio propio declarado en el alta se provisiona con el mismo
+// caso de uso que `POST /practitioners/me/sites`. Import por archivo, mismo
+// criterio que `MedicalSpecialtyCatalogService` arriba.
+import { OwnSiteProvisioningService } from '../../practice/services/own-site-provisioning.service';
 
 const DATA_URI_REGEX = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/;
 
@@ -205,6 +209,9 @@ function contactosDeclarados(
  * common (documento y contacto) y directory (membresía)— en una sola
  * transacción: una cuenta sin perfil profesional, o un perfil sin membresía de
  * tenant, no sirve para nada y obligaría a un flujo de reparación manual.
+ * Cuando el alta declara `ownSite` (ALV-005/006 · P20) cruza un quinto módulo,
+ * practice, dando de alta el consultorio propio del profesional en la misma
+ * transacción, con el mismo caso de uso que usa `POST /practitioners/me/sites`.
  */
 @Injectable()
 export class IamPractitionerSelfRegistrationService {
@@ -232,6 +239,7 @@ export class IamPractitionerSelfRegistrationService {
    * @param notificationsService - Encolado del correo de verificación.
    * @param logger - Logger estructurado.
    * @param tracing - Trazado del span de negocio.
+   * @param ownSiteProvisioning - Alta del consultorio propio declarado en `ownSite` (P20).
    */
   constructor(
     private readonly em: EntityManager,
@@ -260,6 +268,7 @@ export class IamPractitionerSelfRegistrationService {
     private readonly notificationsService: NotificationsService,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
+    private readonly ownSiteProvisioning: OwnSiteProvisioningService,
     @Optional()
     private readonly fileUploadService?: FileUploadService,
   ) {
@@ -654,6 +663,26 @@ export class IamPractitionerSelfRegistrationService {
         actorUserId: user.id,
       });
 
+      // 7b) Consultorio propio, si lo declaró (ALV-005/006 · P20). Va después
+      // de la membresía porque la práctica nace en el mismo tenant que ella,
+      // y antes del token de verificación para que un fallo acá no deje un
+      // token de verificación emitido sin que la transacción avance más.
+      // En el alta asistida el autor de las filas es el administrador que la
+      // ejecuta (trazabilidad C-18), igual que la credencial y la activación;
+      // en el autorregistro es el propio profesional.
+      const ownSite = dto.ownSite
+        ? await this.ownSiteProvisioning.provision(
+            tx,
+            {
+              tenantId: SEED.tenantId,
+              userId: user.id,
+              practitionerProfileId: person.id,
+            },
+            dto.ownSite,
+            asistido?.actor.id ?? user.id,
+          )
+        : null;
+
       // 8) Verificación del correo. No condiciona el acceso.
       const { raw, hash } = this.tokenService.issueRefreshToken();
       this.emailVerificationsRepo.create(tx, {
@@ -737,6 +766,9 @@ export class IamPractitionerSelfRegistrationService {
         emailVerificationToken: raw,
         activacion,
         clinicalRoles: rolesConcedidos,
+        ownSite: ownSite
+          ? { practiceId: ownSite.practiceId, siteId: ownSite.siteId }
+          : null,
       };
     });
 
@@ -781,6 +813,12 @@ export class IamPractitionerSelfRegistrationService {
             activationToken: created.activacion.token,
             activationExpiresAt: created.activacion.expiresAt,
           }),
+      ...(created.ownSite
+        ? {
+            ownPracticeId: created.ownSite.practiceId,
+            ownSiteId: created.ownSite.siteId,
+          }
+        : {}),
     };
   }
 

@@ -13,7 +13,9 @@ import {
   MaxLength,
   MinLength,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import {
   ADMIN_GENDER_CODES,
   BIRTH_SEX_CODES,
@@ -21,6 +23,11 @@ import {
   type BirthSexCode,
 } from '../../profiles/profiles.concepts';
 import { OCCUPATION_FREE_TEXT_MAX_LENGTH } from './register-patient.dto';
+// Import de valor (no `import type`): `@Type(() => CreateOwnSiteDto)` necesita
+// la clase en runtime para instanciar el anidado antes de validarlo. Se
+// importa el archivo hoja, no el barrel de `practice/dto`, para no arrastrar
+// DTOs ajenos a este alta.
+import { CreateOwnSiteDto } from '../../practice/dto/create-own-site.dto';
 
 /** Formato aceptado por los cuatro campos telefónicos del alta. */
 const PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;
@@ -491,6 +498,29 @@ export class RegisterPractitionerDto {
   @IsOptional()
   @IsString()
   profilePhotoBase64?: string;
+
+  /**
+   * Consultorio propio declarado en el alta (ALV-005/006 · P20).
+   *
+   * Es **exactamente** el mismo contrato que recibe `POST
+   * /practitioners/me/sites` (`CreateOwnSiteDto`): esa ruta exige sesión y el
+   * registro termina en el login, sin iniciarla sola, así que quien se
+   * registra sin pertenecer a ninguna organización no tiene forma de
+   * llamarla. El dato viaja adentro del alta y el servicio reutiliza el
+   * mismo caso de uso (`OwnSiteProvisioningService`) dentro de la misma
+   * transacción de la cuenta, la persona y el perfil profesional.
+   *
+   * Opcional entera: omitirlo deja el alta exactamente como era.
+   */
+  @ApiPropertyOptional({
+    type: () => CreateOwnSiteDto,
+    description:
+      'Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateOwnSiteDto)
+  ownSite?: CreateOwnSiteDto;
 }
 
 /** Resultado del auto-registro de un profesional de salud. */
@@ -568,6 +598,25 @@ export class RegisterPractitionerResponseDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   photoFileId?: string;
+
+  /**
+   * Práctica personal creada o reutilizada para el consultorio propio.
+   *
+   * Ausente cuando el alta no declaró `ownSite`. Se devuelve por el mismo
+   * motivo que {@link credentialId}: poder referenciarla por id sin
+   * consultar la base.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  ownPracticeId?: string;
+
+  /**
+   * Consultorio propio creado a partir de `ownSite`.
+   *
+   * Ausente cuando el alta no lo declaró. Es el mismo id que devuelve
+   * `POST /practitioners/me/sites` y que acepta `GET /practitioners/:id/sites`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  ownSiteId?: string;
 }
 
 /**

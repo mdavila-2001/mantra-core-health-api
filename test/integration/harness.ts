@@ -402,14 +402,24 @@ export function bearer(token: string): {
   return { Authorization: `Bearer ${token}` };
 }
 
-/** Conexión a la base de pruebas, con los mismos defaults que `resetBusinessData`. */
+/**
+ * Conexión a la base de pruebas, con los mismos defaults que `resetBusinessData`.
+ *
+ * `ssl` sólo se incluye cuando `DB_SSL` está activo, igual que
+ * `orm.config.ts`: contra el compose local (sin certificado) pasar el objeto
+ * rompería la conexión, y contra Neon (P20, `deleteRegisteredPractitioners`)
+ * su ausencia la rompe al revés — `pg` corta con "connection is insecure
+ * (try using sslmode=require)".
+ */
 function testDbClient(): pg.Client {
+  const ssl = process.env.DB_SSL === 'true';
   return new pg.Client({
     host: process.env.DB_HOST ?? 'localhost',
     port: Number(process.env.DB_PORT ?? 5434),
     user: process.env.DB_USER ?? 'mantra',
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME ?? 'mantra_redesa_health',
+    ...(ssl ? { ssl: { rejectUnauthorized: true } } : {}),
   });
 }
 
@@ -691,6 +701,164 @@ export async function deleteFixturesByRunMark(
     if (pendientes > 0) {
       throw new Error(
         `La limpieza dejó ${pendientes} fixture(s) con la marca ${marca} en la base compartida.`,
+      );
+    }
+  } finally {
+    await client.end();
+  }
+}
+
+/**
+ * Tablas que cuelgan de `iam.users` por una columna semántica (no auditoría)
+ * y que un autorregistro de profesional puede llegar a escribir. Hijas antes
+ * que madres: `practice.practices` primero porque de ahí cuelgan, por FK, sus
+ * sedes y las asignaciones de rol del consultorio propio (P20).
+ *
+ * **Lista corta y deliberada, no la raíz `iam.users`**: hay ~1 850 FKs hacia
+ * `iam.users` en el modelo (casi todas `created_by_user_id`/
+ * `updated_by_user_id` de auditoría), y recorrerlas todas con
+ * {@link deleteWithDependents} contra una base remota (Neon) costaría miles
+ * de viajes de ida y vuelta por corrida. Si el alta empieza a escribir una
+ * tabla nueva por columna semántica, {@link deleteRegisteredPractitioners}
+ * revienta con el detalle de la FK en vez de dejar un huérfano en silencio.
+ */
+const CUENTA_ESCRIBE_EN: readonly { table: string; column: string }[] = [
+  // `HistoryMirrorSubscriber` (`src/orm/subscribers/history-mirror.subscriber.ts`)
+  // sella una revisión en `audit.users_history` en cada alta de cuenta —
+  // sistémico, no algo que este flujo declare—, y esa tabla no tiene otra
+  // columna semántica que `user_id`. Va primero: es la única entrada de esta
+  // lista sin más hijos propios, así que no importa el orden relativo al resto.
+  { table: 'audit.users_history', column: 'user_id' },
+  { table: 'practice.practices', column: 'admin_user_id' },
+  { table: 'iam.sessions', column: 'user_id' },
+  { table: 'iam.authentication_credentials', column: 'user_id' },
+  { table: 'iam.user_global_roles', column: 'user_id' },
+  { table: 'iam.email_verifications', column: 'user_id' },
+  { table: 'iam.account_activations', column: 'user_id' },
+  { table: 'iam.security_events', column: 'user_id' },
+  { table: 'directory.tenant_memberships', column: 'user_id' },
+  { table: 'authz.user_role_assignments', column: 'user_id' },
+  { table: 'messaging.notification_requests', column: 'recipient_user_id' },
+  { table: 'messaging.in_app_notifications', column: 'recipient_user_id' },
+  // `iam.refresh_tokens` NO tiene `user_id`: se llega a través de
+  // `session_id → iam.sessions.id`, y como esa FK sí está en el grafo,
+  // borrar `iam.sessions` de la fila de arriba ya arrastra sus tokens.
+];
+
+/**
+ * Tablas transversales que guardan `owner_id` sin FK declarada (el modelo
+ * las deja polimórficas a propósito): el grafo de {@link readSchemaGraph} no
+ * las ve, así que se limpian aparte, después de {@link CUENTA_ESCRIBE_EN}
+ * (`practice_sites.address_id` apunta acá).
+ */
+const OWNER_SIN_FK = [
+  'common.addresses',
+  'common.contact_points',
+  'common.identifiers',
+] as const;
+
+/**
+ * Borra la cuenta, la persona y todo lo que el auto-registro de profesional
+ * escribió a su alrededor —incluido el consultorio propio de P20—, dejando
+ * la base compartida (Neon, la misma que alimenta la demo) tal como estaba.
+ *
+ * `deleteFixturesByRunMark` no sirve acá: busca `practitioner_code LIKE
+ * 'MED-<marca>-%'`, y el autorregistro genera `PRC-<uuid>`. Este helper parte
+ * de `profiles.persons` (mismo camino ya probado) y además recorre
+ * {@link CUENTA_ESCRIBE_EN} y {@link OWNER_SIN_FK} para alcanzar lo que
+ * cuelga de la cuenta y no de la persona.
+ *
+ * Ruidoso por diseño: si borrar `iam.users` choca con una FK que esta lista
+ * no conoce, o con una tabla WORM, lanza explicando cuál — nunca deshabilita
+ * un trigger para forzar el borrado.
+ *
+ * @param fixtures - Las cuentas y personas creadas por la suite.
+ * @throws Si algo sobrevive al borrado: un huérfano en silencio es
+ *   exactamente el defecto que este helper existe para impedir.
+ */
+export async function deleteRegisteredPractitioners(
+  fixtures: readonly { userId: string; personId: string }[],
+): Promise<void> {
+  if (fixtures.length === 0) return;
+  const userIds = fixtures.map((f) => f.userId);
+  const personIds = fixtures.map((f) => f.personId);
+  const client = testDbClient();
+  await client.connect();
+  try {
+    const graph = await readSchemaGraph(client);
+    const visited = new Set<string>();
+
+    await deleteWithDependents(
+      client,
+      graph,
+      'profiles.persons',
+      personIds,
+      visited,
+    );
+
+    for (const { table, column } of CUENTA_ESCRIBE_EN) {
+      const pk = graph.primaryKey.get(table);
+      if (pk === undefined) continue;
+      const { rows } = await client.query<{ id: string }>(
+        `select "${pk}"::text as id from ${table} where "${column}"::text = any($1::text[])`,
+        [userIds],
+      );
+      await deleteWithDependents(
+        client,
+        graph,
+        table,
+        rows.map((r) => r.id),
+        visited,
+      );
+    }
+
+    // Después de CUENTA_ESCRIBE_EN: `practice_sites.address_id` apunta acá.
+    for (const tabla of OWNER_SIN_FK) {
+      await client.query(
+        `delete from ${tabla} where owner_id::text = any($1::text[])`,
+        [[...userIds, ...personIds]],
+      );
+    }
+
+    try {
+      await client.query(
+        `delete from iam.users where id::text = any($1::text[])`,
+        [userIds],
+      );
+    } catch (err) {
+      const pgErr = err as {
+        code?: string;
+        table?: string;
+        constraint?: string;
+        detail?: string;
+        message: string;
+      };
+      if (pgErr.code === '23503') {
+        const tablaHija = pgErr.table ?? '(desconocida)';
+        if (graph.noBorrables.has(tablaHija)) {
+          throw new Error(
+            `No se pudo limpiar iam.users: "${tablaHija}" es WORM (trigger forbid) ` +
+              `y la suite no debería ejercitar un flujo que escriba ahí contra la ` +
+              `base compartida. Detalle: ${pgErr.detail ?? pgErr.message}`,
+          );
+        }
+        throw new Error(
+          `No se pudo limpiar iam.users: sigue referenciado desde "${tablaHija}" ` +
+            `(constraint "${pgErr.constraint ?? '?'}"). Agregala a CUENTA_ESCRIBE_EN ` +
+            `en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
+        );
+      }
+      throw err;
+    }
+
+    const { rows: resto } = await client.query<{ total: string }>(
+      `select count(*)::text as total from iam.users where id::text = any($1::text[])`,
+      [userIds],
+    );
+    const pendientes = Number(resto[0]?.total ?? 0);
+    if (pendientes > 0) {
+      throw new Error(
+        `La limpieza dejó ${pendientes} cuenta(s) de profesional en la base compartida.`,
       );
     }
   } finally {

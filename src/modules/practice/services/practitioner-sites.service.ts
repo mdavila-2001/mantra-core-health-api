@@ -2,18 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  CONCEPTS,
   requireTenantId,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-// Las direcciones son datos transversales (`common.addresses`); se leían y no
-// se escribían acá, por eso originalmente sólo se importaba la entidad. ALV-006
-// agrega la escritura de la sede propia, y para eso sí hace falta el
-// repositorio — igual que `ServiceCatalogRepository` (de `billing`) más abajo,
-// se registra la clase sin importar `CommonModule` entero.
+// Las direcciones son datos transversales (`common.addresses`) y acá sólo se
+// leen; escribirlas para la sede propia es del `OwnSiteProvisioningService`
+// de abajo.
 import { Addresses } from '../../common/entities';
-import { AddressesRepository } from '../../common/repositories';
 // Mismo patrón que `clinical_ext` con `ProfileOwnershipService`: se importa la
 // clase puntual, no `ProfilesModule`, para no cerrar un ciclo entre módulos.
 import { ProfileOwnershipService } from '../../profiles/services/profile-ownership.service';
@@ -26,6 +22,7 @@ import {
 } from '../repositories';
 import { CreateOwnSiteDto, PractitionerSiteDto } from '../dto';
 import type { PracticeSites } from '../entities';
+import { OwnSiteProvisioningService } from './own-site-provisioning.service';
 
 /**
  * Referencia de un recurso agendable a la entidad que lo respalda.
@@ -89,7 +86,7 @@ export class PractitionerSitesService {
    * @param sitesRepo - Sedes.
    * @param spacesRepo - Espacios de atención.
    * @param rolesRepo - Asignaciones de rol, de donde sale la sede del profesional.
-   * @param addressesRepo - Direcciones (ALV-006: alta de la sede propia).
+   * @param provisioning - Alta transaccional del consultorio propio (ALV-005/006).
    * @param ownership - Resuelve el perfil profesional del actor autenticado.
    * @param logger - Valor de logger requerido por la operación.
    */
@@ -99,7 +96,7 @@ export class PractitionerSitesService {
     private readonly sitesRepo: PracticeSitesRepository,
     private readonly spacesRepo: CareSpacesRepository,
     private readonly rolesRepo: PractitionerRoleAssignmentsRepository,
-    private readonly addressesRepo: AddressesRepository,
+    private readonly provisioning: OwnSiteProvisioningService,
     private readonly ownership: ProfileOwnershipService,
     private readonly logger: PinoLogger,
   ) {
@@ -135,83 +132,12 @@ export class PractitionerSitesService {
       const practitionerProfileId =
         await this.ownership.requireOwnPractitionerProfileId(tx, actor);
 
-      let practice = await this.practicesRepo.findOwnOffice(
+      const { site } = await this.provisioning.provision(
         tx,
-        tenantId,
+        { tenantId, userId: actor.id, practitionerProfileId },
+        dto,
         actor.id,
-        PRAC.PRACTICE_TYPE_OFFICE,
       );
-      if (!practice) {
-        practice = this.practicesRepo.create(tx, {
-          tenantId,
-          // Determinista y único por usuario: dos altas del mismo profesional
-          // deben resolver a la MISMA práctica, no chocar por código.
-          code: `OFFICE-${actor.id}`,
-          name: 'Consultorio propio',
-          typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
-          adminUserId: actor.id,
-          statusConceptId: PRAC.PRACTICE_ACTIVE,
-          actorUserId: actor.id,
-        });
-        await tx.flush();
-      }
-
-      let addressId: string | undefined;
-      if (dto.address) {
-        const address = this.addressesRepo.create(tx, {
-          ownerTypeConceptId: CONCEPTS.OWNER_USER,
-          ownerId: actor.id,
-          lines: dto.address.lines.join('\n'),
-          city: dto.address.city,
-          municipalityConceptId: dto.address.municipalityConceptId,
-          administrativeAreaConceptId: dto.address.administrativeAreaConceptId,
-          countryConceptId: CONCEPTS.COUNTRY_BO,
-          useConceptId: CONCEPTS.ADDR_USE_HOME,
-          typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
-          latitude:
-            dto.address.latitude !== undefined
-              ? String(dto.address.latitude)
-              : undefined,
-          longitude:
-            dto.address.longitude !== undefined
-              ? String(dto.address.longitude)
-              : undefined,
-          actorUserId: actor.id,
-        });
-        await tx.flush();
-        addressId = address.id;
-      }
-
-      const code = await this.uniqueSiteCode(tx, practice.id, dto.name);
-      const site = this.sitesRepo.create(tx, {
-        practiceId: practice.id,
-        code,
-        name: dto.name,
-        siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,
-        operationalStatusConceptId: PRAC.SITE_OP_PLANNED,
-        timeZone: dto.timeZone,
-        addressId,
-        managingTenantId: tenantId,
-        statusConceptId: PRAC.SITE_ACTIVE,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
-
-      this.rolesRepo.create(tx, {
-        practitionerProfileId,
-        practiceId: practice.id,
-        practiceSiteId: site.id,
-        roleConceptId: PRAC.ROLE_ATTENDING,
-        // Es su propio consultorio: no hay nadie más a quien pedirle permiso,
-        // así que nace activa directo (mismo criterio que el bootstrap de
-        // práctica, no el de pedir unirse a la de otro — eso sí nace
-        // pendiente, ver `selfRequestAffiliation`).
-        statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
-        isPrimary: false,
-        validFrom: new Date(),
-        actorUserId: actor.id,
-      });
-      await tx.flush();
 
       this.logger.info(
         { operation: 'practice.sites.createOwn', siteId: site.id },
@@ -264,37 +190,6 @@ export class PractitionerSitesService {
         'Practitioner own site assignment ended',
       );
     });
-  }
-
-  /**
-   * Un código de sitio único dentro de la práctica, derivado del nombre.
-   *
-   * `createSite` (el alta administrativa) exige el código como dato del
-   * cliente; acá no tiene sentido pedírselo al profesional —es un detalle de
-   * unicidad interna, no algo que el consultorio "tenga"—, así que se deriva
-   * y se resuelve el choque con un sufijo numérico.
-   */
-  private async uniqueSiteCode(
-    em: EntityManager,
-    practiceId: string,
-    name: string,
-  ): Promise<string> {
-    const base = name
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .toUpperCase()
-      .replace(/[^A-Z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 90);
-    let candidate = base || 'CONSULTORIO';
-    let suffix = 1;
-    while (
-      await this.sitesRepo.findByPracticeAndCode(em, practiceId, candidate)
-    ) {
-      suffix += 1;
-      candidate = `${base || 'CONSULTORIO'}-${suffix}`;
-    }
-    return candidate;
   }
 
   /**

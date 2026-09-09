@@ -77042,6 +77042,62 @@
           "reason"
         ]
       },
+      "OwnSiteAddressDto": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "description": "Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "city": {
+            "type": "string"
+          },
+          "municipalityConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "administrativeAreaConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        },
+        "required": [
+          "lines"
+        ]
+      },
+      "CreateOwnSiteDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre del consultorio",
+            "maxLength": 200
+          },
+          "timeZone": {
+            "type": "string",
+            "example": "America/La_Paz"
+          },
+          "address": {
+            "$ref": "#/components/schemas/OwnSiteAddressDto"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
       "AssistedPractitionerRegistrationDto": {
         "type": "object",
         "properties": {
@@ -77219,6 +77275,14 @@
           "profilePhotoBase64": {
             "type": "string",
             "description": "Foto de perfil en formato Base64 (Data URI o base64 plano)"
+          },
+          "ownSite": {
+            "description": "Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CreateOwnSiteDto"
+              }
+            ]
           },
           "reason": {
             "type": "string",
@@ -78008,6 +78072,14 @@
           "profilePhotoBase64": {
             "type": "string",
             "description": "Foto de perfil en formato Base64 (Data URI o base64 plano)"
+          },
+          "ownSite": {
+            "description": "Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CreateOwnSiteDto"
+              }
+            ]
           }
         },
         "required": [
@@ -86036,62 +86108,6 @@
             ]
           }
         }
-      },
-      "OwnSiteAddressDto": {
-        "type": "object",
-        "properties": {
-          "lines": {
-            "description": "Líneas de la dirección",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "city": {
-            "type": "string"
-          },
-          "municipalityConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "administrativeAreaConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "latitude": {
-            "type": "number",
-            "minimum": -90,
-            "maximum": 90
-          },
-          "longitude": {
-            "type": "number",
-            "minimum": -180,
-            "maximum": 180
-          }
-        },
-        "required": [
-          "lines"
-        ]
-      },
-      "CreateOwnSiteDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Nombre del consultorio",
-            "maxLength": 200
-          },
-          "timeZone": {
-            "type": "string",
-            "example": "America/La_Paz"
-          },
-          "address": {
-            "$ref": "#/components/schemas/OwnSiteAddressDto"
-          }
-        },
-        "required": [
-          "name"
-        ]
       },
       "CreateSupportAssignmentDto": {
         "type": "object",
