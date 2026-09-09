@@ -35,6 +35,7 @@ function build() {
     // caso de la primera vez. Las pruebas que prueban la reutilización la
     // devuelven explícitamente.
     findDirectBetween: mockFn().mockResolvedValue(null),
+    findMessageInConversation: mockFn().mockResolvedValue(null),
   };
   const blocksRepo = { existsBetween: mockFn().mockResolvedValue(null) };
   // El aviso in-app del carril P1, doblado: enviar un mensaje se prueba acá,
@@ -47,14 +48,22 @@ function build() {
     emitMessage: mockFn(),
     emitRead: mockFn(),
     emitNewConversation: mockFn(),
+    emitMessageUpdated: mockFn(),
+    emitMessageDeleted: mockFn(),
+    emitPinned: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // F4: que el perfil con el que se escribe sea del actor. Por defecto lo es.
+  const visibility = {
+    assertActsAsProfile: mockFn().mockResolvedValue(undefined),
+  };
   const service = new CommunityMessagingService(
     em as any,
     conversationsRepo as any,
     blocksRepo as any,
     messageNotifications as any,
     gateway as any,
+    visibility as any,
     logger as any,
   );
   return {
@@ -64,6 +73,7 @@ function build() {
     blocksRepo,
     messageNotifications,
     gateway,
+    visibility,
   };
 }
 
@@ -241,6 +251,287 @@ describe('CommunityMessagingService', () => {
         profileId: 'p1',
         lastReadMessageId: 'msg9',
       });
+    });
+  });
+
+  /* --- F4.4 · favorita, fijada, archivada ---------------------------------- */
+
+  describe('updateParticipant (F4.4)', () => {
+    const participante = () => ({
+      id: 'part-1',
+      isFavorite: false,
+      isPinned: false,
+      archivedAt: undefined as Date | undefined,
+      updatedAt: new Date(),
+    });
+
+    it('cambia sólo lo que viene y devuelve cómo quedó', async () => {
+      const d = build();
+      const p = participante();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue(p);
+
+      const res = await d.service.updateParticipant(
+        'conv1',
+        { profileId: 'p1', isPinned: true },
+        actor,
+      );
+
+      expect(res).toEqual({
+        conversationId: 'conv1',
+        isFavorite: false,
+        isPinned: true,
+        archivedAt: null,
+      });
+      expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+        expect.anything(),
+        'p1',
+        actor,
+      );
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('archivar quita el favorito; desarchivar limpia la fecha', async () => {
+      const d = build();
+      const p = { ...participante(), isFavorite: true };
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue(p);
+
+      const archivada = await d.service.updateParticipant(
+        'conv1',
+        { profileId: 'p1', archived: true },
+        actor,
+      );
+      expect(archivada.isFavorite).toBe(false);
+      expect(archivada.archivedAt).toBeInstanceOf(Date);
+
+      const devuelta = await d.service.updateParticipant(
+        'conv1',
+        { profileId: 'p1', archived: false },
+        actor,
+      );
+      expect(devuelta.archivedAt).toBeNull();
+    });
+
+    it('404 si no es participante activo', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue(null);
+      await expect(
+        d.service.updateParticipant('conv1', { profileId: 'p1' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  /* --- F4.5 · editar y borrar ---------------------------------------------- */
+
+  describe('editMessage / deleteMessage (F4.5)', () => {
+    const mensaje = (extra: Record<string, unknown> = {}): any => ({
+      id: 'm1',
+      conversationId: 'conv1',
+      senderProfileId: 'p1',
+      contentTypeConceptId: 'ct',
+      bodyText: 'hola',
+      isEdited: false,
+      updatedAt: new Date(),
+      ...extra,
+    });
+
+    it('edita un mensaje propio, lo marca editado y lo empuja actualizado', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue(
+        mensaje(),
+      );
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+        { participantProfileId: 'p2' },
+      ]);
+
+      const res = await d.service.editMessage(
+        'conv1',
+        'm1',
+        { senderProfileId: 'p1', bodyText: 'hola (corregido)' },
+        actor,
+      );
+
+      expect(res).toMatchObject({
+        id: 'm1',
+        bodyText: 'hola (corregido)',
+        isEdited: true,
+      });
+      expect(d.gateway.emitMessageUpdated).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'm1', isEdited: true }),
+        ['p2'],
+      );
+    });
+
+    it('sólo el autor edita o elimina', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue(
+        mensaje({ senderProfileId: 'p-otro' }),
+      );
+
+      await expect(
+        d.service.editMessage(
+          'conv1',
+          'm1',
+          { senderProfileId: 'p1', bodyText: 'x' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(
+        d.service.deleteMessage('conv1', 'm1', 'p1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('un mensaje de otro hilo no existe, aunque el id sea real', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue(null);
+
+      await expect(
+        d.service.editMessage(
+          'conv1',
+          'm-ajeno',
+          { senderProfileId: 'p1', bodyText: 'x' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('elimina de forma lógica, suelta el fijado si era ése y avisa las dos cosas', async () => {
+      const d = build();
+      const m = mensaje();
+      const conversation = {
+        id: 'conv1',
+        pinnedMessageId: 'm1',
+        updatedAt: new Date(),
+      };
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue(m);
+      d.conversationsRepo.findConversationById.mockResolvedValue(conversation);
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+        { participantProfileId: 'p2' },
+      ]);
+
+      const res = await d.service.deleteMessage('conv1', 'm1', 'p1', actor);
+
+      expect(m.deletedAt).toBeInstanceOf(Date);
+      // El texto se conserva en la fila: quien lo enmascara es la lectura.
+      expect(m.bodyText).toBe('hola');
+      expect(conversation.pinnedMessageId).toBeUndefined();
+      expect(res).toEqual({
+        conversationId: 'conv1',
+        messageId: 'm1',
+        deletedAt: m.deletedAt,
+      });
+      expect(d.gateway.emitMessageDeleted).toHaveBeenCalledWith(
+        { conversationId: 'conv1', messageId: 'm1', deletedAt: m.deletedAt },
+        ['p2'],
+      );
+      expect(d.gateway.emitPinned).toHaveBeenCalledWith(
+        { conversationId: 'conv1', pinnedMessageId: null },
+        ['p2'],
+      );
+    });
+
+    it('no se edita lo ya eliminado', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue(
+        mensaje({ deletedAt: new Date() }),
+      );
+      await expect(
+        d.service.editMessage(
+          'conv1',
+          'm1',
+          { senderProfileId: 'p1', bodyText: 'x' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  /* --- F4.6 · fijar ---------------------------------------------------------- */
+
+  describe('pinMessage / unpinMessage (F4.6)', () => {
+    it('fija un mensaje del hilo, aunque no sea propio, y avisa', async () => {
+      const d = build();
+      const conversation = { id: 'conv1', updatedAt: new Date() } as any;
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findConversationById.mockResolvedValue(conversation);
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue({
+        id: 'm7',
+        senderProfileId: 'p-otro',
+      });
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+        { participantProfileId: 'p2' },
+      ]);
+
+      const res = await d.service.pinMessage(
+        'conv1',
+        { profileId: 'p1', messageId: 'm7' },
+        actor,
+      );
+
+      expect(conversation.pinnedMessageId).toBe('m7');
+      expect(res).toEqual({ conversationId: 'conv1', pinnedMessageId: 'm7' });
+      expect(d.gateway.emitPinned).toHaveBeenCalledWith(
+        { conversationId: 'conv1', pinnedMessageId: 'm7' },
+        ['p2'],
+      );
+    });
+
+    it('no fija un mensaje eliminado ni uno de otro hilo', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'conv1',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue({
+        id: 'm7',
+        deletedAt: new Date(),
+      });
+      await expect(
+        d.service.pinMessage(
+          'conv1',
+          { profileId: 'p1', messageId: 'm7' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('soltar deja pinnedMessageId en null', async () => {
+      const d = build();
+      const conversation = {
+        id: 'conv1',
+        pinnedMessageId: 'm7',
+        updatedAt: new Date(),
+      };
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findConversationById.mockResolvedValue(conversation);
+
+      const res = await d.service.unpinMessage('conv1', 'p1', actor);
+
+      expect(conversation.pinnedMessageId).toBeUndefined();
+      expect(res).toEqual({ conversationId: 'conv1', pinnedMessageId: null });
     });
   });
 });

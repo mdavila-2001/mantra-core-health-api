@@ -60,6 +60,7 @@ import {
   CommunityTimelineReadService,
   CommunityMessagingReadService,
   CommunityMessageNotificationsService,
+  CommunityPresenceService,
   CommunityGroupsReadService,
   CommunityPollsReadService,
   CommunityReviewsReadService,
@@ -173,6 +174,8 @@ import {
     CommunityMessagingService,
     CommunityMessagingGateway,
     CommunityMessageNotificationsService,
+    // F4.2 · presencia del chat sobre el Redis compartido del módulo.
+    CommunityPresenceService,
     CommunityModerationService,
     CommunityReviewsService,
     CommunityGroupsService,

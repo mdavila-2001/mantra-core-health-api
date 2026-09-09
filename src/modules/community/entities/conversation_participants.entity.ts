@@ -56,6 +56,22 @@ export class ConversationParticipants {
   })
   mutedUntil?: Date;
 
+  /** Marcada como favorita por este participante (F4.4). */
+  @Property({ fieldName: 'is_favorite', type: 'boolean', default: false })
+  isFavorite: boolean = false;
+
+  /** Fijada arriba de la bandeja de este participante (F4.4). */
+  @Property({ fieldName: 'is_pinned', type: 'boolean', default: false })
+  isPinned: boolean = false;
+
+  /** Desde cuándo la archivó este participante; `null` si no está archivada. */
+  @Property({
+    fieldName: 'archived_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  archivedAt?: Date;
+
   /**
    * Identificador asociado a status concept.
    */

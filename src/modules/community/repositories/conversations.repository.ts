@@ -338,8 +338,12 @@ export class ConversationsRepository {
   /**
    * Mensajes de una conversación (UC-19-14, cara de lectura).
    *
-   * Descendente porque una conversación se abre por el final; lo borrado no
-   * viaja al cliente.
+   * Descendente porque una conversación se abre por el final.
+   *
+   * **Lo eliminado sí viaja** (F4.5): con `deletedAt` puesto y sin cuerpo,
+   * para que el hilo muestre «Se eliminó este mensaje» donde estaba y las
+   * citas que apuntaban a él no queden apuntando a la nada. Quien lo enmascara
+   * es el servicio de lectura, no esta consulta.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param conversationId - Conversación a leer.
@@ -357,7 +361,6 @@ export class ConversationsRepository {
       DirectMessages,
       {
         conversationId,
-        deletedAt: null,
         ...(after
           ? {
               $or: [
@@ -466,6 +469,24 @@ export class ConversationsRepository {
     id: string,
   ): Promise<DirectMessages | null> {
     return em.findOne(DirectMessages, { id });
+  }
+
+  /**
+   * Un mensaje, pero sólo si es de esa conversación (editar, borrar, fijar).
+   *
+   * Se exige la conversación en la consulta y no se comprueba después: un id
+   * de mensaje de otro hilo tiene que dar «no existe», no «no es tuyo».
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param conversationId - Conversación a la que tiene que pertenecer.
+   * @param messageId - Identificador del mensaje.
+   */
+  findMessageInConversation(
+    em: EntityManager,
+    conversationId: string,
+    messageId: string,
+  ): Promise<DirectMessages | null> {
+    return em.findOne(DirectMessages, { id: messageId, conversationId });
   }
 
   /**

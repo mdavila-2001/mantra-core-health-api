@@ -47,6 +47,13 @@ export class Conversations {
   messageCount?: number;
 
   /**
+   * El mensaje fijado en la barra superior del hilo, si hay uno (F4.6).
+   * Es de la conversación y no de un lado: lo ven todos los participantes.
+   */
+  @Property({ fieldName: 'pinned_message_id', type: 'uuid', nullable: true }) // FK → community.direct_messages
+  pinnedMessageId?: string;
+
+  /**
    * Identificador asociado a status concept.
    */
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

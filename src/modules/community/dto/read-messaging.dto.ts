@@ -10,13 +10,87 @@ export class ConversationPreviewMessageDto {
   @ApiProperty({ format: 'uuid' })
   senderProfileId!: string;
 
-  /** Cuerpo del mensaje. */
+  /** Cuerpo del mensaje; `null` si era sólo un adjunto o si se eliminó. */
   @ApiPropertyOptional()
   bodyText?: string | null;
+
+  /**
+   * Concept id del tipo de contenido (texto o media). F4.3: con esto la fila
+   * de la bandeja dice «Foto» o «Documento» sin adivinarlo por el cuerpo vacío.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  contentTypeConceptId?: string | null;
+
+  /** Adjunto en `common.files`, si el último mensaje era uno. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  attachmentFileId?: string | null;
+
+  /** Cuándo se eliminó, si el último mensaje está eliminado (F4.5). */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  deletedAt?: Date | null;
 
   /** Cuándo se envió. */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   sentAt?: Date | null;
+}
+
+/** Si alguien está en línea, y si no, cuándo se lo vio por última vez (F4.2). */
+export class ProfilePresenceDto {
+  /** Perfil público. */
+  @ApiProperty({ format: 'uuid' })
+  profileId!: string;
+
+  /** `true` si tiene la mensajería abierta ahora mismo. */
+  @ApiProperty()
+  online!: boolean;
+
+  /**
+   * Última vez que se lo vio conectado; `null` si nunca, o si la presencia
+   * no está disponible (Redis caído: se responde «no se sabe», no un 500).
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  lastSeenAt!: Date | null;
+}
+
+/** Presencia de los demás participantes de una conversación. */
+export class ConversationPresenceDto {
+  /** Conversación consultada. */
+  @ApiProperty({ format: 'uuid' })
+  conversationId!: string;
+
+  /** Los otros participantes, sin el propio. */
+  @ApiProperty({ type: [ProfilePresenceDto] })
+  peers!: ProfilePresenceDto[];
+}
+
+/** Lo que devuelve `PATCH …/participant`: cómo quedó la conversación de este lado. */
+export class ParticipantPreferencesDto {
+  /** Conversación. */
+  @ApiProperty({ format: 'uuid' })
+  conversationId!: string;
+
+  /** Favorita para este participante. */
+  @ApiProperty()
+  isFavorite!: boolean;
+
+  /** Fijada arriba de la bandeja de este participante. */
+  @ApiProperty()
+  isPinned!: boolean;
+
+  /** Desde cuándo está archivada; `null` si no lo está. */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  archivedAt!: Date | null;
+}
+
+/** Lo que devuelve fijar o soltar un mensaje. */
+export class PinnedMessageResponseDto {
+  /** Conversación. */
+  @ApiProperty({ format: 'uuid' })
+  conversationId!: string;
+
+  /** El mensaje fijado, o `null` si se soltó. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  pinnedMessageId!: string | null;
 }
 
 /**
@@ -72,6 +146,30 @@ export class ConversationListItemDto {
   unreadCount!: number;
 
   /**
+   * Si el otro lado ya leyó el último mensaje, cuando ese mensaje es del
+   * actor y la conversación es directa. `null` si no se sabe (grupo, o el
+   * último no es propio). Con esto la bandeja pinta el doble tilde sin mentir (F4.3).
+   */
+  @ApiPropertyOptional({ nullable: true })
+  lastMessageReadByPeer?: boolean | null;
+
+  /** Favorita para el actor (F4.4). */
+  @ApiProperty()
+  isFavorite!: boolean;
+
+  /** Fijada arriba de la bandeja del actor (F4.4). Las fijadas van primero. */
+  @ApiProperty()
+  isPinned!: boolean;
+
+  /** Desde cuándo la archivó el actor; `null` si no está archivada (F4.4). */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  archivedAt?: Date | null;
+
+  /** El mensaje fijado en la barra superior, si hay uno (F4.6). */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  pinnedMessageId?: string | null;
+
+  /**
    * Los demás participantes, sin el propio.
    *
    * Sin el propio porque la bandeja se lee desde un lado: incluirse a uno
@@ -97,9 +195,10 @@ export class ConversationPageDto {
   limit!: number;
 
   /**
-   * Siempre `null`: la bandeja devuelve las conversaciones activas del actor de
-   * una vez, acotadas por el tope. Se mantiene el campo para que la forma de la
-   * respuesta sea la misma que la de los demás listados.
+   * Cursor de la página siguiente, o `null` si no hay más (F4.3).
+   *
+   * Se pagina sobre el orden de la bandeja —fijadas primero, después por
+   * último mensaje— y dentro del mismo recorte que aplique `q`.
    */
   @ApiPropertyOptional({ nullable: true })
   nextCursor!: string | null;
@@ -135,9 +234,17 @@ export class DirectMessageDto {
   @ApiPropertyOptional({ format: 'uuid' })
   attachmentFileId?: string | null;
 
-  /** Si fue editado. */
+  /** Si fue editado (F4.5). */
   @ApiPropertyOptional()
   isEdited?: boolean | null;
+
+  /**
+   * Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con
+   * `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se
+   * eliminó este mensaje» en su lugar y no un hueco que descoloca las citas.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  deletedAt?: Date | null;
 
   /** Cuándo se envió. */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
@@ -171,4 +278,27 @@ export class DirectMessagePageDto {
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   peerReadUpTo?: Date | null;
+
+  /**
+   * El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja
+   * con la primera página para que la barra superior se pinte sin otra
+   * llamada, aunque el mensaje sea de hace meses y no esté en la página.
+   */
+  @ApiPropertyOptional({ type: DirectMessageDto, nullable: true })
+  pinnedMessage?: DirectMessageDto | null;
+}
+
+/** Lo que devuelve eliminar un mensaje (F4.5). */
+export class DeletedMessageResponseDto {
+  /** Conversación. */
+  @ApiProperty({ format: 'uuid' })
+  conversationId!: string;
+
+  /** El mensaje eliminado. */
+  @ApiProperty({ format: 'uuid' })
+  messageId!: string;
+
+  /** Cuándo. */
+  @ApiProperty({ type: String, format: 'date-time' })
+  deletedAt!: Date;
 }

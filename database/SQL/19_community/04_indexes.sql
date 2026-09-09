@@ -294,6 +294,10 @@ CREATE INDEX IF NOT EXISTS "ix_conversation_participants_last_read_message_id" O
 
 CREATE INDEX IF NOT EXISTS "ix_conversation_participants_status_concept_id" ON "community"."conversation_participants" ("status_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_conversation_participants_profile_pinned" ON "community"."conversation_participants" ("participant_profile_id", "is_pinned") WHERE "is_pinned";
+
+CREATE INDEX IF NOT EXISTS "ix_conversations_pinned_message_id" ON "community"."conversations" ("pinned_message_id");
+
 CREATE INDEX IF NOT EXISTS "ix_conversation_participants_created_by_user_id" ON "community"."conversation_participants" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_conversation_participants_updated_by_user_id" ON "community"."conversation_participants" ("updated_by_user_id");

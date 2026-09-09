@@ -13,10 +13,31 @@ import {
   PublicProfilesRepository,
 } from '../repositories';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityPresenceService } from './community-presence.service';
 import { COMM } from '../community.concepts';
-import type { ConversationPageDto, DirectMessagePageDto } from '../dto';
+import type {
+  ConversationListItemDto,
+  ConversationPageDto,
+  ConversationPresenceDto,
+  DirectMessageDto,
+  DirectMessagePageDto,
+} from '../dto';
+import type {
+  ConversationParticipants,
+  Conversations,
+  DirectMessages,
+} from '../entities';
 
-/** Tope de conversaciones que devuelve la bandeja de una vez. */
+/**
+ * Tope de conversaciones que se resuelven de una vez para armar la bandeja.
+ *
+ * El cursor de `listConversations` (F4.3) pagina **dentro** de este recorte:
+ * la bandeja se arma resolviendo peers, último mensaje y no leídos por
+ * conversación, y hacerlo para quinientas conversaciones por página sería
+ * quinientas veces tres consultas. Cien conversaciones activas son más de
+ * las que cualquier persona usa; pasada esa cantidad, las más quietas quedan
+ * fuera y se anota como límite conocido.
+ */
 const CONVERSATIONS_PER_INBOX = 100;
 
 /**
@@ -36,6 +57,7 @@ export class CommunityMessagingReadService {
    * @param conversationsRepo - Acceso a conversaciones, participantes y mensajes.
    * @param profilesRepo - Perfiles públicos, para nombrar el otro lado.
    * @param visibility - Reglas transversales de propiedad y bloqueo.
+   * @param presence - Quién está en línea (F4.2).
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -43,23 +65,45 @@ export class CommunityMessagingReadService {
     private readonly conversationsRepo: ConversationsRepository,
     private readonly profilesRepo: PublicProfilesRepository,
     private readonly visibility: CommunityVisibilityService,
+    private readonly presence: CommunityPresenceService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityMessagingReadService.name);
   }
 
   /**
-   * Bandeja de un perfil, con vista previa y no leídos. Exige ser el titular.
+   * Bandeja de un perfil, con vista previa, no leídos y lo que marcó de su
+   * lado (favorita, fijada, archivada). Exige ser el titular.
+   *
+   * ## Orden (F4.3 y F4.4)
+   *
+   * Fijadas primero, después por último mensaje — el orden de cualquier
+   * bandeja de chat. Las archivadas **viajan igual**, con `archivedAt`: es el
+   * cliente quien las separa en su carpeta, y mandarlas aparte obligaría a
+   * dos llamadas para pintar una pantalla.
+   *
+   * ## `q` y `cursor`
+   *
+   * `q` recorta por nombre del otro lado o por texto del último mensaje, sin
+   * distinguir mayúsculas ni acentos. El cursor apunta a la última
+   * conversación entregada dentro de ese mismo recorte.
    *
    * @param profileId - Perfil dueño de la bandeja.
    * @param actor - Quien pide la lectura.
-   * @param limit - Tope de conversaciones.
+   * @param options - Tope, cursor y filtro de texto.
    * @returns Conversaciones activas, de la más reciente a la más quieta.
    */
   async listConversations(
     profileId: string,
     actor: AuthenticatedUser,
-    limit: number,
+    options: {
+      /** Tope de conversaciones por página. */
+      limit: number;
+      /** Cursor opaco de la página anterior. */
+      cursor?: string;
+      /** Texto a buscar en el nombre del otro lado o en el último mensaje. */
+      q?: string;
+    },
   ): Promise<ConversationPageDto> {
     const em = this.em.fork();
     await this.visibility.assertOwnProfile(em, profileId, actor);
@@ -69,23 +113,26 @@ export class CommunityMessagingReadService {
         em,
         profileId,
         CONCEPTS.STATE_ACTIVE,
-        Math.min(limit, CONVERSATIONS_PER_INBOX),
+        CONVERSATIONS_PER_INBOX,
       );
     const conversations = await this.conversationsRepo.listConversationsByIds(
       em,
       participations.map((participation) => participation.conversationId),
     );
-    const lastReadByConversation = new Map(
+    const participacionPorConversacion = new Map(
       participations.map((participation) => [
         participation.conversationId,
-        participation.lastReadMessageId,
+        participation,
       ]),
     );
 
     // Los participantes de todas las conversaciones de la página, y sus
     // perfiles, en **dos** consultas: una por fila multiplicaría la bandeja de
     // alguien con cincuenta hilos por cincuenta.
-    const participantesPorConversacion = new Map<string, string[]>();
+    const participantesPorConversacion = new Map<
+      string,
+      ConversationParticipants[]
+    >();
     await Promise.all(
       conversations.map(async (conversation) => {
         const participantes = await this.conversationsRepo.findParticipants(
@@ -94,14 +141,18 @@ export class CommunityMessagingReadService {
         );
         participantesPorConversacion.set(
           conversation.id,
-          participantes
-            .map((participante) => participante.participantProfileId)
-            .filter((otro) => otro !== profileId),
+          participantes.filter(
+            (participante) => participante.participantProfileId !== profileId,
+          ),
         );
       }),
     );
     const perfiles = await this.profilesRepo.listByIds(em, [
-      ...new Set([...participantesPorConversacion.values()].flat()),
+      ...new Set(
+        [...participantesPorConversacion.values()]
+          .flat()
+          .map((participante) => participante.participantProfileId),
+      ),
     ]);
     const nombrePorPerfil = new Map(
       perfiles.map((perfil) => [perfil.id, perfil.displayName]),
@@ -110,25 +161,25 @@ export class CommunityMessagingReadService {
       perfiles.map((perfil) => [perfil.id, this.fileUrl(perfil.avatarFileId)]),
     );
 
-    const items = await Promise.all(
+    const todas: ConversationListItemDto[] = await Promise.all(
       conversations.map(async (conversation) => {
+        const propia = participacionPorConversacion.get(conversation.id);
+        const otros = participantesPorConversacion.get(conversation.id) ?? [];
         const [lastMessage, unreadCount] = await Promise.all([
           this.conversationsRepo.findLastMessage(em, conversation.id),
           this.conversationsRepo.countUnread(
             em,
             conversation.id,
             profileId,
-            lastReadByConversation.get(conversation.id),
+            propia?.lastReadMessageId,
           ),
         ]);
         return {
-          peers: (participantesPorConversacion.get(conversation.id) ?? []).map(
-            (otro) => ({
-              profileId: otro,
-              displayName: nombrePorPerfil.get(otro) ?? null,
-              avatarUrl: avatarPorPerfil.get(otro) ?? null,
-            }),
-          ),
+          peers: otros.map((otro) => ({
+            profileId: otro.participantProfileId,
+            displayName: nombrePorPerfil.get(otro.participantProfileId) ?? null,
+            avatarUrl: avatarPorPerfil.get(otro.participantProfileId) ?? null,
+          })),
           id: conversation.id,
           conversationTypeConceptId: conversation.conversationTypeConceptId,
           groupId: conversation.groupId ?? null,
@@ -138,20 +189,66 @@ export class CommunityMessagingReadService {
             ? {
                 id: lastMessage.id,
                 senderProfileId: lastMessage.senderProfileId,
-                bodyText: lastMessage.bodyText ?? null,
+                bodyText: lastMessage.deletedAt
+                  ? null
+                  : (lastMessage.bodyText ?? null),
+                contentTypeConceptId: lastMessage.contentTypeConceptId,
+                attachmentFileId: lastMessage.deletedAt
+                  ? null
+                  : (lastMessage.attachmentFileId ?? null),
+                deletedAt: lastMessage.deletedAt ?? null,
                 sentAt: lastMessage.sentAt ?? null,
               }
             : null,
           unreadCount,
+          lastMessageReadByPeer: this.leidoPorElOtro(
+            conversation,
+            lastMessage,
+            profileId,
+            otros,
+          ),
+          isFavorite: propia?.isFavorite ?? false,
+          isPinned: propia?.isPinned ?? false,
+          archivedAt: propia?.archivedAt ?? null,
+          pinnedMessageId: conversation.pinnedMessageId ?? null,
         };
       }),
     );
 
+    // Fijadas primero; dentro de cada grupo se conserva el orden por último
+    // mensaje que ya trae `listConversationsByIds`.
+    const ordenadas = [
+      ...todas.filter((item) => item.isPinned),
+      ...todas.filter((item) => !item.isPinned),
+    ];
+
+    const q = normalizar(options.q ?? '');
+    const recortadas =
+      q === ''
+        ? ordenadas
+        : ordenadas.filter(
+            (item) =>
+              item.peers.some((peer) =>
+                normalizar(peer.displayName ?? '').includes(q),
+              ) || normalizar(item.lastMessage?.bodyText ?? '').includes(q),
+          );
+
+    const despuesDe = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const desde =
+      typeof despuesDe?.id === 'string'
+        ? recortadas.findIndex((item) => item.id === despuesDe.id) + 1
+        : 0;
+    const page = recortadas.slice(desde, desde + options.limit);
+    const hasMore = desde + options.limit < recortadas.length;
+    const last = page.at(-1);
+
     return {
-      items,
-      count: items.length,
-      limit,
-      nextCursor: null,
+      items: page,
+      count: page.length,
+      limit: options.limit,
+      nextCursor: hasMore && last ? encodeKeysetCursor({ id: last.id }) : null,
     };
   }
 
@@ -193,9 +290,13 @@ export class CommunityMessagingReadService {
       });
 
     await this.assertNoBlockWithPeers(em, conversationId, profileId);
-    const peerReadUpTo = await this.resolvePeerReadUpTo(
+    const conversation = await this.conversationsRepo.findConversationById(
       em,
       conversationId,
+    );
+    const peerReadUpTo = await this.resolvePeerReadUpTo(
+      em,
+      conversation,
       profileId,
     );
 
@@ -217,18 +318,19 @@ export class CommunityMessagingReadService {
     const page = hasMore ? rows.slice(0, options.limit) : rows;
     const last = page.at(-1);
 
+    // El fijado viaja completo sólo en la primera página: es lo que la barra
+    // de arriba necesita al abrir, y repetirlo en cada página de historia
+    // sería mandar el mismo mensaje treinta veces.
+    const pinnedMessage =
+      !options.cursor && conversation?.pinnedMessageId
+        ? await this.conversationsRepo.findMessageById(
+            em,
+            conversation.pinnedMessageId,
+          )
+        : null;
+
     return {
-      items: page.map((message) => ({
-        id: message.id,
-        conversationId: message.conversationId,
-        senderProfileId: message.senderProfileId,
-        replyToMessageId: message.replyToMessageId ?? null,
-        contentTypeConceptId: message.contentTypeConceptId,
-        bodyText: message.bodyText ?? null,
-        attachmentFileId: message.attachmentFileId ?? null,
-        isEdited: message.isEdited ?? null,
-        sentAt: message.sentAt ?? null,
-      })),
+      items: page.map((message) => this.aDto(message)),
       count: page.length,
       limit: options.limit,
       nextCursor:
@@ -239,7 +341,107 @@ export class CommunityMessagingReadService {
             })
           : null,
       peerReadUpTo,
+      ...(options.cursor
+        ? {}
+        : {
+            pinnedMessage:
+              pinnedMessage && !pinnedMessage.deletedAt
+                ? this.aDto(pinnedMessage)
+                : null,
+          }),
     };
+  }
+
+  /**
+   * Presencia de los demás participantes de una conversación (F4.2). Exige
+   * participar: la presencia de alguien es para quien conversa con él, no
+   * para cualquiera que conozca su id.
+   *
+   * @param conversationId - Conversación abierta.
+   * @param profileId - Perfil que mira.
+   * @param actor - Quien pide la lectura.
+   * @returns En línea o última vez, por cada uno de los otros.
+   */
+  async conversationPresence(
+    conversationId: string,
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<ConversationPresenceDto> {
+    const em = this.em.fork();
+    await this.visibility.assertOwnProfile(em, profileId, actor);
+
+    const participant = await this.conversationsRepo.findActiveParticipant(
+      em,
+      conversationId,
+      profileId,
+      CONCEPTS.STATE_ACTIVE,
+    );
+    if (!participant)
+      throw new ResourceNotFoundException('Conversación no encontrada', {
+        conversationId,
+      });
+
+    const participants = await this.conversationsRepo.findParticipants(
+      em,
+      conversationId,
+    );
+    const otros = participants
+      .map((participante) => participante.participantProfileId)
+      .filter((otro) => otro !== profileId);
+
+    return {
+      conversationId,
+      peers: await this.presence.presenciaDe(otros),
+    };
+  }
+
+  /**
+   * Un mensaje como viaja al cliente. Uno eliminado va **sin** cuerpo ni
+   * adjunto pero con su lugar: el hilo pinta «Se eliminó este mensaje» y las
+   * citas que apuntaban a él siguen sabiendo a qué apuntaban.
+   */
+  private aDto(message: DirectMessages): DirectMessageDto {
+    const eliminado =
+      message.deletedAt !== undefined && message.deletedAt !== null;
+    return {
+      id: message.id,
+      conversationId: message.conversationId,
+      senderProfileId: message.senderProfileId,
+      replyToMessageId: message.replyToMessageId ?? null,
+      contentTypeConceptId: message.contentTypeConceptId,
+      bodyText: eliminado ? null : (message.bodyText ?? null),
+      attachmentFileId: eliminado ? null : (message.attachmentFileId ?? null),
+      isEdited: message.isEdited ?? null,
+      deletedAt: message.deletedAt ?? null,
+      sentAt: message.sentAt ?? null,
+    };
+  }
+
+  /**
+   * Si el otro lado ya leyó el último mensaje, para el doble tilde de la
+   * bandeja (F4.3). Sólo tiene respuesta cuando la conversación es directa y
+   * el último mensaje es propio; en cualquier otro caso es `null`, que el
+   * cliente pinta como «no se sabe» y no como «no leído».
+   *
+   * Se compara por identidad y no por fecha para no volver a la base por
+   * cada fila: `markRead` sin `upToMessageId` deja `lastReadMessageId` en el
+   * último, que es lo que pasa cada vez que alguien abre el hilo.
+   */
+  private leidoPorElOtro(
+    conversation: Conversations,
+    lastMessage: DirectMessages | null,
+    profileId: string,
+    otros: ConversationParticipants[],
+  ): boolean | null {
+    if (
+      conversation.conversationTypeConceptId !== COMM.CONVERSATION_DIRECT ||
+      !lastMessage ||
+      lastMessage.senderProfileId !== profileId ||
+      otros.length !== 1
+    ) {
+      return null;
+    }
+    return otros[0].lastReadMessageId === lastMessage.id;
   }
 
   /**
@@ -250,20 +452,16 @@ export class CommunityMessagingReadService {
    */
   private async resolvePeerReadUpTo(
     em: EntityManager,
-    conversationId: string,
+    conversation: Conversations | null,
     profileId: string,
   ): Promise<Date | null> {
-    const conversation = await this.conversationsRepo.findConversationById(
-      em,
-      conversationId,
-    );
     if (conversation?.conversationTypeConceptId !== COMM.CONVERSATION_DIRECT) {
       return null;
     }
 
     const participants = await this.conversationsRepo.findParticipants(
       em,
-      conversationId,
+      conversation.id,
     );
     if (participants.length !== 2) return null;
 
@@ -315,4 +513,13 @@ export class CommunityMessagingReadService {
   private fileUrl(fileId?: string): string | null {
     return fileId ? `/public/media/${fileId}` : null;
   }
+}
+
+/** Minúsculas y sin acentos, para que «Quispe» encuentre a «quíspe». */
+function normalizar(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
 }
