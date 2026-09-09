@@ -12,6 +12,11 @@ import { AuthzModule } from '../authz/authz.module';
 // así que la dependencia no cierra ciclo.
 import { InsuranceModule } from '../insurance/insurance.module';
 import { TerminologyModule } from '../terminology/terminology.module';
+// El auto-registro de profesional (P20) da de alta el consultorio propio
+// declarado en el alta con `OwnSiteProvisioningService`, dentro de su propia
+// transacción; `practice` no importa `iam`, así que la dependencia no cierra
+// ciclo.
+import { PracticeModule } from '../practice/practice.module';
 import { IamUsersController, IamAuthController } from './controllers';
 import {
   IamUsersService,
@@ -52,6 +57,9 @@ import {
  * persona y su perfil, su documento de identidad y su correo, y su membresía en
  * el tenant por defecto; el de organizaciones crea la cuenta del owner junto al
  * tenant y su membresía OWNER. Ambos encolan la verificación del correo.
+ * Importa además Practice: el auto-registro de profesional cruza un quinto
+ * módulo cuando declara `ownSite` (ALV-005/006 · P20), dando de alta su
+ * consultorio propio en la misma transacción del alta.
  */
 @Module({
   imports: [
@@ -63,6 +71,7 @@ import {
     AuthzModule,
     InsuranceModule,
     TerminologyModule,
+    PracticeModule,
   ],
   controllers: [IamUsersController, IamAuthController],
   providers: [

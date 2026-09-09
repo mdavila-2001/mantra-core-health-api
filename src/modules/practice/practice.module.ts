@@ -18,6 +18,7 @@ import {
   PracticeInventoryService,
   PracticeTenantLookupService,
   PractitionerSitesService,
+  OwnSiteProvisioningService,
   PracticeOrganizationReadService,
 } from './services';
 import {
@@ -37,11 +38,11 @@ import {
 import { ServiceCatalogRepository } from '../billing/repositories';
 import { AddressesRepository } from '../common/repositories';
 // ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
-// quién es la sesión (`ProfileOwnershipService`) y crear la dirección de la
-// sede (`AddressesRepository`). Mismo criterio que `ServiceCatalogRepository`
-// arriba: se registran las clases puntuales, no `ProfilesModule`/`CommonModule`
-// enteros — evita el ciclo (`profiles` ya lee lo que `practice` expone) y no
-// duplica fuente de verdad.
+// quién es la sesión (`ProfileOwnershipService`); `OwnSiteProvisioningService`
+// necesita crear la dirección de la sede (`AddressesRepository`). Mismo
+// criterio que `ServiceCatalogRepository` arriba: se registran las clases
+// puntuales, no `ProfilesModule`/`CommonModule` enteros — evita el ciclo
+// (`profiles` ya lee lo que `practice` expone) y no duplica fuente de verdad.
 import { ProfileOwnershipService } from '../profiles/services/profile-ownership.service';
 import {
   PersonAccountLinksRepository,
@@ -98,11 +99,22 @@ import {
     PracticeInventoryService,
     PracticeTenantLookupService,
     PractitionerSitesService,
+    OwnSiteProvisioningService,
     PracticeOrganizationReadService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
   // la dependencia va en un solo sentido y no cierra ciclo.
-  exports: [PracticeTenantLookupService, PractitionerSitesService],
+  //
+  // `OwnSiteProvisioningService` se exporta además para `iam`: el
+  // auto-registro de profesional (`POST /iam/auth/register-practitioner`, P20)
+  // lo usa DENTRO de su propia transacción para dar de alta el consultorio
+  // propio declarado en el alta. `practice` no importa `iam`, así que la
+  // dependencia va en un solo sentido y no cierra ciclo.
+  exports: [
+    PracticeTenantLookupService,
+    PractitionerSitesService,
+    OwnSiteProvisioningService,
+  ],
 })
 export class PracticeModule {}
