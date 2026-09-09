@@ -86,6 +86,7 @@ import {
   summarizeAddress,
   type AddressSummary,
 } from '../../common/services/residence-address';
+import { aplicarOcupacion, aplicarEmpresa } from '../person-work-fields';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
 
@@ -998,6 +999,20 @@ export class ProfilesPractitionersService {
       issuerAdministrativeAreaConceptId: filiacion.issuerArea,
       residenceMunicipalityConceptId: filiacion.municipio,
       homeAddress: filiacion.homeAddress,
+      // Ocupación y empleador viven en `persons`, no en `filiacion` (que ya
+      // resuelve solo `incluyeContacto`): sin este condicional saldrían
+      // también en la ficha que ve un tercero, y son un dato personal como el
+      // domicilio o el documento. `?? undefined` traduce la columna nula
+      // —MikroORM la hidrata como `null`— a la ausencia que promete el
+      // contrato: lo no declarado viaja ausente, no como `null` en el JSON.
+      ...(incluyeContacto
+        ? {
+            occupationConceptId: person.occupationConceptId ?? undefined,
+            occupationFreeText: person.occupationFreeText ?? undefined,
+            workEmployerConceptId: person.workEmployerConceptId ?? undefined,
+            workEmployerFreeText: person.workEmployerFreeText ?? undefined,
+          }
+        : {}),
       practitionerCategoryConceptId: practitioner.practitionerCategoryConceptId,
       verificationStatusConceptId: practitioner.verificationStatusConceptId,
       practiceStatusConceptId: practitioner.practiceStatusConceptId,
@@ -1154,6 +1169,12 @@ export class ProfilesPractitionersService {
             ? new Date(dto.birthDate)
             : undefined;
         }
+        // Ocupación y empleador: catálogo o texto libre, nunca los dos.
+        // Mismas reglas y mismo ayudante que `PATCH /profiles/patients/me`
+        // (`person-work-fields.ts`): las dos columnas viven en `persons`,
+        // independientemente de qué perfil clínico traiga encima.
+        aplicarOcupacion(person, dto);
+        aplicarEmpresa(person, dto);
         touch(person, actor.id);
 
         if (dto.phone !== undefined) {
