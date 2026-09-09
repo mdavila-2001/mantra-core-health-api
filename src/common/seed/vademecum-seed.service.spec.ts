@@ -60,9 +60,29 @@ describe('VademecumSeedService', () => {
 
   it('reejecutado sobre una base ya completa no inserta nada', async () => {
     const { service, em } = build();
-    em.find.mockImplementation((_entity: unknown, where: any) =>
-      Promise.resolve((where?.id?.$in ?? []).map((id: string) => ({ id }))),
-    );
+    // «Base ya completa» tiene que responder a las DOS formas de consulta que
+    // usa el servicio, no sólo a una. Las designaciones, propiedades e
+    // interacciones se buscan por id; los conceptos, en cambio, se buscan por
+    // su clave natural `(code_system_version_id, code)` —que es lo correcto:
+    // el id del dataset no es el que manda si la fila ya llegó por otro
+    // camino—. Un doble que sólo entendía `id.$in` devolvía «no existe» para
+    // los 17 conceptos y el servicio, con razón, los creaba.
+    em.find.mockImplementation((_entity: unknown, where: any) => {
+      if (where?.id?.$in) {
+        return Promise.resolve(where.id.$in.map((id: string) => ({ id })));
+      }
+      if (where?.code?.$in) {
+        const [versionId] = where.codeSystemVersionId?.$in ?? [];
+        return Promise.resolve(
+          where.code.$in.map((code: string, i: number) => ({
+            id: `concepto-existente-${i}`,
+            codeSystemVersionId: versionId,
+            code,
+          })),
+        );
+      }
+      return Promise.resolve([]);
+    });
     em.findOne.mockResolvedValue({ id: 'ya-existe' });
 
     const result = await service.run('development', false);
