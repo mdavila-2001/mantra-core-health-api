@@ -17,6 +17,7 @@ import {
 } from '../repositories';
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
 import { SchedulingProfessionalTimeService } from './scheduling-professional-time.service';
+import { SchedulingWaitlistService } from './scheduling-waitlist.service';
 import {
   HistoryRepository,
   type HistoryRevision,
@@ -333,6 +334,11 @@ export class SchedulingBookingsService {
     private readonly vinculos: PractitionerAffiliationGateService,
     private readonly tiempoProfesional: SchedulingProfessionalTimeService,
     private readonly coverageRepo: CoverageRepository,
+    // La lista de espera del cupo que una cancelación libera. Se inyecta el
+    // servicio y no su puerto: promover es un caso de uso completo —abre su
+    // transacción, marca a los candidatos y les avisa— y reimplementarlo acá
+    // sería tener dos dueños de la misma regla.
+    private readonly waitlist: SchedulingWaitlistService,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
   }
@@ -1259,6 +1265,11 @@ export class SchedulingBookingsService {
       'Cancelling booking',
     );
 
+    // El cupo que la cancelación devuelve a la oferta, para promover la lista de
+    // espera una vez confirmada. Se anota acá y no se devuelve en el DTO: es un
+    // detalle interno del caso de uso, no algo que el cliente deba conocer.
+    let cupoLiberado: string | null = null;
+
     const resultado = await this.em.transactional(async (tx) => {
       const booking = await this.bookingsRepo.findBookingByIdForUpdate(
         tx,
@@ -1393,6 +1404,10 @@ export class SchedulingBookingsService {
           slot.statusConceptId = CONCEPTS.SLOT_BLOCKED;
         } else if (slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED) {
           slot.statusConceptId = CONCEPTS.SLOT_OPEN;
+          // Sólo el cupo que vuelve a ofrecerse: el de una cita puntual queda
+          // bloqueado arriba —nunca estuvo ofrecido— y promover sobre él le
+          // avisaría a alguien de un horario que no puede reservar.
+          cupoLiberado = slot.id;
         }
         touch(slot, actor.id);
         capacityReleased = true;
@@ -1402,7 +1417,58 @@ export class SchedulingBookingsService {
     });
 
     await this.avisarCambio(bookingId, cambio, motivo, dto.cancelledBy);
+    await this.promoverListaDeEspera(cupoLiberado);
     return resultado;
+  }
+
+  /**
+   * Promueve la lista de espera del cupo que la cancelación acaba de liberar.
+   *
+   * ## Por qué acá y no sólo en el worker
+   *
+   * El barrido existe y sigue existiendo (`promote-waitlist.job`, cada 30 s),
+   * pero es una red de seguridad, no el camino. El pedido del propietario es
+   * que el aviso salga **cuando el paciente se desmarca** —«de manera
+   * AUTOMÁTICA … a los pacientes que no consiguieron horario»—, y treinta
+   * segundos de espera son treinta segundos en los que el cupo recuperado no
+   * existe para nadie. Con esto el aviso sale con la cancelación; el worker
+   * recoge lo que este camino no alcance (un proceso que muere entre el commit
+   * y esta línea, o un cupo liberado por caducidad de un hold).
+   *
+   * ## Por qué fuera de la transacción, y por qué no puede lanzar
+   *
+   * Fuera, porque promover abre su propia transacción y emite avisos: hacerlo
+   * dentro alargaría la ventana de bloqueo de la cita por trabajo que no es
+   * suyo. Y sin lanzar, por la misma regla que ya gobierna los avisos de este
+   * módulo: **la cancelación ya está confirmada**. Que la lista de espera falle
+   * no puede convertir una cancelación exitosa en un error para quien canceló;
+   * el cupo queda libre igual y el worker lo va a encontrar.
+   */
+  private async promoverListaDeEspera(slotId: string | null): Promise<void> {
+    if (slotId === null) return;
+
+    try {
+      const resultado = await this.waitlist.promoteWaitlist(slotId);
+      if (resultado.processed > 0) {
+        this.logger.info(
+          {
+            operation: 'scheduling.booking.cancel.promote-waitlist',
+            slotId,
+            promoted: resultado.processed,
+          },
+          'Promoted waitlist candidates for the freed slot',
+        );
+      }
+    } catch (error) {
+      this.logger.warn(
+        {
+          operation: 'scheduling.booking.cancel.promote-waitlist',
+          slotId,
+          err: error,
+        },
+        'No se pudo promover la lista de espera del cupo liberado; queda para el worker',
+      );
+    }
   }
 
   /**

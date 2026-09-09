@@ -70,6 +70,7 @@ export {
   DelayResourceDto,
   DelayNoticeResponseDto,
   ListWaitlistQueryDto,
+  ListResourceWaitlistQueryDto,
   WaitlistEntryItemDto,
   ListWaitlistResponseDto,
   BOOKING_CHANNELS,

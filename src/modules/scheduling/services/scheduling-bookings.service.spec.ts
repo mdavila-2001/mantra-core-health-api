@@ -139,6 +139,15 @@ function build() {
   const coverageRepo = {
     findActiveCarriersByPatients: mockFn().mockResolvedValue(new Map()),
   };
+  // La lista de espera del cupo que una cancelación libera. Por omisión no hay
+  // nadie esperando: lo que estas pruebas miran es qué le pide la cancelación,
+  // no qué hace la promoción —eso tiene sus propios specs—.
+  const waitlist = {
+    promoteWaitlist: mockFn().mockResolvedValue({
+      processed: 0,
+      detail: 'sin candidatos',
+    }),
+  };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -151,6 +160,7 @@ function build() {
     vinculos as any,
     tiempoProfesional as any,
     coverageRepo as any,
+    waitlist as any,
   );
   return {
     service,
@@ -158,6 +168,7 @@ function build() {
     vinculos,
     tiempoProfesional,
     coverageRepo,
+    waitlist,
     bookingsRepo,
     catalogRepo,
     historyRepo,
@@ -1950,6 +1961,91 @@ describe('SchedulingBookingsService', () => {
 
       expect(res.capacityReleased).toBe(true);
       expect(d.notices.emit).not.toHaveBeenCalled();
+    });
+
+    /* -- El cupo liberado le llega a quien lo estaba esperando -------------- */
+
+    /**
+     * «Si el médico tiene un paciente que se le desmarca en el horario ya
+     * confirmado, la APP de manera AUTOMÁTICA enviará una notificación a los
+     * pacientes que … no consiguieron horario.»
+     *
+     * Hasta acá el aviso salía por el barrido del worker cada treinta
+     * segundos: el cupo recuperado existía en la base y no en la app de quien
+     * lo estaba esperando. El worker sigue —es la red de seguridad—, pero el
+     * camino ahora arranca en la cancelación.
+     */
+    it('cancelar un turno de la jornada promueve la lista de espera de ese cupo', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(vigente());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue({
+        id: SLOT_ID,
+        // Con plantilla: es un turno publicado, y al cancelarse vuelve a
+        // ofrecerse. Es el único caso en el que hay algo que promover.
+        scheduleTemplateId: 'tpl-1',
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      d.noticeRepo.describeBooking.mockResolvedValue(descrita);
+
+      await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PATIENT', reasonText: MOTIVO },
+        actor,
+      );
+
+      expect(d.waitlist.promoteWaitlist).toHaveBeenCalledWith(SLOT_ID);
+    });
+
+    it('el cupo de una cita puntual no se promueve: nunca estuvo ofrecido', async () => {
+      // AG-2: el cupo de una cita creada a mano muere con ella y queda
+      // bloqueado. Promoverlo avisaría de un horario que nadie puede reservar.
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(vigente());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue({
+        id: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      d.noticeRepo.describeBooking.mockResolvedValue(descrita);
+
+      await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PROVIDER', reasonText: MOTIVO },
+        actor,
+      );
+
+      expect(d.waitlist.promoteWaitlist).not.toHaveBeenCalled();
+    });
+
+    it('si la promoción falla, la cancelación sigue en pie', async () => {
+      // La cancelación ya está confirmada cuando esto corre: que la lista de
+      // espera falle no puede convertirla en un error para quien canceló. El
+      // cupo queda libre igual y el worker lo va a encontrar.
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(vigente());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue({
+        id: SLOT_ID,
+        scheduleTemplateId: 'tpl-1',
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      d.noticeRepo.describeBooking.mockResolvedValue(descrita);
+      d.waitlist.promoteWaitlist.mockRejectedValue(
+        new Error('la base se cayó'),
+      );
+
+      const res = await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PROVIDER', reasonText: MOTIVO },
+        actor,
+      );
+
+      expect(res.capacityReleased).toBe(true);
+      expect(d.logger.warn).toHaveBeenCalled();
     });
   });
 

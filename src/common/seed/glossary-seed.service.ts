@@ -366,7 +366,9 @@ export class GlossarySeedService {
     const ids = GLOSSARY_TERMS.flatMap((term) => [
       ...propertyCodes.map((code) => glossaryPropertyId(term.slug, code)),
       ...(term.drugFacts !== undefined
-        ? drugFactPropertyCodes.map((code) => glossaryPropertyId(term.slug, code))
+        ? drugFactPropertyCodes.map((code) =>
+            glossaryPropertyId(term.slug, code),
+          )
         : []),
     ]);
     const existing = await this.existingIds(em, ConceptProperties, ids);
@@ -711,6 +713,11 @@ export class GlossarySeedService {
       );
     }
 
+    // La fuente, antes que el sistema de códigos que la referencia. Ver el
+    // comentario del segundo `flush`: son tres niveles encadenados por columnas
+    // `uuid` sueltas, y el ORM los ordena como quiere si van juntos.
+    await em.flush();
+
     const existingCodeSystem = await this.existingIds(em, CodeSystems, [
       glossaryCodeSystemId,
     ]);
@@ -730,6 +737,19 @@ export class GlossarySeedService {
         { partial: true },
       );
     }
+
+    // Cada padre se escribe ANTES de crear a su hija, y por eso hay tres
+    // `flush` y no uno.
+    //
+    // Las FK de este proyecto se mapean como columnas `uuid` sueltas, no como
+    // relaciones de MikroORM: el ORM no sabe que `code_systems` depende de
+    // `terminology_sources` ni que `code_system_versions` depende de
+    // `code_systems`, así que ordena los INSERT como quiere. Con un solo
+    // `flush` al final escribía las hijas primero y la siembra moría —primero
+    // con `fk_code_system_versions_code_system_id`, después con
+    // `fk_code_systems_source_id`—, lo que dejaba **toda** la suite de
+    // integración sin arrancar: el arnés aborta si un seed queda omitido.
+    await em.flush();
 
     const existingVersion = await this.existingIds(em, CodeSystemVersions, [
       glossaryCodeSystemVersionId,
