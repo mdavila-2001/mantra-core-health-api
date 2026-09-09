@@ -26,6 +26,11 @@ function build() {
     findById: mockFn(),
     create: mockFn(),
     findExpirable: mockFn().mockResolvedValue([]),
+    // FT-07-R05: las sumó `practitioner-access-requests.service`, y el doble
+    // se tipa contra el repositorio entero, así que sin ellas no compila.
+    // `ConsentsService` no las llama: devuelven vacío y nadie las mira.
+    findByPatientCreatorCategory: mockFn().mockResolvedValue([]),
+    findPendingForPatient: mockFn().mockResolvedValue([]),
   };
   const provisionsRepo = {
     findOpenByConsent: mockFn().mockResolvedValue([]),
