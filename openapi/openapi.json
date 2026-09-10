@@ -77809,7 +77809,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan.",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -77820,7 +77820,8 @@
               "MEDICAL_OFFICE",
               "NURSING",
               "HEALTH_OTHER",
-              "HEALTH_BUSINESS"
+              "HEALTH_BUSINESS",
+              "DIAGNOSTIC_CENTER"
             ],
             "example": "HOSPITAL"
           },
@@ -77829,6 +77830,9 @@
           },
           "broker": {
             "$ref": "#/components/schemas/BrokerProfileDto"
+          },
+          "diagnosticUnit": {
+            "$ref": "#/components/schemas/DiagnosticUnitProfileDto"
           },
           "countryConceptId": {
             "type": "string",
@@ -81267,7 +81271,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS— país y jurisdicción).",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -81278,7 +81282,8 @@
               "MEDICAL_OFFICE",
               "NURSING",
               "HEALTH_OTHER",
-              "HEALTH_BUSINESS"
+              "HEALTH_BUSINESS",
+              "DIAGNOSTIC_CENTER"
             ]
           },
           "tenantTypeConceptId": {
@@ -81442,7 +81447,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS— país y jurisdicción).",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -81453,7 +81458,8 @@
               "MEDICAL_OFFICE",
               "NURSING",
               "HEALTH_OTHER",
-              "HEALTH_BUSINESS"
+              "HEALTH_BUSINESS",
+              "DIAGNOSTIC_CENTER"
             ]
           },
           "tenantTypeConceptId": {
@@ -117182,6 +117188,60 @@
           },
           "path": {
             "type": "string"
+          }
+        }
+      },
+      "DiagnosticUnitPrimarySiteDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "example": "Sede central"
+          },
+          "timeZone": {
+            "type": "string",
+            "example": "America/La_Paz"
+          },
+          "address": {
+            "$ref": "#/components/schemas/OwnSiteAddressDto"
+          }
+        }
+      },
+      "DiagnosticUnitProfileDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "CENTRO_IMAGEN_CENTRAL"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "example": "Centro de Diagnóstico por Imágenes"
+          },
+          "diagnosticUnitTypeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "modalityConceptIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "walkInAvailable": {
+            "type": "boolean",
+            "default": true
+          },
+          "homeCollectionAvailable": {
+            "type": "boolean",
+            "default": false
+          },
+          "primarySite": {
+            "$ref": "#/components/schemas/DiagnosticUnitPrimarySiteDto"
           }
         }
       }

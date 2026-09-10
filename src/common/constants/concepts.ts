@@ -552,6 +552,17 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'HEALTH_BUSINESS',
     'Health business',
   ),
+  // Centro de diagnóstico por imágenes o laboratorio clínico (subtarea 1.5,
+  // PR #404 del front). No cabe en `HEALTH_OTHER` —el cajón de las
+  // instituciones asistenciales que no encajan arriba— porque, a diferencia
+  // de esas, un DIAGNOSTIC_CENTER SÍ tiene fila propia: materializa una
+  // `diagnostic_units.diagnostic_units` en el alta, igual que `PAYER`
+  // materializa su `insurance_carriers`.
+  TENANT_TYPE_DIAGNOSTIC_CENTER: def(
+    'directory:tenant-type:diagnostic-center',
+    'DIAGNOSTIC_CENTER',
+    'Diagnostic center',
+  ),
   LEGAL_ENTITY_COMPANY: def(
     'directory:legal-entity:company',
     'COMPANY',

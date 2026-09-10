@@ -59,8 +59,10 @@ export class CreateChildTenantDto {
       'Tipo de organización. Obligatorio: cada tipo exige sus propios datos ' +
       '(PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, ' +
       'UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, ' +
-      'HEALTH_BUSINESS— país y ' +
-      'jurisdicción).',
+      'HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y ' +
+      'jurisdicción). Esta puerta administrativa no acepta todavía el bloque ' +
+      '`diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se ' +
+      'materializa con sus valores por defecto.',
     enum: TENANT_TYPE_CODES,
   })
   @IsIn(TENANT_TYPE_CODES)

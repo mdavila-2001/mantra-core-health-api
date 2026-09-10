@@ -150,9 +150,18 @@ export class DirectoryTenantsService {
       // FK son columnas uuid: persistir el tenant antes de la membership hija.
       await tx.flush();
 
-      // La fila propia del tipo (aseguradora o corredor) va en esta misma
-      // transacción: un PAYER sin su carrier es un tipo que no se sostiene.
-      this.typeProfile.materializeProfile(tx, tenant.id, dto, actor.id);
+      // La fila propia del tipo (aseguradora, corredor o unidad diagnóstica)
+      // va en esta misma transacción: un PAYER sin su carrier es un tipo que
+      // no se sostiene. El administrador de la práctica que provisiona un
+      // DIAGNOSTIC_CENTER es el owner declarado, no `actor` (quien lo
+      // aprovisiona por la puerta administrativa).
+      await this.typeProfile.materializeProfile(
+        tx,
+        tenant.id,
+        dto,
+        actor.id,
+        dto.ownerUserId,
+      );
 
       this.membershipsRepo.create(tx, {
         userId: dto.ownerUserId,
@@ -446,7 +455,13 @@ export class DirectoryTenantsService {
       });
       await tx.flush();
 
-      this.typeProfile.materializeProfile(tx, child.id, dto, actor.id);
+      await this.typeProfile.materializeProfile(
+        tx,
+        child.id,
+        dto,
+        actor.id,
+        dto.adminUserId,
+      );
 
       this.membershipsRepo.create(tx, {
         userId: dto.adminUserId,

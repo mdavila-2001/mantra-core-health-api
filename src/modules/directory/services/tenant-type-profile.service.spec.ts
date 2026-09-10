@@ -4,6 +4,7 @@ const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { TenantTypeProfileService } from './tenant-type-profile.service';
 import { PreconditionFailedException } from '../../../common';
 import { INS } from '../../insurance/insurance.concepts';
+import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import { TERRITORIAL_TENANT_TYPES } from '../directory.concepts';
 
 describe('TenantTypeProfileService', () => {
@@ -24,11 +25,26 @@ describe('TenantTypeProfileService', () => {
           new Map(ids.map((id) => [id, { id }])),
       ),
     };
+    const diagnosticUnitProvisioning = {
+      provision: fn(async () => ({
+        unitId: 'diagnostic-unit-1',
+        practiceId: 'practice-1',
+        siteId: 'site-1',
+        offeringIds: [],
+      })),
+    };
     const service = new TenantTypeProfileService(
       catalogRepo as never,
       conceptsRepo as never,
+      diagnosticUnitProvisioning as never,
     );
-    return { service, catalogRepo, conceptsRepo, tx: {} as never };
+    return {
+      service,
+      catalogRepo,
+      conceptsRepo,
+      diagnosticUnitProvisioning,
+      tx: {} as never,
+    };
   }
 
   describe('assertProfileMatchesType', () => {
@@ -70,7 +86,7 @@ describe('TenantTypeProfileService', () => {
       }
     });
 
-    it('acepta los siete tipos nuevos con país y jurisdicción', () => {
+    it('acepta los ocho tipos nuevos con país y jurisdicción', () => {
       const { service } = build();
 
       // El alta de una universidad, una farmacia o un consultorio no puede
@@ -83,6 +99,7 @@ describe('TenantTypeProfileService', () => {
         'NURSING',
         'HEALTH_OTHER',
         'HEALTH_BUSINESS',
+        'DIAGNOSTIC_CENTER',
       ] as const) {
         expect(() =>
           service.assertProfileMatchesType({
@@ -156,6 +173,95 @@ describe('TenantTypeProfileService', () => {
           broker: { brokerCode: 'B1', licenseNumber: 'L1' },
         }),
       ).not.toThrow();
+    });
+  });
+
+  /**
+   * El centro de diagnóstico (subtarea 1.5): territorial como el resto de
+   * las instituciones, pero a diferencia de PAYER/BROKER su bloque de datos
+   * es opcional — declarar sólo el tipo es válido, la unidad se puede
+   * completar después desde el módulo 23.
+   */
+  describe('assertProfileMatchesType · DIAGNOSTIC_CENTER (1.5)', () => {
+    it('acepta el tipo sin el bloque diagnosticUnit', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+        }),
+      ).not.toThrow();
+    });
+
+    it('acepta el bloque diagnosticUnit completo', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            code: 'CENTRO_Z',
+            modalityConceptIds: [DUNIT.MODALITY_XRAY, DUNIT.MODALITY_MRI],
+          },
+        }),
+      ).not.toThrow();
+    });
+
+    it('rechaza diagnosticUnit con un tipo que no es DIAGNOSTIC_CENTER', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'PROVIDER',
+          legalName: 'Clínica Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: { code: 'X' },
+        }),
+      ).toThrow(PreconditionFailedException);
+    });
+
+    it('rechaza un tipo de unidad que no es IMAGING ni LABORATORY', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            diagnosticUnitTypeConceptId: 'no-es-una-unidad-diagnostica',
+          },
+        }),
+      ).toThrow(PreconditionFailedException);
+    });
+
+    it('rechaza una modalidad que no pertenece a la lista cerrada, nombrándola', () => {
+      const { service } = build();
+      const modalidadInventada = 'no-existe-como-modalidad';
+
+      try {
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: { modalityConceptIds: [modalidadInventada] },
+        });
+        throw new Error('debía rechazar');
+      } catch (error) {
+        expect(error).toBeInstanceOf(PreconditionFailedException);
+        expect((error as PreconditionFailedException).details).toMatchObject({
+          invalidModalities: [modalidadInventada],
+        });
+      }
     });
   });
 
@@ -242,10 +348,10 @@ describe('TenantTypeProfileService', () => {
   });
 
   describe('materializeProfile', () => {
-    it('crea la aseguradora del tenant PAYER pendiente de verificación', () => {
+    it('crea la aseguradora del tenant PAYER pendiente de verificación', async () => {
       const { service, catalogRepo, tx } = build();
 
-      const id = service.materializeProfile(
+      const id = await service.materializeProfile(
         tx,
         'tenant-1',
         {
@@ -278,10 +384,10 @@ describe('TenantTypeProfileService', () => {
       );
     });
 
-    it('crea el corredor del tenant BROKER con su licencia', () => {
+    it('crea el corredor del tenant BROKER con su licencia', async () => {
       const { service, catalogRepo, tx } = build();
 
-      const id = service.materializeProfile(
+      const id = await service.materializeProfile(
         tx,
         'tenant-2',
         {
@@ -304,10 +410,10 @@ describe('TenantTypeProfileService', () => {
       );
     });
 
-    it('no crea fila propia para PROVIDER: su realidad son las sedes', () => {
+    it('no crea fila propia para PROVIDER: su realidad son las sedes', async () => {
       const { service, catalogRepo, tx } = build();
 
-      const id = service.materializeProfile(
+      const id = await service.materializeProfile(
         tx,
         'tenant-3',
         {
@@ -322,6 +428,85 @@ describe('TenantTypeProfileService', () => {
       expect(id).toBeUndefined();
       expect(catalogRepo.createCarrier).not.toHaveBeenCalled();
       expect(catalogRepo.createBroker).not.toHaveBeenCalled();
+    });
+
+    it('delega la unidad diagnostica en DiagnosticUnitProvisioningService con los defaults', async () => {
+      const { service, diagnosticUnitProvisioning, tx } = build();
+
+      const id = await service.materializeProfile(
+        tx,
+        'tenant-4',
+        {
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          code: 'CENTRO_Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            modalityConceptIds: [DUNIT.MODALITY_XRAY],
+          },
+        },
+        'actor-1',
+      );
+
+      expect(id).toBe('diagnostic-unit-1');
+      expect(diagnosticUnitProvisioning.provision).toHaveBeenCalledWith(
+        tx,
+        {
+          tenantId: 'tenant-4',
+          tenantCode: 'CENTRO_Z',
+          legalName: 'Centro de Imagen Z',
+          // Sin quinto parámetro (autorregistro), el administrador de la
+          // práctica es el mismo actor que ejecuta el alta.
+          ownerUserId: 'actor-1',
+        },
+        { modalityConceptIds: [DUNIT.MODALITY_XRAY] },
+        'actor-1',
+      );
+    });
+
+    it('usa practiceAdminUserId como dueño de la práctica cuando se lo pasan', async () => {
+      const { service, diagnosticUnitProvisioning, tx } = build();
+
+      await service.materializeProfile(
+        tx,
+        'tenant-5',
+        {
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {},
+        },
+        'admin-de-plataforma',
+        'dueno-real-del-centro',
+      );
+
+      expect(diagnosticUnitProvisioning.provision).toHaveBeenCalledWith(
+        tx,
+        expect.objectContaining({ ownerUserId: 'dueno-real-del-centro' }),
+        {},
+        'admin-de-plataforma',
+      );
+    });
+
+    it('no crea la unidad si DIAGNOSTIC_CENTER no declaró diagnosticUnit', async () => {
+      const { service, diagnosticUnitProvisioning, tx } = build();
+
+      const id = await service.materializeProfile(
+        tx,
+        'tenant-6',
+        {
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+        },
+        'actor-1',
+      );
+
+      expect(id).toBeUndefined();
+      expect(diagnosticUnitProvisioning.provision).not.toHaveBeenCalled();
     });
   });
 });

@@ -781,19 +781,118 @@ const OWNER_SIN_FK = [
 ] as const;
 
 /**
+ * Borra las cuentas dadas y todo lo que {@link CUENTA_ESCRIBE_EN} y
+ * {@link OWNER_SIN_FK} dicen que cuelga de ellas.
+ *
+ * Extraído de la limpieza del autorregistro de profesional (P20) para que el
+ * de organizaciones (subtarea 1.5) la reutilice: los dos flujos crean una
+ * cuenta ACTIVA con la misma forma alrededor (sesión, credencial, rol
+ * global, verificación de correo, evento de seguridad...) - sólo cambia qué
+ * cuelga de la persona o del tenant *antes* de llegar acá, que resuelve cada
+ * llamador por su cuenta.
+ *
+ * Ruidoso por diseño: si borrar `iam.users` choca con una FK que
+ * {@link CUENTA_ESCRIBE_EN} no conoce, o con una tabla WORM, lanza
+ * explicando cuál - nunca deshabilita un trigger para forzar el borrado.
+ *
+ * @param client - Conexión ya abierta.
+ * @param graph - El grafo de FK, ya leído.
+ * @param visited - Lo ya borrado en esta corrida, compartido con quien
+ *   llama: si el borrado del padre (persona o tenant) ya alcanzó una fila,
+ *   no se reprocesa.
+ * @param userIds - Las cuentas a borrar.
+ * @param personIds - Personas asociadas, si las hay. El autorregistro de
+ *   organización no crea ninguna (`readonly []`); `OWNER_SIN_FK` también las
+ *   limpia por `owner_id`.
+ * @param descripcion - Cómo nombrar el fixture en el mensaje del `throw`
+ *   final ("de profesional", "de organización"...).
+ * @throws Si algo sobrevive al borrado: un huérfano en silencio es
+ *   exactamente el defecto que este helper existe para impedir.
+ */
+async function deleteAccounts(
+  client: pg.Client,
+  graph: SchemaGraph,
+  visited: Set<string>,
+  userIds: readonly string[],
+  personIds: readonly string[],
+  descripcion: string,
+): Promise<void> {
+  for (const { table, column } of CUENTA_ESCRIBE_EN) {
+    const pk = graph.primaryKey.get(table);
+    if (pk === undefined) continue;
+    const { rows } = await client.query<{ id: string }>(
+      `select "${pk}"::text as id from ${table} where "${column}"::text = any($1::text[])`,
+      [userIds],
+    );
+    await deleteWithDependents(
+      client,
+      graph,
+      table,
+      rows.map((r) => r.id),
+      visited,
+    );
+  }
+
+  // Después de CUENTA_ESCRIBE_EN: `practice_sites.address_id` apunta acá.
+  for (const tabla of OWNER_SIN_FK) {
+    await client.query(
+      `delete from ${tabla} where owner_id::text = any($1::text[])`,
+      [[...userIds, ...personIds]],
+    );
+  }
+
+  try {
+    await client.query(
+      `delete from iam.users where id::text = any($1::text[])`,
+      [userIds],
+    );
+  } catch (err) {
+    const pgErr = err as {
+      code?: string;
+      table?: string;
+      constraint?: string;
+      detail?: string;
+      message: string;
+    };
+    if (pgErr.code === '23503') {
+      const tablaHija = pgErr.table ?? '(desconocida)';
+      if (graph.noBorrables.has(tablaHija)) {
+        throw new Error(
+          `No se pudo limpiar iam.users: "${tablaHija}" es WORM (trigger forbid) ` +
+            `y la suite no debería ejercitar un flujo que escriba ahí contra la ` +
+            `base compartida. Detalle: ${pgErr.detail ?? pgErr.message}`,
+        );
+      }
+      throw new Error(
+        `No se pudo limpiar iam.users: sigue referenciado desde "${tablaHija}" ` +
+          `(constraint "${pgErr.constraint ?? '?'}"). Agregala a CUENTA_ESCRIBE_EN ` +
+          `en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
+      );
+    }
+    throw err;
+  }
+
+  const { rows: resto } = await client.query<{ total: string }>(
+    `select count(*)::text as total from iam.users where id::text = any($1::text[])`,
+    [userIds],
+  );
+  const pendientes = Number(resto[0]?.total ?? 0);
+  if (pendientes > 0) {
+    throw new Error(
+      `La limpieza dejó ${pendientes} cuenta(s) ${descripcion} en la base compartida.`,
+    );
+  }
+}
+
+/**
  * Borra la cuenta, la persona y todo lo que el auto-registro de profesional
  * escribió a su alrededor —incluido el consultorio propio de P20—, dejando
  * la base compartida (Neon, la misma que alimenta la demo) tal como estaba.
  *
  * `deleteFixturesByRunMark` no sirve acá: busca `practitioner_code LIKE
  * 'MED-<marca>-%'`, y el autorregistro genera `PRC-<uuid>`. Este helper parte
- * de `profiles.persons` (mismo camino ya probado) y además recorre
- * {@link CUENTA_ESCRIBE_EN} y {@link OWNER_SIN_FK} para alcanzar lo que
- * cuelga de la cuenta y no de la persona.
- *
- * Ruidoso por diseño: si borrar `iam.users` choca con una FK que esta lista
- * no conoce, o con una tabla WORM, lanza explicando cuál — nunca deshabilita
- * un trigger para forzar el borrado.
+ * de `profiles.persons` (mismo camino ya probado) y delega en
+ * {@link deleteAccounts} lo que cuelga de la cuenta y no de la persona.
  *
  * @param fixtures - Las cuentas y personas creadas por la suite.
  * @throws Si algo sobrevive al borrado: un huérfano en silencio es
@@ -819,12 +918,72 @@ export async function deleteRegisteredPractitioners(
       visited,
     );
 
-    for (const { table, column } of CUENTA_ESCRIBE_EN) {
+    await deleteAccounts(
+      client,
+      graph,
+      visited,
+      userIds,
+      personIds,
+      'de profesional',
+    );
+  } finally {
+    await client.end();
+  }
+}
+
+/**
+ * Tablas que cuelgan de `directory.tenants` por una columna semántica
+ * (`tenant_id` u otro nombre propio) y que el autorregistro de organización
+ * puede llegar a escribir. Mismo criterio que {@link CUENTA_ESCRIBE_EN}:
+ * lista corta y deliberada, no la raíz `directory.tenants` a secas —tiene
+ * ~300 FKs entrantes en el modelo, muchas de auditoría, y recorrerlas todas
+ * contra una base remota sería lento sin aportar nada que esta lista no dé.
+ *
+ * Sus hijos (sedes de práctica, sedes y ofertas de la unidad diagnóstica, el
+ * historial de auditoría de `practice.practices`...) los alcanza
+ * {@link deleteWithDependents} solo, recorriendo el grafo de FK desde acá.
+ */
+const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
+  { table: 'audit.tenants_history', column: 'tenant_id' },
+  { table: 'directory.tenant_memberships', column: 'tenant_id' },
+  { table: 'practice.practices', column: 'tenant_id' },
+  { table: 'diagnostic_units.diagnostic_units', column: 'tenant_id' },
+  { table: 'messaging.notification_requests', column: 'tenant_id' },
+  { table: 'messaging.in_app_notifications', column: 'tenant_id' },
+];
+
+/**
+ * Borra la organización, su unidad diagnóstica (si la hubo) y la cuenta de
+ * su owner, dejando la base compartida tal como estaba.
+ *
+ * Mismo criterio que {@link deleteRegisteredPractitioners}: recorre
+ * {@link TENANT_ESCRIBE_EN} para alcanzar lo que cuelga del tenant, borra el
+ * tenant en sí (nombrando, si algo lo sigue referenciando, qué tabla falta
+ * en la lista), y delega en {@link deleteAccounts} la cuenta del owner — el
+ * autorregistro de organización no crea ninguna `profiles.persons` (el
+ * owner es una cuenta administrativa, no un paciente ni un profesional).
+ *
+ * @param fixtures - Las cuentas y tenants creados por la suite.
+ * @throws Si algo sobrevive al borrado.
+ */
+export async function deleteRegisteredOrganizations(
+  fixtures: readonly { userId: string; tenantId: string }[],
+): Promise<void> {
+  if (fixtures.length === 0) return;
+  const userIds = fixtures.map((f) => f.userId);
+  const tenantIds = fixtures.map((f) => f.tenantId);
+  const client = testDbClient();
+  await client.connect();
+  try {
+    const graph = await readSchemaGraph(client);
+    const visited = new Set<string>();
+
+    for (const { table, column } of TENANT_ESCRIBE_EN) {
       const pk = graph.primaryKey.get(table);
       if (pk === undefined) continue;
       const { rows } = await client.query<{ id: string }>(
         `select "${pk}"::text as id from ${table} where "${column}"::text = any($1::text[])`,
-        [userIds],
+        [tenantIds],
       );
       await deleteWithDependents(
         client,
@@ -835,18 +994,10 @@ export async function deleteRegisteredPractitioners(
       );
     }
 
-    // Después de CUENTA_ESCRIBE_EN: `practice_sites.address_id` apunta acá.
-    for (const tabla of OWNER_SIN_FK) {
-      await client.query(
-        `delete from ${tabla} where owner_id::text = any($1::text[])`,
-        [[...userIds, ...personIds]],
-      );
-    }
-
     try {
       await client.query(
-        `delete from iam.users where id::text = any($1::text[])`,
-        [userIds],
+        `delete from directory.tenants where id::text = any($1::text[])`,
+        [tenantIds],
       );
     } catch (err) {
       const pgErr = err as {
@@ -860,30 +1011,39 @@ export async function deleteRegisteredPractitioners(
         const tablaHija = pgErr.table ?? '(desconocida)';
         if (graph.noBorrables.has(tablaHija)) {
           throw new Error(
-            `No se pudo limpiar iam.users: "${tablaHija}" es WORM (trigger forbid) ` +
-              `y la suite no debería ejercitar un flujo que escriba ahí contra la ` +
-              `base compartida. Detalle: ${pgErr.detail ?? pgErr.message}`,
+            `No se pudo limpiar directory.tenants: "${tablaHija}" es WORM ` +
+              `(trigger forbid) y la suite no debería ejercitar un flujo que ` +
+              `escriba ahí contra la base compartida. Detalle: ${pgErr.detail ?? pgErr.message}`,
           );
         }
         throw new Error(
-          `No se pudo limpiar iam.users: sigue referenciado desde "${tablaHija}" ` +
-            `(constraint "${pgErr.constraint ?? '?'}"). Agregala a CUENTA_ESCRIBE_EN ` +
-            `en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
+          `No se pudo limpiar directory.tenants: sigue referenciado desde ` +
+            `"${tablaHija}" (constraint "${pgErr.constraint ?? '?'}"). Agregala ` +
+            `a TENANT_ESCRIBE_EN en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
         );
       }
       throw err;
     }
 
     const { rows: resto } = await client.query<{ total: string }>(
-      `select count(*)::text as total from iam.users where id::text = any($1::text[])`,
-      [userIds],
+      `select count(*)::text as total from directory.tenants where id::text = any($1::text[])`,
+      [tenantIds],
     );
     const pendientes = Number(resto[0]?.total ?? 0);
     if (pendientes > 0) {
       throw new Error(
-        `La limpieza dejó ${pendientes} cuenta(s) de profesional en la base compartida.`,
+        `La limpieza dejó ${pendientes} organización(es) en la base compartida.`,
       );
     }
+
+    await deleteAccounts(
+      client,
+      graph,
+      visited,
+      userIds,
+      [],
+      'de organización',
+    );
   } finally {
     await client.end();
   }

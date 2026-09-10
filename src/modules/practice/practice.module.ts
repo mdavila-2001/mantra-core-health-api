@@ -111,10 +111,18 @@ import {
   // lo usa DENTRO de su propia transacción para dar de alta el consultorio
   // propio declarado en el alta. `practice` no importa `iam`, así que la
   // dependencia va en un solo sentido y no cierra ciclo.
+  //
+  // `PracticesRepository`/`PracticeSitesRepository` se exportan además para
+  // `diagnostic_units`: `DiagnosticUnitProvisioningService` (subtarea 1.5)
+  // los necesita para dar de alta la práctica y la sede propias de una
+  // unidad diagnóstica al registrar un centro de imagenología. `practice` no
+  // importa `diagnostic_units`, así que tampoco acá cierra ciclo.
   exports: [
     PracticeTenantLookupService,
     PractitionerSitesService,
     OwnSiteProvisioningService,
+    PracticesRepository,
+    PracticeSitesRepository,
   ],
 })
 export class PracticeModule {}

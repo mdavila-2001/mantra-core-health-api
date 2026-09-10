@@ -11,6 +11,7 @@ import {
 } from '../repositories';
 import type { CreateOwnSiteDto } from '../dto';
 import type { PracticeSites } from '../entities';
+import { siteCodeBase, uniqueCode } from '../site-code';
 
 /**
  * A quién pertenece el consultorio que se va a provisionar: el tenant en el
@@ -192,21 +193,14 @@ export class OwnSiteProvisioningService {
     practiceId: string,
     name: string,
   ): Promise<string> {
-    const base = name
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .toUpperCase()
-      .replace(/[^A-Z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 90);
-    let candidate = base || 'CONSULTORIO';
-    let suffix = 1;
-    while (
-      await this.sitesRepo.findByPracticeAndCode(em, practiceId, candidate)
-    ) {
-      suffix += 1;
-      candidate = `${base || 'CONSULTORIO'}-${suffix}`;
-    }
-    return candidate;
+    return uniqueCode(
+      siteCodeBase(name, 'CONSULTORIO'),
+      async (candidate) =>
+        (await this.sitesRepo.findByPracticeAndCode(
+          em,
+          practiceId,
+          candidate,
+        )) !== null,
+    );
   }
 }

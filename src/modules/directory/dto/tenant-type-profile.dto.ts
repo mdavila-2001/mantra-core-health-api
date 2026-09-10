@@ -1,11 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsArray,
+  IsBoolean,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { OwnSiteAddressDto } from '../../practice/dto';
 
 /**
  * Datos que identifican a una aseguradora (`PAYER`).
@@ -103,4 +111,133 @@ export class BrokerProfileDto {
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;
+}
+
+/**
+ * La sede primaria del centro de diagnóstico, declarada en el alta.
+ *
+ * Mismo bloque de dirección que el consultorio propio del profesional
+ * (`practice/dto/create-own-site.dto.ts`, P20): es el mismo caso —una sede
+ * que nace junto con quien la administra, sin que exista todavía ninguna
+ * práctica ni sede previa a la que colgarse—.
+ */
+export class DiagnosticUnitPrimarySiteDto {
+  /**
+   * Nombre de la sede, tal como la va a ver el paciente.
+   *
+   * Opcional: si no viene, se usa «Sede central».
+   */
+  @ApiPropertyOptional({ maxLength: 200, example: 'Sede central' })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(200)
+  name?: string;
+
+  /**
+   * Zona horaria IANA de la sede. Por defecto la de la organización.
+   */
+  @ApiPropertyOptional({ example: 'America/La_Paz' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  timeZone?: string;
+
+  /**
+   * Dirección de la sede. Opcional: se puede cargar más tarde.
+   */
+  @ApiPropertyOptional({ type: OwnSiteAddressDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => OwnSiteAddressDto)
+  address?: OwnSiteAddressDto;
+}
+
+/**
+ * Datos del centro de diagnóstico. Obligatorio cuando `tenantType` es
+ * `DIAGNOSTIC_CENTER`... salvo que ninguno de sus campos lo sea: el alta
+ * puede declarar sólo el tipo y completar la unidad diagnóstica después
+ * desde el módulo 23 (`POST /diagnostic-units`).
+ *
+ * Declarar este bloque con cualquier otro `tenantType` es un error del
+ * cliente (`TenantTypeProfileService.assertProfileMatchesType`), mismo
+ * criterio que `payer`/`broker`.
+ */
+export class DiagnosticUnitProfileDto {
+  /**
+   * Código de la unidad dentro del tenant. Por defecto, el código de la
+   * organización.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'CENTRO_IMAGEN_CENTRAL' })
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  @MaxLength(100)
+  @Matches(/^[A-Za-z0-9._-]+$/, {
+    message: 'El código sólo admite letras, dígitos, punto, guion y guion bajo',
+  })
+  code?: string;
+
+  /**
+   * Nombre operativo de la unidad. Por defecto, la razón social.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    example: 'Centro de Diagnóstico por Imágenes',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  name?: string;
+
+  /**
+   * Tipo de unidad: por imágenes o de laboratorio clínico. Por defecto,
+   * imágenes — es la única de las dos que este alta público sirve hoy; el
+   * laboratorio de sangre tiene su propio módulo pendiente (ver handoff del
+   * front).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  diagnosticUnitTypeConceptId?: string;
+
+  /**
+   * Modalidades que ofrece (Rayos X, Ecografía, Tomografía…). Lista cerrada
+   * del módulo 23 (`diagnostic-unit-modalities.ts`), no el catálogo de
+   * terminología: declarar una fuera de esa lista es un 422 que nombra cuál.
+   */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(20)
+  @IsUUID(undefined, { each: true })
+  modalityConceptIds?: string[];
+
+  /**
+   * Si acepta pacientes espontáneos de mostrador, sin orden previa.
+   */
+  @ApiPropertyOptional({ default: true })
+  @IsOptional()
+  @IsBoolean()
+  walkInAvailable?: boolean;
+
+  /**
+   * Si realiza toma de muestras o estudios a domicilio.
+   */
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  homeCollectionAvailable?: boolean;
+
+  /**
+   * La sede operativa inicial de la unidad. Opcional: sin ella, la unidad
+   * nace sin sede primaria y se completa después desde el módulo 23.
+   */
+  @ApiPropertyOptional({ type: DiagnosticUnitPrimarySiteDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DiagnosticUnitPrimarySiteDto)
+  primarySite?: DiagnosticUnitPrimarySiteDto;
 }
