@@ -342,4 +342,74 @@ describe('IamOrganizationSelfRegistrationService', () => {
     expect(result.tenantId).toBe('tenant-1');
     expect(result.emailVerificationSent).toBe(false);
   });
+
+  describe('legalEntityType (subtarea 1.1)', () => {
+    it('resuelve el concepto del tipo societario elegido', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: { ...dto.organization, legalEntityType: 'SRL' },
+      });
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_SRL,
+        }),
+      );
+    });
+
+    it('sin el campo, cae a la forma legada COMPANY', async () => {
+      const d = build();
+
+      await d.service.registerOrganization(dto);
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_COMPANY,
+        }),
+      );
+    });
+
+    it('deriva el país de constitución cuando el tipo lo declara y el cliente no manda país', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          legalEntityType: 'US_LLC',
+          countryConceptId: undefined,
+        },
+      });
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_US_LLC,
+          countryConceptId: CONCEPTS.COUNTRY_US,
+        }),
+      );
+    });
+
+    it('no pisa el país declarado explícitamente por el cliente', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          legalEntityType: 'US_LLC',
+          countryConceptId: 'country-explicito',
+        },
+      });
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ countryConceptId: 'country-explicito' }),
+      );
+    });
+  });
 });

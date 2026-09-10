@@ -18,6 +18,10 @@ import {
   type TenantTypeCode,
 } from '../../directory/directory.concepts';
 import {
+  LEGAL_ENTITY_TYPE_CODES,
+  type LegalEntityTypeCode,
+} from '../../directory/legal-entity-types';
+import {
   BrokerProfileDto,
   DiagnosticUnitProfileDto,
   PayerProfileDto,
@@ -79,6 +83,26 @@ export class RegisterOrganizationDetailsDto {
   })
   @IsIn(TENANT_TYPE_CODES)
   tenantType!: TenantTypeCode;
+
+  /**
+   * Tipo societario, del diccionario internacional (subtarea 1.1).
+   *
+   * Opcional en el contrato por compatibilidad: los clientes que ya integraron
+   * contra este endpoint no lo declaran, y sin él la organización sigue
+   * naciendo con la forma legada `COMPANY`. El formulario público de alta SÍ
+   * lo exige — «SOLO SELECCIONAR AL REGISTRAR», registro de procesos 2.2.1.1 —
+   * pero esa obligatoriedad es del cliente, no de este contrato.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Sin ' +
+      'él, la organización nace con la forma legada `COMPANY`.',
+    enum: LEGAL_ENTITY_TYPE_CODES,
+    example: 'SRL',
+  })
+  @IsOptional()
+  @IsIn(LEGAL_ENTITY_TYPE_CODES)
+  legalEntityType?: LegalEntityTypeCode;
 
   /**
    * Datos de aseguradora. Obligatorio cuando `tenantType` es `PAYER`.

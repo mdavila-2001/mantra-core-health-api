@@ -162,3 +162,48 @@ describe('RegisterOrganizationDto · diagnosticUnit (1.5)', () => {
     ).toEqual(['organization.diagnosticUnit.primarySite.address.longitude']);
   });
 });
+
+/**
+ * El tipo societario del diccionario internacional (subtarea 1.1). El DTO
+ * sólo comprueba que el código pertenezca al set cerrado; la coherencia con
+ * el país declarado y la derivación del concepto la comprueban
+ * `TenantTypeProfileService` e `IamOrganizationSelfRegistrationService`.
+ */
+describe('RegisterOrganizationDto · legalEntityType (1.1)', () => {
+  it('acepta un código boliviano', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        organization: { ...ALTA_MINIMA.organization, legalEntityType: 'SRL' },
+      }),
+    ).toEqual([]);
+  });
+
+  it('acepta un código de otra jurisdicción', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        organization: {
+          ...ALTA_MINIMA.organization,
+          legalEntityType: 'US_LLC',
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un código fuera del diccionario', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        organization: {
+          ...ALTA_MINIMA.organization,
+          legalEntityType: 'BO_SRL',
+        },
+      }),
+    ).toEqual(['organization.legalEntityType']);
+  });
+
+  it('sin el campo, el alta sigue siendo válida', async () => {
+    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+  });
+});

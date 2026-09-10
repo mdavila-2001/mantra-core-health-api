@@ -11,6 +11,10 @@ import {
   TERRITORIAL_TENANT_TYPES,
   type TenantTypeCode,
 } from '../directory.concepts';
+import {
+  LEGAL_ENTITY_TYPE_BY_CODE,
+  LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO,
+} from '../legal-entity-types';
 import type {
   BrokerProfileDto,
   DiagnosticUnitProfileDto,
@@ -54,6 +58,10 @@ export interface TenantTypeProfileInput {
    * `diagnosticUnit.code` no viene.
    */
   code?: string;
+  /**
+   * Tipo societario del diccionario internacional (subtarea 1.1); opcional.
+   */
+  legalEntityType?: string;
   /**
    * Datos del centro de diagnóstico; opcionales para `DIAGNOSTIC_CENTER`
    * (a diferencia de `payer`/`broker`, declarar el tipo sin este bloque es
@@ -130,6 +138,28 @@ export class TenantTypeProfileService {
         throw new PreconditionFailedException(
           `Un tenant de tipo ${tenantType} exige país y jurisdicción`,
           { tenantType, missing },
+        );
+      }
+    }
+
+    // Si el tipo societario declara un país y también viene `countryConceptId`,
+    // los dos deben coincidir: una S.R.L. boliviana no puede constituirse bajo
+    // jurisdicción peruana. Sin uno de los dos no hay nada que contrastar.
+    if (input.legalEntityType && input.countryConceptId) {
+      const entry = LEGAL_ENTITY_TYPE_BY_CODE.get(input.legalEntityType);
+      const expectedCountryConceptId = entry
+        ? LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO[entry.countryIso]
+        : undefined;
+      if (
+        expectedCountryConceptId &&
+        expectedCountryConceptId !== input.countryConceptId
+      ) {
+        throw new PreconditionFailedException(
+          `El tipo societario pertenece al derecho de ${entry!.countryIso} y no coincide con el país declarado`,
+          {
+            legalEntityType: input.legalEntityType,
+            countryConceptId: input.countryConceptId,
+          },
         );
       }
     }
