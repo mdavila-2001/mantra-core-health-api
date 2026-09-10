@@ -425,8 +425,13 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'legal-entity-type',
     name: 'Forma societaria',
     description:
-      'Figura jurídica con la que la organización está constituida, según el derecho comercial boliviano.',
+      'Figura jurídica con la que la organización está constituida. Las ocho primeras son del ' +
+      'derecho comercial boliviano; las siguientes son de otras jurisdicciones (subtarea 1.1, ' +
+      'diccionario internacional) — país y categoría canónica de cada una viajan como propiedades ' +
+      'del concepto (`legal-entity-country` / `legal-entity-canonical-category`), no acá.',
     concepts: [
+      // Bolivia — orden histórico, no se reordena: cambiar el ordinal de un
+      // concepto ya sembrado desplaza el `isDefault`/posición en bases vivas.
       CONCEPTS.LEGAL_ENTITY_SOLE_PROPRIETORSHIP,
       CONCEPTS.LEGAL_ENTITY_SRL,
       CONCEPTS.LEGAL_ENTITY_LTDA,
@@ -435,6 +440,22 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CONCEPTS.LEGAL_ENTITY_LIMITED_PARTNERSHIP,
       CONCEPTS.LEGAL_ENTITY_PARTNERSHIP_BY_SHARES,
       CONCEPTS.LEGAL_ENTITY_FOREIGN_BRANCH,
+      // Brasil
+      CONCEPTS.LEGAL_ENTITY_BR_LTDA,
+      CONCEPTS.LEGAL_ENTITY_BR_SA,
+      CONCEPTS.LEGAL_ENTITY_BR_MEI,
+      CONCEPTS.LEGAL_ENTITY_BR_EI,
+      CONCEPTS.LEGAL_ENTITY_BR_SLU,
+      CONCEPTS.LEGAL_ENTITY_BR_FILIAL_EST,
+      // Estados Unidos
+      CONCEPTS.LEGAL_ENTITY_US_LLC,
+      CONCEPTS.LEGAL_ENTITY_US_CORP,
+      CONCEPTS.LEGAL_ENTITY_US_SOLE_PROP,
+      CONCEPTS.LEGAL_ENTITY_US_LLP,
+      CONCEPTS.LEGAL_ENTITY_US_BRANCH,
+      // Argentina y México
+      CONCEPTS.LEGAL_ENTITY_AR_SAS,
+      CONCEPTS.LEGAL_ENTITY_MX_S_RL,
     ],
     // Sin preseleccionado: la forma societaria es un hecho registral, y el que
     // viniera puesto por omisión sería el que más filas tendría al final sin que

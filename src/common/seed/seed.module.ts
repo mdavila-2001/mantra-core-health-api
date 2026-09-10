@@ -56,6 +56,7 @@ import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
@@ -139,6 +140,7 @@ import { PracticeDefaultServicesSeedService } from './practice-default-services-
     DynamicEnumSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    LegalEntityTypesSeedService,
     BoOccupationsSeedService,
     BoEmployersSeedService,
     BoliviaFacilitiesSeedService,
@@ -162,6 +164,7 @@ import { PracticeDefaultServicesSeedService } from './practice-default-services-
     DynamicEnumSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    LegalEntityTypesSeedService,
     BoOccupationsSeedService,
     BoEmployersSeedService,
     BoliviaFacilitiesSeedService,
