@@ -1,7 +1,10 @@
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
 import { bootstrapTestApp, bearer, type TestContext } from './harness';
-import { boMunicipalityConceptId } from '../../src/common/seed/bo-geography.catalog';
+import {
+  boMunicipalityConceptId,
+  boDepartmentConceptId,
+} from '../../src/common/seed/bo-geography.catalog';
 import { BO_OCCUPATION_VALUE_SET } from '../../src/common/seed/bo-occupations.catalog';
 
 /**
@@ -52,6 +55,7 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
         sexAtBirth: 'FEMALE',
         phone: '+591 700 11111',
         residenceMunicipalityConceptId: municipioInicial,
+        issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
       })
       .expect(201);
 
@@ -393,6 +397,7 @@ describe('Perfil propio del paciente — leer y editar (integración)', () => {
           sexAtBirth: 'MALE',
           phone: '+591 700 22222',
           residenceMunicipalityConceptId: municipioInicial,
+          issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
         })
         .expect(201);
       const otroLogin = await http()

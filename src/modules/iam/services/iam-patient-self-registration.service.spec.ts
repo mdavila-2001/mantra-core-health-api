@@ -6,7 +6,11 @@ import { TracingService } from '../../../observability';
 // `UnauthorizedException` es la de Nest, no la de dominio: es la que usan el
 // resto de flujos de autenticación de IAM (login, activación de cuenta).
 import { UnauthorizedException } from '@nestjs/common';
-import { CONCEPTS, ConflictException } from '../../../common';
+import {
+  CONCEPTS,
+  ConflictException,
+  PreconditionFailedException,
+} from '../../../common';
 import { PROF } from '../../profiles/profiles.concepts';
 import { DIR } from '../../directory/directory.concepts';
 import { INS } from '../../insurance/insurance.concepts';
@@ -14,7 +18,10 @@ import {
   BOLIVIA_PUBLIC_INSURERS,
   carrierPlanId,
 } from '../../../common/seed/bolivia-insurance.catalog';
-import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
+import {
+  boMunicipalityConceptId,
+  boDepartmentConceptId,
+} from '../../../common/seed/bo-geography.catalog';
 import type { RegisterPatientDto } from '../dto';
 
 /**
@@ -38,6 +45,9 @@ const dto: RegisterPatientDto = {
   // ALV-009-bis) — el `build()` de este archivo mockea ese id como Sacaba,
   // Cochabamba. El uuid en sí no importa: es sólo la llave del mock.
   residenceMunicipalityConceptId: boMunicipalityConceptId('030301'),
+  // El departamento emisor es obligatorio desde la subtarea 1.4; el `build()`
+  // de este archivo mockea `administrativeAreas` para que lo acepte siempre.
+  issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
 };
 
 describe('IamPatientSelfRegistrationService', () => {
@@ -107,6 +117,9 @@ describe('IamPatientSelfRegistrationService', () => {
       findByMemberAndPlan: fn().mockResolvedValue(null),
       createCoverage: fn(),
     };
+    const administrativeAreas = {
+      assertIsAdministrativeArea: fn().mockResolvedValue(undefined),
+    };
 
     const service = new IamPatientSelfRegistrationService(
       em as never,
@@ -131,6 +144,7 @@ describe('IamPatientSelfRegistrationService', () => {
       tenantMembershipsRepo as never,
       logger as never,
       new TracingService(),
+      administrativeAreas as never,
     );
     return {
       service,
@@ -151,6 +165,7 @@ describe('IamPatientSelfRegistrationService', () => {
       coverageRepo,
       notificationsService,
       tenantMembershipsRepo,
+      administrativeAreas,
     };
   }
 
@@ -605,6 +620,43 @@ describe('IamPatientSelfRegistrationService', () => {
       // Antes, este `throw` ocurría dentro de `em.transactional` y revertía la
       // propia marca de expiración: el registro quedaba en ACTIVE para siempre.
       expect(verification.stateConceptId).toBe(CONCEPTS.STATE_EXPIRED);
+    });
+  });
+
+  describe('departamento emisor del documento (1.4)', () => {
+    it('comprueba el departamento contra VS_BO_DEPARTMENT antes de crear nada', async () => {
+      const d = build();
+
+      await d.service.registerPatient(dto);
+
+      expect(
+        d.administrativeAreas.assertIsAdministrativeArea,
+      ).toHaveBeenCalledWith(d.tx, dto.issuerAdministrativeAreaConceptId);
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          issuerAdministrativeAreaConceptId:
+            dto.issuerAdministrativeAreaConceptId,
+        }),
+      );
+    });
+
+    it('si el catálogo rechaza el departamento, el alta no escribe nada', async () => {
+      const d = build();
+      d.administrativeAreas.assertIsAdministrativeArea.mockRejectedValueOnce(
+        new PreconditionFailedException(
+          'El departamento no pertenece al catálogo de departamentos de Bolivia',
+        ),
+      );
+
+      await expect(d.service.registerPatient(dto)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+      expect(d.personsRepo.create).not.toHaveBeenCalled();
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
     });
   });
 });

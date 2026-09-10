@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { boDepartmentConceptId } from '../../src/common/seed/bo-geography.catalog';
 
 /**
  * FX-7 · quién ve el motivo de un bloqueo, y cuánto ve (9c).
@@ -85,6 +86,7 @@ describe('FX-7 · el motivo de un bloqueo, según quién mire', () => {
         phone: '+591 70000000',
         sexAtBirth: 'FEMALE',
         residenceMunicipalityConceptId: municipioId,
+        issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
       })
       .expect(201);
     quien.pid = alta.body.patientProfileId ?? alta.body.profileId;

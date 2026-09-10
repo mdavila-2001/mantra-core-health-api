@@ -103,7 +103,8 @@ describe('IamAuthController', () => {
   it('delegates patient self-registration with the client ip', async () => {
     const d = build();
     // Los cinco de abajo del documento y la contraseña son obligatorios desde
-    // la TAREA 03 (AC-03-3): sin ellos el DTO no valida.
+    // la TAREA 03 (AC-03-3); el departamento emisor lo es desde el PR #390
+    // del front (subtarea 1.4): sin ellos el DTO no valida.
     const dto = {
       nationalId: '1234567',
       password: 'password123',
@@ -113,6 +114,7 @@ describe('IamAuthController', () => {
       phone: '+591 70012345',
       sexAtBirth: 'FEMALE' as const,
       residenceMunicipalityConceptId: '11111111-1111-4111-8111-111111111111',
+      issuerAdministrativeAreaConceptId: '22222222-2222-4222-8222-222222222222',
     };
     await d.controller.registerPatient(dto, '1.2.3.4');
     expect(d.selfRegistrationService.registerPatient).toHaveBeenCalledWith(

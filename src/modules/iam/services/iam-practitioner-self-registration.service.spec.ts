@@ -4,7 +4,12 @@ const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 import { IamPractitionerSelfRegistrationService } from './iam-practitioner-self-registration.service';
 import { TracingService } from '../../../observability';
-import { CONCEPTS, ConflictException, SEED } from '../../../common';
+import {
+  CONCEPTS,
+  ConflictException,
+  PreconditionFailedException,
+  SEED,
+} from '../../../common';
 import { PROF } from '../../profiles/profiles.concepts';
 import { DIR } from '../../directory/directory.concepts';
 import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
@@ -23,10 +28,14 @@ const dto: RegisterPractitionerDto = {
 
 /**
  * Un concepto de `VS_BO_DEPARTMENT`, el que siembra `BoGeographySeedService`
- * para Santa Cruz. Va literal y no importado del seeder: la prueba comprueba
- * que el servicio pasa el uuid tal cual llega, no que sepa derivarlo.
+ * para Santa Cruz.
+ *
+ * Corregido en la subtarea 1.4: el literal anterior
+ * (`51fcbf8e-b4ea-5ba9-8aec-0df7be617c69`) era en realidad Tarija
+ * (`geo:bo:department:TJ`), no Santa Cruz — inocuo a nivel unitario porque el
+ * doble de `administrativeAreas` no mira el uuid, pero el nombre mentía.
  */
-const DEPARTAMENTO_SANTA_CRUZ = '51fcbf8e-b4ea-5ba9-8aec-0df7be617c69';
+const DEPARTAMENTO_SANTA_CRUZ = boDepartmentConceptId('SC');
 
 describe('IamPractitionerSelfRegistrationService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
@@ -106,6 +115,12 @@ describe('IamPractitionerSelfRegistrationService', () => {
         site: { id: 'site-own-1' },
       }),
     };
+    // Da por bueno cualquier departamento: la validación de catálogo tiene su
+    // propio spec; acá lo que se prueba es que el alta lo llama (o no) según
+    // haya documento, y que un rechazo suyo tumba el alta entera.
+    const administrativeAreas = {
+      assertIsAdministrativeArea: fn().mockResolvedValue(undefined),
+    };
 
     const service = new IamPractitionerSelfRegistrationService(
       em as never,
@@ -135,6 +150,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       logger as never,
       new TracingService(),
       ownSiteProvisioning as never,
+      administrativeAreas as never,
       fileUploadService as never,
     );
     return {
@@ -162,6 +178,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       activationsRepo,
       fileUploadService,
       ownSiteProvisioning,
+      administrativeAreas,
     };
   }
 
@@ -623,6 +640,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       ...dto,
       phone: '+591 70012345',
       nationalId: '4821993',
+      issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
     });
 
     expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
@@ -892,6 +910,60 @@ describe('IamPractitionerSelfRegistrationService', () => {
           photoFileId: undefined,
         }),
       );
+    });
+  });
+
+  /**
+   * El departamento emisor del documento (1.4): obligatorio con `nationalId`
+   * (PR #390 del front); la FK admite cualquier concepto, así que el
+   * servicio lo comprueba contra `VS_BO_DEPARTMENT` antes de escribir nada —
+   * la foto de perfil se sube a almacenamiento más abajo en la misma
+   * transacción y un rollback no la borraría.
+   */
+  describe('departamento emisor del documento (1.4)', () => {
+    it('comprueba el departamento contra VS_BO_DEPARTMENT cuando hay documento', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        nationalId: '4821993',
+        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+      });
+
+      expect(
+        d.administrativeAreas.assertIsAdministrativeArea,
+      ).toHaveBeenCalledWith(d.tx, DEPARTAMENTO_SANTA_CRUZ);
+    });
+
+    it('sin documento, no comprueba ningún departamento', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner(dto);
+
+      expect(
+        d.administrativeAreas.assertIsAdministrativeArea,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('si el catálogo rechaza el departamento, el alta no escribe nada', async () => {
+      const d = build();
+      d.administrativeAreas.assertIsAdministrativeArea.mockRejectedValueOnce(
+        new PreconditionFailedException(
+          'El departamento no pertenece al catálogo de departamentos de Bolivia',
+        ),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          nationalId: '4821993',
+          issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+      expect(d.personsRepo.create).not.toHaveBeenCalled();
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
     });
   });
 
