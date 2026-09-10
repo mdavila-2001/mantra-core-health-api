@@ -99,6 +99,26 @@ export const { seeds: DIAGNOSTIC_UNITS_CONCEPT_SEEDS, ids: DUNIT } =
       code: 'DU_MODALITY_ULTRASOUND',
       display: 'Ultrasound modality',
     },
+    // Las cuatro que faltaban para cubrir el formulario del centro de
+    // imagenología (subtarea 1.5, PR #404 del front — «RAYOS X, RESONANCIA,
+    // ETC.», handoff `alta-centro-imagenologia.md` §3.1): el catálogo sólo
+    // tenía rayos X y ecografía.
+    MODALITY_CT: {
+      code: 'DU_MODALITY_CT',
+      display: 'Computed tomography modality',
+    },
+    MODALITY_MRI: {
+      code: 'DU_MODALITY_MRI',
+      display: 'Magnetic resonance imaging modality',
+    },
+    MODALITY_MAMMOGRAPHY: {
+      code: 'DU_MODALITY_MAMMOGRAPHY',
+      display: 'Mammography modality',
+    },
+    MODALITY_BONE_DENSITOMETRY: {
+      code: 'DU_MODALITY_BONE_DENSITOMETRY',
+      display: 'Bone densitometry modality',
+    },
     COMPONENT_ROLE_PANEL: {
       code: 'DU_COMP_PANEL',
       display: 'Panel component role',
