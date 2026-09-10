@@ -17,7 +17,11 @@ import {
   TENANT_TYPE_CODES,
   type TenantTypeCode,
 } from '../../directory/directory.concepts';
-import { BrokerProfileDto, PayerProfileDto } from '../../directory/dto';
+import {
+  BrokerProfileDto,
+  DiagnosticUnitProfileDto,
+  PayerProfileDto,
+} from '../../directory/dto';
 
 /** Datos de la organización que se está dando de alta a sí misma. */
 export class RegisterOrganizationDetailsDto {
@@ -65,8 +69,9 @@ export class RegisterOrganizationDetailsDto {
     description:
       'Tipo de organización. Obligatorio: cada tipo exige sus propios datos. ' +
       'PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto ' +
-      '—PROVIDER, UNIVERSITY, PHARMACY y las cuatro institucionales ' +
-      '(HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— ' +
+      '—PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cuatro ' +
+      'institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y ' +
+      'HEALTH_BUSINESS— ' +
       'exigen país y ' +
       'jurisdicción, que es lo que determina bajo qué regulador operan.',
     enum: TENANT_TYPE_CODES,
@@ -92,6 +97,17 @@ export class RegisterOrganizationDetailsDto {
   @ValidateNested()
   @Type(() => BrokerProfileDto)
   broker?: BrokerProfileDto;
+
+  /**
+   * Datos del centro de diagnóstico. Sólo corresponde cuando `tenantType` es
+   * `DIAGNOSTIC_CENTER`; con cualquier otro tipo es un 422 (PR #404 del
+   * front, «alta del centro de imagenología»).
+   */
+  @ApiPropertyOptional({ type: DiagnosticUnitProfileDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DiagnosticUnitProfileDto)
+  diagnosticUnit?: DiagnosticUnitProfileDto;
 
   /**
    * País de la organización. Obligatorio para `PROVIDER`.
@@ -295,4 +311,14 @@ export class RegisterOrganizationResponseDto {
     description: 'Si se pudo encolar el correo de verificación',
   })
   emailVerificationSent!: boolean;
+
+  /**
+   * Id de la unidad diagnóstica creada. Sólo presente cuando `tenantType`
+   * es `DIAGNOSTIC_CENTER` y el alta declaró el bloque `diagnosticUnit`.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Id de la unidad diagnóstica creada (sólo DIAGNOSTIC_CENTER)',
+  })
+  diagnosticUnitId?: string;
 }
