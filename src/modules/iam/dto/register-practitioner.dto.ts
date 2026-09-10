@@ -297,14 +297,20 @@ export class RegisterPractitionerDto {
    * elegir el departamento rompía el alta entera en vez de enriquecerla.
    *
    * Se ignora sin `nationalId`: sin documento no hay identificador al que
-   * atarle un departamento de emisión.
+   * atarle un departamento de emisión. **Con documento pasa a ser obligatorio**
+   * (PR #390 del front): `@ValidateIf` sin `@IsOptional` — agregarlo anularía
+   * la condición y dejaría el campo opcional siempre.
    */
   @ApiPropertyOptional({
     format: 'uuid',
     description:
-      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)',
+      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT); ' +
+      'obligatorio si se envía `nationalId`',
   })
-  @IsOptional()
+  @ValidateIf(
+    (dto: RegisterPractitionerDto) =>
+      typeof dto.nationalId === 'string' && dto.nationalId.trim() !== '',
+  )
   @IsUUID()
   issuerAdministrativeAreaConceptId?: string;
 
