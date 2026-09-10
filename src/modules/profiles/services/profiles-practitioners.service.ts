@@ -758,8 +758,9 @@ export class ProfilesPractitionersService {
     cambios: {
       municipalityConceptId?: string;
       lines?: string;
-      latitude?: number;
-      longitude?: number;
+      /** `null` en las dos quita el punto. Ver `ReplaceResidenceAddressData`. */
+      latitude?: number | null;
+      longitude?: number | null;
     },
     actorUserId: string,
     ahora: Date,
@@ -1209,7 +1210,9 @@ export class ProfilesPractitionersService {
         if (
           dto.residenceMunicipalityConceptId !== undefined ||
           dto.homeAddressLines !== undefined ||
-          dto.homeLatitude !== undefined
+          // `null` también cuenta: quitar el punto es un cambio.
+          dto.homeLatitude !== undefined ||
+          dto.homeLongitude !== undefined
         ) {
           await this.reemplazarDomicilio(
             tx,

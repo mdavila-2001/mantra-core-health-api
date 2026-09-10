@@ -27,6 +27,22 @@ import {
 import { BIRTH_SEX_CODES, type BirthSexCode } from '../profiles.concepts';
 
 /**
+ * Si el par de coordenadas viene a **quitar** el punto del mapa.
+ *
+ * Quitar es mandar los dos extremos en `null`, y es una afirmación distinta de
+ * no mandarlos —eso es «no lo toqué»—. Sin esta distinción no había forma de
+ * borrar una ubicación mal puesta: el servicio conserva la anterior cuando no
+ * llega ninguna, así que un punto equivocado quedaba para siempre.
+ *
+ * **Medio `null` no quita nada.** Si sólo uno viene en `null`, esto devuelve
+ * `false` y la validación de más abajo exige que los dos sean números, así que
+ * el `null` suelto falla como el dato incoherente que es.
+ */
+function quitaElPunto(latitud: unknown, longitud: unknown): boolean {
+  return latitud === null && longitud === null;
+}
+
+/**
  * Cuerpo de `PATCH /profiles/patients/me`.
  *
  * ## Por qué existe
@@ -321,23 +337,25 @@ export class UpdateOwnPatientProfileDto {
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(
     (dto: UpdateOwnPatientProfileDto) =>
-      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+      !quitaElPunto(dto.homeLatitude, dto.homeLongitude) &&
+      (dto.homeLatitude !== undefined || dto.homeLongitude !== undefined),
   )
   @IsNumber()
   @Min(-90)
   @Max(90)
-  homeLatitude?: number;
+  homeLatitude?: number | null;
 
   /** Longitud del domicilio. Ver {@link UpdateOwnPatientProfileDto.homeLatitude}. */
   @ApiPropertyOptional({ minimum: -180, maximum: 180 })
   @ValidateIf(
     (dto: UpdateOwnPatientProfileDto) =>
-      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+      !quitaElPunto(dto.homeLatitude, dto.homeLongitude) &&
+      (dto.homeLatitude !== undefined || dto.homeLongitude !== undefined),
   )
   @IsNumber()
   @Min(-180)
   @Max(180)
-  homeLongitude?: number;
+  homeLongitude?: number | null;
 
   /**
    * Municipio del lugar de trabajo (miembro de `VS_BO_MUNICIPALITY`).
@@ -354,23 +372,25 @@ export class UpdateOwnPatientProfileDto {
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(
     (dto: UpdateOwnPatientProfileDto) =>
-      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
   )
   @IsNumber()
   @Min(-90)
   @Max(90)
-  workLatitude?: number;
+  workLatitude?: number | null;
 
   /** Longitud del trabajo. Ver {@link UpdateOwnPatientProfileDto.workLatitude}. */
   @ApiPropertyOptional({ minimum: -180, maximum: 180 })
   @ValidateIf(
     (dto: UpdateOwnPatientProfileDto) =>
-      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
   )
   @IsNumber()
   @Min(-180)
   @Max(180)
-  workLongitude?: number;
+  workLongitude?: number | null;
 
   /**
    * Empresa donde trabaja, como miembro de `VS_BO_EMPLOYER`. En blanco, se

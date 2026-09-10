@@ -646,7 +646,9 @@ export class ProfilesPatientsService {
       if (
         dto.residenceMunicipalityConceptId !== undefined ||
         dto.homeAddressLines !== undefined ||
-        (dto.homeLatitude !== undefined && dto.homeLongitude !== undefined)
+        // `null` también cuenta: quitar el punto es un cambio.
+        dto.homeLatitude !== undefined ||
+        dto.homeLongitude !== undefined
       ) {
         await this.reemplazarDireccion(
           tx,
@@ -666,7 +668,8 @@ export class ProfilesPatientsService {
       if (
         dto.workMunicipalityConceptId !== undefined ||
         dto.workAddressLines !== undefined ||
-        (dto.workLatitude !== undefined && dto.workLongitude !== undefined)
+        dto.workLatitude !== undefined ||
+        dto.workLongitude !== undefined
       ) {
         await this.reemplazarDireccion(
           tx,
@@ -1152,8 +1155,16 @@ export class ProfilesPatientsService {
     cambios: {
       municipio?: string;
       lines?: string;
-      latitude?: number;
-      longitude?: number;
+      /**
+       * `undefined` no toca el punto; `null` en los dos lo **quita**.
+       *
+       * La distinción hace falta desde que el perfil deja mover la ubicación:
+       * sin ella, el punto sólo se puede cambiar por otro y una ubicación mal
+       * puesta se queda para siempre —abajo, `tieneGps` conserva la anterior
+       * cuando no llega ninguna—.
+       */
+      latitude?: number | null;
+      longitude?: number | null;
     },
     actorUserId: string,
     ahora: Date,
@@ -1171,14 +1182,24 @@ export class ProfilesPatientsService {
         : cambios.lines.trim() === ''
           ? undefined
           : cambios.lines.trim();
+    // Quitar el punto: los dos extremos en `null`. `undefined` a undefined
+    // porque la columna es nullable y es lo que la escritura espera para
+    // «sin dato»; el DTO ya rechazó los `null` a medias.
+    const quitaGps = cambios.latitude === null && cambios.longitude === null;
     const tieneGps =
-      cambios.latitude !== undefined && cambios.longitude !== undefined;
-    const latitude = tieneGps
-      ? cambios.latitude
-      : numeroDeColumna(vigente?.latitude);
-    const longitude = tieneGps
-      ? cambios.longitude
-      : numeroDeColumna(vigente?.longitude);
+      !quitaGps &&
+      cambios.latitude !== undefined &&
+      cambios.longitude !== undefined;
+    const latitude = quitaGps
+      ? undefined
+      : tieneGps
+        ? (cambios.latitude ?? undefined)
+        : numeroDeColumna(vigente?.latitude);
+    const longitude = quitaGps
+      ? undefined
+      : tieneGps
+        ? (cambios.longitude ?? undefined)
+        : numeroDeColumna(vigente?.longitude);
 
     const sinCambios =
       (vigente?.municipalityConceptId ?? undefined) === municipio &&
