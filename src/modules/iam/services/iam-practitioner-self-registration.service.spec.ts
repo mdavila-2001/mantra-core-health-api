@@ -7,6 +7,7 @@ import { TracingService } from '../../../observability';
 import { CONCEPTS, ConflictException, SEED } from '../../../common';
 import { PROF } from '../../profiles/profiles.concepts';
 import { DIR } from '../../directory/directory.concepts';
+import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
 import type { RegisterPractitionerDto } from '../dto';
 
 const dto: RegisterPractitionerDto = {
@@ -152,6 +153,8 @@ describe('IamPractitionerSelfRegistrationService', () => {
       accountLinksRepo,
       identifiersRepo,
       contactPointsRepo,
+      addressesRepo,
+      catalogConceptsRepo,
       tenantMembershipsRepo,
       emailVerificationsRepo,
       eventsRepo,
@@ -933,6 +936,95 @@ describe('IamPractitionerSelfRegistrationService', () => {
         ownPracticeId: 'pr-own-1',
         ownSiteId: 'site-own-1',
       });
+    });
+  });
+
+  /**
+   * El domicilio del alta (P19): calle y coordenadas, además del municipio
+   * que ya se aceptaba. Mismos tres campos y mismo ayudante
+   * (`createResidenceAddress`) que ya usa el registro de paciente.
+   */
+  describe('el domicilio del alta (P19)', () => {
+    const municipio = 'concept-santa-cruz';
+
+    it('con calle, coordenadas y municipio: escribe la fila HOME completa', async () => {
+      const d = build();
+      d.catalogConceptsRepo.findById.mockResolvedValue({
+        code: 'SC-SANTA_CRUZ_DE_LA_SIERRA',
+        display: 'Santa Cruz de la Sierra',
+      });
+
+      await d.service.registerPractitioner({
+        ...dto,
+        residenceMunicipalityConceptId: municipio,
+        homeAddressLines: 'Barrio Equipetrol, Calle 7 Este #12',
+        homeLatitude: -17.7689,
+        homeLongitude: -63.1956,
+      });
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'person-1',
+          useConceptId: CONCEPTS.ADDR_USE_HOME,
+          municipalityConceptId: municipio,
+          administrativeAreaConceptId: boDepartmentConceptId('SC'),
+          city: 'Santa Cruz de la Sierra',
+          lines: 'Barrio Equipetrol, Calle 7 Este #12',
+          // La columna es numeric y la entidad la mapea a texto.
+          latitude: '-17.7689',
+          longitude: '-63.1956',
+        }),
+      );
+    });
+
+    it('sólo con municipio: sigue igual que siempre, sin calle ni coordenadas', async () => {
+      const d = build();
+      d.catalogConceptsRepo.findById.mockResolvedValue({
+        code: 'SC-SANTA_CRUZ_DE_LA_SIERRA',
+        display: 'Santa Cruz de la Sierra',
+      });
+
+      await d.service.registerPractitioner({
+        ...dto,
+        residenceMunicipalityConceptId: municipio,
+      });
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          municipalityConceptId: municipio,
+          lines: undefined,
+          latitude: undefined,
+          longitude: undefined,
+        }),
+      );
+    });
+
+    it('sin municipio, calle ni coordenadas: no escribe ninguna dirección', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner(dto);
+
+      expect(d.addressesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('con calle pero sin municipio: igual escribe, sin departamento derivado', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        homeAddressLines: 'Calle Sucre 450',
+      });
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          municipalityConceptId: undefined,
+          administrativeAreaConceptId: undefined,
+          lines: 'Calle Sucre 450',
+        }),
+      );
     });
   });
 });

@@ -51052,6 +51052,18 @@ components:
           type: string
           format: uuid
           description: Municipio de residencia (catálogo VS_BO_MUNICIPALITY)
+        homeAddressLines:
+          type: string
+          maxLength: 500
+          description: Calle y número del domicilio particular
+        homeLatitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        homeLongitude:
+          type: number
+          minimum: -180
+          maximum: 180
         phone:
           type: string
           description: Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone.
@@ -51672,6 +51684,18 @@ components:
           type: string
           format: uuid
           description: Municipio de residencia (catálogo VS_BO_MUNICIPALITY)
+        homeAddressLines:
+          type: string
+          maxLength: 500
+          description: Calle y número del domicilio particular
+        homeLatitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        homeLongitude:
+          type: number
+          minimum: -180
+          maximum: 180
         phone:
           type: string
           description: Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone.

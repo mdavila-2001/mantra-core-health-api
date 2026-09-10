@@ -141,3 +141,67 @@ describe('RegisterPractitionerDto · ownSite (P20)', () => {
     expect(rutasConError(errores)).toEqual(['ownSite.name']);
   });
 });
+
+/**
+ * El domicilio del alta (P19): calle y coordenadas, mismo patrón que
+ * `RegisterPatientDto.homeLatitude` — el par viaja junto o no viaja.
+ */
+describe('RegisterPractitionerDto · domicilio (P19)', () => {
+  it('acepta los tres campos del domicilio', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        residenceMunicipalityConceptId: '11111111-1111-4111-8111-111111111111',
+        homeAddressLines: 'Barrio Equipetrol, Calle 7 Este #12',
+        homeLatitude: -17.7689,
+        homeLongitude: -63.1956,
+      }),
+    ).toEqual([]);
+  });
+
+  it('acepta el alta sin ningún dato de domicilio', async () => {
+    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+  });
+
+  it('rechaza latitud sin longitud', async () => {
+    expect(
+      await propiedadesConError({ ...ALTA_MINIMA, homeLatitude: -17.7689 }),
+    ).toEqual(['homeLongitude']);
+  });
+
+  it('rechaza longitud sin latitud', async () => {
+    expect(
+      await propiedadesConError({ ...ALTA_MINIMA, homeLongitude: -63.1956 }),
+    ).toEqual(['homeLatitude']);
+  });
+
+  it('rechaza la calle vacía: ausente y vacía no son lo mismo', async () => {
+    expect(
+      await propiedadesConError({ ...ALTA_MINIMA, homeAddressLines: '' }),
+    ).toEqual(['homeAddressLines']);
+  });
+
+  it('rechaza una latitud fuera de rango', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        homeLatitude: 91,
+        homeLongitude: -63.1956,
+      }),
+    ).toEqual(['homeLatitude']);
+  });
+
+  it('el alta asistida (OmitType) hereda el domicilio', async () => {
+    const { password: _password, ...altaSinPassword } = ALTA_MINIMA;
+    const dto = plainToInstance(AssistedPractitionerRegistrationDto, {
+      ...altaSinPassword,
+      reason: 'Alta de plantel',
+      homeLatitude: -17.7689,
+    });
+    const errores = await validate(dto, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    });
+    expect(rutasConError(errores)).toEqual(['homeLongitude']);
+  });
+});
