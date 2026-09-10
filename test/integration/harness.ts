@@ -950,6 +950,11 @@ const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   { table: 'diagnostic_units.diagnostic_units', column: 'tenant_id' },
   { table: 'messaging.notification_requests', column: 'tenant_id' },
   { table: 'messaging.in_app_notifications', column: 'tenant_id' },
+  // Un tenant PAYER materializa su aseguradora en la misma transacción del
+  // alta (`TenantTypeProfileService.materializeProfile`); faltaba acá y
+  // cualquier suite que registrara una aseguradora por
+  // `POST /iam/auth/register-organization` no podía limpiarse (subtarea 1.1).
+  { table: 'insurance.insurance_carriers', column: 'tenant_id' },
 ];
 
 /**
