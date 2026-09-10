@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { boDepartmentConceptId } from '../../src/common/seed/bo-geography.catalog';
 
 /**
  * FX-9 · las tres carreras que la agenda tiene que perder siempre (H-1).
@@ -121,6 +122,7 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
         phone: '+591 70000000',
         sexAtBirth: 'FEMALE',
         residenceMunicipalityConceptId: municipioId,
+        issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
       })
       .expect(201);
     quien.pid = alta.body.patientProfileId ?? alta.body.profileId;

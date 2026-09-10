@@ -30,6 +30,7 @@ import {
   RelatedPersonsRepository,
 } from '../../profiles/repositories';
 import { composeAccountDisplayName } from '../../profiles/person-name';
+import { AdministrativeAreaCatalogService } from '../../profiles/services/administrative-area-catalog.service';
 import {
   AddressesRepository,
   ContactPointsRepository,
@@ -131,6 +132,7 @@ export class IamPatientSelfRegistrationService {
     private readonly tenantMembershipsRepo: TenantMembershipsRepository,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
+    private readonly administrativeAreas: AdministrativeAreaCatalogService,
   ) {
     this.logger.setContext(IamPatientSelfRegistrationService.name);
   }
@@ -199,6 +201,16 @@ export class IamPatientSelfRegistrationService {
           'Ya existe una cuenta con ese documento de identidad',
         );
       }
+
+      // El departamento emisor es obligatorio en el DTO, pero la columna que
+      // lo recibe (`identifiers.issuer_administrative_area_concept_id`) es una
+      // FK plana a `terminology.catalog_concepts`: la base aceptaría CUALQUIER
+      // concepto (un municipio, una especialidad) como si fuera un
+      // departamento. Se comprueba antes de escribir nada.
+      await this.administrativeAreas.assertIsAdministrativeArea(
+        tx,
+        dto.issuerAdministrativeAreaConceptId,
+      );
 
       // 1) Cuenta ACTIVA con su contraseña definitiva.
       // El nombre para mostrar sale de las partes; si el cliente mandó la forma

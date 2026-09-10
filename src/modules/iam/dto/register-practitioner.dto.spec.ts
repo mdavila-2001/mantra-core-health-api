@@ -112,6 +112,71 @@ describe('RegisterPractitionerDto · ocupación y empresa (1.3)', () => {
   });
 });
 
+/**
+ * El departamento emisor del documento (1.4): `ALTA_MINIMA` no trae
+ * `nationalId`, así que sirve tal cual para «sin documento, el departamento
+ * no hace falta». Con documento pasa a ser obligatorio (PR #390 del front) —
+ * mismo catálogo `VS_BO_DEPARTMENT` que en `RegisterPatientDto`, pero acá
+ * condicionado a `nationalId` en vez de siempre obligatorio.
+ */
+describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', () => {
+  it('acepta el alta sin documento ni departamento', async () => {
+    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+  });
+
+  it('rechaza el documento sin departamento', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        nationalId: '4821993',
+      }),
+    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  });
+
+  it('acepta documento y departamento juntos', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        nationalId: '4821993',
+        issuerAdministrativeAreaConceptId:
+          '22222222-2222-4222-8222-222222222222',
+      }),
+    ).toEqual([]);
+  });
+
+  it('acepta el departamento sin documento: se ignora', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        issuerAdministrativeAreaConceptId:
+          '22222222-2222-4222-8222-222222222222',
+      }),
+    ).toEqual([]);
+  });
+
+  it('un documento en blanco no activa la exigencia del departamento', async () => {
+    // El `Matches` del propio `nationalId` ya lo rechaza; lo que se fija acá
+    // es que el `ValidateIf` no dispare por una condición mal escrita
+    // (`!== undefined` en vez de comprobar la cadena vacía).
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        nationalId: '',
+      }),
+    ).toEqual(['nationalId']);
+  });
+
+  it('rechaza un departamento que no es un uuid', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        nationalId: '4821993',
+        issuerAdministrativeAreaConceptId: 'geo:bo:department:SC',
+      }),
+    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  });
+});
+
 describe('RegisterPractitionerDto · ownSite (P20)', () => {
   it('acepta el alta sin ownSite: el campo es opcional', async () => {
     expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);

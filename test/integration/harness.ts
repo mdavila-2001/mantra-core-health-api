@@ -368,28 +368,51 @@ async function seedAdmin(orm: MikroORM): Promise<void> {
  * check. Cada suite volvía a escribir su propio alta, así que el próximo campo
  * obligatorio habría vuelto a romperlas una por una.
  *
- * El municipio se **busca**, no se clava: los ids son deterministas, pero
- * fijarlos haría caducar las suites el día que el namespace cambie.
+ * **Ampliado en la subtarea 1.4** con `issuerAdministrativeAreaConceptId`
+ * (departamento emisor del documento), obligatorio desde el PR #390 del
+ * front: mismo motivo, mismo riesgo de romper suites en silencio.
+ *
+ * El municipio y el departamento se **buscan**, no se clavan: los ids son
+ * deterministas, pero fijarlos haría caducar las suites el día que el
+ * namespace cambie. El departamento se busca con el mismo predicado que
+ * comprueba `AdministrativeAreaCatalogService.assertIsAdministrativeArea`
+ * (versión por defecto de `VS_BO_DEPARTMENT`, miembros incluidos): si algún
+ * día ese predicado cambia, esta consulta debe cambiar con él.
  *
  * @param ctx - El contexto de la prueba, del que sale la conexión.
- * @returns Los cuatro campos, listos para desparramar en el cuerpo del alta.
+ * @returns Los cinco campos, listos para desparramar en el cuerpo del alta.
  */
 export async function camposObligatoriosDePaciente(ctx: TestContext): Promise<{
   birthDate: string;
   phone: string;
   sexAtBirth: string;
   residenceMunicipalityConceptId: string;
+  issuerAdministrativeAreaConceptId: string;
 }> {
   const municipios = await ctx.orm.em.getConnection().execute<{ id: string }[]>(
     `select id from terminology.catalog_concepts
         where code like 'geo:bo:municipality:%' order by code limit 1`,
   );
+  const departamentos = await ctx.orm.em
+    .getConnection()
+    .execute<{ id: string }[]>(
+      `select m.concept_id as id
+         from terminology.value_set_members m
+         join terminology.value_set_versions v on v.id = m.value_set_version_id
+         join terminology.value_sets vs on vs.id = v.value_set_id
+        where vs.internal_code = 'VS_BO_DEPARTMENT'
+          and v.is_default
+          and m.included
+        order by m.ordinal
+        limit 1`,
+    );
 
   return {
     birthDate: '1990-01-01',
     phone: '+591 70000000',
     sexAtBirth: 'FEMALE',
     residenceMunicipalityConceptId: municipios[0]?.id ?? '',
+    issuerAdministrativeAreaConceptId: departamentos[0]?.id ?? '',
   };
 }
 

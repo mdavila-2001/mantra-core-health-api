@@ -26,6 +26,7 @@ import { PROF } from '../../profiles/profiles.concepts';
 const ALTA_MINIMA = {
   nationalId: '1234567',
   residenceMunicipalityConceptId: '11111111-1111-4111-8111-111111111111',
+  issuerAdministrativeAreaConceptId: '22222222-2222-4222-8222-222222222222',
   password: 'secreto12',
   name: 'Ana',
   lastName: 'Paz',
@@ -83,5 +84,53 @@ describe('RegisterPatientDto · parentesco del contacto de emergencia', () => {
         guardianRelationshipConceptId: '',
       }),
     ).toEqual(['guardianRelationshipConceptId']);
+  });
+});
+
+/**
+ * El departamento emisor del documento (1.4): obligatorio desde el PR #390
+ * del front — es lo que separa cédulas homónimas de departamentos distintos
+ * (backlog T-01). El DTO sólo comprueba la forma (uuid); que el uuid
+ * pertenezca de verdad a `VS_BO_DEPARTMENT` lo decide el servicio con
+ * `AdministrativeAreaCatalogService`.
+ */
+describe('RegisterPatientDto · departamento emisor del documento (1.4)', () => {
+  it('rechaza el alta sin el campo: es obligatorio', async () => {
+    const { issuerAdministrativeAreaConceptId: _omitido, ...sinDepartamento } =
+      ALTA_MINIMA;
+    expect(await propiedadesConError(sinDepartamento)).toEqual([
+      'issuerAdministrativeAreaConceptId',
+    ]);
+  });
+
+  it('rechaza null', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        issuerAdministrativeAreaConceptId: null,
+      }),
+    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  });
+
+  it('rechaza la cadena vacía: ausente y vacío no son lo mismo', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        issuerAdministrativeAreaConceptId: '',
+      }),
+    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  });
+
+  it('rechaza lo que no es un uuid', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        issuerAdministrativeAreaConceptId: 'geo:bo:department:SC',
+      }),
+    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  });
+
+  it('acepta un uuid', async () => {
+    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
   });
 });

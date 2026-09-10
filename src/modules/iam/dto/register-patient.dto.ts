@@ -93,15 +93,19 @@ export class RegisterPatientDto {
    * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`): la
    * terminación LP/CB/SC/... que evita confundir cédulas homónimas de
    * departamentos distintos (backlog T-01).
+   *
+   * Obligatorio desde el PR #390 del front (mockup): el formulario de alta
+   * ya no deja avanzar sin elegirlo, así que aceptarlo como opcional sólo
+   * escondería en el backend un dato que el cliente siempre manda. `@IsUUID`
+   * rechaza de una vez `undefined`, `null` y `''`.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     format: 'uuid',
     description:
       'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)',
   })
-  @IsOptional()
   @IsUUID()
-  issuerAdministrativeAreaConceptId?: string;
+  issuerAdministrativeAreaConceptId!: string;
 
   /**
    * Municipio de residencia (miembro de `VS_BO_MUNICIPALITY`).

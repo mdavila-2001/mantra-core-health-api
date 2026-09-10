@@ -51047,7 +51047,7 @@ components:
         issuerAdministrativeAreaConceptId:
           type: string
           format: uuid
-          description: Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)
+          description: Departamento emisor del documento (catálogo VS_BO_DEPARTMENT); obligatorio si se envía `nationalId`
         residenceMunicipalityConceptId:
           type: string
           format: uuid
@@ -51424,6 +51424,7 @@ components:
           maxLength: 200
       required:
         - nationalId
+        - issuerAdministrativeAreaConceptId
         - residenceMunicipalityConceptId
         - password
         - email
@@ -51687,7 +51688,7 @@ components:
         issuerAdministrativeAreaConceptId:
           type: string
           format: uuid
-          description: Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)
+          description: Departamento emisor del documento (catálogo VS_BO_DEPARTMENT); obligatorio si se envía `nationalId`
         residenceMunicipalityConceptId:
           type: string
           format: uuid
