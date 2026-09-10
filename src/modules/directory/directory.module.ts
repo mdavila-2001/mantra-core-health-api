@@ -3,6 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CommunityModule } from '../community/community.module';
 import { InsuranceModule } from '../insurance/insurance.module';
 import { TerminologyModule } from '../terminology/terminology.module';
+import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
 import {
   TenantAdministrationService,
   TenantTypeProfileService,
@@ -37,11 +38,16 @@ import {
   // directorio público, con el mismo puerto de proyección que ya usan las
   // unidades de diagnóstico. No hay ciclo: `community` no depende de
   // `directory`.
+  // DiagnosticUnitsModule (subtarea 1.5): `TenantTypeProfileService`
+  // materializa la unidad diagnóstica de un tenant `DIAGNOSTIC_CENTER`
+  // dentro de la misma transacción del alta. `diagnostic_units` no importa
+  // `directory`, así que la dependencia va en un solo sentido.
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     CommunityModule,
     InsuranceModule,
     TerminologyModule,
+    DiagnosticUnitsModule,
   ],
   controllers: [AdminTenantsController, TenantsController],
   providers: [

@@ -24,11 +24,26 @@ describe('TenantTypeProfileService', () => {
           new Map(ids.map((id) => [id, { id }])),
       ),
     };
+    const diagnosticUnitProvisioning = {
+      provision: fn(async () => ({
+        unitId: 'diagnostic-unit-1',
+        practiceId: 'practice-1',
+        siteId: 'site-1',
+        offeringIds: [],
+      })),
+    };
     const service = new TenantTypeProfileService(
       catalogRepo as never,
       conceptsRepo as never,
+      diagnosticUnitProvisioning as never,
     );
-    return { service, catalogRepo, conceptsRepo, tx: {} as never };
+    return {
+      service,
+      catalogRepo,
+      conceptsRepo,
+      diagnosticUnitProvisioning,
+      tx: {} as never,
+    };
   }
 
   describe('assertProfileMatchesType', () => {
@@ -242,10 +257,10 @@ describe('TenantTypeProfileService', () => {
   });
 
   describe('materializeProfile', () => {
-    it('crea la aseguradora del tenant PAYER pendiente de verificación', () => {
+    it('crea la aseguradora del tenant PAYER pendiente de verificación', async () => {
       const { service, catalogRepo, tx } = build();
 
-      const id = service.materializeProfile(
+      const id = await service.materializeProfile(
         tx,
         'tenant-1',
         {
@@ -278,10 +293,10 @@ describe('TenantTypeProfileService', () => {
       );
     });
 
-    it('crea el corredor del tenant BROKER con su licencia', () => {
+    it('crea el corredor del tenant BROKER con su licencia', async () => {
       const { service, catalogRepo, tx } = build();
 
-      const id = service.materializeProfile(
+      const id = await service.materializeProfile(
         tx,
         'tenant-2',
         {
@@ -304,10 +319,10 @@ describe('TenantTypeProfileService', () => {
       );
     });
 
-    it('no crea fila propia para PROVIDER: su realidad son las sedes', () => {
+    it('no crea fila propia para PROVIDER: su realidad son las sedes', async () => {
       const { service, catalogRepo, tx } = build();
 
-      const id = service.materializeProfile(
+      const id = await service.materializeProfile(
         tx,
         'tenant-3',
         {

@@ -181,6 +181,16 @@ export class IamOrganizationSelfRegistrationService {
         throw new ConflictException('Ya existe una cuenta con ese correo');
       }
 
+      // El tipo declarado y sus datos se validan antes de escribir nada —ni
+      // siquiera la cuenta—, y con ellos los conceptos: un `countryConceptId`
+      // inexistente sólo lo delataba la FK, ya dentro del INSERT, y salía
+      // como 500 sin decir qué campo era.
+      this.typeProfile.assertProfileMatchesType(dto.organization);
+      await this.typeProfile.assertConceptsExist(
+        tx,
+        this.typeProfile.declaredConcepts(dto.organization),
+      );
+
       // 1) Cuenta del owner, ACTIVA y con su contraseña definitiva: el titular
       // está presente, así que no hay token de activación ni cambio forzado.
       // El nombre sale de las partes; si el cliente mandó la forma anterior,
@@ -206,15 +216,6 @@ export class IamOrganizationSelfRegistrationService {
         actorUserId: user.id,
       });
 
-      // El tipo declarado y sus datos se validan antes de escribir nada, y con
-      // ellos los conceptos: un `countryConceptId` inexistente sólo lo delataba
-      // la FK, ya dentro del INSERT, y salía como 500 sin decir qué campo era.
-      this.typeProfile.assertProfileMatchesType(dto.organization);
-      await this.typeProfile.assertConceptsExist(
-        tx,
-        this.typeProfile.declaredConcepts(dto.organization),
-      );
-
       // 2) La organización, pendiente de verificación por la plataforma.
       const tenant = this.tenantsRepo.create(tx, {
         code: dto.organization.code,
@@ -234,9 +235,11 @@ export class IamOrganizationSelfRegistrationService {
       });
       await tx.flush();
 
-      // La aseguradora o el corredor se materializan aquí: elegir el tipo y no
-      // crear su fila dejaba un tenant etiquetado que no se sostiene en nada.
-      this.typeProfile.materializeProfile(
+      // La aseguradora, el corredor o la unidad diagnóstica se materializan
+      // aquí: elegir el tipo y no crear su fila dejaba un tenant etiquetado
+      // que no se sostiene en nada. Acá el owner ES el actor: es su propia
+      // alta, así que no hace falta el quinto parámetro.
+      const profileId = await this.typeProfile.materializeProfile(
         tx,
         tenant.id,
         dto.organization,
@@ -289,6 +292,13 @@ export class IamOrganizationSelfRegistrationService {
         membershipId: membership.id,
         status: tenant.statusConceptId,
         emailVerificationToken: raw,
+        // Sólo DIAGNOSTIC_CENTER materializa una fila propia con id útil
+        // para el cliente; PROVIDER no tiene tabla propia y PAYER/BROKER
+        // devuelven la suya por su propio contrato (no expuesto acá).
+        diagnosticUnitId:
+          dto.organization.tenantType === 'DIAGNOSTIC_CENTER'
+            ? profileId
+            : undefined,
       };
     });
 
@@ -320,6 +330,7 @@ export class IamOrganizationSelfRegistrationService {
       membershipId: created.membershipId,
       status: created.status,
       emailVerificationSent,
+      diagnosticUnitId: created.diagnosticUnitId,
     };
   }
 
