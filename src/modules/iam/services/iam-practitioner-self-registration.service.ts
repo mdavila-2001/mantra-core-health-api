@@ -38,6 +38,7 @@ import {
   ProfessionalCredentialsRepository,
 } from '../../profiles/repositories';
 import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
+import { AdministrativeAreaCatalogService } from '../../profiles/services/administrative-area-catalog.service';
 import {
   AddressesRepository,
   ContactPointsRepository,
@@ -269,6 +270,7 @@ export class IamPractitionerSelfRegistrationService {
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
     private readonly ownSiteProvisioning: OwnSiteProvisioningService,
+    private readonly administrativeAreas: AdministrativeAreaCatalogService,
     @Optional()
     private readonly fileUploadService?: FileUploadService,
   ) {
@@ -396,6 +398,18 @@ export class IamPractitionerSelfRegistrationService {
         throw new ConflictException('El practitioner_code ya está en uso', {
           practitionerCode,
         });
+      }
+
+      // Con documento, el departamento emisor es obligatorio (el DTO ya lo
+      // exige por `@ValidateIf`); se comprueba acá también porque un llamador
+      // que no pase por el `ValidationPipe` HTTP podría saltárselo. Antes de
+      // cualquier escritura: la foto de perfil se sube a almacenamiento más
+      // abajo y un rollback de la transacción no la borraría.
+      if (dto.nationalId) {
+        await this.assertDepartamentoEmisor(
+          tx,
+          dto.issuerAdministrativeAreaConceptId,
+        );
       }
 
       // El nombre para mostrar sale de las partes; si el cliente mandó la forma
@@ -609,6 +623,8 @@ export class IamPractitionerSelfRegistrationService {
       });
 
       if (dto.nationalId) {
+        // `issuerAdministrativeAreaConceptId` ya se comprobó semánticamente
+        // (VS_BO_DEPARTMENT) al principio de esta transacción.
         this.identifiersRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
@@ -829,6 +845,35 @@ export class IamPractitionerSelfRegistrationService {
           }
         : {}),
     };
+  }
+
+  /**
+   * Comprueba que el departamento emisor del documento sea uno real de
+   * Bolivia antes de dejarlo llegar a `common.identifiers`.
+   *
+   * La columna `issuer_administrative_area_concept_id` es una FK plana a
+   * `terminology.catalog_concepts`: la base aceptaría cualquier concepto (un
+   * municipio, una especialidad) como si fuera un departamento. El DTO exige
+   * el campo con `@ValidateIf` cuando hay `nationalId`, así que `conceptId`
+   * indefinido sólo puede llegar acá si alguien invoca el servicio sin pasar
+   * por el `ValidationPipe` HTTP — se lo rechaza igual, en vez de dejar que
+   * `assertIsAdministrativeArea` reciba `undefined`.
+   *
+   * @param tx - Contexto de persistencia de la transacción en curso.
+   * @param conceptId - El uuid declarado como `issuerAdministrativeAreaConceptId`.
+   * @throws PreconditionFailedException si falta o no pertenece a `VS_BO_DEPARTMENT`.
+   */
+  private async assertDepartamentoEmisor(
+    tx: EntityManager,
+    conceptId: string | undefined,
+  ): Promise<void> {
+    if (conceptId === undefined) {
+      throw new PreconditionFailedException(
+        'El departamento emisor es obligatorio cuando se declara el documento',
+        { field: 'issuerAdministrativeAreaConceptId' },
+      );
+    }
+    await this.administrativeAreas.assertIsAdministrativeArea(tx, conceptId);
   }
 
   /**
