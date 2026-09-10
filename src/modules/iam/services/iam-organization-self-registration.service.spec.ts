@@ -3,7 +3,11 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { IamOrganizationSelfRegistrationService } from './iam-organization-self-registration.service';
 import { TracingService } from '../../../observability';
-import { CONCEPTS, ConflictException } from '../../../common';
+import {
+  CONCEPTS,
+  ConflictException,
+  PreconditionFailedException,
+} from '../../../common';
 import { DIR } from '../../directory/directory.concepts';
 import type { RegisterOrganizationDto } from '../dto';
 
@@ -64,7 +68,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       assertProfileMatchesType: fn(),
       declaredConcepts: fn(() => ({})),
       assertConceptsExist: fn().mockResolvedValue(undefined),
-      materializeProfile: fn(() => undefined),
+      materializeProfile: fn().mockResolvedValue(undefined),
     };
 
     const service = new IamOrganizationSelfRegistrationService(
@@ -88,6 +92,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       usersRepo,
       credentialsRepo,
       rolesRepo,
+      eventsRepo,
       emailVerificationsRepo,
       tenantsRepo,
       membershipsRepo,
@@ -160,6 +165,68 @@ describe('IamOrganizationSelfRegistrationService', () => {
         tenantTypeConceptId: CONCEPTS.TENANT_TYPE_BROKER,
       }),
     );
+  });
+
+  describe('DIAGNOSTIC_CENTER (subtarea 1.5)', () => {
+    it('devuelve diagnosticUnitId cuando el tipo es DIAGNOSTIC_CENTER', async () => {
+      const d = build();
+      d.typeProfile.materializeProfile.mockResolvedValueOnce(
+        'diagnostic-unit-1',
+      );
+
+      const result = await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          tenantType: 'DIAGNOSTIC_CENTER',
+          diagnosticUnit: { modalityConceptIds: [] },
+        },
+      });
+
+      expect(result).toMatchObject({
+        tenantId: 'tenant-1',
+        ownerUserId: 'user-1',
+        membershipId: 'membership-1',
+        diagnosticUnitId: 'diagnostic-unit-1',
+      });
+      expect(d.eventsRepo.record).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          detailJson: expect.objectContaining({
+            flow: 'organization-self-registration',
+          }),
+        }),
+      );
+    });
+
+    it('no lleva diagnosticUnitId cuando el tipo no es DIAGNOSTIC_CENTER', async () => {
+      const d = build();
+      // Aunque el doble de materializeProfile devolviera algo (no debería para
+      // PROVIDER), la respuesta no lo expone: el campo es propio del tipo.
+      d.typeProfile.materializeProfile.mockResolvedValueOnce('carrier-1');
+
+      const result = await d.service.registerOrganization(dto);
+
+      expect(result.diagnosticUnitId).toBeUndefined();
+    });
+
+    it('rechaza con PreconditionFailedException sin crear nada, si el perfil no coincide con el tipo', async () => {
+      const d = build();
+      d.typeProfile.assertProfileMatchesType.mockImplementation(() => {
+        throw new PreconditionFailedException(
+          'El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER',
+        );
+      });
+
+      await expect(d.service.registerOrganization(dto)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+
+      // La validación se adelantó a ANTES de crear la cuenta: un tipo mal
+      // formado no debe dejar ni el usuario ni el tenant a medio hacer.
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+      expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+    });
   });
 
   it('makes the owner an OWNER member with the directory active status', async () => {
