@@ -12,6 +12,12 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+// Mismas constantes de longitud que el alta y que el PATCH de paciente: son el
+// mismo dato declarado por la misma persona.
+import {
+  EMPLOYER_FREE_TEXT_MAX_LENGTH,
+  OCCUPATION_FREE_TEXT_MAX_LENGTH,
+} from '../../iam/dto/register-patient.dto';
 
 /**
  * Cuerpo de `PATCH /profiles/practitioners/me`.
@@ -227,4 +233,76 @@ export class UpdateOwnPractitionerProfileDto {
   @Min(-180)
   @Max(180)
   homeLongitude?: number;
+
+  /* --- ocupación y empleador, con salida a texto libre --------------------
+     Mismo contrato y misma regla de exclusión mutua que
+     `UpdateOwnPatientProfileDto`: el catálogo (`VS_BO_OCCUPATION`/
+     `VS_BO_EMPLOYER`) gana cuando viene junto al texto libre, y `''` borra
+     el campo correspondiente sin caer en el `IsUUID`. La escritura la
+     aplican `aplicarOcupacion`/`aplicarEmpresa` (`profiles/person-work-fields.ts`),
+     compartidas con el DTO de paciente. */
+
+  /**
+   * Ocupación del catálogo (VS_BO_OCCUPATION). En blanco, se borra. Si viene,
+   * el texto libre se descarta.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta.',
+  })
+  // `''` no es un uuid mal escrito, es la ausencia de ocupación: sin esto,
+  // quitar la del catálogo sería un 400.
+  @ValidateIf(
+    (dto: UpdateOwnPractitionerProfileDto) => dto.occupationConceptId !== '',
+  )
+  @IsOptional()
+  @IsUUID()
+  occupationConceptId?: string;
+
+  /**
+   * Ocupación en texto libre. En blanco, se borra. Declararla es decir que no
+   * está en el catálogo, así que borra el concepto que hubiera —salvo que el
+   * mismo cuerpo traiga uno, y entonces manda el catálogo—.
+   */
+  @ApiPropertyOptional({
+    maxLength: OCCUPATION_FREE_TEXT_MAX_LENGTH,
+    description:
+      'Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)
+  occupationFreeText?: string;
+
+  /**
+   * Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER). En blanco, se
+   * borra. Mismo criterio que la ocupación: si viene junto al texto libre,
+   * gana el catálogo.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta.',
+  })
+  @ValidateIf(
+    (dto: UpdateOwnPractitionerProfileDto) => dto.workEmployerConceptId !== '',
+  )
+  @IsOptional()
+  @IsUUID()
+  workEmployerConceptId?: string;
+
+  /**
+   * Empresa en texto libre, para cuando no está en el catálogo. En blanco, se
+   * borra. Se ignora si el mismo cuerpo trae `workEmployerConceptId`.
+   */
+  @ApiPropertyOptional({
+    maxLength: EMPLOYER_FREE_TEXT_MAX_LENGTH,
+    description:
+      'Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)
+  workEmployerFreeText?: string;
 }

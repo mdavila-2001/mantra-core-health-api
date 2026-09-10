@@ -77283,6 +77283,16 @@
             "maxLength": 200,
             "description": "Ocupación en texto libre, para cuando no está en el catálogo"
           },
+          "workEmployerConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)"
+          },
+          "workEmployerFreeText": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Empresa en texto libre, para cuando no está en el catálogo"
+          },
           "timeZone": {
             "type": "string",
             "maxLength": 100
@@ -78094,6 +78104,16 @@
             "type": "string",
             "maxLength": 200,
             "description": "Ocupación en texto libre, para cuando no está en el catálogo"
+          },
+          "workEmployerConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)"
+          },
+          "workEmployerFreeText": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Empresa en texto libre, para cuando no está en el catálogo"
           },
           "timeZone": {
             "type": "string",
@@ -78924,6 +78944,26 @@
             "type": "number",
             "minimum": -180,
             "maximum": 180
+          },
+          "occupationConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta."
+          },
+          "occupationFreeText": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla."
+          },
+          "workEmployerConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta."
+          },
+          "workEmployerFreeText": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto."
           }
         }
       },

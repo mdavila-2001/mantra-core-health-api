@@ -91,6 +91,11 @@ import {
   type InsuranceSector,
 } from '../../../common/seed/bolivia-insurance.catalog';
 import { ProfileOwnershipService } from './profile-ownership.service';
+import {
+  textoOpcional,
+  aplicarOcupacion,
+  aplicarEmpresa,
+} from '../person-work-fields';
 
 /**
  * Deja fuera de la respuesta los campos sin valor.
@@ -114,23 +119,6 @@ function sinCamposAusentes<T extends object>(respuesta: T): T {
 }
 
 /**
- * Normaliza un texto opcional que el titular puede querer dejar en blanco.
- *
- * `''` —y un texto de sólo espacios— significa «esto no lo tengo», no «tengo un
- * dato vacío». La columna es nullable, así que la forma de decirlo es `NULL`:
- * guardar la cadena vacía dejaría un valor que la lectura devolvería como `""`,
- * indistinguible de un dato real y contrario a la convención del contrato —lo
- * que no se declaró viaja ausente—. Además metería un espacio de más al
- * recomponer el nombre visible.
- *
- * @param valor - Lo que llegó en el cuerpo.
- * @returns El texto, o `undefined` para que la columna quede en `NULL`.
- */
-function textoOpcional(valor: string): string | undefined {
-  return valor.trim() === '' ? undefined : valor;
-}
-
-/**
  * Una columna `numeric` mapeada como string, de vuelta a número.
  *
  * `common.addresses.latitude`/`longitude` viajan como texto en la entidad
@@ -143,85 +131,6 @@ function textoOpcional(valor: string): string | undefined {
  */
 function numeroDeColumna(valor: string | undefined): number | undefined {
   return valor === undefined ? undefined : Number(valor);
-}
-
-/**
- * Escribe la ocupación, que se declara de dos formas que no pueden convivir.
- *
- * La persona tiene una sola ocupación, y el modelo la guarda en dos columnas: el
- * concepto del catálogo (`VS_BO_OCCUPATION`) para lo que está en la lista y el
- * texto libre para lo que no. Dejar las dos con valor diría que tiene dos, y la
- * lectura tendría que elegir una por su cuenta.
- *
- * La regla es la misma del alta: **el catálogo gana**. Declarar un concepto borra
- * el texto libre —aunque venga en el mismo cuerpo—, y declarar un texto borra el
- * concepto, porque escribir la ocupación a mano es decir que no está en la lista.
- * Vaciar uno de los dos no toca al otro: es quitar lo que se declaró, no
- * redeclararlo.
- *
- * @param person - La persona bajo edición, que se muta.
- * @param dto - Los campos que llegaron en el cuerpo.
- */
-function aplicarOcupacion(
-  person: Persons,
-  dto: UpdateOwnPatientProfileDto,
-): void {
-  const conceptoDeclarado = dto.occupationConceptId;
-
-  if (dto.occupationFreeText !== undefined) {
-    person.occupationFreeText = textoOpcional(dto.occupationFreeText);
-    // Sólo un texto con contenido desplaza al concepto: vaciarlo es quedarse sin
-    // texto, no negar la ocupación del catálogo. Y si el cuerpo también trae
-    // concepto, decide el bloque de abajo y éste sobra.
-    if (
-      person.occupationFreeText !== undefined &&
-      conceptoDeclarado === undefined
-    ) {
-      person.occupationConceptId = undefined;
-    }
-  }
-
-  if (conceptoDeclarado !== undefined) {
-    person.occupationConceptId = textoOpcional(conceptoDeclarado);
-    if (person.occupationConceptId !== undefined) {
-      person.occupationFreeText = undefined;
-    }
-  }
-}
-
-/**
- * Escribe la empresa donde trabaja, con la misma regla de las dos formas que
- * no pueden convivir que rige la ocupación — ver {@link aplicarOcupacion}, del
- * que ésta es la copia exacta para `work_employer_concept_id`/
- * `work_employer_free_text`. Existe separada y no parametrizada porque las dos
- * parejas de columnas viven en la misma entidad y una función genérica sobre
- * «cuál par» sería más difícil de leer que la duplicación de ocho líneas.
- *
- * @param person - La persona bajo edición, que se muta.
- * @param dto - Los campos que llegaron en el cuerpo.
- */
-function aplicarEmpresa(
-  person: Persons,
-  dto: UpdateOwnPatientProfileDto,
-): void {
-  const conceptoDeclarado = dto.workEmployerConceptId;
-
-  if (dto.workEmployerFreeText !== undefined) {
-    person.workEmployerFreeText = textoOpcional(dto.workEmployerFreeText);
-    if (
-      person.workEmployerFreeText !== undefined &&
-      conceptoDeclarado === undefined
-    ) {
-      person.workEmployerConceptId = undefined;
-    }
-  }
-
-  if (conceptoDeclarado !== undefined) {
-    person.workEmployerConceptId = textoOpcional(conceptoDeclarado);
-    if (person.workEmployerConceptId !== undefined) {
-      person.workEmployerFreeText = undefined;
-    }
-  }
 }
 
 /** Las cuatro partes del nombre, que son las que recomponen `display_name`. */

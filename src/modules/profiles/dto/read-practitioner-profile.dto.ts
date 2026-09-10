@@ -304,6 +304,38 @@ export class PractitionerProfileSummaryDto {
   @ApiPropertyOptional({ type: OwnAddressDto })
   homeAddress?: OwnAddressDto;
 
+  /**
+   * Ocupación elegida del catálogo (VS_BO_OCCUPATION). Sólo en la lectura
+   * propia, igual que el domicilio.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Ocupación elegida del catálogo (VS_BO_OCCUPATION)',
+  })
+  occupationConceptId?: string;
+
+  /**
+   * Ocupación en texto libre. Nunca viaja junto a {@link occupationConceptId}:
+   * es la salida para lo que no está en el catálogo.
+   */
+  @ApiPropertyOptional({ description: 'Ocupación declarada en texto libre' })
+  occupationFreeText?: string;
+
+  /**
+   * Empresa donde trabaja, elegida del catálogo (VS_BO_EMPLOYER). Mismo
+   * criterio que la ocupación: nunca viaja junto a
+   * {@link workEmployerFreeText}.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)',
+  })
+  workEmployerConceptId?: string;
+
+  /** Empresa en texto libre, para cuando no está en el catálogo. */
+  @ApiPropertyOptional({ description: 'Empresa declarada en texto libre' })
+  workEmployerFreeText?: string;
+
   @ApiProperty({ format: 'uuid' })
   practitionerCategoryConceptId!: string;
 

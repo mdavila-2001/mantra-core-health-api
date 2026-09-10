@@ -18,8 +18,12 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { AttachableFileService } from '../../common/services';
+import { boOccupationConceptId } from '../../../common/seed/bo-occupations.catalog';
+import { boEmployerConceptId } from '../../../common/seed/bo-employers.catalog';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+const BO_OCCUPATION_CONCEPT_ID = boOccupationConceptId('DOCENTE');
+const BO_EMPLOYER_CONCEPT_ID = boEmployerConceptId('BANCO_UNION');
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -1111,6 +1115,42 @@ describe('ProfilesPractitionersService', () => {
       });
     });
 
+    /**
+     * Ocupación y empleador (1.3): la lectura propia los trae, igual que el
+     * domicilio o el documento — son un dato personal, no de la Guía.
+     */
+    it('devuelve la ocupación y el empleador declarados', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        occupationConceptId: BO_OCCUPATION_CONCEPT_ID,
+        workEmployerFreeText: 'Consultores Médicos Asociados S.R.L.',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      });
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.occupationConceptId).toBe(BO_OCCUPATION_CONCEPT_ID);
+      expect(perfil.occupationFreeText).toBeUndefined();
+      expect(perfil.workEmployerFreeText).toBe(
+        'Consultores Médicos Asociados S.R.L.',
+      );
+      expect(perfil.workEmployerConceptId).toBeUndefined();
+    });
+
     /** Sin domicilio declarado, `homeAddress` no viaja como objeto vacío. */
     it('sin domicilio declarado, homeAddress queda ausente', async () => {
       const d = build();
@@ -1456,6 +1496,188 @@ describe('ProfilesPractitionersService', () => {
         expect.anything(),
         expect.objectContaining({ lines: 'Av. Brasil 1234' }),
       );
+    });
+
+    /**
+     * Ocupación y empleador (1.3): catálogo o texto, nunca los dos — misma
+     * matriz de reglas que `PATCH /profiles/patients/me`, compartida por
+     * `aplicarOcupacion`/`aplicarEmpresa` (`profiles/person-work-fields.ts`).
+     */
+    describe('ocupación y empresa: catálogo o texto, nunca los dos', () => {
+      /** El objeto mutable que representa la fila de `persons`. */
+      function personConOcupacion(): any {
+        return {
+          id: 'per-1',
+          displayName: 'Dr. Uno',
+          occupationFreeText: 'Médico rural',
+        };
+      }
+
+      /** Deja el doble listo para editar, con la persona dada. */
+      function prepararConPersona(d: ReturnType<typeof build>, person: any) {
+        const practitioner = practitionerBase();
+        d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+          personId: 'per-1',
+        });
+        d.personsRepo.findById.mockResolvedValue(person);
+        d.practitionersRepo.findById.mockResolvedValue(practitioner);
+      }
+
+      it('elegir una ocupación del catálogo borra el texto libre que hubiera', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          { occupationConceptId: BO_OCCUPATION_CONCEPT_ID },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.occupationConceptId).toBe(BO_OCCUPATION_CONCEPT_ID);
+        expect(person.occupationFreeText).toBeUndefined();
+      });
+
+      it('vaciar la del catálogo la deja en NULL y no toca el texto libre', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          { occupationConceptId: '' },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.occupationConceptId).toBeUndefined();
+        expect(person.occupationFreeText).toBe('Médico rural');
+      });
+
+      it('declararla en texto libre borra la del catálogo', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          { occupationFreeText: 'Docente' },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.occupationFreeText).toBe('Docente');
+        expect(person.occupationConceptId).toBeUndefined();
+      });
+
+      it('vaciar el texto libre no borra la del catálogo', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          { occupationFreeText: '' },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.occupationFreeText).toBeUndefined();
+        expect(person.occupationConceptId).toBe(BO_OCCUPATION_CONCEPT_ID);
+      });
+
+      it('con las dos ocupaciones en el mismo cuerpo gana el catálogo', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          {
+            occupationConceptId: BO_OCCUPATION_CONCEPT_ID,
+            occupationFreeText: 'Docente',
+          },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.occupationConceptId).toBe(BO_OCCUPATION_CONCEPT_ID);
+        expect(person.occupationFreeText).toBeUndefined();
+      });
+
+      it('vaciar la del catálogo y declarar texto en el mismo cuerpo deja el texto', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          { occupationConceptId: '', occupationFreeText: 'Docente' },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.occupationConceptId).toBeUndefined();
+        expect(person.occupationFreeText).toBe('Docente');
+      });
+
+      /* ---- empresa: misma matriz de reglas que la ocupación --------------- */
+
+      it('elegir una empresa del catálogo borra el texto libre que hubiera', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        person.workEmployerFreeText = 'Kiosco de la esquina';
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          { workEmployerConceptId: BO_EMPLOYER_CONCEPT_ID },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.workEmployerConceptId).toBe(BO_EMPLOYER_CONCEPT_ID);
+        expect(person.workEmployerFreeText).toBeUndefined();
+      });
+
+      it('vaciar la empresa del catálogo la deja en NULL y no toca el texto libre', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        person.workEmployerConceptId = BO_EMPLOYER_CONCEPT_ID;
+        person.workEmployerFreeText = 'Kiosco de la esquina';
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          { workEmployerConceptId: '' },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.workEmployerConceptId).toBeUndefined();
+        expect(person.workEmployerFreeText).toBe('Kiosco de la esquina');
+      });
+
+      it('declarar la empresa en texto libre borra la del catálogo', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        person.workEmployerConceptId = BO_EMPLOYER_CONCEPT_ID;
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          { workEmployerFreeText: 'Kiosco de la esquina' },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.workEmployerFreeText).toBe('Kiosco de la esquina');
+        expect(person.workEmployerConceptId).toBeUndefined();
+      });
+
+      it('con las dos empresas en el mismo cuerpo gana el catálogo', async () => {
+        const d = build();
+        const person = personConOcupacion();
+        prepararConPersona(d, person);
+
+        await d.service.updateOwnPractitionerProfile(
+          {
+            workEmployerConceptId: BO_EMPLOYER_CONCEPT_ID,
+            workEmployerFreeText: 'Kiosco de la esquina',
+          },
+          { id: 'u-1' } as any,
+        );
+
+        expect(person.workEmployerConceptId).toBe(BO_EMPLOYER_CONCEPT_ID);
+        expect(person.workEmployerFreeText).toBeUndefined();
+      });
     });
   });
   describe('dónde atiende cada uno, en la guía', () => {
@@ -2072,6 +2294,37 @@ describe('ProfilesPractitionersService', () => {
       await expect(
         d.service.getPractitionerSummary('per-x'),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    /**
+     * Ocupación y empleador (1.3): son un dato personal, no de la Guía —
+     * la ficha que ve un tercero no los trae aunque `persons` los tenga.
+     */
+    it('no expone la ocupación ni el empleador a un tercero', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'u-titular',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        occupationConceptId: BO_OCCUPATION_CONCEPT_ID,
+        workEmployerFreeText: 'Consultores Médicos Asociados S.R.L.',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+
+      const perfil = await d.service.getPractitionerSummary('per-1');
+
+      expect(perfil).not.toHaveProperty('occupationConceptId');
+      expect(perfil).not.toHaveProperty('occupationFreeText');
+      expect(perfil).not.toHaveProperty('workEmployerConceptId');
+      expect(perfil).not.toHaveProperty('workEmployerFreeText');
     });
   });
 

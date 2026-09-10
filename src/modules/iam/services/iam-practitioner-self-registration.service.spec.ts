@@ -559,6 +559,63 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
+  /**
+   * El empleador (1.3): mismo par catálogo/texto libre que la ocupación, y
+   * misma regla ya probada en `IamPatientSelfRegistrationService` — el
+   * catálogo gana cuando llegan los dos.
+   */
+  it('persists the employer concept on the person', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      workEmployerConceptId: '36c99f5d-9417-51e8-89d2-4f54138bb323',
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        workEmployerConceptId: '36c99f5d-9417-51e8-89d2-4f54138bb323',
+        workEmployerFreeText: undefined,
+      }),
+    );
+  });
+
+  it('persists free text employer when no catalog concept is provided', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      workEmployerFreeText: 'Consultores Médicos Asociados S.R.L.',
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        workEmployerConceptId: undefined,
+        workEmployerFreeText: 'Consultores Médicos Asociados S.R.L.',
+      }),
+    );
+  });
+
+  it('when both are sent, the catalog concept wins over the free text employer', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      workEmployerConceptId: '36c99f5d-9417-51e8-89d2-4f54138bb323',
+      workEmployerFreeText: 'Consultores Médicos Asociados S.R.L.',
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        workEmployerConceptId: '36c99f5d-9417-51e8-89d2-4f54138bb323',
+        workEmployerFreeText: undefined,
+      }),
+    );
+  });
+
   it('stores the phone as a contact point and the document as an identifier', async () => {
     const d = build();
 
