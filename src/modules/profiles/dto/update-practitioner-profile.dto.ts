@@ -44,6 +44,18 @@ import {
 /** Formato aceptado por los cuatro campos telefónicos del perfil. */
 const PATRON_TELEFONO = /^[+]?[0-9 ()-]{6,}$/;
 
+/**
+ * Si el par de coordenadas viene a **quitar** el punto del mapa.
+ *
+ * Mismo criterio que en el `PATCH` del paciente: quitar es mandar los dos
+ * extremos en `null`, y es distinto de no mandarlos —eso es «no lo toqué»—.
+ * Medio `null` no quita nada: la validación de abajo exige entonces que los dos
+ * sean números, así que el `null` suelto falla como el dato incoherente que es.
+ */
+function quitaElPunto(latitud: unknown, longitud: unknown): boolean {
+  return latitud === null && longitud === null;
+}
+
 /** Mensaje único para los cuatro campos telefónicos del perfil. */
 const MENSAJE_TELEFONO =
   'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion';
@@ -216,23 +228,25 @@ export class UpdateOwnPractitionerProfileDto {
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(
     (dto: UpdateOwnPractitionerProfileDto) =>
-      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+      !quitaElPunto(dto.homeLatitude, dto.homeLongitude) &&
+      (dto.homeLatitude !== undefined || dto.homeLongitude !== undefined),
   )
   @IsNumber()
   @Min(-90)
   @Max(90)
-  homeLatitude?: number;
+  homeLatitude?: number | null;
 
   /** Longitud del domicilio. Ver {@link homeLatitude}. */
   @ApiPropertyOptional({ minimum: -180, maximum: 180 })
   @ValidateIf(
     (dto: UpdateOwnPractitionerProfileDto) =>
-      dto.homeLatitude !== undefined || dto.homeLongitude !== undefined,
+      !quitaElPunto(dto.homeLatitude, dto.homeLongitude) &&
+      (dto.homeLatitude !== undefined || dto.homeLongitude !== undefined),
   )
   @IsNumber()
   @Min(-180)
   @Max(180)
-  homeLongitude?: number;
+  homeLongitude?: number | null;
 
   /* --- ocupación y empleador, con salida a texto libre --------------------
      Mismo contrato y misma regla de exclusión mutua que

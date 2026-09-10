@@ -238,9 +238,16 @@ export interface ReplaceResidenceAddressData {
    * sólo el municipio, sigue siendo un dato).
    */
   readonly lines?: string;
-  /** Ambas o ninguna: el DTO ya rechaza el par incompleto. */
-  readonly latitude?: number;
-  readonly longitude?: number;
+  /**
+   * Ambas o ninguna: el DTO ya rechaza el par incompleto.
+   *
+   * Tres estados, no dos: `undefined` conserva el punto vigente, un par de
+   * números lo mueve, y **`null` en las dos lo quita**. Sin el tercero, una
+   * ubicación mal puesta sólo se podía cambiar por otra —nunca borrar—, porque
+   * la mezcla de aquí abajo conserva lo anterior cuando no llega nada.
+   */
+  readonly latitude?: number | null;
+  readonly longitude?: number | null;
   /** Quién edita, para la auditoría y el cierre de la fila anterior. */
   readonly actorUserId: string;
 }
@@ -291,13 +298,20 @@ export async function replaceResidenceAddress(
       : data.lines.trim() === ''
         ? undefined
         : data.lines.trim();
-  const tieneGps = data.latitude !== undefined && data.longitude !== undefined;
-  const latitude = tieneGps
-    ? data.latitude
-    : numeroDeColumna(vigente?.latitude);
-  const longitude = tieneGps
-    ? data.longitude
-    : numeroDeColumna(vigente?.longitude);
+  // Quitar el punto: los dos extremos en `null` (ver `latitude` en la interfaz).
+  const quitaGps = data.latitude === null && data.longitude === null;
+  const tieneGps =
+    !quitaGps && data.latitude !== undefined && data.longitude !== undefined;
+  const latitude = quitaGps
+    ? undefined
+    : tieneGps
+      ? (data.latitude ?? undefined)
+      : numeroDeColumna(vigente?.latitude);
+  const longitude = quitaGps
+    ? undefined
+    : tieneGps
+      ? (data.longitude ?? undefined)
+      : numeroDeColumna(vigente?.longitude);
 
   const sinCambios =
     (vigente?.municipalityConceptId ?? undefined) === municipalityConceptId &&
