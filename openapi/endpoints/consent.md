@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `consent`
 
-Referencia exhaustiva de 12 operación(es) del módulo `consent`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 15 operación(es) del módulo `consent`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-patient-objections`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents`
-- **Controladores:** `ConsentEvidenceController`, `ConsentSweepController`, `ConsentsController`, `HipaaAuthorizationsController`, `PatientObjectionsController`, `PrivacyRestrictionsController`, `ProcessingLegalBasesController`, `TreatmentInformedConsentsController`
+- **Etiquetas OpenAPI:** `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents`
+- **Controladores:** `ConsentEvidenceController`, `ConsentSweepController`, `ConsentsController`, `HipaaAuthorizationsController`, `PatientObjectionsController`, `PractitionerAccessRequestsController`, `PrivacyRestrictionsController`, `ProcessingLegalBasesController`, `TreatmentInformedConsentsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -20,9 +20,12 @@ Referencia exhaustiva de 12 operación(es) del módulo `consent`, derivada del c
 7. [POST /consent/internal/expiration-sweep](#7-post-consent-internal-expiration-sweep) — Expirar consentimientos y autorizaciones vencidas (barrido)
 8. [POST /consent/patient-objections](#8-post-consent-patient-objections) — Registrar objeción del paciente y materializar restricción
 9. [POST /consent/patient-objections/{id}/resolve](#9-post-consent-patient-objections-id-resolve) — Resolver objeción del paciente
-10. [POST /consent/privacy-restrictions](#10-post-consent-privacy-restrictions) — Aplicar restricción de privacidad que afecta RLS clínico
-11. [POST /consent/processing-legal-bases](#11-post-consent-processing-legal-bases) — Establecer/versionar base legal de procesamiento
-12. [POST /consent/treatment-informed-consents](#12-post-consent-treatment-informed-consents) — Capturar consentimiento informado de tratamiento
+10. [POST /consent/practitioner-access-requests](#10-post-consent-practitioner-access-requests) — Pedir acceso al expediente de un paciente encontrado en la búsqueda
+11. [POST /consent/practitioner-access-requests/{id}/decision](#11-post-consent-practitioner-access-requests-id-decision) — Aceptar (con las especialidades autorizadas) o rechazar la solicitud
+12. [GET /consent/practitioner-access-requests/mine](#12-get-consent-practitioner-access-requests-mine) — Mis solicitudes de vínculo pendientes de decisión
+13. [POST /consent/privacy-restrictions](#13-post-consent-privacy-restrictions) — Aplicar restricción de privacidad que afecta RLS clínico
+14. [POST /consent/processing-legal-bases](#14-post-consent-processing-legal-bases) — Establecer/versionar base legal de procesamiento
+15. [POST /consent/treatment-informed-consents](#15-post-consent-treatment-informed-consents) — Capturar consentimiento informado de tratamiento
 
 ---
 
@@ -1239,7 +1242,421 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /consent/privacy-restrictions
+## 10. POST /consent/practitioner-access-requests
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-practitioner-access`
+- **Nombre:** Pedir acceso al expediente de un paciente encontrado en la búsqueda
+- **Operation ID:** `PractitionerAccessRequestsController_request`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerAccessRequestsController.request](../../src/modules/consent/controllers/practitioner-access-requests.controller.ts)
+
+### Descripción de negocio
+
+Pedir acceso al expediente de un paciente encontrado en la búsqueda. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: FT-07-R05: el profesional pide acceso tras encontrar al paciente.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /consent/practitioner-access-requests` en `PractitionerAccessRequestsController_request`. El controlador delega en `PractitionerAccessRequestsService.request`. Valida el body como `RequestPractitionerAccessDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerAccessRequestResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RequestPractitionerAccessDto`; los campos opcionales se omiten.
+
+```http
+POST /consent/practitioner-access-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "specialtyConceptIds": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que se pide acceso (patient profile id) | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptIds` | Sí | `array<string>` | formato `uuid`; mínimo 1 elemento(s); máximo 50 elemento(s) | Especialidades/áreas para las que se pide acceso (concept ids del árbol de especialidades). El paciente decide cuáles de éstas autoriza — FT-07-R06. | `["valor-ejemplo"]` |
+| `reasonText` | No | `string` | longitud máxima 500 | Motivo declarado por el profesional (texto libre) | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /consent/practitioner-access-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "specialtyConceptIds": [
+    "valor-ejemplo"
+  ],
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerAccessRequestResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "requestedByUserId": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "requestedSpecialtyConceptIds": [
+    "valor-ejemplo"
+  ],
+  "authorizedSpecialtyConceptIds": [
+    "valor-ejemplo"
+  ],
+  "reasonText": "Texto descriptivo de ejemplo",
+  "requestedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Id del consent que representa la solicitud | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requestedByUserId` | Sí | `string` | formato `uuid` | Profesional que pidió el acceso | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Estado actual (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `requestedSpecialtyConceptIds` | Sí | `array<string>` | Sin restricción adicional declarada | Especialidades pedidas (concept ids) | `["valor-ejemplo"]` |
+| `authorizedSpecialtyConceptIds` | Sí | `array<string>` | Sin restricción adicional declarada | Especialidades ya autorizadas por el paciente (vacío si aún no decidió) | `["valor-ejemplo"]` |
+| `reasonText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Ya existe una solicitud pendiente o un vínculo activo con este paciente | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/practitioner-access-requests"
+}
+```
+
+---
+
+## 11. POST /consent/practitioner-access-requests/{id}/decision
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-practitioner-access`
+- **Nombre:** Aceptar (con las especialidades autorizadas) o rechazar la solicitud
+- **Operation ID:** `PractitionerAccessRequestsController_decide`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerAccessRequestsController.decide](../../src/modules/consent/controllers/practitioner-access-requests.controller.ts)
+
+### Descripción de negocio
+
+Aceptar (con las especialidades autorizadas) o rechazar la solicitud. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: FT-07-R05/R06/R07: el paciente decide, eligiendo qué áreas autoriza.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /consent/practitioner-access-requests/{id}/decision` en `PractitionerAccessRequestsController_decide`. El controlador delega en `PractitionerAccessRequestsService.decide`. Valida el body como `DecidePractitionerAccessRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerAccessRequestResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DecidePractitionerAccessRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /consent/practitioner-access-requests/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "decision": "ACCEPTED"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `decision` | Sí | `string` | valores: `ACCEPTED`, `DECLINED` | Sin descripción específica en el contrato OpenAPI. | `ACCEPTED` |
+| `authorizedSpecialtyConceptIds` | No | `array<string>` | formato `uuid`; máximo 50 elemento(s) | Subconjunto de las especialidades pedidas que el paciente autoriza. Obligatorio si decision = ACCEPTED. | `["valor-ejemplo"]` |
+| `validityMonths` | No | `number` | mínimo 1; máximo 60 | Meses de vigencia desde la aceptación (por defecto 12) | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /consent/practitioner-access-requests/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "decision": "ACCEPTED",
+  "authorizedSpecialtyConceptIds": [
+    "valor-ejemplo"
+  ],
+  "validityMonths": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerAccessRequestResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "requestedByUserId": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "requestedSpecialtyConceptIds": [
+    "valor-ejemplo"
+  ],
+  "authorizedSpecialtyConceptIds": [
+    "valor-ejemplo"
+  ],
+  "reasonText": "Texto descriptivo de ejemplo",
+  "requestedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Id del consent que representa la solicitud | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requestedByUserId` | Sí | `string` | formato `uuid` | Profesional que pidió el acceso | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Estado actual (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `requestedSpecialtyConceptIds` | Sí | `array<string>` | Sin restricción adicional declarada | Especialidades pedidas (concept ids) | `["valor-ejemplo"]` |
+| `authorizedSpecialtyConceptIds` | Sí | `array<string>` | Sin restricción adicional declarada | Especialidades ya autorizadas por el paciente (vacío si aún no decidió) | `["valor-ejemplo"]` |
+| `reasonText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
+| 409 | `CONFLICT` | Esta solicitud ya fue decidida | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La solicitud no tiene profesional asociado | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo se pueden autorizar especialidades que el profesional pidió | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | Aceptar exige autorizar al menos una especialidad; si no autorizás ninguna, rechazá la solicitud | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/practitioner-access-requests/{id}/decision"
+}
+```
+
+---
+
+## 12. GET /consent/practitioner-access-requests/mine
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-practitioner-access`
+- **Nombre:** Mis solicitudes de vínculo pendientes de decisión
+- **Operation ID:** `PractitionerAccessRequestsController_listMine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerAccessRequestsController.listMine](../../src/modules/consent/controllers/practitioner-access-requests.controller.ts)
+
+### Descripción de negocio
+
+Mis solicitudes de vínculo pendientes de decisión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: FT-07-R06: lo que el paciente logueado tiene pendiente de decidir.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /consent/practitioner-access-requests/mine` en `PractitionerAccessRequestsController_listMine`. El controlador delega en `PractitionerAccessRequestsService.listMineAsPatient`. No recibe body. El tipo de retorno estático es `Promise<PractitionerAccessRequestResponseDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /consent/practitioner-access-requests/mine HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /consent/practitioner-access-requests/mine HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerAccessRequestResponseDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "requestedByUserId": "00000000-0000-4000-8000-000000000001",
+    "status": "00000000-0000-4000-8000-000000000001",
+    "requestedSpecialtyConceptIds": [
+      "valor-ejemplo"
+    ],
+    "authorizedSpecialtyConceptIds": [
+      "valor-ejemplo"
+    ],
+    "reasonText": "Texto descriptivo de ejemplo",
+    "requestedAt": "2026-07-31T12:00:00.000Z"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/practitioner-access-requests/mine"
+}
+```
+
+---
+
+## 13. POST /consent/privacy-restrictions
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-privacy-restrictions`
@@ -1379,7 +1796,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /consent/processing-legal-bases
+## 14. POST /consent/processing-legal-bases
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-processing-legal-bases`
@@ -1518,7 +1935,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /consent/treatment-informed-consents
+## 15. POST /consent/treatment-informed-consents
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`

@@ -9,7 +9,7 @@
 # Módulo `community`
 
 **Fuente:** [`src/modules/community/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/community/README.md)
-· 12 controllers · 26 services · 18 repositories · 38 entidades · 30 DTO
+· 12 controllers · 27 services · 18 repositories · 39 entidades · 31 DTO
 
 ---
 

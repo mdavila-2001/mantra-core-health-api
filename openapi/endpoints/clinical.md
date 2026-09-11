@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `clinical`
 
-Referencia exhaustiva de 25 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 27 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records`
 - **Controladores:** `ClinicalEncountersController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionPoliciesController`, `ClinicalReadController`, `ClinicalRecordsController`
@@ -14,28 +14,30 @@ Referencia exhaustiva de 25 operación(es) del módulo `clinical`, derivada del 
 1. [POST /clinical/allergy-intolerances](#1-post-clinical-allergy-intolerances) — Registrar una alergia con reacciones
 2. [POST /clinical/care-episodes](#2-post-clinical-care-episodes) — Abrir un episodio de cuidado
 3. [POST /clinical/conditions](#3-post-clinical-conditions) — Registrar una condición/diagnóstico
-4. [POST /clinical/conditions/{id}/change-status](#4-post-clinical-conditions-id-change-status) — Cambiar el estado clínico de una condición
-5. [POST /clinical/diagnostic-reports](#5-post-clinical-diagnostic-reports) — Emitir un reporte diagnóstico desde la orden
-6. [POST /clinical/diagnostic-reports/{id}/release](#6-post-clinical-diagnostic-reports-id-release) — Liberar los resultados de un reporte diagnóstico
-7. [POST /clinical/encounters/{id}/close](#7-post-clinical-encounters-id-close) — Cerrar un encuentro en curso (gatilla facturación)
-8. [POST /clinical/encounters/check-in](#8-post-clinical-encounters-check-in) — Check-in de un encuentro con participantes y ubicación
-9. [POST /clinical/immunizations](#9-post-clinical-immunizations) — Registrar una inmunización
-10. [POST /clinical/medication-records](#10-post-clinical-medication-records) — Administrar/registrar medicación
-11. [POST /clinical/medication-requests](#11-post-clinical-medication-requests) — Prescribir medicación
-12. [POST /clinical/medication-requests/{id}/edit](#12-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
-13. [POST /clinical/medication-requests/{id}/invalidate](#13-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
-14. [POST /clinical/medication-requests/{id}/issue](#14-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
-15. [POST /clinical/medication-requests/{id}/renew](#15-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
-16. [POST /clinical/medication-requests/{id}/replace](#16-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
-17. [POST /clinical/medication-requests/{id}/sign](#17-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
-18. [POST /clinical/observations](#18-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
-19. [PATCH /clinical/observations/{id}/amend](#19-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
-20. [GET /clinical/patients/{patientProfileId}/summary](#20-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
-21. [GET /clinical/prescription-signature-policies](#21-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
-22. [POST /clinical/prescription-signature-policies](#22-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
-23. [POST /clinical/prescription-signature-policies/{id}/deactivate](#23-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
-24. [POST /clinical/procedures](#24-post-clinical-procedures) — Registrar un procedimiento
-25. [POST /clinical/service-requests](#25-post-clinical-service-requests) — Crear una orden de servicio
+4. [POST /clinical/conditions/{id}/attachments](#4-post-clinical-conditions-id-attachments) — Adjuntar un archivo ya subido a una condición
+5. [POST /clinical/conditions/{id}/change-status](#5-post-clinical-conditions-id-change-status) — Cambiar el estado clínico de una condición
+6. [POST /clinical/diagnostic-reports](#6-post-clinical-diagnostic-reports) — Emitir un reporte diagnóstico desde la orden
+7. [POST /clinical/diagnostic-reports/{id}/release](#7-post-clinical-diagnostic-reports-id-release) — Liberar los resultados de un reporte diagnóstico
+8. [POST /clinical/encounters/{id}/close](#8-post-clinical-encounters-id-close) — Cerrar un encuentro en curso (gatilla facturación)
+9. [POST /clinical/encounters/check-in](#9-post-clinical-encounters-check-in) — Check-in de un encuentro con participantes y ubicación
+10. [POST /clinical/immunizations](#10-post-clinical-immunizations) — Registrar una inmunización
+11. [POST /clinical/medication-records](#11-post-clinical-medication-records) — Administrar/registrar medicación
+12. [POST /clinical/medication-requests](#12-post-clinical-medication-requests) — Prescribir medicación
+13. [POST /clinical/medication-requests/{id}/edit](#13-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
+14. [POST /clinical/medication-requests/{id}/invalidate](#14-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
+15. [POST /clinical/medication-requests/{id}/issue](#15-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
+16. [POST /clinical/medication-requests/{id}/renew](#16-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
+17. [POST /clinical/medication-requests/{id}/replace](#17-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
+18. [POST /clinical/medication-requests/{id}/sign](#18-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
+19. [POST /clinical/observations](#19-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
+20. [PATCH /clinical/observations/{id}/amend](#20-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
+21. [GET /clinical/patients/{patientProfileId}/summary](#21-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
+22. [GET /clinical/prescription-signature-policies](#22-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
+23. [POST /clinical/prescription-signature-policies](#23-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
+24. [POST /clinical/prescription-signature-policies/{id}/deactivate](#24-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
+25. [POST /clinical/procedures](#25-post-clinical-procedures) — Registrar un procedimiento
+26. [POST /clinical/procedures/{id}/attachments](#26-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
+27. [POST /clinical/service-requests](#27-post-clinical-service-requests) — Crear una orden de servicio
 
 ---
 
@@ -483,7 +485,141 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /clinical/conditions/{id}/change-status
+## 4. POST /clinical/conditions/{id}/attachments
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-records`
+- **Nombre:** Adjuntar un archivo ya subido a una condición
+- **Operation ID:** `ClinicalRecordsController_attachFileToCondition`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalRecordsController.attachFileToCondition](../../src/modules/clinical/controllers/clinical-records.controller.ts)
+
+### Descripción de negocio
+
+Adjuntar un archivo ya subido a una condición. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: ALV-033 (reemplazo de ALV-032): liga un archivo ya subido a este diagnóstico puntual. Subí el archivo antes con `POST /common/files`.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/conditions/{id}/attachments` en `ClinicalRecordsController_attachFileToCondition`. El controlador delega en `ConditionsService.attachFile`. Valida el body como `AttachFileToConditionDto` y consume `application/json`. El tipo de retorno estático es `Promise<FileLinkResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AttachFileToConditionDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/conditions/00000000-0000-4000-8000-000000000001/attachments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/conditions/00000000-0000-4000-8000-000000000001/attachments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileLinkResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "ownerId": "00000000-0000-4000-8000-000000000001",
+  "ownerType": "USER",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | Sí | `string` | formato `uuid` | Identificador asociado a file. | `00000000-0000-4000-8000-000000000001` |
+| `ownerId` | Sí | `string` | formato `uuid` | Identificador asociado a owner. | `00000000-0000-4000-8000-000000000001` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Valor de owner type mantenido por la instancia. | `USER` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Condición no encontrada | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/files.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/conditions/{id}/attachments"
+}
+```
+
+---
+
+## 5. POST /clinical/conditions/{id}/change-status
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -623,7 +759,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /clinical/diagnostic-reports
+## 6. POST /clinical/diagnostic-reports
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -767,7 +903,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /clinical/diagnostic-reports/{id}/release
+## 7. POST /clinical/diagnostic-reports/{id}/release
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -901,7 +1037,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /clinical/encounters/{id}/close
+## 8. POST /clinical/encounters/{id}/close
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-encounters`
@@ -1048,7 +1184,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /clinical/encounters/check-in
+## 9. POST /clinical/encounters/check-in
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-encounters`
@@ -1225,7 +1361,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /clinical/immunizations
+## 10. POST /clinical/immunizations
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1369,7 +1505,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /clinical/medication-records
+## 11. POST /clinical/medication-records
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1514,7 +1650,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /clinical/medication-requests
+## 12. POST /clinical/medication-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1678,7 +1814,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /clinical/medication-requests/{id}/edit
+## 13. POST /clinical/medication-requests/{id}/edit
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1841,7 +1977,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /clinical/medication-requests/{id}/invalidate
+## 14. POST /clinical/medication-requests/{id}/invalidate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -1981,7 +2117,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /clinical/medication-requests/{id}/issue
+## 15. POST /clinical/medication-requests/{id}/issue
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2114,7 +2250,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /clinical/medication-requests/{id}/renew
+## 16. POST /clinical/medication-requests/{id}/renew
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2260,7 +2396,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /clinical/medication-requests/{id}/replace
+## 17. POST /clinical/medication-requests/{id}/replace
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2418,7 +2554,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /clinical/medication-requests/{id}/sign
+## 18. POST /clinical/medication-requests/{id}/sign
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2543,7 +2679,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /clinical/observations
+## 19. POST /clinical/observations
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -2758,7 +2894,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. PATCH /clinical/observations/{id}/amend
+## 20. PATCH /clinical/observations/{id}/amend
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -2906,7 +3042,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /clinical/patients/{patientProfileId}/summary
+## 21. GET /clinical/patients/{patientProfileId}/summary
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-read`
@@ -2923,7 +3059,7 @@ Contexto declarado en el controlador: UC-39-20: historial clínico del paciente 
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /clinical/patients/{patientProfileId}/summary` en `ClinicalReadController_getPatientSummary`. El controlador delega en `ClinicalReadService.assertOwnRecord`, `ClinicalReadService.getPatientSummary`. No recibe body. El tipo de retorno estático es `Promise<PatientClinicalSummaryResponseDto>`.
+NestJS resuelve `GET /clinical/patients/{patientProfileId}/summary` en `ClinicalReadController_getPatientSummary`. El controlador delega en `ClinicalReadService.getPatientSummary`. No recibe body. El tipo de retorno estático es `Promise<PatientClinicalSummaryResponseDto>`.
 
 ### Parámetros
 
@@ -3155,7 +3291,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo podés consultar tu propia historia clínica. | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3173,7 +3308,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /clinical/prescription-signature-policies
+## 22. GET /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -3285,7 +3420,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /clinical/prescription-signature-policies
+## 23. POST /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -3432,7 +3567,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /clinical/prescription-signature-policies/{id}/deactivate
+## 24. POST /clinical/prescription-signature-policies/{id}/deactivate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -3556,7 +3691,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /clinical/procedures
+## 25. POST /clinical/procedures
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3715,7 +3850,141 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /clinical/service-requests
+## 26. POST /clinical/procedures/{id}/attachments
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-records`
+- **Nombre:** Adjuntar un archivo ya subido a un procedimiento
+- **Operation ID:** `ClinicalRecordsController_attachFileToProcedure`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalRecordsController.attachFileToProcedure](../../src/modules/clinical/controllers/clinical-records.controller.ts)
+
+### Descripción de negocio
+
+Adjuntar un archivo ya subido a un procedimiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: ALV-033 (odontología): liga un archivo ya subido a este procedimiento puntual. Sirve también a los tratamientos odontológicos —son `clinical.procedures` con categoría dental, ver `PeriopDentalService`—, así que no hace falta un endpoint propio en ese módulo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/procedures/{id}/attachments` en `ClinicalRecordsController_attachFileToProcedure`. El controlador delega en `ProceduresService.attachFile`. Valida el body como `AttachFileToProcedureDto` y consume `application/json`. El tipo de retorno estático es `Promise<FileLinkResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AttachFileToProcedureDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/procedures/00000000-0000-4000-8000-000000000001/attachments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/procedures/00000000-0000-4000-8000-000000000001/attachments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileLinkResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "ownerId": "00000000-0000-4000-8000-000000000001",
+  "ownerType": "USER",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | Sí | `string` | formato `uuid` | Identificador asociado a file. | `00000000-0000-4000-8000-000000000001` |
+| `ownerId` | Sí | `string` | formato `uuid` | Identificador asociado a owner. | `00000000-0000-4000-8000-000000000001` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Valor de owner type mantenido por la instancia. | `USER` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Procedimiento no encontrado | Excepción explícita en src/modules/clinical/services/procedures.service.ts |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/files.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/procedures/{id}/attachments"
+}
+```
+
+---
+
+## 27. POST /clinical/service-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`

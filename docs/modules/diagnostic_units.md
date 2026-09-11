@@ -9,7 +9,7 @@
 # Módulo `diagnostic_units`
 
 **Fuente:** [`src/modules/diagnostic_units/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/diagnostic_units/README.md)
-· 5 controllers · 7 services · 12 repositories · 10 entidades · 13 DTO
+· 5 controllers · 8 services · 12 repositories · 10 entidades · 13 DTO
 
 ---
 

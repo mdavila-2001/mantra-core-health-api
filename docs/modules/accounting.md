@@ -9,7 +9,7 @@
 # Módulo `accounting`
 
 **Fuente:** [`src/modules/accounting/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/accounting/README.md)
-· 8 controllers · 9 services · 9 repositories · 42 entidades · 10 DTO
+· 8 controllers · 9 services · 9 repositories · 42 entidades · 11 DTO
 
 ---
 

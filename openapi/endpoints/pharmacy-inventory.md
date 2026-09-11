@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `pharmacy_inventory`
 
-Referencia exhaustiva de 26 operación(es) del módulo `pharmacy_inventory`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 29 operación(es) del módulo `pharmacy_inventory`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `pharmacy-inventory`, `pharmacy-inventory-directory`, `pharmacy-inventory-internal`, `pharmacy-orders`
 - **Controladores:** `PharmacyDispensingController`, `PharmacyInventoryController`, `PharmacyInventoryInternalController`, `PharmacyInventoryReadController`, `PharmacyOrdersController`, `PharmacyProcurementController`
@@ -29,14 +29,17 @@ Referencia exhaustiva de 26 operación(es) del módulo `pharmacy_inventory`, der
 16. [GET /pharmacy/orders](#16-get-pharmacy-orders) — Bandeja de pedidos de las farmacias del tenant (FAR-E2)
 17. [POST /pharmacy/orders](#17-post-pharmacy-orders) — Crear un pedido de farmacia (FAR-E1)
 18. [GET /pharmacy/orders/{id}](#18-get-pharmacy-orders-id) — Consultar un pedido de farmacia (FAR-E1)
-19. [POST /pharmacy/orders/{id}/cancel](#19-post-pharmacy-orders-id-cancel) — Cancelar un pedido de farmacia (FAR-E1)
-20. [POST /pharmacy/orders/{id}/confirm](#20-post-pharmacy-orders-id-confirm) — Confirmar el pedido (FAR-E2)
-21. [POST /pharmacy/orders/{id}/ready](#21-post-pharmacy-orders-id-ready) — Marcar el pedido listo para retiro (FAR-E2 — bloqueado)
-22. [POST /pharmacy/orders/{id}/reject](#22-post-pharmacy-orders-id-reject) — Rechazar el pedido (FAR-E2)
-23. [POST /pharmacy/orders/{id}/review](#23-post-pharmacy-orders-id-review) — Abrir revisión del pedido (FAR-E2)
-24. [GET /pharmacy/orders/me](#24-get-pharmacy-orders-me) — Mis pedidos de farmacia, más nuevos primero (FAR-E1)
-25. [POST /pharmacy/recall-holds](#25-post-pharmacy-recall-holds) — Aplicar retiro/recall de lote (UC-25-08)
-26. [POST /pharmacy/recall-holds/{id}/release](#26-post-pharmacy-recall-holds-id-release) — Liberar recall y reactivar lote (UC-25-09)
+19. [POST /pharmacy/orders/{id}/accept-substitutions](#19-post-pharmacy-orders-id-accept-substitutions) — Aceptar los genéricos propuestos (paciente)
+20. [POST /pharmacy/orders/{id}/cancel](#20-post-pharmacy-orders-id-cancel) — Cancelar un pedido de farmacia (FAR-E1)
+21. [POST /pharmacy/orders/{id}/confirm](#21-post-pharmacy-orders-id-confirm) — Confirmar el pedido (FAR-E2)
+22. [POST /pharmacy/orders/{id}/dispense](#22-post-pharmacy-orders-id-dispense) — Dispensar el pedido en el mostrador (FAR-E3)
+23. [POST /pharmacy/orders/{id}/prefer-original](#23-post-pharmacy-orders-id-prefer-original) — Preferir los productos originales (paciente)
+24. [POST /pharmacy/orders/{id}/ready](#24-post-pharmacy-orders-id-ready) — Marcar el pedido listo para retiro (FAR-E2/E3)
+25. [POST /pharmacy/orders/{id}/reject](#25-post-pharmacy-orders-id-reject) — Rechazar el pedido (FAR-E2)
+26. [POST /pharmacy/orders/{id}/review](#26-post-pharmacy-orders-id-review) — Abrir revisión del pedido (FAR-E2)
+27. [GET /pharmacy/orders/me](#27-get-pharmacy-orders-me) — Mis pedidos de farmacia, más nuevos primero (FAR-E1)
+28. [POST /pharmacy/recall-holds](#28-post-pharmacy-recall-holds) — Aplicar retiro/recall de lote (UC-25-08)
+29. [POST /pharmacy/recall-holds/{id}/release](#29-post-pharmacy-recall-holds-id-release) — Liberar recall y reactivar lote (UC-25-09)
 
 ---
 
@@ -391,6 +394,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -898,6 +904,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Reserva no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/medication-dispensations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La reserva es un pedido de paciente: se dispensa con su código de retiro por POST /pharmacy/orders/:id/dispense | Excepción explícita en src/modules/pharmacy_inventory/services/medication-dispensations.service.ts |
 | 422 | `PRECONDITION_FAILED` | Stock insuficiente para dispensar | Excepción explícita en src/modules/pharmacy_inventory/services/medication-dispensations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2319,9 +2326,41 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "pharmacyName": "Nombre de ejemplo",
       "medicationRequestId": "00000000-0000-4000-8000-000000000001",
       "patientName": "Nombre de ejemplo",
+      "deliveryMode": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "pickupCode": "CODIGO_EJEMPLO",
+      "totalAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "rejectionReasonText": "Texto descriptivo de ejemplo",
+      "substitutions": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "originalProductId": "00000000-0000-4000-8000-000000000001",
+          "originalName": "Nombre de ejemplo",
+          "originalUnitPriceAmount": "valor-ejemplo",
+          "proposedProductId": "00000000-0000-4000-8000-000000000001",
+          "proposedName": "Nombre de ejemplo",
+          "proposedUnitPriceAmount": "valor-ejemplo",
+          "currency": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
+          "status": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
+          "decidedAt": "valor-ejemplo"
+        }
+      ],
       "lines": [
         {
           "productId": "00000000-0000-4000-8000-000000000001",
+          "medicationConceptId": "00000000-0000-4000-8000-000000000001",
           "productCode": "CODIGO_EJEMPLO",
           "brandName": "Nombre de ejemplo",
           "genericName": "Nombre de ejemplo",
@@ -2333,6 +2372,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           },
           "requestedQuantity": 1,
           "reservedQuantity": 1,
+          "fulfilledQuantity": 1,
+          "unitPriceAmount": "valor-ejemplo",
+          "currency": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
           "status": {
             "code": "CODIGO_EJEMPLO",
             "display": "valor-ejemplo"
@@ -2349,7 +2394,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PharmacyOrderDto>` | Sin restricción adicional declarada | Pedidos del paciente, más nuevos primero. | `[{"id":"00000000-0000-4000-8000-000000000001","status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"createdAt":"valor-ejemplo","expiresAt":"valor-ejemplo","siteId":"00000000-0000-4000-8000-000000000001","siteName":"Nombre de ejemplo","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","medicationRequestId":"00000000-0000-4000-8000-000000000001","patientName":"Nombre de ejemplo","lines":[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]}]` |
+| `items` | Sí | `array<PharmacyOrderDto>` | Sin restricción adicional declarada | Pedidos del paciente, más nuevos primero. | `[{"id":"00000000-0000-4000-8000-000000000001","status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"createdAt":"valor-ejemplo","expiresAt":"valor-ejemplo","siteId":"00000000-0000-4000-8000-000000000001","siteName":"Nombre de ejemplo","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","medicationRequestId":"00000000-0000-4000-8000-000000000001","patientName":"Nombre de ejemplo","deliveryMode":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"pickupCode":"CODIGO_EJEMPLO","totalAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"rejectionReasonText":"Texto descriptivo de ejemplo","substitutions":[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}],"lines":[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único del pedido. | `00000000-0000-4000-8000-000000000001` |
 | `items[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado del pedido (`PINV_ORDER_*`). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `items[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -2362,8 +2407,33 @@ Campos de la respuesta:
 | `items[].pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
 | `items[].medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
-| `items[].lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `items[].deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `items[].totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `items[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `items[].substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `items[].substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `items[].substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `items[].substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `items[].substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `items[].substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `items[].substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `items[].substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `items[].substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `items[].lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
 | `items[].lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `items[].lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
 | `items[].lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
 | `items[].lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
 | `items[].lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
@@ -2374,6 +2444,11 @@ Campos de la respuesta:
 | `items[].lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
 | `items[].lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `items[].lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `items[].lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `items[].lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `items[].lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -2388,7 +2463,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | Estado de pedido desconocido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2462,6 +2540,7 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `siteId` | Sí | `string` | formato `uuid` | Sede de farmacia | `00000000-0000-4000-8000-000000000001` |
 | `medicationRequestId` | No | `string` | formato `uuid` | Receta (clinical.medication_requests) | `00000000-0000-4000-8000-000000000001` |
+| `deliveryMode` | No | `string` | valores: `RETIRO`, `DOMICILIO`, `TRABAJO` | Sin descripción específica en el contrato OpenAPI. | `RETIRO` |
 | `idempotencyKey` | No | `string` | longitud máxima 120 | Clave de idempotencia; repetirla devuelve el mismo pedido | `valor-ejemplo` |
 | `lines` | Sí | `array<PharmacyOrderLineInputDto>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"productId":"00000000-0000-4000-8000-000000000001","quantity":1}]` |
 | `lines[].productId` | Sí | `string` | formato `uuid` | Producto de farmacia | `00000000-0000-4000-8000-000000000001` |
@@ -2480,6 +2559,7 @@ Content-Type: application/json
 {
   "siteId": "00000000-0000-4000-8000-000000000001",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "deliveryMode": "RETIRO",
   "idempotencyKey": "valor-ejemplo",
   "lines": [
     {
@@ -2521,9 +2601,41 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
   "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
   "lines": [
     {
       "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
       "productCode": "CODIGO_EJEMPLO",
       "brandName": "Nombre de ejemplo",
       "genericName": "Nombre de ejemplo",
@@ -2535,6 +2647,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       },
       "requestedQuantity": 1,
       "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
       "status": {
         "code": "CODIGO_EJEMPLO",
         "display": "valor-ejemplo"
@@ -2560,8 +2678,33 @@ Campos de la respuesta:
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
 | `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
-| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
 | `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
 | `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
 | `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
@@ -2572,6 +2715,11 @@ Campos de la respuesta:
 | `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
 | `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -2591,6 +2739,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
 | 422 | `PRECONDITION_FAILED` | El pedido repite productos; use una línea por producto | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El envío a domicilio o al trabajo llega con el carril de envío (FAR-E4); hoy solo RETIRO | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2692,9 +2841,41 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
   "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
   "lines": [
     {
       "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
       "productCode": "CODIGO_EJEMPLO",
       "brandName": "Nombre de ejemplo",
       "genericName": "Nombre de ejemplo",
@@ -2706,6 +2887,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       },
       "requestedQuantity": 1,
       "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
       "status": {
         "code": "CODIGO_EJEMPLO",
         "display": "valor-ejemplo"
@@ -2731,8 +2918,33 @@ Campos de la respuesta:
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
 | `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
-| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
 | `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
 | `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
 | `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
@@ -2743,6 +2955,11 @@ Campos de la respuesta:
 | `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
 | `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -2756,6 +2973,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2773,7 +2993,245 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /pharmacy/orders/{id}/cancel
+## 19. POST /pharmacy/orders/{id}/accept-substitutions
+
+- **Módulo:** `pharmacy_inventory`
+- **Etiqueta OpenAPI:** `pharmacy-orders`
+- **Nombre:** Aceptar los genéricos propuestos (paciente)
+- **Operation ID:** `PharmacyOrdersController_acceptSubstitutions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyOrdersController.acceptSubstitutions](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+
+### Descripción de negocio
+
+Devuelve el stock del original, reserva el propuesto con la misma contabilidad y re-congela el total con el precio de la oferta. La propuesta queda como historia (ACEPTADA + decided_at).
+
+Contexto declarado en el controlador: FAR-E2/I2: el titular acepta los genéricos propuestos. Todo-o-nada, como los dos botones del front: `ACEPTACION_PENDIENTE → ACEPTADO`.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /pharmacy/orders/{id}/accept-substitutions` en `PharmacyOrdersController_acceptSubstitutions`. El controlador delega en `PharmacyOrdersService.acceptSubstitutions`. No recibe body. El tipo de retorno estático es `Promise<PharmacyOrderDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /pharmacy/orders/00000000-0000-4000-8000-000000000001/accept-substitutions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /pharmacy/orders/00000000-0000-4000-8000-000000000001/accept-substitutions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyOrderDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "createdAt": "valor-ejemplo",
+  "expiresAt": "valor-ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "pharmacyId": "00000000-0000-4000-8000-000000000001",
+  "pharmacyName": "Nombre de ejemplo",
+  "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
+  "lines": [
+    {
+      "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
+      "productCode": "CODIGO_EJEMPLO",
+      "brandName": "Nombre de ejemplo",
+      "genericName": "Nombre de ejemplo",
+      "strengthText": "valor-ejemplo",
+      "packageSizeText": "valor-ejemplo",
+      "medication": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "requestedQuantity": 1,
+      "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      }
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único del pedido. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado del pedido (`PINV_ORDER_*`). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `createdAt` | Sí | `string` | Sin restricción adicional declarada | Instante de creación, ISO 8601. | `valor-ejemplo` |
+| `expiresAt` | Sí | `string` | Sin restricción adicional declarada | Vencimiento vigente del pedido, ISO 8601 (48 h desde la creación; el carril E2 la renueva al dejarlo listo para retiro). | `valor-ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid` | Identificador asociado a site. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede. | `Nombre de ejemplo` |
+| `pharmacyId` | Sí | `string` | formato `uuid` | Identificador asociado a pharmacy. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
+| `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
+| `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
+| `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
+| `lines[].strengthText` | No | `string` | admite null | Concentración, legible. | `valor-ejemplo` |
+| `lines[].packageSizeText` | No | `string` | admite null | Presentación, legible. | `valor-ejemplo` |
+| `lines[].medication` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Medicamento del vademécum, resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].medication.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
+| `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene una decisión de sustituciones pendiente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene propuestas de sustitución en pie | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacy/orders/{id}/accept-substitutions"
+}
+```
+
+---
+
+## 20. POST /pharmacy/orders/{id}/cancel
 
 - **Módulo:** `pharmacy_inventory`
 - **Etiqueta OpenAPI:** `pharmacy-orders`
@@ -2859,9 +3317,41 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
   "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
   "lines": [
     {
       "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
       "productCode": "CODIGO_EJEMPLO",
       "brandName": "Nombre de ejemplo",
       "genericName": "Nombre de ejemplo",
@@ -2873,6 +3363,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       },
       "requestedQuantity": 1,
       "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
       "status": {
         "code": "CODIGO_EJEMPLO",
         "display": "valor-ejemplo"
@@ -2898,8 +3394,33 @@ Campos de la respuesta:
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
 | `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
-| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
 | `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
 | `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
 | `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
@@ -2910,6 +3431,11 @@ Campos de la respuesta:
 | `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
 | `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -2942,7 +3468,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /pharmacy/orders/{id}/confirm
+## 21. POST /pharmacy/orders/{id}/confirm
 
 - **Módulo:** `pharmacy_inventory`
 - **Etiqueta OpenAPI:** `pharmacy-orders`
@@ -2953,9 +3479,9 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea; PROPONER_GENERICO responde 422 porque la sustitución está bloqueada por modelo.
+Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea. PROPONER_GENERICO (con proposedProductId del mismo medicamento) persiste la propuesta con sus precios congelados y deja el pedido en ACEPTACION_PENDIENTE: decide el paciente.
 
-Contexto declarado en el controlador: FAR-E2: confirmar sin sustituciones (proponer genérico: 422, bloqueado).
+Contexto declarado en el controlador: FAR-E2: confirmar, con genéricos propuestos si el mostrador los declara.
 
 ### Descripción del sistema
 
@@ -2991,9 +3517,10 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `adjustments` | No | `array<ConfirmOrderAdjustmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"productId":"00000000-0000-4000-8000-000000000001","decision":"NO_DISPONIBLE"}]` |
+| `adjustments` | No | `array<ConfirmOrderAdjustmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"productId":"00000000-0000-4000-8000-000000000001","decision":"NO_DISPONIBLE","proposedProductId":"00000000-0000-4000-8000-000000000001"}]` |
 | `adjustments[].productId` | No | `string` | formato `uuid` | Producto de la línea ajustada | `00000000-0000-4000-8000-000000000001` |
 | `adjustments[].decision` | No | `string` | valores: `NO_DISPONIBLE`, `PROPONER_GENERICO` | Sin descripción específica en el contrato OpenAPI. | `NO_DISPONIBLE` |
+| `adjustments[].proposedProductId` | No | `string` | formato `uuid` | Producto propuesto (mismo concepto del vademécum) | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -3009,7 +3536,8 @@ Content-Type: application/json
   "adjustments": [
     {
       "productId": "00000000-0000-4000-8000-000000000001",
-      "decision": "NO_DISPONIBLE"
+      "decision": "NO_DISPONIBLE",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001"
     }
   ]
 }
@@ -3047,9 +3575,41 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
   "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
   "lines": [
     {
       "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
       "productCode": "CODIGO_EJEMPLO",
       "brandName": "Nombre de ejemplo",
       "genericName": "Nombre de ejemplo",
@@ -3061,6 +3621,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       },
       "requestedQuantity": 1,
       "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
       "status": {
         "code": "CODIGO_EJEMPLO",
         "display": "valor-ejemplo"
@@ -3086,8 +3652,33 @@ Campos de la respuesta:
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
 | `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
-| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
 | `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
 | `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
 | `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
@@ -3098,6 +3689,11 @@ Campos de la respuesta:
 | `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
 | `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -3113,9 +3709,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La propuesta de sustitución está bloqueada por modelo: no existe persistencia de propuestas por línea. El pedido no se modificó. | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
 | 422 | `PRECONDITION_FAILED` | El ajuste refiere un producto que no está en el pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | Hay más de un ajuste para el mismo renglón | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
 | 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | PROPONER_GENERICO exige el producto propuesto (proposedProductId) | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El producto propuesto no está disponible en esta farmacia | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El producto propuesto no es del mismo medicamento que el original | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3135,20 +3734,522 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /pharmacy/orders/{id}/ready
+## 22. POST /pharmacy/orders/{id}/dispense
 
 - **Módulo:** `pharmacy_inventory`
 - **Etiqueta OpenAPI:** `pharmacy-orders`
-- **Nombre:** Marcar el pedido listo para retiro (FAR-E2 — bloqueado)
+- **Nombre:** Dispensar el pedido en el mostrador (FAR-E3)
+- **Operation ID:** `PharmacyOrdersController_dispense`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyOrdersController.dispense](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+
+### Descripción de negocio
+
+Valida el código de retiro (insensible a mayúsculas; mismatch: 422 sin efectos) y entrega el saldo en pie — todo, o solo productIds. Acumula fulfilled_quantity por línea; con saldo cero el pedido pasa a RETIRADO. Repetir la idempotencyKey no duplica stock ni ledger.
+
+Contexto declarado en el controlador: FAR-E3: la entrega en el mostrador, contra el código de retiro. Parcial acumulativa: mientras quede saldo el pedido sigue LISTO_PARA_RETIRO con el mismo código, y pasa a RETIRADO cuando la última línea se cubre.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /pharmacy/orders/{id}/dispense` en `PharmacyOrdersController_dispense`. El controlador delega en `PharmacyOrdersService.dispense`. Valida el body como `DispensePharmacyOrderDto` y consume `application/json`. El tipo de retorno estático es `Promise<PharmacyOrderDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DispensePharmacyOrderDto`; los campos opcionales se omiten.
+
+```http
+POST /pharmacy/orders/00000000-0000-4000-8000-000000000001/dispense HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "pickupCode": "CODIGO_EJEMPLO"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `pickupCode` | Sí | `string` | longitud mínima 1; longitud máxima 20 | Código de retiro que presenta la persona | `CODIGO_EJEMPLO` |
+| `productIds` | No | `array<string>` | formato `uuid`; mínimo 1 elemento(s) | Productos de esta entrega; omitido = todo el saldo en pie | `["00000000-0000-4000-8000-000000000001"]` |
+| `idempotencyKey` | No | `string` | longitud máxima 120 | Clave de idempotencia; repetirla no duplica la entrega | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /pharmacy/orders/00000000-0000-4000-8000-000000000001/dispense HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "pickupCode": "CODIGO_EJEMPLO",
+  "productIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
+  "idempotencyKey": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyOrderDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "createdAt": "valor-ejemplo",
+  "expiresAt": "valor-ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "pharmacyId": "00000000-0000-4000-8000-000000000001",
+  "pharmacyName": "Nombre de ejemplo",
+  "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
+  "lines": [
+    {
+      "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
+      "productCode": "CODIGO_EJEMPLO",
+      "brandName": "Nombre de ejemplo",
+      "genericName": "Nombre de ejemplo",
+      "strengthText": "valor-ejemplo",
+      "packageSizeText": "valor-ejemplo",
+      "medication": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "requestedQuantity": 1,
+      "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      }
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único del pedido. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado del pedido (`PINV_ORDER_*`). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `createdAt` | Sí | `string` | Sin restricción adicional declarada | Instante de creación, ISO 8601. | `valor-ejemplo` |
+| `expiresAt` | Sí | `string` | Sin restricción adicional declarada | Vencimiento vigente del pedido, ISO 8601 (48 h desde la creación; el carril E2 la renueva al dejarlo listo para retiro). | `valor-ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid` | Identificador asociado a site. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede. | `Nombre de ejemplo` |
+| `pharmacyId` | Sí | `string` | formato `uuid` | Identificador asociado a pharmacy. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
+| `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
+| `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
+| `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
+| `lines[].strengthText` | No | `string` | admite null | Concentración, legible. | `valor-ejemplo` |
+| `lines[].packageSizeText` | No | `string` | admite null | Presentación, legible. | `valor-ejemplo` |
+| `lines[].medication` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Medicamento del vademécum, resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].medication.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
+| `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia ya se usó para otra entrega | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Solo un pedido listo para retiro puede dispensarse | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El código de retiro no coincide. El pedido no se modificó. | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | La entrega refiere productos sin saldo en pie en este pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene saldo en pie que entregar | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacy/orders/{id}/dispense"
+}
+```
+
+---
+
+## 23. POST /pharmacy/orders/{id}/prefer-original
+
+- **Módulo:** `pharmacy_inventory`
+- **Etiqueta OpenAPI:** `pharmacy-orders`
+- **Nombre:** Preferir los productos originales (paciente)
+- **Operation ID:** `PharmacyOrdersController_preferOriginal`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyOrdersController.preferOriginal](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+
+### Descripción de negocio
+
+Las propuestas quedan como historia (RECHAZADA + decided_at) y el pedido vuelve a la cola del mostrador como CONFIRMADO — el stock del original siguió reservado todo el tiempo.
+
+Contexto declarado en el controlador: FAR-E2/I2: el titular prefiere los originales. `ACEPTACION_PENDIENTE → CONFIRMADO`; las líneas no se tocan.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /pharmacy/orders/{id}/prefer-original` en `PharmacyOrdersController_preferOriginal`. El controlador delega en `PharmacyOrdersService.preferOriginal`. No recibe body. El tipo de retorno estático es `Promise<PharmacyOrderDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /pharmacy/orders/00000000-0000-4000-8000-000000000001/prefer-original HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /pharmacy/orders/00000000-0000-4000-8000-000000000001/prefer-original HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PharmacyOrderDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyOrderDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "createdAt": "valor-ejemplo",
+  "expiresAt": "valor-ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "pharmacyId": "00000000-0000-4000-8000-000000000001",
+  "pharmacyName": "Nombre de ejemplo",
+  "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
+  "lines": [
+    {
+      "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
+      "productCode": "CODIGO_EJEMPLO",
+      "brandName": "Nombre de ejemplo",
+      "genericName": "Nombre de ejemplo",
+      "strengthText": "valor-ejemplo",
+      "packageSizeText": "valor-ejemplo",
+      "medication": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "requestedQuantity": 1,
+      "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      }
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único del pedido. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado del pedido (`PINV_ORDER_*`). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `createdAt` | Sí | `string` | Sin restricción adicional declarada | Instante de creación, ISO 8601. | `valor-ejemplo` |
+| `expiresAt` | Sí | `string` | Sin restricción adicional declarada | Vencimiento vigente del pedido, ISO 8601 (48 h desde la creación; el carril E2 la renueva al dejarlo listo para retiro). | `valor-ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid` | Identificador asociado a site. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede. | `Nombre de ejemplo` |
+| `pharmacyId` | Sí | `string` | formato `uuid` | Identificador asociado a pharmacy. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
+| `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
+| `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
+| `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
+| `lines[].strengthText` | No | `string` | admite null | Concentración, legible. | `valor-ejemplo` |
+| `lines[].packageSizeText` | No | `string` | admite null | Presentación, legible. | `valor-ejemplo` |
+| `lines[].medication` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Medicamento del vademécum, resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].medication.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
+| `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene una decisión de sustituciones pendiente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene propuestas de sustitución en pie | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacy/orders/{id}/prefer-original"
+}
+```
+
+---
+
+## 24. POST /pharmacy/orders/{id}/ready
+
+- **Módulo:** `pharmacy_inventory`
+- **Etiqueta OpenAPI:** `pharmacy-orders`
+- **Nombre:** Marcar el pedido listo para retiro (FAR-E2/E3)
 - **Operation ID:** `PharmacyOrdersController_ready`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [PharmacyOrdersController.ready](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
-Responde 422 (blockedByModel: deliveryMode) sin ningún efecto: la modalidad del pedido no se persiste y no puede demostrarse que sea un retiro. Se habilita con el patch de modelo.
+CONFIRMADO|ACEPTADO → LISTO_PARA_RETIRO. Solo pedidos con modalidad RETIRO y sede con mostrador; sella el código de retiro (una sola vez) y renueva expires_at +48 h. Un pedido de envío o sin modalidad responde 422 tipificado sin efectos.
 
-Contexto declarado en el controlador: FAR-E2: dejar listo en mostrador — **bloqueado por modelo**. La ruta queda por compatibilidad y responde 422 tipificado: sin modalidad persistida no puede demostrarse que el pedido sea un retiro, y «listo para retiro» sobre un pedido de entrega sería mentirle al mostrador y al paciente.
+Contexto declarado en el controlador: FAR-E2/E3: dejar listo en mostrador (habilitado por el modelo v4.2.1). Exige que el pedido sea demostrablemente un RETIRO y que la sede ofrezca mostrador; sella el código de retiro y renueva la reserva 48 h.
 
 ### Descripción del sistema
 
@@ -3221,9 +4322,41 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
   "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
   "lines": [
     {
       "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
       "productCode": "CODIGO_EJEMPLO",
       "brandName": "Nombre de ejemplo",
       "genericName": "Nombre de ejemplo",
@@ -3235,6 +4368,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       },
       "requestedQuantity": 1,
       "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
       "status": {
         "code": "CODIGO_EJEMPLO",
         "display": "valor-ejemplo"
@@ -3260,8 +4399,33 @@ Campos de la respuesta:
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
 | `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
-| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
 | `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
 | `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
 | `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
@@ -3272,6 +4436,11 @@ Campos de la respuesta:
 | `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
 | `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -3285,7 +4454,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | Marcar listo para retiro está bloqueado por modelo: la modalidad del pedido no se persiste y no puede demostrarse que sea un retiro. El pedido no se modificó. | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 409 | `CONFLICT` | No se pudo sellar un código de retiro único; reintente la operación | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no declara modalidad de entrega: no puede demostrarse que sea un retiro | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido es de envío: se cierra por el carril de envío, no por el mostrador | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | La sede no ofrece retiro en mostrador | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3303,7 +4479,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /pharmacy/orders/{id}/reject
+## 25. POST /pharmacy/orders/{id}/reject
 
 - **Módulo:** `pharmacy_inventory`
 - **Etiqueta OpenAPI:** `pharmacy-orders`
@@ -3314,9 +4490,9 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Libera el stock reservado. El motivo es obligatorio y viaja en el evento y la campana; no se persiste todavía (bloqueador de modelo).
+Libera el stock reservado. El motivo es obligatorio: se persiste en rejection_reason_text y viaja además en el evento y la campana.
 
-Contexto declarado en el controlador: FAR-E2: rechazar con motivo (el motivo aún no se persiste: viaja en el aviso).
+Contexto declarado en el controlador: FAR-E2: rechazar con motivo (v4.2.1 lo persiste en el pedido).
 
 ### Descripción del sistema
 
@@ -3354,7 +4530,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `reason` | Sí | `string` | longitud mínima 1; longitud máxima 500 | Motivo del rechazo (no se persiste todavía) | `Texto descriptivo de ejemplo` |
+| `reason` | Sí | `string` | longitud mínima 1; longitud máxima 500 | Motivo del rechazo (se persiste en el pedido) | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -3403,9 +4579,41 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
   "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
   "lines": [
     {
       "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
       "productCode": "CODIGO_EJEMPLO",
       "brandName": "Nombre de ejemplo",
       "genericName": "Nombre de ejemplo",
@@ -3417,6 +4625,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       },
       "requestedQuantity": 1,
       "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
       "status": {
         "code": "CODIGO_EJEMPLO",
         "display": "valor-ejemplo"
@@ -3442,8 +4656,33 @@ Campos de la respuesta:
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
 | `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
-| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
 | `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
 | `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
 | `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
@@ -3454,6 +4693,11 @@ Campos de la respuesta:
 | `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
 | `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -3490,7 +4734,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /pharmacy/orders/{id}/review
+## 26. POST /pharmacy/orders/{id}/review
 
 - **Módulo:** `pharmacy_inventory`
 - **Etiqueta OpenAPI:** `pharmacy-orders`
@@ -3576,9 +4820,41 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
   "patientName": "Nombre de ejemplo",
+  "deliveryMode": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "pickupCode": "CODIGO_EJEMPLO",
+  "totalAmount": "valor-ejemplo",
+  "currency": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "rejectionReasonText": "Texto descriptivo de ejemplo",
+  "substitutions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "originalProductId": "00000000-0000-4000-8000-000000000001",
+      "originalName": "Nombre de ejemplo",
+      "originalUnitPriceAmount": "valor-ejemplo",
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "proposedName": "Nombre de ejemplo",
+      "proposedUnitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "decidedAt": "valor-ejemplo"
+    }
+  ],
   "lines": [
     {
       "productId": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
       "productCode": "CODIGO_EJEMPLO",
       "brandName": "Nombre de ejemplo",
       "genericName": "Nombre de ejemplo",
@@ -3590,6 +4866,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       },
       "requestedQuantity": 1,
       "reservedQuantity": 1,
+      "fulfilledQuantity": 1,
+      "unitPriceAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
       "status": {
         "code": "CODIGO_EJEMPLO",
         "display": "valor-ejemplo"
@@ -3615,8 +4897,33 @@ Campos de la respuesta:
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
 | `patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
-| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
 | `lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
 | `lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
 | `lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
@@ -3627,6 +4934,11 @@ Campos de la respuesta:
 | `lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
 | `lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -3661,7 +4973,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /pharmacy/orders/me
+## 27. GET /pharmacy/orders/me
 
 - **Módulo:** `pharmacy_inventory`
 - **Etiqueta OpenAPI:** `pharmacy-orders`
@@ -3743,9 +5055,41 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "pharmacyName": "Nombre de ejemplo",
       "medicationRequestId": "00000000-0000-4000-8000-000000000001",
       "patientName": "Nombre de ejemplo",
+      "deliveryMode": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "pickupCode": "CODIGO_EJEMPLO",
+      "totalAmount": "valor-ejemplo",
+      "currency": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "rejectionReasonText": "Texto descriptivo de ejemplo",
+      "substitutions": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "originalProductId": "00000000-0000-4000-8000-000000000001",
+          "originalName": "Nombre de ejemplo",
+          "originalUnitPriceAmount": "valor-ejemplo",
+          "proposedProductId": "00000000-0000-4000-8000-000000000001",
+          "proposedName": "Nombre de ejemplo",
+          "proposedUnitPriceAmount": "valor-ejemplo",
+          "currency": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
+          "status": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
+          "decidedAt": "valor-ejemplo"
+        }
+      ],
       "lines": [
         {
           "productId": "00000000-0000-4000-8000-000000000001",
+          "medicationConceptId": "00000000-0000-4000-8000-000000000001",
           "productCode": "CODIGO_EJEMPLO",
           "brandName": "Nombre de ejemplo",
           "genericName": "Nombre de ejemplo",
@@ -3757,6 +5101,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           },
           "requestedQuantity": 1,
           "reservedQuantity": 1,
+          "fulfilledQuantity": 1,
+          "unitPriceAmount": "valor-ejemplo",
+          "currency": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
           "status": {
             "code": "CODIGO_EJEMPLO",
             "display": "valor-ejemplo"
@@ -3773,7 +5123,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PharmacyOrderDto>` | Sin restricción adicional declarada | Pedidos del paciente, más nuevos primero. | `[{"id":"00000000-0000-4000-8000-000000000001","status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"createdAt":"valor-ejemplo","expiresAt":"valor-ejemplo","siteId":"00000000-0000-4000-8000-000000000001","siteName":"Nombre de ejemplo","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","medicationRequestId":"00000000-0000-4000-8000-000000000001","patientName":"Nombre de ejemplo","lines":[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]}]` |
+| `items` | Sí | `array<PharmacyOrderDto>` | Sin restricción adicional declarada | Pedidos del paciente, más nuevos primero. | `[{"id":"00000000-0000-4000-8000-000000000001","status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"createdAt":"valor-ejemplo","expiresAt":"valor-ejemplo","siteId":"00000000-0000-4000-8000-000000000001","siteName":"Nombre de ejemplo","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","medicationRequestId":"00000000-0000-4000-8000-000000000001","patientName":"Nombre de ejemplo","deliveryMode":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"pickupCode":"CODIGO_EJEMPLO","totalAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"rejectionReasonText":"Texto descriptivo de ejemplo","substitutions":[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}],"lines":[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único del pedido. | `00000000-0000-4000-8000-000000000001` |
 | `items[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado del pedido (`PINV_ORDER_*`). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `items[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -3786,8 +5136,33 @@ Campos de la respuesta:
 | `items[].pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la farmacia (comercial, o la razón social). | `Nombre de ejemplo` |
 | `items[].medicationRequestId` | No | `string` | formato `uuid`; admite null | Receta que respalda el pedido, si la hay. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientName` | No | `string` | admite null | Nombre pintable del paciente, resuelto en lote por el backend (la bandeja FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene nombre cargado. | `Nombre de ejemplo` |
-| `items[].lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `items[].deliveryMode` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Modalidad de entrega (`PINV_DELIVERY_*`), resuelta. `null` en pedidos anteriores al modelo v4.2.1, que no la declararon. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].pickupCode` | No | `string` | admite null | Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`. **Solo en la lectura del titular**: es la prueba de posesión con que la persona retira, así que la bandeja y las lecturas de staff lo sirven `null` — el mostrador no valida mirándolo, valida enviándolo en `POST /pharmacy/orders/:id/dispense`. | `CODIGO_EJEMPLO` |
+| `items[].totalAmount` | No | `string` | admite null | Total CONGELADO del pedido con su moneda: suma de los precios congelados por el saldo reservado de cada renglón en pie. `null` si a algún renglón le falta precio publicado o si las listas mezclan monedas — una suma con huecos o que mezcla monedas afirma un costo que nadie publicó. Se re-congela cuando el pedido cambia (línea no disponible, sustitución aceptada); jamás se recalcula en una lectura. | `valor-ejemplo` |
+| `items[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del total congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].rejectionReasonText` | No | `string` | admite null | Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1 lo persiste). `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `items[].substitutions` | Sí | `array<PharmacyOrderSubstitutionDto>` | Sin restricción adicional declarada | La historia de propuestas de sustitución del pedido, más nuevas primero. Las decididas conservan su estado y su `decidedAt`: son bitácora, no un campo mutable. | `[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}]` |
+| `items[].substitutions[].id` | Sí | `string` | formato `uuid` | Identificador de la propuesta. | `00000000-0000-4000-8000-000000000001` |
+| `items[].substitutions[].originalProductId` | Sí | `string` | formato `uuid` | Producto recetado/pedido. | `00000000-0000-4000-8000-000000000001` |
+| `items[].substitutions[].originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del original. | `Nombre de ejemplo` |
+| `items[].substitutions[].originalUnitPriceAmount` | No | `string` | admite null | Precio congelado del original al proponer, o `null` sin precio publicado. | `valor-ejemplo` |
+| `items[].substitutions[].proposedProductId` | Sí | `string` | formato `uuid` | Producto propuesto (mismo medicamento del vademécum). | `00000000-0000-4000-8000-000000000001` |
+| `items[].substitutions[].proposedName` | Sí | `string` | Sin restricción adicional declarada | Nombre pintable del propuesto. | `Nombre de ejemplo` |
+| `items[].substitutions[].proposedUnitPriceAmount` | No | `string` | admite null | Precio congelado del propuesto: la oferta que el paciente decidió. | `valor-ejemplo` |
+| `items[].substitutions[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda de la oferta, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].substitutions[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].substitutions[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].substitutions[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la propuesta (`PINV_SUBSTITUTION_*`), resuelto. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].substitutions[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].substitutions[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].substitutions[].decidedAt` | No | `string` | admite null | Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie. | `valor-ejemplo` |
+| `items[].lines` | Sí | `array<PharmacyOrderLineDto>` | Sin restricción adicional declarada | Líneas del pedido. | `[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
 | `items[].lines[].productId` | Sí | `string` | formato `uuid` | Identificador asociado a product. | `00000000-0000-4000-8000-000000000001` |
+| `items[].lines[].medicationConceptId` | No | `string` | formato `uuid`; admite null | Concepto de medicamento asociado al producto, cuando fue publicado. | `00000000-0000-4000-8000-000000000001` |
 | `items[].lines[].productCode` | Sí | `string` | Sin restricción adicional declarada | Código interno del producto. | `CODIGO_EJEMPLO` |
 | `items[].lines[].brandName` | No | `string` | admite null | Nombre comercial. | `Nombre de ejemplo` |
 | `items[].lines[].genericName` | No | `string` | admite null | Nombre genérico. | `Nombre de ejemplo` |
@@ -3798,6 +5173,11 @@ Campos de la respuesta:
 | `items[].lines[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].lines[].requestedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad solicitada por el paciente. | `1` |
 | `items[].lines[].reservedQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad efectivamente reservada; `0` cuando la línea quedó sin stock. | `1` |
+| `items[].lines[].fulfilledQuantity` | Sí | `number` | Sin restricción adicional declarada | Cantidad ya entregada en el mostrador, acumulada entre entregas parciales (FAR-E3). El saldo por retirar es `reservedQuantity − fulfilledQuantity`. | `1` |
+| `items[].lines[].unitPriceAmount` | No | `string` | admite null | Precio unitario CONGELADO del renglón (lo que paga el paciente), sellado al crear el pedido o al aceptar una sustitución. `null` si la sede no publicaba precio: el GET no recalcula — un precio congelado que se recalcula contra listas nuevas reescribe un pedido histórico. | `valor-ejemplo` |
+| `items[].lines[].currency` | No | `InventoryConceptDto` | Sin restricción adicional declarada | Moneda del precio congelado, resuelta. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].lines[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].lines[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].lines[].status` | Sí | `InventoryConceptDto` | Sin restricción adicional declarada | Estado de la línea (`PINV_RES_LINE_CONFIRMED` reservada, `PINV_RES_LINE_OUT_OF_STOCK` sin stock, `PINV_RES_LINE_RELEASED` liberada). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `items[].lines[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].lines[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -3811,7 +5191,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3829,7 +5212,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /pharmacy/recall-holds
+## 28. POST /pharmacy/recall-holds
 
 - **Módulo:** `pharmacy_inventory`
 - **Etiqueta OpenAPI:** `pharmacy-inventory`
@@ -3967,7 +5350,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /pharmacy/recall-holds/{id}/release
+## 29. POST /pharmacy/recall-holds/{id}/release
 
 - **Módulo:** `pharmacy_inventory`
 - **Etiqueta OpenAPI:** `pharmacy-inventory`

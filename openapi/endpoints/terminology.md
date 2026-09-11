@@ -2244,6 +2244,7 @@ NestJS resuelve `GET /terminology/value-sets/{id}/$expand` en `TerminologyValueS
 | `valueSetVersionId` | query | No | `string` | Sin restricción adicional declarada | Versión concreta a leer; por defecto la vigente | `00000000-0000-4000-8000-000000000001` |
 | `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
 | `limit` | query | No | `number` | Sin restricción adicional declarada | Miembros por página (por defecto 50) | `1` |
+| `includeProperties` | query | No | `boolean` | Sin restricción adicional declarada | Trae también las propiedades de cada concepto. Opt-in: hay catálogos cuyo dato útil vive ahí (el nomenclador guarda especialidad, precio y unidad como propiedades). | `true` |
 
 ### Payload mínimo aceptable
 
@@ -2269,7 +2270,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /terminology/value-sets/00000000-0000-4000-8000-000000000001/$expand?valueSetVersionId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+GET /terminology/value-sets/00000000-0000-4000-8000-000000000001/$expand?valueSetVersionId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1&includeProperties=true HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -2301,7 +2302,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "definition": "valor-ejemplo",
       "selectable": true,
       "codeSystemVersionId": "00000000-0000-4000-8000-000000000001",
-      "ordinal": 1
+      "ordinal": 1,
+      "properties": {
+        "clave": "valor"
+      }
     }
   ],
   "count": 1,
@@ -2317,7 +2321,7 @@ Campos de la respuesta:
 | `valueSetId` | Sí | `string` | formato `uuid` | Id del conjunto de valores | `00000000-0000-4000-8000-000000000001` |
 | `valueSetVersionId` | Sí | `string` | formato `uuid` | Id de la versión leída | `00000000-0000-4000-8000-000000000001` |
 | `version` | Sí | `string` | Sin restricción adicional declarada | Etiqueta de la versión | `1.0.0` |
-| `items` | Sí | `array<ValueSetExpansionItemDto>` | Sin restricción adicional declarada | Miembros de esta página. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"GENDER_FEMALE","display":"valor-ejemplo","definition":"valor-ejemplo","selectable":true,"codeSystemVersionId":"00000000-0000-4000-8000-000000000001","ordinal":1}]` |
+| `items` | Sí | `array<ValueSetExpansionItemDto>` | Sin restricción adicional declarada | Miembros de esta página. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"GENDER_FEMALE","display":"valor-ejemplo","definition":"valor-ejemplo","selectable":true,"codeSystemVersionId":"00000000-0000-4000-8000-000000000001","ordinal":1,"properties":{"clave":"valor"}}]` |
 | `items[].conceptId` | Sí | `string` | formato `uuid` | Valor a enviar en los campos `*ConceptId` del contrato | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código del concepto | `GENDER_FEMALE` |
 | `items[].display` | Sí | `string` | Sin restricción adicional declarada | Denominación principal | `valor-ejemplo` |
@@ -2325,6 +2329,7 @@ Campos de la respuesta:
 | `items[].selectable` | No | `boolean` | Sin restricción adicional declarada | Si el concepto puede seleccionarse | `true` |
 | `items[].codeSystemVersionId` | Sí | `string` | formato `uuid` | Versión del sistema de códigos | `00000000-0000-4000-8000-000000000001` |
 | `items[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición del miembro dentro de la expansión | `1` |
+| `items[].properties` | No | `object` | Sin restricción adicional declarada | Propiedades del concepto; sólo con includeProperties=true | `{"clave":"valor"}` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor opaco para pedir la página siguiente | `valor-ejemplo` |

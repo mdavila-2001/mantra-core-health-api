@@ -126,7 +126,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
   "organizationName": "Nombre de ejemplo",
   "roleTitle": "valor-ejemplo",
-  "departmentText": "valor-ejemplo",
   "practiceSiteId": "00000000-0000-4000-8000-000000000001",
   "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "startDate": "2026-07-31",
@@ -146,8 +145,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
 | `organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
-| `roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
-| `departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
 | `practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
 | `affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
 | `startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
