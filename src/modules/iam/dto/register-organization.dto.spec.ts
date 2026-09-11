@@ -270,3 +270,101 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
     expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
   });
 });
+
+/**
+ * Coordenadas de la casa matriz del `PAYER` (subtarea 1.3). El DTO sólo
+ * comprueba forma y rango; la persistencia en `common.addresses` la hace
+ * `TenantTypeProfileService`, no este DTO.
+ */
+describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () => {
+  const ALTA_PAYER = {
+    organization: {
+      code: 'ASEGURADORA_Z',
+      legalName: 'Aseguradora Z S.R.L.',
+      tenantType: 'PAYER',
+      payer: {
+        carrierCode: 'CAR-Z',
+        sigla: 'ASZ',
+        address: 'Av. Siempre Viva 742',
+        regulatorIdentifier: 'APS-9001',
+      },
+    },
+    owner: ALTA_MINIMA.owner,
+  };
+
+  it('acepta el par completo', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_PAYER,
+        organization: {
+          ...ALTA_PAYER.organization,
+          payer: {
+            ...ALTA_PAYER.organization.payer,
+            latitude: -17.7833,
+            longitude: -63.1821,
+          },
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('sólo latitude es 400: el par va junto o no va', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_PAYER,
+        organization: {
+          ...ALTA_PAYER.organization,
+          payer: { ...ALTA_PAYER.organization.payer, latitude: -17.7833 },
+        },
+      }),
+    ).toEqual(['organization.payer.longitude']);
+  });
+
+  it('sólo longitude es 400: el par va junto o no va', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_PAYER,
+        organization: {
+          ...ALTA_PAYER.organization,
+          payer: { ...ALTA_PAYER.organization.payer, longitude: -63.1821 },
+        },
+      }),
+    ).toEqual(['organization.payer.latitude']);
+  });
+
+  it('rechaza una latitud fuera de rango', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_PAYER,
+        organization: {
+          ...ALTA_PAYER.organization,
+          payer: {
+            ...ALTA_PAYER.organization.payer,
+            latitude: 90.5,
+            longitude: -63.1821,
+          },
+        },
+      }),
+    ).toEqual(['organization.payer.latitude']);
+  });
+
+  it('rechaza una longitud fuera de rango', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_PAYER,
+        organization: {
+          ...ALTA_PAYER.organization,
+          payer: {
+            ...ALTA_PAYER.organization.payer,
+            latitude: -17.7833,
+            longitude: -180.5,
+          },
+        },
+      }),
+    ).toEqual(['organization.payer.longitude']);
+  });
+
+  it('sin coordenadas, el alta sigue siendo válida (opcional en el contrato)', async () => {
+    expect(await propiedadesConError(ALTA_PAYER)).toEqual([]);
+  });
+});

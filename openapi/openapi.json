@@ -77865,6 +77865,20 @@
             "description": "Dirección de la aseguradora",
             "maxLength": 300
           },
+          "latitude": {
+            "type": "number",
+            "description": "Latitud de la casa matriz (-90 a 90); va junto con longitude o no va",
+            "minimum": -90,
+            "maximum": 90,
+            "example": -17.7833
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitud de la casa matriz (-180 a 180); va junto con latitude o no va",
+            "minimum": -180,
+            "maximum": 180,
+            "example": -63.1821
+          },
           "regulatorIdentifier": {
             "type": "string",
             "description": "Identificador ante el regulador de seguros",

@@ -15,6 +15,7 @@ import {
   TenantsRepository,
 } from '../repositories';
 import { TenantAdministrationService } from './tenant-administration.service';
+import { AddressesRepository } from '../../common/repositories';
 import { CatalogRepository } from '../../insurance/repositories';
 import { DIR, TENANT_TYPE_CONCEPT_BY_CODE } from '../directory.concepts';
 import type {
@@ -63,6 +64,7 @@ export class DirectoryReadService {
    * @param branchMembershipsRepo - Acceso a `directory.branch_memberships`.
    * @param tenantAdmin - Comprobación de alcance por organización.
    * @param catalogRepo - Acceso a `insurance.insurance_carriers`, para el bloque `payer`.
+   * @param addressesRepo - Acceso a `common.addresses`, para la casa matriz del `payer` (subtarea 1.3).
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -73,6 +75,7 @@ export class DirectoryReadService {
     private readonly branchMembershipsRepo: BranchMembershipsRepository,
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly catalogRepo: CatalogRepository,
+    private readonly addressesRepo: AddressesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryReadService.name);
@@ -228,11 +231,29 @@ export class DirectoryReadService {
           tenant.id,
         );
         if (carrier) {
+          // La casa matriz georreferenciada (subtarea 1.3) vive en
+          // `common.addresses`, no en el carrier: `owner_id` es el tenant y
+          // `findVigenteByOwnerAndUse` no distingue por `owner_type`, pero
+          // un uuid de tenant no colisiona con uno de persona o de usuario.
+          const casaMatriz = await this.addressesRepo.findVigenteByOwnerAndUse(
+            em,
+            tenant.id,
+            CONCEPTS.ADDR_USE_WORK,
+          );
           payer = {
             carrierCode: carrier.carrierCode,
             regulatorIdentifier: carrier.regulatorIdentifier ?? '',
             sigla: carrier.sigla ?? '',
             address: carrier.address ?? '',
+            ...(casaMatriz?.latitude !== undefined &&
+            casaMatriz?.latitude !== null &&
+            casaMatriz?.longitude !== undefined &&
+            casaMatriz?.longitude !== null
+              ? {
+                  latitude: Number(casaMatriz.latitude),
+                  longitude: Number(casaMatriz.longitude),
+                }
+              : {}),
           };
         }
       }

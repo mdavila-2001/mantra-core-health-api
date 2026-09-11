@@ -4,12 +4,16 @@ import {
   ArrayUnique,
   IsArray,
   IsBoolean,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   Matches,
+  Max,
   MaxLength,
+  Min,
   MinLength,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -53,6 +57,49 @@ export class PayerProfileDto {
   @MinLength(1)
   @MaxLength(300)
   address!: string;
+
+  /**
+   * Latitud de la casa matriz (-90 a 90).
+   *
+   * No se guarda en `insurance_carriers`: junto con `longitude` y `address`
+   * materializa una fila de `common.addresses` (subtarea 1.3). El par viaja
+   * junto o no viaja — mismo patrón que `OwnSiteAddressDto` (sin
+   * `@IsOptional`, que anularía la condición del `@ValidateIf`): mandar una
+   * sola coordenada hace caer a la que falta en su `@IsNumber` y la petición
+   * termina en 400. Opcional en el contrato, como `legalEntityType`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Latitud de la casa matriz (-90 a 90); va junto con longitude o no va',
+    minimum: -90,
+    maximum: 90,
+    example: -17.7833,
+  })
+  @ValidateIf(
+    (dto: PayerProfileDto) =>
+      dto.latitude !== undefined || dto.longitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
+
+  /** Longitud de la casa matriz (-180 a 180). Ver {@link PayerProfileDto.latitude}. */
+  @ApiPropertyOptional({
+    description:
+      'Longitud de la casa matriz (-180 a 180); va junto con latitude o no va',
+    minimum: -180,
+    maximum: 180,
+    example: -63.1821,
+  })
+  @ValidateIf(
+    (dto: PayerProfileDto) =>
+      dto.latitude !== undefined || dto.longitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  longitude?: number;
 
   /**
    * Identificador ante el regulador de seguros (registro, matrícula, NIT).
