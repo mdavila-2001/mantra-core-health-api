@@ -963,6 +963,12 @@ const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   // reclamado sobrevive al borrado del tenant que lo reclamó.
   { table: 'directory.tenant_affiliation_documents', column: 'tenant_id' },
   { table: 'common.files', column: 'tenant_id' },
+  // Casa matriz georreferenciada (subtarea 1.3): `materializeProfile` crea una
+  // fila de `common.addresses` con `owner_id = tenant_id` (owner_type TENANT).
+  // No hay FK hacia `directory.tenants`, así que sin esta entrada el borrado
+  // del tenant NO falla: la fila queda huérfana en silencio. `OWNER_SIN_FK`
+  // no la alcanza (sólo cubre `owner_id in (userIds, personIds)`).
+  { table: 'common.addresses', column: 'owner_id' },
 ];
 
 /**
