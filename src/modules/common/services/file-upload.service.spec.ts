@@ -196,6 +196,94 @@ describe('FileUploadService', () => {
     });
   });
 
+  describe('uploadAnonymous', () => {
+    const policy = {
+      allowedMimeTypes: ['application/pdf'] as const,
+      operation: 'iam.auth.upload-registration-document',
+    };
+
+    it('crea el archivo con actor null: sin dueño hasta que alguien lo reclame', async () => {
+      const { service, storage, filesService } = build();
+      storage.store.mockResolvedValue({
+        storageUri: 'file://local/pdf',
+        sizeBytes: 9,
+        contentHash: 'hash',
+      });
+      filesService.createFile.mockResolvedValue({
+        id: 'file-anon-1',
+        category: FileCategory.DOCUMENT,
+      });
+
+      const result = await service.uploadAnonymous(
+        {
+          originalname: 'escritura.pdf',
+          mimetype: 'application/pdf',
+          buffer: MAGIC.pdf,
+        },
+        { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.NORMAL },
+        policy,
+      );
+
+      expect(filesService.createFile).toHaveBeenCalledWith(
+        expect.objectContaining({ mimeType: 'application/pdf' }),
+        null,
+      );
+      expect(result).toMatchObject({
+        id: 'file-anon-1',
+        sizeBytes: 9,
+        mimeType: 'application/pdf',
+      });
+    });
+
+    it('rechaza un archivo que no es PDF, aunque declare serlo', async () => {
+      const { service, storage } = build();
+
+      await expect(
+        service.uploadAnonymous(
+          {
+            originalname: 'disfrazado.pdf',
+            mimetype: 'application/pdf',
+            buffer: MAGIC.png,
+          },
+          { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.NORMAL },
+          policy,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(storage.store).not.toHaveBeenCalled();
+    });
+
+    it('rechaza contenido vacío', async () => {
+      const { service, storage } = build();
+
+      await expect(
+        service.uploadAnonymous(
+          undefined,
+          { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.NORMAL },
+          policy,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(storage.store).not.toHaveBeenCalled();
+    });
+
+    it('rechaza contenido que excede el tamaño máximo', async () => {
+      const { service, storage } = build();
+      const oversized = {
+        originalname: 'grande.pdf',
+        mimetype: 'application/pdf',
+        buffer: Buffer.alloc(10 * 1024 * 1024 + 1),
+      };
+
+      await expect(
+        service.uploadAnonymous(
+          oversized,
+          { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.NORMAL },
+          policy,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(storage.store).not.toHaveBeenCalled();
+    });
+  });
+
   describe('download', () => {
     /** Archivo vivo con versión vigente en el estado de escaneo indicado. */
     function withVersion(

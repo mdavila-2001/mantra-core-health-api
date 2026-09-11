@@ -12,6 +12,7 @@ import {
   sniffMimeType,
   type AuthenticatedUser,
   type FileStorageAdapter,
+  type SniffedMimeType,
 } from '../../../common';
 
 /** Roles cuyo trabajo exige leer archivos que no subieron ellos mismos (p. ej. revisar evidencia de identidad). */
@@ -35,6 +36,19 @@ export interface UploadedFileBytes {
    */
   buffer: Buffer;
 }
+
+/**
+ * Lo que devuelve una pre-carga anónima: el archivo, más el tamaño y el tipo
+ * detectado, que `FileResponseDto` no expone porque viven en su versión
+ * (`common.file_versions`) y esta vía todavía no tiene versión que leer para
+ * responder — el cliente de la pre-carga necesita mostrarlos de inmediato.
+ */
+export type AnonymousUploadResult = FileResponseDto & {
+  /** Tamaño real de lo escrito, calculado por el adaptador de almacenamiento. */
+  readonly sizeBytes: number;
+  /** Tipo MIME detectado por firma binaria, no el declarado por el cliente. */
+  readonly mimeType: string;
+};
 
 /**
  * Subida y descarga reales de archivos: mueve los bytes contra el adaptador de
@@ -173,6 +187,99 @@ export class FileUploadService {
       },
       actor,
     );
+  }
+
+  /**
+   * Pre-carga sin sesión: mismas comprobaciones de tamaño y contenido que
+   * {@link upload}, pero el archivo nace **sin dueño**
+   * (`created_by_user_id`/`recorded_by_user_id` NULL) y sólo admite los
+   * formatos que declare `policy.allowedMimeTypes` — más estricto que la
+   * lista por categoría, porque esta vía no exige autenticación y conviene
+   * acotarla al mínimo que el llamador necesita.
+   *
+   * Nace para el registro público de organización (subtarea 1.2): quien la
+   * usa sube un PDF antes de que exista su cuenta. El archivo queda
+   * huérfano hasta que alguien lo reclama dentro de una transacción
+   * autenticada (`AttachableFileService.claimAnonymousUpload`), que es quien
+   * le asigna tenant y dueño. Deuda conocida: nada purga las subidas
+   * anónimas que nunca se reclaman.
+   *
+   * No reutiliza `UPLOAD_MIME_ALLOWLIST` ni `isMimeTypeAllowedForCategory`
+   * a propósito: esa lista gobierna todo el sistema y `DOCUMENT` admite
+   * bastante más que PDF; restringir a un uso puntual es responsabilidad de
+   * quien llama, no de la lista global.
+   *
+   * @param file - Contenido recibido por multipart.
+   * @param dto - Clasificación funcional del archivo.
+   * @param policy - Formatos admitidos para este uso y el nombre de la
+   *   operación, para el registro.
+   * @returns El archivo recién creado, sin dueño, con el tamaño y el tipo
+   *   detectado que `FileResponseDto` no expone.
+   * @throws PreconditionFailedException si el contenido viene vacío, excede
+   *   el máximo configurado o no corresponde a uno de los formatos admitidos.
+   */
+  async uploadAnonymous(
+    file: UploadedFileBytes | undefined,
+    dto: UploadFileDto,
+    policy: {
+      readonly allowedMimeTypes: readonly SniffedMimeType[];
+      readonly operation: string;
+    },
+  ): Promise<AnonymousUploadResult> {
+    if (!file?.buffer?.byteLength) {
+      throw new PreconditionFailedException(
+        'No se recibió contenido en el campo "file"',
+      );
+    }
+    // Multer ya corta por `limits.fileSize`, pero se revalida aquí por la
+    // misma razón que en `upload`: que el límite siga vigente si el servicio
+    // se invoca desde otro transporte.
+    if (file.buffer.byteLength > this.maxSizeBytes) {
+      throw new PreconditionFailedException(
+        'El archivo excede el tamaño máximo permitido',
+        { maxSizeBytes: this.maxSizeBytes, sizeBytes: file.buffer.byteLength },
+      );
+    }
+
+    const detectedMimeType = sniffMimeType(file.buffer);
+    if (
+      !detectedMimeType ||
+      !policy.allowedMimeTypes.includes(detectedMimeType)
+    ) {
+      throw new PreconditionFailedException('Solo se admiten documentos PDF', {
+        detectedMimeType: detectedMimeType ?? null,
+        allowedMimeTypes: policy.allowedMimeTypes,
+      });
+    }
+
+    const stored = await this.storage.store({
+      buffer: file.buffer,
+      originalName: file.originalname,
+      mimeType: detectedMimeType,
+    });
+
+    this.logger.info(
+      {
+        operation: policy.operation,
+        sizeBytes: stored.sizeBytes,
+        mimeType: detectedMimeType,
+      },
+      'Anonymous upload stored, registering metadata',
+    );
+
+    const created = await this.filesService.createFile(
+      {
+        originalName: file.originalname,
+        category: dto.category,
+        sensitivity: dto.sensitivity,
+        mimeType: detectedMimeType,
+        sizeBytes: stored.sizeBytes,
+        contentHash: stored.contentHash,
+        storageUri: stored.storageUri,
+      },
+      null,
+    );
+    return { ...created, sizeBytes: stored.sizeBytes, mimeType: detectedMimeType };
   }
 
   /**
