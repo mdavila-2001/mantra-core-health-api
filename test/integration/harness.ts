@@ -955,6 +955,14 @@ const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   // cualquier suite que registrara una aseguradora por
   // `POST /iam/auth/register-organization` no podía limpiarse (subtarea 1.1).
   { table: 'insurance.insurance_carriers', column: 'tenant_id' },
+  // Documentos legales de afiliación (subtarea 1.2): el alta los vincula al
+  // tenant recién creado en la misma transacción. Y el `fileId` que cada uno
+  // envuelve pasa a ser propiedad de ESE tenant al reclamarse
+  // (`AttachableFileService.claimAnonymousUpload` reasigna `common.files.tenant_id`
+  // desde el tenant DEFAULT), así que sin esta segunda fila el archivo
+  // reclamado sobrevive al borrado del tenant que lo reclamó.
+  { table: 'directory.tenant_affiliation_documents', column: 'tenant_id' },
+  { table: 'common.files', column: 'tenant_id' },
 ];
 
 /**
