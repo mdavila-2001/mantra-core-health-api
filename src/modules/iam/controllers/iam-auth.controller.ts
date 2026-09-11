@@ -8,8 +8,17 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import {
@@ -19,16 +28,19 @@ import {
   TenantAgnostic,
   clearRefreshCookie,
   loadRefreshCookieEnv,
+  loadStorageEnv,
   readRefreshCookie,
   setRefreshCookie,
   type AuthenticatedUser,
   type RefreshCookieEnv,
 } from '../../../common';
+import type { UploadedFileBytes } from '../../common/services';
 import {
   IamAuthService,
   IamAssistedRegistrationService,
   IamPatientSelfRegistrationService,
   IamOrganizationSelfRegistrationService,
+  IamRegistrationDocumentUploadService,
   IamPractitionerSelfRegistrationService,
   IamPasswordResetService,
   IamEmailVerificationService,
@@ -46,6 +58,7 @@ import {
   RegisterPatientResponseDto,
   RegisterOrganizationDto,
   RegisterOrganizationResponseDto,
+  RegistrationDocumentUploadResponseDto,
   RegisterPractitionerDto,
   RegisterPractitionerResponseDto,
   VerifyEmailDto,
@@ -74,6 +87,7 @@ export class IamAuthController {
     private readonly assistedRegistrationService: IamAssistedRegistrationService,
     private readonly selfRegistrationService: IamPatientSelfRegistrationService,
     private readonly organizationRegistrationService: IamOrganizationSelfRegistrationService,
+    private readonly registrationDocumentUploadService: IamRegistrationDocumentUploadService,
     private readonly practitionerRegistrationService: IamPractitionerSelfRegistrationService,
     private readonly passwordResetService: IamPasswordResetService,
     private readonly emailVerificationService: IamEmailVerificationService,
@@ -126,6 +140,50 @@ export class IamAuthController {
     @Ip() ip: string,
   ): Promise<RegisterOrganizationResponseDto> {
     return this.organizationRegistrationService.registerOrganization(dto, ip);
+  }
+
+  /**
+   * Pre-carga pública de un documento legal en PDF para el alta de
+   * organización (subtarea 1.2).
+   *
+   * El archivo nace sin dueño (`common.files.created_by_user_id` NULL) y
+   * queda inutilizable hasta que `POST /iam/auth/register-organization` lo
+   * reclama por su `fileId` dentro de `organization.legalDocuments`, en la
+   * misma transacción que crea el tenant.
+   *
+   * Límite de 30/min y no el estándar de 10: un alta legítima de aseguradora
+   * sube hasta 5 PDF y puede reintentar alguno, y sigue diez veces por
+   * debajo del backstop global (300/min, `app.module.ts`).
+   *
+   * Deuda conocida, declarada y no resuelta acá: nada purga las subidas
+   * anónimas que nunca se reclaman (abandono del formulario, rechazo del
+   * alta). Quedan en `common.files` con el tenant DEFAULT y sin dueño.
+   */
+  @Post('upload-registration-document')
+  @Public()
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: loadStorageEnv().maxSizeBytes, files: 1 },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @ApiOperation({
+    summary:
+      'Pre-cargar un documento legal (PDF) del registro de organización',
+  })
+  uploadRegistrationDocument(
+    @UploadedFile() file: UploadedFileBytes | undefined,
+  ): Promise<RegistrationDocumentUploadResponseDto> {
+    return this.registrationDocumentUploadService.upload(file);
   }
 
   /**

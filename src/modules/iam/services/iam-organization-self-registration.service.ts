@@ -27,7 +27,10 @@ import {
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../../directory/repositories';
-import { TenantTypeProfileService } from '../../directory/services';
+import {
+  TenantAffiliationDocumentsService,
+  TenantTypeProfileService,
+} from '../../directory/services';
 import { composeAccountDisplayName } from '../../profiles/person-name';
 import {
   CredentialsRepository,
@@ -83,6 +86,7 @@ export class IamOrganizationSelfRegistrationService {
    * @param tenantsRepo - Valor de tenants repo requerido por la operación.
    * @param membershipsRepo - Valor de memberships repo requerido por la operación.
    * @param notificationsService - Valor de notifications service requerido por la operación.
+   * @param affiliationDocuments - Vincula los documentos legales declarados (subtarea 1.2).
    * @param logger - Valor de logger requerido por la operación.
    * @param tracing - Valor de tracing requerido por la operación.
    */
@@ -98,6 +102,7 @@ export class IamOrganizationSelfRegistrationService {
     private readonly membershipsRepo: TenantMembershipsRepository,
     private readonly notificationsService: NotificationsService,
     private readonly typeProfile: TenantTypeProfileService,
+    private readonly affiliationDocuments: TenantAffiliationDocumentsService,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
   ) {
@@ -272,6 +277,32 @@ export class IamOrganizationSelfRegistrationService {
         actorUserId: user.id,
       });
 
+      // 3b) Documentos legales de afiliación (subtarea 1.2), si el alta los
+      // declaró. Va DESPUÉS del tenant y ANTES del correo, dentro de esta
+      // misma transacción: cada PDF se reclama por su `fileId` y queda
+      // vinculado al tenant recién creado, así que un archivo no puede
+      // terminar reclamado por un tenant que no llegó a existir. Un 422 acá
+      // (archivo ajeno, ya reclamado, o el catálogo sin sembrar) revienta
+      // toda el alta — ni cuenta, ni tenant, ni correo.
+      const legalDocumentIds = dto.organization.legalDocuments
+        ? await this.affiliationDocuments.attachRegistrationDocuments(tx, {
+            tenantId: tenant.id,
+            ownerUserId: user.id,
+            legalEntityType: dto.organization.legalEntityType,
+            taxIdentifier: dto.organization.payer?.regulatorIdentifier,
+            documents: {
+              CONSTITUTION_DOC: dto.organization.legalDocuments.constitutionFileId,
+              TAX_IDENTIFIER_DOC: dto.organization.legalDocuments.taxIdentifierFileId,
+              COMMERCE_REGISTRY_DOC:
+                dto.organization.legalDocuments.commerceRegistryFileId,
+              OPERATING_LICENSE_DOC:
+                dto.organization.legalDocuments.operatingLicenseFileId,
+              HEALTH_AUTHORITY_CERT_DOC:
+                dto.organization.legalDocuments.healthAuthorityCertificateFileId,
+            },
+          })
+        : undefined;
+
       // 4) Verificación del correo. Igual que en el registro de pacientes, no
       // condiciona el acceso: el owner puede entrar y preparar su organización
       // mientras la plataforma revisa la documentación.
@@ -293,6 +324,7 @@ export class IamOrganizationSelfRegistrationService {
         detailJson: {
           flow: 'organization-self-registration',
           tenantId: tenant.id,
+          ...(legalDocumentIds ? { legalDocuments: legalDocumentIds.length } : {}),
         },
       });
 
@@ -312,6 +344,7 @@ export class IamOrganizationSelfRegistrationService {
           dto.organization.tenantType === 'DIAGNOSTIC_CENTER'
             ? profileId
             : undefined,
+        legalDocumentsRegistered: legalDocumentIds?.length,
       };
     });
 
@@ -344,6 +377,7 @@ export class IamOrganizationSelfRegistrationService {
       status: created.status,
       emailVerificationSent,
       diagnosticUnitId: created.diagnosticUnitId,
+      legalDocumentsRegistered: created.legalDocumentsRegistered,
     };
   }
 
