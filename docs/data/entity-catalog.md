@@ -5,11 +5,11 @@
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../Mantra Core Health Vault/SALUD/Entidades` vía `vault.mjs`, la misma fuente que usa
 > `yarn orm:catalog`; `SALUD_VAULT` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1193/1245** entidades tienen descripción de negocio
+> repositorio. **1195/1245** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
-> Este es el catálogo de lo **implementado**. La bóveda describe 1341 entidades en total
-> — la diferencia (96) son entidades diseñadas pero no materializadas aún en
+> Este es el catálogo de lo **implementado**. La bóveda describe 1343 entidades en total
+> — la diferencia (98) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
 ## Por schema (61 schemas · 1245 entidades)
@@ -357,8 +357,8 @@
 | `payable_payment_allocations` | `PayablePaymentAllocations` | 11 | `id` | — | payable_payment_allocations es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `payments_made` | `PaymentsMade` | 17 | `id` | ✅ | payments_made es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `payments_received` | `PaymentsReceived` | 18 | `id` | ✅ | payments_received es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
-| `quotation_installments` | `QuotationInstallments` | 10 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `quotations` | `Quotations` | 20 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `quotation_installments` | `QuotationInstallments` | 10 | `id` | ✅ | quotation_installments es cada cuota del plan de pagos de una cotización, congelada al momento de cotizar: número de cuota, vencimiento, capital, interés y total. |
+| `quotations` | `Quotations` | 20 | `id` | ✅ | quotations es la cotización que un profesional le ofrece a un paciente antes de la atención: un servicio del catálogo, un precio ofrecido y un plan de pagos simulado (tasa, plazo, método FLAT/FRENCH), con una validez fij… |
 | `receivable_payment_allocations` | `ReceivablePaymentAllocations` | 11 | `id` | — | receivable_payment_allocations es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `reimbursements` | `Reimbursements` | 11 | `id` | ✅ | reimbursements es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `service_catalog` | `ServiceCatalog` | 17 | `id` | ✅ | service_catalog es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
