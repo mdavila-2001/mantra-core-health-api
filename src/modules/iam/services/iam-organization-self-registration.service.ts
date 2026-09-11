@@ -291,14 +291,17 @@ export class IamOrganizationSelfRegistrationService {
             legalEntityType: dto.organization.legalEntityType,
             taxIdentifier: dto.organization.payer?.regulatorIdentifier,
             documents: {
-              CONSTITUTION_DOC: dto.organization.legalDocuments.constitutionFileId,
-              TAX_IDENTIFIER_DOC: dto.organization.legalDocuments.taxIdentifierFileId,
+              CONSTITUTION_DOC:
+                dto.organization.legalDocuments.constitutionFileId,
+              TAX_IDENTIFIER_DOC:
+                dto.organization.legalDocuments.taxIdentifierFileId,
               COMMERCE_REGISTRY_DOC:
                 dto.organization.legalDocuments.commerceRegistryFileId,
               OPERATING_LICENSE_DOC:
                 dto.organization.legalDocuments.operatingLicenseFileId,
               HEALTH_AUTHORITY_CERT_DOC:
-                dto.organization.legalDocuments.healthAuthorityCertificateFileId,
+                dto.organization.legalDocuments
+                  .healthAuthorityCertificateFileId,
             },
           })
         : undefined;
@@ -324,7 +327,9 @@ export class IamOrganizationSelfRegistrationService {
         detailJson: {
           flow: 'organization-self-registration',
           tenantId: tenant.id,
-          ...(legalDocumentIds ? { legalDocuments: legalDocumentIds.length } : {}),
+          ...(legalDocumentIds
+            ? { legalDocuments: legalDocumentIds.length }
+            : {}),
         },
       });
 

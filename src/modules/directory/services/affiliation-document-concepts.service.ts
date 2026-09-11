@@ -85,9 +85,7 @@ export class AffiliationDocumentConceptsService {
     return conceptId;
   }
 
-  private async load(
-    em: EntityManager,
-  ): Promise<AffiliationDocumentConcepts> {
+  private async load(em: EntityManager): Promise<AffiliationDocumentConcepts> {
     const documentType = await this.resolveValueSet(
       em,
       AFFILIATION_DOCUMENT_VALUE_SETS.documentType,

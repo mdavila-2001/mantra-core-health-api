@@ -5,7 +5,10 @@ import {
   deleteRegisteredOrganizations,
   type TestContext,
 } from './harness';
-import { TenantAffiliationDocuments, Tenants } from '../../src/modules/directory/entities';
+import {
+  TenantAffiliationDocuments,
+  Tenants,
+} from '../../src/modules/directory/entities';
 import { Files } from '../../src/modules/common/entities';
 import { CatalogConcepts } from '../../src/modules/terminology/entities';
 
@@ -114,7 +117,9 @@ describe('1.2 · documentos legales del alta de organización (integración)', (
       expect(doc.isRequiredForAffiliation).toBe(true);
     }
 
-    const nit = documentos.find((d) => d.fileId === fileIds.taxIdentifierFileId);
+    const nit = documentos.find(
+      (d) => d.fileId === fileIds.taxIdentifierFileId,
+    );
     expect(nit?.documentNumber).toBe(`NIT-${codigo}`);
 
     const otro = documentos.find(

@@ -451,22 +451,21 @@ describe('IamOrganizationSelfRegistrationService', () => {
         },
       });
 
-      expect(d.affiliationDocuments.attachRegistrationDocuments).toHaveBeenCalledWith(
-        d.tx,
-        {
-          tenantId: 'tenant-1',
-          ownerUserId: 'user-1',
-          legalEntityType: undefined,
-          taxIdentifier: 'NIT-12345',
-          documents: {
-            CONSTITUTION_DOC: 'file-constitution',
-            TAX_IDENTIFIER_DOC: 'file-tax',
-            COMMERCE_REGISTRY_DOC: 'file-commerce',
-            OPERATING_LICENSE_DOC: 'file-license',
-            HEALTH_AUTHORITY_CERT_DOC: 'file-sedes',
-          },
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(d.tx, {
+        tenantId: 'tenant-1',
+        ownerUserId: 'user-1',
+        legalEntityType: undefined,
+        taxIdentifier: 'NIT-12345',
+        documents: {
+          CONSTITUTION_DOC: 'file-constitution',
+          TAX_IDENTIFIER_DOC: 'file-tax',
+          COMMERCE_REGISTRY_DOC: 'file-commerce',
+          OPERATING_LICENSE_DOC: 'file-license',
+          HEALTH_AUTHORITY_CERT_DOC: 'file-sedes',
         },
-      );
+      });
       expect(result.legalDocumentsRegistered).toBe(5);
     });
 
@@ -484,7 +483,9 @@ describe('IamOrganizationSelfRegistrationService', () => {
     it('un rechazo 422 al vincularlos revienta toda el alta', async () => {
       const d = build();
       d.affiliationDocuments.attachRegistrationDocuments.mockRejectedValueOnce(
-        new PreconditionFailedException('El documento el NIT ya está vinculado a una organización'),
+        new PreconditionFailedException(
+          'El documento el NIT ya está vinculado a una organización',
+        ),
       );
 
       await expect(

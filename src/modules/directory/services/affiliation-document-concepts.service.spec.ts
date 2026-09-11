@@ -1,9 +1,7 @@
 import { jest } from '@jest/globals';
 
 import { PreconditionFailedException } from '../../../common';
-import {
-  AffiliationDocumentConceptsService,
-} from './affiliation-document-concepts.service';
+import { AffiliationDocumentConceptsService } from './affiliation-document-concepts.service';
 
 /** El proyecto corre jest en ESM: los dobles se arman con este envoltorio. */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -46,14 +44,19 @@ function build(
   const setsByCode: Record<string, { id: string }> = {
     VS_AFFILIATION_DOCUMENT_TYPE: { id: 'vs-document-type' },
     VS_ISSUING_AUTHORITY: { id: 'vs-issuing-authority' },
-    VS_AFFILIATION_DOCUMENT_VERIFICATION_STATUS: { id: 'vs-verification-status' },
+    VS_AFFILIATION_DOCUMENT_VERIFICATION_STATUS: {
+      id: 'vs-verification-status',
+    },
   };
   const membersByValueSetId: Record<string, string[]> = {
     'vs-document-type': Object.keys(DOCUMENT_TYPE_MEMBERS),
     'vs-issuing-authority': Object.keys(ISSUING_AUTHORITY_MEMBERS),
     'vs-verification-status': Object.keys(VERIFICATION_STATUS_MEMBERS),
   };
-  const conceptsByValueSetId: Record<string, Map<string, { id: string; code: string }>> = {
+  const conceptsByValueSetId: Record<
+    string,
+    Map<string, { id: string; code: string }>
+  > = {
     'vs-document-type': conceptsFor(DOCUMENT_TYPE_MEMBERS),
     'vs-issuing-authority': conceptsFor(ISSUING_AUTHORITY_MEMBERS),
     'vs-verification-status': conceptsFor(VERIFICATION_STATUS_MEMBERS),
@@ -86,10 +89,12 @@ function build(
     findByInternalCode: mockFn((_em: unknown, code: string) =>
       Promise.resolve(setsByCode[code] ?? null),
     ),
-    findIncludedConceptIdsByValueSet: mockFn((_em: unknown, valueSetId: string) => {
-      const ids = membersByValueSetId[valueSetId];
-      return Promise.resolve(ids === undefined ? null : ids);
-    }),
+    findIncludedConceptIdsByValueSet: mockFn(
+      (_em: unknown, valueSetId: string) => {
+        const ids = membersByValueSetId[valueSetId];
+        return Promise.resolve(ids === undefined ? null : ids);
+      },
+    ),
   };
   const catalogConcepts = {
     findByIds: mockFn((_em: unknown, ids: string[]) => {
@@ -131,7 +136,11 @@ describe('AffiliationDocumentConceptsService', () => {
     const map = new Map([['CERTIFICADO_SEDES', 'concept-sedes']]);
 
     expect(
-      d.service.conceptIdOf(map, 'VS_AFFILIATION_DOCUMENT_TYPE', 'certificado_sedes'),
+      d.service.conceptIdOf(
+        map,
+        'VS_AFFILIATION_DOCUMENT_TYPE',
+        'certificado_sedes',
+      ),
     ).toBe('concept-sedes');
   });
 

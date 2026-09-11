@@ -154,9 +154,7 @@ describe('TenantAffiliationDocumentsService', () => {
       ),
     );
     expect(byFile.get('file-tax').issuingAuthorityConceptId).toBe('ia-siat');
-    expect(byFile.get('file-sedes').issuingAuthorityConceptId).toBe(
-      'ia-sedes',
-    );
+    expect(byFile.get('file-sedes').issuingAuthorityConceptId).toBe('ia-sedes');
   });
 
   it('fuera de Bolivia (US_LLC) las cinco autoridades son OTRO', async () => {
@@ -184,7 +182,10 @@ describe('TenantAffiliationDocumentsService', () => {
       d.service.attachRegistrationDocuments(d.tx, {
         tenantId: 'tenant-1',
         ownerUserId: 'user-1',
-        documents: { ...DOCUMENTS, TAX_IDENTIFIER_DOC: DOCUMENTS.CONSTITUTION_DOC },
+        documents: {
+          ...DOCUMENTS,
+          TAX_IDENTIFIER_DOC: DOCUMENTS.CONSTITUTION_DOC,
+        },
       }),
     ).rejects.toThrow(PreconditionFailedException);
 
@@ -212,7 +213,9 @@ describe('TenantAffiliationDocumentsService', () => {
   it('propaga el error del reclamo (archivo ajeno, no-PDF, ya reclamado)', async () => {
     const d = build();
     d.attachable.claimAnonymousUpload.mockRejectedValueOnce(
-      new PreconditionFailedException('El documento el NIT tiene que ser un PDF'),
+      new PreconditionFailedException(
+        'El documento el NIT tiene que ser un PDF',
+      ),
     );
 
     await expect(

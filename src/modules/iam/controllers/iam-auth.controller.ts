@@ -177,8 +177,7 @@ export class IamAuthController {
     },
   })
   @ApiOperation({
-    summary:
-      'Pre-cargar un documento legal (PDF) del registro de organización',
+    summary: 'Pre-cargar un documento legal (PDF) del registro de organización',
   })
   uploadRegistrationDocument(
     @UploadedFile() file: UploadedFileBytes | undefined,

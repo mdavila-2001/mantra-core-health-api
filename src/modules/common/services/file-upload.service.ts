@@ -279,7 +279,11 @@ export class FileUploadService {
       },
       null,
     );
-    return { ...created, sizeBytes: stored.sizeBytes, mimeType: detectedMimeType };
+    return {
+      ...created,
+      sizeBytes: stored.sizeBytes,
+      mimeType: detectedMimeType,
+    };
   }
 
   /**

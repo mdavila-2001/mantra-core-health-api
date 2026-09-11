@@ -220,7 +220,10 @@ describe('FileUploadService', () => {
           mimetype: 'application/pdf',
           buffer: MAGIC.pdf,
         },
-        { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.NORMAL },
+        {
+          category: FileCategory.DOCUMENT,
+          sensitivity: FileSensitivity.NORMAL,
+        },
         policy,
       );
 
@@ -245,7 +248,10 @@ describe('FileUploadService', () => {
             mimetype: 'application/pdf',
             buffer: MAGIC.png,
           },
-          { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.NORMAL },
+          {
+            category: FileCategory.DOCUMENT,
+            sensitivity: FileSensitivity.NORMAL,
+          },
           policy,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -258,7 +264,10 @@ describe('FileUploadService', () => {
       await expect(
         service.uploadAnonymous(
           undefined,
-          { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.NORMAL },
+          {
+            category: FileCategory.DOCUMENT,
+            sensitivity: FileSensitivity.NORMAL,
+          },
           policy,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -276,7 +285,10 @@ describe('FileUploadService', () => {
       await expect(
         service.uploadAnonymous(
           oversized,
-          { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.NORMAL },
+          {
+            category: FileCategory.DOCUMENT,
+            sensitivity: FileSensitivity.NORMAL,
+          },
           policy,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);

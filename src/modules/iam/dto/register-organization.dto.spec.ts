@@ -248,9 +248,7 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
           legalDocuments: incompleto,
         },
       }),
-    ).toEqual([
-      'organization.legalDocuments.healthAuthorityCertificateFileId',
-    ]);
+    ).toEqual(['organization.legalDocuments.healthAuthorityCertificateFileId']);
   });
 
   it('rechaza un fileId que no es un uuid', async () => {

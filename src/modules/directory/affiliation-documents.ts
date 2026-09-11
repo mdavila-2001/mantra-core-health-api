@@ -55,7 +55,8 @@ export const AFFILIATION_DOCUMENT_ROLES = [
   'POWER_OF_ATTORNEY_DOC',
 ] as const;
 
-export type AffiliationDocumentRole = (typeof AFFILIATION_DOCUMENT_ROLES)[number];
+export type AffiliationDocumentRole =
+  (typeof AFFILIATION_DOCUMENT_ROLES)[number];
 
 /**
  * Los cinco que el autorregistro público de organización exige (1.1.2 · 1.2.1
@@ -69,13 +70,14 @@ export type RegistrationDocumentRole = Exclude<
   'POWER_OF_ATTORNEY_DOC'
 >;
 
-export const REGISTRATION_DOCUMENT_ROLES: readonly RegistrationDocumentRole[] = [
-  'CONSTITUTION_DOC',
-  'TAX_IDENTIFIER_DOC',
-  'COMMERCE_REGISTRY_DOC',
-  'OPERATING_LICENSE_DOC',
-  'HEALTH_AUTHORITY_CERT_DOC',
-];
+export const REGISTRATION_DOCUMENT_ROLES: readonly RegistrationDocumentRole[] =
+  [
+    'CONSTITUTION_DOC',
+    'TAX_IDENTIFIER_DOC',
+    'COMMERCE_REGISTRY_DOC',
+    'OPERATING_LICENSE_DOC',
+    'HEALTH_AUTHORITY_CERT_DOC',
+  ];
 
 /** Código de `vs_affiliation_document_type` que corresponde a cada rol. */
 export const DOCUMENT_TYPE_CODE_BY_ROLE: Readonly<

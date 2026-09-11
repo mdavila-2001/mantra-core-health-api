@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { FileCategory, FileSensitivity } from '../../common/dto';
-import { FileUploadService, type UploadedFileBytes } from '../../common/services';
+import {
+  FileUploadService,
+  type UploadedFileBytes,
+} from '../../common/services';
 import { RegistrationDocumentUploadResponseDto } from '../dto';
 
 /** Único formato admitido por esta vía: el registro de procesos pide PDF. */
@@ -46,7 +49,10 @@ export class IamRegistrationDocumentUploadService {
       },
     );
     this.logger.info(
-      { operation: 'iam.auth.upload-registration-document', fileId: uploaded.id },
+      {
+        operation: 'iam.auth.upload-registration-document',
+        fileId: uploaded.id,
+      },
       'Registration document uploaded anonymously',
     );
     return {

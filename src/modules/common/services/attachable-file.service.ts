@@ -137,7 +137,13 @@ export class AttachableFileService {
         { fileId },
       );
     }
-    const version = await this.assertVersionUsable(em, file, fileId, options, labels);
+    const version = await this.assertVersionUsable(
+      em,
+      file,
+      fileId,
+      options,
+      labels,
+    );
     return { file, version };
   }
 
@@ -210,7 +216,13 @@ export class AttachableFileService {
         { fileId },
       );
     }
-    const version = await this.assertVersionUsable(em, file, fileId, options, labels);
+    const version = await this.assertVersionUsable(
+      em,
+      file,
+      fileId,
+      options,
+      labels,
+    );
     const now = new Date();
     file.tenantId = claim.tenantId;
     file.createdByUserId = claim.ownerUserId;
