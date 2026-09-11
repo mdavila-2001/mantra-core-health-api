@@ -6,6 +6,7 @@ import { PreconditionFailedException } from '../../../common';
 import { INS } from '../../insurance/insurance.concepts';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import { TERRITORIAL_TENANT_TYPES } from '../directory.concepts';
+import { LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO } from '../legal-entity-types';
 
 describe('TenantTypeProfileService', () => {
   /**
@@ -171,6 +172,59 @@ describe('TenantTypeProfileService', () => {
           tenantType: 'BROKER',
           legalName: 'Corredora Y',
           broker: { brokerCode: 'B1', licenseNumber: 'L1' },
+        }),
+      ).not.toThrow();
+    });
+  });
+
+  /**
+   * El tipo societario del diccionario internacional (subtarea 1.1): si el
+   * cliente declara ambos, el país que implica el tipo debe coincidir con el
+   * `countryConceptId` explícito.
+   */
+  describe('assertProfileMatchesType · legalEntityType (1.1)', () => {
+    it('acepta un tipo boliviano con el país de Bolivia', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'PROVIDER',
+          legalName: 'Clínica Z',
+          legalEntityType: 'SRL',
+          countryConceptId: LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO.BO,
+          jurisdictionConceptId: 'jur-1',
+        }),
+      ).not.toThrow();
+    });
+
+    it('rechaza un tipo boliviano declarado bajo un país distinto', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'PROVIDER',
+          legalName: 'Clínica Z',
+          legalEntityType: 'SRL',
+          countryConceptId: LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO.US,
+          jurisdictionConceptId: 'jur-1',
+        }),
+      ).toThrow(PreconditionFailedException);
+    });
+
+    it('sin countryConceptId no hay nada que contrastar', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'PAYER',
+          legalName: 'Aseguradora X',
+          legalEntityType: 'SRL',
+          payer: {
+            carrierCode: 'C1',
+            regulatorIdentifier: 'R1',
+            sigla: 'C1',
+            address: 'Calle Falsa 123',
+          },
         }),
       ).not.toThrow();
     });

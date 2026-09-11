@@ -20,6 +20,10 @@ import {
   TENANT_TYPE_CONCEPT_BY_CODE,
 } from '../../directory/directory.concepts';
 import {
+  countryConceptForLegalEntityType,
+  resolveLegalEntityType,
+} from '../../directory/legal-entity-types';
+import {
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../../directory/repositories';
@@ -225,10 +229,19 @@ export class IamOrganizationSelfRegistrationService {
           TENANT_TYPE_CONCEPT_BY_CODE[
             dto.organization.tenantType ?? 'PROVIDER'
           ],
-        legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_COMPANY,
+        legalEntityTypeConceptId: resolveLegalEntityType(
+          dto.organization.legalEntityType,
+          undefined,
+          CONCEPTS.LEGAL_ENTITY_COMPANY,
+        ),
         statusConceptId: DIR.TENANT_PENDING,
         verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
-        countryConceptId: dto.organization.countryConceptId,
+        // El «país de constitución» que el tipo societario implica: sólo se
+        // usa cuando el cliente eligió el tipo pero no declaró país explícito
+        // — evita pedir la misma cosa dos veces cuando el tipo ya la dice.
+        countryConceptId:
+          dto.organization.countryConceptId ??
+          countryConceptForLegalEntityType(dto.organization.legalEntityType),
         jurisdictionConceptId: dto.organization.jurisdictionConceptId,
         timeZone: dto.organization.timeZone,
         actorUserId: user.id,

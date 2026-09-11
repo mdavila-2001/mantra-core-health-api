@@ -144,6 +144,39 @@ describe('DirectoryTenantsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.tenantsRepo.create).not.toHaveBeenCalled();
     });
+
+    it('resuelve legalEntityType por código (subtarea 1.1)', async () => {
+      const d = build();
+      d.tenantsRepo.findByCode.mockResolvedValue(null);
+      d.tenantsRepo.create.mockReturnValue({
+        id: 't1',
+        code: 'ACME',
+        legalName: 'Acme',
+        statusConceptId: DIR.TENANT_PENDING,
+        verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
+        createdAt: new Date('2026-01-01'),
+      });
+
+      await d.service.provision(
+        {
+          tenantType: 'PROVIDER' as const,
+          legalEntityType: 'SRL',
+          countryConceptId: 'c1',
+          jurisdictionConceptId: 'j1',
+          code: 'ACME',
+          legalName: 'Acme',
+          ownerUserId: 'u1',
+        } as any,
+        actor,
+      );
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_SRL,
+        }),
+      );
+    });
   });
 
   describe('verify (UC-04-02)', () => {

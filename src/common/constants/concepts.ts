@@ -409,6 +409,14 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // dejaba cada dirección creada apuntando al país equivocado.
   COUNTRY_BO: def('common:country:bo', 'BO', 'Bolivia'),
 
+  // Países de las formas societarias extranjeras (subtarea 1.1). Sin
+  // jurisdicción propia sembrada todavía: alcanza con el país para derivar
+  // `countryConceptId` en el autoalta cuando el cliente no lo declara.
+  COUNTRY_BR: def('common:country:br', 'BR', 'Brazil'),
+  COUNTRY_US: def('common:country:us', 'US', 'United States'),
+  COUNTRY_AR: def('common:country:ar', 'AR', 'Argentina'),
+  COUNTRY_MX: def('common:country:mx', 'MX', 'Mexico'),
+
   // --- Common: archivos ---
   FILE_CATEGORY_DOCUMENT: def(
     'common:file-category:document',
@@ -618,6 +626,82 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'directory:legal-entity:foreign-branch',
     'SUCURSAL_EXTRANJERA',
     'Branch of a foreign company',
+  ),
+
+  /* Formas societarias de otras jurisdicciones (subtarea 1.1, prompt del
+     diccionario internacional). Los 8 conceptos de arriba son de Bolivia y NO
+     se renombran: son los que ya persisten filas reales. Cada figura nueva
+     lleva su código de país como propiedad (`legal-entity-country`) y su
+     categoría canónica (`legal-entity-canonical-category`), sembradas por
+     `LegalEntityTypesSeedService` — ver `legal-entity-types.ts`. Fuentes:
+     Código Civil brasileño (Lei 10.406/2002) + Lei das S.A. (6.404/1976) para
+     BR; derecho societario estatal de EE. UU. (LLC/Corporation genéricas,
+     sin estado específico) para US; Ley 27.349 de Sociedades por Acciones
+     Simplificadas para AR; Ley General de Sociedades Mercantiles para MX. */
+  LEGAL_ENTITY_BR_LTDA: def(
+    'directory:legal-entity:br-ltda',
+    'BR_LTDA',
+    'Sociedade Limitada (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_SA: def(
+    'directory:legal-entity:br-sa',
+    'BR_SA',
+    'Sociedade Anônima (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_MEI: def(
+    'directory:legal-entity:br-mei',
+    'BR_MEI',
+    'Microempreendedor Individual (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_EI: def(
+    'directory:legal-entity:br-ei',
+    'BR_EI',
+    'Empresário Individual (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_SLU: def(
+    'directory:legal-entity:br-slu',
+    'BR_SLU',
+    'Sociedade Limitada Unipessoal (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_FILIAL_EST: def(
+    'directory:legal-entity:br-filial-est',
+    'BR_FILIAL_EST',
+    'Foreign company branch (Brazil)',
+  ),
+  LEGAL_ENTITY_US_LLC: def(
+    'directory:legal-entity:us-llc',
+    'US_LLC',
+    'Limited Liability Company (US)',
+  ),
+  LEGAL_ENTITY_US_CORP: def(
+    'directory:legal-entity:us-corp',
+    'US_CORP',
+    'Corporation (US)',
+  ),
+  LEGAL_ENTITY_US_SOLE_PROP: def(
+    'directory:legal-entity:us-sole-prop',
+    'US_SOLE_PROP',
+    'Sole Proprietorship (US)',
+  ),
+  LEGAL_ENTITY_US_LLP: def(
+    'directory:legal-entity:us-llp',
+    'US_LLP',
+    'Limited Liability Partnership (US)',
+  ),
+  LEGAL_ENTITY_US_BRANCH: def(
+    'directory:legal-entity:us-branch',
+    'US_BRANCH',
+    'Foreign company branch (US)',
+  ),
+  LEGAL_ENTITY_AR_SAS: def(
+    'directory:legal-entity:ar-sas',
+    'AR_SAS',
+    'Sociedad por Acciones Simplificada (Argentina)',
+  ),
+  LEGAL_ENTITY_MX_S_RL: def(
+    'directory:legal-entity:mx-s-rl',
+    'MX_S_RL',
+    'Sociedad de Responsabilidad Limitada (Mexico)',
   ),
   TENANT_ACTIVE: def(
     'directory:tenant-status:active',

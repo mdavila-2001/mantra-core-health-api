@@ -7,6 +7,7 @@ import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
@@ -117,6 +118,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
+   * @param legalEntityTypes - País y categoría canónica de cada forma societaria
+   *   del diccionario internacional (subtarea 1.1).
    * @param boOccupations - Ocupaciones de Bolivia (`VS_BO_OCCUPATION`).
    * @param boEmployers - Empresas y empleadores de Bolivia (`VS_BO_EMPLOYER`).
    * @param boliviaFacilities - Directorio de establecimientos de salud de
@@ -142,6 +145,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
+    private readonly legalEntityTypes: LegalEntityTypesSeedService,
     private readonly boOccupations: BoOccupationsSeedService,
     private readonly boEmployers: BoEmployersSeedService,
     private readonly boliviaFacilities: BoliviaFacilitiesSeedService,
@@ -272,6 +276,17 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'departamentos de Bolivia',
         kind: 'core',
         run: () => this.boGeography.run(),
+      },
+      // Va justo después del catálogo de conceptos: sólo depende de que los 21
+      // conceptos de `LEGAL_ENTITY_TYPES` ya existan (los materializa el paso
+      // 'catálogo de conceptos'), y sin sus propiedades el registro sigue
+      // funcionando -- sólo faltan país y categoría canónica en `$expand`. Es
+      // núcleo, no contenido, porque las 8 formas bolivianas son las que el
+      // registro de procesos exige poder contar desde el primer arranque.
+      {
+        name: 'país y categoría canónica de formas societarias',
+        kind: 'core',
+        run: () => this.legalEntityTypes.run(),
       },
       // Y con ellos, por lo mismo: el alta de paciente resuelve
       // `VS_BO_OCCUPATION` por su código para el desplegable de ocupación.

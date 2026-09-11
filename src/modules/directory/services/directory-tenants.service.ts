@@ -15,6 +15,7 @@ import {
   TENANT_TYPE_CONCEPT_BY_CODE,
   type TenantTypeCode,
 } from '../directory.concepts';
+import { resolveLegalEntityType } from '../legal-entity-types';
 import {
   BranchesRepository,
   TenantMembershipsRepository,
@@ -139,8 +140,11 @@ export class DirectoryTenantsService {
           dto.tenantTypeConceptId,
           CONCEPTS.TENANT_TYPE_PROVIDER,
         ),
-        legalEntityTypeConceptId:
-          dto.legalEntityTypeConceptId ?? CONCEPTS.LEGAL_ENTITY_COMPANY,
+        legalEntityTypeConceptId: resolveLegalEntityType(
+          dto.legalEntityType,
+          dto.legalEntityTypeConceptId,
+          CONCEPTS.LEGAL_ENTITY_COMPANY,
+        ),
         statusConceptId: DIR.TENANT_PENDING,
         verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
         dataResidencyRegionConceptId: dto.dataResidencyRegionConceptId,
@@ -443,8 +447,11 @@ export class DirectoryTenantsService {
           dto.tenantTypeConceptId,
           parent.tenantTypeConceptId,
         ),
-        legalEntityTypeConceptId:
-          dto.legalEntityTypeConceptId ?? parent.legalEntityTypeConceptId,
+        legalEntityTypeConceptId: resolveLegalEntityType(
+          dto.legalEntityType,
+          dto.legalEntityTypeConceptId,
+          parent.legalEntityTypeConceptId,
+        ),
         statusConceptId: CONCEPTS.TENANT_ACTIVE,
         verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
         dataResidencyRegionConceptId:

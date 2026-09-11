@@ -2765,6 +2765,112 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
         'Establecimiento en Bolivia de una sociedad constituida en otro país, inscrito en el registro de comercio.',
     },
   ],
+  // --- Formas societarias de otras jurisdicciones (subtarea 1.1) ----------
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_LTDA,
+    {
+      display: 'Sociedad Limitada (Brasil)',
+      definition:
+        'Figura brasileña de responsabilidad limitada: los socios responden hasta el monto de su cuota, regida por el Código Civil.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_SA,
+    {
+      display: 'Sociedad Anónima (Brasil)',
+      definition:
+        'Capital dividido en acciones, abierta o cerrada, regida por la Lei das S.A. (6.404/1976).',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_MEI,
+    {
+      display: 'Microemprendedor Individual (Brasil)',
+      definition:
+        'Régimen simplificado brasileño para quien factura poco y trabaja por cuenta propia.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_EI,
+    {
+      display: 'Empresario Individual (Brasil)',
+      definition:
+        'Persona física brasileña que ejerce una actividad empresarial sin constituir sociedad.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_SLU,
+    {
+      display: 'Sociedad Limitada Unipersonal (Brasil)',
+      definition:
+        'Limitada brasileña de un solo socio, sin exigir un mínimo de capital.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_FILIAL_EST,
+    {
+      display: 'Filial de sociedad extranjera (Brasil)',
+      definition:
+        'Establecimiento en Brasil de una sociedad constituida en otro país.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_LLC,
+    {
+      display: 'Compañía de Responsabilidad Limitada (LLC, EE. UU.)',
+      definition:
+        'Estructura estadounidense que combina la protección patrimonial de una corporación con la flexibilidad de una sociedad de personas.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_CORP,
+    {
+      display: 'Corporación (EE. UU.)',
+      definition:
+        'Entidad legal separada de sus accionistas, con capital dividido en acciones.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_SOLE_PROP,
+    {
+      display: 'Propietario único (EE. UU.)',
+      definition:
+        'Negocio no incorporado, operado y respondido por una sola persona.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_LLP,
+    {
+      display:
+        'Sociedad de Responsabilidad Limitada entre profesionales (EE. UU.)',
+      definition:
+        'Sociedad de personas donde cada socio responde por sus propios actos y no por los de los demás.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_BRANCH,
+    {
+      display: 'Sucursal extranjera (EE. UU.)',
+      definition:
+        'Establecimiento en Estados Unidos de una empresa constituida en otro país.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_AR_SAS,
+    {
+      display: 'Sociedad por Acciones Simplificada (Argentina)',
+      definition:
+        'Figura societaria argentina de trámite ágil, con capital dividido en acciones y responsabilidad limitada al aporte.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_MX_S_RL,
+    {
+      display: 'Sociedad de Responsabilidad Limitada (México)',
+      definition:
+        'Figura mexicana con socios que responden hasta el monto de sus aportaciones, sin partes representadas en títulos negociables.',
+    },
+  ],
   /* --- la nota clínica narrativa (v4.1.4) -----------------------------------
      Se veían en inglés en la pestaña «Notas» del expediente, que es justo donde
      el médico va a buscar lo que acaba de escribir. */
