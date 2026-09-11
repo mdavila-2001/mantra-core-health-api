@@ -41,6 +41,22 @@ export class PayerOrganizationProfileDto {
    */
   @ApiProperty({ description: 'Dirección de la aseguradora' })
   address!: string;
+
+  /**
+   * Latitud de la casa matriz, si se registró (subtarea 1.3).
+   *
+   * Sale de `common.addresses` (dueño el tenant, uso `ADDR_USE_WORK`), no de
+   * una columna propia de `insurance_carriers`; ver
+   * `TenantTypeProfileService.materializePayerHeadquarters`.
+   */
+  @ApiPropertyOptional({ description: 'Latitud de la casa matriz (-90 a 90)' })
+  latitude?: number;
+
+  /** Longitud de la casa matriz, si se registró. Ver {@link PayerOrganizationProfileDto.latitude}. */
+  @ApiPropertyOptional({
+    description: 'Longitud de la casa matriz (-180 a 180)',
+  })
+  longitude?: number;
 }
 
 /**

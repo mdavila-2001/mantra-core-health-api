@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { PreconditionFailedException } from '../../../common';
+import { CONCEPTS, PreconditionFailedException } from '../../../common';
+import { AddressesRepository } from '../../common/repositories';
 import { CatalogRepository } from '../../insurance/repositories';
 import { INS } from '../../insurance/insurance.concepts';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
@@ -93,11 +94,13 @@ export class TenantTypeProfileService {
    *
    * @param catalogRepo - Repositorio del catálogo de seguros (carriers/brokers).
    * @param conceptsRepo - Catálogo de terminología, para validar los `*ConceptId` declarados.
+   * @param addressesRepo - Repositorio de `common.addresses`, para la casa matriz del PAYER.
    */
   constructor(
     private readonly catalogRepo: CatalogRepository,
     private readonly conceptsRepo: CatalogConceptsRepository,
     private readonly diagnosticUnitProvisioning: DiagnosticUnitProvisioningService,
+    private readonly addressesRepo: AddressesRepository,
   ) {}
 
   /**
@@ -315,6 +318,7 @@ export class TenantTypeProfileService {
         statusConceptId: INS.CARRIER_ACTIVE,
         actorUserId,
       });
+      this.materializePayerHeadquarters(tx, tenantId, input.payer, actorUserId);
       return carrier.id;
     }
 
@@ -355,5 +359,49 @@ export class TenantTypeProfileService {
     // PROVIDER no tiene fila propia: su realidad operativa son las sedes y los
     // servicios de salud, que se crean después con su propio caso de uso.
     return undefined;
+  }
+
+  /**
+   * Registra la ubicación de la casa matriz de un `PAYER`, si la declaró.
+   *
+   * Va en `common.addresses` (dueño `OWNER_TENANT`, uso `ADDR_USE_WORK`) y no
+   * en una columna de `insurance_carriers`: es el mismo lugar donde ya viven
+   * las coordenadas del consultorio propio y del centro de diagnóstico
+   * (`OwnSiteProvisioningService`, `DiagnosticUnitProvisioningService`), y
+   * evita inventar un segundo esquema de coordenadas por tabla. Tampoco es
+   * una fila de `directory.branches`: esa tabla es para sucursales
+   * (`DIR_BRANCH_TYPE_CLINIC`/`OFFICE`), y la casa matriz no es una sucursal.
+   *
+   * `COUNTRY_BO` fijo porque `PAYER` no es un tipo territorial —no declara su
+   * propio país— y Bolivia es, hoy, el único país con municipios sembrados
+   * para completar una dirección real.
+   *
+   * @param tx - Transacción activa del alta del tenant.
+   * @param tenantId - Tenant recién creado, dueño de la dirección.
+   * @param payer - Bloque de aseguradora del alta.
+   * @param actorUserId - Actor al que se imputa la escritura (auditoría).
+   */
+  private materializePayerHeadquarters(
+    tx: EntityManager,
+    tenantId: string,
+    payer: PayerProfileDto,
+    actorUserId: string,
+  ): void {
+    // `!== undefined`, no truthiness: 0 es una coordenada válida (el
+    // ecuador o el meridiano de Greenwich). El DTO ya garantiza "ambos o
+    // ninguno" (`@ValidateIf`), así que comprobar una alcanza.
+    if (payer.latitude === undefined || payer.longitude === undefined) return;
+
+    this.addressesRepo.create(tx, {
+      ownerTypeConceptId: CONCEPTS.OWNER_TENANT,
+      ownerId: tenantId,
+      lines: payer.address,
+      countryConceptId: CONCEPTS.COUNTRY_BO,
+      useConceptId: CONCEPTS.ADDR_USE_WORK,
+      typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+      latitude: String(payer.latitude),
+      longitude: String(payer.longitude),
+      actorUserId,
+    });
   }
 }

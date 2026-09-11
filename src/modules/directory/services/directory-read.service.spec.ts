@@ -43,6 +43,10 @@ function build() {
   const catalogRepo = {
     findCarrierByTenantId: mockFn(() => Promise.resolve(null)),
   };
+  // Por defecto no hay casa matriz georreferenciada (subtarea 1.3).
+  const addressesRepo = {
+    findVigenteByOwnerAndUse: mockFn(() => Promise.resolve(null)),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DirectoryReadService(
@@ -53,6 +57,7 @@ function build() {
     branchMembershipsRepo as any,
     tenantAdmin as any,
     catalogRepo as any,
+    addressesRepo as any,
     logger as any,
   );
   return {
@@ -63,6 +68,7 @@ function build() {
     branchMembershipsRepo,
     tenantAdmin,
     catalogRepo,
+    addressesRepo,
   };
 }
 
@@ -374,6 +380,48 @@ describe('DirectoryReadService.listMemberships', () => {
         regulatorIdentifier: 'APS-4821',
         sigla: 'ASX',
         address: 'Av. Siempre Viva 742',
+      });
+    });
+
+    /** Subtarea 1.3: la casa matriz georreferenciada vive en `common.addresses`, no en el carrier. */
+    it('para un tenant PAYER con casa matriz georreferenciada, incluye latitude y longitude', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-payer', tenantRoleConceptId: DIR.ROLE_OWNER },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-payer',
+        code: 'ASE-1',
+        legalName: 'Aseguradora X',
+        tenantTypeConceptId: TENANT_TYPE_CONCEPT_BY_CODE.PAYER,
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      d.catalogRepo.findCarrierByTenantId.mockResolvedValue({
+        carrierCode: 'CAR-1',
+        regulatorIdentifier: 'APS-4821',
+        sigla: 'ASX',
+        address: 'Av. Siempre Viva 742',
+      });
+      // Tal como vuelve MikroORM: `numeric` como string, `null` (no
+      // `undefined`) para lo que no aplicara — acá sí aplica.
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+        latitude: '-17.7833',
+        longitude: '-63.1821',
+      });
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items[0].payer).toEqual({
+        carrierCode: 'CAR-1',
+        regulatorIdentifier: 'APS-4821',
+        sigla: 'ASX',
+        address: 'Av. Siempre Viva 742',
+        latitude: -17.7833,
+        longitude: -63.1821,
       });
     });
 

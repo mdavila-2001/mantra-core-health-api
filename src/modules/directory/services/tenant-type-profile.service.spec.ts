@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { TenantTypeProfileService } from './tenant-type-profile.service';
-import { PreconditionFailedException } from '../../../common';
+import { CONCEPTS, PreconditionFailedException } from '../../../common';
 import { INS } from '../../insurance/insurance.concepts';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import { TERRITORIAL_TENANT_TYPES } from '../directory.concepts';
@@ -34,16 +34,21 @@ describe('TenantTypeProfileService', () => {
         offeringIds: [],
       })),
     };
+    const addressesRepo = {
+      create: fn(() => ({ id: 'address-1' })),
+    };
     const service = new TenantTypeProfileService(
       catalogRepo as never,
       conceptsRepo as never,
       diagnosticUnitProvisioning as never,
+      addressesRepo as never,
     );
     return {
       service,
       catalogRepo,
       conceptsRepo,
       diagnosticUnitProvisioning,
+      addressesRepo,
       tx: {} as never,
     };
   }
@@ -436,6 +441,106 @@ describe('TenantTypeProfileService', () => {
           verificationStatusConceptId: INS.VERIFY_PENDING,
         }),
       );
+    });
+
+    describe('la casa matriz del PAYER (subtarea 1.3)', () => {
+      const payerConCoordenadas = {
+        carrierCode: 'CAR-1',
+        regulatorIdentifier: 'APS-4821',
+        sigla: 'ASX',
+        address: 'Av. Siempre Viva 742',
+        latitude: -17.7833,
+        longitude: -63.1821,
+      };
+
+      it('con el par de coordenadas, crea una fila de common.addresses del tenant', async () => {
+        const { service, addressesRepo, tx } = build();
+
+        await service.materializeProfile(
+          tx,
+          'tenant-1',
+          {
+            tenantType: 'PAYER',
+            legalName: 'Aseguradora X',
+            payer: payerConCoordenadas,
+          },
+          'actor-1',
+        );
+
+        expect(addressesRepo.create).toHaveBeenCalledWith(
+          tx,
+          expect.objectContaining({
+            ownerTypeConceptId: CONCEPTS.OWNER_TENANT,
+            ownerId: 'tenant-1',
+            lines: 'Av. Siempre Viva 742',
+            countryConceptId: CONCEPTS.COUNTRY_BO,
+            useConceptId: CONCEPTS.ADDR_USE_WORK,
+            typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+            latitude: '-17.7833',
+            longitude: '-63.1821',
+            actorUserId: 'actor-1',
+          }),
+        );
+      });
+
+      it('sin coordenadas, no toca common.addresses', async () => {
+        const { service, addressesRepo, tx } = build();
+
+        await service.materializeProfile(
+          tx,
+          'tenant-1',
+          {
+            tenantType: 'PAYER',
+            legalName: 'Aseguradora X',
+            payer: {
+              carrierCode: 'CAR-1',
+              regulatorIdentifier: 'APS-4821',
+              sigla: 'ASX',
+              address: 'Av. Siempre Viva 742',
+            },
+          },
+          'actor-1',
+        );
+
+        expect(addressesRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('con {0, 0} igual crea la fila: 0 es una coordenada válida, no "sin dato"', async () => {
+        const { service, addressesRepo, tx } = build();
+
+        await service.materializeProfile(
+          tx,
+          'tenant-1',
+          {
+            tenantType: 'PAYER',
+            legalName: 'Aseguradora X',
+            payer: { ...payerConCoordenadas, latitude: 0, longitude: 0 },
+          },
+          'actor-1',
+        );
+
+        expect(addressesRepo.create).toHaveBeenCalledWith(
+          tx,
+          expect.objectContaining({ latitude: '0', longitude: '0' }),
+        );
+      });
+
+      it('un BROKER no toca common.addresses aunque el bloque payer no exista', async () => {
+        const { service, addressesRepo, tx } = build();
+
+        await service.materializeProfile(
+          tx,
+          'tenant-2',
+          {
+            tenantType: 'BROKER',
+            legalName: 'Corredora Y',
+            broker: { brokerCode: 'BRO-1', licenseNumber: 'LIC-9' },
+          },
+          'actor-1',
+        );
+
+        expect(addressesRepo.create).not.toHaveBeenCalled();
+      });
     });
 
     it('crea el corredor del tenant BROKER con su licencia', async () => {
