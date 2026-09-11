@@ -70,6 +70,15 @@ describe('IamOrganizationSelfRegistrationService', () => {
       assertConceptsExist: fn().mockResolvedValue(undefined),
       materializeProfile: fn().mockResolvedValue(undefined),
     };
+    const affiliationDocuments = {
+      attachRegistrationDocuments: fn().mockResolvedValue([
+        'doc-1',
+        'doc-2',
+        'doc-3',
+        'doc-4',
+        'doc-5',
+      ]),
+    };
 
     const service = new IamOrganizationSelfRegistrationService(
       em as never,
@@ -83,6 +92,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       membershipsRepo as never,
       notificationsService as never,
       typeProfile as never,
+      affiliationDocuments as never,
       logger as never,
       new TracingService(),
     );
@@ -98,6 +108,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       membershipsRepo,
       notificationsService,
       typeProfile,
+      affiliationDocuments,
     };
   }
 
@@ -410,6 +421,92 @@ describe('IamOrganizationSelfRegistrationService', () => {
         d.tx,
         expect.objectContaining({ countryConceptId: 'country-explicito' }),
       );
+    });
+  });
+
+  describe('documentos legales de afiliación (subtarea 1.2)', () => {
+    const legalDocuments = {
+      constitutionFileId: 'file-constitution',
+      taxIdentifierFileId: 'file-tax',
+      commerceRegistryFileId: 'file-commerce',
+      operatingLicenseFileId: 'file-license',
+      healthAuthorityCertificateFileId: 'file-sedes',
+    };
+
+    it('los vincula dentro de la misma transacción cuando el alta los declara', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          tenantType: 'PAYER',
+          payer: {
+            carrierCode: 'CARRIER_1',
+            sigla: 'CX',
+            address: 'Av. Siempre Viva 123',
+            regulatorIdentifier: 'NIT-12345',
+          },
+          legalDocuments,
+        },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(d.tx, {
+        tenantId: 'tenant-1',
+        ownerUserId: 'user-1',
+        legalEntityType: undefined,
+        taxIdentifier: 'NIT-12345',
+        documents: {
+          CONSTITUTION_DOC: 'file-constitution',
+          TAX_IDENTIFIER_DOC: 'file-tax',
+          COMMERCE_REGISTRY_DOC: 'file-commerce',
+          OPERATING_LICENSE_DOC: 'file-license',
+          HEALTH_AUTHORITY_CERT_DOC: 'file-sedes',
+        },
+      });
+      expect(result.legalDocumentsRegistered).toBe(5);
+    });
+
+    it('no los toca si el alta no declara el bloque', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(dto);
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).not.toHaveBeenCalled();
+      expect(result.legalDocumentsRegistered).toBeUndefined();
+    });
+
+    it('un rechazo 422 al vincularlos revienta toda el alta', async () => {
+      const d = build();
+      d.affiliationDocuments.attachRegistrationDocuments.mockRejectedValueOnce(
+        new PreconditionFailedException(
+          'El documento el NIT ya está vinculado a una organización',
+        ),
+      );
+
+      await expect(
+        d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            tenantType: 'PAYER',
+            payer: {
+              carrierCode: 'CARRIER_1',
+              sigla: 'CX',
+              address: 'Av. Siempre Viva 123',
+              regulatorIdentifier: 'NIT-12345',
+            },
+            legalDocuments,
+          },
+        }),
+      ).rejects.toThrow(PreconditionFailedException);
+
+      // Nada de correo: la transacción entera se descarta con el rechazo.
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
     });
   });
 });

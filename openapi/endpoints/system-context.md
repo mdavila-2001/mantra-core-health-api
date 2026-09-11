@@ -788,7 +788,7 @@ Ejemplo de error normalizado:
 
 Por campo destino o por código; devuelve `conceptId` para escribir y `display` para pintar.
 
-Contexto declarado en el controlador: Cara de lectura de UC-45-05: las opciones válidas de un campo de catálogo. Se pide por la ruta del campo (`target=profiles.persons.administrative_gender_concept_id`) o por el código de la enumeración (`code=administrative-gender`). Los dos son constantes del código fuente; ninguno es un uuid sembrado por entorno, que es lo que impedía poblar un selector.
+Contexto declarado en el controlador: Cara de lectura de UC-45-05: las opciones válidas de un campo de catálogo. Se pide por la ruta del campo (`target=profiles.persons.administrative_gender_concept_id`) o por el código de la enumeración (`code=administrative-gender`). Los dos son constantes del código fuente; ninguno es un uuid sembrado por entorno, que es lo que impedía poblar un selector. Es `@Public()` por la misma razón por la que `listEnumBindings` no exige rol: quien más necesita estas opciones es el alta anónima de paciente, que todavía no tiene sesión con la que pedirlas.
 
 ### Descripción del sistema
 

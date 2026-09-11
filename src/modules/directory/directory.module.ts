@@ -3,19 +3,20 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CommunityModule } from '../community/community.module';
 import { InsuranceModule } from '../insurance/insurance.module';
 import { TerminologyModule } from '../terminology/terminology.module';
+import { CommonModule } from '../common/common.module';
 import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
 import {
   TenantAdministrationService,
   TenantTypeProfileService,
-} from './services';
-import * as entities from './entities';
-import { AdminTenantsController, TenantsController } from './controllers';
-import {
+  AffiliationDocumentConceptsService,
+  TenantAffiliationDocumentsService,
   DirectoryTenantsService,
   DirectoryBranchesService,
   DirectoryMembershipsService,
   DirectoryReadService,
 } from './services';
+import * as entities from './entities';
+import { AdminTenantsController, TenantsController } from './controllers';
 import {
   TenantsRepository,
   BranchesRepository,
@@ -42,17 +43,24 @@ import {
   // materializa la unidad diagnóstica de un tenant `DIAGNOSTIC_CENTER`
   // dentro de la misma transacción del alta. `diagnostic_units` no importa
   // `directory`, así que la dependencia va en un solo sentido.
+  // CommonModule (subtarea 1.2): `TenantAffiliationDocumentsService` necesita
+  // `AttachableFileService` para reclamar, dentro de la transacción del alta,
+  // los PDF que el autorregistro subió sin sesión. `common` no importa
+  // `directory`, así que tampoco cierra ciclo.
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     CommunityModule,
     InsuranceModule,
     TerminologyModule,
     DiagnosticUnitsModule,
+    CommonModule,
   ],
   controllers: [AdminTenantsController, TenantsController],
   providers: [
     TenantTypeProfileService,
     TenantAdministrationService,
+    AffiliationDocumentConceptsService,
+    TenantAffiliationDocumentsService,
     // Repositorios
     TenantsRepository,
     BranchesRepository,
@@ -75,12 +83,15 @@ import {
   // `DirectoryMembershipsService` lo necesita `profiles` para que aprobar un
   // vínculo conceda la membresía asistencial (MAC-VINCULO): qué campos lleva una
   // membresía y qué cuenta como duplicada se decide acá, no en cada llamador.
+  // `TenantAffiliationDocumentsService` lo necesita `iam` para el
+  // autorregistro de organización, igual que `TenantTypeProfileService`.
   exports: [
     TenantsRepository,
     TenantMembershipsRepository,
     TenantTypeProfileService,
     TenantAdministrationService,
     DirectoryMembershipsService,
+    TenantAffiliationDocumentsService,
   ],
 })
 export class DirectoryModule {}

@@ -104,6 +104,27 @@ describe('FilesService', () => {
       expect(file.currentVersionId).toBe('ver-1');
       expect(result).toMatchObject({ id: 'file-1', currentVersionId: 'ver-1' });
     });
+
+    it('con actor null deja createdByUserId/recordedByUserId sin declarar (pre-carga anónima)', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.create.mockReturnValue({
+        id: 'file-anon',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.create.mockReturnValue({ id: 'ver-1' });
+
+      await service.createFile(createFileDto, null);
+
+      expect(filesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ actorUserId: undefined }),
+      );
+      expect(fileVersionsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ recordedByUserId: undefined }),
+      );
+    });
   });
 
   describe('createVersion', () => {

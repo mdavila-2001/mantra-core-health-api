@@ -1705,6 +1705,47 @@ paths:
       description: >-
         Registrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de
         error usan el envelope ErrorResponse.
+  /iam/auth/upload-registration-document:
+    post:
+      operationId: IamAuthController_uploadRegistrationDocument
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Pre-cargar un documento legal (PDF) del registro de organización
+      tags:
+        - iam-auth
+      description: >-
+        Pre-cargar un documento legal (PDF) del registro de organización. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /iam/auth/register-practitioner:
     post:
       operationId: IamAuthController_registerPractitioner
@@ -13962,6 +14003,902 @@ paths:
       description: >-
         Registrar un movimiento de inventario (ajuste de stock). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units:
+    get:
+      operationId: DiagnosticUnitsController_list
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticUnitDirectoryResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar unidades diagnósticas publicadas
+      tags:
+        - diagnostic-units
+      description: >-
+        Listar unidades diagnósticas publicadas. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: DiagnosticUnitsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDiagnosticUnitDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Alta de unidad diagnóstica con sitios y acreditaciones
+      tags:
+        - diagnostic-units
+      description: >-
+        Alta de unidad diagnóstica con sitios y acreditaciones. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/administration:
+    get:
+      operationId: DiagnosticUnitsController_listForAdministration
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticUnitAdminListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las unidades del tenant, publicadas o no
+      tags:
+        - diagnostic-units
+      description: >-
+        Listar las unidades del tenant, publicadas o no. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/search:
+    get:
+      description: >-
+        Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A
+        diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio
+        busca en la ciudad, no en su institución.
+      operationId: DiagnosticUnitsController_search
+      parameters:
+        - name: q
+          required: false
+          in: query
+          description: Texto a buscar en nombre o código
+          schema:
+            type: string
+        - name: tenantId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: kind
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - LABORATORY
+              - IMAGING
+        - name: studyCode
+          required: false
+          in: query
+          description: Código del estudio buscado
+          schema:
+            type: string
+        - name: insurerTenantId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: homeCollection
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: walkIn
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: acceptsExternalOrders
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: maxAmount
+          required: false
+          in: query
+          description: Tope del importe publicado
+          schema:
+            type: number
+        - name: minRating
+          required: false
+          in: query
+          description: Nota mínima (0 a 5)
+          schema:
+            type: number
+        - name: limit
+          required: false
+          in: query
+          schema:
+            maximum: 100
+            default: 20
+            type: number
+        - name: offset
+          required: false
+          in: query
+          schema:
+            default: 0
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchDiagnosticUnitsResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Buscar centros de diagnóstico, laboratorio e imagen
+      tags:
+        - diagnostic-units
+  /diagnostic-units/{id}:
+    get:
+      operationId: DiagnosticUnitsController_getById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticUnitDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Consultar el perfil de una unidad diagnóstica
+      tags:
+        - diagnostic-units
+      description: >-
+        Consultar el perfil de una unidad diagnóstica. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}/administration:
+    get:
+      operationId: DiagnosticUnitsController_getForAdministration
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticUnitAdminDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Consola de administración de una unidad diagnóstica
+      tags:
+        - diagnostic-units
+      description: >-
+        Consola de administración de una unidad diagnóstica. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}/sites:
+    post:
+      operationId: DiagnosticUnitsController_addSite
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddSiteDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registrar un sitio operativo de la unidad
+      tags:
+        - diagnostic-units
+      description: >-
+        Registrar un sitio operativo de la unidad. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}/verify-and-publish:
+    post:
+      operationId: DiagnosticUnitsController_verifyAndPublish
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Verificar la unidad y publicar su perfil público
+      tags:
+        - diagnostic-units
+      description: >-
+        Verificar la unidad y publicar su perfil público. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}/specialties:
+    put:
+      operationId: DiagnosticUnitsController_setSpecialties
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetSpecialtiesDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Declarar las especialidades de la unidad
+      tags:
+        - diagnostic-units
+      description: >-
+        Declarar las especialidades de la unidad. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}/study-offerings:
+    post:
+      operationId: DiagnosticUnitsController_createOffering
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudyOfferingDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Publicar oferta de estudio con componentes (panel)
+      tags:
+        - diagnostic-units
+      description: >-
+        Publicar oferta de estudio con componentes (panel). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}/price-schedules:
+    post:
+      operationId: DiagnosticUnitsController_createSchedule
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePriceScheduleDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Crear un cronograma de precios
+      tags:
+        - diagnostic-units
+      description: >-
+        Crear un cronograma de precios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}/practitioner-assignments:
+    post:
+      operationId: DiagnosticUnitsController_assignPractitioner
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePractitionerAssignmentDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Asignar un especialista a la unidad/sitio
+      tags:
+        - diagnostic-units
+      description: >-
+        Asignar un especialista a la unidad/sitio. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}/accreditations:
+    post:
+      operationId: DiagnosticUnitsController_addAccreditation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiagnosticUnitsCreateAccreditationDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registrar una acreditación con evidencia
+      tags:
+        - diagnostic-units
+      description: >-
+        Registrar una acreditación con evidencia. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}/reproject:
+    post:
+      operationId: DiagnosticUnitsController_reproject
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Reconstruir la proyección del perfil público
+      tags:
+        - diagnostic-units
+      description: >-
+        Reconstruir la proyección del perfil público. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-unit-sites/{siteId}:
+    patch:
+      operationId: DiagnosticUnitSitesController_updateSite
+      parameters:
+        - name: siteId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSiteDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Actualizar un sitio operativo de la unidad
+      tags:
+        - diagnostic-unit-sites
+      description: >-
+        Actualizar un sitio operativo de la unidad. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-unit-sites/{siteId}/equipment:
+    post:
+      operationId: DiagnosticUnitSitesController_addEquipment
+      parameters:
+        - name: siteId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEquipmentDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registrar equipamiento y calibración del sitio
+      tags:
+        - diagnostic-unit-sites
+      description: >-
+        Registrar equipamiento y calibración del sitio. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /price-schedules/{scheduleId}/study-prices:
+    post:
+      operationId: DiagnosticPricingController_addStudyPrice
+      parameters:
+        - name: scheduleId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudyPriceDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Fijar/versionar el precio de un estudio (append-only)
+      tags:
+        - diagnostic-pricing
+      description: >-
+        Fijar/versionar el precio de un estudio (append-only). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /study-prices/{priceId}/close:
+    post:
+      operationId: DiagnosticPricingController_closePrice
+      parameters:
+        - name: priceId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Cerrar una versión de precio vigente
+      tags:
+        - diagnostic-pricing
+      description: >-
+        Cerrar una versión de precio vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-study-offerings/{id}:
+    delete:
+      operationId: DiagnosticPricingController_retireOffering
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Retirar (soft-delete) una oferta de estudio
+      tags:
+        - diagnostic-pricing
+      description: >-
+        Retirar (soft-delete) una oferta de estudio. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-equipment/{id}:
+    patch:
+      operationId: DiagnosticEquipmentController_updateEquipment
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEquipmentDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Actualizar estado/calibración de un equipo
+      tags:
+        - diagnostic-equipment
+      description: >-
+        Actualizar estado/calibración de un equipo. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-unit-accreditations/{id}/renew:
+    post:
+      operationId: DiagnosticUnitAccreditationsController_renew
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewAccreditationDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Renovar/registrar acreditación con evidencia
+      tags:
+        - diagnostic-unit-accreditations
+      description: >-
+        Renovar/registrar acreditación con evidencia. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /admin/content-packs:
     get:
       operationId: ContentPacksController_listar
@@ -22932,902 +23869,6 @@ paths:
       description: >-
         Evaluar actor efectivo por propósito (step-up). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units:
-    get:
-      operationId: DiagnosticUnitsController_list
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DiagnosticUnitDirectoryResponseDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Listar unidades diagnósticas publicadas
-      tags:
-        - diagnostic-units
-      description: >-
-        Listar unidades diagnósticas publicadas. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-    post:
-      operationId: DiagnosticUnitsController_create
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateDiagnosticUnitDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Alta de unidad diagnóstica con sitios y acreditaciones
-      tags:
-        - diagnostic-units
-      description: >-
-        Alta de unidad diagnóstica con sitios y acreditaciones. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/administration:
-    get:
-      operationId: DiagnosticUnitsController_listForAdministration
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DiagnosticUnitAdminListDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Listar las unidades del tenant, publicadas o no
-      tags:
-        - diagnostic-units
-      description: >-
-        Listar las unidades del tenant, publicadas o no. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/search:
-    get:
-      description: >-
-        Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A
-        diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio
-        busca en la ciudad, no en su institución.
-      operationId: DiagnosticUnitsController_search
-      parameters:
-        - name: q
-          required: false
-          in: query
-          description: Texto a buscar en nombre o código
-          schema:
-            type: string
-        - name: tenantId
-          required: false
-          in: query
-          schema:
-            format: uuid
-            type: string
-        - name: kind
-          required: false
-          in: query
-          schema:
-            type: string
-            enum:
-              - LABORATORY
-              - IMAGING
-        - name: studyCode
-          required: false
-          in: query
-          description: Código del estudio buscado
-          schema:
-            type: string
-        - name: insurerTenantId
-          required: false
-          in: query
-          schema:
-            format: uuid
-            type: string
-        - name: homeCollection
-          required: false
-          in: query
-          schema:
-            type: boolean
-        - name: walkIn
-          required: false
-          in: query
-          schema:
-            type: boolean
-        - name: acceptsExternalOrders
-          required: false
-          in: query
-          schema:
-            type: boolean
-        - name: maxAmount
-          required: false
-          in: query
-          description: Tope del importe publicado
-          schema:
-            type: number
-        - name: minRating
-          required: false
-          in: query
-          description: Nota mínima (0 a 5)
-          schema:
-            type: number
-        - name: limit
-          required: false
-          in: query
-          schema:
-            maximum: 100
-            default: 20
-            type: number
-        - name: offset
-          required: false
-          in: query
-          schema:
-            default: 0
-            type: number
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SearchDiagnosticUnitsResponseDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Buscar centros de diagnóstico, laboratorio e imagen
-      tags:
-        - diagnostic-units
-  /diagnostic-units/{id}:
-    get:
-      operationId: DiagnosticUnitsController_getById
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DiagnosticUnitDetailDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Consultar el perfil de una unidad diagnóstica
-      tags:
-        - diagnostic-units
-      description: >-
-        Consultar el perfil de una unidad diagnóstica. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/{id}/administration:
-    get:
-      operationId: DiagnosticUnitsController_getForAdministration
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DiagnosticUnitAdminDetailDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Consola de administración de una unidad diagnóstica
-      tags:
-        - diagnostic-units
-      description: >-
-        Consola de administración de una unidad diagnóstica. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/{id}/sites:
-    post:
-      operationId: DiagnosticUnitsController_addSite
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AddSiteDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Registrar un sitio operativo de la unidad
-      tags:
-        - diagnostic-units
-      description: >-
-        Registrar un sitio operativo de la unidad. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/{id}/verify-and-publish:
-    post:
-      operationId: DiagnosticUnitsController_verifyAndPublish
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Verificar la unidad y publicar su perfil público
-      tags:
-        - diagnostic-units
-      description: >-
-        Verificar la unidad y publicar su perfil público. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/{id}/specialties:
-    put:
-      operationId: DiagnosticUnitsController_setSpecialties
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SetSpecialtiesDto'
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Declarar las especialidades de la unidad
-      tags:
-        - diagnostic-units
-      description: >-
-        Declarar las especialidades de la unidad. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/{id}/study-offerings:
-    post:
-      operationId: DiagnosticUnitsController_createOffering
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateStudyOfferingDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Publicar oferta de estudio con componentes (panel)
-      tags:
-        - diagnostic-units
-      description: >-
-        Publicar oferta de estudio con componentes (panel). Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/{id}/price-schedules:
-    post:
-      operationId: DiagnosticUnitsController_createSchedule
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreatePriceScheduleDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Crear un cronograma de precios
-      tags:
-        - diagnostic-units
-      description: >-
-        Crear un cronograma de precios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
-        respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/{id}/practitioner-assignments:
-    post:
-      operationId: DiagnosticUnitsController_assignPractitioner
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreatePractitionerAssignmentDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Asignar un especialista a la unidad/sitio
-      tags:
-        - diagnostic-units
-      description: >-
-        Asignar un especialista a la unidad/sitio. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/{id}/accreditations:
-    post:
-      operationId: DiagnosticUnitsController_addAccreditation
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DiagnosticUnitsCreateAccreditationDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Registrar una acreditación con evidencia
-      tags:
-        - diagnostic-units
-      description: >-
-        Registrar una acreditación con evidencia. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-units/{id}/reproject:
-    post:
-      operationId: DiagnosticUnitsController_reproject
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Reconstruir la proyección del perfil público
-      tags:
-        - diagnostic-units
-      description: >-
-        Reconstruir la proyección del perfil público. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-unit-sites/{siteId}:
-    patch:
-      operationId: DiagnosticUnitSitesController_updateSite
-      parameters:
-        - name: siteId
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateSiteDto'
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Actualizar un sitio operativo de la unidad
-      tags:
-        - diagnostic-unit-sites
-      description: >-
-        Actualizar un sitio operativo de la unidad. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-unit-sites/{siteId}/equipment:
-    post:
-      operationId: DiagnosticUnitSitesController_addEquipment
-      parameters:
-        - name: siteId
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateEquipmentDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Registrar equipamiento y calibración del sitio
-      tags:
-        - diagnostic-unit-sites
-      description: >-
-        Registrar equipamiento y calibración del sitio. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /price-schedules/{scheduleId}/study-prices:
-    post:
-      operationId: DiagnosticPricingController_addStudyPrice
-      parameters:
-        - name: scheduleId
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateStudyPriceDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Fijar/versionar el precio de un estudio (append-only)
-      tags:
-        - diagnostic-pricing
-      description: >-
-        Fijar/versionar el precio de un estudio (append-only). Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /study-prices/{priceId}/close:
-    post:
-      operationId: DiagnosticPricingController_closePrice
-      parameters:
-        - name: priceId
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Cerrar una versión de precio vigente
-      tags:
-        - diagnostic-pricing
-      description: >-
-        Cerrar una versión de precio vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas
-        las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-study-offerings/{id}:
-    delete:
-      operationId: DiagnosticPricingController_retireOffering
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Retirar (soft-delete) una oferta de estudio
-      tags:
-        - diagnostic-pricing
-      description: >-
-        Retirar (soft-delete) una oferta de estudio. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-equipment/{id}:
-    patch:
-      operationId: DiagnosticEquipmentController_updateEquipment
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateEquipmentDto'
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Actualizar estado/calibración de un equipo
-      tags:
-        - diagnostic-equipment
-      description: >-
-        Actualizar estado/calibración de un equipo. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-  /diagnostic-unit-accreditations/{id}/renew:
-    post:
-      operationId: DiagnosticUnitAccreditationsController_renew
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RenewAccreditationDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Renovar/registrar acreditación con evidencia
-      tags:
-        - diagnostic-unit-accreditations
-      description: >-
-        Renovar/registrar acreditación con evidencia. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
   /diagnostics/specimens:
     post:
       operationId: DiagnosticsSpecimensController_createSpecimen
@@ -44216,6 +44257,51 @@ paths:
       description: >-
         Listar las entradas de lista de espera de un paciente. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /scheduling/resources/{resourceId}/waitlist:
+    get:
+      operationId: SchedulingController_listResourceWaitlist
+      parameters:
+        - name: resourceId
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
+        - name: includeClosed
+          required: false
+          in: query
+          description: Incluye las cubiertas y canceladas (por omisión, no)
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            default: 50
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar quiénes esperan turno en una agenda
+      tags:
+        - scheduling
+      description: >-
+        Listar quiénes esperan turno en una agenda. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /scheduling/resources/{id}/delay:
     post:
       description: Avisa a los pacientes con cita vigente en la ventana. No mueve ningún turno ni toca los cupos.
@@ -51431,6 +51517,35 @@ components:
         - birthDate
         - phone
         - sexAtBirth
+    RegisterOrganizationLegalDocumentsDto:
+      type: object
+      properties:
+        constitutionFileId:
+          type: string
+          format: uuid
+          description: Escritura de constitución (fileId de POST /iam/auth/upload-registration-document)
+        taxIdentifierFileId:
+          type: string
+          format: uuid
+          description: Identificación tributaria (NIT en Bolivia)
+        commerceRegistryFileId:
+          type: string
+          format: uuid
+          description: Registro mercantil (matrícula SEPREC en Bolivia)
+        operatingLicenseFileId:
+          type: string
+          format: uuid
+          description: Licencia de funcionamiento
+        healthAuthorityCertificateFileId:
+          type: string
+          format: uuid
+          description: Certificado de la autoridad sanitaria (SEDES en Bolivia)
+      required:
+        - constitutionFileId
+        - taxIdentifierFileId
+        - commerceRegistryFileId
+        - operatingLicenseFileId
+        - healthAuthorityCertificateFileId
     PayerProfileDto:
       type: object
       properties:
@@ -51509,6 +51624,45 @@ components:
         - createdAt
         - agreements
         - publicProfileId
+    DiagnosticUnitPrimarySiteDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          example: Sede central
+        timeZone:
+          type: string
+          example: America/La_Paz
+        address:
+          $ref: '#/components/schemas/OwnSiteAddressDto'
+    DiagnosticUnitProfileDto:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 100
+          example: CENTRO_IMAGEN_CENTRAL
+        name:
+          type: string
+          maxLength: 200
+          example: Centro de Diagnóstico por Imágenes
+        diagnosticUnitTypeConceptId:
+          type: string
+          format: uuid
+        modalityConceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        walkInAvailable:
+          type: boolean
+          default: true
+        homeCollectionAvailable:
+          type: boolean
+          default: false
+        primarySite:
+          $ref: '#/components/schemas/DiagnosticUnitPrimarySiteDto'
     RegisterOrganizationDetailsDto:
       type: object
       properties:
@@ -51545,6 +51699,36 @@ components:
             - HEALTH_BUSINESS
             - DIAGNOSTIC_CENTER
           example: HOSPITAL
+        legalEntityType:
+          type: string
+          description: >-
+            Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Sin él, la organización nace con la forma
+            legada `COMPANY`.
+          enum:
+            - UNIPERSONAL
+            - SRL
+            - LTDA
+            - SA
+            - SOCIEDAD_COLECTIVA
+            - COMANDITA_SIMPLE
+            - COMANDITA_ACCIONES
+            - SUCURSAL_EXTRANJERA
+            - BR_LTDA
+            - BR_SA
+            - BR_MEI
+            - BR_EI
+            - BR_SLU
+            - BR_FILIAL_EST
+            - US_LLC
+            - US_CORP
+            - US_SOLE_PROP
+            - US_LLP
+            - US_BRANCH
+            - AR_SAS
+            - MX_S_RL
+          example: SRL
+        legalDocuments:
+          $ref: '#/components/schemas/RegisterOrganizationLegalDocumentsDto'
         payer:
           $ref: '#/components/schemas/PayerProfileDto'
         broker:
@@ -52118,11 +52302,11 @@ components:
           format: uuid
           description: Departamento que emitió el documento (VS_BO_DEPARTMENT)
         homeLatitude:
-          type: number
+          type: object
           minimum: -90
           maximum: 90
         homeLongitude:
-          type: number
+          type: object
           minimum: -180
           maximum: 180
         workMunicipalityConceptId:
@@ -52130,11 +52314,11 @@ components:
           format: uuid
           description: Municipio del trabajo (catálogo VS_BO_MUNICIPALITY)
         workLatitude:
-          type: number
+          type: object
           minimum: -90
           maximum: 90
         workLongitude:
-          type: number
+          type: object
           minimum: -180
           maximum: 180
         workEmployerConceptId:
@@ -52398,11 +52582,11 @@ components:
           maxLength: 300
           description: Domicilio, tal como lo escribe la persona. Vacío para quitarlo.
         homeLatitude:
-          type: number
+          type: object
           minimum: -90
           maximum: 90
         homeLongitude:
-          type: number
+          type: object
           minimum: -180
           maximum: 180
         occupationConceptId:
@@ -54191,6 +54375,34 @@ components:
             Concept id del tipo de tenant. Escotilla para tipos fuera del catálogo interno; si viene `tenantType`, este
             campo se ignora.
           format: uuid
+        legalEntityType:
+          type: string
+          description: >-
+            Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Si viene, se ignora
+            `legalEntityTypeConceptId`.
+          enum:
+            - UNIPERSONAL
+            - SRL
+            - LTDA
+            - SA
+            - SOCIEDAD_COLECTIVA
+            - COMANDITA_SIMPLE
+            - COMANDITA_ACCIONES
+            - SUCURSAL_EXTRANJERA
+            - BR_LTDA
+            - BR_SA
+            - BR_MEI
+            - BR_EI
+            - BR_SLU
+            - BR_FILIAL_EST
+            - US_LLC
+            - US_CORP
+            - US_SOLE_PROP
+            - US_LLP
+            - US_BRANCH
+            - AR_SAS
+            - MX_S_RL
+          example: SRL
         legalEntityTypeConceptId:
           type: string
           description: Concept id del tipo de entidad legal
@@ -54329,6 +54541,34 @@ components:
           type: string
           description: Concept id del tipo de tenant. Si viene `tenantType`, se ignora.
           format: uuid
+        legalEntityType:
+          type: string
+          description: >-
+            Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Si viene, se ignora
+            `legalEntityTypeConceptId`.
+          enum:
+            - UNIPERSONAL
+            - SRL
+            - LTDA
+            - SA
+            - SOCIEDAD_COLECTIVA
+            - COMANDITA_SIMPLE
+            - COMANDITA_ACCIONES
+            - SUCURSAL_EXTRANJERA
+            - BR_LTDA
+            - BR_SA
+            - BR_MEI
+            - BR_EI
+            - BR_SLU
+            - BR_FILIAL_EST
+            - US_LLC
+            - US_CORP
+            - US_SOLE_PROP
+            - US_LLP
+            - US_BRANCH
+            - AR_SAS
+            - MX_S_RL
+          example: SRL
         legalEntityTypeConceptId:
           type: string
           description: Concept id del tipo de entidad legal
@@ -57881,6 +58121,1180 @@ components:
       required:
         - direction
         - quantity
+    DiagnosticConceptDto:
+      type: object
+      properties:
+        code:
+          type: string
+        display:
+          type: string
+      required:
+        - code
+        - display
+    DiagnosticUnitDirectoryItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        siteCount:
+          type: number
+        equipmentCount:
+          type: number
+        studyCount:
+          type: number
+        acceptsExternalOrders:
+          type: object
+          nullable: true
+        walkInAvailable:
+          type: object
+          nullable: true
+        homeCollectionAvailable:
+          type: object
+          nullable: true
+      required:
+        - id
+        - code
+        - name
+        - type
+        - siteCount
+        - equipmentCount
+        - studyCount
+    DiagnosticUnitDirectoryResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitDirectoryItemDto'
+        count:
+          type: number
+      required:
+        - items
+        - count
+    DiagnosticUnitAdminItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        status:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        verificationStatus:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        publiclyListed:
+          type: boolean
+        siteCount:
+          type: number
+        studyCount:
+          type: number
+        equipmentCount:
+          type: number
+        acceptsExternalOrders:
+          type: object
+          nullable: true
+        walkInAvailable:
+          type: object
+          nullable: true
+        homeCollectionAvailable:
+          type: object
+          nullable: true
+      required:
+        - id
+        - code
+        - name
+        - type
+        - status
+        - verificationStatus
+        - publiclyListed
+        - siteCount
+        - studyCount
+        - equipmentCount
+    DiagnosticUnitAdminListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitAdminItemDto'
+        count:
+          type: number
+      required:
+        - items
+        - count
+    DiagnosticUnitSearchItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        siteCount:
+          type: number
+        equipmentCount:
+          type: number
+        studyCount:
+          type: number
+        acceptsExternalOrders:
+          type: object
+          nullable: true
+        walkInAvailable:
+          type: object
+          nullable: true
+        homeCollectionAvailable:
+          type: object
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+        rating:
+          type: object
+          nullable: true
+        ratingCount:
+          type: number
+        minAmount:
+          type: object
+          nullable: true
+      required:
+        - id
+        - code
+        - name
+        - type
+        - siteCount
+        - equipmentCount
+        - studyCount
+        - tenantId
+        - ratingCount
+    SearchDiagnosticUnitsResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitSearchItemDto'
+        total:
+          type: number
+        limit:
+          type: number
+        offset:
+          type: number
+      required:
+        - items
+        - total
+        - limit
+        - offset
+    DiagnosticUnitSiteDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        sampleCollectionAvailable:
+          type: object
+          nullable: true
+        imagingAvailable:
+          type: object
+          nullable: true
+      required:
+        - id
+        - code
+        - name
+        - role
+    DiagnosticEquipmentDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        siteId:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        manufacturer:
+          type: object
+          nullable: true
+        model:
+          type: object
+          nullable: true
+        modality:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        operationalStatus:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        lastCalibrationAt:
+          type: object
+          format: date-time
+          nullable: true
+        nextCalibrationDueAt:
+          type: object
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - siteId
+        - type
+        - operationalStatus
+    DiagnosticPublicPriceDto:
+      type: object
+      properties:
+        amount:
+          type: string
+        currency:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        scheduleCode:
+          type: string
+        siteId:
+          type: object
+          format: uuid
+          nullable: true
+      required:
+        - amount
+        - currency
+        - scheduleCode
+    DiagnosticStudyDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: object
+          nullable: true
+        siteId:
+          type: object
+          format: uuid
+          nullable: true
+        modality:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        preparationInstructions:
+          type: object
+          nullable: true
+        expectedDurationMinutes:
+          type: object
+          nullable: true
+        expectedTurnaroundMinutes:
+          type: object
+          nullable: true
+        requiresMedicalOrder:
+          type: object
+          nullable: true
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticPublicPriceDto'
+      required:
+        - id
+        - code
+        - name
+        - prices
+    DiagnosticAccreditationDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        number:
+          type: object
+          nullable: true
+        siteId:
+          type: object
+          format: uuid
+          nullable: true
+        validFrom:
+          type: object
+          format: date
+          nullable: true
+        validTo:
+          type: object
+          format: date
+          nullable: true
+      required:
+        - id
+        - type
+    DiagnosticUnitDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        siteCount:
+          type: number
+        equipmentCount:
+          type: number
+        studyCount:
+          type: number
+        acceptsExternalOrders:
+          type: object
+          nullable: true
+        walkInAvailable:
+          type: object
+          nullable: true
+        homeCollectionAvailable:
+          type: object
+          nullable: true
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitSiteDetailDto'
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticEquipmentDetailDto'
+        studies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticStudyDetailDto'
+        accreditations:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticAccreditationDetailDto'
+      required:
+        - id
+        - code
+        - name
+        - type
+        - siteCount
+        - equipmentCount
+        - studyCount
+        - sites
+        - equipment
+        - studies
+        - accreditations
+    DiagnosticUnitAdminSiteDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        practiceSiteId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        accessionPrefix:
+          type: object
+          nullable: true
+        sampleCollectionAvailable:
+          type: object
+          nullable: true
+        imagingAvailable:
+          type: object
+          nullable: true
+        status:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+      required:
+        - id
+        - practiceSiteId
+        - code
+        - name
+        - role
+        - status
+    DiagnosticUnitAdminEquipmentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        siteId:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        manufacturer:
+          type: object
+          nullable: true
+        model:
+          type: object
+          nullable: true
+        serialNumber:
+          type: object
+          nullable: true
+        modality:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        operationalStatus:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        lastCalibrationAt:
+          type: object
+          format: date-time
+          nullable: true
+        nextCalibrationDueAt:
+          type: object
+          format: date-time
+          nullable: true
+        daysToCalibration:
+          type: object
+          nullable: true
+      required:
+        - id
+        - siteId
+        - type
+        - operationalStatus
+    DiagnosticUnitAdminPriceDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        scheduleId:
+          type: string
+          format: uuid
+        scheduleCode:
+          type: string
+        schedulePublic:
+          type: boolean
+        versionNumber:
+          type: number
+        baseAmount:
+          type: string
+          example: '120.00'
+        patientAmount:
+          type: object
+          nullable: true
+        insurerAmount:
+          type: object
+          nullable: true
+        currency:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        effectiveFrom:
+          type: string
+          format: date-time
+        effectiveTo:
+          type: object
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+      required:
+        - id
+        - scheduleId
+        - scheduleCode
+        - schedulePublic
+        - versionNumber
+        - baseAmount
+        - effectiveFrom
+        - status
+    DiagnosticUnitAdminStudyDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: object
+          nullable: true
+        siteId:
+          type: object
+          format: uuid
+          nullable: true
+        modality:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        specimenType:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        preparationInstructions:
+          type: object
+          nullable: true
+        expectedDurationMinutes:
+          type: object
+          nullable: true
+        expectedTurnaroundMinutes:
+          type: object
+          nullable: true
+        requiresMedicalOrder:
+          type: object
+          nullable: true
+        requiresPriorAuthorization:
+          type: object
+          nullable: true
+        homeCollectionEligible:
+          type: object
+          nullable: true
+        status:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitAdminPriceDto'
+      required:
+        - id
+        - code
+        - name
+        - status
+        - prices
+    DiagnosticUnitAdminAccreditationDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        siteId:
+          type: object
+          format: uuid
+          nullable: true
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        number:
+          type: object
+          nullable: true
+        evidenceFileId:
+          type: object
+          format: uuid
+          nullable: true
+        validFrom:
+          type: object
+          format: date
+          nullable: true
+        validTo:
+          type: object
+          format: date
+          nullable: true
+        daysToExpiry:
+          type: object
+          nullable: true
+        verificationStatus:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+      required:
+        - id
+        - type
+        - verificationStatus
+    DiagnosticUnitAdminStaffDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        practitionerRoleAssignmentId:
+          type: string
+          format: uuid
+        practitionerProfileId:
+          type: object
+          format: uuid
+          nullable: true
+        practitionerName:
+          type: object
+          nullable: true
+        siteId:
+          type: object
+          format: uuid
+          nullable: true
+        assignmentRole:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        specialty:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        mayValidateResults:
+          type: object
+          nullable: true
+        maySignReports:
+          type: object
+          nullable: true
+        validFrom:
+          type: object
+          format: date
+          nullable: true
+        validTo:
+          type: object
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+      required:
+        - id
+        - practitionerRoleAssignmentId
+        - status
+    DiagnosticUnitAdminDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        status:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        verificationStatus:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        publiclyListed:
+          type: boolean
+        siteCount:
+          type: number
+        studyCount:
+          type: number
+        equipmentCount:
+          type: number
+        acceptsExternalOrders:
+          type: object
+          nullable: true
+        walkInAvailable:
+          type: object
+          nullable: true
+        homeCollectionAvailable:
+          type: object
+          nullable: true
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitAdminSiteDto'
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitAdminEquipmentDto'
+        studies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitAdminStudyDto'
+        accreditations:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitAdminAccreditationDto'
+        staff:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitAdminStaffDto'
+      required:
+        - id
+        - code
+        - name
+        - type
+        - status
+        - verificationStatus
+        - publiclyListed
+        - siteCount
+        - studyCount
+        - equipmentCount
+        - sites
+        - equipment
+        - studies
+        - accreditations
+        - staff
+    CreateUnitSiteDto:
+      type: object
+      properties:
+        practiceSiteId:
+          type: string
+          description: Sitio del practice donde opera la unidad
+          format: uuid
+        siteRoleConceptId:
+          type: string
+          description: Rol del sitio (concept id)
+          format: uuid
+        accessionPrefix:
+          type: string
+          description: Prefijo de accesión del sitio
+          maxLength: 20
+        sampleCollectionAvailable:
+          type: boolean
+          description: Toma de muestras disponible
+        imagingAvailable:
+          type: boolean
+          description: Imagenología disponible
+      required:
+        - practiceSiteId
+    CreateUnitAccreditationDto:
+      type: object
+      properties:
+        accreditationConceptId:
+          type: string
+          description: Tipo de acreditación (concept id)
+          format: uuid
+        accreditationNumber:
+          type: string
+          description: Nº de acreditación
+          maxLength: 100
+        issuerTenantId:
+          type: string
+          description: Tenant emisor
+          format: uuid
+        evidenceFileId:
+          type: string
+          description: Archivo de evidencia
+          format: uuid
+      required:
+        - accreditationConceptId
+    CreateDiagnosticUnitDto:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: Tenant propietario de la unidad
+          format: uuid
+        code:
+          type: string
+          description: Código único de la unidad en el tenant
+          maxLength: 60
+        name:
+          type: string
+          description: Nombre de la unidad
+          maxLength: 200
+        diagnosticUnitTypeConceptId:
+          type: string
+          description: Tipo de unidad (concept id)
+          format: uuid
+        ownershipTypeConceptId:
+          type: string
+          description: Tipo de propiedad (concept id)
+          format: uuid
+        practiceId:
+          type: string
+          description: Practice asociado
+          format: uuid
+        primaryPracticeSiteId:
+          type: string
+          description: Sitio principal del practice
+          format: uuid
+        acceptsExternalOrders:
+          type: boolean
+          description: Acepta órdenes externas
+        sites:
+          description: Sitios operativos (1..N)
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateUnitSiteDto'
+        accreditations:
+          description: Acreditaciones (0..N)
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateUnitAccreditationDto'
+      required:
+        - tenantId
+        - code
+        - name
+    AddSiteDto:
+      type: object
+      properties:
+        practiceSiteId:
+          type: string
+          description: Sitio del practice donde opera la unidad
+          format: uuid
+        siteRoleConceptId:
+          type: string
+          description: Rol del sitio (concept id)
+          format: uuid
+        accessionPrefix:
+          type: string
+          description: Prefijo de accesión
+          maxLength: 20
+        sampleCollectionAvailable:
+          type: boolean
+          description: Toma de muestras disponible
+        imagingAvailable:
+          type: boolean
+          description: Imagenología disponible
+      required:
+        - practiceSiteId
+    SpecialtyItemDto:
+      type: object
+      properties:
+        specialtyConceptId:
+          type: string
+          description: Especialidad (concept id)
+          format: uuid
+        isPrimary:
+          type: boolean
+          description: Especialidad primaria de la unidad
+      required:
+        - specialtyConceptId
+    SetSpecialtiesDto:
+      type: object
+      properties:
+        specialties:
+          description: Conjunto vigente de especialidades
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialtyItemDto'
+      required:
+        - specialties
+    StudyComponentDto:
+      type: object
+      properties:
+        componentOfferingId:
+          type: string
+          description: Oferta que actúa como componente
+          format: uuid
+        componentRoleConceptId:
+          type: string
+          description: Rol del componente (concept id)
+          format: uuid
+        quantity:
+          type: string
+          description: Cantidad
+          example: '1'
+        ordinal:
+          type: number
+          description: Orden en el panel
+      required:
+        - componentOfferingId
+    CreateStudyOfferingDto:
+      type: object
+      properties:
+        studyCode:
+          type: string
+          description: Código del estudio en la unidad
+          maxLength: 60
+        studyConceptId:
+          type: string
+          description: Estudio (concept id)
+          format: uuid
+        displayName:
+          type: string
+          description: Nombre visible del estudio
+          maxLength: 200
+        diagnosticUnitSiteId:
+          type: string
+          description: Sitio de la unidad donde se ofrece
+          format: uuid
+        modalityConceptId:
+          type: string
+          description: Modalidad (concept id)
+          format: uuid
+        bodySiteConceptId:
+          type: string
+          description: Zona anatómica (concept id)
+          format: uuid
+        specimenTypeConceptId:
+          type: string
+          description: Tipo de muestra (concept id)
+          format: uuid
+        description:
+          type: string
+          description: Descripción
+        preparationInstructions:
+          type: string
+          description: Instrucciones de preparación
+        expectedDurationMinutes:
+          type: number
+          description: Duración esperada (min)
+        expectedTurnaroundMinutes:
+          type: number
+          description: Turnaround esperado (min)
+        requiresMedicalOrder:
+          type: boolean
+          description: Requiere orden médica
+        requiresPriorAuthorization:
+          type: boolean
+          description: Requiere autorización previa
+        homeCollectionEligible:
+          type: boolean
+          description: Elegible para toma domiciliaria
+        components:
+          description: Componentes del panel (0..N)
+          type: array
+          items:
+            $ref: '#/components/schemas/StudyComponentDto'
+      required:
+        - studyCode
+        - studyConceptId
+        - displayName
+    CreatePriceScheduleDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Código único del cronograma en la unidad
+          maxLength: 60
+        priceScheduleTypeConceptId:
+          type: string
+          description: Tipo de cronograma (concept id)
+          format: uuid
+        diagnosticUnitSiteId:
+          type: string
+          description: Sitio de la unidad
+          format: uuid
+        insurerTenantId:
+          type: string
+          description: Tenant aseguradora
+          format: uuid
+        brokerTenantId:
+          type: string
+          description: Tenant broker
+          format: uuid
+        currencyConceptId:
+          type: string
+          description: Moneda (concept id)
+          format: uuid
+        validFrom:
+          type: string
+          description: Vigente desde
+          format: date-time
+        validTo:
+          type: string
+          description: Vigente hasta
+          format: date-time
+        publicVisibility:
+          type: boolean
+          description: Visible al público
+      required:
+        - code
+    CreatePractitionerAssignmentDto:
+      type: object
+      properties:
+        practitionerRoleAssignmentId:
+          type: string
+          description: Asignación de rol del profesional (RRHH)
+          format: uuid
+        diagnosticUnitSiteId:
+          type: string
+          description: Sitio de la unidad
+          format: uuid
+        specialtyConceptId:
+          type: string
+          description: Especialidad aportada (concept id)
+          format: uuid
+        assignmentRoleConceptId:
+          type: string
+          description: Rol de la asignación (concept id)
+          format: uuid
+        mayValidateResults:
+          type: boolean
+          description: Puede validar resultados
+        maySignReports:
+          type: boolean
+          description: Puede firmar informes
+        validFrom:
+          type: string
+          description: Vigente desde
+          format: date-time
+        validTo:
+          type: string
+          description: Vigente hasta
+          format: date-time
+      required:
+        - practitionerRoleAssignmentId
+    DiagnosticUnitsCreateAccreditationDto:
+      type: object
+      properties:
+        accreditationConceptId:
+          type: string
+          description: Tipo de acreditación (concept id)
+          format: uuid
+        diagnosticUnitSiteId:
+          type: string
+          description: Sitio de la unidad
+          format: uuid
+        accreditationNumber:
+          type: string
+          description: Nº de acreditación
+          maxLength: 100
+        issuerTenantId:
+          type: string
+          description: Tenant emisor
+          format: uuid
+        evidenceFileId:
+          type: string
+          description: Archivo de evidencia
+          format: uuid
+        validFrom:
+          type: string
+          description: Vigente desde
+          format: date-time
+        validTo:
+          type: string
+          description: Vigente hasta
+          format: date-time
+      required:
+        - accreditationConceptId
+    UpdateSiteDto:
+      type: object
+      properties:
+        siteRoleConceptId:
+          type: string
+          description: Rol del sitio (concept id)
+          format: uuid
+        accessionPrefix:
+          type: string
+          description: Prefijo de accesión
+          maxLength: 20
+        sampleCollectionAvailable:
+          type: boolean
+          description: Toma de muestras disponible
+        imagingAvailable:
+          type: boolean
+          description: Imagenología disponible
+    CreateEquipmentDto:
+      type: object
+      properties:
+        equipmentTypeConceptId:
+          type: string
+          description: Tipo de equipo (concept id)
+          format: uuid
+        manufacturer:
+          type: string
+          description: Fabricante
+          maxLength: 200
+        model:
+          type: string
+          description: Modelo
+          maxLength: 200
+        serialNumber:
+          type: string
+          description: Nº de serie
+          maxLength: 200
+        modalityConceptId:
+          type: string
+          description: Modalidad (concept id)
+          format: uuid
+        lastCalibrationAt:
+          type: string
+          description: Última calibración
+          format: date-time
+        nextCalibrationDueAt:
+          type: string
+          description: Próxima calibración
+          format: date-time
+        operationalStatusConceptId:
+          type: string
+          description: Estado operativo (concept id)
+          format: uuid
+      required:
+        - equipmentTypeConceptId
+    CreateStudyPriceDto:
+      type: object
+      properties:
+        diagnosticStudyOfferingId:
+          type: string
+          description: Oferta de estudio a tarificar
+          format: uuid
+        baseAmount:
+          type: string
+          description: Importe base
+          example: '120.00'
+        patientAmount:
+          type: string
+          description: Importe a paciente
+          example: '120.00'
+        insurerAmount:
+          type: string
+          description: Importe a aseguradora
+          example: '80.00'
+        taxAmount:
+          type: string
+          description: Impuesto
+          example: '18.00'
+        discountFactor:
+          type: string
+          description: Factor de descuento
+          example: '0.10'
+        pricingRuleJson:
+          type: object
+          description: Reglas de precio (JSON)
+        effectiveFrom:
+          type: string
+          description: Vigente desde
+          format: date-time
+      required:
+        - diagnosticStudyOfferingId
+        - baseAmount
+    UpdateEquipmentDto:
+      type: object
+      properties:
+        manufacturer:
+          type: string
+          description: Fabricante
+          maxLength: 200
+        model:
+          type: string
+          description: Modelo
+          maxLength: 200
+        lastCalibrationAt:
+          type: string
+          description: Última calibración
+          format: date-time
+        nextCalibrationDueAt:
+          type: string
+          description: Próxima calibración
+          format: date-time
+        operationalStatusConceptId:
+          type: string
+          description: Estado operativo (concept id)
+          format: uuid
+    RenewAccreditationDto:
+      type: object
+      properties:
+        accreditationNumber:
+          type: string
+          description: Nuevo nº de acreditación
+          maxLength: 100
+        evidenceFileId:
+          type: string
+          description: Nuevo archivo de evidencia
+          format: uuid
+        validFrom:
+          type: string
+          description: Nueva vigencia desde
+          format: date-time
+        validTo:
+          type: string
+          description: Nueva vigencia hasta
+          format: date-time
     ApplyContentPackDto:
       type: object
       properties:
@@ -63529,1180 +64943,6 @@ components:
       required:
         - practitionerDelegateAssignmentId
         - purpose
-    DiagnosticConceptDto:
-      type: object
-      properties:
-        code:
-          type: string
-        display:
-          type: string
-      required:
-        - code
-        - display
-    DiagnosticUnitDirectoryItemDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        name:
-          type: string
-        type:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        siteCount:
-          type: number
-        equipmentCount:
-          type: number
-        studyCount:
-          type: number
-        acceptsExternalOrders:
-          type: object
-          nullable: true
-        walkInAvailable:
-          type: object
-          nullable: true
-        homeCollectionAvailable:
-          type: object
-          nullable: true
-      required:
-        - id
-        - code
-        - name
-        - type
-        - siteCount
-        - equipmentCount
-        - studyCount
-    DiagnosticUnitDirectoryResponseDto:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitDirectoryItemDto'
-        count:
-          type: number
-      required:
-        - items
-        - count
-    DiagnosticUnitAdminItemDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        name:
-          type: string
-        type:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        status:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        verificationStatus:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        publiclyListed:
-          type: boolean
-        siteCount:
-          type: number
-        studyCount:
-          type: number
-        equipmentCount:
-          type: number
-        acceptsExternalOrders:
-          type: object
-          nullable: true
-        walkInAvailable:
-          type: object
-          nullable: true
-        homeCollectionAvailable:
-          type: object
-          nullable: true
-      required:
-        - id
-        - code
-        - name
-        - type
-        - status
-        - verificationStatus
-        - publiclyListed
-        - siteCount
-        - studyCount
-        - equipmentCount
-    DiagnosticUnitAdminListDto:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitAdminItemDto'
-        count:
-          type: number
-      required:
-        - items
-        - count
-    DiagnosticUnitSearchItemDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        name:
-          type: string
-        type:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        siteCount:
-          type: number
-        equipmentCount:
-          type: number
-        studyCount:
-          type: number
-        acceptsExternalOrders:
-          type: object
-          nullable: true
-        walkInAvailable:
-          type: object
-          nullable: true
-        homeCollectionAvailable:
-          type: object
-          nullable: true
-        tenantId:
-          type: string
-          format: uuid
-        rating:
-          type: object
-          nullable: true
-        ratingCount:
-          type: number
-        minAmount:
-          type: object
-          nullable: true
-      required:
-        - id
-        - code
-        - name
-        - type
-        - siteCount
-        - equipmentCount
-        - studyCount
-        - tenantId
-        - ratingCount
-    SearchDiagnosticUnitsResponseDto:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitSearchItemDto'
-        total:
-          type: number
-        limit:
-          type: number
-        offset:
-          type: number
-      required:
-        - items
-        - total
-        - limit
-        - offset
-    DiagnosticUnitSiteDetailDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        name:
-          type: string
-        role:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        sampleCollectionAvailable:
-          type: object
-          nullable: true
-        imagingAvailable:
-          type: object
-          nullable: true
-      required:
-        - id
-        - code
-        - name
-        - role
-    DiagnosticEquipmentDetailDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        siteId:
-          type: string
-          format: uuid
-        type:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        manufacturer:
-          type: object
-          nullable: true
-        model:
-          type: object
-          nullable: true
-        modality:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/DiagnosticConceptDto'
-        operationalStatus:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        lastCalibrationAt:
-          type: object
-          format: date-time
-          nullable: true
-        nextCalibrationDueAt:
-          type: object
-          format: date-time
-          nullable: true
-      required:
-        - id
-        - siteId
-        - type
-        - operationalStatus
-    DiagnosticPublicPriceDto:
-      type: object
-      properties:
-        amount:
-          type: string
-        currency:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        scheduleCode:
-          type: string
-        siteId:
-          type: object
-          format: uuid
-          nullable: true
-      required:
-        - amount
-        - currency
-        - scheduleCode
-    DiagnosticStudyDetailDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        name:
-          type: string
-        description:
-          type: object
-          nullable: true
-        siteId:
-          type: object
-          format: uuid
-          nullable: true
-        modality:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/DiagnosticConceptDto'
-        preparationInstructions:
-          type: object
-          nullable: true
-        expectedDurationMinutes:
-          type: object
-          nullable: true
-        expectedTurnaroundMinutes:
-          type: object
-          nullable: true
-        requiresMedicalOrder:
-          type: object
-          nullable: true
-        prices:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticPublicPriceDto'
-      required:
-        - id
-        - code
-        - name
-        - prices
-    DiagnosticAccreditationDetailDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        number:
-          type: object
-          nullable: true
-        siteId:
-          type: object
-          format: uuid
-          nullable: true
-        validFrom:
-          type: object
-          format: date
-          nullable: true
-        validTo:
-          type: object
-          format: date
-          nullable: true
-      required:
-        - id
-        - type
-    DiagnosticUnitDetailDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        name:
-          type: string
-        type:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        siteCount:
-          type: number
-        equipmentCount:
-          type: number
-        studyCount:
-          type: number
-        acceptsExternalOrders:
-          type: object
-          nullable: true
-        walkInAvailable:
-          type: object
-          nullable: true
-        homeCollectionAvailable:
-          type: object
-          nullable: true
-        sites:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitSiteDetailDto'
-        equipment:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticEquipmentDetailDto'
-        studies:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticStudyDetailDto'
-        accreditations:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticAccreditationDetailDto'
-      required:
-        - id
-        - code
-        - name
-        - type
-        - siteCount
-        - equipmentCount
-        - studyCount
-        - sites
-        - equipment
-        - studies
-        - accreditations
-    DiagnosticUnitAdminSiteDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        practiceSiteId:
-          type: string
-          format: uuid
-        code:
-          type: string
-        name:
-          type: string
-        role:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        accessionPrefix:
-          type: object
-          nullable: true
-        sampleCollectionAvailable:
-          type: object
-          nullable: true
-        imagingAvailable:
-          type: object
-          nullable: true
-        status:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-      required:
-        - id
-        - practiceSiteId
-        - code
-        - name
-        - role
-        - status
-    DiagnosticUnitAdminEquipmentDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        siteId:
-          type: string
-          format: uuid
-        type:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        manufacturer:
-          type: object
-          nullable: true
-        model:
-          type: object
-          nullable: true
-        serialNumber:
-          type: object
-          nullable: true
-        modality:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/DiagnosticConceptDto'
-        operationalStatus:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        lastCalibrationAt:
-          type: object
-          format: date-time
-          nullable: true
-        nextCalibrationDueAt:
-          type: object
-          format: date-time
-          nullable: true
-        daysToCalibration:
-          type: object
-          nullable: true
-      required:
-        - id
-        - siteId
-        - type
-        - operationalStatus
-    DiagnosticUnitAdminPriceDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        scheduleId:
-          type: string
-          format: uuid
-        scheduleCode:
-          type: string
-        schedulePublic:
-          type: boolean
-        versionNumber:
-          type: number
-        baseAmount:
-          type: string
-          example: '120.00'
-        patientAmount:
-          type: object
-          nullable: true
-        insurerAmount:
-          type: object
-          nullable: true
-        currency:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/DiagnosticConceptDto'
-        effectiveFrom:
-          type: string
-          format: date-time
-        effectiveTo:
-          type: object
-          format: date-time
-          nullable: true
-        status:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-      required:
-        - id
-        - scheduleId
-        - scheduleCode
-        - schedulePublic
-        - versionNumber
-        - baseAmount
-        - effectiveFrom
-        - status
-    DiagnosticUnitAdminStudyDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        name:
-          type: string
-        description:
-          type: object
-          nullable: true
-        siteId:
-          type: object
-          format: uuid
-          nullable: true
-        modality:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/DiagnosticConceptDto'
-        specimenType:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/DiagnosticConceptDto'
-        preparationInstructions:
-          type: object
-          nullable: true
-        expectedDurationMinutes:
-          type: object
-          nullable: true
-        expectedTurnaroundMinutes:
-          type: object
-          nullable: true
-        requiresMedicalOrder:
-          type: object
-          nullable: true
-        requiresPriorAuthorization:
-          type: object
-          nullable: true
-        homeCollectionEligible:
-          type: object
-          nullable: true
-        status:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        prices:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitAdminPriceDto'
-      required:
-        - id
-        - code
-        - name
-        - status
-        - prices
-    DiagnosticUnitAdminAccreditationDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        siteId:
-          type: object
-          format: uuid
-          nullable: true
-        type:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        number:
-          type: object
-          nullable: true
-        evidenceFileId:
-          type: object
-          format: uuid
-          nullable: true
-        validFrom:
-          type: object
-          format: date
-          nullable: true
-        validTo:
-          type: object
-          format: date
-          nullable: true
-        daysToExpiry:
-          type: object
-          nullable: true
-        verificationStatus:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-      required:
-        - id
-        - type
-        - verificationStatus
-    DiagnosticUnitAdminStaffDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        practitionerRoleAssignmentId:
-          type: string
-          format: uuid
-        practitionerProfileId:
-          type: object
-          format: uuid
-          nullable: true
-        practitionerName:
-          type: object
-          nullable: true
-        siteId:
-          type: object
-          format: uuid
-          nullable: true
-        assignmentRole:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/DiagnosticConceptDto'
-        specialty:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/DiagnosticConceptDto'
-        mayValidateResults:
-          type: object
-          nullable: true
-        maySignReports:
-          type: object
-          nullable: true
-        validFrom:
-          type: object
-          format: date
-          nullable: true
-        validTo:
-          type: object
-          format: date
-          nullable: true
-        status:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-      required:
-        - id
-        - practitionerRoleAssignmentId
-        - status
-    DiagnosticUnitAdminDetailDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        name:
-          type: string
-        type:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        status:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        verificationStatus:
-          $ref: '#/components/schemas/DiagnosticConceptDto'
-        publiclyListed:
-          type: boolean
-        siteCount:
-          type: number
-        studyCount:
-          type: number
-        equipmentCount:
-          type: number
-        acceptsExternalOrders:
-          type: object
-          nullable: true
-        walkInAvailable:
-          type: object
-          nullable: true
-        homeCollectionAvailable:
-          type: object
-          nullable: true
-        sites:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitAdminSiteDto'
-        equipment:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitAdminEquipmentDto'
-        studies:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitAdminStudyDto'
-        accreditations:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitAdminAccreditationDto'
-        staff:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticUnitAdminStaffDto'
-      required:
-        - id
-        - code
-        - name
-        - type
-        - status
-        - verificationStatus
-        - publiclyListed
-        - siteCount
-        - studyCount
-        - equipmentCount
-        - sites
-        - equipment
-        - studies
-        - accreditations
-        - staff
-    CreateUnitSiteDto:
-      type: object
-      properties:
-        practiceSiteId:
-          type: string
-          description: Sitio del practice donde opera la unidad
-          format: uuid
-        siteRoleConceptId:
-          type: string
-          description: Rol del sitio (concept id)
-          format: uuid
-        accessionPrefix:
-          type: string
-          description: Prefijo de accesión del sitio
-          maxLength: 20
-        sampleCollectionAvailable:
-          type: boolean
-          description: Toma de muestras disponible
-        imagingAvailable:
-          type: boolean
-          description: Imagenología disponible
-      required:
-        - practiceSiteId
-    CreateUnitAccreditationDto:
-      type: object
-      properties:
-        accreditationConceptId:
-          type: string
-          description: Tipo de acreditación (concept id)
-          format: uuid
-        accreditationNumber:
-          type: string
-          description: Nº de acreditación
-          maxLength: 100
-        issuerTenantId:
-          type: string
-          description: Tenant emisor
-          format: uuid
-        evidenceFileId:
-          type: string
-          description: Archivo de evidencia
-          format: uuid
-      required:
-        - accreditationConceptId
-    CreateDiagnosticUnitDto:
-      type: object
-      properties:
-        tenantId:
-          type: string
-          description: Tenant propietario de la unidad
-          format: uuid
-        code:
-          type: string
-          description: Código único de la unidad en el tenant
-          maxLength: 60
-        name:
-          type: string
-          description: Nombre de la unidad
-          maxLength: 200
-        diagnosticUnitTypeConceptId:
-          type: string
-          description: Tipo de unidad (concept id)
-          format: uuid
-        ownershipTypeConceptId:
-          type: string
-          description: Tipo de propiedad (concept id)
-          format: uuid
-        practiceId:
-          type: string
-          description: Practice asociado
-          format: uuid
-        primaryPracticeSiteId:
-          type: string
-          description: Sitio principal del practice
-          format: uuid
-        acceptsExternalOrders:
-          type: boolean
-          description: Acepta órdenes externas
-        sites:
-          description: Sitios operativos (1..N)
-          type: array
-          items:
-            $ref: '#/components/schemas/CreateUnitSiteDto'
-        accreditations:
-          description: Acreditaciones (0..N)
-          type: array
-          items:
-            $ref: '#/components/schemas/CreateUnitAccreditationDto'
-      required:
-        - tenantId
-        - code
-        - name
-    AddSiteDto:
-      type: object
-      properties:
-        practiceSiteId:
-          type: string
-          description: Sitio del practice donde opera la unidad
-          format: uuid
-        siteRoleConceptId:
-          type: string
-          description: Rol del sitio (concept id)
-          format: uuid
-        accessionPrefix:
-          type: string
-          description: Prefijo de accesión
-          maxLength: 20
-        sampleCollectionAvailable:
-          type: boolean
-          description: Toma de muestras disponible
-        imagingAvailable:
-          type: boolean
-          description: Imagenología disponible
-      required:
-        - practiceSiteId
-    SpecialtyItemDto:
-      type: object
-      properties:
-        specialtyConceptId:
-          type: string
-          description: Especialidad (concept id)
-          format: uuid
-        isPrimary:
-          type: boolean
-          description: Especialidad primaria de la unidad
-      required:
-        - specialtyConceptId
-    SetSpecialtiesDto:
-      type: object
-      properties:
-        specialties:
-          description: Conjunto vigente de especialidades
-          type: array
-          items:
-            $ref: '#/components/schemas/SpecialtyItemDto'
-      required:
-        - specialties
-    StudyComponentDto:
-      type: object
-      properties:
-        componentOfferingId:
-          type: string
-          description: Oferta que actúa como componente
-          format: uuid
-        componentRoleConceptId:
-          type: string
-          description: Rol del componente (concept id)
-          format: uuid
-        quantity:
-          type: string
-          description: Cantidad
-          example: '1'
-        ordinal:
-          type: number
-          description: Orden en el panel
-      required:
-        - componentOfferingId
-    CreateStudyOfferingDto:
-      type: object
-      properties:
-        studyCode:
-          type: string
-          description: Código del estudio en la unidad
-          maxLength: 60
-        studyConceptId:
-          type: string
-          description: Estudio (concept id)
-          format: uuid
-        displayName:
-          type: string
-          description: Nombre visible del estudio
-          maxLength: 200
-        diagnosticUnitSiteId:
-          type: string
-          description: Sitio de la unidad donde se ofrece
-          format: uuid
-        modalityConceptId:
-          type: string
-          description: Modalidad (concept id)
-          format: uuid
-        bodySiteConceptId:
-          type: string
-          description: Zona anatómica (concept id)
-          format: uuid
-        specimenTypeConceptId:
-          type: string
-          description: Tipo de muestra (concept id)
-          format: uuid
-        description:
-          type: string
-          description: Descripción
-        preparationInstructions:
-          type: string
-          description: Instrucciones de preparación
-        expectedDurationMinutes:
-          type: number
-          description: Duración esperada (min)
-        expectedTurnaroundMinutes:
-          type: number
-          description: Turnaround esperado (min)
-        requiresMedicalOrder:
-          type: boolean
-          description: Requiere orden médica
-        requiresPriorAuthorization:
-          type: boolean
-          description: Requiere autorización previa
-        homeCollectionEligible:
-          type: boolean
-          description: Elegible para toma domiciliaria
-        components:
-          description: Componentes del panel (0..N)
-          type: array
-          items:
-            $ref: '#/components/schemas/StudyComponentDto'
-      required:
-        - studyCode
-        - studyConceptId
-        - displayName
-    CreatePriceScheduleDto:
-      type: object
-      properties:
-        code:
-          type: string
-          description: Código único del cronograma en la unidad
-          maxLength: 60
-        priceScheduleTypeConceptId:
-          type: string
-          description: Tipo de cronograma (concept id)
-          format: uuid
-        diagnosticUnitSiteId:
-          type: string
-          description: Sitio de la unidad
-          format: uuid
-        insurerTenantId:
-          type: string
-          description: Tenant aseguradora
-          format: uuid
-        brokerTenantId:
-          type: string
-          description: Tenant broker
-          format: uuid
-        currencyConceptId:
-          type: string
-          description: Moneda (concept id)
-          format: uuid
-        validFrom:
-          type: string
-          description: Vigente desde
-          format: date-time
-        validTo:
-          type: string
-          description: Vigente hasta
-          format: date-time
-        publicVisibility:
-          type: boolean
-          description: Visible al público
-      required:
-        - code
-    CreatePractitionerAssignmentDto:
-      type: object
-      properties:
-        practitionerRoleAssignmentId:
-          type: string
-          description: Asignación de rol del profesional (RRHH)
-          format: uuid
-        diagnosticUnitSiteId:
-          type: string
-          description: Sitio de la unidad
-          format: uuid
-        specialtyConceptId:
-          type: string
-          description: Especialidad aportada (concept id)
-          format: uuid
-        assignmentRoleConceptId:
-          type: string
-          description: Rol de la asignación (concept id)
-          format: uuid
-        mayValidateResults:
-          type: boolean
-          description: Puede validar resultados
-        maySignReports:
-          type: boolean
-          description: Puede firmar informes
-        validFrom:
-          type: string
-          description: Vigente desde
-          format: date-time
-        validTo:
-          type: string
-          description: Vigente hasta
-          format: date-time
-      required:
-        - practitionerRoleAssignmentId
-    DiagnosticUnitsCreateAccreditationDto:
-      type: object
-      properties:
-        accreditationConceptId:
-          type: string
-          description: Tipo de acreditación (concept id)
-          format: uuid
-        diagnosticUnitSiteId:
-          type: string
-          description: Sitio de la unidad
-          format: uuid
-        accreditationNumber:
-          type: string
-          description: Nº de acreditación
-          maxLength: 100
-        issuerTenantId:
-          type: string
-          description: Tenant emisor
-          format: uuid
-        evidenceFileId:
-          type: string
-          description: Archivo de evidencia
-          format: uuid
-        validFrom:
-          type: string
-          description: Vigente desde
-          format: date-time
-        validTo:
-          type: string
-          description: Vigente hasta
-          format: date-time
-      required:
-        - accreditationConceptId
-    UpdateSiteDto:
-      type: object
-      properties:
-        siteRoleConceptId:
-          type: string
-          description: Rol del sitio (concept id)
-          format: uuid
-        accessionPrefix:
-          type: string
-          description: Prefijo de accesión
-          maxLength: 20
-        sampleCollectionAvailable:
-          type: boolean
-          description: Toma de muestras disponible
-        imagingAvailable:
-          type: boolean
-          description: Imagenología disponible
-    CreateEquipmentDto:
-      type: object
-      properties:
-        equipmentTypeConceptId:
-          type: string
-          description: Tipo de equipo (concept id)
-          format: uuid
-        manufacturer:
-          type: string
-          description: Fabricante
-          maxLength: 200
-        model:
-          type: string
-          description: Modelo
-          maxLength: 200
-        serialNumber:
-          type: string
-          description: Nº de serie
-          maxLength: 200
-        modalityConceptId:
-          type: string
-          description: Modalidad (concept id)
-          format: uuid
-        lastCalibrationAt:
-          type: string
-          description: Última calibración
-          format: date-time
-        nextCalibrationDueAt:
-          type: string
-          description: Próxima calibración
-          format: date-time
-        operationalStatusConceptId:
-          type: string
-          description: Estado operativo (concept id)
-          format: uuid
-      required:
-        - equipmentTypeConceptId
-    CreateStudyPriceDto:
-      type: object
-      properties:
-        diagnosticStudyOfferingId:
-          type: string
-          description: Oferta de estudio a tarificar
-          format: uuid
-        baseAmount:
-          type: string
-          description: Importe base
-          example: '120.00'
-        patientAmount:
-          type: string
-          description: Importe a paciente
-          example: '120.00'
-        insurerAmount:
-          type: string
-          description: Importe a aseguradora
-          example: '80.00'
-        taxAmount:
-          type: string
-          description: Impuesto
-          example: '18.00'
-        discountFactor:
-          type: string
-          description: Factor de descuento
-          example: '0.10'
-        pricingRuleJson:
-          type: object
-          description: Reglas de precio (JSON)
-        effectiveFrom:
-          type: string
-          description: Vigente desde
-          format: date-time
-      required:
-        - diagnosticStudyOfferingId
-        - baseAmount
-    UpdateEquipmentDto:
-      type: object
-      properties:
-        manufacturer:
-          type: string
-          description: Fabricante
-          maxLength: 200
-        model:
-          type: string
-          description: Modelo
-          maxLength: 200
-        lastCalibrationAt:
-          type: string
-          description: Última calibración
-          format: date-time
-        nextCalibrationDueAt:
-          type: string
-          description: Próxima calibración
-          format: date-time
-        operationalStatusConceptId:
-          type: string
-          description: Estado operativo (concept id)
-          format: uuid
-    RenewAccreditationDto:
-      type: object
-      properties:
-        accreditationNumber:
-          type: string
-          description: Nuevo nº de acreditación
-          maxLength: 100
-        evidenceFileId:
-          type: string
-          description: Nuevo archivo de evidencia
-          format: uuid
-        validFrom:
-          type: string
-          description: Nueva vigencia desde
-          format: date-time
-        validTo:
-          type: string
-          description: Nueva vigencia hasta
-          format: date-time
     CreateSpecimenDto:
       type: object
       properties:
@@ -80895,45 +81135,6 @@ components:
           format: date-time
         path:
           type: string
-    DiagnosticUnitPrimarySiteDto:
-      type: object
-      properties:
-        name:
-          type: string
-          maxLength: 200
-          example: Sede central
-        timeZone:
-          type: string
-          example: America/La_Paz
-        address:
-          $ref: '#/components/schemas/OwnSiteAddressDto'
-    DiagnosticUnitProfileDto:
-      type: object
-      properties:
-        code:
-          type: string
-          maxLength: 100
-          example: CENTRO_IMAGEN_CENTRAL
-        name:
-          type: string
-          maxLength: 200
-          example: Centro de Diagnóstico por Imágenes
-        diagnosticUnitTypeConceptId:
-          type: string
-          format: uuid
-        modalityConceptIds:
-          type: array
-          items:
-            type: string
-            format: uuid
-        walkInAvailable:
-          type: boolean
-          default: true
-        homeCollectionAvailable:
-          type: boolean
-          default: false
-        primarySite:
-          $ref: '#/components/schemas/DiagnosticUnitPrimarySiteDto'
   responses:
     BadRequest:
       description: La solicitud no cumple el contrato de entrada.

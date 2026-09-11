@@ -137,10 +137,18 @@ export class FilesService {
     this.logger.setContext(FilesService.name);
   }
 
-  /** UC-02-05: crea el archivo y su versión 1 (pendiente de escaneo). */
+  /**
+   * UC-02-05: crea el archivo y su versión 1 (pendiente de escaneo).
+   *
+   * `actor` es `null` sólo para la pre-carga anónima del registro de
+   * organizaciones (subtarea 1.2): el archivo nace sin dueño
+   * (`created_by_user_id`/`recorded_by_user_id` NULL, ambas columnas
+   * nullable) y queda inutilizable hasta que alguien lo reclame dentro de
+   * una transacción autenticada (`AttachableFileService.claimAnonymousUpload`).
+   */
   async createFile(
     dto: CreateFileDto,
-    actor: AuthenticatedUser,
+    actor: AuthenticatedUser | null,
   ): Promise<FileResponseDto> {
     this.logger.info(
       { operation: 'common.file.create', category: dto.category },
@@ -154,7 +162,7 @@ export class FilesService {
         sensitivityConceptId: CONCEPTS[`SENSITIVITY_${dto.sensitivity}`],
         lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
         originalName: dto.originalName,
-        actorUserId: actor.id,
+        actorUserId: actor?.id,
       });
       // Flush del padre antes de crear la versión que lo referencia por FK.
       await tx.flush();
@@ -172,7 +180,7 @@ export class FilesService {
         encryptionStatusConceptId: CONCEPTS.ENCRYPTION_AT_REST,
         malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
         recordedAt: new Date(),
-        recordedByUserId: actor.id,
+        recordedByUserId: actor?.id,
       });
       await tx.flush();
 

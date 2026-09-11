@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 32 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 40 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`
 - **Controladores:** `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
@@ -20,29 +20,37 @@ Referencia exhaustiva de 32 operación(es) del módulo `profiles`, derivada del 
 7. [POST /profiles/patients/{profileId}/related-persons](#7-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
 8. [GET /profiles/patients/me](#8-get-profiles-patients-me) — Consultar los propios datos de filiación
 9. [PATCH /profiles/patients/me](#9-patch-profiles-patients-me) — Editar los propios datos de filiación
-10. [GET /profiles/patients/me/summary](#10-get-profiles-patients-me-summary) — Consultar el resumen propio
-11. [POST /profiles/patients/merge](#11-post-profiles-patients-merge) — Fusionar pacientes duplicados
-12. [GET /profiles/patients/merge-events](#12-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
-13. [POST /profiles/patients/merge/{eventId}/reverse](#13-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
-14. [POST /profiles/persons/{personId}/account-links](#14-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
-15. [POST /profiles/persons/{personId}/decease](#15-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
-16. [GET /profiles/practitioners](#16-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
-17. [POST /profiles/practitioners](#17-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
-18. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#18-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
-19. [DELETE /profiles/practitioners/{profileId}/photo](#19-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
-20. [PUT /profiles/practitioners/{profileId}/photo](#20-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
-21. [POST /profiles/practitioners/{profileId}/specialties](#21-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
-22. [GET /profiles/practitioners/{profileId}/summary](#22-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
-23. [PATCH /profiles/practitioners/me](#23-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
-24. [GET /profiles/practitioners/me/affiliations](#24-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
-25. [POST /profiles/practitioners/me/affiliations](#25-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
-26. [GET /profiles/practitioners/me/linkable-organizations](#26-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
-27. [GET /profiles/practitioners/me/onboarding](#27-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
-28. [GET /profiles/practitioners/me/summary](#28-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
-29. [GET /tenants/{tenantId}/practitioner-requests](#29-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
-30. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#30-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
-31. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#31-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
-32. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#32-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
+10. [DELETE /profiles/patients/me/photo](#10-delete-profiles-patients-me-photo) — Quitar la propia foto de perfil
+11. [PUT /profiles/patients/me/photo](#11-put-profiles-patients-me-photo) — Fijar la propia foto de perfil
+12. [GET /profiles/patients/me/summary](#12-get-profiles-patients-me-summary) — Consultar el resumen propio
+13. [POST /profiles/patients/merge](#13-post-profiles-patients-merge) — Fusionar pacientes duplicados
+14. [GET /profiles/patients/merge-events](#14-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
+15. [POST /profiles/patients/merge/{eventId}/reverse](#15-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
+16. [POST /profiles/persons/{personId}/account-links](#16-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
+17. [POST /profiles/persons/{personId}/decease](#17-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
+18. [GET /profiles/practitioners](#18-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
+19. [POST /profiles/practitioners](#19-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
+20. [POST /profiles/practitioners/{profileId}/affiliations](#20-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
+21. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#21-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
+22. [DELETE /profiles/practitioners/{profileId}/photo](#22-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
+23. [PUT /profiles/practitioners/{profileId}/photo](#23-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
+24. [POST /profiles/practitioners/{profileId}/specialties](#24-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
+25. [GET /profiles/practitioners/{profileId}/summary](#25-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
+26. [PATCH /profiles/practitioners/me](#26-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
+27. [GET /profiles/practitioners/me/affiliations](#27-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
+28. [POST /profiles/practitioners/me/affiliations](#28-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
+29. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#29-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
+30. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#30-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
+31. [POST /profiles/practitioners/me/credentials](#31-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
+32. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#32-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
+33. [GET /profiles/practitioners/me/linkable-organizations](#33-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
+34. [GET /profiles/practitioners/me/onboarding](#34-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
+35. [GET /profiles/practitioners/me/summary](#35-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
+36. [GET /profiles/practitioners/specialty-counts](#36-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
+37. [GET /tenants/{tenantId}/practitioner-requests](#37-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
+38. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#38-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
+39. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#39-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
+40. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#40-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
 
 ---
 
@@ -193,7 +201,7 @@ Ejemplo de error normalizado:
 
 UC-05-13: listado paginado de pacientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: UC-05-13: listado de pacientes para el personal administrativo. Va declarado **después** de `patients/me/summary` a propósito: Nest resuelve las rutas por orden de declaración y `patients/:profileId` capturaría `patients/me` si fuera antes.
+Contexto declarado en el controlador: UC-05-13: listado de pacientes. Va declarado **después** de `patients/me/summary` a propósito: Nest resuelve las rutas por orden de declaración y `patients/:profileId` capturaría `patients/me` si fuera antes. ## Quién puede buscar, y qué ve (TAREA-07, P-07-10 — 2026-09-02) Hasta acá el listado era exclusivo de `SECURITY_ADMIN`, con esta nota: «la lista de todas las historias de una organización es exactamente el dato que no debe existir como pantalla». El propietario pidió que quien atiende (`CLINICIAN`, `PRACTITIONER`) también pueda buscar. Una primera versión acotó ese acceso a la gente con actividad en su organización; se revirtió el mismo día porque la búsqueda no es sólo para consultar a quien ya se atendió — es para **registrar** a quien nunca se atendió, y acotar por actividad le impide precisamente eso. Hoy los cuatro roles ven el **mismo padrón sin acotar** (`resolvePatientSearchScope()`, en `patient-search-scope.ts`). Lo que reemplaza al acotamiento: `CLINICIAN`/`PRACTITIONER` deben aportar `q` o `nationalId` — sin ninguno de los dos, `422` (`requiereCriterioDeBusqueda()`); sin este freno, listar sin criterio sería enumerar el padrón, no buscar. `SECURITY_ADMIN`/`SUPERADMIN` siguen listando libremente. Encontrar a alguien acá **no** abre su expediente clínico: esa puerta la decide `ClinicalReadService` aparte (turno confirmado hoy o relación asistencial aceptada vigente).
 
 ### Descripción del sistema
 
@@ -204,8 +212,10 @@ NestJS resuelve `GET /profiles/patients` en `ProfilesPatientsController_searchPa
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en el código de paciente o el nombre | `valor-ejemplo` |
+| `nationalId` | query | No | `string` | Sin restricción adicional declarada | Documento de identidad exacto (`common.identifiers.value`) | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | query | No | `string` | formato `uuid` | Departamento que expidió el documento (VS_BO_DEPARTMENT); sólo tiene efecto junto a nationalId | `00000000-0000-4000-8000-000000000001` |
 | `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
-| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de resultados (por defecto 50) | `1` |
+| `limit` | query | No | `number` | máximo 500 | Tope de resultados (por defecto 50) | `50` |
 
 ### Payload mínimo aceptable
 
@@ -220,7 +230,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPERADMIN`, `CLINICIAN`, `PRACTITIONER`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -231,7 +241,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /profiles/patients?q=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
+GET /profiles/patients?q=valor-ejemplo&nationalId=00000000-0000-4000-8000-000000000001&issuerAdministrativeAreaConceptId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=50 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -292,7 +302,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | Buscá por nombre, código o documento: no se puede listar el padrón completo de pacientes | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1117,10 +1130,52 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "sexAtBirth": "MALE",
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
   "phone": "+59170000000",
   "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
   "identityVerified": true,
-  "patientCode": "CODIGO_EJEMPLO"
+  "patientCode": "CODIGO_EJEMPLO",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxId": "00000000-0000-4000-8000-000000000001",
+  "taxHolderName": "Nombre de ejemplo",
+  "email": "usuario@example.com",
+  "photoFileId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "workAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "coverages": [
+    {
+      "carrierName": "Nombre de ejemplo",
+      "planName": "Nombre de ejemplo",
+      "isPublic": true,
+      "memberIdentifier": "valor-ejemplo",
+      "verified": true,
+      "planId": "00000000-0000-4000-8000-000000000001",
+      "coverageOrder": 1
+    }
+  ],
+  "guardians": [
+    {
+      "displayName": "Nombre de ejemplo",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
+      "isEmergencyContact": true,
+      "isLegalGuardian": true,
+      "phone": "+59170000000"
+    }
+  ]
 }
 ```
 
@@ -1139,10 +1194,44 @@ Campos de la respuesta:
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `MALE` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `phone` | No | `string` | Sin restricción adicional declarada | Teléfono de contacto vigente (`common.contact_points`) | `+59170000000` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `00000000-0000-4000-8000-000000000001` |
 | `identityVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `true` |
 | `patientCode` | No | `string` | Sin restricción adicional declarada | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `CODIGO_EJEMPLO` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `taxId` | No | `string` | Sin restricción adicional declarada | NIT para facturación | `00000000-0000-4000-8000-000000000001` |
+| `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
+| `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"memberIdentifier":"valor-ejemplo","verified":true,"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Aseguradora, en palabras | `Nombre de ejemplo` |
+| `coverages[].planName` | No | `string` | Sin restricción adicional declarada | Plan contratado, en palabras | `Nombre de ejemplo` |
+| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador. | `true` |
+| `coverages[].memberIdentifier` | No | `string` | Sin restricción adicional declarada | Con qué documento figura afiliado | `valor-ejemplo` |
+| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar. | `true` |
+| `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
+| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
+| `guardians[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
+| `guardians[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `guardians[].isEmergencyContact` | Sí | `boolean` | Sin restricción adicional declarada | Es a quien llamar en una urgencia | `true` |
+| `guardians[].isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Es su representante legal | `true` |
+| `guardians[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1220,12 +1309,29 @@ Content-Type: application/json
 | `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Andrea` |
 | `lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mamani` |
 | `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Quispe` |
-| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `birthDate` | No | `object` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `valor-ejemplo` |
 | `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres. Cadena vacía para quedarse sin teléfono. | `+59170000000` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `taxId` | No | `string` | longitud máxima 20 | NIT para facturación. Cadena vacía para quedarse sin NIT. | `00000000-0000-4000-8000-000000000001` |
+| `taxHolderName` | No | `string` | longitud máxima 200 | Nombre o razón social del titular del NIT. Cadena vacía para quitarla. | `Nombre de ejemplo` |
+| `homeAddressLines` | No | `string` | longitud máxima 300 | Domicilio, tal como lo escribe la persona. Vacío para quitarlo. | `valor-ejemplo` |
+| `workAddressLines` | No | `string` | longitud máxima 300 | Dirección de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `workMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio del trabajo (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `workLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `valor-ejemplo` |
+| `guardianName` | No | `string` | longitud máxima 200 | Nombre del tutor o persona autorizada. No hay forma de quitarlo, sólo de declararlo o corregirlo. | `Nombre de ejemplo` |
+| `guardianPhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono del tutor, en formato E.164 o nacional | `+59170000000` |
+| `guardianRelationshipConceptId` | No | `string` | formato `uuid` | Parentesco del tutor o contacto de emergencia (conjunto related-person-relationship) | `00000000-0000-4000-8000-000000000001` |
+| `privateInsurancePlanId` | No | `string` | formato `uuid` | Plan de la aseguradora privada declarada. Sólo si la persona no tenía ninguna ya. | `00000000-0000-4000-8000-000000000001` |
+| `publicInsurancePlanId` | No | `string` | formato `uuid` | Plan del seguro público declarado. Sólo si la persona no tenía ninguno ya. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -1242,12 +1348,29 @@ Content-Type: application/json
   "middleName": "Andrea",
   "lastName": "Mamani",
   "motherLastName": "Quispe",
-  "birthDate": "2026-07-31",
+  "birthDate": {},
   "sexAtBirth": "MALE",
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
   "phone": "+59170000000",
-  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001"
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxId": "00000000-0000-4000-8000-000000000001",
+  "taxHolderName": "Nombre de ejemplo",
+  "homeAddressLines": "valor-ejemplo",
+  "workAddressLines": "valor-ejemplo",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeLatitude": {},
+  "homeLongitude": {},
+  "workMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "workLatitude": {},
+  "workLongitude": {},
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
+  "guardianName": "Nombre de ejemplo",
+  "guardianPhone": "+59170000000",
+  "guardianRelationshipConceptId": "00000000-0000-4000-8000-000000000001",
+  "privateInsurancePlanId": "00000000-0000-4000-8000-000000000001",
+  "publicInsurancePlanId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1280,10 +1403,52 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "sexAtBirth": "MALE",
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
   "phone": "+59170000000",
   "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
   "identityVerified": true,
-  "patientCode": "CODIGO_EJEMPLO"
+  "patientCode": "CODIGO_EJEMPLO",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxId": "00000000-0000-4000-8000-000000000001",
+  "taxHolderName": "Nombre de ejemplo",
+  "email": "usuario@example.com",
+  "photoFileId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "workAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "coverages": [
+    {
+      "carrierName": "Nombre de ejemplo",
+      "planName": "Nombre de ejemplo",
+      "isPublic": true,
+      "memberIdentifier": "valor-ejemplo",
+      "verified": true,
+      "planId": "00000000-0000-4000-8000-000000000001",
+      "coverageOrder": 1
+    }
+  ],
+  "guardians": [
+    {
+      "displayName": "Nombre de ejemplo",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
+      "isEmergencyContact": true,
+      "isLegalGuardian": true,
+      "phone": "+59170000000"
+    }
+  ]
 }
 ```
 
@@ -1302,10 +1467,44 @@ Campos de la respuesta:
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `MALE` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `phone` | No | `string` | Sin restricción adicional declarada | Teléfono de contacto vigente (`common.contact_points`) | `+59170000000` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `00000000-0000-4000-8000-000000000001` |
 | `identityVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `true` |
 | `patientCode` | No | `string` | Sin restricción adicional declarada | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `CODIGO_EJEMPLO` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `taxId` | No | `string` | Sin restricción adicional declarada | NIT para facturación | `00000000-0000-4000-8000-000000000001` |
+| `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
+| `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"memberIdentifier":"valor-ejemplo","verified":true,"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Aseguradora, en palabras | `Nombre de ejemplo` |
+| `coverages[].planName` | No | `string` | Sin restricción adicional declarada | Plan contratado, en palabras | `Nombre de ejemplo` |
+| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador. | `true` |
+| `coverages[].memberIdentifier` | No | `string` | Sin restricción adicional declarada | Con qué documento figura afiliado | `valor-ejemplo` |
+| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar. | `true` |
+| `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
+| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
+| `guardians[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
+| `guardians[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `guardians[].isEmergencyContact` | Sí | `boolean` | Sin restricción adicional declarada | Es a quien llamar en una urgencia | `true` |
+| `guardians[].isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Es su representante legal | `true` |
+| `guardians[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1336,7 +1535,447 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /profiles/patients/me/summary
+## 10. DELETE /profiles/patients/me/photo
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Quitar la propia foto de perfil
+- **Operation ID:** `ProfilesPatientsController_removeOwnPhoto`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPatientsController.removeOwnPhoto](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+
+### Descripción de negocio
+
+Quitar la propia foto de perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Quitar la foto de perfil propia. Quita la referencia; el archivo no se toca. Idempotente.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /profiles/patients/me/photo` en `ProfilesPatientsController_removeOwnPhoto`. El controlador delega en `ProfilesPatientsService.removeOwnPhoto`. No recibe body. El tipo de retorno estático es `Promise<OwnPatientProfileResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /profiles/patients/me/photo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /profiles/patients/me/photo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPatientProfileResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "personId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "sexAtBirth": "MALE",
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
+  "phone": "+59170000000",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
+  "patientCode": "CODIGO_EJEMPLO",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxId": "00000000-0000-4000-8000-000000000001",
+  "taxHolderName": "Nombre de ejemplo",
+  "email": "usuario@example.com",
+  "photoFileId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "workAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "coverages": [
+    {
+      "carrierName": "Nombre de ejemplo",
+      "planName": "Nombre de ejemplo",
+      "isPublic": true,
+      "memberIdentifier": "valor-ejemplo",
+      "verified": true,
+      "planId": "00000000-0000-4000-8000-000000000001",
+      "coverageOrder": 1
+    }
+  ],
+  "guardians": [
+    {
+      "displayName": "Nombre de ejemplo",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
+      "isEmergencyContact": true,
+      "isLegalGuardian": true,
+      "phone": "+59170000000"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `name` | No | `string` | Sin restricción adicional declarada | Nombre de pila | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Segundo nombre | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Apellido paterno | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Apellido materno | `Nombre de ejemplo` |
+| `displayName` | No | `string` | Sin restricción adicional declarada | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Fecha sin hora: serializarla como instante la desplazaría un día | `2026-07-31` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `MALE` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
+| `phone` | No | `string` | Sin restricción adicional declarada | Teléfono de contacto vigente (`common.contact_points`) | `+59170000000` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `true` |
+| `patientCode` | No | `string` | Sin restricción adicional declarada | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `CODIGO_EJEMPLO` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `taxId` | No | `string` | Sin restricción adicional declarada | NIT para facturación | `00000000-0000-4000-8000-000000000001` |
+| `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
+| `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"memberIdentifier":"valor-ejemplo","verified":true,"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Aseguradora, en palabras | `Nombre de ejemplo` |
+| `coverages[].planName` | No | `string` | Sin restricción adicional declarada | Plan contratado, en palabras | `Nombre de ejemplo` |
+| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador. | `true` |
+| `coverages[].memberIdentifier` | No | `string` | Sin restricción adicional declarada | Con qué documento figura afiliado | `valor-ejemplo` |
+| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar. | `true` |
+| `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
+| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
+| `guardians[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
+| `guardians[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `guardians[].isEmergencyContact` | Sí | `boolean` | Sin restricción adicional declarada | Es a quien llamar en una urgencia | `true` |
+| `guardians[].isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Es su representante legal | `true` |
+| `guardians[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/photo"
+}
+```
+
+---
+
+## 11. PUT /profiles/patients/me/photo
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Fijar la propia foto de perfil
+- **Operation ID:** `ProfilesPatientsController_setOwnPhoto`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPatientsController.setOwnPhoto](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+
+### Descripción de negocio
+
+Fijar la propia foto de perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Fijar la foto de perfil propia. Sin `@Roles` por lo mismo que el resto de `patients/me/*`: el sujeto lo resuelve el servidor desde la sesión y no hay parámetro que apunte a otro. `PUT` porque el resultado no depende de cuántas veces se pida: la persona queda con esa foto.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /profiles/patients/me/photo` en `ProfilesPatientsController_setOwnPhoto`. El controlador delega en `ProfilesPatientsService.setOwnPhoto`. Valida el body como `SetOwnPatientPhotoDto` y consume `application/json`. El tipo de retorno estático es `Promise<OwnPatientProfileResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SetOwnPatientPhotoDto`; los campos opcionales se omiten.
+
+```http
+PUT /profiles/patients/me/photo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileId` | Sí | `string` | formato `uuid` | Identificador del archivo ya subido que será la foto | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /profiles/patients/me/photo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPatientProfileResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "personId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "sexAtBirth": "MALE",
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
+  "phone": "+59170000000",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
+  "patientCode": "CODIGO_EJEMPLO",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxId": "00000000-0000-4000-8000-000000000001",
+  "taxHolderName": "Nombre de ejemplo",
+  "email": "usuario@example.com",
+  "photoFileId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "workAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "coverages": [
+    {
+      "carrierName": "Nombre de ejemplo",
+      "planName": "Nombre de ejemplo",
+      "isPublic": true,
+      "memberIdentifier": "valor-ejemplo",
+      "verified": true,
+      "planId": "00000000-0000-4000-8000-000000000001",
+      "coverageOrder": 1
+    }
+  ],
+  "guardians": [
+    {
+      "displayName": "Nombre de ejemplo",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
+      "isEmergencyContact": true,
+      "isLegalGuardian": true,
+      "phone": "+59170000000"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `name` | No | `string` | Sin restricción adicional declarada | Nombre de pila | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Segundo nombre | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Apellido paterno | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Apellido materno | `Nombre de ejemplo` |
+| `displayName` | No | `string` | Sin restricción adicional declarada | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Fecha sin hora: serializarla como instante la desplazaría un día | `2026-07-31` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `MALE` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
+| `phone` | No | `string` | Sin restricción adicional declarada | Teléfono de contacto vigente (`common.contact_points`) | `+59170000000` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `true` |
+| `patientCode` | No | `string` | Sin restricción adicional declarada | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `CODIGO_EJEMPLO` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `taxId` | No | `string` | Sin restricción adicional declarada | NIT para facturación | `00000000-0000-4000-8000-000000000001` |
+| `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
+| `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"memberIdentifier":"valor-ejemplo","verified":true,"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Aseguradora, en palabras | `Nombre de ejemplo` |
+| `coverages[].planName` | No | `string` | Sin restricción adicional declarada | Plan contratado, en palabras | `Nombre de ejemplo` |
+| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador. | `true` |
+| `coverages[].memberIdentifier` | No | `string` | Sin restricción adicional declarada | Con qué documento figura afiliado | `valor-ejemplo` |
+| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar. | `true` |
+| `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
+| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
+| `guardians[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
+| `guardians[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `guardians[].isEmergencyContact` | Sí | `boolean` | Sin restricción adicional declarada | Es a quien llamar en una urgencia | `true` |
+| `guardians[].isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Es su representante legal | `true` |
+| `guardians[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/photo"
+}
+```
+
+---
+
+## 12. GET /profiles/patients/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1451,7 +2090,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /profiles/patients/merge
+## 13. POST /profiles/patients/merge
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1589,7 +2228,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /profiles/patients/merge-events
+## 14. GET /profiles/patients/merge-events
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1714,7 +2353,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /profiles/patients/merge/{eventId}/reverse
+## 15. POST /profiles/patients/merge/{eventId}/reverse
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1848,7 +2487,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /profiles/persons/{personId}/account-links
+## 16. POST /profiles/persons/{personId}/account-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1983,7 +2622,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /profiles/persons/{personId}/decease
+## 17. POST /profiles/persons/{personId}/decease
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2118,7 +2757,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /profiles/practitioners
+## 18. GET /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2142,6 +2781,7 @@ NestJS resuelve `GET /profiles/practitioners` en `ProfilesPractitionersControlle
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `specialtyConceptId` | query | No | `string` | Sin restricción adicional declarada | Filtra por especialidad vigente (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `withoutSpecialty` | query | No | `string` | Sin restricción adicional declarada | true = sólo quienes no declaran ninguna especialidad vigente | `valor-ejemplo` |
 | `cursor` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de resultados (por defecto 50) | `1` |
 
@@ -2168,7 +2808,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /profiles/practitioners?specialtyConceptId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+GET /profiles/practitioners?specialtyConceptId=00000000-0000-4000-8000-000000000001&withoutSpecialty=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -2196,6 +2836,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "professionalTitle": "valor-ejemplo",
       "photoFileId": "00000000-0000-4000-8000-000000000001",
       "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "verified": true,
       "acceptsNewPatients": true,
       "telehealthAvailable": true,
       "specialties": [
@@ -2203,6 +2844,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
           "isPrimary": true
         }
+      ],
+      "workplaces": [
+        "valor-ejemplo"
       ]
     }
   ],
@@ -2216,18 +2860,20 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PractitionerListItemDto>` | Sin restricción adicional declarada | Las filas de esta página. | `[{"profileId":"00000000-0000-4000-8000-000000000001","practitionerCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","photoFileId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","acceptsNewPatients":true,"telehealthAvailable":true,"specialties":[{"specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true}]}]` |
+| `items` | Sí | `array<PractitionerListItemDto>` | Sin restricción adicional declarada | Las filas de esta página. | `[{"profileId":"00000000-0000-4000-8000-000000000001","practitionerCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","photoFileId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","verified":true,"acceptsNewPatients":true,"telehealthAvailable":true,"specialties":[{"specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true}],"workplaces":["valor-ejemplo"]}]` |
 | `items[].profileId` | Sí | `string` | formato `uuid` | Con este id se abre la ficha (`GET /profiles/practitioners/:id/summary`). | `00000000-0000-4000-8000-000000000001` |
 | `items[].practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Código único del profesional | `CODIGO_EJEMPLO` |
 | `items[].displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible de la persona | `Nombre de ejemplo` |
 | `items[].professionalTitle` | No | `string` | Sin restricción adicional declarada | Título profesional declarado. | `valor-ejemplo` |
 | `items[].photoFileId` | No | `string` | formato `uuid` | Archivo de la foto | `00000000-0000-4000-8000-000000000001` |
 | `items[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Estado de verificación de la matrícula. | `00000000-0000-4000-8000-000000000001` |
+| `items[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la matrícula fue verificada | `true` |
 | `items[].acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Si declara tomar pacientes nuevos. | `true` |
 | `items[].telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Si atiende por telemedicina. | `true` |
 | `items[].specialties` | Sí | `array<PractitionerListSpecialtyDto>` | Sin restricción adicional declarada | Sus especialidades, la principal primero. | `[{"specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true}]` |
 | `items[].specialties[].specialtyConceptId` | Sí | `string` | formato `uuid` | Concept id de la especialidad | `00000000-0000-4000-8000-000000000001` |
 | `items[].specialties[].isPrimary` | Sí | `boolean` | Sin restricción adicional declarada | Si es la especialidad con la que se presenta. | `true` |
+| `items[].workplaces` | Sí | `array<string>` | Sin restricción adicional declarada | Dónde atiende, en texto | `["valor-ejemplo"]` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor opaco de la página siguiente; null si no hay más | `valor-ejemplo` |
@@ -2258,7 +2904,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /profiles/practitioners
+## 19. POST /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2291,9 +2937,7 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "practitionerCode": "CODIGO_EJEMPLO",
-  "licenseNumber": "valor-ejemplo",
-  "credentialNumber": "valor-ejemplo"
+  "practitionerCode": "CODIGO_EJEMPLO"
 }
 ```
 
@@ -2316,10 +2960,10 @@ Content-Type: application/json
 | `professionalBio` | No | `string` | longitud máxima 4000 | Biografía profesional en prosa | `valor-ejemplo` |
 | `acceptsNewPatients` | No | `boolean` | Sin restricción adicional declarada | Si acepta pacientes nuevos | `false` |
 | `telehealthAvailable` | No | `boolean` | Sin restricción adicional declarada | Si atiende por telemedicina | `false` |
-| `licenseNumber` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Nº de licencia de la autorización jurisdiccional inicial | `valor-ejemplo` |
+| `licenseNumber` | No | `string` | longitud mínima 1; longitud máxima 100 | Nº de licencia de la autorización jurisdiccional inicial | `valor-ejemplo` |
 | `jurisdictionConceptId` | No | `string` | formato `uuid` | Concept id de jurisdicción de la licencia | `00000000-0000-4000-8000-000000000001` |
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad regulatoria emisora | `valor-ejemplo` |
-| `credentialNumber` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Nº de la credencial de soporte | `valor-ejemplo` |
+| `credentialNumber` | No | `string` | longitud mínima 1; longitud máxima 100 | Nº de la credencial de soporte | `valor-ejemplo` |
 | `credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial | `00000000-0000-4000-8000-000000000001` |
 | `credentialIssuingInstitutionText` | No | `string` | longitud máxima 300 | Institución que emitió la credencial de soporte | `valor-ejemplo` |
 | `credentialIssueDate` | No | `string` | formato `date` | Fecha de emisión de la credencial de soporte (ISO) | `2026-07-31` |
@@ -2396,8 +3040,8 @@ Campos de la respuesta:
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Valor de practitioner code mantenido por la instancia. | `CODIGO_EJEMPLO` |
 | `verificationStatus` | Sí | `string` | formato `uuid` | Concept id del estado de verificación | `00000000-0000-4000-8000-000000000001` |
 | `practiceStatus` | Sí | `string` | formato `uuid` | Concept id del estado de práctica | `00000000-0000-4000-8000-000000000001` |
-| `licenseId` | Sí | `string` | formato `uuid` | Identificador asociado a license. | `00000000-0000-4000-8000-000000000001` |
-| `credentialId` | Sí | `string` | formato `uuid` | Identificador asociado a credential. | `00000000-0000-4000-8000-000000000001` |
+| `licenseId` | No | `string` | formato `uuid` | La autorización creada — **ausente** si el alta no trajo matrícula, que es el caso de una ficha de directorio. | `00000000-0000-4000-8000-000000000001` |
+| `credentialId` | No | `string` | formato `uuid` | La credencial creada. Ausente por el mismo motivo que `licenseId`. | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -2432,7 +3076,178 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 20. POST /profiles/practitioners/{profileId}/affiliations
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Registrar un consultorio de un profesional sin cuenta
+- **Operation ID:** `ProfilesPractitionersController_addAffiliationFor`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.addAffiliationFor](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+Mismas reglas que el alta propia: no repite un vínculo ya declarado y respeta el estado inicial según la sede.
+
+Contexto declarado en el controlador: Un consultorio de OTRO profesional — las fichas de directorio. Los profesionales que publican las redes de las aseguradoras no tienen cuenta —no traen correo— y por eso no pueden declarar dónde atienden. Sin esta ruta, un médico con tres consultorios se veía sin ninguno. Pide rol administrativo: escribir el historial laboral de alguien que no está mirando es otra cosa que escribir el propio.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `ProfilesPractitionersController_addAffiliationFor`. El controlador delega en `ProfilesPractitionersService.addAffiliationFor`. Valida el body como `CreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateAffiliationDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/practitioners/00000000-0000-4000-8000-000000000001/affiliations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
+  "participatingTenantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `profileId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `primaryTenantId` | Sí | `string` | formato `uuid` | Tenant primario (organizador) | `00000000-0000-4000-8000-000000000001` |
+| `participatingTenantId` | Sí | `string` | formato `uuid` | Tenant participante | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de afiliación (concepto) | `00000000-0000-4000-8000-000000000001` |
+| `hostPracticeSiteId` | No | `string` | formato `uuid` | Sitio de práctica anfitrión | `00000000-0000-4000-8000-000000000001` |
+| `healthcareServiceId` | No | `string` | formato `uuid` | Servicio de salud implicado | `00000000-0000-4000-8000-000000000001` |
+| `contractReference` | No | `string` | longitud máxima 200 | Referencia de contrato | `valor-ejemplo` |
+| `dataUseAgreementId` | No | `string` | formato `uuid` | Acuerdo de uso de datos (DUA) firmado | `00000000-0000-4000-8000-000000000001` |
+| `validFrom` | No | `string` | Sin restricción adicional declarada | Vigente desde (ISO date-time) | `valor-ejemplo` |
+| `validTo` | No | `string` | Sin restricción adicional declarada | Vigente hasta (ISO date-time) | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/practitioners/00000000-0000-4000-8000-000000000001/affiliations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
+  "participatingTenantId": "00000000-0000-4000-8000-000000000001",
+  "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "hostPracticeSiteId": "00000000-0000-4000-8000-000000000001",
+  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+  "contractReference": "valor-ejemplo",
+  "dataUseAgreementId": "00000000-0000-4000-8000-000000000001",
+  "validFrom": "valor-ejemplo",
+  "validTo": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Nombre de ejemplo",
+  "roleTitle": "valor-ejemplo",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31",
+  "current": true,
+  "status": "00000000-0000-4000-8000-000000000001",
+  "statusKind": {},
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
+| `roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
+| `practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
+| `endDate` | No | `string` | formato `date`; admite null | Fin del vínculo, o `null` si sigue vigente. | `2026-07-31` |
+| `current` | Sí | `boolean` | Sin restricción adicional declarada | Derivado de `endDate`: sin fin declarado, sigue vigente | `true` |
+| `status` | Sí | `string` | formato `uuid` | Estado del registro (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `statusKind` | Sí | `object` | valores: `pendiente`, `declarado`, `aprobado`, `rechazado`, `revocado`, `desconocido` | El mismo estado, en algo sobre lo que una pantalla pueda ramificar. El concept id sigue viajando en `status` y es la verdad; esto es una derivación de conveniencia. Existe porque la alternativa era que el frontend comparara uuids escritos a mano, que es exactamente lo que el proyecto prohíbe: los conceptos se resuelven en el servidor. `desconocido` cuando el estado no es ninguno de los tres esperados. Es preferible a suponer: cuando exista el value set de estados —donde entra `declarado`— las pantallas que ya distinguen los casos conocidos no van a mentir sobre el nuevo, van a decir que no lo reconocen. | `{}` |
+| `decisionReasonText` | No | `string` | admite null | Por qué la organización rechazó o dio de baja el vínculo. **Lo lee el profesional**, no es una nota interna. Un rechazo sin motivo es mudo para quien lo recibe, y quien lo escribe tiene que saber que se lee. `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | La sede indicada no existe | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
+| 409 | `CONFLICT` | Ese vínculo ya está en el historial laboral | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | Ya pediste vincularte a esa sede | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El fin del vínculo no puede ser anterior a su inicio | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/{profileId}/affiliations"
+}
+```
+
+---
+
+## 21. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2574,7 +3389,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. DELETE /profiles/practitioners/{profileId}/photo
+## 22. DELETE /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2655,6 +3470,30 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "photoFileId": "00000000-0000-4000-8000-000000000001",
   "email": "usuario@example.com",
   "phone": "+59170000000",
+  "workEmail": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -2709,7 +3548,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
       "organizationName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
-      "departmentText": "valor-ejemplo",
       "practiceSiteId": "00000000-0000-4000-8000-000000000001",
       "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "startDate": "2026-07-31",
@@ -2744,6 +3582,29 @@ Campos de la respuesta:
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil, si cargó una. Se resuelve por el módulo de archivos. | `00000000-0000-4000-8000-000000000001` |
 | `email` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
 | `phone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `personalEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `mobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workMobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workLandline` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `valor-ejemplo` |
+| `name` | No | `string` | Sin restricción adicional declarada | Las cuatro partes, para poder corregir el nombre sin adivinar dónde cortarlo. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad. **No editable desde el perfil**: es un identificador oficial y tiene su propio circuito de verificación. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | El domicilio, si lo declaró (ALV-009). Ausente y no un objeto vacío cuando no hay fila vigente — mismo criterio que `OwnPatientProfile`. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -2780,12 +3641,11 @@ Campos de la respuesta:
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
-| `affiliations[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
-| `affiliations[].departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `affiliations[].roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
 | `affiliations[].practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
@@ -2831,7 +3691,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. PUT /profiles/practitioners/{profileId}/photo
+## 23. PUT /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2926,6 +3786,30 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "photoFileId": "00000000-0000-4000-8000-000000000001",
   "email": "usuario@example.com",
   "phone": "+59170000000",
+  "workEmail": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -2980,7 +3864,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
       "organizationName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
-      "departmentText": "valor-ejemplo",
       "practiceSiteId": "00000000-0000-4000-8000-000000000001",
       "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "startDate": "2026-07-31",
@@ -3015,6 +3898,29 @@ Campos de la respuesta:
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil, si cargó una. Se resuelve por el módulo de archivos. | `00000000-0000-4000-8000-000000000001` |
 | `email` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
 | `phone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `personalEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `mobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workMobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workLandline` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `valor-ejemplo` |
+| `name` | No | `string` | Sin restricción adicional declarada | Las cuatro partes, para poder corregir el nombre sin adivinar dónde cortarlo. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad. **No editable desde el perfil**: es un identificador oficial y tiene su propio circuito de verificación. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | El domicilio, si lo declaró (ALV-009). Ausente y no un objeto vacío cuando no hay fila vigente — mismo criterio que `OwnPatientProfile`. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -3051,12 +3957,11 @@ Campos de la respuesta:
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
-| `affiliations[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
-| `affiliations[].departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `affiliations[].roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
 | `affiliations[].practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
@@ -3109,7 +4014,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /profiles/practitioners/{profileId}/specialties
+## 24. POST /profiles/practitioners/{profileId}/specialties
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -3254,7 +4159,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /profiles/practitioners/{profileId}/summary
+## 25. GET /profiles/practitioners/{profileId}/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -3333,6 +4238,30 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "photoFileId": "00000000-0000-4000-8000-000000000001",
   "email": "usuario@example.com",
   "phone": "+59170000000",
+  "workEmail": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -3387,7 +4316,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
       "organizationName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
-      "departmentText": "valor-ejemplo",
       "practiceSiteId": "00000000-0000-4000-8000-000000000001",
       "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "startDate": "2026-07-31",
@@ -3422,6 +4350,29 @@ Campos de la respuesta:
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil, si cargó una. Se resuelve por el módulo de archivos. | `00000000-0000-4000-8000-000000000001` |
 | `email` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
 | `phone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `personalEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `mobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workMobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workLandline` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `valor-ejemplo` |
+| `name` | No | `string` | Sin restricción adicional declarada | Las cuatro partes, para poder corregir el nombre sin adivinar dónde cortarlo. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad. **No editable desde el perfil**: es un identificador oficial y tiene su propio circuito de verificación. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | El domicilio, si lo declaró (ALV-009). Ausente y no un objeto vacío cuando no hay fila vigente — mismo criterio que `OwnPatientProfile`. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -3458,12 +4409,11 @@ Campos de la respuesta:
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
-| `affiliations[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
-| `affiliations[].departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `affiliations[].roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
 | `affiliations[].practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
@@ -3507,7 +4457,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. PATCH /profiles/practitioners/me
+## 26. PATCH /profiles/practitioners/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -3556,6 +4506,24 @@ Content-Type: application/json
 | `professionalBio` | No | `string` | longitud máxima 4000 | Biografía profesional | `valor-ejemplo` |
 | `acceptsNewPatients` | No | `boolean` | Sin restricción adicional declarada | Si acepta pacientes nuevos | `true` |
 | `telehealthAvailable` | No | `boolean` | Sin restricción adicional declarada | Si atiende por telemedicina | `true` |
+| `name` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `object` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `phone` | No | `string` | longitud máxima 40; patrón runtime `PATRON_TELEFONO` | Forma anterior de declarar el teléfono. Preferí workMobilePhone. | `+59170000000` |
+| `personalEmail` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `mobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PATRON_TELEFONO` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `workMobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PATRON_TELEFONO` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `workLandline` | No | `string` | longitud máxima 40; patrón runtime `PATRON_TELEFONO` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddressLines` | No | `string` | longitud máxima 300 | Domicilio, tal como lo escribe la persona. Vacío para quitarlo. | `valor-ejemplo` |
+| `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -3571,7 +4539,25 @@ Content-Type: application/json
   "professionalTitle": "valor-ejemplo",
   "professionalBio": "valor-ejemplo",
   "acceptsNewPatients": true,
-  "telehealthAvailable": true
+  "telehealthAvailable": true,
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": {},
+  "phone": "+59170000000",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddressLines": "valor-ejemplo",
+  "homeLatitude": {},
+  "homeLongitude": {},
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo"
 }
 ```
 
@@ -3602,6 +4588,30 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "photoFileId": "00000000-0000-4000-8000-000000000001",
   "email": "usuario@example.com",
   "phone": "+59170000000",
+  "workEmail": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -3656,7 +4666,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
       "organizationName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
-      "departmentText": "valor-ejemplo",
       "practiceSiteId": "00000000-0000-4000-8000-000000000001",
       "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "startDate": "2026-07-31",
@@ -3691,6 +4700,29 @@ Campos de la respuesta:
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil, si cargó una. Se resuelve por el módulo de archivos. | `00000000-0000-4000-8000-000000000001` |
 | `email` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
 | `phone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `personalEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `mobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workMobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workLandline` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `valor-ejemplo` |
+| `name` | No | `string` | Sin restricción adicional declarada | Las cuatro partes, para poder corregir el nombre sin adivinar dónde cortarlo. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad. **No editable desde el perfil**: es un identificador oficial y tiene su propio circuito de verificación. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | El domicilio, si lo declaró (ALV-009). Ausente y no un objeto vacío cuando no hay fila vigente — mismo criterio que `OwnPatientProfile`. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -3727,12 +4759,11 @@ Campos de la respuesta:
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
-| `affiliations[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
-| `affiliations[].departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `affiliations[].roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
 | `affiliations[].practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
@@ -3778,7 +4809,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /profiles/practitioners/me/affiliations
+## 27. GET /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -3850,7 +4881,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
       "organizationName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
-      "departmentText": "valor-ejemplo",
       "practiceSiteId": "00000000-0000-4000-8000-000000000001",
       "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "startDate": "2026-07-31",
@@ -3870,12 +4900,11 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Las afiliaciones, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Las afiliaciones, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
 | `items[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
-| `items[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
-| `items[].departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `items[].roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
 | `items[].practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
 | `items[].affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
 | `items[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
@@ -3913,7 +4942,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /profiles/practitioners/me/affiliations
+## 28. POST /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4015,7 +5044,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
   "organizationName": "Nombre de ejemplo",
   "roleTitle": "valor-ejemplo",
-  "departmentText": "valor-ejemplo",
   "practiceSiteId": "00000000-0000-4000-8000-000000000001",
   "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "startDate": "2026-07-31",
@@ -4035,8 +5063,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
 | `organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
-| `roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
-| `departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
 | `practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
 | `affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
 | `startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
@@ -4057,6 +5084,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 404 | `NOT_FOUND` | La sede indicada no existe | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
 | 409 | `CONFLICT` | Ese vínculo ya está en el historial laboral | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 409 | `CONFLICT` | Ya pediste vincularte a esa sede | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
@@ -4079,7 +5107,511 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /profiles/practitioners/me/linkable-organizations
+## 29. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Quitar una afiliación del historial laboral propio
+- **Operation ID:** `ProfilesPractitionersController_removeOwnAffiliation`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.removeOwnAffiliation](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+Borrado físico de una línea de currículum del titular. `404` si no existe o es de otro profesional.
+
+Contexto declarado en el controlador: UC-05-16·B: quitar una línea del historial propio.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /profiles/practitioners/me/affiliations/{affiliationId}` en `ProfilesPractitionersController_removeOwnAffiliation`. El controlador delega en `ProfilesPractitionersService.removeOwnAffiliation`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `affiliationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /profiles/practitioners/me/affiliations/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `affiliationId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /profiles/practitioners/me/affiliations/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Afiliación no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/affiliations/{affiliationId}"
+}
+```
+
+---
+
+## 30. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Corregir una afiliación del historial laboral propio
+- **Operation ID:** `ProfilesPractitionersController_updateOwnAffiliation`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.updateOwnAffiliation](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+Sólo el titular edita su historial; la sede no se cambia desde acá. `409` si la corrección la vuelve idéntica a otra línea; `422` si el fin queda antes del inicio.
+
+Contexto declarado en el controlador: UC-05-16·E: corregir una línea del historial propio. El sujeto sigue saliendo de la sesión: el id de una afiliación ajena responde `404`, igual que uno inexistente.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /profiles/practitioners/me/affiliations/{affiliationId}` en `ProfilesPractitionersController_updateOwnAffiliation`. El controlador delega en `ProfilesPractitionersService.updateOwnAffiliation`. Valida el body como `UpdateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `affiliationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateAffiliationDto`; los campos opcionales se omiten.
+
+```http
+PATCH /profiles/practitioners/me/affiliations/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `affiliationId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `organizationName` | No | `string` | Sin restricción adicional declarada | Hospital o entidad médica, tal como la declara el profesional | `Hospital Obrero N.º 1` |
+| `roleTitle` | No | `string` | Sin restricción adicional declarada | Cargo ejercido, cuando aplica | `Médico de planta` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de vínculo laboral (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | No | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `endDate` | No | `object` | formato `date`; admite null | Fin del vínculo. `null` lo vuelve vigente; omitido, se conserva | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /profiles/practitioners/me/affiliations/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "organizationName": "Hospital Obrero N.º 1",
+  "roleTitle": "Médico de planta",
+  "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "startDate": "2026-07-31",
+  "endDate": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Nombre de ejemplo",
+  "roleTitle": "valor-ejemplo",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31",
+  "current": true,
+  "status": "00000000-0000-4000-8000-000000000001",
+  "statusKind": {},
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
+| `roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
+| `practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
+| `endDate` | No | `string` | formato `date`; admite null | Fin del vínculo, o `null` si sigue vigente. | `2026-07-31` |
+| `current` | Sí | `boolean` | Sin restricción adicional declarada | Derivado de `endDate`: sin fin declarado, sigue vigente | `true` |
+| `status` | Sí | `string` | formato `uuid` | Estado del registro (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `statusKind` | Sí | `object` | valores: `pendiente`, `declarado`, `aprobado`, `rechazado`, `revocado`, `desconocido` | El mismo estado, en algo sobre lo que una pantalla pueda ramificar. El concept id sigue viajando en `status` y es la verdad; esto es una derivación de conveniencia. Existe porque la alternativa era que el frontend comparara uuids escritos a mano, que es exactamente lo que el proyecto prohíbe: los conceptos se resuelven en el servidor. `desconocido` cuando el estado no es ninguno de los tres esperados. Es preferible a suponer: cuando exista el value set de estados —donde entra `declarado`— las pantallas que ya distinguen los casos conocidos no van a mentir sobre el nuevo, van a decir que no lo reconocen. | `{}` |
+| `decisionReasonText` | No | `string` | admite null | Por qué la organización rechazó o dio de baja el vínculo. **Lo lee el profesional**, no es una nota interna. Un rechazo sin motivo es mudo para quien lo recibe, y quien lo escribe tiene que saber que se lee. `null` en cualquier otro estado. | `Texto descriptivo de ejemplo` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Afiliación no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | Ese vínculo ya está en el historial laboral | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El fin del vínculo no puede ser anterior a su inicio | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/affiliations/{affiliationId}"
+}
+```
+
+---
+
+## 31. POST /profiles/practitioners/me/credentials
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Agregar un título propio (diplomado, maestría, doctorado…)
+- **Operation ID:** `ProfilesPractitionersController_addOwnCredential`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.addOwnCredential](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+Cada llamada agrega uno: el registro de procesos pide poder cargar varios de cada clase. Nace pendiente de verificación y admite el PDF o la foto del diploma, ya subido por POST /common/files/upload.
+
+Contexto declarado en el controlador: Los títulos propios, uno por llamada. Va bajo `practitioners/me` y no bajo `practitioners/:profileId` porque el sujeto sale de la sesión: así no existe la forma de escribir la formación de otro profesional, ni siquiera equivocándose de id.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/practitioners/me/credentials` en `ProfilesPractitionersController_addOwnCredential`. El controlador delega en `ProfilesPractitionersService.addOwnCredential`. Valida el body como `AddOwnCredentialDto` y consume `application/json`. El tipo de retorno estático es `Promise<OwnCredentialResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AddOwnCredentialDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/practitioners/me/credentials HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "number": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `credentialTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
+| `number` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issueDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `fileId` | No | `string` | formato `uuid` | Archivo del diploma (debe haberlo subido el mismo usuario) | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/practitioners/me/credentials HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "number": "valor-ejemplo",
+  "issuingInstitutionText": "valor-ejemplo",
+  "issueDate": "2026-07-31",
+  "fileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnCredentialResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "number": "valor-ejemplo",
+  "issuingInstitutionText": "valor-ejemplo",
+  "issueDate": "2026-07-31",
+  "stateConceptId": "00000000-0000-4000-8000-000000000001",
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `number` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issueDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `stateConceptId` | Sí | `string` | formato `uuid` | `CRED_PENDING` recién creada: declararla no es haberla verificado. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/credentials"
+}
+```
+
+---
+
+## 32. DELETE /profiles/practitioners/me/credentials/{credentialId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Retirar un título propio pendiente
+- **Operation ID:** `ProfilesPractitionersController_removeOwnCredential`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.removeOwnCredential](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+`404` si no existe o es de otro profesional. `422` si ya fue verificado o rechazado.
+
+Contexto declarado en el controlador: Retirar un título propio cargado por error. Sólo mientras está **pendiente**: uno ya verificado o rechazado es un hecho de la autoridad que lo revisó, no algo que el titular deshace borrándolo. `404` si no existe o es de otro profesional —indistinguible, como el resto del módulo—.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /profiles/practitioners/me/credentials/{credentialId}` en `ProfilesPractitionersController_removeOwnCredential`. El controlador delega en `ProfilesPractitionersService.removeOwnCredential`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `credentialId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /profiles/practitioners/me/credentials/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `credentialId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /profiles/practitioners/me/credentials/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Título no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese título ya fue verificado o rechazado; no se puede retirar | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/credentials/{credentialId}"
+}
+```
+
+---
+
+## 33. GET /profiles/practitioners/me/linkable-organizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4204,7 +5736,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /profiles/practitioners/me/onboarding
+## 34. GET /profiles/practitioners/me/onboarding
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4322,7 +5854,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /profiles/practitioners/me/summary
+## 35. GET /profiles/practitioners/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4397,6 +5929,30 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "photoFileId": "00000000-0000-4000-8000-000000000001",
   "email": "usuario@example.com",
   "phone": "+59170000000",
+  "workEmail": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -4451,7 +6007,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
       "organizationName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
-      "departmentText": "valor-ejemplo",
       "practiceSiteId": "00000000-0000-4000-8000-000000000001",
       "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "startDate": "2026-07-31",
@@ -4486,6 +6041,29 @@ Campos de la respuesta:
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil, si cargó una. Se resuelve por el módulo de archivos. | `00000000-0000-4000-8000-000000000001` |
 | `email` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
 | `phone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `personalEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `mobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workMobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workLandline` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `valor-ejemplo` |
+| `name` | No | `string` | Sin restricción adicional declarada | Las cuatro partes, para poder corregir el nombre sin adivinar dónde cortarlo. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad. **No editable desde el perfil**: es un identificador oficial y tiene su propio circuito de verificación. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | El domicilio, si lo declaró (ALV-009). Ausente y no un objeto vacío cuando no hay fila vigente — mismo criterio que `OwnPatientProfile`. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -4522,12 +6100,11 @@ Campos de la respuesta:
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":{},"decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
-| `affiliations[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
-| `affiliations[].departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `affiliations[].roleTitle` | No | `string` | admite null | Cargo, cuando el vínculo lo declara. | `valor-ejemplo` |
 | `affiliations[].practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
@@ -4571,7 +6148,119 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /tenants/{tenantId}/practitioner-requests
+## 36. GET /profiles/practitioners/specialty-counts
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Contar profesionales visibles por especialidad
+- **Operation ID:** `ProfilesPractitionersController_countPractitionersBySpecialty`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.countPractitionersBySpecialty](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+Contar profesionales visibles por especialidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El recuento de la guía por especialidad (portada de especialidades). Sin `@Roles`, por lo mismo que el listado del que sale: es el dato con el que la guía del paciente dibuja «Cardiología · 12» sin traerse los 12. Va declarado ANTES de `practitioners/:profileId/summary` por la regla de este archivo: Nest resuelve por orden y el parámetro no debe capturar un literal.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/practitioners/specialty-counts` en `ProfilesPractitionersController_countPractitionersBySpecialty`. El controlador delega en `ProfilesPractitionersService.countPractitionersBySpecialty`. No recibe body. El tipo de retorno estático es `Promise<ListSpecialtyCountsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/practitioners/specialty-counts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/practitioners/specialty-counts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSpecialtyCountsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+      "practitionerCount": 1
+    }
+  ],
+  "practitionerTotal": 1,
+  "withoutSpecialtyCount": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SpecialtyPractitionerCountDto>` | Sin restricción adicional declarada | Una fila por especialidad con al menos un profesional. Las que no tienen a nadie **no viajan**: una tarjeta que promete y abre vacía es peor que no estar. | `[{"specialtyConceptId":"00000000-0000-4000-8000-000000000001","practitionerCount":1}]` |
+| `items[].specialtyConceptId` | Sí | `string` | Sin restricción adicional declarada | Concepto de la especialidad | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerCount` | Sí | `number` | Sin restricción adicional declarada | Profesionales visibles que la ejercen | `1` |
+| `practitionerTotal` | Sí | `number` | Sin restricción adicional declarada | Profesionales visibles, sin repetir | `1` |
+| `withoutSpecialtyCount` | Sí | `number` | Sin restricción adicional declarada | Visibles sin ninguna especialidad vigente | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/specialty-counts"
+}
+```
+
+---
+
+## 37. GET /tenants/{tenantId}/practitioner-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -4668,7 +6357,7 @@ Campos de la respuesta:
 | `items[].practitionerName` | Sí | `string` | admite null | Cómo se llama quien pide, para poder decidir. Sin esto la bandeja mostraba cargo, institución y fecha, y ningún nombre: quien administra la organización tenía que aprobar o rechazar a un identificador. Nadie acepta a alguien que no sabe quién es —y si acepta igual, es peor—, así que el pedido viaja identificado. `null` si el profesional no tiene nombre cargado, que la pantalla debe contar como dato faltante y no como una persona anónima. | `Nombre de ejemplo` |
 | `items[].practitionerLicense` | Sí | `string` | admite null | Matrícula del Ministerio, que es lo que lo habilita a ejercer. Es el dato con el que una organización verifica de verdad a quien le pide entrar: el nombre dice quién dice ser, la matrícula dice si puede. | `valor-ejemplo` |
 | `items[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución tal como la declaró el profesional. | `Nombre de ejemplo` |
-| `items[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo declarado. | `valor-ejemplo` |
+| `items[].roleTitle` | No | `string` | admite null | Cargo declarado, cuando el vínculo lo tiene. Opcional desde ALV-007: un pedido de "atiendo en mi propio consultorio" no tiene cargo dentro de una jerarquía. | `valor-ejemplo` |
 | `items[].practiceSiteId` | Sí | `string` | formato `uuid`; admite null | Sede de la organización a la que apunta el pedido. | `00000000-0000-4000-8000-000000000001` |
 | `items[].startDate` | Sí | `string` | formato `date-time` | Desde cuándo dice que el vínculo empieza. | `2026-07-31T12:00:00.000Z` |
 | `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del vínculo. | `00000000-0000-4000-8000-000000000001` |
@@ -4701,7 +6390,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 38. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -4801,7 +6490,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 39. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -4914,7 +6603,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 40. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`

@@ -27,6 +27,72 @@ import {
   PayerProfileDto,
 } from '../../directory/dto';
 
+/**
+ * Los cinco documentos legales de afiliación en PDF (subtarea 1.2), ya
+ * subidos por `POST /iam/auth/upload-registration-document`.
+ *
+ * El bloque es todo o nada: `@IsUUID()` sin `@IsOptional()` en cada campo
+ * hace que mandar cuatro de cinco sea un **400** de `ValidationPipe` — nunca
+ * un 422 de negocio, porque no es una regla de dominio, es una forma
+ * incompleta del contrato.
+ *
+ * Los nombres son los roles canónicos del documento
+ * (`AffiliationDocumentRole` de `directory/affiliation-documents.ts`), no
+ * las siglas bolivianas del proceso original (`nitFileId`, `seprecFileId`,
+ * `sedesCertificateFileId`): la API es en inglés y el mismo contrato tiene
+ * que servir a Brasil o Estados Unidos, donde esos nombres no significan
+ * nada.
+ */
+export class RegisterOrganizationLegalDocumentsDto {
+  /**
+   * Escritura de constitución de la empresa (1.1.2 del registro de procesos).
+   */
+  @ApiProperty({
+    format: 'uuid',
+    description:
+      'Escritura de constitución (fileId de POST /iam/auth/upload-registration-document)',
+  })
+  @IsUUID()
+  constitutionFileId!: string;
+
+  /**
+   * Certificado de inscripción tributaria — el NIT en Bolivia (1.2.1).
+   */
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Identificación tributaria (NIT en Bolivia)',
+  })
+  @IsUUID()
+  taxIdentifierFileId!: string;
+
+  /**
+   * Registro mercantil — la matrícula de comercio SEPREC en Bolivia (1.3).
+   */
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Registro mercantil (matrícula SEPREC en Bolivia)',
+  })
+  @IsUUID()
+  commerceRegistryFileId!: string;
+
+  /**
+   * Licencia de funcionamiento municipal (1.4).
+   */
+  @ApiProperty({ format: 'uuid', description: 'Licencia de funcionamiento' })
+  @IsUUID()
+  operatingLicenseFileId!: string;
+
+  /**
+   * Certificado de la autoridad sanitaria — el SEDES en Bolivia (1.5).
+   */
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Certificado de la autoridad sanitaria (SEDES en Bolivia)',
+  })
+  @IsUUID()
+  healthAuthorityCertificateFileId!: string;
+}
+
 /** Datos de la organización que se está dando de alta a sí misma. */
 export class RegisterOrganizationDetailsDto {
   /**
@@ -103,6 +169,22 @@ export class RegisterOrganizationDetailsDto {
   @IsOptional()
   @IsIn(LEGAL_ENTITY_TYPE_CODES)
   legalEntityType?: LegalEntityTypeCode;
+
+  /**
+   * Documentos legales de afiliación en PDF (subtarea 1.2).
+   *
+   * Opcional en el contrato por el mismo motivo que `legalEntityType`: los
+   * clientes que ya integraron contra este endpoint no los declaran, y sin
+   * ellos el tenant nace igual (pendiente de verificación, como siempre). El
+   * formulario público de alta SÍ los exige — «Adjuntar … en PDF», registro
+   * de procesos 1.1.2/1.2.1/1.3/1.4/1.5 — pero esa obligatoriedad es del
+   * cliente, no de este contrato.
+   */
+  @ApiPropertyOptional({ type: RegisterOrganizationLegalDocumentsDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RegisterOrganizationLegalDocumentsDto)
+  legalDocuments?: RegisterOrganizationLegalDocumentsDto;
 
   /**
    * Datos de aseguradora. Obligatorio cuando `tenantType` es `PAYER`.
@@ -345,4 +427,15 @@ export class RegisterOrganizationResponseDto {
     description: 'Id de la unidad diagnóstica creada (sólo DIAGNOSTIC_CENTER)',
   })
   diagnosticUnitId?: string;
+
+  /**
+   * Cuántos documentos legales quedaron registrados, pendientes de
+   * verificación (subtarea 1.2). Ausente si el alta no declaró `legalDocuments`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Cuántos documentos legales quedaron registrados pendientes de ' +
+      'verificación (sólo si el alta los declaró)',
+  })
+  legalDocumentsRegistered?: number;
 }

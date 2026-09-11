@@ -207,3 +207,66 @@ describe('RegisterOrganizationDto · legalEntityType (1.1)', () => {
     expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
   });
 });
+
+/**
+ * Los documentos legales de afiliación en PDF (subtarea 1.2). El DTO sólo
+ * comprueba que el bloque venga completo y con uuids; la existencia y
+ * pertenencia al catálogo de cada `fileId` las comprueba
+ * `TenantAffiliationDocumentsService`, no este DTO.
+ */
+describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
+  const LEGAL_DOCUMENTS_COMPLETOS = {
+    constitutionFileId: '11111111-1111-4111-8111-111111111111',
+    taxIdentifierFileId: '22222222-2222-4222-8222-222222222222',
+    commerceRegistryFileId: '33333333-3333-4333-8333-333333333333',
+    operatingLicenseFileId: '44444444-4444-4444-8444-444444444444',
+    healthAuthorityCertificateFileId: '55555555-5555-4555-8555-555555555555',
+  };
+
+  it('acepta el bloque completo con los cinco fileId', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        organization: {
+          ...ALTA_MINIMA.organization,
+          legalDocuments: LEGAL_DOCUMENTS_COMPLETOS,
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('el bloque es todo o nada: falta uno solo es 400, no 422', async () => {
+    const { healthAuthorityCertificateFileId, ...incompleto } =
+      LEGAL_DOCUMENTS_COMPLETOS;
+    void healthAuthorityCertificateFileId;
+
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        organization: {
+          ...ALTA_MINIMA.organization,
+          legalDocuments: incompleto,
+        },
+      }),
+    ).toEqual(['organization.legalDocuments.healthAuthorityCertificateFileId']);
+  });
+
+  it('rechaza un fileId que no es un uuid', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        organization: {
+          ...ALTA_MINIMA.organization,
+          legalDocuments: {
+            ...LEGAL_DOCUMENTS_COMPLETOS,
+            constitutionFileId: 'no-es-un-uuid',
+          },
+        },
+      }),
+    ).toEqual(['organization.legalDocuments.constitutionFileId']);
+  });
+
+  it('sin el bloque, el alta sigue siendo válida (opcional en el contrato)', async () => {
+    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+  });
+});

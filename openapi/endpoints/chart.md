@@ -270,7 +270,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
-  "activityType": "TASK",
+  "activityType": "APPOINTMENT",
   "subtypeCreated": true
 }
 ```
@@ -280,7 +280,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
-| `activityType` | Sí | `string` | valores: `TASK`, `EVENT`, `EMAIL`, `CALL`, `NOTE` | Valor de activity type mantenido por la instancia. | `TASK` |
+| `activityType` | Sí | `string` | valores: `APPOINTMENT`, `PROCEDURE`, `FOLLOW_UP`, `TELEHEALTH`, `OTHER` | Valor de activity type mantenido por la instancia. | `APPOINTMENT` |
 | `subtypeCreated` | Sí | `boolean` | Sin restricción adicional declarada | true si además se creó la fila del subtipo (tarea o nota) | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.

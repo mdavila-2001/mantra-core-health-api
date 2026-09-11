@@ -80,7 +80,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Sin descripción específica en el contrato OpenAPI. | `USER` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Sin descripción específica en el contrato OpenAPI. | `USER` |
 | `ownerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines` | Sí | `array<string>` | Sin restricción adicional declarada | Líneas de la dirección. | `["valor-ejemplo"]` |
 | `city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -160,7 +160,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `ownerId` | Sí | `string` | formato `uuid` | Identificador asociado a owner. | `00000000-0000-4000-8000-000000000001` |
-| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Valor de owner type mantenido por la instancia. | `USER` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Valor de owner type mantenido por la instancia. | `USER` |
 | `lines` | Sí | `array<string>` | Sin restricción adicional declarada | Valor de lines mantenido por la instancia. | `["valor-ejemplo"]` |
 | `city` | No | `string` | Sin restricción adicional declarada | Valor de city mantenido por la instancia. | `valor-ejemplo` |
 | `municipalityConceptId` | No | `string` | formato `uuid` | Municipio boliviano, miembro de `VS_BO_MUNICIPALITY`. | `00000000-0000-4000-8000-000000000001` |
@@ -248,7 +248,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Sin descripción específica en el contrato OpenAPI. | `USER` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Sin descripción específica en el contrato OpenAPI. | `USER` |
 | `ownerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `system` | Sí | `string` | valores: `EMAIL`, `PHONE` | Sin descripción específica en el contrato OpenAPI. | `EMAIL` |
 | `value` | Sí | `string` | longitud máxima 255 | Correo o teléfono según el sistema. | `valor-ejemplo` |
@@ -309,7 +309,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `ownerId` | Sí | `string` | formato `uuid` | Identificador asociado a owner. | `00000000-0000-4000-8000-000000000001` |
-| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Valor de owner type mantenido por la instancia. | `USER` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Valor de owner type mantenido por la instancia. | `USER` |
 | `system` | Sí | `string` | valores: `EMAIL`, `PHONE` | Valor de system mantenido por la instancia. | `EMAIL` |
 | `value` | Sí | `string` | Sin restricción adicional declarada | Valor de value mantenido por la instancia. | `valor-ejemplo` |
 | `verified` | Sí | `boolean` | Sin restricción adicional declarada | Valor de verified mantenido por la instancia. | `true` |
@@ -442,7 +442,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `ownerId` | Sí | `string` | formato `uuid` | Identificador asociado a owner. | `00000000-0000-4000-8000-000000000001` |
-| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Valor de owner type mantenido por la instancia. | `USER` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Valor de owner type mantenido por la instancia. | `USER` |
 | `system` | Sí | `string` | valores: `EMAIL`, `PHONE` | Valor de system mantenido por la instancia. | `EMAIL` |
 | `value` | Sí | `string` | Sin restricción adicional declarada | Valor de value mantenido por la instancia. | `valor-ejemplo` |
 | `verified` | Sí | `boolean` | Sin restricción adicional declarada | Valor de verified mantenido por la instancia. | `true` |
@@ -1003,7 +1003,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Sin descripción específica en el contrato OpenAPI. | `USER` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Sin descripción específica en el contrato OpenAPI. | `USER` |
 | `ownerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `linkRole` | No | `string` | valores: `ATTACHMENT` | Sin descripción específica en el contrato OpenAPI. | `ATTACHMENT` |
 | `visibility` | No | `string` | valores: `INTERNAL` | Sin descripción específica en el contrato OpenAPI. | `INTERNAL` |
@@ -1060,7 +1060,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `fileId` | Sí | `string` | formato `uuid` | Identificador asociado a file. | `00000000-0000-4000-8000-000000000001` |
 | `ownerId` | Sí | `string` | formato `uuid` | Identificador asociado a owner. | `00000000-0000-4000-8000-000000000001` |
-| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Valor de owner type mantenido por la instancia. | `USER` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Valor de owner type mantenido por la instancia. | `USER` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -1407,7 +1407,7 @@ NestJS resuelve `GET /common/files/links` en `CommonFilesController_listLinks`. 
 
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
-| `ownerType` | query | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Sin descripción específica en OpenAPI. | `USER` |
+| `ownerType` | query | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Sin descripción específica en OpenAPI. | `USER` |
 | `ownerId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
@@ -1481,7 +1481,7 @@ Campos de la respuesta:
 | `items` | Sí | `array<LinkedFileResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"linkId":"00000000-0000-4000-8000-000000000001","ownerId":"00000000-0000-4000-8000-000000000001","ownerType":"USER","linkedAt":"2026-07-31T12:00:00.000Z","file":{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}}]` |
 | `items[].linkId` | Sí | `string` | formato `uuid` | Id del vínculo, no del archivo. | `00000000-0000-4000-8000-000000000001` |
 | `items[].ownerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `items[].ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Sin descripción específica en el contrato OpenAPI. | `USER` |
+| `items[].ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Sin descripción específica en el contrato OpenAPI. | `USER` |
 | `items[].linkedAt` | Sí | `string` | formato `date-time` | Cuándo se adjuntó. | `2026-07-31T12:00:00.000Z` |
 | `items[].file` | Sí | `FileResponseDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}` |
 | `items[].file.id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
@@ -1710,7 +1710,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Tipo de propietario polimórfico. | `USER` |
+| `ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Tipo de propietario polimórfico. | `USER` |
 | `ownerId` | Sí | `string` | formato `uuid` | Id del propietario (no FK). | `00000000-0000-4000-8000-000000000001` |
 | `type` | Sí | `string` | valores: `NATIONAL_ID`, `MRN`, `PASSPORT` | Sin descripción específica en el contrato OpenAPI. | `NATIONAL_ID` |
 | `system` | No | `string` | longitud máxima 255 | Sistema emisor (URI/OID) opcional. | `valor-ejemplo` |

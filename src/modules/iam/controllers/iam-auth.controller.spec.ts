@@ -27,6 +27,7 @@ function build() {
     verifyEmail: mockFn(),
   };
   const organizationRegistrationService = { registerOrganization: mockFn() };
+  const registrationDocumentUploadService = { upload: mockFn() };
   const practitionerRegistrationService = { registerPractitioner: mockFn() };
   const emailVerificationService = { resend: mockFn() };
   const passwordResetService = {
@@ -38,6 +39,7 @@ function build() {
     assistedRegistrationService as any,
     selfRegistrationService as any,
     organizationRegistrationService as any,
+    registrationDocumentUploadService as any,
     practitionerRegistrationService as any,
     passwordResetService as any,
     emailVerificationService as any,
@@ -48,6 +50,7 @@ function build() {
     assistedRegistrationService,
     selfRegistrationService,
     organizationRegistrationService,
+    registrationDocumentUploadService,
     practitionerRegistrationService,
     passwordResetService,
   };
@@ -137,6 +140,19 @@ describe('IamAuthController', () => {
     expect(
       d.organizationRegistrationService.registerOrganization,
     ).toHaveBeenCalledWith(dto, '1.2.3.4');
+  });
+
+  it('delegates the anonymous pre-upload of a registration document', async () => {
+    const d = build();
+    const file = {
+      originalname: 'escritura.pdf',
+      mimetype: 'application/pdf',
+      buffer: Buffer.from('%PDF-1.4'),
+    };
+    await d.controller.uploadRegistrationDocument(file as any);
+    expect(d.registrationDocumentUploadService.upload).toHaveBeenCalledWith(
+      file,
+    );
   });
 
   it('delegates email verification', async () => {
