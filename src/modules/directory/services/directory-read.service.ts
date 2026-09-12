@@ -13,11 +13,24 @@ import {
   BranchesRepository,
   TenantMembershipsRepository,
   TenantsRepository,
+  DirectoryTenantLegalRepository,
 } from '../repositories';
 import { TenantAdministrationService } from './tenant-administration.service';
-import { AddressesRepository } from '../../common/repositories';
+import {
+  AddressesRepository,
+  ContactPointsRepository,
+  IdentifiersRepository,
+} from '../../common/repositories';
 import { CatalogRepository } from '../../insurance/repositories';
 import { DIR, TENANT_TYPE_CONCEPT_BY_CODE } from '../directory.concepts';
+import {
+  EXECUTIVE_DTO_KEYS,
+  EXECUTIVE_ROLE_BY_DTO_KEY,
+  REPRESENTATIVE_ROLE_BY_CODE,
+  type RepresentativeRole,
+} from '../legal-representatives';
+import { AffiliationDocumentConceptsService } from './affiliation-document-concepts.service';
+
 import type {
   ListBranchAssignmentsResponseDto,
   ListBranchesResponseDto,
@@ -65,6 +78,10 @@ export class DirectoryReadService {
    * @param tenantAdmin - Comprobación de alcance por organización.
    * @param catalogRepo - Acceso a `insurance.insurance_carriers`, para el bloque `payer`.
    * @param addressesRepo - Acceso a `common.addresses`, para la casa matriz del `payer` (subtarea 1.3).
+   * @param legalRepo - Acceso a los vínculos de representación (subtarea 1.4).
+   * @param identifiersRepo - Acceso a `common.identifiers`, para el documento del representante.
+   * @param contactPointsRepo - Acceso a `common.contact_points`, para correos y teléfonos.
+   * @param concepts - Resuelve los conceptos de rol para traducirlos a su código canónico.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -76,6 +93,10 @@ export class DirectoryReadService {
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly catalogRepo: CatalogRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly legalRepo: DirectoryTenantLegalRepository,
+    private readonly identifiersRepo: IdentifiersRepository,
+    private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly concepts: AffiliationDocumentConceptsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryReadService.name);
@@ -258,6 +279,8 @@ export class DirectoryReadService {
         }
       }
 
+      const representacion = await this.leerRepresentacion(em, tenant.id);
+
       items.push({
         id: tenant.id,
         code: tenant.code,
@@ -282,6 +305,7 @@ export class DirectoryReadService {
         isVerified:
           tenant.verificationStatusConceptId === CONCEPTS.TENANT_VERIFIED,
         ...(payer ? { payer } : {}),
+        ...representacion,
       });
     }
 
@@ -505,5 +529,110 @@ export class DirectoryReadService {
     }
     await this.tenantAdmin.assertCanRead(em, tenantId, actor);
     return em;
+  }
+
+  /**
+   * Quién representa a la organización y quiénes son sus gerencias de
+   * contacto (subtarea 1.4).
+   *
+   * Tres consultas por organización con fila de representación —personas,
+   * documentos y contactos— en vez de una por persona: la ficha nombra hasta
+   * cuatro, y el bucle de arriba ya recorre una membresía por vuelta.
+   *
+   * El orden **no** lo decide Postgres: `listLegalRepsByTenant` no ordena, así
+   * que el representante se identifica por su rol y las gerencias se devuelven
+   * en el orden canónico de `EXECUTIVE_DTO_KEYS`. Una fila con un rol que el
+   * diccionario no conoce —un `apoderado` cargado a mano, por ejemplo— se
+   * omite en vez de romper la ficha.
+   *
+   * @param em - Contexto de persistencia de esta lectura.
+   * @param tenantId - La organización.
+   * @returns Las claves a mezclar en la ficha; vacío si no hay vínculos.
+   */
+  private async leerRepresentacion(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<
+    Pick<MyOrganizationDto, 'legalRepresentative' | 'executives'> | object
+  > {
+    const vinculos = await this.legalRepo.listLegalRepsByTenant(em, tenantId);
+    if (vinculos.length === 0) return {};
+
+    const concepts = await this.concepts.resolve(em);
+    // Concepto → código del catálogo → rol canónico. El mapa viene al revés
+    // (código → concepto), así que se invierte una vez por lectura.
+    const rolPorConcepto = new Map<string, RepresentativeRole>();
+    for (const [code, conceptId] of concepts.representativeRole) {
+      const rol = REPRESENTATIVE_ROLE_BY_CODE[code];
+      if (rol) rolPorConcepto.set(conceptId, rol);
+    }
+
+    const personIds = vinculos.map((v) => v.personId);
+    const ciIds = vinculos
+      .map((v) => v.ciIdentifierId)
+      .filter((id): id is string => Boolean(id));
+
+    const personas = await this.legalRepo.findPersonsByIds(em, personIds);
+    const documentos = await this.identifiersRepo.findByIds(em, ciIds);
+    const contactos = await this.contactPointsRepo.findVigentesByOwners(
+      em,
+      personIds,
+    );
+
+    // `findVigentesByOwners` ya viene ordenado por preferencia: el primero de
+    // cada sistema es el que la organización quiere que se use.
+    const contactoDe = (personId: string, systemConceptIds: string[]) =>
+      contactos.find(
+        (c) =>
+          c.ownerId === personId &&
+          systemConceptIds.includes(c.systemConceptId),
+      )?.value;
+
+    const fichaDe = (
+      vinculo: (typeof vinculos)[number],
+      rol: RepresentativeRole,
+    ) => {
+      const persona = personas.get(vinculo.personId);
+      if (!persona) return undefined;
+      return {
+        role: rol,
+        fullName: persona.displayName ?? '',
+        email: contactoDe(vinculo.personId, [CONCEPTS.CONTACT_EMAIL]),
+        phone: contactoDe(vinculo.personId, [
+          CONCEPTS.CONTACT_MOBILE,
+          CONCEPTS.CONTACT_PHONE,
+        ]),
+        idNumber: vinculo.ciIdentifierId
+          ? documentos.get(vinculo.ciIdentifierId)?.value
+          : undefined,
+      };
+    };
+
+    const porRol = new Map<RepresentativeRole, (typeof vinculos)[number]>();
+    for (const vinculo of vinculos) {
+      const rol = rolPorConcepto.get(vinculo.representativeRoleConceptId);
+      if (!rol) continue;
+      // Ante dos filas del mismo rol —datos viejos, o una corrección a mano—
+      // gana la marcada como principal; si ninguna lo está, la primera.
+      const previo = porRol.get(rol);
+      if (previo && !(vinculo.isPrimary === true)) continue;
+      porRol.set(rol, vinculo);
+    }
+
+    const representante = porRol.get('LEGAL_REPRESENTATIVE');
+    const legalRepresentative = representante
+      ? fichaDe(representante, 'LEGAL_REPRESENTATIVE')
+      : undefined;
+
+    const executives = EXECUTIVE_DTO_KEYS.map((key) => {
+      const rol = EXECUTIVE_ROLE_BY_DTO_KEY[key];
+      const vinculo = porRol.get(rol);
+      return vinculo ? fichaDe(vinculo, rol) : undefined;
+    }).filter((ficha): ficha is NonNullable<typeof ficha> => Boolean(ficha));
+
+    return {
+      ...(legalRepresentative ? { legalRepresentative } : {}),
+      ...(executives.length > 0 ? { executives } : {}),
+    };
   }
 }

@@ -60,6 +60,54 @@ export class PayerOrganizationProfileDto {
 }
 
 /**
+ * Una persona que la organización declara como contacto: su representante
+ * legal o una de sus gerencias (subtarea 1.4).
+ *
+ * Sale de `directory.tenant_legal_representatives` + `profiles.persons`, con
+ * el correo y el teléfono de `common.contact_points` y el documento de
+ * `common.identifiers`. No es una cuenta de la plataforma: es a quién llamar.
+ */
+export class OrganizationContactPersonDto {
+  /**
+   * El cargo, en su código canónico (`LEGAL_REPRESENTATIVE`,
+   * `GENERAL_MANAGER`, `COMMERCIAL_MANAGER`, `MARKETING_MANAGER`).
+   *
+   * Viaja resuelto y no como `representativeRoleConceptId` por lo mismo que
+   * `isVerified`: el rol es un uuid del catálogo, y para saber cuál significa
+   * «gerente comercial» la pantalla tendría que atarse a un id sembrado.
+   */
+  @ApiProperty({
+    description: 'Rol canónico del contacto dentro de la organización',
+    example: 'MARKETING_MANAGER',
+  })
+  role!: string;
+
+  /**
+   * Nombre completo, tal como lo declaró el alta.
+   */
+  @ApiProperty({ description: 'Nombre completo del contacto' })
+  fullName!: string;
+
+  /**
+   * Correo de contacto, si lo tiene vigente.
+   */
+  @ApiPropertyOptional({ description: 'Correo de contacto', format: 'email' })
+  email?: string;
+
+  /**
+   * Celular o teléfono de contacto, si lo tiene vigente.
+   */
+  @ApiPropertyOptional({ description: 'Celular o teléfono de contacto' })
+  phone?: string;
+
+  /**
+   * Documento de identidad, si se declaró (sólo el representante legal).
+   */
+  @ApiPropertyOptional({ description: 'Documento de identidad declarado' })
+  idNumber?: string;
+}
+
+/**
  * Una organización del actor, con qué puede hacer en ella.
  *
  * ## Por qué el permiso viaja junto a la ficha
@@ -112,6 +160,29 @@ export class MyOrganizationDto extends TenantDetailResponseDto {
   @ValidateNested()
   @Type(() => PayerOrganizationProfileDto)
   payer?: PayerOrganizationProfileDto;
+
+  /**
+   * Quién representa legalmente a la organización (subtarea 1.4).
+   *
+   * Va al nivel de la organización y no dentro de `payer` porque no es un dato
+   * de aseguradora: el registro de procesos pide el mismo bloque para
+   * farmacia, laboratorio e imagenología.
+   */
+  @ApiPropertyOptional({ type: OrganizationContactPersonDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => OrganizationContactPersonDto)
+  legalRepresentative?: OrganizationContactPersonDto;
+
+  /**
+   * Las gerencias de contacto declaradas, en orden canónico (general,
+   * comercial, marketing).
+   */
+  @ApiPropertyOptional({ type: [OrganizationContactPersonDto] })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => OrganizationContactPersonDto)
+  executives?: OrganizationContactPersonDto[];
 }
 
 /**
