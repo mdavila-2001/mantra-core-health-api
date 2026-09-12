@@ -455,6 +455,171 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
+  /**
+   * Los títulos declarados EN el alta (subtarea 1.6).
+   *
+   * El modelo admite N credenciales por profesional desde siempre; lo que no
+   * existía era la vía para declararlas al registrarse. Estas pruebas fijan que
+   * se crean todas, en la misma transacción, y que el contrato anterior
+   * (`credentialNumber`) sigue funcionando sin quedar ambiguo.
+   */
+  describe('los títulos declarados en el alta', () => {
+    const titulo = {
+      credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+      number: 'DIP-001',
+    };
+
+    it('sin el arreglo el alta sigue igual que siempre', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+      });
+
+      expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un arreglo vacío tampoco crea filas', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+        credentials: [],
+      });
+
+      expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('crea la fila del único título declarado, pendiente de verificación', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+        credentials: [{ ...titulo, issuingInstitutionText: '  UMSA  ' }],
+      });
+
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledTimes(1);
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+          number: 'DIP-001',
+          // El texto se guarda limpio: el formulario deja espacios al pegar.
+          issuingInstitutionText: 'UMSA',
+          stateConceptId: PROF.CRED_PENDING,
+        }),
+      );
+    });
+
+    it('crea una fila por título, incluidos dos del mismo tipo', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+        credentials: [
+          { credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE, number: 'TIT-1' },
+          { credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE, number: 'TIT-2' },
+          { credentialTypeConceptId: PROF.CREDENTIAL_TYPE_MASTER, number: 'MAE-9' },
+        ],
+      });
+
+      // Dos carreras es el caso que el propietario pidió: dos filas del mismo
+      // tipo no se pisan ni se deduplican.
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledTimes(3);
+      expect(
+        d.professionalCredentialsRepo.create.mock.calls.map(
+          ([, data]: [unknown, { number: string }]) => data.number,
+        ),
+      ).toEqual(['TIT-1', 'TIT-2', 'MAE-9']);
+    });
+
+    it('un concepto que no es tipo de credencial corta el alta entera', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          email: dto.email,
+          password: dto.password,
+          licenseNumber: dto.licenseNumber,
+          credentials: [
+            titulo,
+            // El segundo es un idioma: la FK lo aceptaría, el dominio no.
+            { credentialTypeConceptId: PROF.LANGUAGE_SPANISH, number: 'X-1' },
+          ],
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      // La fila inválida no se escribe. La primera alcanza a llamarse, pero el
+      // alta entera ocurre dentro de `em.transactional`, así que nada se
+      // confirma: que no queden escrituras parciales es propiedad de la
+      // transacción y se comprueba en integración, no con un doble de test.
+      expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          credentialTypeConceptId: PROF.LANGUAGE_SPANISH,
+        }),
+      );
+    });
+
+    it('un número en blanco corta el alta aunque el DTO no haya pasado', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          email: dto.email,
+          password: dto.password,
+          licenseNumber: dto.licenseNumber,
+          credentials: [{ ...titulo, number: '   ' }],
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el contrato anterior sigue creando su credencial', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+        credentialNumber: 'TIT-99310',
+      });
+
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledTimes(1);
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ number: 'TIT-99310' }),
+      );
+    });
+
+    it('mandar el número suelto y el arreglo a la vez se rechaza, para no duplicar', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          email: dto.email,
+          password: dto.password,
+          licenseNumber: dto.licenseNumber,
+          credentialNumber: 'TIT-99310',
+          credentials: [titulo],
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      // Y no escribe ninguna de las dos: si fueran el mismo título declarado de
+      // dos formas, guardarlas dejaría el perfil con una credencial repetida.
+      expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
   it('gives the account a tenant membership so it is usable beyond login', async () => {
     const d = build();
 
