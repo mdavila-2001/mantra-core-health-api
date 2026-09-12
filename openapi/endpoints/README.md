@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1259 de 1259 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1260 de 1260 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -99,7 +99,7 @@ Esta referencia documenta **1259 de 1259 operaciones HTTP** registradas en `open
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
 | [redis_runtime](redis-runtime.md) | 5 | `redis-runtime` | 1 |
 | [reporting](reporting.md) | 12 | `reporting` | 1 |
-| [scheduling](scheduling.md) | 52 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 6 |
+| [scheduling](scheduling.md) | 53 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 6 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
 | [surveys](surveys.md) | 13 | `surveys-assignments`, `surveys-patient`, `surveys-templates` | 3 |
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
@@ -117,4 +117,4 @@ Esta referencia documenta **1259 de 1259 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1259 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1260 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

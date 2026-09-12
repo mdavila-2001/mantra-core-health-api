@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1259 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1259 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1260 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1260 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -67068,7 +67068,7 @@
       ]
     },
     {
-      "name": "scheduling (51)",
+      "name": "scheduling (52)",
       "item": [
         {
           "name": "scheduling",
@@ -67265,6 +67265,66 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"resourceId\": \"{{resourceId}}\",\n  \"startAt\": \"2026-01-01T00:00:00.000Z\",\n  \"durationMinutes\": 5,\n  \"reasonText\": \"reasonText-ejemplo\",\n  \"channel\": \"PRESENCIAL\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{appointmentId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.appointmentId);",
+                      "  if (id) pm.environment.set('appointmentId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /scheduling/appointments/walk-in · Turno de mostrador atómico (walk-in)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/appointments/walk-in",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "appointments",
+                    "walk-in"
+                  ]
+                },
+                "description": "Registra al paciente sin cuenta, reserva, abre el encuentro y arranca la atención en una sola transacción. 404 recurso; 409 documento ya registrado; 422 choque de horario.\n\n`POST /scheduling/appointments/walk-in`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `SchedulingController_createWalkInAppointment`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"patient\": {\n    \"name\": \"Lucía\",\n    \"middleName\": \"Andrea\",\n    \"lastName\": \"Mamani\",\n    \"motherLastName\": \"Quispe\",\n    \"nationalId\": \"nationalId-ejemplo\",\n    \"birthDate\": \"2026-01-01\",\n    \"phone\": \"phone-ejemplo\",\n    \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n    \"guardianName\": \"guardianName-ejemplo\",\n    \"guardianPhone\": \"guardianPhone-ejemplo\"\n  },\n  \"resourceId\": \"{{resourceId}}\",\n  \"startAt\": \"2026-01-01T00:00:00.000Z\",\n  \"durationMinutes\": 5,\n  \"reasonText\": \"reasonText-ejemplo\",\n  \"channel\": \"PRESENCIAL\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
