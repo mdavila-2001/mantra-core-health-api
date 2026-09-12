@@ -187,6 +187,28 @@ async function municipioDeLaPaz() {
   );
 }
 
+/**
+ * Departamento de expedición del CI para las altas de paciente
+ * (`register-patient` exige `issuerAdministrativeAreaConceptId` desde
+ * v4.1.4, validado contra `VS_BO_DEPARTMENT` — la validación quedó sin
+ * cubrir en este seeder hasta ahora, y sin ella ninguna alta de paciente
+ * pasaba de 422). Mismo departamento que `municipioDeLaPaz`.
+ *
+ * @returns El `conceptId` de La Paz (`VS_BO_DEPARTMENT`), o `null`.
+ */
+async function departamentoDeEmision() {
+  const res = await call(
+    'departamento de emisión (La Paz)',
+    'GET',
+    '/terminology/concepts?q=geo%3Abo%3Adepartment%3ALP&limit=10',
+  );
+  if (!res.ok) return null;
+  return (
+    (res.body?.items ?? []).find((c) => c.code === 'geo:bo:department:LP')
+      ?.conceptId ?? null
+  );
+}
+
 /** Los pacientes de la corrida. Sexo declarado, no deducido del nombre. */
 const PACIENTES = [
   { nombre: 'Teresa', apellido: 'Aruquipa', ci: '3312874', sexo: 'FEMALE', nacimiento: '1968-11-05' },
@@ -198,7 +220,10 @@ const PACIENTES = [
  * Las cuatro solicitudes, con lo que hay que poder ver en cada una.
  *
  * `dictamen: null` es la que deja el total aprobado vacío. `reclamo: true`
- * abre disputa después de dictaminar.
+ * abre disputa después de dictaminar. Desde v4.2.9 (subtarea 2.2), toda línea
+ * `DENIED` es OBLIGATORIA de mandar con `policyClauseReference` — la API
+ * responde 400 si no viene —, así que `dictamen.clausulas`/`.justificaciones`
+ * llevan un valor en cada posición cuya `decisiones[i] === 'DENIED'`.
  */
 const SOLICITUDES = [
   {
@@ -217,7 +242,16 @@ const SOLICITUDES = [
       { billedAmount: '75.125', patientResponsibilityAmount: '0.00' },
       { billedAmount: '340.00', patientResponsibilityAmount: '0.00' },
     ],
-    dictamen: { outcome: 'DENIED', decisiones: ['APPROVED', 'DENIED', 'APPROVED'] },
+    dictamen: {
+      outcome: 'DENIED',
+      decisiones: ['APPROVED', 'DENIED', 'APPROVED'],
+      clausulas: [null, 'Cláusula 12.3: Estudio no cubierto en el plan ambulatorio', null],
+      justificaciones: [
+        null,
+        'El estudio requiere autorización previa del área médica según las condiciones generales de la póliza.',
+        null,
+      ],
+    },
     reclamo: false,
   },
   {
@@ -232,7 +266,15 @@ const SOLICITUDES = [
       { billedAmount: '2100.00', patientResponsibilityAmount: '210.00' },
       { billedAmount: '95.00', patientResponsibilityAmount: '0.00' },
     ],
-    dictamen: { outcome: 'DENIED', decisiones: ['DENIED', 'APPROVED'] },
+    dictamen: {
+      outcome: 'DENIED',
+      decisiones: ['DENIED', 'APPROVED'],
+      clausulas: ['Cláusula 4.1: Preexistencia declarada al momento de la afiliación', null],
+      justificaciones: [
+        'La condición fue declarada como preexistencia en la solicitud de afiliación y queda excluida durante el período de carencia.',
+        null,
+      ],
+    },
     reclamo: true,
   },
 ];
@@ -275,6 +317,13 @@ async function main() {
   const municipio = await municipioDeLaPaz();
   if (!municipio) {
     console.log('✗ El catálogo no tiene el municipio de La Paz.');
+    process.exitCode = 1;
+    return;
+  }
+
+  const departamento = await departamentoDeEmision();
+  if (!departamento) {
+    console.log('✗ El catálogo no tiene el departamento de emisión (La Paz).');
     process.exitCode = 1;
     return;
   }
@@ -438,6 +487,7 @@ async function main() {
         email: correo,
         birthDate: persona.nacimiento,
         residenceMunicipalityConceptId: municipio,
+        issuerAdministrativeAreaConceptId: departamento,
         phone: `+591 7${String(30_000_000 + indice * 317).slice(0, 7)}`,
         sexAtBirth: persona.sexo,
       },
@@ -555,6 +605,15 @@ async function main() {
         approvedAmount: decision === 'APPROVED' ? facturado : ceroComo(facturado),
         deniedAmount: decision === 'APPROVED' ? ceroComo(facturado) : facturado,
         patientAmount: linea.patientResponsibilityAmount?.amount ?? '0',
+        // Subtarea 2.2 (v4.2.9): DENIED sin cláusula responde 400 desde este
+        // patch. Los dos campos son `undefined` en una línea APPROVED —no se
+        // manda un string vacío ni null: la propiedad simplemente no viaja.
+        ...(decision === 'DENIED'
+          ? {
+              policyClauseReference: receta.dictamen.clausulas?.[orden] ?? undefined,
+              denialRationale: receta.dictamen.justificaciones?.[orden] ?? undefined,
+            }
+          : {}),
       };
     });
     const sumar = (clave) =>

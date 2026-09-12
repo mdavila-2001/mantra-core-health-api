@@ -383,5 +383,71 @@ describe('ClaimsReadService', () => {
       expect(detalle.lines[0].referenceType).toBe('DIAGNOSTIC_STUDY');
       expect(detalle.lines[0].reference).toBe('off-1');
     });
+
+    /**
+     * `policyClauseReference`/`denialRationale` — subtarea 2.2. La cita de la
+     * cláusula y la justificación viven en la adjudicación de línea y viajan
+     * tal cual al DTO de lectura, sin tocar los importes.
+     */
+    it('lleva la cláusula y la justificación de la adjudicación de línea', async () => {
+      const r = repo({
+        findLinesByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'l1',
+            insuranceClaimId: CLAIM,
+            lineSequence: 1,
+            billedAmount: '120.00',
+          },
+        ]),
+        findAdjudicationsByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'v1',
+            insuranceClaimId: CLAIM,
+            adjudicationVersion: 1,
+            supersedesVersionId: null,
+            adjudicatedAt: new Date('2026-09-01T00:00:00.000Z'),
+          },
+        ]),
+        findLineAdjudications: mockFn().mockResolvedValue([
+          {
+            insuranceClaimLineId: 'l1',
+            decisionConceptId: 'dec-denied',
+            approvedAmount: '0.00',
+            deniedAmount: '120.00',
+            policyClauseReference: 'Cláusula 12.3: Fármaco fuera de vademécum',
+            denialRationale: 'Requiere autorización previa según la póliza.',
+          },
+        ]),
+      });
+
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+
+      expect(detalle.lines[0].policyClauseReference).toBe(
+        'Cláusula 12.3: Fármaco fuera de vademécum',
+      );
+      expect(detalle.lines[0].denialRationale).toBe(
+        'Requiere autorización previa según la póliza.',
+      );
+      // Los importes no se alteran por agregar la cláusula.
+      expect(detalle.lines[0].deniedAmount?.amount).toBe('120.00');
+    });
+
+    it('sin adjudicación de línea, la cláusula y la justificación quedan en null, no undefined', async () => {
+      const r = repo({
+        findLinesByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'l1',
+            insuranceClaimId: CLAIM,
+            lineSequence: 1,
+            billedAmount: '10.00',
+          },
+        ]),
+      });
+
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+
+      expect(detalle.lines[0].policyClauseReference).toBeNull();
+      expect(detalle.lines[0].denialRationale).toBeNull();
+    });
   });
 });

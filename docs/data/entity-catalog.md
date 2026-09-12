@@ -1,18 +1,18 @@
 # Catálogo de entidades
 
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
-> **1245 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
+> **1246 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../Mantra Core Health Vault/SALUD/Entidades` vía `vault.mjs`, la misma fuente que usa
 > `yarn orm:catalog`; `SALUD_VAULT` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1195/1245** entidades tienen descripción de negocio
+> repositorio. **1195/1246** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
 > Este es el catálogo de lo **implementado**. La bóveda describe 1343 entidades en total
-> — la diferencia (98) son entidades diseñadas pero no materializadas aún en
+> — la diferencia (97) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
-## Por schema (61 schemas · 1245 entidades)
+## Por schema (61 schemas · 1246 entidades)
 
 ### `accounting` (42 entidades, módulo `accounting`)
 
@@ -439,16 +439,17 @@
 | `files` | `Files` | 15 | `id` | ✅ | files es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 | `identifiers` | `Identifiers` | 19 | `id` | ✅ | identifiers es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 
-### `community` (39 entidades, módulo `community`)
+### `community` (40 entidades, módulo `community`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
 | `bookmarks` | `Bookmarks` | 10 | `id` | ✅ | bookmarks es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
+| `chat_auto_replies` | `ChatAutoReplies` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `comment_media` | `CommentMedia` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
 | `comments` | `Comments` | 20 | `id` | ✅ | comments es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `content_hashtags` | `ContentHashtags` | 9 | `id` | ✅ | content_hashtags es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `content_reports` | `ContentReports` | 11 | `id` | — | content_reports es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
-| `conversation_participants` | `ConversationParticipants` | 16 | `id` | ✅ | conversation_participants es una tabla de asociación del módulo 19 · community (dominio Marketing y Crecimiento): conecta entidades (`conversations`) para representar relaciones muchos-a-muchos. |
+| `conversation_participants` | `ConversationParticipants` | 17 | `id` | ✅ | conversation_participants es una tabla de asociación del módulo 19 · community (dominio Marketing y Crecimiento): conecta entidades (`conversations`) para representar relaciones muchos-a-muchos. |
 | `conversations` | `Conversations` | 13 | `id` | ✅ | conversations es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `direct_messages` | `DirectMessages` | 16 | `id` | ✅ | direct_messages es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `feed_items` | `FeedItems` | 15 | `id` | ✅ | feed_items es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
@@ -865,7 +866,7 @@
 | `claim_adjudication_versions` | `ClaimAdjudicationVersions` | 11 | `id` | — | claim_adjudication_versions es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `claim_appeal_decisions` | `ClaimAppealDecisions` | 12 | `id` | — | claim_appeal_decisions es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `claim_disputes` | `ClaimDisputes` | 16 | `id` | ✅ | claim_disputes es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `claim_line_adjudications` | `ClaimLineAdjudications` | 9 | `id` | — | claim_line_adjudications es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
+| `claim_line_adjudications` | `ClaimLineAdjudications` | 11 | `id` | — | claim_line_adjudications es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `claim_reversals` | `ClaimReversals` | 11 | `id` | — | claim_reversals es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `coordination_of_benefits` | `CoordinationOfBenefits` | 13 | `id` | — | coordination_of_benefits es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `coverage_dependents` | `CoverageDependents` | 12 | `id` | ✅ | coverage_dependents es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |

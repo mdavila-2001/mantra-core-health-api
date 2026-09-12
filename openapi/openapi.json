@@ -11525,6 +11525,119 @@
         "description": "Ficha de un perfil público por su slug. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/community/profiles/{profileId}/auto-reply": {
+      "get": {
+        "operationId": "CommunitySocialController_getAutoReply",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Respuesta automática por inactividad del perfil",
+        "tags": [
+          "community-social"
+        ],
+        "description": "Respuesta automática por inactividad del perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "put": {
+        "operationId": "CommunitySocialController_upsertAutoReply",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertChatAutoReplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Configurar la respuesta automática del perfil",
+        "tags": [
+          "community-social"
+        ],
+        "description": "Configurar la respuesta automática del perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/community/profiles/{profileId}": {
       "get": {
         "operationId": "CommunitySocialController_getProfile",
@@ -17770,12 +17883,12 @@
         "description": "Alta de producto de aseguradora (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/insurance-products/{id}/plans": {
+    "/insurance-products/{productId}/plans": {
       "post": {
         "operationId": "InsuranceBackboneController_createPlan",
         "parameters": [
           {
-            "name": "id",
+            "name": "productId",
             "required": true,
             "in": "path",
             "schema": {
@@ -17830,19 +17943,19 @@
             "bearer": []
           }
         ],
-        "summary": "Alta de plan (soporte)",
+        "summary": "Crear un plan del carrier del tenant activo",
         "tags": [
           "insurance-backbone"
         ],
-        "description": "Alta de plan (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Crear un plan del carrier del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/insurance-plans/{id}/benefits": {
+    "/insurance-plans/{planId}/benefits": {
       "post": {
         "operationId": "InsuranceBackboneController_createBenefit",
         "parameters": [
           {
-            "name": "id",
+            "name": "planId",
             "required": true,
             "in": "path",
             "schema": {
@@ -17897,11 +18010,161 @@
             "bearer": []
           }
         ],
-        "summary": "Alta de beneficio de plan (soporte)",
+        "summary": "Crear una cobertura de un plan administrable",
         "tags": [
           "insurance-backbone"
         ],
-        "description": "Alta de beneficio de plan (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Crear una cobertura de un plan administrable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-plans/{planId}/benefits/{benefitId}": {
+      "put": {
+        "operationId": "InsuranceBackboneController_updateBenefit",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "benefitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanBenefitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar importes de una cobertura",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Editar importes de una cobertura. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-plans/{planId}/benefits/{benefitId}/rules": {
+      "put": {
+        "operationId": "InsuranceBackboneController_updateBenefitRules",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "benefitId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanBenefitRulesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar reglas de aprobación de una cobertura",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Editar reglas de aprobación de una cobertura. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/provider-networks": {
@@ -82685,6 +82948,53 @@
           "blockedProfileId"
         ]
       },
+      "UpsertChatAutoReplyDto": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "Si la respuesta automática está encendida"
+          },
+          "inactivityMinutes": {
+            "type": "number",
+            "description": "Minutos de inactividad antes de contestar solo",
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "bodyText": {
+            "type": "string",
+            "description": "Texto de la respuesta",
+            "maxLength": 4000
+          },
+          "cooldownHours": {
+            "type": "number",
+            "description": "Horas de descanso antes de repetirle a la misma conversación",
+            "minimum": 1,
+            "maximum": 168
+          },
+          "onlyOutsideBusinessHours": {
+            "type": "boolean",
+            "description": "Contestar sólo fuera del horario de atención"
+          },
+          "businessHoursFrom": {
+            "type": "string",
+            "description": "Inicio del horario de atención",
+            "example": "08:00"
+          },
+          "businessHoursTo": {
+            "type": "string",
+            "description": "Fin del horario de atención",
+            "example": "18:00"
+          }
+        },
+        "required": [
+          "isActive",
+          "inactivityMinutes",
+          "bodyText",
+          "cooldownHours",
+          "onlyOutsideBusinessHours"
+        ]
+      },
       "CreateConversationDto": {
         "type": "object",
         "properties": {
@@ -84611,6 +84921,10 @@
             "format": "date",
             "description": "Vigencia desde (ISO date)"
           },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date"
+          },
           "currencyConceptId": {
             "type": "string",
             "format": "uuid"
@@ -84624,7 +84938,19 @@
       "CreatePlanBenefitDto": {
         "type": "object",
         "properties": {
+          "benefitCategoryConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
             "type": "string",
             "format": "date"
           },
@@ -84636,8 +84962,84 @@
             "type": "string",
             "description": "Porcentaje de cobertura",
             "example": "80"
+          },
+          "copayAmount": {
+            "type": "string",
+            "example": "25.00"
+          },
+          "deductibleAmount": {
+            "type": "string",
+            "example": "100.00"
+          },
+          "annualLimitAmount": {
+            "type": "string",
+            "example": "5000.00"
           }
-        }
+        },
+        "required": [
+          "benefitCategoryConceptId"
+        ]
+      },
+      "UpdatePlanBenefitDto": {
+        "type": "object",
+        "properties": {
+          "coveragePercent": {
+            "type": "string",
+            "nullable": true,
+            "example": "80.00"
+          },
+          "copayAmount": {
+            "type": "string",
+            "nullable": true,
+            "example": "25.00"
+          },
+          "deductibleAmount": {
+            "type": "string",
+            "nullable": true,
+            "example": "100.00"
+          },
+          "annualLimitAmount": {
+            "type": "string",
+            "nullable": true,
+            "example": "5000.00"
+          }
+        },
+        "required": [
+          "coveragePercent",
+          "copayAmount",
+          "deductibleAmount",
+          "annualLimitAmount"
+        ]
+      },
+      "UpdatePlanBenefitRulesDto": {
+        "type": "object",
+        "properties": {
+          "requiresPriorAuthorization": {
+            "type": "boolean"
+          },
+          "requiredDocuments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FIRMA_MEDICO",
+                "SELLO_MEDICO",
+                "ORDEN_MEDICA",
+                "INFORME_CLINICO"
+              ]
+            }
+          },
+          "exclusionNotes": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "requiresPriorAuthorization",
+          "requiredDocuments",
+          "exclusionNotes"
+        ]
       },
       "CreateProviderNetworkDto": {
         "type": "object",
@@ -85068,6 +85470,18 @@
             "format": "uuid",
             "description": "Motivo catalogado de la denegación (concepto de terminology). El catálogo interno todavía no declara sus miembros — AC-16-8."
           },
+          "policyClauseReference": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "Cláusula 12.3: Medicamento no cubierto en plan ambulatorio",
+            "description": "Cita textual de la cláusula contractual que fundamenta la exclusión. Obligatoria cuando decision === DENIED."
+          },
+          "denialRationale": {
+            "type": "string",
+            "maxLength": 4000,
+            "example": "El principio activo solicitado no está contemplado en el vademécum de cobertura ambulatoria contratado.",
+            "description": "Fundamentación circunstanciada de la exclusión, por ítem."
+          },
           "approvedAmount": {
             "type": "string",
             "example": "80.00"
@@ -85417,6 +85831,14 @@
               }
             ]
           },
+          "policyClauseReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "denialRationale": {
+            "type": "string",
+            "nullable": true
+          },
           "referenceType": {
             "type": "string",
             "nullable": true,
@@ -85440,6 +85862,8 @@
           "deniedAmount",
           "decision",
           "denialReason",
+          "policyClauseReference",
+          "denialRationale",
           "referenceType",
           "reference"
         ]
@@ -85784,6 +86208,9 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "canAdminister": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -85797,7 +86224,8 @@
           "productCount",
           "planCount",
           "networkCount",
-          "createdAt"
+          "createdAt",
+          "canAdminister"
         ]
       },
       "CarrierDirectoryResponseDto": {
@@ -85816,6 +86244,31 @@
         "required": [
           "items",
           "count"
+        ]
+      },
+      "BenefitApprovalRulesDto": {
+        "type": "object",
+        "properties": {
+          "requiredDocuments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FIRMA_MEDICO",
+                "SELLO_MEDICO",
+                "ORDEN_MEDICA",
+                "INFORME_CLINICO"
+              ]
+            }
+          },
+          "exclusionNotes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "requiredDocuments",
+          "exclusionNotes"
         ]
       },
       "PlanBenefitDto": {
@@ -85857,6 +86310,9 @@
             "type": "boolean",
             "nullable": true
           },
+          "approvalRules": {
+            "$ref": "#/components/schemas/BenefitApprovalRulesDto"
+          },
           "effectiveFrom": {
             "type": "string",
             "nullable": true
@@ -85875,6 +86331,7 @@
           "deductibleAmount",
           "annualLimitAmount",
           "requiresPriorAuthorization",
+          "approvalRules",
           "effectiveFrom",
           "effectiveTo"
         ]
@@ -86085,6 +86542,9 @@
             "type": "string",
             "format": "date-time"
           },
+          "canAdminister": {
+            "type": "boolean"
+          },
           "products": {
             "type": "array",
             "items": {
@@ -86110,6 +86570,7 @@
           "planCount",
           "networkCount",
           "createdAt",
+          "canAdminister",
           "products",
           "networks"
         ]

@@ -222,3 +222,109 @@ describe('ClaimsService.openDispute', () => {
     });
   });
 });
+
+/**
+ * `adjudicate` (UC-26-07) — subtarea 2.2: `policyClauseReference` y
+ * `denialRationale` viajan del DTO a la fila de `claim_line_adjudications` tal
+ * cual, sin alterar los importes ya cubiertos por otras pruebas.
+ */
+describe('ClaimsService.adjudicate', () => {
+  const LINEA = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+
+  function reclamoSubmitted(over: Record<string, unknown> = {}) {
+    return reclamo({ statusConceptId: INS.CLAIM_SUBMITTED, ...over });
+  }
+
+  function repoDeAdjudicacion(over: Record<string, unknown> = {}) {
+    return {
+      findClaim: mockFn().mockResolvedValue(reclamoSubmitted()),
+      findLine: mockFn().mockResolvedValue({
+        id: LINEA,
+        insuranceClaimId: CLAIM,
+      }),
+      latestVersion: mockFn().mockResolvedValue(null),
+      createVersion: mockFn(() => ({ id: VERSION })),
+      createLineAdjudication: mockFn(),
+      ...over,
+    };
+  }
+
+  it('persiste la cláusula y la justificación de una línea denegada, sin tocar los importes', async () => {
+    const r = repoDeAdjudicacion();
+    const dto = {
+      outcome: 'DENIED',
+      lineAdjudications: [
+        {
+          insuranceClaimLineId: LINEA,
+          decision: 'DENIED',
+          policyClauseReference: 'Cláusula 12.3: Fármaco fuera de vademécum',
+          denialRationale: 'Requiere autorización previa según la póliza.',
+          approvedAmount: '0.00',
+          patientAmount: '0.00',
+          deniedAmount: '120.00',
+        },
+      ],
+    } as never;
+
+    await conTenant(() => servicioCon(r).adjudicate(CLAIM, dto, actor));
+
+    expect(r.createLineAdjudication).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        insuranceClaimLineId: LINEA,
+        decisionConceptId: INS.LINE_DECISION_DENIED,
+        policyClauseReference: 'Cláusula 12.3: Fármaco fuera de vademécum',
+        denialRationale: 'Requiere autorización previa según la póliza.',
+        approvedAmount: '0.00',
+        patientAmount: '0.00',
+        deniedAmount: '120.00',
+      }),
+    );
+  });
+
+  it('una línea aprobada viaja sin cláusula ni justificación (quedan undefined, no vacías)', async () => {
+    const r = repoDeAdjudicacion();
+    const dto = {
+      outcome: 'APPROVED',
+      lineAdjudications: [
+        {
+          insuranceClaimLineId: LINEA,
+          decision: 'APPROVED',
+          approvedAmount: '120.00',
+          patientAmount: '0.00',
+          deniedAmount: '0.00',
+        },
+      ],
+    } as never;
+
+    await conTenant(() => servicioCon(r).adjudicate(CLAIM, dto, actor));
+
+    const llamada = (r.createLineAdjudication as any).mock.calls[0][1];
+    expect(llamada.decisionConceptId).toBe(INS.LINE_DECISION_APPROVED);
+    expect(llamada.policyClauseReference).toBeUndefined();
+    expect(llamada.denialRationale).toBeUndefined();
+  });
+
+  it('el reclamo pasa a CLAIM_ADJUDICATED tras adjudicar', async () => {
+    const r = repoDeAdjudicacion();
+    const dto = {
+      outcome: 'APPROVED',
+      lineAdjudications: [
+        {
+          insuranceClaimLineId: LINEA,
+          decision: 'APPROVED',
+          approvedAmount: '120.00',
+        },
+      ],
+    } as never;
+
+    const claim = reclamoSubmitted();
+    const r2 = repoDeAdjudicacion({
+      findClaim: mockFn().mockResolvedValue(claim),
+    });
+
+    await conTenant(() => servicioCon(r2).adjudicate(CLAIM, dto, actor));
+
+    expect((claim as any).statusConceptId).toBe(INS.CLAIM_ADJUDICATED);
+  });
+});

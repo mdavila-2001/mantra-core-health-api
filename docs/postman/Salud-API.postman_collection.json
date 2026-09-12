@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1261 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1261 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1265 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1265 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -17591,7 +17591,7 @@
       ]
     },
     {
-      "name": "community (59)",
+      "name": "community (61)",
       "item": [
         {
           "name": "community-groups",
@@ -20965,6 +20965,62 @@
               ]
             },
             {
+              "name": "GET /community/profiles/{profileId}/auto-reply · Respuesta automática por inactividad del perfil",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/community/profiles/:profileId/auto-reply",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "community",
+                    "profiles",
+                    ":profileId",
+                    "auto-reply"
+                  ],
+                  "variable": [
+                    {
+                      "key": "profileId",
+                      "value": "{{profileId}}",
+                      "description": "Identificador de ruta · variable `{{profileId}}`"
+                    }
+                  ]
+                },
+                "description": "Respuesta automática por inactividad del perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /community/profiles/{profileId}/auto-reply`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `CommunitySocialController_getAutoReply`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.profiles || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('profileId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "GET /community/profiles/{profileId}/posts · Publicaciones de un perfil",
               "request": {
                 "method": "GET",
@@ -21071,6 +21127,67 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"slug\": \"slug-ejemplo\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"headline\": \"headline-ejemplo\",\n  \"biography\": \"biography-ejemplo\",\n  \"acceptsReviews\": true,\n  \"visibility\": \"PUBLIC\",\n  \"avatarFileId\": {},\n  \"coverFileId\": {}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /community/profiles/{profileId}/auto-reply · Configurar la respuesta automática del perfil",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/community/profiles/:profileId/auto-reply",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "community",
+                    "profiles",
+                    ":profileId",
+                    "auto-reply"
+                  ],
+                  "variable": [
+                    {
+                      "key": "profileId",
+                      "value": "{{profileId}}",
+                      "description": "Identificador de ruta · variable `{{profileId}}`"
+                    }
+                  ]
+                },
+                "description": "Configurar la respuesta automática del perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /community/profiles/{profileId}/auto-reply`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `CommunitySocialController_upsertAutoReply`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isActive\": true,\n  \"inactivityMinutes\": 1,\n  \"bodyText\": \"bodyText-ejemplo\",\n  \"cooldownHours\": 1,\n  \"onlyOutsideBusinessHours\": true,\n  \"businessHoursFrom\": \"08:00\",\n  \"businessHoursTo\": \"18:00\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -39340,7 +39457,7 @@
             "description": "Adjudicar reclamo por línea (835). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims/{id}/adjudications`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_adjudicate`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"outcome\": \"APPROVED\",\n  \"dispositionText\": \"Prestaciones cubiertas por el plan familiar.\",\n  \"totalApprovedAmount\": \"80.00\",\n  \"totalPatientAmount\": \"20.00\",\n  \"totalDeniedAmount\": \"0.00\",\n  \"lineAdjudications\": [\n    {\n      \"insuranceClaimLineId\": \"<insuranceClaimLineId: uuid existente>\",\n      \"decision\": \"APPROVED\",\n      \"reasonConceptId\": \"<reasonConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"approvedAmount\": \"80.00\",\n      \"patientAmount\": \"20.00\",\n      \"deniedAmount\": \"0.00\"\n    }\n  ]\n}",
+              "raw": "{\n  \"outcome\": \"APPROVED\",\n  \"dispositionText\": \"Prestaciones cubiertas por el plan familiar.\",\n  \"totalApprovedAmount\": \"80.00\",\n  \"totalPatientAmount\": \"20.00\",\n  \"totalDeniedAmount\": \"0.00\",\n  \"lineAdjudications\": [\n    {\n      \"insuranceClaimLineId\": \"<insuranceClaimLineId: uuid existente>\",\n      \"decision\": \"APPROVED\",\n      \"reasonConceptId\": \"<reasonConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"policyClauseReference\": \"Cláusula 12.3: Medicamento no cubierto en plan ambulatorio\",\n      \"denialRationale\": \"El principio activo solicitado no está contemplado en el vademécum de cobertura ambulatoria contratado.\",\n      \"approvedAmount\": \"80.00\",\n      \"patientAmount\": \"20.00\",\n      \"deniedAmount\": \"0.00\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -39619,10 +39736,10 @@
       ]
     },
     {
-      "name": "insurance-plans (1)",
+      "name": "insurance-plans (3)",
       "item": [
         {
-          "name": "POST /insurance-plans/{id}/benefits · Alta de beneficio de plan (soporte)",
+          "name": "POST /insurance-plans/{planId}/benefits · Crear una cobertura de un plan administrable",
           "request": {
             "method": "POST",
             "header": [
@@ -39638,27 +39755,27 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/insurance-plans/:id/benefits",
+              "raw": "{{baseUrl}}/insurance-plans/:planId/benefits",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "insurance-plans",
-                ":id",
+                ":planId",
                 "benefits"
               ],
               "variable": [
                 {
-                  "key": "id",
-                  "value": "{{insurancePlanId}}",
-                  "description": "Identificador de ruta · variable `{{insurancePlanId}}`"
+                  "key": "planId",
+                  "value": "{{planId}}",
+                  "description": "Identificador de ruta · variable `{{planId}}`"
                 }
               ]
             },
-            "description": "Alta de beneficio de plan (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-plans/{id}/benefits`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceBackboneController_createBenefit`",
+            "description": "Crear una cobertura de un plan administrable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-plans/{planId}/benefits`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceBackboneController_createBenefit`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"effectiveFrom\": \"2026-01-01\",\n  \"requiresPriorAuthorization\": true,\n  \"coveragePercent\": \"80\"\n}",
+              "raw": "{\n  \"benefitCategoryConceptId\": \"<benefitCategoryConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"effectiveFrom\": \"2026-01-01\",\n  \"effectiveTo\": \"2026-01-01\",\n  \"requiresPriorAuthorization\": true,\n  \"coveragePercent\": \"80\",\n  \"copayAmount\": \"25.00\",\n  \"deductibleAmount\": \"100.00\",\n  \"annualLimitAmount\": \"5000.00\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -39687,6 +39804,139 @@
               }
             }
           ]
+        },
+        {
+          "name": "PUT /insurance-plans/{planId}/benefits/{benefitId} · Editar importes de una cobertura",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-plans/:planId/benefits/:benefitId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-plans",
+                ":planId",
+                "benefits",
+                ":benefitId"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "{{planId}}",
+                  "description": "Identificador de ruta · variable `{{planId}}`"
+                },
+                {
+                  "key": "benefitId",
+                  "value": "{{benefitId}}",
+                  "description": "Identificador de ruta · variable `{{benefitId}}`"
+                }
+              ]
+            },
+            "description": "Editar importes de una cobertura. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /insurance-plans/{planId}/benefits/{benefitId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceBackboneController_updateBenefit`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coveragePercent\": \"80.00\",\n  \"copayAmount\": \"25.00\",\n  \"deductibleAmount\": \"100.00\",\n  \"annualLimitAmount\": \"5000.00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /insurance-plans/{planId}/benefits/{benefitId}/rules · Editar reglas de aprobación de una cobertura",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-plans/:planId/benefits/:benefitId/rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-plans",
+                ":planId",
+                "benefits",
+                ":benefitId",
+                "rules"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "{{planId}}",
+                  "description": "Identificador de ruta · variable `{{planId}}`"
+                },
+                {
+                  "key": "benefitId",
+                  "value": "{{benefitId}}",
+                  "description": "Identificador de ruta · variable `{{benefitId}}`"
+                }
+              ]
+            },
+            "description": "Editar reglas de aprobación de una cobertura. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /insurance-plans/{planId}/benefits/{benefitId}/rules`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceBackboneController_updateBenefitRules`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requiresPriorAuthorization\": true,\n  \"requiredDocuments\": [\n    \"FIRMA_MEDICO\"\n  ],\n  \"exclusionNotes\": \"exclusionNotes-ejemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -39694,7 +39944,7 @@
       "name": "insurance-products (1)",
       "item": [
         {
-          "name": "POST /insurance-products/{id}/plans · Alta de plan (soporte)",
+          "name": "POST /insurance-products/{productId}/plans · Crear un plan del carrier del tenant activo",
           "request": {
             "method": "POST",
             "header": [
@@ -39710,27 +39960,27 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/insurance-products/:id/plans",
+              "raw": "{{baseUrl}}/insurance-products/:productId/plans",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "insurance-products",
-                ":id",
+                ":productId",
                 "plans"
               ],
               "variable": [
                 {
-                  "key": "id",
-                  "value": "{{insuranceProductId}}",
-                  "description": "Identificador de ruta · variable `{{insuranceProductId}}`"
+                  "key": "productId",
+                  "value": "{{productId}}",
+                  "description": "Identificador de ruta · variable `{{productId}}`"
                 }
               ]
             },
-            "description": "Alta de plan (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-products/{id}/plans`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceBackboneController_createPlan`",
+            "description": "Crear un plan del carrier del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-products/{productId}/plans`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceBackboneController_createPlan`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"planCode\": \"planCode-ejemplo\",\n  \"name\": \"name-ejemplo\",\n  \"effectiveFrom\": \"2026-01-01\"\n}",
+              "raw": "{\n  \"planCode\": \"planCode-ejemplo\",\n  \"name\": \"name-ejemplo\",\n  \"effectiveFrom\": \"2026-01-01\",\n  \"effectiveTo\": \"2026-01-01\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -48969,7 +49219,7 @@
             "description": "Registrar cobertura de paciente y dependientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /patient-coverages`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `CoverageController_enroll`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"insurancePlanId\": \"{{insurancePlanId}}\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"memberIdentifier\": \"memberIdentifier-ejemplo\",\n  \"policyIdentifier\": \"policyIdentifier-ejemplo\",\n  \"coverageOrder\": 1,\n  \"insuranceBrokerId\": \"{{insuranceBrokerId}}\",\n  \"dependents\": [\n    {\n      \"dependentPatientProfileId\": \"<dependentPatientProfileId: uuid existente>\",\n      \"relationship\": \"SPOUSE\"\n    }\n  ]\n}",
+              "raw": "{\n  \"insurancePlanId\": \"<insurancePlanId: uuid existente>\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"memberIdentifier\": \"memberIdentifier-ejemplo\",\n  \"policyIdentifier\": \"policyIdentifier-ejemplo\",\n  \"coverageOrder\": 1,\n  \"insuranceBrokerId\": \"{{insuranceBrokerId}}\",\n  \"dependents\": [\n    {\n      \"dependentPatientProfileId\": \"<dependentPatientProfileId: uuid existente>\",\n      \"relationship\": \"SPOUSE\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
