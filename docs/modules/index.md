@@ -7,7 +7,7 @@
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
-| [`community`](community.md) | 12 | 27 | 18 | 39 | 31 |
+| [`community`](community.md) | 12 | 28 | 18 | 40 | 32 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`insurance`](insurance.md) | 10 | 10 | 8 | 29 | 11 |
 | [`consent`](consent.md) | 9 | 9 | 9 | 10 | 15 |
@@ -70,4 +70,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **236** | **356** | **390** | **1243** | **463** |
+| **Total** | **236** | **357** | **390** | **1244** | **464** |
