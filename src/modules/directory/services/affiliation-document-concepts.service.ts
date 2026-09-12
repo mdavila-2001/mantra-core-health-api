@@ -6,6 +6,7 @@ import {
   ValueSetsRepository,
 } from '../../terminology/repositories';
 import {
+  AFFILIATION_DOCUMENT_ROLES,
   AFFILIATION_DOCUMENT_VALUE_SETS,
   DOCUMENT_TYPE_CODE_BY_ROLE,
   BOLIVIAN_ISSUING_AUTHORITY_BY_ROLE,
@@ -13,12 +14,33 @@ import {
   ISSUING_AUTHORITY_OTHER,
   REGISTRATION_DOCUMENT_ROLES,
 } from '../affiliation-documents';
+import {
+  LEGAL_REPRESENTATIVE_ROLE_VALUE_SET,
+  REPRESENTATIVE_ROLE_CODE,
+} from '../legal-representatives';
 
-/** Los tres mapas `code -> concept_id` que gobiernan `tenant_affiliation_documents`. */
+/**
+ * Cómo nombrar el catálogo en el mensaje de rechazo.
+ *
+ * Existe porque este servicio resuelve dos familias: los documentos de
+ * afiliación y los roles del representante legal. Sin el sujeto, un
+ * `GERENTE_COMERCIAL` sin sembrar se rechazaba diciendo «el catálogo de
+ * documentos de afiliación no incluye el código» — verdadero para el código,
+ * falso para el catálogo.
+ */
+const SUBJECT_DOCUMENTS = 'documentos de afiliación';
+const SUBJECT_REPRESENTATIVE_ROLES = 'roles de representante legal';
+
+/**
+ * Los mapas `code -> concept_id` del onboarding legal del tenant: los tres de
+ * `tenant_affiliation_documents` y el de los roles de
+ * `tenant_legal_representatives` (subtarea 1.4).
+ */
 export interface AffiliationDocumentConcepts {
   readonly documentType: ReadonlyMap<string, string>;
   readonly issuingAuthority: ReadonlyMap<string, string>;
   readonly verificationStatus: ReadonlyMap<string, string>;
+  readonly representativeRole: ReadonlyMap<string, string>;
 }
 
 /**
@@ -74,11 +96,12 @@ export class AffiliationDocumentConceptsService {
     map: ReadonlyMap<string, string>,
     valueSet: string,
     code: string,
+    subject: string = SUBJECT_DOCUMENTS,
   ): string {
     const conceptId = map.get(code.toUpperCase());
     if (!conceptId) {
       throw new PreconditionFailedException(
-        `El catálogo de documentos de afiliación no incluye el código ${code.toUpperCase()}`,
+        `El catálogo de ${subject} no incluye el código ${code.toUpperCase()}`,
         { valueSet, code: code.toUpperCase() },
       );
     }
@@ -86,12 +109,16 @@ export class AffiliationDocumentConceptsService {
   }
 
   private async load(em: EntityManager): Promise<AffiliationDocumentConcepts> {
+    // Los SEIS roles, no los cinco del autorregistro: desde la subtarea 1.4 el
+    // poder del representante legal (`PODER_REPRESENTANTE_LEGAL`) también se
+    // materializa como documento de afiliación, y exigirlo acá hace que una
+    // base sin ese código falle nombrándolo, en vez de fallar al crear la fila.
     const documentType = await this.resolveValueSet(
       em,
       AFFILIATION_DOCUMENT_VALUE_SETS.documentType,
       [
         ...new Set(
-          REGISTRATION_DOCUMENT_ROLES.map(
+          AFFILIATION_DOCUMENT_ROLES.map(
             (role) => DOCUMENT_TYPE_CODE_BY_ROLE[role],
           ),
         ),
@@ -114,7 +141,18 @@ export class AffiliationDocumentConceptsService {
       AFFILIATION_DOCUMENT_VALUE_SETS.verificationStatus,
       [DOCUMENT_VERIFICATION_PENDING],
     );
-    return { documentType, issuingAuthority, verificationStatus };
+    const representativeRole = await this.resolveValueSet(
+      em,
+      LEGAL_REPRESENTATIVE_ROLE_VALUE_SET,
+      Object.values(REPRESENTATIVE_ROLE_CODE),
+      SUBJECT_REPRESENTATIVE_ROLES,
+    );
+    return {
+      documentType,
+      issuingAuthority,
+      verificationStatus,
+      representativeRole,
+    };
   }
 
   /**
@@ -125,11 +163,12 @@ export class AffiliationDocumentConceptsService {
     em: EntityManager,
     valueSet: string,
     requiredCodes: readonly string[],
+    subject: string = SUBJECT_DOCUMENTS,
   ): Promise<ReadonlyMap<string, string>> {
     const set = await this.valueSets.findByInternalCode(em, valueSet);
     if (!set) {
       throw new PreconditionFailedException(
-        'El catálogo de documentos de afiliación no está disponible',
+        `El catálogo de ${subject} no está disponible`,
         { valueSet },
       );
     }
@@ -139,7 +178,7 @@ export class AffiliationDocumentConceptsService {
     );
     if (!conceptIds) {
       throw new PreconditionFailedException(
-        'El catálogo de documentos de afiliación no está disponible',
+        `El catálogo de ${subject} no está disponible`,
         { valueSet },
       );
     }
@@ -151,7 +190,7 @@ export class AffiliationDocumentConceptsService {
     for (const code of requiredCodes) {
       if (!byCode.has(code)) {
         throw new PreconditionFailedException(
-          `El catálogo de documentos de afiliación no incluye el código ${code}`,
+          `El catálogo de ${subject} no incluye el código ${code}`,
           { valueSet, code },
         );
       }

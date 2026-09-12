@@ -2775,7 +2775,23 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "address": "valor-ejemplo",
         "latitude": 1,
         "longitude": 1
-      }
+      },
+      "legalRepresentative": {
+        "role": "MARKETING_MANAGER",
+        "fullName": "Nombre de ejemplo",
+        "email": "usuario@example.com",
+        "phone": "+59170000000",
+        "idNumber": "valor-ejemplo"
+      },
+      "executives": [
+        {
+          "role": "MARKETING_MANAGER",
+          "fullName": "Nombre de ejemplo",
+          "email": "usuario@example.com",
+          "phone": "+59170000000",
+          "idNumber": "valor-ejemplo"
+        }
+      ]
     }
   ]
 }
@@ -2785,7 +2801,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<MyOrganizationDto>` | Sin restricción adicional declarada | Sus organizaciones, de la más recientemente creada a la más antigua. | `[{"myRoleConceptId":"00000000-0000-4000-8000-000000000001","canAdminister":true,"isVerified":true,"payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","sigla":"valor-ejemplo","address":"valor-ejemplo","latitude":1,"longitude":1}}]` |
+| `items` | Sí | `array<MyOrganizationDto>` | Sin restricción adicional declarada | Sus organizaciones, de la más recientemente creada a la más antigua. | `[{"myRoleConceptId":"00000000-0000-4000-8000-000000000001","canAdminister":true,"isVerified":true,"payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","sigla":"valor-ejemplo","address":"valor-ejemplo","latitude":1,"longitude":1},"legalRepresentative":{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"},"executives":[{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}]}]` |
 | `items[].myRoleConceptId` | Sí | `string` | formato `uuid` | Concepto del rol de la membresía activa (owner/admin/staff) | `00000000-0000-4000-8000-000000000001` |
 | `items[].canAdminister` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero para owner y admin de la organización | `true` |
 | `items[].isVerified` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero cuando la plataforma verificó la organización | `true` |
@@ -2796,6 +2812,18 @@ Campos de la respuesta:
 | `items[].payer.address` | No | `string` | Sin restricción adicional declarada | Dirección de la aseguradora | `valor-ejemplo` |
 | `items[].payer.latitude` | No | `number` | Sin restricción adicional declarada | Latitud de la casa matriz (-90 a 90) | `1` |
 | `items[].payer.longitude` | No | `number` | Sin restricción adicional declarada | Longitud de la casa matriz (-180 a 180) | `1` |
+| `items[].legalRepresentative` | No | `OrganizationContactPersonDto` | Sin restricción adicional declarada | Quién representa legalmente a la organización (subtarea 1.4). Va al nivel de la organización y no dentro de `payer` porque no es un dato de aseguradora: el registro de procesos pide el mismo bloque para farmacia, laboratorio e imagenología. | `{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}` |
+| `items[].legalRepresentative.role` | No | `string` | Sin restricción adicional declarada | Rol canónico del contacto dentro de la organización | `MARKETING_MANAGER` |
+| `items[].legalRepresentative.fullName` | No | `string` | Sin restricción adicional declarada | Nombre completo del contacto | `Nombre de ejemplo` |
+| `items[].legalRepresentative.email` | No | `string` | formato `email` | Correo de contacto | `usuario@example.com` |
+| `items[].legalRepresentative.phone` | No | `string` | Sin restricción adicional declarada | Celular o teléfono de contacto | `+59170000000` |
+| `items[].legalRepresentative.idNumber` | No | `string` | Sin restricción adicional declarada | Documento de identidad declarado | `valor-ejemplo` |
+| `items[].executives` | No | `array<OrganizationContactPersonDto>` | Sin restricción adicional declarada | Las gerencias de contacto declaradas, en orden canónico (general, comercial, marketing). | `[{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}]` |
+| `items[].executives[].role` | No | `string` | Sin restricción adicional declarada | Rol canónico del contacto dentro de la organización | `MARKETING_MANAGER` |
+| `items[].executives[].fullName` | No | `string` | Sin restricción adicional declarada | Nombre completo del contacto | `Nombre de ejemplo` |
+| `items[].executives[].email` | No | `string` | formato `email` | Correo de contacto | `usuario@example.com` |
+| `items[].executives[].phone` | No | `string` | Sin restricción adicional declarada | Celular o teléfono de contacto | `+59170000000` |
+| `items[].executives[].idNumber` | No | `string` | Sin restricción adicional declarada | Documento de identidad declarado | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2805,6 +2833,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

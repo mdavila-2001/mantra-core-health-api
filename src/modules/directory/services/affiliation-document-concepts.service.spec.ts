@@ -13,6 +13,9 @@ const DOCUMENT_TYPE_MEMBERS: Record<string, string> = {
   'concept-seprec': 'MATRICULA_SEPREC',
   'concept-licencia': 'LICENCIA_FUNCIONAMIENTO',
   'concept-sedes': 'CERTIFICADO_SEDES',
+  // Subtarea 1.4: `load()` ahora exige los SEIS roles de
+  // `AFFILIATION_DOCUMENT_ROLES`, no sólo los cinco del autorregistro.
+  'concept-poder': 'PODER_REPRESENTANTE_LEGAL',
 };
 const ISSUING_AUTHORITY_MEMBERS: Record<string, string> = {
   'concept-notaria': 'NOTARIA',
@@ -25,6 +28,13 @@ const ISSUING_AUTHORITY_MEMBERS: Record<string, string> = {
 const VERIFICATION_STATUS_MEMBERS: Record<string, string> = {
   'concept-pendiente': 'PENDIENTE',
 };
+/** Los cuatro roles que `tenant_legal_representatives` puede declarar (subtarea 1.4). */
+const REPRESENTATIVE_ROLE_MEMBERS: Record<string, string> = {
+  'concept-representante': 'REPRESENTANTE_LEGAL',
+  'concept-gerente-general': 'GERENTE_GENERAL',
+  'concept-gerente-comercial': 'GERENTE_COMERCIAL',
+  'concept-gerente-marketing': 'GERENTE_MARKETING',
+};
 
 function conceptsFor(members: Record<string, string>) {
   return new Map(
@@ -32,7 +42,11 @@ function conceptsFor(members: Record<string, string>) {
   );
 }
 
-type ValueSetKey = 'documentType' | 'issuingAuthority' | 'verificationStatus';
+type ValueSetKey =
+  | 'documentType'
+  | 'issuingAuthority'
+  | 'verificationStatus'
+  | 'representativeRole';
 
 function build(
   overrides: {
@@ -47,11 +61,13 @@ function build(
     VS_AFFILIATION_DOCUMENT_VERIFICATION_STATUS: {
       id: 'vs-verification-status',
     },
+    VS_LEGAL_REPRESENTATIVE_ROLE: { id: 'vs-representative-role' },
   };
   const membersByValueSetId: Record<string, string[]> = {
     'vs-document-type': Object.keys(DOCUMENT_TYPE_MEMBERS),
     'vs-issuing-authority': Object.keys(ISSUING_AUTHORITY_MEMBERS),
     'vs-verification-status': Object.keys(VERIFICATION_STATUS_MEMBERS),
+    'vs-representative-role': Object.keys(REPRESENTATIVE_ROLE_MEMBERS),
   };
   const conceptsByValueSetId: Record<
     string,
@@ -60,12 +76,14 @@ function build(
     'vs-document-type': conceptsFor(DOCUMENT_TYPE_MEMBERS),
     'vs-issuing-authority': conceptsFor(ISSUING_AUTHORITY_MEMBERS),
     'vs-verification-status': conceptsFor(VERIFICATION_STATUS_MEMBERS),
+    'vs-representative-role': conceptsFor(REPRESENTATIVE_ROLE_MEMBERS),
   };
 
   const codeByKey = {
     documentType: 'VS_AFFILIATION_DOCUMENT_TYPE',
     issuingAuthority: 'VS_ISSUING_AUTHORITY',
     verificationStatus: 'VS_AFFILIATION_DOCUMENT_VERIFICATION_STATUS',
+    representativeRole: 'VS_LEGAL_REPRESENTATIVE_ROLE',
   } as const;
 
   if (overrides.missingValueSet) {
@@ -125,10 +143,30 @@ describe('AffiliationDocumentConceptsService', () => {
     const result = await d.service.resolve(d.em);
 
     expect(result.documentType.get('CERTIFICADO_SEDES')).toBe('concept-sedes');
+    expect(result.documentType.get('PODER_REPRESENTANTE_LEGAL')).toBe(
+      'concept-poder',
+    );
     expect(result.issuingAuthority.get('SEDES')).toBe('concept-sedes-auth');
     expect(result.verificationStatus.get('PENDIENTE')).toBe(
       'concept-pendiente',
     );
+    expect(result.representativeRole.get('GERENTE_COMERCIAL')).toBe(
+      'concept-gerente-comercial',
+    );
+  });
+
+  it('422 con el sujeto "roles de representante legal" si falta un código de gerencia', async () => {
+    const d = build({
+      missingCode: {
+        valueSet: 'representativeRole',
+        code: 'GERENTE_MARKETING',
+      },
+    });
+
+    await expect(d.service.resolve(d.em)).rejects.toMatchObject({
+      message: expect.stringContaining('roles de representante legal'),
+      details: expect.objectContaining({ code: 'GERENTE_MARKETING' }),
+    });
   });
 
   it('conceptIdOf resuelve por código en mayúsculas indistintamente del caso', () => {
@@ -185,7 +223,7 @@ describe('AffiliationDocumentConceptsService', () => {
     await d.service.resolve(d.em);
     await d.service.resolve(d.em);
 
-    expect(d.valueSets.findByInternalCode).toHaveBeenCalledTimes(3);
+    expect(d.valueSets.findByInternalCode).toHaveBeenCalledTimes(4);
   });
 
   it('un fallo no queda cacheado: la siguiente llamada reintenta', async () => {

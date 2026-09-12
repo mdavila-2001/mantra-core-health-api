@@ -93,6 +93,174 @@ export class RegisterOrganizationLegalDocumentsDto {
   healthAuthorityCertificateFileId!: string;
 }
 
+/**
+ * Una gerencia de contacto de la organización (subtarea 1.4).
+ *
+ * El registro de procesos pide, para la aseguradora, el nombre, el celular y
+ * el correo de tres cargos — general, comercial y marketing (ASEGURADORA
+ * 1.9-1.17) —. No son cuentas de la plataforma: son a quién llamar para un
+ * convenio, una conciliación o un siniestro.
+ */
+export class RegisterOrganizationExecutiveContactDto {
+  /**
+   * Nombre completo del ejecutivo, tal como lo escriban.
+   */
+  @ApiProperty({
+    description: 'Nombre completo del ejecutivo',
+    maxLength: 200,
+    example: 'Carlos Mendoza Rivero',
+  })
+  @IsString()
+  @MinLength(3)
+  @MaxLength(200)
+  fullName!: string;
+
+  /**
+   * Celular de contacto, con su prefijo internacional.
+   *
+   * El piso de 7 caracteres es deliberadamente laxo: el formato lo compone el
+   * formulario (`+591 70012345`) y validarlo por longitud acá rechazaría
+   * números legítimos de otras jurisdicciones.
+   */
+  @ApiProperty({
+    description: 'Teléfono celular de contacto',
+    maxLength: 30,
+    example: '+591 70012345',
+  })
+  @IsString()
+  @MinLength(7)
+  @MaxLength(30)
+  phone!: string;
+
+  /**
+   * Correo corporativo del ejecutivo.
+   */
+  @ApiProperty({
+    description: 'Correo electrónico corporativo',
+    format: 'email',
+    maxLength: 320,
+    example: 'cmendoza@aseguradora.com',
+  })
+  @IsEmail()
+  @MaxLength(320)
+  email!: string;
+}
+
+/**
+ * El representante legal de la organización y su poder notariado (subtarea 1.4).
+ *
+ * `powerOfAttorneyFileId` es el `fileId` que devolvió
+ * `POST /iam/auth/upload-registration-document`, igual que los cinco
+ * documentos de `legalDocuments`: el alta lo reclama dentro de su propia
+ * transacción y lo materializa como un documento de afiliación de tipo
+ * `PODER_REPRESENTANTE_LEGAL`, emitido por una notaría, que apunta a la
+ * persona del representante.
+ */
+export class RegisterOrganizationLegalRepresentativeDto {
+  /**
+   * Nombre completo del representante legal.
+   */
+  @ApiProperty({
+    description: 'Nombre completo del representante legal',
+    maxLength: 200,
+    example: 'Mariana Siles Justiniano',
+  })
+  @IsString()
+  @MinLength(3)
+  @MaxLength(200)
+  fullName!: string;
+
+  /**
+   * Documento de identidad, tal como figura en el carnet.
+   */
+  @ApiProperty({
+    description: 'Cédula de identidad o documento legal equivalente',
+    maxLength: 50,
+    example: '4872190 SC',
+  })
+  @IsString()
+  @MinLength(4)
+  @MaxLength(50)
+  idNumber!: string;
+
+  /**
+   * Correo al que se le notifica lo legal.
+   */
+  @ApiProperty({
+    description: 'Correo oficial para notificaciones legales',
+    format: 'email',
+    maxLength: 320,
+    example: 'legal@aseguradora.com',
+  })
+  @IsEmail()
+  @MaxLength(320)
+  email!: string;
+
+  /**
+   * Teléfono de contacto. Opcional: el registro de procesos no lo pide, pero
+   * si el formulario lo captura no se tira.
+   */
+  @ApiPropertyOptional({
+    description: 'Teléfono de contacto del representante',
+    maxLength: 30,
+    example: '+591 70012345',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(7)
+  @MaxLength(30)
+  phone?: string;
+
+  /**
+   * Id del PDF del poder notariado, ya subido con
+   * `POST /iam/auth/upload-registration-document`.
+   */
+  @ApiProperty({
+    description: 'Id del archivo del poder notariado (PDF ya pre-cargado)',
+    format: 'uuid',
+  })
+  @IsUUID()
+  powerOfAttorneyFileId!: string;
+}
+
+/**
+ * Las tres gerencias de contacto. Bloque todo-o-nada (subtarea 1.4).
+ *
+ * Las tres propiedades llevan `@IsNotEmptyObject()` además de
+ * `@ValidateNested()` porque `class-validator` **no valida una propiedad
+ * anidada ausente**: sin él, mandar sólo `generalManager` pasaría el pipe y
+ * llegaría al servicio con dos gerencias `undefined`. Mismo patrón que
+ * `organization`/`owner` en {@link RegisterOrganizationDto}.
+ */
+export class RegisterOrganizationExecutivesDto {
+  /**
+   * Gerencia general.
+   */
+  @ApiProperty({ type: RegisterOrganizationExecutiveContactDto })
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => RegisterOrganizationExecutiveContactDto)
+  generalManager!: RegisterOrganizationExecutiveContactDto;
+
+  /**
+   * Gerencia comercial.
+   */
+  @ApiProperty({ type: RegisterOrganizationExecutiveContactDto })
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => RegisterOrganizationExecutiveContactDto)
+  commercialManager!: RegisterOrganizationExecutiveContactDto;
+
+  /**
+   * Gerencia de marketing.
+   */
+  @ApiProperty({ type: RegisterOrganizationExecutiveContactDto })
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => RegisterOrganizationExecutiveContactDto)
+  marketingManager!: RegisterOrganizationExecutiveContactDto;
+}
+
 /** Datos de la organización que se está dando de alta a sí misma. */
 export class RegisterOrganizationDetailsDto {
   /**
@@ -185,6 +353,37 @@ export class RegisterOrganizationDetailsDto {
   @ValidateNested()
   @Type(() => RegisterOrganizationLegalDocumentsDto)
   legalDocuments?: RegisterOrganizationLegalDocumentsDto;
+
+  /**
+   * El representante legal de la organización, con su poder notariado
+   * (subtarea 1.4).
+   *
+   * Va acá y no en `payer` por dos razones: el registro de procesos repite el
+   * mismo bloque para farmacia, laboratorio e imagenología —es onboarding del
+   * tenant, no de la aseguradora—, y `PayerProfileDto` lo consumen tres
+   * puertas de alta, dos de las cuales no pueden crear las personas que este
+   * bloque implica.
+   *
+   * Opcional en el contrato y obligatorio en el formulario, mismo criterio que
+   * `legalEntityType` (1.1), `legalDocuments` (1.2) y las coordenadas de la
+   * casa matriz (1.3): un cliente que todavía no lo manda no se rompe.
+   */
+  @ApiPropertyOptional({ type: RegisterOrganizationLegalRepresentativeDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RegisterOrganizationLegalRepresentativeDto)
+  legalRepresentative?: RegisterOrganizationLegalRepresentativeDto;
+
+  /**
+   * Las tres gerencias de contacto (subtarea 1.4). Ver
+   * {@link RegisterOrganizationDetailsDto.legalRepresentative} para por qué
+   * está acá y no en `payer`.
+   */
+  @ApiPropertyOptional({ type: RegisterOrganizationExecutivesDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RegisterOrganizationExecutivesDto)
+  executives?: RegisterOrganizationExecutivesDto;
 
   /**
    * Datos de aseguradora. Obligatorio cuando `tenantType` es `PAYER`.
@@ -438,4 +637,17 @@ export class RegisterOrganizationResponseDto {
       'verificación (sólo si el alta los declaró)',
   })
   legalDocumentsRegistered?: number;
+
+  /**
+   * Cuántos vínculos de representación quedaron registrados (subtarea 1.4):
+   * el representante legal más las tres gerencias, cuando el alta los declara.
+   *
+   * Ausente cuando el alta no declaró ninguno.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Vínculos de representación registrados (representante legal + gerencias)',
+    example: 4,
+  })
+  representativesRegistered?: number;
 }

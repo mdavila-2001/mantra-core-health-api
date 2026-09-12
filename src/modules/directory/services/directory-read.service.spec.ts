@@ -11,7 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import { DirectoryReadService } from './directory-read.service';
 import { DIR, TENANT_TYPE_CONCEPT_BY_CODE } from '../directory.concepts';
-import { ResourceNotFoundException } from '../../../common';
+import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 
 const actor = { id: 'u1', roles: ['STAFF'] } as any;
 const TENANT = 't1';
@@ -47,6 +47,34 @@ function build() {
   const addressesRepo = {
     findVigenteByOwnerAndUse: mockFn(() => Promise.resolve(null)),
   };
+  // Por defecto la organización no declaró representante ni gerencias
+  // (subtarea 1.4); los tests que las ejercen sobrescriben estos dobles.
+  const legalRepo = {
+    listLegalRepsByTenant: mockFn(() => Promise.resolve([])),
+    findPersonsByIds: mockFn(() => Promise.resolve(new Map())),
+  };
+  const identifiersRepo = {
+    findByIds: mockFn(() => Promise.resolve(new Map())),
+  };
+  const contactPointsRepo = {
+    findVigentesByOwners: mockFn(() => Promise.resolve([])),
+  };
+  // El mapa va al revés que en el servicio (código -> concepto), como el real.
+  const concepts = {
+    resolve: mockFn(() =>
+      Promise.resolve({
+        documentType: new Map(),
+        issuingAuthority: new Map(),
+        verificationStatus: new Map(),
+        representativeRole: new Map([
+          ['REPRESENTANTE_LEGAL', 'ct-representante'],
+          ['GERENTE_GENERAL', 'ct-general'],
+          ['GERENTE_COMERCIAL', 'ct-comercial'],
+          ['GERENTE_MARKETING', 'ct-marketing'],
+        ]),
+      }),
+    ),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DirectoryReadService(
@@ -58,6 +86,10 @@ function build() {
     tenantAdmin as any,
     catalogRepo as any,
     addressesRepo as any,
+    legalRepo as any,
+    identifiersRepo as any,
+    contactPointsRepo as any,
+    concepts as any,
     logger as any,
   );
   return {
@@ -69,6 +101,10 @@ function build() {
     tenantAdmin,
     catalogRepo,
     addressesRepo,
+    legalRepo,
+    identifiersRepo,
+    contactPointsRepo,
+    concepts,
   };
 }
 
@@ -475,6 +511,163 @@ describe('DirectoryReadService.listMemberships', () => {
       await expect(d.service.listMyTenants(actor)).resolves.toEqual({
         items: [],
       });
+    });
+
+    /**
+     * Subtarea 1.4: el representante se identifica por su rol —no por el
+     * orden en que Postgres devuelva las filas— y las gerencias salen en el
+     * orden canónico de `EXECUTIVE_DTO_KEYS`, no en el que se hayan creado.
+     */
+    it('con representante legal y las tres gerencias, arma legalRepresentative y executives en orden canónico', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-1', tenantRoleConceptId: DIR.ROLE_OWNER },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-1',
+        code: 'ASE-1',
+        legalName: 'Aseguradora X',
+        tenantTypeConceptId: TENANT_TYPE_CONCEPT_BY_CODE.PAYER,
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      // Deliberadamente fuera de orden canónico: comercial antes que general.
+      d.legalRepo.listLegalRepsByTenant.mockResolvedValue([
+        {
+          personId: 'person-cm',
+          representativeRoleConceptId: 'ct-comercial',
+          isPrimary: null,
+        },
+        {
+          personId: 'person-rep',
+          representativeRoleConceptId: 'ct-representante',
+          ciIdentifierId: 'ci-1',
+          isPrimary: true,
+        },
+        {
+          personId: 'person-mm',
+          representativeRoleConceptId: 'ct-marketing',
+          isPrimary: null,
+        },
+        {
+          personId: 'person-gm',
+          representativeRoleConceptId: 'ct-general',
+          isPrimary: null,
+        },
+      ]);
+      d.legalRepo.findPersonsByIds.mockResolvedValue(
+        new Map([
+          ['person-rep', { id: 'person-rep', displayName: 'Mariana Siles' }],
+          ['person-gm', { id: 'person-gm', displayName: 'Carlos Mendoza' }],
+          ['person-cm', { id: 'person-cm', displayName: 'Ana Paz' }],
+          ['person-mm', { id: 'person-mm', displayName: 'Luis Rojas' }],
+        ]),
+      );
+      d.identifiersRepo.findByIds.mockResolvedValue(
+        new Map([['ci-1', { id: 'ci-1', value: '4872190 SC' }]]),
+      );
+      d.contactPointsRepo.findVigentesByOwners.mockResolvedValue([
+        {
+          ownerId: 'person-rep',
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          value: 'legal@aseguradora.com',
+        },
+        {
+          ownerId: 'person-rep',
+          systemConceptId: CONCEPTS.CONTACT_PHONE,
+          value: '+591 70012345',
+        },
+        {
+          ownerId: 'person-gm',
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          value: 'gm@aseguradora.com',
+        },
+        {
+          ownerId: 'person-gm',
+          systemConceptId: CONCEPTS.CONTACT_MOBILE,
+          value: '+591 70000001',
+        },
+        {
+          ownerId: 'person-cm',
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          value: 'cm@aseguradora.com',
+        },
+        {
+          ownerId: 'person-cm',
+          systemConceptId: CONCEPTS.CONTACT_MOBILE,
+          value: '+591 70000002',
+        },
+        {
+          ownerId: 'person-mm',
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          value: 'mm@aseguradora.com',
+        },
+        {
+          ownerId: 'person-mm',
+          systemConceptId: CONCEPTS.CONTACT_MOBILE,
+          value: '+591 70000003',
+        },
+      ]);
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items[0].legalRepresentative).toEqual({
+        role: 'LEGAL_REPRESENTATIVE',
+        fullName: 'Mariana Siles',
+        email: 'legal@aseguradora.com',
+        phone: '+591 70012345',
+        idNumber: '4872190 SC',
+      });
+      expect(salida.items[0].executives).toEqual([
+        {
+          role: 'GENERAL_MANAGER',
+          fullName: 'Carlos Mendoza',
+          email: 'gm@aseguradora.com',
+          phone: '+591 70000001',
+          idNumber: undefined,
+        },
+        {
+          role: 'COMMERCIAL_MANAGER',
+          fullName: 'Ana Paz',
+          email: 'cm@aseguradora.com',
+          phone: '+591 70000002',
+          idNumber: undefined,
+        },
+        {
+          role: 'MARKETING_MANAGER',
+          fullName: 'Luis Rojas',
+          email: 'mm@aseguradora.com',
+          phone: '+591 70000003',
+          idNumber: undefined,
+        },
+      ]);
+    });
+
+    it('sin representante legal ni gerencias, la ficha no lleva esas claves', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-1', tenantRoleConceptId: DIR.ROLE_OWNER },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-1',
+        code: 'CLIN-1',
+        legalName: 'Clínica del Centro SRL',
+        tenantTypeConceptId: 'tt-provider',
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items[0]).not.toHaveProperty('legalRepresentative');
+      expect(salida.items[0]).not.toHaveProperty('executives');
+      expect(d.legalRepo.findPersonsByIds).not.toHaveBeenCalled();
     });
   });
 });

@@ -31,6 +31,7 @@ describe('ContactPointsService', () => {
       findById: fn(),
       create: fn(),
       findVigentesByOwner: fn(),
+      findVigentesByOwners: fn(),
       findVigenteByOwnerAndSystem: fn(),
       findVigenteByOwnerSystemAndUse: fn(),
       closeVigente: fn(),

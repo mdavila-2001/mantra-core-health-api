@@ -10,6 +10,7 @@ import {
   TenantTypeProfileService,
   AffiliationDocumentConceptsService,
   TenantAffiliationDocumentsService,
+  TenantLegalRepresentativesService,
   DirectoryTenantsService,
   DirectoryBranchesService,
   DirectoryMembershipsService,
@@ -61,6 +62,7 @@ import {
     TenantAdministrationService,
     AffiliationDocumentConceptsService,
     TenantAffiliationDocumentsService,
+    TenantLegalRepresentativesService,
     // Repositorios
     TenantsRepository,
     BranchesRepository,
@@ -92,6 +94,9 @@ import {
     TenantAdministrationService,
     DirectoryMembershipsService,
     TenantAffiliationDocumentsService,
+    // `TenantLegalRepresentativesService` lo necesita `iam` para el
+    // autorregistro de organización (subtarea 1.4), igual que los otros dos.
+    TenantLegalRepresentativesService,
   ],
 })
 export class DirectoryModule {}
