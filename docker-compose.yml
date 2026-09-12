@@ -490,7 +490,7 @@ services:
     # Última release de MinIO community con consola de administración completa.
     # RELEASE.2025-05-24 en adelante reduce la consola a un navegador de objetos
     # y el proyecto fue archivado en 2026 — no actualizar más allá de esta versión.
-    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     restart: always
     command: server /data --console-address ":9001"
     environment:
