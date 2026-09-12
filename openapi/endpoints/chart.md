@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `chart`
 
-Referencia exhaustiva de 16 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 17 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates`
 - **Controladores:** `ChartCarePlansController`, `ChartDocumentsController`, `ChartNotesController`, `ChartReadController`, `ChartTemplatesController`
@@ -14,19 +14,20 @@ Referencia exhaustiva de 16 operación(es) del módulo `chart`, derivada del con
 1. [POST /charts/care-plans](#1-post-charts-care-plans) — Crear un plan de cuidado con actividades
 2. [PATCH /charts/care-plans/{planId}/activities/{activityId}](#2-patch-charts-care-plans-planid-activities-activityid) — Actualizar una actividad del plan de cuidado
 3. [POST /charts/documents](#3-post-charts-documents) — Adjuntar un documento con archivos gobernados
-4. [POST /charts/notes](#4-post-charts-notes) — Crear una nota clínica versionada (borrador SOAP)
-5. [POST /charts/notes/{noteId}/amendments](#5-post-charts-notes-noteid-amendments) — Enmendar una nota firmada (addendum versionado)
-6. [PUT /charts/notes/{noteId}/versions](#6-put-charts-notes-noteid-versions) — Editar borrador creando una nueva versión inmutable
-7. [POST /charts/notes/{noteId}/versions/{versionId}/cosign](#7-post-charts-notes-noteid-versions-versionid-cosign) — Cofirmar una versión firmada (cadena de firmas)
-8. [POST /charts/notes/{noteId}/versions/{versionId}/sign](#8-post-charts-notes-noteid-versions-versionid-sign) — Firmar una versión y sellar su contenido
-9. [POST /charts/notes/versions/{versionId}/exam-findings](#9-post-charts-notes-versions-versionid-exam-findings) — Registrar hallazgos de examen físico
-10. [POST /charts/notes/versions/{versionId}/release](#10-post-charts-notes-versions-versionid-release) — Liberar una versión al paciente
-11. [POST /charts/notes/versions/{versionId}/withhold](#11-post-charts-notes-versions-versionid-withhold) — Retener una versión del paciente (motivo legal)
-12. [GET /charts/patients/{patientProfileId}/chart](#12-get-charts-patients-patientprofileid-chart) — UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)
-13. [GET /charts/templates](#13-get-charts-templates) — Listar las plantillas de chart por especialidad
-14. [POST /charts/templates](#14-post-charts-templates) — Crear una plantilla de chart con su esquema de campos, por especialidad
-15. [GET /charts/templates/{id}](#15-get-charts-templates-id) — Leer el esquema de una plantilla de chart
-16. [POST /charts/templates/{templateId}/assignments](#16-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
+4. [GET /charts/notes](#4-get-charts-notes) — Listar las notas de evolución de un profesional por ventana de fechas
+5. [POST /charts/notes](#5-post-charts-notes) — Crear una nota clínica versionada (borrador SOAP)
+6. [POST /charts/notes/{noteId}/amendments](#6-post-charts-notes-noteid-amendments) — Enmendar una nota firmada (addendum versionado)
+7. [PUT /charts/notes/{noteId}/versions](#7-put-charts-notes-noteid-versions) — Editar borrador creando una nueva versión inmutable
+8. [POST /charts/notes/{noteId}/versions/{versionId}/cosign](#8-post-charts-notes-noteid-versions-versionid-cosign) — Cofirmar una versión firmada (cadena de firmas)
+9. [POST /charts/notes/{noteId}/versions/{versionId}/sign](#9-post-charts-notes-noteid-versions-versionid-sign) — Firmar una versión y sellar su contenido
+10. [POST /charts/notes/versions/{versionId}/exam-findings](#10-post-charts-notes-versions-versionid-exam-findings) — Registrar hallazgos de examen físico
+11. [POST /charts/notes/versions/{versionId}/release](#11-post-charts-notes-versions-versionid-release) — Liberar una versión al paciente
+12. [POST /charts/notes/versions/{versionId}/withhold](#12-post-charts-notes-versions-versionid-withhold) — Retener una versión del paciente (motivo legal)
+13. [GET /charts/patients/{patientProfileId}/chart](#13-get-charts-patients-patientprofileid-chart) — UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)
+14. [GET /charts/templates](#14-get-charts-templates) — Listar las plantillas de chart por especialidad
+15. [POST /charts/templates](#15-post-charts-templates) — Crear una plantilla de chart con su esquema de campos, por especialidad
+16. [GET /charts/templates/{id}](#16-get-charts-templates-id) — Leer el esquema de una plantilla de chart
+17. [POST /charts/templates/{templateId}/assignments](#17-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
 
 ---
 
@@ -479,7 +480,161 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /charts/notes
+## 4. GET /charts/notes
+
+- **Módulo:** `chart`
+- **Etiqueta OpenAPI:** `chart-notes`
+- **Nombre:** Listar las notas de evolución de un profesional por ventana de fechas
+- **Operation ID:** `ChartNotesController_listNotes`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ChartNotesController.listNotes](../../src/modules/chart/controllers/chart-notes.controller.ts)
+
+### Descripción de negocio
+
+Listar las notas de evolución de un profesional por ventana de fechas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P18: colección de notas de evolución de un profesional.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /charts/notes` en `ChartNotesController_listNotes`. El controlador delega en `ChartNotesReadService.listNotes`. No recibe body. El tipo de retorno estático es `Promise<ChartNotesListResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practitionerId` | query | No | `string` | formato `uuid` | Perfil profesional autor; por defecto, el de la sesión | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-01-01T00:00:00.000Z` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-12-31T23:59:59.999Z` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `50` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /charts/notes HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /charts/notes?practitionerId=00000000-0000-4000-8000-000000000001&patientProfileId=00000000-0000-4000-8000-000000000001&from=2026-01-01T00%3A00%3A00.000Z&to=2026-12-31T23%3A59%3A59.999Z&cursor=valor-ejemplo&limit=50 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChartNotesListResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
+| 403 | La sesión no tiene perfil profesional, o pide las notas de otro profesional sin ser SUPERADMIN. | `Promise<ChartNotesListResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartNotesListResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "noteId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "noteTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "currentVersionId": "00000000-0000-4000-8000-000000000001",
+      "versionNumber": 1,
+      "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "chiefComplaintText": "valor-ejemplo",
+      "subjectiveText": "valor-ejemplo",
+      "objectiveText": "valor-ejemplo",
+      "assessmentText": "valor-ejemplo",
+      "planText": "valor-ejemplo",
+      "signedAt": "2026-07-31T12:00:00.000Z",
+      "releasedToPatient": true,
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ChartNoteListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z","patientProfileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].noteId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].noteTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].lifecycleStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].currentVersionId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].versionNumber` | No | `number` | Sin restricción adicional declarada | Número de la versión vigente | `1` |
+| `items[].authorProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].chiefComplaintText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].subjectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].objectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].assessmentText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].planText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].signedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].releasedToPatient` | Sí | `boolean` | Sin restricción adicional declarada | Si la nota tiene una versión liberada al portal del paciente. Derivado, para no obligar a resolver terminología antes de decidir si se muestra | `true` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor opaco para la página siguiente; `null` sin más | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | La fecha "from" no puede ser posterior a "to" | Excepción explícita en src/modules/chart/services/chart-notes-read.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Estas notas son de otro profesional: solo las lista quien las firma. | Excepción explícita en src/modules/chart/services/chart-notes-read.service.ts |
+| 403 | `FORBIDDEN` | Esta lectura es la de un profesional: la sesión no tiene perfil profesional. | Excepción explícita en src/modules/chart/services/chart-notes-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/charts/notes"
+}
+```
+
+---
+
+## 5. POST /charts/notes
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -625,7 +780,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /charts/notes/{noteId}/amendments
+## 6. POST /charts/notes/{noteId}/amendments
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -771,7 +926,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. PUT /charts/notes/{noteId}/versions
+## 7. PUT /charts/notes/{noteId}/versions
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -914,7 +1069,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /charts/notes/{noteId}/versions/{versionId}/cosign
+## 8. POST /charts/notes/{noteId}/versions/{versionId}/cosign
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1055,7 +1210,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /charts/notes/{noteId}/versions/{versionId}/sign
+## 9. POST /charts/notes/{noteId}/versions/{versionId}/sign
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1194,7 +1349,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /charts/notes/versions/{versionId}/exam-findings
+## 10. POST /charts/notes/versions/{versionId}/exam-findings
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1336,7 +1491,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /charts/notes/versions/{versionId}/release
+## 11. POST /charts/notes/versions/{versionId}/release
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1465,7 +1620,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /charts/notes/versions/{versionId}/withhold
+## 12. POST /charts/notes/versions/{versionId}/withhold
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1594,7 +1749,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /charts/patients/{patientProfileId}/chart
+## 13. GET /charts/patients/{patientProfileId}/chart
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-read`
@@ -1796,7 +1951,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /charts/templates
+## 14. GET /charts/templates
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`
@@ -1931,7 +2086,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /charts/templates
+## 15. POST /charts/templates
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`
@@ -2139,7 +2294,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /charts/templates/{id}
+## 16. GET /charts/templates/{id}
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`
@@ -2303,7 +2458,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /charts/templates/{templateId}/assignments
+## 17. POST /charts/templates/{templateId}/assignments
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`

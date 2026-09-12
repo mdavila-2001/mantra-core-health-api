@@ -7,6 +7,7 @@ import {
   DocumentsRepository,
 } from '../repositories';
 import type { PatientChartResponseDto } from '../dto';
+import { toChartNoteItem } from './chart-note-item.mapper';
 
 /**
  * Cara de lectura del expediente clínico (UC-40-14).
@@ -97,30 +98,14 @@ export class ChartReadService {
 
     return {
       patientProfileId,
-      notes: notesPage.map((header) => {
-        const version = header.currentVersionId
-          ? versions.get(header.currentVersionId)
-          : undefined;
-        return {
-          noteId: header.id,
-          encounterId: header.encounterId,
-          noteTypeConceptId: header.noteTypeConceptId,
-          lifecycleStatusConceptId: header.lifecycleStatusConceptId,
-          currentVersionId: header.currentVersionId,
-          versionNumber: version?.versionNumber,
-          authorProfileId: version?.authorProfileId,
-          chiefComplaintText: version?.chiefComplaintText,
-          subjectiveText: version?.subjectiveText,
-          objectiveText: version?.objectiveText,
-          assessmentText: version?.assessmentText,
-          planText: version?.planText,
-          signedAt: version?.signedAt,
-          // Liberada al portal es tener una versión liberada, no un estado del
-          // encabezado: una nota puede estar firmada y aún así retenida.
-          releasedToPatient: Boolean(header.currentReleasedVersionId),
-          createdAt: header.createdAt,
-        };
-      }),
+      notes: notesPage.map((header) =>
+        toChartNoteItem(
+          header,
+          header.currentVersionId
+            ? versions.get(header.currentVersionId)
+            : undefined,
+        ),
+      ),
       carePlans: plansPage.map((plan) => ({
         id: plan.id,
         statusConceptId: plan.statusConceptId,

@@ -14,6 +14,7 @@ import {
   ChartCarePlansService,
   ChartTemplatesService,
   ChartReadService,
+  ChartNotesReadService,
 } from './services';
 import {
   ClinicalNotesRepository,
@@ -55,6 +56,7 @@ import { ClinicalModule } from '../clinical/clinical.module';
     ChartCarePlansService,
     ChartTemplatesService,
     ChartReadService,
+    ChartNotesReadService,
   ],
 })
 export class ChartModule {}

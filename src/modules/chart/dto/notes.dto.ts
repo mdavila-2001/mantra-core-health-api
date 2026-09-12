@@ -4,13 +4,24 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsInt,
+  IsISO8601,
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
+  Min,
   MinLength,
   ValidateNested,
 } from 'class-validator';
+import { ChartNoteItemDto } from './chart-read.dto';
+
+/** Tamaño de página por defecto de `GET /charts/notes`. */
+export const DEFAULT_NOTES_PAGE_SIZE = 50;
+
+/** Tope máximo de página de `GET /charts/notes`. */
+const MAX_NOTES_PAGE_SIZE = 100;
 
 /** Cuerpo de `POST /charts/notes` (UC-15-01): crea una nota y su versión 1 borrador. */
 export class CreateNoteDto {
@@ -445,6 +456,98 @@ export class ExamFindingsResultDto {
    */
   @ApiProperty({ description: 'Nº de hallazgos registrados' })
   recordedFindings!: number;
+}
+
+/**
+ * Filtros y paginación del listado de notas de evolución (`GET /charts/notes`).
+ *
+ * `to` es **inclusivo**: la ventana se declara así en el `@ApiPropertyOptional`
+ * porque la semántica no está unificada en el repo (insurance también la usa
+ * inclusiva; otros módulos no la validan). El cursor es **opaco**: sale de
+ * `encodeKeysetCursor` y se reenvía tal cual.
+ */
+export class ListChartNotesQueryDto {
+  /**
+   * Profesional cuyas notas se listan. Si no viene, se usa el de la sesión.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Perfil profesional autor; por defecto, el de la sesión',
+  })
+  @IsOptional()
+  @IsUUID()
+  practitionerId?: string;
+
+  /** Filtra además por paciente, sin ampliar el alcance por profesional. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  patientProfileId?: string;
+
+  /** Desde (inclusive) sobre `header.created_at`, en ISO 8601. */
+  @ApiPropertyOptional({ example: '2026-01-01T00:00:00.000Z' })
+  @IsOptional()
+  @IsISO8601()
+  from?: string;
+
+  /** Hasta (inclusive) sobre `header.created_at`, en ISO 8601. */
+  @ApiPropertyOptional({ example: '2026-12-31T23:59:59.999Z' })
+  @IsOptional()
+  @IsISO8601()
+  to?: string;
+
+  /** Cursor opaco devuelto por la página anterior. */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+
+  /** Tamaño de página. */
+  @ApiPropertyOptional({
+    minimum: 1,
+    maximum: MAX_NOTES_PAGE_SIZE,
+    default: DEFAULT_NOTES_PAGE_SIZE,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(MAX_NOTES_PAGE_SIZE)
+  limit?: number;
+}
+
+/** Una fila del listado de notas: el ítem del expediente más su paciente. */
+export class ChartNoteListItemDto extends ChartNoteItemDto {
+  /**
+   * Paciente de la nota. En el expediente lo trae el propio contexto de la
+   * pantalla; en una colección por profesional hay que declararlo para poder
+   * pintar la lista sin resolverlo aparte.
+   */
+  @ApiProperty({ format: 'uuid' })
+  patientProfileId!: string;
+}
+
+/** Página del listado de notas de evolución. */
+export class ChartNotesListResponseDto {
+  /** Filas de esta página. */
+  @ApiProperty({ type: [ChartNoteListItemDto] })
+  items!: ChartNoteListItemDto[];
+
+  /** Cantidad devuelta en esta página. */
+  @ApiProperty({ description: 'Cantidad devuelta en esta página' })
+  count!: number;
+
+  /** Tope aplicado a la consulta. */
+  @ApiProperty({ description: 'Tope de resultados aplicado' })
+  limit!: number;
+
+  /** Cursor de continuación, o `null` si esta es la última página. */
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    description: 'Cursor opaco para la página siguiente; `null` sin más',
+  })
+  nextCursor!: string | null;
 }
 
 /** Resultado de una transición de liberación/retención (UC-15-06/07). */

@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1260 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1260 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1261 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1261 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -13662,7 +13662,7 @@
       ]
     },
     {
-      "name": "charts (16)",
+      "name": "charts (17)",
       "item": [
         {
           "name": "chart-care-plans",
@@ -13862,6 +13862,91 @@
         {
           "name": "chart-notes",
           "item": [
+            {
+              "name": "GET /charts/notes · Listar las notas de evolución de un profesional por ventana de fechas",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/charts/notes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "charts",
+                    "notes"
+                  ],
+                  "query": [
+                    {
+                      "key": "practitionerId",
+                      "value": "{{practitionerId}}",
+                      "description": "Perfil profesional autor; por defecto, el de la sesión",
+                      "disabled": true
+                    },
+                    {
+                      "key": "patientProfileId",
+                      "value": "{{patientProfileId}}",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-12-31T23:59:59.999Z",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Listar las notas de evolución de un profesional por ventana de fechas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /charts/notes`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `ChartNotesController_listNotes`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.notes || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('noteId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
             {
               "name": "POST /charts/notes · Crear una nota clínica versionada (borrador SOAP)",
               "request": {
