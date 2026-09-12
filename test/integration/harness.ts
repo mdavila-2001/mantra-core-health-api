@@ -969,18 +969,32 @@ const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   // del tenant NO falla: la fila queda huérfana en silencio. `OWNER_SIN_FK`
   // no la alcanza (sólo cubre `owner_id in (userIds, personIds)`).
   { table: 'common.addresses', column: 'owner_id' },
+  // Representante legal y gerencias de contacto (subtarea 1.4): los 3
+  // gerentes llevan `power_of_attorney_document_id NULL` y no son
+  // alcanzables desde `tenant_affiliation_documents` — sin esta entrada,
+  // `delete from directory.tenants` revienta con 23503 nombrando esta tabla.
+  // El orden relativo a `tenant_affiliation_documents` es indiferente: la
+  // recursión por FK borra al representante antes del corte de ciclos.
+  { table: 'directory.tenant_legal_representatives', column: 'tenant_id' },
 ];
 
 /**
- * Borra la organización, su unidad diagnóstica (si la hubo) y la cuenta de
- * su owner, dejando la base compartida tal como estaba.
+ * Borra la organización, su unidad diagnóstica (si la hubo), a quienes la
+ * representan (subtarea 1.4) y la cuenta de su owner, dejando la base
+ * compartida tal como estaba.
  *
  * Mismo criterio que {@link deleteRegisteredPractitioners}: recorre
  * {@link TENANT_ESCRIBE_EN} para alcanzar lo que cuelga del tenant, borra el
  * tenant en sí (nombrando, si algo lo sigue referenciando, qué tabla falta
- * en la lista), y delega en {@link deleteAccounts} la cuenta del owner — el
- * autorregistro de organización no crea ninguna `profiles.persons` (el
- * owner es una cuenta administrativa, no un paciente ni un profesional).
+ * en la lista), y delega en {@link deleteAccounts} la cuenta del owner. Desde
+ * la subtarea 1.4 esto **ya no** es cierto para toda organización: un alta
+ * que declaró representante legal o gerencias crea hasta cuatro
+ * `profiles.persons`, así que sus ids se capturan ANTES del bucle —el bucle
+ * borra las filas de `tenant_legal_representatives` que los nombran— y se
+ * borran después de los tenants, igual que hace
+ * {@link deleteRegisteredPractitioners}. `OWNER_SIN_FK` limpia sus
+ * `identifiers`/`contact_points` por `owner_id` una vez que `deleteAccounts`
+ * recibe esos ids.
  *
  * @param fixtures - Las cuentas y tenants creados por la suite.
  * @throws Si algo sobrevive al borrado.
@@ -996,6 +1010,17 @@ export async function deleteRegisteredOrganizations(
   try {
     const graph = await readSchemaGraph(client);
     const visited = new Set<string>();
+
+    // Antes de que el bucle de abajo borre las filas de
+    // `tenant_legal_representatives`: son las únicas que nombran a estas
+    // personas, así que sus ids hay que capturarlos ahora o se pierden.
+    const { rows: filasDeRepresentacion } = await client.query<{
+      person_id: string;
+    }>(
+      `select person_id from directory.tenant_legal_representatives where tenant_id::text = any($1::text[])`,
+      [tenantIds],
+    );
+    const personIds = filasDeRepresentacion.map((f) => f.person_id);
 
     for (const { table, column } of TENANT_ESCRIBE_EN) {
       const pk = graph.primaryKey.get(table);
@@ -1055,12 +1080,22 @@ export async function deleteRegisteredOrganizations(
       );
     }
 
+    // El representante legal y las gerencias (subtarea 1.4): sus vínculos ya
+    // se borraron en el bucle de arriba; sus personas, todavía no.
+    await deleteWithDependents(
+      client,
+      graph,
+      'profiles.persons',
+      personIds,
+      visited,
+    );
+
     await deleteAccounts(
       client,
       graph,
       visited,
       userIds,
-      [],
+      personIds,
       'de organización',
     );
   } finally {

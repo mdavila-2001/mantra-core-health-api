@@ -94,7 +94,9 @@ describe('1.3 · casa matriz georreferenciada del alta de organización (integra
     return filas[0];
   }
 
-  async function direccionDelCarrier(tenantId: string): Promise<string | undefined> {
+  async function direccionDelCarrier(
+    tenantId: string,
+  ): Promise<string | undefined> {
     const filas = await ctx.orm.em
       .getConnection()
       .execute<Array<{ address: string }>>(
@@ -186,7 +188,13 @@ describe('1.3 · casa matriz georreferenciada del alta de organización (integra
     const codigo = `GPS3_${marca}`;
     const res = await http()
       .post('/iam/auth/register-organization')
-      .send(altaDto({ code: codigo, email: `gps3-${marca}@example.test`, latitude: -17.7833 }))
+      .send(
+        altaDto({
+          code: codigo,
+          email: `gps3-${marca}@example.test`,
+          latitude: -17.7833,
+        }),
+      )
       .expect(400);
 
     expect(JSON.stringify(res.body)).toContain('organization.payer.longitude');
