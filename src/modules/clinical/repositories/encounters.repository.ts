@@ -288,6 +288,41 @@ export class EncountersRepository {
   }
 
   /**
+   * El encuentro más reciente de cada cita, indexado por `appointmentId`.
+   *
+   * En lote y no uno por uno: la agenda proyecta hasta cien reservas por
+   * página, y pedir el encuentro de cada una convertiría un listado en cien
+   * consultas más. Es el mismo criterio que `AppointmentsRepository.findTypesByIds`.
+   *
+   * Si una cita tiene más de un encuentro, gana el más reciente por
+   * `createdAt` — la misma regla que ya usa el check-in para resolver «el
+   * encuentro de esta cita» (ver `findByAppointmentId`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param appointmentIds - Citas cuyo encuentro más reciente se necesita.
+   * @returns Mapa `appointmentId` → `encounters.id`.
+   */
+  async findLatestIdsByAppointmentIds(
+    em: EntityManager,
+    appointmentIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const mapa = new Map<string, string>();
+    if (appointmentIds.length === 0) return mapa;
+    const encuentros = await em.find(
+      Encounters,
+      { appointmentId: { $in: [...appointmentIds] } },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+    for (const encuentro of encuentros) {
+      if (encuentro.appointmentId == null) continue;
+      if (!mapa.has(encuentro.appointmentId)) {
+        mapa.set(encuentro.appointmentId, encuentro.id);
+      }
+    }
+    return mapa;
+  }
+
+  /**
    * Obtiene find active participants.
    *
    * @param em - Contexto de persistencia o transacción activa.
