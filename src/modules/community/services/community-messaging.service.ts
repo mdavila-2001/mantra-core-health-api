@@ -16,6 +16,7 @@ import { CommunityMessageNotificationsService } from './community-message-notifi
 import { CommunityMessagingGateway } from '../gateways/community-messaging.gateway';
 // Directo y no por el barrel, por el mismo ciclo que el gateway.
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityChatAutoReplyService } from './community-chat-auto-reply.service';
 import { COMM } from '../community.concepts';
 import {
   CreateConversationDto,
@@ -35,6 +36,17 @@ import {
 import type { DirectMessages } from '../entities';
 
 /**
+ * Cuánto tiempo después de enviarlo se puede editar un mensaje (F4.5).
+ *
+ * Cinco minutos: lo que alcanza para corregir una dosis mal tecleada y no para
+ * reescribir una indicación que la otra persona ya leyó y siguió.
+ *
+ * El cliente aplica la misma regla para no ofrecer un botón que va a fallar,
+ * pero la barrera es ésta: una pantalla no autoriza nada.
+ */
+export const VENTANA_DE_EDICION_MS = 5 * 60_000;
+
+/**
  * Mensajería social: crea conversaciones con participantes (bootstrap), envía
  * mensajes directos (UC-19-06) y marca mensajes como leídos vía recibos
  * (UC-19-07). Verifica participación activa y ausencia de bloqueo antes de enviar.
@@ -49,6 +61,7 @@ export class CommunityMessagingService {
    * @param blocksRepo - Valor de blocks repo requerido por la operación.
    * @param messageNotifications - Aviso in-app del carril P1.
    * @param gateway - Empuje en tiempo real por WebSocket.
+   * @param autoReply - La respuesta automática por inactividad (F4.7).
    * @param visibility - Que el perfil con el que se escribe sea del actor.
    * @param logger - Valor de logger requerido por la operación.
    */
@@ -58,6 +71,7 @@ export class CommunityMessagingService {
     private readonly blocksRepo: BlocksRepository,
     private readonly messageNotifications: CommunityMessageNotificationsService,
     private readonly gateway: CommunityMessagingGateway,
+    private readonly autoReply: CommunityChatAutoReplyService,
     private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
@@ -144,6 +158,30 @@ export class CommunityMessagingService {
     dto: SendMessageDto,
     actor: AuthenticatedUser,
   ): Promise<MessageResponseDto> {
+    return this.enviar(conversationId, dto, actor.id, true);
+  }
+
+  /**
+   * El envío de verdad.
+   *
+   * Separado de `sendMessage` por dos cosas que la API pública no tiene por qué
+   * conocer: **quién queda como autor de la fila** —un `userId` y no un actor,
+   * porque la respuesta automática la manda el sistema en nombre de alguien que
+   * no tiene sesión abierta— y **si evaluar el contestador**, que es lo que
+   * impide que dos ausentes se contesten en bucle.
+   *
+   * @param conversationId - La conversación.
+   * @param dto - Quién escribe y qué.
+   * @param actorUserId - Qué usuario queda como autor de la fila, si alguno.
+   * @param evaluarRespuestaAutomatica - `false` para el propio mensaje
+   *   automático: no se contesta a un contestador.
+   */
+  private async enviar(
+    conversationId: string,
+    dto: SendMessageDto,
+    actorUserId: string | undefined,
+    evaluarRespuestaAutomatica: boolean,
+  ): Promise<MessageResponseDto> {
     this.logger.info(
       { operation: 'community.message.send', conversationId },
       'Sending direct message',
@@ -210,12 +248,12 @@ export class CommunityMessagingService {
         attachmentFileId: dto.attachmentFileId,
         statusConceptId: COMM.MESSAGE_SENT,
         sentAt: now,
-        actorUserId: actor.id,
+        actorUserId: actorUserId,
       });
 
       conversation.messageCount = (conversation.messageCount ?? 0) + 1;
       conversation.lastMessageAt = now;
-      touch(conversation, actor.id);
+      touch(conversation, actorUserId);
       await tx.flush();
 
       // Recibos de entregado para el resto de participantes (append-only).
@@ -225,7 +263,7 @@ export class CommunityMessagingService {
           directMessageId: message.id,
           recipientProfileId: p.participantProfileId,
           receiptTypeConceptId: COMM.RECEIPT_DELIVERED,
-          recordedByUserId: actor.id,
+          recordedByUserId: actorUserId,
         });
       }
 
@@ -256,7 +294,7 @@ export class CommunityMessagingService {
       conversationId,
       dto.senderProfileId,
       enviado.destinatarios,
-      actor.id,
+      actorUserId,
     );
 
     // Empuje en vivo por WS — mismo criterio que la notificación: después del
@@ -278,11 +316,85 @@ export class CommunityMessagingService {
       enviado.destinatarios,
     );
 
+    // F4.7 · La respuesta automática de quien recibió, si corresponde.
+    //
+    // Después del commit y en su propia transacción: el mensaje de la persona
+    // ya está guardado y entregado, así que nada de lo que pase acá puede
+    // hacerlo desaparecer. Y no lanza — que el contestador falle no puede
+    // convertir un envío correcto en un error para quien escribió.
+    //
+    // **No se evalúa el contestador del mensaje automático.** Es la condición
+    // que corta el bucle: con dos personas ausentes y las dos con respuesta
+    // automática encendida, cada aviso dispararía el del otro para siempre.
+    if (evaluarRespuestaAutomatica) {
+      await this.responderSolo(conversationId, enviado.destinatarios);
+    }
+
     return {
       id: enviado.id,
       conversationId: enviado.conversationId,
       sentAt: enviado.sentAt,
     };
+  }
+
+  /**
+   * Contesta por cada destinatario que tenga la respuesta automática activa.
+   *
+   * ## Por qué el mensaje sale como suyo y no como un aviso del sistema
+   *
+   * Porque es suyo: lo escribió y lo configuró. Un mensaje de sistema no se
+   * podría responder ni citar, y quien recibe «no estoy disponible» muchas
+   * veces quiere contestar a eso mismo.
+   *
+   * ## Por qué el actor es el del envío original
+   *
+   * No hay sesión del titular —justamente, está ausente—. El perfil que firma
+   * el mensaje es el suyo (`senderProfileId`), y `created_by_user_id` queda con
+   * el usuario que disparó la cadena, que es la traza real de por qué existe esa
+   * fila. Registrarlo como si el titular hubiera estado sería peor: diría que
+   * alguien escribió cuando no estaba.
+   *
+   * @param conversationId - Dónde llegó el mensaje.
+   * @param senderProfileId - Quién escribió, para no contestarse a sí mismo.
+   * @param destinatarios - A quiénes les llegó.
+   */
+  private async responderSolo(
+    conversationId: string,
+    destinatarios: readonly string[],
+  ): Promise<void> {
+    for (const destinatario of destinatarios) {
+      try {
+        // La evaluación y la marca del descanso van en una transacción, y el
+        // envío en otra: si el envío falla, la marca se revierte con ella y el
+        // próximo mensaje vuelve a intentarlo en vez de quedar en silencio.
+        const texto = await this.em.transactional((tx) =>
+          this.autoReply.textoParaResponder(tx, conversationId, destinatario),
+        );
+        if (texto === null) {
+          continue;
+        }
+        // Sin `actorUserId`: `created_by_user_id` queda nulo a propósito. Nadie
+        // apretó enviar —el titular está ausente, que es la razón de que exista
+        // este mensaje—, y anotar un usuario diría que sí lo hizo. El mensaje
+        // igual es suyo: lo firma su perfil, que es lo que ve la otra persona.
+        await this.enviar(
+          conversationId,
+          { senderProfileId: destinatario, bodyText: texto },
+          undefined,
+          false,
+        );
+      } catch (error) {
+        this.logger.warn(
+          {
+            operation: 'community.message.auto-reply',
+            conversationId,
+            destinatario,
+            err: error,
+          },
+          'No se pudo mandar la respuesta automática',
+        );
+      }
+    }
   }
 
   /** UC-19-07: marca la conversación como leída para un participante. */
@@ -422,6 +534,7 @@ export class CommunityMessagingService {
         messageId,
         dto.senderProfileId,
       );
+      this.assertDentroDeLaVentanaDeEdicion(message, conversationId, messageId);
 
       message.bodyText = dto.bodyText;
       message.isEdited = true;
@@ -617,6 +730,51 @@ export class CommunityMessagingService {
   }
 
   /** Un mensaje de este hilo, escrito por este perfil y no eliminado. */
+  /**
+   * Rechaza la edición de un mensaje que ya salió de la ventana.
+   *
+   * ## Por qué existe
+   *
+   * Editar sin plazo deja reescribir para siempre lo que la otra persona ya
+   * leyó —y en un chat clínico eso es una indicación médica que cambia debajo
+   * de quien la recibió—. El cliente ya no ofrece «Editar» pasada la ventana,
+   * pero **una pantalla no es una barrera**: la regla tiene que estar donde se
+   * decide, que es acá.
+   *
+   * ## Contra `sent_at`, no contra el reloj de quien edita
+   *
+   * `sent_at` lo puso el servidor al aceptar el mensaje. Medir contra la hora
+   * que mande el cliente dejaría la ventana en manos de su reloj.
+   *
+   * Un mensaje **sin** `sent_at` no se edita: sin marca de envío no hay plazo
+   * que medir, y dar por buena la edición sería abrir la ventana para siempre
+   * justo en el caso raro.
+   */
+  private assertDentroDeLaVentanaDeEdicion(
+    message: DirectMessages,
+    conversationId: string,
+    messageId: string,
+  ): void {
+    const enviado = message.sentAt;
+    if (!enviado) {
+      throw new PreconditionFailedException(
+        'El mensaje no tiene marca de envío: no se puede editar',
+        { conversationId, messageId },
+      );
+    }
+    const transcurrido = Date.now() - enviado.getTime();
+    if (transcurrido > VENTANA_DE_EDICION_MS) {
+      throw new PreconditionFailedException(
+        'Pasaron más de 5 minutos: el mensaje ya no se puede editar',
+        {
+          conversationId,
+          messageId,
+          ventanaMinutos: VENTANA_DE_EDICION_MS / 60_000,
+        },
+      );
+    }
+  }
+
   private async mensajePropioVivo(
     em: EntityManager,
     conversationId: string,

@@ -23,6 +23,7 @@ import {
 } from '../../../common';
 import {
   CommunitySocialService,
+  CommunityChatAutoReplyService,
   CommunitySocialReadService,
 } from '../services';
 import {
@@ -38,7 +39,9 @@ import {
   CommentResponseDto,
   ReactionResponseDto,
   IdResponseDto,
+  ChatAutoReplyDto,
   PublicProfileDetailDto,
+  UpsertChatAutoReplyDto,
   PostPageDto,
   PostDetailDto,
   CommentThreadPageDto,
@@ -71,10 +74,12 @@ export class CommunitySocialController {
    *
    * @param service - Escrituras del grafo social.
    * @param readService - Lecturas del grafo social.
+   * @param autoReplyService - La respuesta automática por inactividad (F4.7).
    */
   constructor(
     private readonly service: CommunitySocialService,
     private readonly readService: CommunitySocialReadService,
+    private readonly autoReplyService: CommunityChatAutoReplyService,
   ) {}
 
   /** Bootstrap: crea el perfil público (nodo raíz social). */
@@ -277,6 +282,42 @@ export class CommunitySocialController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PublicProfileDetailDto> {
     return this.readService.getProfileBySlug(slug, actor);
+  }
+
+  /**
+   * F4.7 · La respuesta automática por inactividad de un perfil.
+   *
+   * **Va declarada antes que `profiles/:profileId`**, por el mismo motivo que
+   * `by-slug`: el router prueba en orden.
+   *
+   * `null` cuando nunca se configuró — que no es lo mismo que estar apagada, y
+   * la pantalla los dibuja distinto.
+   */
+  @Get('profiles/:profileId/auto-reply')
+  @ApiOperation({ summary: 'Respuesta automática por inactividad del perfil' })
+  getAutoReply(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ChatAutoReplyDto | null> {
+    return this.autoReplyService.get(profileId, actor);
+  }
+
+  /**
+   * F4.7 · Configura la respuesta automática del perfil.
+   *
+   * `PUT` y no `PATCH`: hay **una sola fila por perfil** y se manda entera, así
+   * que quien configura no tiene que saber si ya existía. Sólo el titular del
+   * perfil — lo comprueba el servicio, que es donde hay base para comprobarlo.
+   */
+  @Put('profiles/:profileId/auto-reply')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Configurar la respuesta automática del perfil' })
+  upsertAutoReply(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: UpsertChatAutoReplyDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ChatAutoReplyDto> {
+    return this.autoReplyService.upsert(profileId, dto, actor);
   }
 
   /** Ficha del perfil, con sellos de verificación y prestigio. */

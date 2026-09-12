@@ -67,7 +67,10 @@ export class CommunityMessageNotificationsService {
     conversationId: string,
     remitenteProfileId: string,
     destinatarioProfileIds: readonly string[],
-    actorUserId: string,
+    // Opcional desde F4.7: la respuesta automática la manda el sistema en
+    // nombre de alguien que no tiene sesión abierta, así que no hay usuario
+    // que anotar como autor.
+    actorUserId: string | undefined,
   ): Promise<void> {
     try {
       const em = this.em.fork();

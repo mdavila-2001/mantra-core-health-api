@@ -38,13 +38,21 @@ function build() {
     listBookmarks: mockFn(),
     listBlocks: mockFn(),
   };
+  // F4.7 · la respuesta automática. El controlador sólo delega; la regla se
+  // prueba en `community-chat-auto-reply.service.spec.ts`.
+  const autoReplyService = {
+    get: mockFn(),
+    upsert: mockFn(),
+  };
   return {
     controller: new CommunitySocialController(
       service as any,
       readService as any,
+      autoReplyService as any,
     ),
     service,
     readService,
+    autoReplyService,
   };
 }
 

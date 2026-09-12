@@ -24,6 +24,7 @@ import {
   SOCIAL_OBJECT_CONCEPT_BY_CODE,
 } from '../community.concepts';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { KIND_BY_TARGET_CONCEPT } from './community-public.service';
 import {
   CommunityEngagementService,
   type PostEngagement,
@@ -174,6 +175,9 @@ export class CommunitySocialReadService {
       id: profile.id,
       tenantId: profile.tenantId,
       targetTypeConceptId: profile.targetTypeConceptId,
+      // La vertical en claro, del mismo mapa que usa el buscador anónimo. Sin
+      // esto el cliente no puede saber a qué URL pública lleva un perfil.
+      kind: KIND_BY_TARGET_CONCEPT[profile.targetTypeConceptId] ?? null,
       slug: profile.slug,
       displayName: profile.displayName,
       headline: profile.headline ?? null,

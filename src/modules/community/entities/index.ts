@@ -1,4 +1,5 @@
 export * from './bookmarks.entity';
+export * from './chat_auto_replies.entity';
 export * from './comment_media.entity';
 export * from './comments.entity';
 export * from './content_hashtags.entity';

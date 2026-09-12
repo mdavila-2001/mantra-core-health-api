@@ -57,16 +57,24 @@ function build() {
   const visibility = {
     assertActsAsProfile: mockFn().mockResolvedValue(undefined),
   };
+  // F4.7 · la respuesta automática, doblada: enviar se prueba acá, contestar
+  // solo se prueba en su propio servicio. Por defecto no contesta nadie, que
+  // es el caso de todo perfil que no la configuró.
+  const autoReply = {
+    textoParaResponder: mockFn().mockResolvedValue(null),
+  };
   const service = new CommunityMessagingService(
     em as any,
     conversationsRepo as any,
     blocksRepo as any,
     messageNotifications as any,
     gateway as any,
+    autoReply as any,
     visibility as any,
     logger as any,
   );
   return {
+    autoReply,
     service,
     tx,
     conversationsRepo,
@@ -323,6 +331,13 @@ describe('CommunityMessagingService', () => {
   /* --- F4.5 · editar y borrar ---------------------------------------------- */
 
   describe('editMessage / deleteMessage (F4.5)', () => {
+    /**
+     * Un mensaje recién enviado.
+     *
+     * `sentAt` va en el molde y no en cada prueba porque **todo mensaje que
+     * aceptó el servidor lo tiene**: es lo que le pone `sendMessage` al
+     * confirmarlo, y es contra eso que se mide la ventana de edición.
+     */
     const mensaje = (extra: Record<string, unknown> = {}): any => ({
       id: 'm1',
       conversationId: 'conv1',
@@ -330,9 +345,14 @@ describe('CommunityMessagingService', () => {
       contentTypeConceptId: 'ct',
       bodyText: 'hola',
       isEdited: false,
+      sentAt: new Date(),
       updatedAt: new Date(),
       ...extra,
     });
+
+    /** Hace `minutos` que se mandó. */
+    const haceMinutos = (minutos: number): Date =>
+      new Date(Date.now() - minutos * 60_000);
 
     it('edita un mensaje propio, lo marca editado y lo empuja actualizado', async () => {
       const d = build();
@@ -363,6 +383,98 @@ describe('CommunityMessagingService', () => {
         expect.objectContaining({ id: 'm1', isEdited: true }),
         ['p2'],
       );
+    });
+
+    it('no deja editar pasados los cinco minutos', async () => {
+      // La barrera es el servidor, no la pantalla: el cliente deja de ofrecer
+      // «Editar» al vencer la ventana, pero un `PATCH` a mano llega igual.
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue(
+        mensaje({ sentAt: haceMinutos(6) }),
+      );
+
+      await expect(
+        d.service.editMessage(
+          'conv1',
+          'm1',
+          { senderProfileId: 'p1', bodyText: 'tarde' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      // Y no se empuja nada: no hubo edición que contar.
+      expect(d.gateway.emitMessageUpdated).not.toHaveBeenCalled();
+    });
+
+    it('deja editar dentro de la ventana', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue(
+        mensaje({ sentAt: haceMinutos(4) }),
+      );
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+        { participantProfileId: 'p2' },
+      ]);
+
+      await expect(
+        d.service.editMessage(
+          'conv1',
+          'm1',
+          { senderProfileId: 'p1', bodyText: 'a tiempo' },
+          actor,
+        ),
+      ).resolves.toMatchObject({ bodyText: 'a tiempo', isEdited: true });
+    });
+
+    it('un mensaje sin marca de envío no se edita', async () => {
+      // Sin `sent_at` no hay plazo que medir, y darlo por bueno dejaría la
+      // ventana abierta para siempre justo en el caso raro.
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue(
+        mensaje({ sentAt: null }),
+      );
+
+      await expect(
+        d.service.editMessage(
+          'conv1',
+          'm1',
+          { senderProfileId: 'p1', bodyText: 'x' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('la ventana no estorba al borrado: un mensaje viejo se elimina igual', async () => {
+      // Editar y eliminar son cosas distintas. Reescribir lo que el otro leyó
+      // tiene plazo; retirarlo, no — y la bitácora del mensaje sobrevive porque
+      // el borrado es lógico.
+      const d = build();
+      const m = mensaje({ sentAt: haceMinutos(600) });
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part',
+      });
+      d.conversationsRepo.findMessageInConversation.mockResolvedValue(m);
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'conv1',
+        pinnedMessageId: null,
+        updatedAt: new Date(),
+      });
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+        { participantProfileId: 'p2' },
+      ]);
+
+      await expect(
+        d.service.deleteMessage('conv1', 'm1', 'p1', actor),
+      ).resolves.toBeDefined();
     });
 
     it('sólo el autor edita o elimina', async () => {

@@ -56,6 +56,20 @@ export class ConversationParticipants {
   })
   mutedUntil?: Date;
 
+  /**
+   * Cuándo se mandó la última respuesta automática en esta conversación (F4.7).
+   *
+   * Es la marca del descanso entre avisos, y vive en la fila del participante
+   * **que responde**: eso la hace única por (conversación, perfil) sin una
+   * tabla de bitácora que diría lo mismo con un join.
+   */
+  @Property({
+    fieldName: 'last_auto_reply_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  lastAutoReplyAt?: Date;
+
   /** Marcada como favorita por este participante (F4.4). */
   @Property({ fieldName: 'is_favorite', type: 'boolean', default: false })
   isFavorite: boolean = false;
