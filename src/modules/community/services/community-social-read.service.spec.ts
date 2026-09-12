@@ -140,6 +140,39 @@ describe('CommunitySocialReadService', () => {
       expect(res.prestige?.totalPoints).toBe('120');
     });
 
+    it('dice la vertical en claro, para que el cliente sepa a qué URL lleva', async () => {
+      // El cliente no tiene la tabla de terminología: sin este campo tendría
+      // que adivinar el prefijo público (`/p`, `/o`, `/f`, `/l`, `/s`) a partir
+      // de un uuid, o no ofrecer el enlace nunca.
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({
+        ...perfil,
+        targetTypeConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
+      });
+      d.profilesRepo.listBadgesBySubject.mockResolvedValue([]);
+      d.prestigeRepo.findScoreByProfile.mockResolvedValue(null);
+
+      const res = await d.service.getProfile('p-1', actor);
+
+      expect(res.kind).toBe('PRACTITIONER');
+      // Y el concepto sigue viajando: el campo nuevo no reemplaza nada.
+      expect(res.targetTypeConceptId).toBe(COMM.PROFILE_TARGET_PRACTITIONER);
+    });
+
+    it('el perfil de un paciente no declara vertical: no tiene ficha pública', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({
+        ...perfil,
+        targetTypeConceptId: COMM.PROFILE_TARGET_USER,
+      });
+      d.profilesRepo.listBadgesBySubject.mockResolvedValue([]);
+      d.prestigeRepo.findScoreByProfile.mockResolvedValue(null);
+
+      const res = await d.service.getProfile('p-1', actor);
+
+      expect(res.kind).toBeNull();
+    });
+
     it('404 si el perfil no existe', async () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue(null);

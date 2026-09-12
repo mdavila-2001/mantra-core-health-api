@@ -70,8 +70,18 @@ const EARTH_RADIUS_KM = 6371;
 /** Largo máximo del texto buscado. */
 const MAX_QUERY_LENGTH = 120;
 
-/** Tipo de sujeto → tipo de resultado del contrato público. */
-const KIND_BY_TARGET_CONCEPT: Record<string, PublicResultKind> = {
+/**
+ * Tipo de sujeto → tipo de resultado del contrato público.
+ *
+ * Se exporta porque la ficha con sesión (`getProfile`) necesita decir la misma
+ * vertical que el buscador anónimo: dos tablas equivalentes se separan la
+ * primera vez que nazca una vertical nueva.
+ *
+ * `PROFILE_TARGET_USER` —el perfil de un paciente— **no está**, y no es un
+ * olvido: no tiene ficha pública, así que su vertical es `null` y quien la lea
+ * sabe que no hay a dónde enlazar.
+ */
+export const KIND_BY_TARGET_CONCEPT: Record<string, PublicResultKind> = {
   [COMM.PROFILE_TARGET_PRACTITIONER]: 'PRACTITIONER',
   [COMM.PROFILE_TARGET_ORGANIZATION]: 'ORGANIZATION',
   [COMM.PROFILE_TARGET_PHARMACY]: 'PHARMACY',

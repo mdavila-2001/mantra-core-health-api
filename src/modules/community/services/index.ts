@@ -1,3 +1,4 @@
+export * from './community-chat-auto-reply.service';
 export * from './community-social.service';
 export * from './community-messaging.service';
 export * from './community-moderation.service';

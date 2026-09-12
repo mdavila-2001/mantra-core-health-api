@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+import type { PublicResultKind } from './public-search.dto';
+
 /**
  * Sello de verificación vigente de un perfil (`community.verified_badges`).
  *
@@ -60,6 +62,29 @@ export class PublicProfileDetailDto {
   /** Concept id del tipo de sujeto (usuario, profesional, organización). */
   @ApiProperty({ format: 'uuid' })
   targetTypeConceptId!: string;
+
+  /**
+   * La vertical en claro, o `null` si este perfil no tiene ficha pública.
+   *
+   * `targetTypeConceptId` es un uuid de terminología y el cliente **no tiene su
+   * tabla**: sin esto tendría que adivinar a qué URL pública lleva un perfil
+   * —`/p`, `/o`, `/f`, `/l`, `/s`— o no ofrecer el enlace nunca. Es el mismo
+   * valor que publica el buscador anónimo, del mismo mapa.
+   *
+   * `null` en el perfil de un paciente: no se publica, y decirlo es parte de la
+   * respuesta.
+   */
+  @ApiPropertyOptional({
+    enum: [
+      'PRACTITIONER',
+      'ORGANIZATION',
+      'PHARMACY',
+      'DIAGNOSTIC_UNIT',
+      'INSURER',
+    ],
+    nullable: true,
+  })
+  kind?: PublicResultKind | null;
 
   /** Ruta pública del perfil. */
   @ApiProperty()
