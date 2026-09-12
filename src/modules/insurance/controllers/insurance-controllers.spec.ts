@@ -78,6 +78,8 @@ describe('Insurance controllers (delegación)', () => {
       createProduct: mockFn().mockResolvedValue({ id: ID }),
       createPlan: mockFn().mockResolvedValue({ id: ID }),
       createBenefit: mockFn().mockResolvedValue({ id: ID }),
+      updateBenefit: mockFn().mockResolvedValue({ ok: true }),
+      updateBenefitRules: mockFn().mockResolvedValue({ ok: true }),
       createProviderNetwork: mockFn().mockResolvedValue({ id: ID }),
       addMembership: mockFn().mockResolvedValue({ id: ID }),
       createBroker: mockFn().mockResolvedValue({ id: ID }),
@@ -89,6 +91,14 @@ describe('Insurance controllers (delegación)', () => {
     expect(service.createCarrier).toHaveBeenCalledWith(dto, actor);
     await c.createProduct(ID, dto, actor);
     expect(service.createProduct).toHaveBeenCalledWith(ID, dto, actor);
+    await c.createPlan(ID, dto, actor);
+    expect(service.createPlan).toHaveBeenCalledWith(ID, dto, actor);
+    await c.createBenefit(ID, dto, actor);
+    expect(service.createBenefit).toHaveBeenCalledWith(ID, dto, actor);
+    await c.updateBenefit(ID, ID, dto, actor);
+    expect(service.updateBenefit).toHaveBeenCalledWith(ID, ID, dto, actor);
+    await c.updateBenefitRules(ID, ID, dto, actor);
+    expect(service.updateBenefitRules).toHaveBeenCalledWith(ID, ID, dto, actor);
     await c.createBroker(dto, actor);
     expect(service.createBroker).toHaveBeenCalledWith(dto, actor);
     await c.createEmployerGroup(dto, actor);
@@ -143,10 +153,10 @@ describe('Insurance controllers (delegación)', () => {
     };
     const c = new InsuranceReadController(service as never) as any;
 
-    expect(await c.listCarriers()).toEqual({ items: [], count: 0 });
-    expect(service.listCarriers).toHaveBeenCalledWith();
-    await c.getCarrier(ID);
-    expect(service.getCarrier).toHaveBeenCalledWith(ID);
+    expect(await c.listCarriers(actor)).toEqual({ items: [], count: 0 });
+    expect(service.listCarriers).toHaveBeenCalledWith(actor);
+    await c.getCarrier(ID, actor);
+    expect(service.getCarrier).toHaveBeenCalledWith(ID, actor);
     await c.listBrokers();
     expect(service.listBrokers).toHaveBeenCalledWith();
     await c.getBroker(ID);
@@ -177,6 +187,30 @@ describe('Insurance controllers (delegación)', () => {
       );
       expect(roles).toBeUndefined();
     }
+  });
+
+  it('plan y cobertura delegan autorización al tenant; soporte conserva rol global', () => {
+    const roles = (method: string): string[] | undefined =>
+      Reflect.getMetadata(
+        'requiredRoles',
+        (
+          InsuranceBackboneController.prototype as never as Record<
+            string,
+            object
+          >
+        )[method],
+      );
+
+    for (const method of [
+      'createPlan',
+      'createBenefit',
+      'updateBenefit',
+      'updateBenefitRules',
+    ]) {
+      expect(roles(method)).toBeUndefined();
+    }
+    expect(roles('createProduct')).toEqual(['SECURITY_ADMIN']);
+    expect(roles('createCarrier')).toEqual(['SECURITY_ADMIN']);
   });
 
   /**

@@ -73,6 +73,10 @@ export class CarrierSummaryDto {
   /** Alta de la fila. */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: string;
+
+  /** Si el actor puede administrar planes y coberturas de esta aseguradora. */
+  @ApiProperty()
+  canAdminister!: boolean;
 }
 
 /** Listado de aseguradoras del tenant activo. No pagina: hay una por tenant. */
@@ -87,6 +91,17 @@ export class CarrierDirectoryResponseDto {
 }
 
 /** Un beneficio de un plan, con sus topes económicos. */
+export class BenefitApprovalRulesDto {
+  @ApiProperty({
+    enum: ['FIRMA_MEDICO', 'SELLO_MEDICO', 'ORDEN_MEDICA', 'INFORME_CLINICO'],
+    isArray: true,
+  })
+  requiredDocuments!: string[];
+
+  @ApiProperty({ nullable: true, type: String })
+  exclusionNotes!: string | null;
+}
+
 export class PlanBenefitDto {
   /** Identificador del beneficio. */
   @ApiProperty({ format: 'uuid' })
@@ -125,6 +140,10 @@ export class PlanBenefitDto {
   /** Si la prestación exige autorización previa. */
   @ApiProperty({ nullable: true, type: Boolean })
   requiresPriorAuthorization!: boolean | null;
+
+  /** Reglas de documentos y exclusión normalizadas para la consola. */
+  @ApiProperty({ type: BenefitApprovalRulesDto })
+  approvalRules!: BenefitApprovalRulesDto;
 
   /** Inicio de vigencia (fecha, sin hora). */
   @ApiProperty({ nullable: true, type: String })

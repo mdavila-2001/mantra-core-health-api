@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { requireTenantId, ResourceNotFoundException } from '../../../common';
+import {
+  requireTenantId,
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
+import { TenantAdministrationService } from '../../directory/services';
 import type { CatalogConcepts } from '../../terminology/entities';
 import type {
   BrokerCarrierAgreements,
@@ -12,6 +17,7 @@ import type {
   ProviderNetworks,
 } from '../entities';
 import { INS } from '../insurance.concepts';
+import { APPROVAL_DOCUMENT_CODES } from '../dto/backbone.dto';
 import type {
   BrokerAgreementDto,
   BrokerDirectoryResponseDto,
@@ -58,6 +64,7 @@ export class InsuranceReadService {
   constructor(
     private readonly em: EntityManager,
     private readonly readRepo: InsuranceReadRepository,
+    private readonly tenantAdministration: TenantAdministrationService,
   ) {}
 
   /**
@@ -65,11 +72,18 @@ export class InsuranceReadService {
    *
    * @returns Listado con recuentos de productos, planes y redes.
    */
-  async listCarriers(): Promise<CarrierDirectoryResponseDto> {
+  async listCarriers(
+    actor: AuthenticatedUser,
+  ): Promise<CarrierDirectoryResponseDto> {
     const tenantId = requireTenantId();
     const em = this.em.fork();
     const carriers = await this.readRepo.findCarriersByTenant(em, tenantId);
     if (carriers.length === 0) return { items: [], count: 0 };
+    const canAdminister = await this.tenantAdministration.canAdminister(
+      em,
+      tenantId,
+      actor,
+    );
 
     const carrierIds = carriers.map((carrier) => carrier.id);
     const [products, networks] = await Promise.all([
@@ -100,7 +114,7 @@ export class InsuranceReadService {
     const networkCount = countBy(networks, (n) => n.insuranceCarrierId);
 
     const items = carriers.map((carrier) =>
-      this.toCarrierSummary(carrier, conceptById, {
+      this.toCarrierSummary(carrier, conceptById, canAdminister, {
         productCount: productCount.get(carrier.id) ?? 0,
         planCount: planCount.get(carrier.id) ?? 0,
         networkCount: networkCount.get(carrier.id) ?? 0,
@@ -116,7 +130,10 @@ export class InsuranceReadService {
    * @returns El catálogo comercial activo y la red de prestadores.
    * @throws ResourceNotFoundException si no pertenece al tenant activo.
    */
-  async getCarrier(id: string): Promise<CarrierDetailDto> {
+  async getCarrier(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<CarrierDetailDto> {
     const tenantId = requireTenantId();
     const em = this.em.fork();
     const carrier = await this.readRepo.findCarrierByTenant(em, tenantId, id);
@@ -125,6 +142,11 @@ export class InsuranceReadService {
         carrierId: id,
       });
     }
+    const canAdminister = await this.tenantAdministration.canAdminister(
+      em,
+      tenantId,
+      actor,
+    );
 
     const [products, networks] = await Promise.all([
       this.readRepo.findActiveProducts(em, [carrier.id]),
@@ -173,7 +195,7 @@ export class InsuranceReadService {
     const plansByProduct = groupBy(plans, (p) => p.insuranceProductId);
     const memberCount = countBy(memberships, (m) => m.providerNetworkId);
 
-    const summary = this.toCarrierSummary(carrier, conceptById, {
+    const summary = this.toCarrierSummary(carrier, conceptById, canAdminister, {
       productCount: products.length,
       planCount: plans.length,
       networkCount: networks.length,
@@ -344,6 +366,7 @@ export class InsuranceReadService {
   private toCarrierSummary(
     carrier: InsuranceCarriers,
     concepts: ReadonlyMap<string, CatalogConcepts>,
+    canAdminister: boolean,
     counts: {
       /** Productos activos. */
       productCount: number;
@@ -365,6 +388,7 @@ export class InsuranceReadService {
       planCount: counts.planCount,
       networkCount: counts.networkCount,
       createdAt: carrier.createdAt.toISOString(),
+      canAdminister,
     };
   }
 
@@ -489,8 +513,31 @@ function toBenefit(
     deductibleAmount: benefit.deductibleAmount ?? null,
     annualLimitAmount: benefit.annualLimitAmount ?? null,
     requiresPriorAuthorization: benefit.requiresPriorAuthorization ?? null,
+    approvalRules: normalizeApprovalRules(benefit.eligibilityRuleJson),
     effectiveFrom: dateOnly(benefit.effectiveFrom),
     effectiveTo: dateOnly(benefit.effectiveTo),
+  };
+}
+
+function normalizeApprovalRules(
+  value: unknown,
+): PlanBenefitDto['approvalRules'] {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return { requiredDocuments: [], exclusionNotes: null };
+  }
+  const candidate = value as Record<string, unknown>;
+  const allowed = new Set<string>(APPROVAL_DOCUMENT_CODES);
+  const requiredDocuments = Array.isArray(candidate.requiredDocuments)
+    ? candidate.requiredDocuments.filter(
+        (item): item is string => typeof item === 'string' && allowed.has(item),
+      )
+    : [];
+  return {
+    requiredDocuments: [...new Set(requiredDocuments)],
+    exclusionNotes:
+      typeof candidate.exclusionNotes === 'string'
+        ? candidate.exclusionNotes
+        : null,
   };
 }
 

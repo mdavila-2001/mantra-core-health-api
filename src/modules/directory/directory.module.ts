@@ -5,8 +5,8 @@ import { InsuranceModule } from '../insurance/insurance.module';
 import { TerminologyModule } from '../terminology/terminology.module';
 import { CommonModule } from '../common/common.module';
 import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
+import { DirectoryAuthorizationModule } from './directory-authorization.module';
 import {
-  TenantAdministrationService,
   TenantTypeProfileService,
   AffiliationDocumentConceptsService,
   TenantAffiliationDocumentsService,
@@ -21,7 +21,6 @@ import { AdminTenantsController, TenantsController } from './controllers';
 import {
   TenantsRepository,
   BranchesRepository,
-  TenantMembershipsRepository,
   BranchMembershipsRepository,
   DirectoryTenantLegalRepository,
 } from './repositories';
@@ -55,18 +54,17 @@ import {
     TerminologyModule,
     DiagnosticUnitsModule,
     CommonModule,
+    DirectoryAuthorizationModule,
   ],
   controllers: [AdminTenantsController, TenantsController],
   providers: [
     TenantTypeProfileService,
-    TenantAdministrationService,
     AffiliationDocumentConceptsService,
     TenantAffiliationDocumentsService,
     TenantLegalRepresentativesService,
     // Repositorios
     TenantsRepository,
     BranchesRepository,
-    TenantMembershipsRepository,
     BranchMembershipsRepository,
     DirectoryTenantLegalRepository,
     // Servicios
@@ -89,9 +87,8 @@ import {
   // autorregistro de organización, igual que `TenantTypeProfileService`.
   exports: [
     TenantsRepository,
-    TenantMembershipsRepository,
+    DirectoryAuthorizationModule,
     TenantTypeProfileService,
-    TenantAdministrationService,
     DirectoryMembershipsService,
     TenantAffiliationDocumentsService,
     // `TenantLegalRepresentativesService` lo necesita `iam` para el

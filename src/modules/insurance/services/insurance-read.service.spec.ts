@@ -10,6 +10,7 @@ import { InsuranceReadService } from './insurance-read.service';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 const TENANT = 'tenant-a';
+const ACTOR = { id: 'user-a', roles: ['USER'] } as never;
 
 const CARRIER_ACTIVE = {
   id: INS.CARRIER_ACTIVE,
@@ -107,14 +108,21 @@ function build() {
       CLIENT_TYPE,
     ]),
   };
-  const service = new InsuranceReadService(em as any, repo as any);
-  return { service, repo };
+  const tenantAdministration = {
+    canAdminister: mockFn().mockResolvedValue(true),
+  };
+  const service = new InsuranceReadService(
+    em as any,
+    repo as any,
+    tenantAdministration as any,
+  );
+  return { service, repo, tenantAdministration };
 }
 
 describe('InsuranceReadService', () => {
   it('exige el tenant del contexto en vez de aceptar uno del cliente', async () => {
     const d = build();
-    await expect(d.service.listCarriers()).rejects.toBeInstanceOf(
+    await expect(d.service.listCarriers(ACTOR)).rejects.toBeInstanceOf(
       PreconditionFailedException,
     );
     await expect(d.service.listBrokers()).rejects.toBeInstanceOf(
@@ -126,7 +134,9 @@ describe('InsuranceReadService', () => {
     const d = build();
     d.repo.findCarriersByTenant.mockResolvedValue([carrier('c1')]);
 
-    const result = await runWithTenant(TENANT, () => d.service.listCarriers());
+    const result = await runWithTenant(TENANT, () =>
+      d.service.listCarriers(ACTOR),
+    );
 
     expect(d.repo.findCarriersByTenant).toHaveBeenCalledWith(
       expect.anything(),
@@ -134,6 +144,12 @@ describe('InsuranceReadService', () => {
     );
     expect(result.count).toBe(1);
     expect(result.items[0]?.legalName).toBe('Aseguradora c1');
+    expect(result.items[0]?.canAdminister).toBe(true);
+    expect(d.tenantAdministration.canAdminister).toHaveBeenCalledWith(
+      expect.anything(),
+      TENANT,
+      ACTOR,
+    );
   });
 
   it('cuenta planes por aseguradora atravesando el producto', async () => {
@@ -152,7 +168,9 @@ describe('InsuranceReadService', () => {
       { id: 'n1', insuranceCarrierId: 'c1' },
     ]);
 
-    const result = await runWithTenant(TENANT, () => d.service.listCarriers());
+    const result = await runWithTenant(TENANT, () =>
+      d.service.listCarriers(ACTOR),
+    );
 
     expect(result.items[0]?.productCount).toBe(2);
     expect(result.items[0]?.planCount).toBe(3);
@@ -164,7 +182,7 @@ describe('InsuranceReadService', () => {
     d.repo.findCarrierByTenant.mockResolvedValue(null);
 
     await expect(
-      runWithTenant(TENANT, () => d.service.getCarrier('otra')),
+      runWithTenant(TENANT, () => d.service.getCarrier('otra', ACTOR)),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
@@ -197,12 +215,21 @@ describe('InsuranceReadService', () => {
         benefitCategoryConceptId: INS.BENEFIT_CATEGORY_GENERAL,
         coveragePercent: '80.00',
         requiresPriorAuthorization: true,
+        eligibilityRuleJson: {
+          requiredDocuments: [
+            'FIRMA_MEDICO',
+            'FIRMA_MEDICO',
+            'DOCUMENTO_DESCONOCIDO',
+          ],
+          exclusionNotes: 'No cubre tratamientos experimentales.',
+          internalKey: true,
+        },
         effectiveFrom: new Date('2026-01-01T00:00:00.000Z'),
       },
     ]);
 
     const result = await runWithTenant(TENANT, () =>
-      d.service.getCarrier('c1'),
+      d.service.getCarrier('c1', ACTOR),
     );
 
     expect(result.products).toHaveLength(1);
@@ -213,6 +240,58 @@ describe('InsuranceReadService', () => {
     expect(result.products[0]?.plans[0]?.benefits[0]?.effectiveFrom).toBe(
       '2026-01-01',
     );
+    expect(result.products[0]?.plans[0]?.benefits[0]?.approvalRules).toEqual({
+      requiredDocuments: ['FIRMA_MEDICO'],
+      exclusionNotes: 'No cubre tratamientos experimentales.',
+    });
+    expect(
+      result.products[0]?.plans[0]?.benefits[0] as unknown as Record<
+        string,
+        unknown
+      >,
+    ).not.toHaveProperty('eligibilityRuleJson');
+  });
+
+  it('normaliza reglas ausentes o malformadas a valores vacíos', async () => {
+    const d = build();
+    d.repo.findCarrierByTenant.mockResolvedValue(carrier('c1'));
+    d.repo.findActiveProducts.mockResolvedValue([
+      {
+        id: 'p1',
+        insuranceCarrierId: 'c1',
+        productCode: 'P1',
+        name: 'Producto',
+        productTypeConceptId: INS.PRODUCT_TYPE_HEALTH,
+        statusConceptId: INS.PRODUCT_ACTIVE,
+      },
+    ]);
+    d.repo.findActivePlans.mockResolvedValue([
+      {
+        id: 'pl1',
+        insuranceProductId: 'p1',
+        planCode: 'PL1',
+        name: 'Plan',
+        statusConceptId: INS.PLAN_ACTIVE,
+      },
+    ]);
+    d.repo.findActiveBenefits.mockResolvedValue([
+      {
+        id: 'b1',
+        insurancePlanId: 'pl1',
+        benefitCategoryConceptId: INS.BENEFIT_CATEGORY_GENERAL,
+        effectiveFrom: new Date('2026-01-01'),
+        eligibilityRuleJson: ['malformado'],
+      },
+    ]);
+
+    const result = await runWithTenant(TENANT, () =>
+      d.service.getCarrier('c1', ACTOR),
+    );
+
+    expect(result.products[0]?.plans[0]?.benefits[0]?.approvalRules).toEqual({
+      requiredDocuments: [],
+      exclusionNotes: null,
+    });
   });
 
   it('cuenta los prestadores de cada red', async () => {
@@ -233,7 +312,7 @@ describe('InsuranceReadService', () => {
     ]);
 
     const result = await runWithTenant(TENANT, () =>
-      d.service.getCarrier('c1'),
+      d.service.getCarrier('c1', ACTOR),
     );
 
     expect(result.networks[0]?.memberCount).toBe(2);
@@ -362,7 +441,9 @@ describe('InsuranceReadService', () => {
     d.repo.findCarriersByTenant.mockResolvedValue([carrier('c1')]);
     d.repo.findConcepts.mockResolvedValue([]);
 
-    const result = await runWithTenant(TENANT, () => d.service.listCarriers());
+    const result = await runWithTenant(TENANT, () =>
+      d.service.listCarriers(ACTOR),
+    );
 
     expect(result.items[0]?.status).toEqual({
       code: 'UNKNOWN',

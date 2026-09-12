@@ -1,4 +1,5 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
+import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -48,8 +49,10 @@ export class InsuranceReadController {
   @Get('insurance-carriers')
   @ApiOperation({ summary: 'Listar las aseguradoras del tenant activo' })
   @ApiOkResponse({ type: CarrierDirectoryResponseDto })
-  listCarriers(): Promise<CarrierDirectoryResponseDto> {
-    return this.readService.listCarriers();
+  listCarriers(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CarrierDirectoryResponseDto> {
+    return this.readService.listCarriers(actor);
   }
 
   /**
@@ -65,8 +68,9 @@ export class InsuranceReadController {
   @ApiOkResponse({ type: CarrierDetailDto })
   getCarrier(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CarrierDetailDto> {
-    return this.readService.getCarrier(id);
+    return this.readService.getCarrier(id, actor);
   }
 
   /**
