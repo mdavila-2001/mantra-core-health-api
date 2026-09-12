@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { SchedulingProfessionalTimeService } from './scheduling-professional-time.service';
 import { PreconditionFailedException } from '../../../common';
+import { SCHED } from '../scheduling.concepts';
 
 const HP = 'aaaaaaaa-0000-0000-0000-0000000000hp';
 
@@ -128,7 +129,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
     expect(llamada[5]).toBe('bk-propia');
   });
 
-  it('solo cuentan confirmada y con paciente adentro, no lo pendiente', async () => {
+  it('cuentan confirmada, con paciente adentro y en curso, no lo pendiente', async () => {
     // Lo pendiente es una pregunta sin responder: la política de #186 lo
     // desplaza, no lo protege. Contarlo como compromiso bloquearía la agenda
     // con pedidos que quizá nadie acepte.
@@ -143,7 +144,27 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
 
     const estados =
       d.bookingsRepo.findProfessionalCommitmentsOverlapping.mock.calls[0][4];
-    expect(estados).toHaveLength(2);
+    expect(estados).toHaveLength(3);
+    expect(estados).toContain(SCHED.BOOKING_IN_PROGRESS);
+  });
+
+  it('una consulta en curso compromete el tiempo del profesional', async () => {
+    // La #3.3 (turno de mostrador WALK_IN) chocaba con la base en vez de con
+    // la regla madre: una reserva IN_PROGRESS —el paciente ya está adentro—
+    // no contaba como compromiso y `assertRangoLibre` la dejaba pasar.
+    const d = build();
+    d.bookingsRepo.findProfessionalCommitmentsOverlapping.mockResolvedValue([
+      compromiso({ statusConceptId: SCHED.BOOKING_IN_PROGRESS }),
+    ]);
+
+    await expect(
+      d.service.assertRangoLibre(
+        {} as any,
+        HP,
+        new Date('2026-09-03T14:15:00Z'),
+        new Date('2026-09-03T14:45:00Z'),
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 
   it('el tiempo ocupado bloquea igual que una cita, y se cuenta por su rótulo', async () => {

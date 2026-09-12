@@ -118,3 +118,9 @@ export {
   ListSlotsResponseDto,
 } from './scheduling-agenda.dto';
 export * from './tenant-agenda.dto';
+
+export {
+  WalkInPatientDto,
+  WalkInAppointmentDto,
+  WalkInAppointmentResponseDto,
+} from './scheduling-walk-in.dto';

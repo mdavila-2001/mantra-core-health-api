@@ -1008,6 +1008,8 @@ export class SchedulingBookingsRepository {
     const nombres = new Map<string, string>();
     if (patientProfileIds.length === 0) return nombres;
 
+    // Pasamos el contexto de transacción: el turno de mostrador crea al paciente
+    // y la cita en la misma transacción, así que esta consulta debe ver esas filas.
     const filas = await em
       .getConnection()
       .execute<{ profileId: string; displayName: string }[]>(
@@ -1017,6 +1019,8 @@ export class SchedulingBookingsRepository {
           WHERE pp.profile_id IN (?)
             AND pe.display_name IS NOT NULL`,
         [[...patientProfileIds]],
+        'all',
+        em.getTransactionContext(),
       );
 
     for (const fila of filas) {

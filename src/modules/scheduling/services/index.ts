@@ -14,3 +14,4 @@ export { SchedulingAgendaNoticesService } from './scheduling-agenda-notices.serv
 export * from './scheduling-tenant-agenda.service';
 export * from './practitioner-affiliation-gate.service';
 export * from './scheduling-professional-time.service';
+export { SchedulingWalkInService } from './scheduling-walk-in.service';
