@@ -43,6 +43,7 @@ import {
   RegisterOrganizationDto,
   RegisterOrganizationResponseDto,
 } from '../dto';
+import { IamOrganizationRepresentativesService } from './iam-organization-representatives.service';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
@@ -87,6 +88,7 @@ export class IamOrganizationSelfRegistrationService {
    * @param membershipsRepo - Valor de memberships repo requerido por la operación.
    * @param notificationsService - Valor de notifications service requerido por la operación.
    * @param affiliationDocuments - Vincula los documentos legales declarados (subtarea 1.2).
+   * @param representatives - Registra al representante legal y a las gerencias (subtarea 1.4).
    * @param logger - Valor de logger requerido por la operación.
    * @param tracing - Valor de tracing requerido por la operación.
    */
@@ -103,6 +105,7 @@ export class IamOrganizationSelfRegistrationService {
     private readonly notificationsService: NotificationsService,
     private readonly typeProfile: TenantTypeProfileService,
     private readonly affiliationDocuments: TenantAffiliationDocumentsService,
+    private readonly representatives: IamOrganizationRepresentativesService,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
   ) {
@@ -306,6 +309,27 @@ export class IamOrganizationSelfRegistrationService {
           })
         : undefined;
 
+      // 3c) Representante legal y gerencias de contacto (subtarea 1.4), si el
+      // alta las declaró. Va DESPUÉS de los documentos porque el poder
+      // notariado no puede repetir un archivo que los cinco ya reclamaron, y
+      // dentro de la misma transacción: las personas, sus contactos y sus
+      // vínculos no deben sobrevivir a un alta que termina revertida.
+      const representativesRegistered =
+        dto.organization.legalRepresentative || dto.organization.executives
+          ? (
+              await this.representatives.register(tx, {
+                tenantId: tenant.id,
+                ownerUserId: user.id,
+                legalEntityType: dto.organization.legalEntityType,
+                legalDocumentFileIds: dto.organization.legalDocuments
+                  ? Object.values(dto.organization.legalDocuments)
+                  : [],
+                legalRepresentative: dto.organization.legalRepresentative,
+                executives: dto.organization.executives,
+              })
+            ).representativesRegistered
+          : undefined;
+
       // 4) Verificación del correo. Igual que en el registro de pacientes, no
       // condiciona el acceso: el owner puede entrar y preparar su organización
       // mientras la plataforma revisa la documentación.
@@ -330,6 +354,9 @@ export class IamOrganizationSelfRegistrationService {
           ...(legalDocumentIds
             ? { legalDocuments: legalDocumentIds.length }
             : {}),
+          ...(representativesRegistered === undefined
+            ? {}
+            : { representatives: representativesRegistered }),
         },
       });
 
@@ -350,6 +377,7 @@ export class IamOrganizationSelfRegistrationService {
             ? profileId
             : undefined,
         legalDocumentsRegistered: legalDocumentIds?.length,
+        representativesRegistered,
       };
     });
 
@@ -383,6 +411,7 @@ export class IamOrganizationSelfRegistrationService {
       emailVerificationSent,
       diagnosticUnitId: created.diagnosticUnitId,
       legalDocumentsRegistered: created.legalDocumentsRegistered,
+      representativesRegistered: created.representativesRegistered,
     };
   }
 
