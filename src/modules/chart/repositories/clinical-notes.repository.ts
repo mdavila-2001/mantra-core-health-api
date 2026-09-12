@@ -189,6 +189,24 @@ export interface CreateExamFindingData {
   actorUserId?: string;
 }
 
+/** Filtro de la página de cabeceras por autor de la versión vigente. */
+export interface HeadersPageByAuthorFilter {
+  /**
+   * Perfil profesional autor de la versión vigente (`v.author_profile_id`).
+   */
+  authorProfileId: string;
+  /** Filtra además por paciente, sin ampliar el alcance por autor. */
+  patientProfileId?: string;
+  /** Desde (inclusive) sobre `h.created_at`. */
+  from?: Date;
+  /** Hasta (inclusive) sobre `h.created_at`. */
+  to?: Date;
+  /** Continuación de keyset: última fila de la página anterior. */
+  cursor?: { createdAt: Date; id: string };
+  /** Cuántas cabeceras traer. */
+  limit: number;
+}
+
 /**
  * Acceso a datos del agregado "nota clínica versionada": cabecera, versiones
  * inmutables, firmas, eventos de liberación y hallazgos de examen físico.
@@ -245,6 +263,72 @@ export class ClinicalNotesRepository {
       { patientProfileId },
       { orderBy: { createdAt: 'DESC' }, limit },
     );
+  }
+
+  /**
+   * Página de cabeceras cuya versión vigente es de un autor dado, por keyset.
+   *
+   * No hay relación mapeada entre cabecera y versión (nota de la clase): el
+   * cruce va por SQL crudo, no por `em.find`. El join es sólo para **filtrar**
+   * por `v.author_profile_id`; hidratar las cabeceras se hace después con
+   * `em.find` sobre los ids, en el orden que trajo el SQL. Es una lectura sin
+   * transacción abierta (se corre sobre un `em.fork()`), por eso no se pasa
+   * `getTransactionContext()`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filter - Autor, filtros opcionales, cursor y tope.
+   * @returns Cabeceras de la página, `limit + 1` si hay más, en el orden del SQL.
+   */
+  async findHeadersPageByAuthor(
+    em: EntityManager,
+    filter: HeadersPageByAuthorFilter,
+  ): Promise<ClinicalNoteHeaders[]> {
+    const parametros: unknown[] = [filter.authorProfileId];
+    let condiciones = '';
+
+    if (filter.patientProfileId) {
+      condiciones += ' AND h.patient_profile_id = ?';
+      parametros.push(filter.patientProfileId);
+    }
+    if (filter.from) {
+      condiciones += ' AND h.created_at >= ?';
+      parametros.push(filter.from);
+    }
+    if (filter.to) {
+      condiciones += ' AND h.created_at <= ?';
+      parametros.push(filter.to);
+    }
+    // `(a, b) < (c, d)` es comparación de tuplas de Postgres: ordena por
+    // `created_at` y desempata por `id` en una sola condición, el mismo orden
+    // del `ORDER BY`.
+    if (filter.cursor) {
+      condiciones += ' AND (h.created_at, h.id) < (?, ?)';
+      parametros.push(filter.cursor.createdAt, filter.cursor.id);
+    }
+    parametros.push(filter.limit);
+
+    const filas = await em.getConnection().execute<{ id: string }[]>(
+      `SELECT h.id
+         FROM chart.clinical_note_headers h
+         JOIN chart.clinical_note_versions v ON v.id = h.current_version_id
+        WHERE v.author_profile_id = ?
+          ${condiciones}
+        ORDER BY h.created_at DESC, h.id DESC
+        LIMIT ?`,
+      parametros,
+      'all',
+    );
+
+    if (filas.length === 0) return [];
+
+    const ids = filas.map((fila) => fila.id);
+    const cabeceras = await em.find(ClinicalNoteHeaders, { id: { $in: ids } });
+    const porId = new Map(cabeceras.map((header) => [header.id, header]));
+    // El `IN` de MikroORM no preserva el orden del SQL: se reordena según la
+    // secuencia que ya vino ordenada por `created_at DESC, id DESC`.
+    return ids
+      .map((id) => porId.get(id))
+      .filter((header): header is ClinicalNoteHeaders => Boolean(header));
   }
 
   /**
