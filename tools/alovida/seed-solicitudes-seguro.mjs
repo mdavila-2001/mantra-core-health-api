@@ -187,6 +187,28 @@ async function municipioDeLaPaz() {
   );
 }
 
+/**
+ * Departamento de expedición del CI para las altas de paciente
+ * (`register-patient` exige `issuerAdministrativeAreaConceptId` desde
+ * v4.1.4, validado contra `VS_BO_DEPARTMENT` — la validación quedó sin
+ * cubrir en este seeder hasta ahora, y sin ella ninguna alta de paciente
+ * pasaba de 422). Mismo departamento que `municipioDeLaPaz`.
+ *
+ * @returns El `conceptId` de La Paz (`VS_BO_DEPARTMENT`), o `null`.
+ */
+async function departamentoDeEmision() {
+  const res = await call(
+    'departamento de emisión (La Paz)',
+    'GET',
+    '/terminology/concepts?q=geo%3Abo%3Adepartment%3ALP&limit=10',
+  );
+  if (!res.ok) return null;
+  return (
+    (res.body?.items ?? []).find((c) => c.code === 'geo:bo:department:LP')
+      ?.conceptId ?? null
+  );
+}
+
 /** Los pacientes de la corrida. Sexo declarado, no deducido del nombre. */
 const PACIENTES = [
   { nombre: 'Teresa', apellido: 'Aruquipa', ci: '3312874', sexo: 'FEMALE', nacimiento: '1968-11-05' },
@@ -295,6 +317,13 @@ async function main() {
   const municipio = await municipioDeLaPaz();
   if (!municipio) {
     console.log('✗ El catálogo no tiene el municipio de La Paz.');
+    process.exitCode = 1;
+    return;
+  }
+
+  const departamento = await departamentoDeEmision();
+  if (!departamento) {
+    console.log('✗ El catálogo no tiene el departamento de emisión (La Paz).');
     process.exitCode = 1;
     return;
   }
@@ -458,6 +487,7 @@ async function main() {
         email: correo,
         birthDate: persona.nacimiento,
         residenceMunicipalityConceptId: municipio,
+        issuerAdministrativeAreaConceptId: departamento,
         phone: `+591 7${String(30_000_000 + indice * 317).slice(0, 7)}`,
         sexAtBirth: persona.sexo,
       },
