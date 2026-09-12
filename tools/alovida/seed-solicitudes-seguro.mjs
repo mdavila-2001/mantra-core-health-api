@@ -198,7 +198,10 @@ const PACIENTES = [
  * Las cuatro solicitudes, con lo que hay que poder ver en cada una.
  *
  * `dictamen: null` es la que deja el total aprobado vacío. `reclamo: true`
- * abre disputa después de dictaminar.
+ * abre disputa después de dictaminar. Desde v4.2.9 (subtarea 2.2), toda línea
+ * `DENIED` es OBLIGATORIA de mandar con `policyClauseReference` — la API
+ * responde 400 si no viene —, así que `dictamen.clausulas`/`.justificaciones`
+ * llevan un valor en cada posición cuya `decisiones[i] === 'DENIED'`.
  */
 const SOLICITUDES = [
   {
@@ -217,7 +220,16 @@ const SOLICITUDES = [
       { billedAmount: '75.125', patientResponsibilityAmount: '0.00' },
       { billedAmount: '340.00', patientResponsibilityAmount: '0.00' },
     ],
-    dictamen: { outcome: 'DENIED', decisiones: ['APPROVED', 'DENIED', 'APPROVED'] },
+    dictamen: {
+      outcome: 'DENIED',
+      decisiones: ['APPROVED', 'DENIED', 'APPROVED'],
+      clausulas: [null, 'Cláusula 12.3: Estudio no cubierto en el plan ambulatorio', null],
+      justificaciones: [
+        null,
+        'El estudio requiere autorización previa del área médica según las condiciones generales de la póliza.',
+        null,
+      ],
+    },
     reclamo: false,
   },
   {
@@ -232,7 +244,15 @@ const SOLICITUDES = [
       { billedAmount: '2100.00', patientResponsibilityAmount: '210.00' },
       { billedAmount: '95.00', patientResponsibilityAmount: '0.00' },
     ],
-    dictamen: { outcome: 'DENIED', decisiones: ['DENIED', 'APPROVED'] },
+    dictamen: {
+      outcome: 'DENIED',
+      decisiones: ['DENIED', 'APPROVED'],
+      clausulas: ['Cláusula 4.1: Preexistencia declarada al momento de la afiliación', null],
+      justificaciones: [
+        'La condición fue declarada como preexistencia en la solicitud de afiliación y queda excluida durante el período de carencia.',
+        null,
+      ],
+    },
     reclamo: true,
   },
 ];
@@ -555,6 +575,15 @@ async function main() {
         approvedAmount: decision === 'APPROVED' ? facturado : ceroComo(facturado),
         deniedAmount: decision === 'APPROVED' ? ceroComo(facturado) : facturado,
         patientAmount: linea.patientResponsibilityAmount?.amount ?? '0',
+        // Subtarea 2.2 (v4.2.9): DENIED sin cláusula responde 400 desde este
+        // patch. Los dos campos son `undefined` en una línea APPROVED —no se
+        // manda un string vacío ni null: la propiedad simplemente no viaja.
+        ...(decision === 'DENIED'
+          ? {
+              policyClauseReference: receta.dictamen.clausulas?.[orden] ?? undefined,
+              denialRationale: receta.dictamen.justificaciones?.[orden] ?? undefined,
+            }
+          : {}),
       };
     });
     const sumar = (clave) =>
