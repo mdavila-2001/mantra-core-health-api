@@ -214,6 +214,12 @@ export class ClaimsService {
           // que hoy llega vacío en la práctica — pero la vía queda hecha y no
           // se inventa ningún código para llenarla.
           reasonConceptId: la.reasonConceptId,
+          // La obligatoriedad de `policyClauseReference` al denegar (subtarea 2.2)
+          // se valida en el DTO (`@ValidateIf` + `@IsNotEmpty`): la pipe global
+          // responde 400 antes de que esta transacción se abra. Acá se persiste
+          // tal cual, sin repetir la regla.
+          policyClauseReference: la.policyClauseReference,
+          denialRationale: la.denialRationale,
           approvedAmount: la.approvedAmount,
           patientAmount: la.patientAmount,
           deniedAmount: la.deniedAmount,

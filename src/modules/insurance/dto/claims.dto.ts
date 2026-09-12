@@ -4,12 +4,14 @@ import {
   IsArray,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -185,6 +187,56 @@ export class LineAdjudicationDto {
   reasonConceptId?: string;
 
   /**
+   * Cita textual de la cláusula o artículo de la póliza contractual que fundamenta el
+   * rechazo (subtarea 2.2, 2026-09-12).
+   *
+   * **Obligatoria al denegar** (`decision === 'DENIED'`): el registro de procesos del
+   * stakeholder (MÓDULO ASEGURADORA · 2 · 3) exige que la app explique por qué no se
+   * aprobó una prestación citando la cláusula del contrato. Complementa a
+   * `reasonConceptId` — que sigue siendo el motivo TIPIFICADO — sin reemplazarlo: no se
+   * acuña un segundo catálogo en texto libre para el mismo dato.
+   *
+   * El `@ValidateIf` también se activa si la propiedad viene con valor en una línea
+   * `APPROVED`: sin eso, `@IsString`/`@MaxLength` no correrían y una aprobación podría
+   * llevar cualquier texto sin validar.
+   */
+  @ApiPropertyOptional({
+    maxLength: 255,
+    example: 'Cláusula 12.3: Medicamento no cubierto en plan ambulatorio',
+    description:
+      'Cita textual de la cláusula contractual que fundamenta la exclusión. ' +
+      'Obligatoria cuando decision === DENIED.',
+  })
+  @ValidateIf(
+    (o: LineAdjudicationDto) =>
+      o.decision === 'DENIED' || o.policyClauseReference !== undefined,
+  )
+  @IsNotEmpty({
+    message:
+      'La referencia de cláusula contractual es obligatoria al denegar una prestación',
+  })
+  @IsString()
+  @MaxLength(255)
+  policyClauseReference?: string;
+
+  /**
+   * Justificación circunstanciada del rechazo, redactada por quien adjudica la línea
+   * (subtarea 2.2). Opcional incluso al denegar: la cláusula ya es la fundamentación
+   * mínima exigida; esto es la prosa adicional cuando la aseguradora la aporta.
+   */
+  @ApiPropertyOptional({
+    maxLength: 4000,
+    example:
+      'El principio activo solicitado no está contemplado en el vademécum ' +
+      'de cobertura ambulatoria contratado.',
+    description: 'Fundamentación circunstanciada de la exclusión, por ítem.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  denialRationale?: string;
+
+  /**
    * Valor de approved amount mantenido por la instancia.
    */
   @ApiPropertyOptional({ example: '80.00' })
@@ -227,9 +279,10 @@ export class CreateAdjudicationDto {
    * entrada. Es el texto que la pantalla del reclamo muestra junto al
    * dictamen; sin él, un rechazo llega con un concepto y sin motivo redactado.
    *
-   * Es **de la versión entera**, no del ítem: el motivo particular de un ítem
-   * va en `claim_line_adjudications.reason_concept_id`, que es un concepto y no
-   * texto libre.
+   * Es **de la versión entera**, no del ítem: el texto por ítem —cita de
+   * cláusula y justificación (subtarea 2.2)— va en
+   * `LineAdjudicationDto.policyClauseReference`/`.denialRationale`, y el motivo
+   * tipificado del ítem sigue siendo `claim_line_adjudications.reason_concept_id`.
    */
   @ApiPropertyOptional({
     maxLength: 4000,
