@@ -486,7 +486,7 @@ services:
   # de archivo por S3 muere con `NoSuchBucket` — y el worker lo registra como
   # fallo de proveedor, que manda a buscar el problema donde no está.
   minio-init:
-    image: minio/mc:RELEASE.2024-09-16T17-43-14Z
+    image: quay.io/minio/mc:RELEASE.2024-09-16T17-43-14Z
     restart: "no"
     entrypoint:
       - /bin/sh
