@@ -3,6 +3,7 @@ import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
+import { INS } from '../../modules/insurance/insurance.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
 
 /**
@@ -53,7 +54,7 @@ import { definitionPropertyCode } from '../../modules/terminology/terminology.co
  *
  * ## Cobertura, dicha en voz alta
  *
- * Cubre los **162 conceptos que componen los 63 conjuntos de valores** de
+ * Cubre los **498 conceptos que componen los 65 conjuntos de valores** de
  * `DYNAMIC_ENUM_CATALOG` — es decir, todo lo que el glosario puede llegar a
  * mostrar hoy navegando por etiquetas. El catálogo interno completo es mayor
  * (estados de auditoría, tipos de evento, cosas que ningún conjunto de valores
@@ -68,7 +69,10 @@ import { definitionPropertyCode } from '../../modules/terminology/terminology.co
  * clínico de la condición entraron con el conjunto que los ofrece, y llegaron
  * acá porque esa prueba se puso roja — que es exactamente para lo que está. Los
  * siete de v4.1.9 (los cinco estados del vínculo profesional–institución y los
- * dos peldaños intermedios de la escalera de verificación) entraron igual.
+ * dos peldaños intermedios de la escalera de verificación) entraron igual. Y los
+ * ocho de la consola de planes y coberturas (las dos monedas del plan y las seis
+ * categorías de cobertura) también: llegaron acá porque su conjunto de valores
+ * se publicó sin traducir y la prueba lo delató.
  */
 
 /** El nombre y la explicación de un concepto en castellano. */
@@ -3943,6 +3947,75 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Control de salud de rutina del niño',
       definition:
         'Control periódico de crecimiento y desarrollo. CIE-10: Z00.1.',
+    },
+  ],
+
+  // --- Seguros: moneda del plan y categorías de cobertura -----------------
+  // Vocabulario del propio sistema: lo que la aseguradora elige al armar un
+  // plan y sus coberturas. La definición se escribe para quien contrata o
+  // consulta el plan, no para quien lo configura.
+  [
+    CONCEPTS.CURRENCY_BOB,
+    {
+      display: 'Boliviano',
+      definition:
+        'Moneda de curso legal en Bolivia. El plan expresa en bolivianos sus copagos, deducibles y topes de cobertura.',
+    },
+  ],
+  [
+    CONCEPTS.CURRENCY_USD,
+    {
+      display: 'Dólar estadounidense',
+      definition:
+        'Moneda en la que algunos planes pactan sus importes. Los copagos, deducibles y topes se leen en dólares, no en bolivianos.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_GENERAL,
+    {
+      display: 'Cobertura general',
+      definition:
+        'Cobertura que no se limita a un ámbito asistencial concreto: vale para todo el plan.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_OUTPATIENT,
+    {
+      display: 'Consulta externa',
+      definition:
+        'Atención ambulatoria: consultas con el profesional sin quedar internado.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_EMERGENCY,
+    {
+      display: 'Emergencias',
+      definition:
+        'Atención inmediata por una urgencia, incluida la llegada por guardia.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_HOSPITALIZATION,
+    {
+      display: 'Hospitalización',
+      definition:
+        'Internación: la estadía en el centro de salud y lo que se hace durante ella.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_LAB_IMAGING,
+    {
+      display: 'Laboratorio e imagen',
+      definition:
+        'Análisis de laboratorio y estudios por imagen, como una radiografía o una ecografía.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_PHARMACY,
+    {
+      display: 'Farmacia',
+      definition:
+        'Medicamentos que el plan cubre cuando se retiran con receta.',
     },
   ],
 ];
