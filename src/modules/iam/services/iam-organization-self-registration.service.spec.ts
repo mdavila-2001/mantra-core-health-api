@@ -79,6 +79,10 @@ describe('IamOrganizationSelfRegistrationService', () => {
         'doc-5',
       ]),
     };
+    // Subtarea 1.4: por defecto el alta no declara representante ni gerencias.
+    const representatives = {
+      register: fn(async () => ({ representativesRegistered: 4 })),
+    };
 
     const service = new IamOrganizationSelfRegistrationService(
       em as never,
@@ -93,6 +97,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       notificationsService as never,
       typeProfile as never,
       affiliationDocuments as never,
+      representatives as never,
       logger as never,
       new TracingService(),
     );
@@ -109,6 +114,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       notificationsService,
       typeProfile,
       affiliationDocuments,
+      representatives,
     };
   }
 

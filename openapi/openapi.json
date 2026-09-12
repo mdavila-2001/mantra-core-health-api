@@ -77279,6 +77279,28 @@
           "name"
         ]
       },
+      "RegisterPractitionerCredentialDto": {
+        "type": "object",
+        "properties": {
+          "credentialTypeConceptId": {
+            "type": "string",
+            "description": "Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad)",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "issuingInstitutionText": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "credentialTypeConceptId",
+          "number"
+        ]
+      },
       "AssistedPractitionerRegistrationDto": {
         "type": "object",
         "properties": {
@@ -77489,6 +77511,13 @@
                 "$ref": "#/components/schemas/CreateOwnSiteDto"
               }
             ]
+          },
+          "credentials": {
+            "description": "Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegisterPractitionerCredentialDto"
+            }
           },
           "reason": {
             "type": "string",
@@ -77901,6 +77930,95 @@
           "healthAuthorityCertificateFileId"
         ]
       },
+      "RegisterOrganizationLegalRepresentativeDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Nombre completo del representante legal",
+            "maxLength": 200,
+            "example": "Mariana Siles Justiniano"
+          },
+          "idNumber": {
+            "type": "string",
+            "description": "Cédula de identidad o documento legal equivalente",
+            "maxLength": 50,
+            "example": "4872190 SC"
+          },
+          "email": {
+            "type": "string",
+            "description": "Correo oficial para notificaciones legales",
+            "format": "email",
+            "maxLength": 320,
+            "example": "legal@aseguradora.com"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Teléfono de contacto del representante",
+            "maxLength": 30,
+            "example": "+591 70012345"
+          },
+          "powerOfAttorneyFileId": {
+            "type": "string",
+            "description": "Id del archivo del poder notariado (PDF ya pre-cargado)",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "fullName",
+          "idNumber",
+          "email",
+          "powerOfAttorneyFileId"
+        ]
+      },
+      "RegisterOrganizationExecutiveContactDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Nombre completo del ejecutivo",
+            "maxLength": 200,
+            "example": "Carlos Mendoza Rivero"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Teléfono celular de contacto",
+            "maxLength": 30,
+            "example": "+591 70012345"
+          },
+          "email": {
+            "type": "string",
+            "description": "Correo electrónico corporativo",
+            "format": "email",
+            "maxLength": 320,
+            "example": "cmendoza@aseguradora.com"
+          }
+        },
+        "required": [
+          "fullName",
+          "phone",
+          "email"
+        ]
+      },
+      "RegisterOrganizationExecutivesDto": {
+        "type": "object",
+        "properties": {
+          "generalManager": {
+            "$ref": "#/components/schemas/RegisterOrganizationExecutiveContactDto"
+          },
+          "commercialManager": {
+            "$ref": "#/components/schemas/RegisterOrganizationExecutiveContactDto"
+          },
+          "marketingManager": {
+            "$ref": "#/components/schemas/RegisterOrganizationExecutiveContactDto"
+          }
+        },
+        "required": [
+          "generalManager",
+          "commercialManager",
+          "marketingManager"
+        ]
+      },
       "PayerProfileDto": {
         "type": "object",
         "properties": {
@@ -78141,6 +78259,12 @@
           },
           "legalDocuments": {
             "$ref": "#/components/schemas/RegisterOrganizationLegalDocumentsDto"
+          },
+          "legalRepresentative": {
+            "$ref": "#/components/schemas/RegisterOrganizationLegalRepresentativeDto"
+          },
+          "executives": {
+            "$ref": "#/components/schemas/RegisterOrganizationExecutivesDto"
           },
           "payer": {
             "$ref": "#/components/schemas/PayerProfileDto"
@@ -78452,6 +78576,13 @@
                 "$ref": "#/components/schemas/CreateOwnSiteDto"
               }
             ]
+          },
+          "credentials": {
+            "description": "Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegisterPractitionerCredentialDto"
+            }
           }
         },
         "required": [

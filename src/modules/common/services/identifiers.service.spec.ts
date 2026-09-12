@@ -32,7 +32,7 @@ describe('IdentifiersService', () => {
    */
   function build() {
     const { em, tx } = createEmMock();
-    const repo = { findActiveDuplicate: fn(), create: fn() };
+    const repo = { findActiveDuplicate: fn(), findByIds: fn(), create: fn() };
     const service = new IdentifiersService(em as never, repo, logger as never);
     return { service, em, tx, repo };
   }

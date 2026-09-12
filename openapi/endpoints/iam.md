@@ -669,7 +669,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz"}` |
+| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz"}` |
 | `organization.code` | Sí | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Código único global de la organización | `CLINICA_SAN_RAFAEL` |
 | `organization.legalName` | Sí | `string` | longitud mínima 1; longitud máxima 300 | Razón social / nombre legal | `Nombre de ejemplo` |
 | `organization.tradeName` | No | `string` | longitud máxima 300 | Nombre comercial | `Nombre de ejemplo` |
@@ -681,6 +681,25 @@ Content-Type: application/json
 | `organization.legalDocuments.commerceRegistryFileId` | No | `string` | formato `uuid` | Registro mercantil (matrícula SEPREC en Bolivia) | `00000000-0000-4000-8000-000000000001` |
 | `organization.legalDocuments.operatingLicenseFileId` | No | `string` | formato `uuid` | Licencia de funcionamiento | `00000000-0000-4000-8000-000000000001` |
 | `organization.legalDocuments.healthAuthorityCertificateFileId` | No | `string` | formato `uuid` | Certificado de la autoridad sanitaria (SEDES en Bolivia) | `00000000-0000-4000-8000-000000000001` |
+| `organization.legalRepresentative` | No | `RegisterOrganizationLegalRepresentativeDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"}` |
+| `organization.legalRepresentative.fullName` | No | `string` | longitud mínima 3; longitud máxima 200 | Nombre completo del representante legal | `Mariana Siles Justiniano` |
+| `organization.legalRepresentative.idNumber` | No | `string` | longitud mínima 4; longitud máxima 50 | Cédula de identidad o documento legal equivalente | `4872190 SC` |
+| `organization.legalRepresentative.email` | No | `string` | formato `email`; longitud máxima 320 | Correo oficial para notificaciones legales | `legal@aseguradora.com` |
+| `organization.legalRepresentative.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Teléfono de contacto del representante | `+591 70012345` |
+| `organization.legalRepresentative.powerOfAttorneyFileId` | No | `string` | formato `uuid` | Id del archivo del poder notariado (PDF ya pre-cargado) | `00000000-0000-4000-8000-000000000001` |
+| `organization.executives` | No | `RegisterOrganizationExecutivesDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"generalManager":{"fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}}` |
+| `organization.executives.generalManager` | No | `RegisterOrganizationExecutiveContactDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}` |
+| `organization.executives.generalManager.fullName` | No | `string` | longitud mínima 3; longitud máxima 200 | Nombre completo del ejecutivo | `Carlos Mendoza Rivero` |
+| `organization.executives.generalManager.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Teléfono celular de contacto | `+591 70012345` |
+| `organization.executives.generalManager.email` | No | `string` | formato `email`; longitud máxima 320 | Correo electrónico corporativo | `cmendoza@aseguradora.com` |
+| `organization.executives.commercialManager` | No | `RegisterOrganizationExecutiveContactDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}` |
+| `organization.executives.commercialManager.fullName` | No | `string` | longitud mínima 3; longitud máxima 200 | Nombre completo del ejecutivo | `Carlos Mendoza Rivero` |
+| `organization.executives.commercialManager.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Teléfono celular de contacto | `+591 70012345` |
+| `organization.executives.commercialManager.email` | No | `string` | formato `email`; longitud máxima 320 | Correo electrónico corporativo | `cmendoza@aseguradora.com` |
+| `organization.executives.marketingManager` | No | `RegisterOrganizationExecutiveContactDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}` |
+| `organization.executives.marketingManager.fullName` | No | `string` | longitud mínima 3; longitud máxima 200 | Nombre completo del ejecutivo | `Carlos Mendoza Rivero` |
+| `organization.executives.marketingManager.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Teléfono celular de contacto | `+591 70012345` |
+| `organization.executives.marketingManager.email` | No | `string` | formato `email`; longitud máxima 320 | Correo electrónico corporativo | `cmendoza@aseguradora.com` |
 | `organization.payer` | No | `PayerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"}` |
 | `organization.payer.carrierCode` | No | `string` | longitud mínima 1; longitud máxima 60 | Código de la aseguradora | `CODIGO_EJEMPLO` |
 | `organization.payer.sigla` | No | `string` | longitud mínima 1; longitud máxima 20 | Sigla de la aseguradora | `BUPA` |
@@ -774,6 +793,30 @@ Content-Type: application/json
       "commerceRegistryFileId": "00000000-0000-4000-8000-000000000001",
       "operatingLicenseFileId": "00000000-0000-4000-8000-000000000001",
       "healthAuthorityCertificateFileId": "00000000-0000-4000-8000-000000000001"
+    },
+    "legalRepresentative": {
+      "fullName": "Mariana Siles Justiniano",
+      "idNumber": "4872190 SC",
+      "email": "legal@aseguradora.com",
+      "phone": "+591 70012345",
+      "powerOfAttorneyFileId": "00000000-0000-4000-8000-000000000001"
+    },
+    "executives": {
+      "generalManager": {
+        "fullName": "Carlos Mendoza Rivero",
+        "phone": "+591 70012345",
+        "email": "cmendoza@aseguradora.com"
+      },
+      "commercialManager": {
+        "fullName": "Carlos Mendoza Rivero",
+        "phone": "+591 70012345",
+        "email": "cmendoza@aseguradora.com"
+      },
+      "marketingManager": {
+        "fullName": "Carlos Mendoza Rivero",
+        "phone": "+591 70012345",
+        "email": "cmendoza@aseguradora.com"
+      }
     },
     "payer": {
       "carrierCode": "CODIGO_EJEMPLO",
@@ -890,7 +933,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "00000000-0000-4000-8000-000000000001",
   "emailVerificationSent": true,
   "diagnosticUnitId": "00000000-0000-4000-8000-000000000001",
-  "legalDocumentsRegistered": 1
+  "legalDocumentsRegistered": 1,
+  "representativesRegistered": 1
 }
 ```
 
@@ -906,6 +950,7 @@ Campos de la respuesta:
 | `emailVerificationSent` | Sí | `boolean` | Sin restricción adicional declarada | Si se pudo encolar el correo de verificación | `true` |
 | `diagnosticUnitId` | No | `string` | formato `uuid` | Id de la unidad diagnóstica creada (sólo DIAGNOSTIC_CENTER) | `00000000-0000-4000-8000-000000000001` |
 | `legalDocumentsRegistered` | No | `number` | Sin restricción adicional declarada | Cuántos documentos legales quedaron registrados pendientes de | `1` |
+| `representativesRegistered` | No | `number` | Sin restricción adicional declarada | Vínculos de representación registrados (representante legal + gerencias) | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -933,16 +978,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El tipo de unidad diagnóstica declarado no es válido | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | Los conceptos declarados no existen en el catálogo de terminología | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | El documento ${label} ya está vinculado a una organización | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un mismo archivo no puede respaldar dos documentos distintos | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de documentos de afiliación no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de documentos de afiliación no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 422 | `PRECONDITION_FAILED` | El documento ${label} ya está vinculado a una organización | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de documentos de afiliación no incluye el código ${code.toUpperCase()} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code.toUpperCase()} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1262,6 +1307,10 @@ Content-Type: application/json
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo"}]` |
+| `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -1327,7 +1376,14 @@ Content-Type: application/json
       "latitude": 1,
       "longitude": 1
     }
-  }
+  },
+  "credentials": [
+    {
+      "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "number": "valor-ejemplo",
+      "issuingInstitutionText": "valor-ejemplo"
+    }
+  ]
 }
 ```
 
@@ -1391,6 +1447,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Declará los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio cuando se declara el documento | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
@@ -4126,6 +4185,10 @@ Content-Type: application/json
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo"}]` |
+| `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `reason` | Sí | `string` | longitud máxima 500 | Motivo del alta administrativa (trazabilidad C-18) | `Texto descriptivo de ejemplo` |
 | `clinicalRoles` | No | `array<string>` | longitud máxima 100; máximo 10 elemento(s) | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `["CLINICIAN","SURGEON"]` |
 
@@ -4194,6 +4257,13 @@ Content-Type: application/json
       "longitude": 1
     }
   },
+  "credentials": [
+    {
+      "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "number": "valor-ejemplo",
+      "issuingInstitutionText": "valor-ejemplo"
+    }
+  ],
   "reason": "Texto descriptivo de ejemplo",
   "clinicalRoles": [
     "CLINICIAN",
@@ -4250,6 +4320,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Declará los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio cuando se declara el documento | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |

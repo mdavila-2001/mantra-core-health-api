@@ -76,6 +76,34 @@ export class ContactPointsRepository {
   }
 
   /**
+   * Los puntos de contacto vigentes de VARIOS dueños, en una sola consulta.
+   *
+   * Mismo criterio de vigencia y mismo orden que
+   * {@link ContactPointsRepository.findVigentesByOwner}; existe porque la ficha
+   * de una organización nombra hasta cuatro personas a la vez (subtarea 1.4) y
+   * recorrerlas de a una sería N+1.
+   *
+   * @param em - Contexto de persistencia.
+   * @param ownerIds - Los dueños; lista vacía devuelve lista vacía.
+   * @returns Sus contactos vigentes, mezclados y ordenados por preferencia.
+   */
+  async findVigentesByOwners(
+    em: EntityManager,
+    ownerIds: readonly string[],
+  ): Promise<ContactPoints[]> {
+    if (ownerIds.length === 0) return [];
+    const ahora = new Date();
+    return em.find(
+      ContactPoints,
+      {
+        ownerId: { $in: [...ownerIds] },
+        $or: [{ validTo: null }, { validTo: { $gt: ahora } }],
+      },
+      { orderBy: { rank: 'asc nulls last', createdAt: 'asc' } },
+    );
+  }
+
+  /**
    * El punto de contacto vigente y preferente de un dueño para un sistema
    * (teléfono, correo).
    *

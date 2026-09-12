@@ -122,6 +122,7 @@ function build() {
   const contactPointsRepo = {
     findById: mockFn(),
     findVigentesByOwner: mockFn().mockResolvedValue([]),
+    findVigentesByOwners: mockFn().mockResolvedValue([]),
     findVigenteByOwnerAndSystem: mockFn().mockResolvedValue(null),
     findVigenteByOwnerSystemAndUse: mockFn().mockResolvedValue(null),
     closeVigente: mockFn(),

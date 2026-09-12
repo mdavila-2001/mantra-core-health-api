@@ -113,6 +113,140 @@ describe('RegisterPractitionerDto · ocupación y empresa (1.3)', () => {
 });
 
 /**
+ * Los títulos declarados en el alta (1.6).
+ *
+ * El arreglo es opcional entero, pero cada elemento que llegue tiene que ser
+ * guardable: sin `number` la fila no se puede escribir —la columna es NOT
+ * NULL—, así que el rechazo tiene que ocurrir en el borde y no al persistir.
+ */
+describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () => {
+  const TIPO = '36c99f5d-9417-51e8-89d2-4f54138bb323';
+
+  it('acepta el alta sin el arreglo', async () => {
+    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+  });
+
+  it('acepta un arreglo vacío', async () => {
+    expect(
+      await propiedadesConError({ ...ALTA_MINIMA, credentials: [] }),
+    ).toEqual([]);
+  });
+
+  it('acepta un título con su tipo, su número y su institución', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'DIP-001',
+            issuingInstitutionText: 'Universidad Mayor de San Andrés',
+          },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un elemento sin número', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [{ credentialTypeConceptId: TIPO }],
+      }),
+    ).toEqual(['credentials.0.number']);
+  });
+
+  it('señala el elemento exacto que viene mal', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          { credentialTypeConceptId: TIPO, number: 'DIP-001' },
+          { credentialTypeConceptId: TIPO },
+        ],
+      }),
+    ).toEqual(['credentials.1.number']);
+  });
+
+  it('rechaza un número vacío', async () => {
+    // La columna es NOT NULL pero acepta la cadena vacía: sin esto, una
+    // credencial sin número entraría por una superficie pública.
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [{ credentialTypeConceptId: TIPO, number: '' }],
+      }),
+    ).toEqual(['credentials.0.number']);
+  });
+
+  it('rechaza un número que es sólo espacios', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [{ credentialTypeConceptId: TIPO, number: '   ' }],
+      }),
+    ).toEqual(['credentials.0.number']);
+  });
+
+  it('acepta el número más largo que la columna admite', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [{ credentialTypeConceptId: TIPO, number: 'A'.repeat(100) }],
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un número más largo que la columna', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [{ credentialTypeConceptId: TIPO, number: 'A'.repeat(101) }],
+      }),
+    ).toEqual(['credentials.0.number']);
+  });
+
+  it('rechaza un tipo que no es un uuid', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          { credentialTypeConceptId: 'CREDENTIAL_TYPE_DEGREE', number: 'T-1' },
+        ],
+      }),
+    ).toEqual(['credentials.0.credentialTypeConceptId']);
+  });
+
+  it('rechaza una institución más larga que la columna', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'T-1',
+            issuingInstitutionText: 'A'.repeat(201),
+          },
+        ],
+      }),
+    ).toEqual(['credentials.0.issuingInstitutionText']);
+  });
+
+  it('rechaza una clave que el elemento no declara', async () => {
+    // `forbidNonWhitelisted` también rige adentro del arreglo: la ciudad del
+    // lugar de estudio no tiene dónde guardarse y no se acepta en silencio.
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          { credentialTypeConceptId: TIPO, number: 'T-1', issuingCityText: 'La Paz' },
+        ],
+      }),
+    ).toEqual(['credentials.0.issuingCityText']);
+  });
+});
+
+/**
  * El departamento emisor del documento (1.4): `ALTA_MINIMA` no trae
  * `nationalId`, así que sirve tal cual para «sin documento, el departamento
  * no hace falta». Con documento pasa a ser obligatorio (PR #390 del front) —

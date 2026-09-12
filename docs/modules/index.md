@@ -44,10 +44,10 @@
 | [`audio_assets`](audio_assets.md) | 2 | 4 | 2 | 4 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
 | [`cross_store_consistency`](cross_store_consistency.md) | 2 | 4 | 3 | 20 | 1 |
-| [`directory`](directory.md) | 2 | 8 | 5 | 7 | 18 |
+| [`directory`](directory.md) | 2 | 9 | 5 | 7 | 18 |
 | [`graph_intelligence`](graph_intelligence.md) | 2 | 3 | 2 | 13 | 1 |
 | [`health_data`](health_data.md) | 2 | 5 | 7 | 34 | 1 |
-| [`iam`](iam.md) | 2 | 13 | 13 | 14 | 23 |
+| [`iam`](iam.md) | 2 | 14 | 13 | 14 | 23 |
 | [`integration_contracts`](integration_contracts.md) | 2 | 4 | 9 | 9 | 13 |
 | [`lakehouse`](lakehouse.md) | 2 | 3 | 3 | 18 | 1 |
 | [`marketing`](marketing.md) | 2 | 2 | 2 | 14 | 1 |
@@ -70,4 +70,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **236** | **353** | **390** | **1243** | **463** |
+| **Total** | **236** | **355** | **390** | **1243** | **463** |

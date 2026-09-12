@@ -19,6 +19,8 @@ const CONCEPTS_RESOLVED = {
     ['MATRICULA_SEPREC', 'ct-seprec'],
     ['LICENCIA_FUNCIONAMIENTO', 'ct-licencia'],
     ['CERTIFICADO_SEDES', 'ct-sedes'],
+    // Subtarea 1.4: el poder notariado del representante legal.
+    ['PODER_REPRESENTANTE_LEGAL', 'ct-poder'],
   ]),
   issuingAuthority: new Map([
     ['NOTARIA', 'ia-notaria'],
@@ -225,5 +227,73 @@ describe('TenantAffiliationDocumentsService', () => {
         documents: DOCUMENTS,
       }),
     ).rejects.toThrow(PreconditionFailedException);
+  });
+
+  describe('attachPowerOfAttorney (subtarea 1.4)', () => {
+    it('reclama el archivo y crea la fila con NOTARIA, PENDIENTE y related_person_id', async () => {
+      const d = build();
+
+      const id = await d.service.attachPowerOfAttorney(d.tx, {
+        tenantId: 'tenant-1',
+        ownerUserId: 'user-1',
+        legalEntityType: 'SRL',
+        fileId: 'file-poder',
+        relatedPersonId: 'person-1',
+        alreadyDeclaredFileIds: Object.values(DOCUMENTS),
+      });
+
+      expect(id).toBe('doc-file-poder');
+      expect(d.attachable.claimAnonymousUpload).toHaveBeenCalledTimes(1);
+      expect(d.legalRepo.createAffiliationDocument).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          tenantId: 'tenant-1',
+          documentTypeConceptId: 'ct-poder',
+          issuingAuthorityConceptId: 'ia-notaria',
+          fileId: 'file-poder',
+          relatedPersonId: 'person-1',
+          verificationStatusConceptId: 'vs-pendiente',
+          isRequiredForAffiliation: true,
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+          actorUserId: 'user-1',
+        }),
+      );
+    });
+
+    it('422 sin reclamar si el archivo ya lo usó uno de los cinco documentos de esta misma alta', async () => {
+      const d = build();
+
+      await expect(
+        d.service.attachPowerOfAttorney(d.tx, {
+          tenantId: 'tenant-1',
+          ownerUserId: 'user-1',
+          fileId: DOCUMENTS.CONSTITUTION_DOC,
+          relatedPersonId: 'person-1',
+          alreadyDeclaredFileIds: Object.values(DOCUMENTS),
+        }),
+      ).rejects.toThrow(PreconditionFailedException);
+
+      expect(d.attachable.claimAnonymousUpload).not.toHaveBeenCalled();
+      expect(d.legalRepo.createAffiliationDocument).not.toHaveBeenCalled();
+    });
+
+    it('422 si el archivo del poder ya está vinculado a otra organización', async () => {
+      const d = build();
+      d.legalRepo.findAffiliationDocumentByFile.mockImplementationOnce(
+        async () => ({ id: 'doc-existente' }),
+      );
+
+      await expect(
+        d.service.attachPowerOfAttorney(d.tx, {
+          tenantId: 'tenant-1',
+          ownerUserId: 'user-1',
+          fileId: 'file-poder',
+          relatedPersonId: 'person-1',
+          alreadyDeclaredFileIds: Object.values(DOCUMENTS),
+        }),
+      ).rejects.toThrow(PreconditionFailedException);
+
+      expect(d.attachable.claimAnonymousUpload).not.toHaveBeenCalled();
+    });
   });
 });

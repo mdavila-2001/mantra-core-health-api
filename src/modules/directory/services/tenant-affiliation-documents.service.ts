@@ -14,7 +14,10 @@ import {
   type RegistrationDocumentRole,
 } from '../affiliation-documents';
 import { DirectoryTenantLegalRepository } from '../repositories';
-import { AffiliationDocumentConceptsService } from './affiliation-document-concepts.service';
+import {
+  AffiliationDocumentConceptsService,
+  type AffiliationDocumentConcepts,
+} from './affiliation-document-concepts.service';
 
 /** Rótulo en castellano de cada rol, para los mensajes de rechazo. */
 const ROLE_LABEL_ES: Readonly<Record<AffiliationDocumentRole, string>> = {
@@ -40,6 +43,31 @@ export interface RegistrationDocumentsInput {
   /** El NIT ya capturado por el formulario (`payer.regulatorIdentifier`); se copia a `document_number`. */
   readonly taxIdentifier?: string;
   readonly documents: RegistrationDocumentFiles;
+}
+
+/** Datos para vincular el poder notariado del representante legal (subtarea 1.4). */
+export interface PowerOfAttorneyInput {
+  readonly tenantId: string;
+  readonly ownerUserId: string;
+  /** Tipo societario declarado, para derivar el país y así la autoridad emisora. */
+  readonly legalEntityType?: string;
+  /** El PDF del poder, ya pre-cargado sin sesión. */
+  readonly fileId: string;
+  /** La persona a la que el poder acredita. */
+  readonly relatedPersonId: string;
+  /** Los archivos que los documentos de la empresa ya declararon en esta alta. */
+  readonly alreadyDeclaredFileIds: readonly string[];
+}
+
+/** Lo que `attachOne` necesita y no viaja en el rol ni en el archivo. */
+interface AttachContext {
+  readonly tenantId: string;
+  readonly ownerUserId: string;
+  readonly countryIso: ReturnType<typeof countryIsoForLegalEntityType>;
+  readonly concepts: AffiliationDocumentConcepts;
+  readonly today: Date;
+  readonly documentNumber?: string;
+  readonly relatedPersonId?: string;
 }
 
 /**
@@ -94,75 +122,141 @@ export class TenantAffiliationDocumentsService {
 
     const createdIds: string[] = [];
     for (const role of REGISTRATION_DOCUMENT_ROLES) {
-      const fileId = input.documents[role];
-      const label = ROLE_LABEL_ES[role];
-
-      const alreadyLinked = await this.legalRepo.findAffiliationDocumentByFile(
-        tx,
-        fileId,
-      );
-      if (alreadyLinked) {
-        this.logger.warn(
-          { operation: 'directory.affiliation-document.attach', role, fileId },
-          'Refused to attach a file already linked to an affiliation document',
-        );
-        throw new PreconditionFailedException(
-          `El documento ${label} ya está vinculado a una organización`,
-          { role, fileId },
-        );
-      }
-
-      await this.attachable.claimAnonymousUpload(
-        tx,
-        fileId,
-        { tenantId: input.tenantId, ownerUserId: input.ownerUserId },
-        {
-          allowedMimeTypes: ['application/pdf'],
-          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
-          operation: 'directory.affiliation-document.claim',
-        },
-        {
-          subject: `El documento ${label}`,
-          notFound: `El documento ${label} no fue encontrado`,
-        },
-      );
-
-      const documentTypeConceptId = this.concepts.conceptIdOf(
-        concepts.documentType,
-        AFFILIATION_DOCUMENT_VALUE_SETS.documentType,
-        DOCUMENT_TYPE_CODE_BY_ROLE[role],
-      );
-      const issuingAuthorityConceptId = this.concepts.conceptIdOf(
-        concepts.issuingAuthority,
-        AFFILIATION_DOCUMENT_VALUE_SETS.issuingAuthority,
-        issuingAuthorityCodeFor(role, countryIso),
-      );
-      const verificationStatusConceptId = this.concepts.conceptIdOf(
-        concepts.verificationStatus,
-        AFFILIATION_DOCUMENT_VALUE_SETS.verificationStatus,
-        DOCUMENT_VERIFICATION_PENDING,
-      );
-
-      const created = this.legalRepo.createAffiliationDocument(tx, {
+      const created = await this.attachOne(tx, role, input.documents[role], {
         tenantId: input.tenantId,
-        documentTypeConceptId,
-        issuingAuthorityConceptId,
-        fileId,
+        ownerUserId: input.ownerUserId,
+        countryIso,
+        concepts,
+        today,
         // Sólo el NIT lleva número: es el único dato que el formulario ya
         // capturó por separado. El resto queda sin `documentNumber`, no
         // porque falte, sino porque nadie lo pidió todavía.
         documentNumber:
           role === 'TAX_IDENTIFIER_DOC' ? input.taxIdentifier : undefined,
-        registeredAt: today,
-        verificationStatusConceptId,
-        isRequiredForAffiliation: true,
-        statusConceptId: CONCEPTS.STATE_ACTIVE,
-        actorUserId: input.ownerUserId,
       });
-      createdIds.push(created.id);
+      createdIds.push(created);
     }
 
     return createdIds;
+  }
+
+  /**
+   * Vincula el poder notariado del representante legal (subtarea 1.4).
+   *
+   * Va por separado de {@link attachRegistrationDocuments} porque no es uno de
+   * los cinco documentos de la empresa: acredita a UNA persona, y su fila
+   * apunta a ella con `related_person_id`. Lo demás es idéntico —misma
+   * pre-carga anónima, mismo reclamo dentro de la transacción del alta, misma
+   * autoridad emisora derivada del país (en Bolivia, la notaría)—.
+   *
+   * @param tx - Transacción activa del alta.
+   * @param input - Tenant, owner, tipo societario, archivo del poder, la
+   *   persona acreditada y los archivos que los documentos de la empresa ya
+   *   declararon en esta misma alta.
+   * @returns Id de la fila creada.
+   * @throws PreconditionFailedException si el archivo ya lo usó otro documento
+   *   de esta alta, si no es una pre-carga anónima válida, si ya está
+   *   vinculado a otra organización, o si el catálogo no tiene el código.
+   */
+  async attachPowerOfAttorney(
+    tx: EntityManager,
+    input: PowerOfAttorneyInput,
+  ): Promise<string> {
+    // Antes de tocar la base: el reclamo del segundo uso fallaría igual —el
+    // archivo ya tendría dueño— pero con un mensaje que no diría por qué.
+    if (input.alreadyDeclaredFileIds.includes(input.fileId)) {
+      throw new PreconditionFailedException(
+        'Un mismo archivo no puede respaldar dos documentos distintos',
+        { fileId: input.fileId, roles: ['POWER_OF_ATTORNEY_DOC'] },
+      );
+    }
+
+    const concepts = await this.concepts.resolve(tx);
+    return this.attachOne(tx, 'POWER_OF_ATTORNEY_DOC', input.fileId, {
+      tenantId: input.tenantId,
+      ownerUserId: input.ownerUserId,
+      countryIso: countryIsoForLegalEntityType(input.legalEntityType),
+      concepts,
+      today: new Date(),
+      relatedPersonId: input.relatedPersonId,
+    });
+  }
+
+  /**
+   * Reclama un archivo y crea la fila que lo envuelve.
+   *
+   * Es el cuerpo que compartían los cinco documentos del autorregistro y que
+   * el poder notariado necesitaba igual; extraerlo evitó una segunda copia que
+   * se iba a separar de ésta en el primer cambio.
+   */
+  private async attachOne(
+    tx: EntityManager,
+    role: AffiliationDocumentRole,
+    fileId: string,
+    ctx: AttachContext,
+  ): Promise<string> {
+    const label = ROLE_LABEL_ES[role];
+
+    const alreadyLinked = await this.legalRepo.findAffiliationDocumentByFile(
+      tx,
+      fileId,
+    );
+    if (alreadyLinked) {
+      this.logger.warn(
+        { operation: 'directory.affiliation-document.attach', role, fileId },
+        'Refused to attach a file already linked to an affiliation document',
+      );
+      throw new PreconditionFailedException(
+        `El documento ${label} ya está vinculado a una organización`,
+        { role, fileId },
+      );
+    }
+
+    await this.attachable.claimAnonymousUpload(
+      tx,
+      fileId,
+      { tenantId: ctx.tenantId, ownerUserId: ctx.ownerUserId },
+      {
+        allowedMimeTypes: ['application/pdf'],
+        allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        operation: 'directory.affiliation-document.claim',
+      },
+      {
+        subject: `El documento ${label}`,
+        notFound: `El documento ${label} no fue encontrado`,
+      },
+    );
+
+    const documentTypeConceptId = this.concepts.conceptIdOf(
+      ctx.concepts.documentType,
+      AFFILIATION_DOCUMENT_VALUE_SETS.documentType,
+      DOCUMENT_TYPE_CODE_BY_ROLE[role],
+    );
+    const issuingAuthorityConceptId = this.concepts.conceptIdOf(
+      ctx.concepts.issuingAuthority,
+      AFFILIATION_DOCUMENT_VALUE_SETS.issuingAuthority,
+      issuingAuthorityCodeFor(role, ctx.countryIso),
+    );
+    const verificationStatusConceptId = this.concepts.conceptIdOf(
+      ctx.concepts.verificationStatus,
+      AFFILIATION_DOCUMENT_VALUE_SETS.verificationStatus,
+      DOCUMENT_VERIFICATION_PENDING,
+    );
+
+    const created = this.legalRepo.createAffiliationDocument(tx, {
+      tenantId: ctx.tenantId,
+      documentTypeConceptId,
+      issuingAuthorityConceptId,
+      fileId,
+      documentNumber: ctx.documentNumber,
+      registeredAt: ctx.today,
+      relatedPersonId: ctx.relatedPersonId,
+      verificationStatusConceptId,
+      isRequiredForAffiliation: true,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      actorUserId: ctx.ownerUserId,
+    });
+    return created.id;
   }
 
   /**

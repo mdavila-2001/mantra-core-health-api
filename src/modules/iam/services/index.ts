@@ -12,3 +12,4 @@ export * from './iam-registration-document-upload.service';
 export * from './iam-practitioner-self-registration.service';
 export * from './iam-email-verification.service';
 export * from './role-mapping';
+export * from './iam-organization-representatives.service';

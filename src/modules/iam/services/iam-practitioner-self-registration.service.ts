@@ -71,6 +71,23 @@ import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 // criterio que `MedicalSpecialtyCatalogService` arriba.
 import { OwnSiteProvisioningService } from '../../practice/services/own-site-provisioning.service';
 
+/**
+ * Los cinco tipos que el modelo admite para una credencial académica.
+ *
+ * La FK acepta CUALQUIER concepto del catálogo, así que sin esta lista alguien
+ * podría archivar como «título» el concepto de un idioma o de un estado de
+ * cita. Quién decide cuáles son tipos de credencial es la enumeración
+ * `professional-credential-type`, la misma que siembra la app y la misma que
+ * valida `ProfilesPractitionersService.addOwnCredential`.
+ */
+const TIPOS_DE_CREDENCIAL: readonly string[] = [
+  PROF.CREDENTIAL_TYPE_DEGREE,
+  PROF.CREDENTIAL_TYPE_DIPLOMA,
+  PROF.CREDENTIAL_TYPE_MASTER,
+  PROF.CREDENTIAL_TYPE_DOCTORATE,
+  PROF.CREDENTIAL_TYPE_SPECIALTY,
+];
+
 const DATA_URI_REGEX = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/;
 
 /** Decodifica una imagen en base64 (Data URI o base64 plano). */
@@ -371,6 +388,21 @@ export class IamPractitionerSelfRegistrationService {
       'Practitioner self-registration',
     );
 
+    // El contrato anterior declara UN título suelto (`credentialNumber`) y el
+    // nuevo declara N (`credentials`). Mandar los dos deja sin respuesta la
+    // única pregunta que importa —¿es el mismo título declarado dos veces o son
+    // dos títulos?— y cualquiera de las dos lecturas escribe algo que el
+    // profesional no pidió. Se rechaza antes de tocar nada.
+    if (
+      dto.credentialNumber !== undefined &&
+      dto.credentials !== undefined &&
+      dto.credentials.length > 0
+    ) {
+      throw new PreconditionFailedException(
+        'Declará los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos',
+      );
+    }
+
     const created = await this.em.transactional(async (tx) => {
       // El correo es la identidad de login: comprobarlo antes de escribir nada
       // convierte una violación de constraint (500) en un 409 explicativo.
@@ -578,6 +610,45 @@ export class IamPractitionerSelfRegistrationService {
               stateConceptId: PROF.CRED_PENDING,
               actorUserId: user.id,
             });
+
+      // 4a) Los títulos declarados EN el alta (subtarea 1.6). El modelo admite N
+      // filas por profesional desde siempre; lo que faltaba era una vía para
+      // declararlas al registrarse, porque `POST /me/credentials` exige sesión y
+      // el alta termina en el login. Nacen PENDIENTES por lo mismo que la de
+      // arriba: declarar un título no es haberlo acreditado.
+      //
+      // Van en esta misma transacción, así que si una falla no queda ninguna a
+      // medias: o entra el alta entera o no entra nada.
+      for (const declarada of dto.credentials ?? []) {
+        // La FK acepta CUALQUIER concepto del catálogo, así que sin esta
+        // comprobación alguien podría archivar como «título» el concepto de un
+        // idioma. Quién decide cuáles son tipos de credencial es la enumeración
+        // `professional-credential-type`, la misma que valida `addOwnCredential`.
+        if (!TIPOS_DE_CREDENCIAL.includes(declarada.credentialTypeConceptId)) {
+          throw new PreconditionFailedException(
+            'Ese concepto no es un tipo de credencial profesional',
+            { credentialTypeConceptId: declarada.credentialTypeConceptId },
+          );
+        }
+        // El DTO ya lo exige, y se comprueba acá también por lo mismo que el
+        // departamento emisor: un llamador que no pase por el `ValidationPipe`
+        // podría saltárselo, y una credencial sin número no se puede verificar.
+        const numero = declarada.number.trim();
+        if (numero === '') {
+          throw new PreconditionFailedException(
+            'El número del título no puede estar vacío',
+            { credentialTypeConceptId: declarada.credentialTypeConceptId },
+          );
+        }
+        this.professionalCredentialsRepo.create(tx, {
+          practitionerProfileId: person.id,
+          credentialTypeConceptId: declarada.credentialTypeConceptId,
+          number: numero,
+          issuingInstitutionText: declarada.issuingInstitutionText?.trim(),
+          stateConceptId: PROF.CRED_PENDING,
+          actorUserId: user.id,
+        });
+      }
       this.languagesRepo.create(tx, {
         practitionerProfileId: person.id,
         languageConceptId: dto.languageConceptId ?? PROF.LANGUAGE_SPANISH,
