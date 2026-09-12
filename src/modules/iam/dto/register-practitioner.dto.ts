@@ -605,6 +605,85 @@ export class RegisterPractitionerDto {
   @ValidateNested()
   @Type(() => CreateOwnSiteDto)
   ownSite?: CreateOwnSiteDto;
+
+  /**
+   * Los títulos académicos que el profesional declara EN el alta (subtarea 1.6).
+   *
+   * Hasta acá el alta creaba **una** credencial y sólo si venía
+   * {@link credentialNumber}: no había forma de declarar la segunda carrera, el
+   * diplomado ni la maestría, aunque el modelo admite N filas por profesional.
+   * Cada elemento es una fila de `profiles.professional_credentials`, creada en
+   * la **misma transacción** que la cuenta, la persona y el perfil.
+   *
+   * Va adentro del alta por lo mismo que {@link ownSite}: el contrato que ya
+   * existe para esto —`POST /profiles/practitioners/me/credentials`— exige
+   * sesión, y el registro termina en el login sin iniciarla.
+   *
+   * **No se combina con {@link credentialNumber}**: mandar los dos a la vez deja
+   * ambiguo si son el mismo título declarado dos veces, y el alta responde 422.
+   */
+  @ApiPropertyOptional({
+    type: () => [RegisterPractitionerCredentialDto],
+    description:
+      'Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RegisterPractitionerCredentialDto)
+  credentials?: RegisterPractitionerCredentialDto[];
+}
+
+/**
+ * Un título académico declarado dentro del alta pública (subtarea 1.6).
+ *
+ * Es el subconjunto **mínimo** de `AddOwnCredentialDto` que el alta necesita:
+ * qué clase de título es, su número y dónde se cursó. Nada más viaja, porque
+ * nada más tiene hoy dónde guardarse sin cambiar el modelo.
+ *
+ * `number` es obligatorio: la columna es `NOT NULL`, así que aceptar la fila sin
+ * él cambiaría un aviso claro del formulario por un error al escribir. Es la
+ * misma razón por la que `AddOwnCredentialDto.number` tampoco es opcional.
+ */
+export class RegisterPractitionerCredentialDto {
+  /**
+   * Qué acredita el documento. Uno de los cinco de la enumeración
+   * `professional-credential-type`; cualquier otro concepto se rechaza con 422.
+   */
+  @ApiProperty({
+    description:
+      'Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad)',
+    format: 'uuid',
+  })
+  @IsUUID()
+  credentialTypeConceptId!: string;
+
+  /**
+   * Número o código del diploma.
+   *
+   * `@Matches(/\S/)` además de `@IsString`: la columna es NOT NULL pero acepta
+   * la cadena vacía, así que sin esto `''` o `'   '` entrarían por una
+   * superficie pública y dejarían una credencial sin número que nadie puede
+   * verificar. El formulario ya lo exige; esto lo exige también a quien no pase
+   * por el formulario.
+   */
+  @ApiProperty({ maxLength: 100 })
+  @IsString()
+  @Matches(/\S/, { message: 'number no puede estar vacío' })
+  @MaxLength(100)
+  number!: string;
+
+  /**
+   * Dónde se cursó. Texto libre a propósito, igual que en
+   * `AddOwnCredentialDto`: las universidades del exterior no están en ningún
+   * catálogo nuestro, y exigir que lo estén dejaría fuera a quien se formó
+   * afuera.
+   */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  issuingInstitutionText?: string;
 }
 
 /** Resultado del auto-registro de un profesional de salud. */
