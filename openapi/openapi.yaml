@@ -20545,6 +20545,72 @@ paths:
       tags:
         - automation
   /charts/notes:
+    get:
+      operationId: ChartNotesController_listNotes
+      parameters:
+        - name: practitionerId
+          required: false
+          in: query
+          description: Perfil profesional autor; por defecto, el de la sesión
+          schema:
+            format: uuid
+            type: string
+        - name: patientProfileId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: from
+          required: false
+          in: query
+          schema:
+            example: '2026-01-01T00:00:00.000Z'
+            type: string
+        - name: to
+          required: false
+          in: query
+          schema:
+            example: '2026-12-31T23:59:59.999Z'
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 50
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChartNotesListResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: La sesión no tiene perfil profesional, o pide las notas de otro profesional sin ser SUPERADMIN.
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las notas de evolución de un profesional por ventana de fechas
+      tags:
+        - chart-notes
+      description: >-
+        Listar las notas de evolución de un profesional por ventana de fechas. Requiere JWT y los roles o alcances
+        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
     post:
       operationId: ChartNotesController_createNote
       parameters: []
@@ -63182,6 +63248,84 @@ components:
         errorText:
           type: string
           description: Motivo del fallo
+    ChartNoteListItemDto:
+      type: object
+      properties:
+        noteId:
+          type: string
+          format: uuid
+        encounterId:
+          type: string
+          format: uuid
+        noteTypeConceptId:
+          type: string
+          format: uuid
+        lifecycleStatusConceptId:
+          type: string
+          format: uuid
+        currentVersionId:
+          type: string
+          format: uuid
+          nullable: true
+        versionNumber:
+          type: number
+          description: Número de la versión vigente
+        authorProfileId:
+          type: string
+          format: uuid
+        chiefComplaintText:
+          type: string
+        subjectiveText:
+          type: string
+        objectiveText:
+          type: string
+        assessmentText:
+          type: string
+        planText:
+          type: string
+        signedAt:
+          type: string
+          format: date-time
+          nullable: true
+        releasedToPatient:
+          type: boolean
+          description: >-
+            Si la nota tiene una versión liberada al portal del paciente. Derivado, para no obligar a resolver
+            terminología antes de decidir si se muestra
+        createdAt:
+          type: string
+          format: date-time
+        patientProfileId:
+          type: string
+          format: uuid
+      required:
+        - noteId
+        - lifecycleStatusConceptId
+        - releasedToPatient
+        - createdAt
+        - patientProfileId
+    ChartNotesListResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartNoteListItemDto'
+        count:
+          type: number
+          description: Cantidad devuelta en esta página
+        limit:
+          type: number
+          description: Tope de resultados aplicado
+        nextCursor:
+          type: string
+          nullable: true
+          description: Cursor opaco para la página siguiente; `null` sin más
+      required:
+        - items
+        - count
+        - limit
+        - nextCursor
     CreateNoteDto:
       type: object
       properties:
