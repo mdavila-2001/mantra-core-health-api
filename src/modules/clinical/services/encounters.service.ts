@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConcurrencyConflictException,
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -14,8 +15,16 @@ import {
   CloseEncounterDto,
   EncounterResponseDto,
 } from '../dto';
+import { Encounters } from '../entities';
 import { CLIN } from '../clinical.concepts';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
+
+/**
+ * Código del estado `ENCOUNTER_FINISHED` (`CLIN.ENCOUNTER_FINISHED` sólo
+ * expone el uuid derivado; el 409 de la subtarea 4.2 necesita el código
+ * legible del concepto, no su identificador).
+ */
+const ENCOUNTER_FINISHED_STATUS_CODE = 'ENC_FINISHED';
 
 /**
  * UC-08-02 (check-in) y UC-08-14 (cierre) de encuentros. El check-in abre el
@@ -65,6 +74,16 @@ export class EncountersService {
               episodeId: dto.episodeId,
             },
           );
+        }
+      }
+
+      if (dto.appointmentId) {
+        const encuentroDeLaCita = await this.resolverEncuentroDeLaCita(
+          tx,
+          dto.appointmentId,
+        );
+        if (encuentroDeLaCita) {
+          return encuentroDeLaCita;
         }
       }
 
@@ -120,18 +139,106 @@ export class EncountersService {
         { operation: 'clinical.encounter.check-in', encounterId: encounter.id },
         'Encounter opened',
       );
-      return {
-        id: encounter.id,
-        patientProfileId: encounter.patientProfileId,
-        episodeId: encounter.episodeId ?? null,
-        status: encounter.statusConceptId,
-        participantIds,
-        locationIds,
-        startAt: encounter.startAt ?? null,
-        endAt: encounter.endAt ?? null,
-        createdAt: encounter.createdAt,
-      };
+      return this.aRespuesta(encounter, participantIds, locationIds);
     });
+  }
+
+  /**
+   * Idempotencia del check-in por cita (subtarea 4.2): si la cita ya tiene un
+   * encuentro en curso, lo devuelve sin escribir nada; si ya tiene uno
+   * finalizado, rechaza con 409. Sin encuentro previo (o en cualquier otro
+   * estado), devuelve `null` para que `checkIn` cree uno nuevo.
+   *
+   * @param tx - Transacción activa del check-in.
+   * @param appointmentId - Cita clínica referenciada por el check-in.
+   * @returns La respuesta del encuentro reutilizado, o `null` si hay que crear uno.
+   */
+  private async resolverEncuentroDeLaCita(
+    tx: EntityManager,
+    appointmentId: string,
+  ): Promise<EncounterResponseDto | null> {
+    // D-3: serializa los check-in concurrentes sobre la misma cita. Si la cita
+    // no existe, se sigue igual: la FK plana produce el mismo 422 de hoy.
+    await this.encountersRepo.findAppointmentForUpdate(tx, appointmentId);
+
+    const previos = await this.encountersRepo.findByAppointmentId(
+      tx,
+      appointmentId,
+    );
+    const previo = previos[0];
+    if (!previo) {
+      return null;
+    }
+
+    if (previo.statusConceptId === CLIN.ENCOUNTER_IN_PROGRESS) {
+      const [participants, locations] = await Promise.all([
+        this.encountersRepo.findActiveParticipants(
+          tx,
+          previo.id,
+          CLIN.PARTICIPANT_ACTIVE,
+        ),
+        this.encountersRepo.findActiveLocations(
+          tx,
+          previo.id,
+          CLIN.LOCATION_ACTIVE,
+        ),
+      ]);
+      this.logger.info(
+        {
+          operation: 'clinical.encounter.check-in',
+          encounterId: previo.id,
+          reused: true,
+        },
+        'Encounter reused',
+      );
+      return this.aRespuesta(
+        previo,
+        participants.map((p) => p.id),
+        locations.map((l) => l.id),
+      );
+    }
+
+    if (previo.statusConceptId === CLIN.ENCOUNTER_FINISHED) {
+      throw new ConflictException(
+        'La cita ya cuenta con un encuentro clínico finalizado.',
+        {
+          appointmentId,
+          encounterId: previo.id,
+          status: ENCOUNTER_FINISHED_STATUS_CODE,
+          endAt: previo.endAt ?? null,
+        },
+      );
+    }
+
+    return null;
+  }
+
+  /**
+   * Arma el `EncounterResponseDto` a partir del encuentro y sus participantes
+   * y ubicaciones (creados o reutilizados). Extraído para que el check-in y el
+   * cierre emitan exactamente la misma forma de respuesta.
+   *
+   * @param encounter - Encuentro persistido.
+   * @param participantIds - Identificadores de sus participantes activos.
+   * @param locationIds - Identificadores de sus ubicaciones activas.
+   * @returns El DTO de respuesta del módulo.
+   */
+  private aRespuesta(
+    encounter: Encounters,
+    participantIds: string[],
+    locationIds: string[],
+  ): EncounterResponseDto {
+    return {
+      id: encounter.id,
+      patientProfileId: encounter.patientProfileId,
+      episodeId: encounter.episodeId ?? null,
+      status: encounter.statusConceptId,
+      participantIds,
+      locationIds,
+      startAt: encounter.startAt ?? null,
+      endAt: encounter.endAt ?? null,
+      createdAt: encounter.createdAt,
+    };
   }
 
   /** UC-08-14: cierra un encuentro en curso y sus periodos activos. */
@@ -203,17 +310,11 @@ export class EncountersService {
         { operation: 'clinical.encounter.close', encounterId },
         'Encounter closed',
       );
-      return {
-        id: encounter.id,
-        patientProfileId: encounter.patientProfileId,
-        episodeId: encounter.episodeId ?? null,
-        status: encounter.statusConceptId,
-        participantIds: participants.map((p) => p.id),
-        locationIds: locations.map((l) => l.id),
-        startAt: encounter.startAt ?? null,
-        endAt: encounter.endAt ?? null,
-        createdAt: encounter.createdAt,
-      };
+      return this.aRespuesta(
+        encounter,
+        participants.map((p) => p.id),
+        locations.map((l) => l.id),
+      );
     });
 
     // Carril P1: «tu consulta está disponible». Fuera de la transacción por lo

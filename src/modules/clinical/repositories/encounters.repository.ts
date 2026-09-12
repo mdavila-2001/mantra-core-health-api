@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  Appointments,
   Encounters,
   EncounterParticipants,
   EncounterLocations,
@@ -244,6 +246,44 @@ export class EncountersRepository {
         ...createdBy(data.actorUserId),
       },
       { partial: true },
+    );
+  }
+
+  /**
+   * Bloquea la cita clínica para serializar los check-in concurrentes que la
+   * referencian (D-3 de la subtarea 4.2). Molde:
+   * `scheduling-bookings.repository.ts:195-204`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param appointmentId - Identificador de la cita a bloquear.
+   * @returns La cita bloqueada, o `null` si no existe.
+   */
+  findAppointmentForUpdate(
+    em: EntityManager,
+    appointmentId: string,
+  ): Promise<Appointments | null> {
+    return em.findOne(
+      Appointments,
+      { id: appointmentId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Encuentros asociados a una cita clínica, del más reciente al más antiguo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param appointmentId - Identificador de la cita.
+   * @returns Filas de la cita, ordenadas de la más reciente a la más antigua.
+   */
+  findByAppointmentId(
+    em: EntityManager,
+    appointmentId: string,
+  ): Promise<Encounters[]> {
+    return em.find(
+      Encounters,
+      { appointmentId },
+      { orderBy: { createdAt: 'DESC' } },
     );
   }
 
