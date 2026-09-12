@@ -26,11 +26,22 @@ function build() {
     withholdVersion: mockFn(),
     recordExamFindings: mockFn(),
   };
-  const controller = new ChartNotesController(notesService as any);
-  return { controller, notesService };
+  const notesReadService = { listNotes: mockFn() };
+  const controller = new ChartNotesController(
+    notesService as any,
+    notesReadService as any,
+  );
+  return { controller, notesService, notesReadService };
 }
 
 describe('ChartNotesController', () => {
+  it('delegates listNotes (P18)', async () => {
+    const d = build();
+    const query = { practitionerId: 'pr1' };
+    await d.controller.listNotes(query as any, actor);
+    expect(d.notesReadService.listNotes).toHaveBeenCalledWith(query, actor);
+  });
+
   it('delegates createNote (UC-15-01)', async () => {
     const d = build();
     const dto = { patientProfileId: 'p1', authorProfileId: 'a1' };

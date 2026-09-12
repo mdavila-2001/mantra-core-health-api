@@ -1,23 +1,33 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { ChartNotesService } from '../services';
+import { ChartNotesService, ChartNotesReadService } from '../services';
 import {
   AddVersionDto,
   AmendNoteDto,
+  ChartNotesListResponseDto,
   CosignVersionDto,
   CreateNoteDto,
   ExamFindingsDto,
   ExamFindingsResultDto,
+  ListChartNotesQueryDto,
   NoteVersionResponseDto,
   ReleaseResultDto,
   ReleaseVersionDto,
@@ -40,7 +50,29 @@ export class ChartNotesController {
    *
    * @param notesService - Valor de notes service requerido por la operación.
    */
-  constructor(private readonly notesService: ChartNotesService) {}
+  constructor(
+    private readonly notesService: ChartNotesService,
+    private readonly notesReadService: ChartNotesReadService,
+  ) {}
+
+  /** P18: colección de notas de evolución de un profesional. */
+  @Get()
+  @ApiOperation({
+    summary:
+      'Listar las notas de evolución de un profesional por ventana de fechas',
+  })
+  @ApiOkResponse({ type: ChartNotesListResponseDto })
+  @ApiForbiddenResponse({
+    description:
+      'La sesión no tiene perfil profesional, o pide las notas de otro ' +
+      'profesional sin ser SUPERADMIN.',
+  })
+  listNotes(
+    @Query() query: ListChartNotesQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ChartNotesListResponseDto> {
+    return this.notesReadService.listNotes(query, actor);
+  }
 
   /** UC-15-01. */
   @Post()
