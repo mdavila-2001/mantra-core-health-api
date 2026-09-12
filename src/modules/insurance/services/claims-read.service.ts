@@ -384,6 +384,8 @@ export class ClaimsReadService {
       deniedAmount: this.money(adj?.deniedAmount, currency),
       decision: concepts.get(adj?.decisionConceptId ?? '') ?? null,
       denialReason: concepts.get(adj?.reasonConceptId ?? '') ?? null,
+      policyClauseReference: adj?.policyClauseReference ?? null,
+      denialRationale: adj?.denialRationale ?? null,
       referenceType,
       reference,
     };

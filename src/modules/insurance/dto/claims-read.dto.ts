@@ -197,6 +197,10 @@ export class ClaimListResponseDto {
  * `supporting_clinical_reference` —un `varchar` sin integridad referencial— se
  * devuelve el texto con `referenceType: null`, y la pantalla dice que el tipo
  * no está registrado en vez de adivinarlo (AC-16-10).
+ *
+ * `policyClauseReference`/`denialRationale` (subtarea 2.2) son la cita de la
+ * cláusula y la justificación circunstanciada **del ítem**; `denialReason` sigue
+ * siendo el motivo TIPIFICADO. Ninguna reemplaza a las otras.
  */
 export class ClaimLineViewDto {
   /** Identificador del ítem. */
@@ -234,6 +238,19 @@ export class ClaimLineViewDto {
   /** Motivo catalogado del rechazo. */
   @ApiProperty({ nullable: true, type: InsuranceConceptDto })
   denialReason!: InsuranceConceptDto | null;
+
+  /**
+   * Cita textual de la cláusula contractual que fundamenta el rechazo (subtarea 2.2).
+   *
+   * `null` mientras el ítem no tenga dictamen, o si el dictamen es anterior a v4.2.9:
+   * la tabla es `<<IMMUTABLE>>` y esas filas no pueden ganar la cláusula después.
+   */
+  @ApiProperty({ nullable: true, type: String })
+  policyClauseReference!: string | null;
+
+  /** Justificación circunstanciada del rechazo, por ítem (subtarea 2.2). `null` en las mismas condiciones que `policyClauseReference`. */
+  @ApiProperty({ nullable: true, type: String })
+  denialRationale!: string | null;
 
   /**
    * Qué es el documento clínico de origen.
