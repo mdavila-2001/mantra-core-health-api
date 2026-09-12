@@ -148,6 +148,11 @@ function build() {
       detail: 'sin candidatos',
     }),
   };
+  // El encuentro clínico de la cita (subtarea 4.3). Por omisión ninguna cita
+  // tiene encuentro: las pruebas que lo comprueban devuelven el mapa a propósito.
+  const encountersRepo = {
+    findLatestIdsByAppointmentIds: mockFn().mockResolvedValue(new Map()),
+  };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -161,6 +166,7 @@ function build() {
     tiempoProfesional as any,
     coverageRepo as any,
     waitlist as any,
+    encountersRepo as any,
   );
   return {
     service,
@@ -176,6 +182,7 @@ function build() {
     noticeRepo,
     notices,
     logger,
+    encountersRepo,
   };
 }
 
@@ -2517,6 +2524,84 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect('typeConceptId' in res.items[0]).toBe(false);
+    });
+
+    /* ------------------------------------------------------------------
+       Subtarea 4.3 · el encuentro clínico de la cita viaja en la reserva
+       ------------------------------------------------------------------ */
+
+    it('el encuentro de la cita llega en el listado', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: 'appt-1',
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+      d.encountersRepo.findLatestIdsByAppointmentIds.mockResolvedValue(
+        new Map([['appt-1', 'encounter-1']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(res.items[0].encounterId).toBe('encounter-1');
+      const [, ids] =
+        d.encountersRepo.findLatestIdsByAppointmentIds.mock.calls[0];
+      expect(ids).toEqual(['appt-1']);
+    });
+
+    it('una reserva sin cita clínica trae encounterId null y no pide el lote', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          {
+            booking: {
+              ...guardada,
+              id: 'b1',
+              resourceId: 'res-1',
+              appointmentId: null,
+            },
+            slot: null,
+          },
+        ],
+        fetchCapReached: false,
+      });
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(res.items[0].encounterId).toBeNull();
+      const [, ids] =
+        d.encountersRepo.findLatestIdsByAppointmentIds.mock.calls[0];
+      expect(ids).toHaveLength(0);
+    });
+
+    it('el encuentro de la cita llega en el detalle', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue({
+        ...guardada,
+        appointmentId: 'appt-1',
+      });
+      d.encountersRepo.findLatestIdsByAppointmentIds.mockResolvedValue(
+        new Map([['appt-1', 'encounter-1']]),
+      );
+
+      const cita = await d.service.getBookingById('booking-1');
+
+      expect(cita.encounterId).toBe('encounter-1');
     });
 
     it('el listado por omisión incluye las pendientes y las completadas', async () => {

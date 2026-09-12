@@ -252,6 +252,25 @@ export class BookingItemDto {
   appointmentId?: string | null;
 
   /**
+   * Encuentro clínico de la cita que respalda la reserva (`clinical.encounters`).
+   *
+   * Sirve para cruzar la reserva con `ChartNote.encounterId` sin estimar por
+   * fecha: es el mismo id que devuelve `POST /clinical/encounters/check-in`.
+   * Si la cita tuviera más de un encuentro, viaja el más reciente.
+   *
+   * `null` cuando la reserva no tiene cita clínica, o la cita no tiene
+   * encuentro todavía. Quien lo consuma tiene que tratar la ausencia como
+   * normal, no como error.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    nullable: true,
+    description:
+      'Encuentro clínico de la cita que respalda la reserva; es el encounterId con el que la lectura de notas identifica cada atención.',
+  })
+  encounterId?: string | null;
+
+  /**
    * Valor de start at mantenido por la instancia.
    */
   @ApiPropertyOptional({
