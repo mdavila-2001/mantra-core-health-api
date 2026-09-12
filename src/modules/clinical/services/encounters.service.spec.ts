@@ -10,6 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { EncountersService } from './encounters.service';
 import {
   ConcurrencyConflictException,
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
@@ -32,6 +33,8 @@ function build() {
     createLocation: mockFn(),
     findActiveParticipants: mockFn().mockResolvedValue([]),
     findActiveLocations: mockFn().mockResolvedValue([]),
+    findAppointmentForUpdate: mockFn().mockResolvedValue(null),
+    findByAppointmentId: mockFn().mockResolvedValue([]),
   };
   const episodesRepo = { findById: mockFn() };
   // Carril P1: el aviso in-app del cierre. Se dobla con un espía que no hace
@@ -111,6 +114,80 @@ describe('EncountersService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('reuses the in-progress encounter already open for the appointment', async () => {
+      const d = build();
+      const enc = { ...encounter(), id: 'enc-existing' };
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([enc]);
+      d.encountersRepo.findActiveParticipants.mockResolvedValue([
+        { id: 'part1' },
+      ]);
+      d.encountersRepo.findActiveLocations.mockResolvedValue([{ id: 'loc1' }]);
+
+      const res = await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'appt1' },
+        actor,
+      );
+
+      expect(res.id).toBe('enc-existing');
+      expect(res.participantIds).toEqual(['part1']);
+      expect(res.locationIds).toEqual(['loc1']);
+      expect(d.encountersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects with 409 when the appointment already has a finished encounter', async () => {
+      const d = build();
+      const enc = {
+        ...encounter(),
+        id: 'enc-finished',
+        statusConceptId: CLIN.ENCOUNTER_FINISHED,
+        endAt: new Date(),
+      };
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([enc]);
+
+      const promesa = d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'appt1' },
+        actor,
+      );
+
+      await expect(promesa).rejects.toBeInstanceOf(ConflictException);
+      await expect(promesa).rejects.toMatchObject({
+        details: {
+          encounterId: 'enc-finished',
+          status: 'ENC_FINISHED',
+        },
+      });
+      expect(d.encountersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('creates a new encounter when the appointment has none', async () => {
+      const d = build();
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([]);
+      d.encountersRepo.create.mockReturnValue(encounter());
+
+      await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'appt1' },
+        actor,
+      );
+
+      expect(d.encountersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ appointmentId: 'appt1' }),
+      );
+    });
+
+    it('does not look up the appointment when none is given', async () => {
+      const d = build();
+      d.encountersRepo.create.mockReturnValue(encounter());
+
+      await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1' },
+        actor,
+      );
+
+      expect(d.encountersRepo.findAppointmentForUpdate).not.toHaveBeenCalled();
+      expect(d.encountersRepo.findByAppointmentId).not.toHaveBeenCalled();
     });
   });
 
