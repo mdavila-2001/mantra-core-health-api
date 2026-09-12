@@ -1261,6 +1261,9 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   CHANNEL_DESK: def('scheduling:channel:desk', 'CH_DESK', 'Front desk'),
   CHANNEL_PHONE: def('scheduling:channel:phone', 'CH_PHONE', 'Phone'),
+  // El turno de mostrador atómico (walk-in): el paciente se atiende en el
+  // momento, distinto de una reserva de mostrador para más adelante (CH_DESK).
+  CHANNEL_WALK_IN: def('scheduling:channel:walk-in', 'CH_WALK_IN', 'Walk-in'),
 
   // --- Scheduling: motivos de cancelación ---
   CANCEL_BY_PATIENT: def(
