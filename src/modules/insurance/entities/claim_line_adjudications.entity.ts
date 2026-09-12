@@ -67,6 +67,36 @@ export class ClaimLineAdjudications {
   reasonConceptId?: string;
 
   /**
+   * Cita textual de la cláusula o artículo de la póliza contractual que
+   * fundamenta el rechazo (ej. "Cláusula 12.3: Medicamento no cubierto en
+   * plan ambulatorio"). Complementa a `reasonConceptId` — que sigue siendo
+   * el motivo TIPIFICADO — sin reemplazarlo: esta es la cita, no un código.
+   *
+   * `null` en toda adjudicación registrada antes de v4.2.9: la tabla es
+   * `<<IMMUTABLE>>` y no admite backfill.
+   */
+  @Property({
+    fieldName: 'policy_clause_reference',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  policyClauseReference?: string;
+
+  /**
+   * Justificación circunstanciada del rechazo, redactada por quien
+   * adjudica la línea. A diferencia de `claim_adjudication_versions.dispositionText`
+   * (de la versión entera), esta es del ítem puntual.
+   *
+   * `null` en toda adjudicación registrada antes de v4.2.9.
+   */
+  @Property({
+    fieldName: 'denial_rationale',
+    columnType: 'text',
+    nullable: true,
+  })
+  denialRationale?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
