@@ -85,6 +85,26 @@ export class IdentifiersRepository {
     });
   }
 
+  /**
+   * Los identificadores de un conjunto de ids, por id.
+   *
+   * Lectura en lote: la ficha de una organización nombra hasta cuatro personas
+   * y pedir sus documentos de a uno sería N+1 sobre la tabla que ya resuelve
+   * el login.
+   *
+   * @param em - Contexto de persistencia.
+   * @param ids - Los identificadores a traer; lista vacía devuelve un mapa vacío.
+   * @returns Mapa `id -> identificador` con los que existan.
+   */
+  async findByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Map<string, Identifiers>> {
+    if (ids.length === 0) return new Map();
+    const filas = await em.find(Identifiers, { id: { $in: [...ids] } });
+    return new Map(filas.map((fila) => [fila.id, fila]));
+  }
+
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateIdentifierData): Identifiers {
     return em.create(
