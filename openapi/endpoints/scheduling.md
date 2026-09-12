@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `scheduling`
 
-Referencia exhaustiva de 52 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 53 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda`
 - **Controladores:** `SchedulingAgendaController`, `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingInternalController`, `TenantAgendaController`
@@ -13,56 +13,57 @@ Referencia exhaustiva de 52 operación(es) del módulo `scheduling`, derivada de
 
 1. [GET /scheduling/activity-types](#1-get-scheduling-activity-types) — Listar las tipologías de actividad de la agenda
 2. [POST /scheduling/appointments/direct](#2-post-scheduling-appointments-direct) — Asignar una cita puntual a un paciente (nace confirmada)
-3. [POST /scheduling/booking-policies](#3-post-scheduling-booking-policies) — Definir una política de reserva
-4. [GET /scheduling/bookings](#4-get-scheduling-bookings) — UC-41-15: lista citas por paciente, recurso y/o ventana
-5. [GET /scheduling/bookings/{id}](#5-get-scheduling-bookings-id) — UC-41-15: consulta una cita
-6. [POST /scheduling/bookings/{id}/accept](#6-post-scheduling-bookings-id-accept) — Aceptar la solicitud de cita
-7. [POST /scheduling/bookings/{id}/cancel](#7-post-scheduling-bookings-id-cancel) — Cancelar la cita y liberar el cupo
-8. [POST /scheduling/bookings/{id}/check-in](#8-post-scheduling-bookings-id-check-in) — Registrar la llegada del paciente
-9. [POST /scheduling/bookings/{id}/complete](#9-post-scheduling-bookings-id-complete) — Completar la atención
-10. [POST /scheduling/bookings/{id}/delay](#10-post-scheduling-bookings-id-delay) — Informar una demora sobre una cita
-11. [GET /scheduling/bookings/{id}/payment-state](#11-get-scheduling-bookings-id-payment-state) — Leer el estado de pago de una cita
-12. [PUT /scheduling/bookings/{id}/payment-state](#12-put-scheduling-bookings-id-payment-state) — Marcar el estado de pago de una cita
-13. [POST /scheduling/bookings/{id}/propose-schedule](#13-post-scheduling-bookings-id-propose-schedule) — Proponer otro horario para la solicitud
-14. [POST /scheduling/bookings/{id}/reject](#14-post-scheduling-bookings-id-reject) — Rechazar la solicitud de cita
-15. [POST /scheduling/bookings/{id}/reminders](#15-post-scheduling-bookings-id-reminders) — Programar recordatorios para la cita
-16. [POST /scheduling/bookings/{id}/request-info](#16-post-scheduling-bookings-id-request-info) — Pedir documentación u orden médica antes de aceptar
-17. [POST /scheduling/bookings/{id}/reschedule](#17-post-scheduling-bookings-id-reschedule) — Reprogramar la cita a otro slot
-18. [POST /scheduling/bookings/{id}/start](#18-post-scheduling-bookings-id-start) — Iniciar la atención
-19. [GET /scheduling/confirmation-rules](#19-get-scheduling-confirmation-rules) — Listar las reglas de un tenant
-20. [POST /scheduling/confirmation-rules](#20-post-scheduling-confirmation-rules) — Crear una regla de confirmación
-21. [POST /scheduling/confirmation-rules/{id}/activate](#21-post-scheduling-confirmation-rules-id-activate) — Reactivar una regla desactivada
-22. [POST /scheduling/confirmation-rules/{id}/deactivate](#22-post-scheduling-confirmation-rules-id-deactivate) — Desactivar una regla (sin borrado duro)
-23. [POST /scheduling/confirmation-rules/evaluate](#23-post-scheduling-confirmation-rules-evaluate) — Evaluar una solicitud de reserva contra las reglas vigentes
-24. [GET /scheduling/exception-types](#24-get-scheduling-exception-types) — Listar los motivos de bloqueo de agenda
-25. [DELETE /scheduling/exceptions/{id}](#25-delete-scheduling-exceptions-id) — Eliminar una excepción de disponibilidad
-26. [PATCH /scheduling/exceptions/{id}](#26-patch-scheduling-exceptions-id) — Editar una excepción de disponibilidad
-27. [POST /scheduling/holds/{holdToken}/confirm](#27-post-scheduling-holds-holdtoken-confirm) — Confirmar la cita a partir de la reserva temporal
-28. [POST /scheduling/holds/{holdToken}/request](#28-post-scheduling-holds-holdtoken-request) — Solicitar la cita a partir de la reserva temporal
-29. [POST /scheduling/internal/dispatch-reminders](#29-post-scheduling-internal-dispatch-reminders) — Despachar los recordatorios cuya hora ya llegó
-30. [POST /scheduling/internal/expire-holds](#30-post-scheduling-internal-expire-holds) — Liberar las reservas temporales vencidas
-31. [POST /scheduling/internal/promote-waitlist/{slotId}](#31-post-scheduling-internal-promote-waitlist-slotid) — Promover candidatos de la lista de espera a un slot con cupo
-32. [GET /scheduling/internal/waitlist-candidates](#32-get-scheduling-internal-waitlist-candidates) — Listar slots con cupo libre y candidatos activos en espera
-33. [GET /scheduling/resources](#33-get-scheduling-resources) — Listar los recursos agendables de un tenant
-34. [POST /scheduling/resources](#34-post-scheduling-resources) — Dar de alta un recurso agendable
-35. [POST /scheduling/resources/{id}/close-slots](#35-post-scheduling-resources-id-close-slots) — Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos
-36. [POST /scheduling/resources/{id}/delay](#36-post-scheduling-resources-id-delay) — Informar una demora que alcanza a toda la agenda del recurso
-37. [GET /scheduling/resources/{id}/exceptions](#37-get-scheduling-resources-id-exceptions) — Listar las excepciones de disponibilidad de un recurso
-38. [POST /scheduling/resources/{id}/exceptions](#38-post-scheduling-resources-id-exceptions) — Registrar una excepción de disponibilidad
-39. [POST /scheduling/resources/{id}/shift-slots](#39-post-scheduling-resources-id-shift-slots) — Correr los cupos de una agenda N minutos
-40. [GET /scheduling/resources/{id}/slots](#40-get-scheduling-resources-id-slots) — UC-41-14: agenda publicada del recurso en una ventana
-41. [GET /scheduling/resources/{id}/templates](#41-get-scheduling-resources-id-templates) — Listar las plantillas de agenda de un recurso
-42. [POST /scheduling/resources/{id}/templates](#42-post-scheduling-resources-id-templates) — Publicar una plantilla de agenda con sus franjas
-43. [GET /scheduling/resources/{resourceId}/waitlist](#43-get-scheduling-resources-resourceid-waitlist) — Listar quiénes esperan turno en una agenda
-44. [GET /scheduling/slots](#44-get-scheduling-slots) — Consultar los cupos de una ventana
-45. [POST /scheduling/slots/{id}/holds](#45-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
-46. [DELETE /scheduling/templates/{id}](#46-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
-47. [PATCH /scheduling/templates/{id}](#47-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
-48. [POST /scheduling/templates/{id}/generate-slots](#48-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
-49. [POST /scheduling/templates/{id}/reactivate](#49-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
-50. [GET /scheduling/waitlist](#50-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
-51. [POST /scheduling/waitlist](#51-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
-52. [GET /tenants/{tenantId}/agenda](#52-get-tenants-tenantid-agenda) — La agenda de la organización
+3. [POST /scheduling/appointments/walk-in](#3-post-scheduling-appointments-walk-in) — Turno de mostrador atómico (walk-in)
+4. [POST /scheduling/booking-policies](#4-post-scheduling-booking-policies) — Definir una política de reserva
+5. [GET /scheduling/bookings](#5-get-scheduling-bookings) — UC-41-15: lista citas por paciente, recurso y/o ventana
+6. [GET /scheduling/bookings/{id}](#6-get-scheduling-bookings-id) — UC-41-15: consulta una cita
+7. [POST /scheduling/bookings/{id}/accept](#7-post-scheduling-bookings-id-accept) — Aceptar la solicitud de cita
+8. [POST /scheduling/bookings/{id}/cancel](#8-post-scheduling-bookings-id-cancel) — Cancelar la cita y liberar el cupo
+9. [POST /scheduling/bookings/{id}/check-in](#9-post-scheduling-bookings-id-check-in) — Registrar la llegada del paciente
+10. [POST /scheduling/bookings/{id}/complete](#10-post-scheduling-bookings-id-complete) — Completar la atención
+11. [POST /scheduling/bookings/{id}/delay](#11-post-scheduling-bookings-id-delay) — Informar una demora sobre una cita
+12. [GET /scheduling/bookings/{id}/payment-state](#12-get-scheduling-bookings-id-payment-state) — Leer el estado de pago de una cita
+13. [PUT /scheduling/bookings/{id}/payment-state](#13-put-scheduling-bookings-id-payment-state) — Marcar el estado de pago de una cita
+14. [POST /scheduling/bookings/{id}/propose-schedule](#14-post-scheduling-bookings-id-propose-schedule) — Proponer otro horario para la solicitud
+15. [POST /scheduling/bookings/{id}/reject](#15-post-scheduling-bookings-id-reject) — Rechazar la solicitud de cita
+16. [POST /scheduling/bookings/{id}/reminders](#16-post-scheduling-bookings-id-reminders) — Programar recordatorios para la cita
+17. [POST /scheduling/bookings/{id}/request-info](#17-post-scheduling-bookings-id-request-info) — Pedir documentación u orden médica antes de aceptar
+18. [POST /scheduling/bookings/{id}/reschedule](#18-post-scheduling-bookings-id-reschedule) — Reprogramar la cita a otro slot
+19. [POST /scheduling/bookings/{id}/start](#19-post-scheduling-bookings-id-start) — Iniciar la atención
+20. [GET /scheduling/confirmation-rules](#20-get-scheduling-confirmation-rules) — Listar las reglas de un tenant
+21. [POST /scheduling/confirmation-rules](#21-post-scheduling-confirmation-rules) — Crear una regla de confirmación
+22. [POST /scheduling/confirmation-rules/{id}/activate](#22-post-scheduling-confirmation-rules-id-activate) — Reactivar una regla desactivada
+23. [POST /scheduling/confirmation-rules/{id}/deactivate](#23-post-scheduling-confirmation-rules-id-deactivate) — Desactivar una regla (sin borrado duro)
+24. [POST /scheduling/confirmation-rules/evaluate](#24-post-scheduling-confirmation-rules-evaluate) — Evaluar una solicitud de reserva contra las reglas vigentes
+25. [GET /scheduling/exception-types](#25-get-scheduling-exception-types) — Listar los motivos de bloqueo de agenda
+26. [DELETE /scheduling/exceptions/{id}](#26-delete-scheduling-exceptions-id) — Eliminar una excepción de disponibilidad
+27. [PATCH /scheduling/exceptions/{id}](#27-patch-scheduling-exceptions-id) — Editar una excepción de disponibilidad
+28. [POST /scheduling/holds/{holdToken}/confirm](#28-post-scheduling-holds-holdtoken-confirm) — Confirmar la cita a partir de la reserva temporal
+29. [POST /scheduling/holds/{holdToken}/request](#29-post-scheduling-holds-holdtoken-request) — Solicitar la cita a partir de la reserva temporal
+30. [POST /scheduling/internal/dispatch-reminders](#30-post-scheduling-internal-dispatch-reminders) — Despachar los recordatorios cuya hora ya llegó
+31. [POST /scheduling/internal/expire-holds](#31-post-scheduling-internal-expire-holds) — Liberar las reservas temporales vencidas
+32. [POST /scheduling/internal/promote-waitlist/{slotId}](#32-post-scheduling-internal-promote-waitlist-slotid) — Promover candidatos de la lista de espera a un slot con cupo
+33. [GET /scheduling/internal/waitlist-candidates](#33-get-scheduling-internal-waitlist-candidates) — Listar slots con cupo libre y candidatos activos en espera
+34. [GET /scheduling/resources](#34-get-scheduling-resources) — Listar los recursos agendables de un tenant
+35. [POST /scheduling/resources](#35-post-scheduling-resources) — Dar de alta un recurso agendable
+36. [POST /scheduling/resources/{id}/close-slots](#36-post-scheduling-resources-id-close-slots) — Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos
+37. [POST /scheduling/resources/{id}/delay](#37-post-scheduling-resources-id-delay) — Informar una demora que alcanza a toda la agenda del recurso
+38. [GET /scheduling/resources/{id}/exceptions](#38-get-scheduling-resources-id-exceptions) — Listar las excepciones de disponibilidad de un recurso
+39. [POST /scheduling/resources/{id}/exceptions](#39-post-scheduling-resources-id-exceptions) — Registrar una excepción de disponibilidad
+40. [POST /scheduling/resources/{id}/shift-slots](#40-post-scheduling-resources-id-shift-slots) — Correr los cupos de una agenda N minutos
+41. [GET /scheduling/resources/{id}/slots](#41-get-scheduling-resources-id-slots) — UC-41-14: agenda publicada del recurso en una ventana
+42. [GET /scheduling/resources/{id}/templates](#42-get-scheduling-resources-id-templates) — Listar las plantillas de agenda de un recurso
+43. [POST /scheduling/resources/{id}/templates](#43-post-scheduling-resources-id-templates) — Publicar una plantilla de agenda con sus franjas
+44. [GET /scheduling/resources/{resourceId}/waitlist](#44-get-scheduling-resources-resourceid-waitlist) — Listar quiénes esperan turno en una agenda
+45. [GET /scheduling/slots](#45-get-scheduling-slots) — Consultar los cupos de una ventana
+46. [POST /scheduling/slots/{id}/holds](#46-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
+47. [DELETE /scheduling/templates/{id}](#47-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
+48. [PATCH /scheduling/templates/{id}](#48-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
+49. [POST /scheduling/templates/{id}/generate-slots](#49-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
+50. [POST /scheduling/templates/{id}/reactivate](#50-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
+51. [GET /scheduling/waitlist](#51-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
+52. [POST /scheduling/waitlist](#52-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
+53. [GET /tenants/{tenantId}/agenda](#53-get-tenants-tenantid-agenda) — La agenda de la organización
 
 ---
 
@@ -304,7 +305,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El paciente ya tiene un turno confirmado en ese rato${             choque.resourceName ? ` en «${choque.resourceName}»` : ''           }. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene un turno confirmado en ese rato${           choque.resourceName ? ` en «${choque.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Tu vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no podés comprometer turnos suyos.'         : 'Tu vínculo con esta organización ya no está vigente, así que no ' +             'podés aceptar turnos suyos. Las citas que ya confirmaste siguen ' +             'en pie: hablá con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -324,7 +325,195 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /scheduling/booking-policies
+## 3. POST /scheduling/appointments/walk-in
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Turno de mostrador atómico (walk-in)
+- **Operation ID:** `SchedulingController_createWalkInAppointment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingController.createWalkInAppointment](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+
+### Descripción de negocio
+
+Registra al paciente sin cuenta, reserva, abre el encuentro y arranca la atención en una sola transacción. 404 recurso; 409 documento ya registrado; 422 choque de horario.
+
+Contexto declarado en el controlador: AC-3.3 · El turno de mostrador atómico: quien llega sin cuenta de portal se registra, reserva y empieza a ser atendido en un solo paso. Registra al paciente sin cuenta, reserva la cita, abre el encuentro clínico y arranca la atención — todo en una sola transacción. La reserva nace `IN_PROGRESS`, no `CONFIRMED`: quien llegó al mostrador ya está ahí, no esperando un check-in posterior. 404 si el recurso no existe; 409 si el documento ya está registrado (retomar al paciente existente con `GET /profiles/patients?nationalId=`); 422 si el horario choca con otro turno del profesional o del paciente.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /scheduling/appointments/walk-in` en `SchedulingController_createWalkInAppointment`. El controlador delega en `SchedulingWalkInService.createWalkInAppointment`. Valida el body como `WalkInAppointmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<WalkInAppointmentResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `WalkInAppointmentDto`; los campos opcionales se omiten.
+
+```http
+POST /scheduling/appointments/walk-in HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patient": {
+    "name": "Lucía",
+    "lastName": "Mamani",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "phone": "+59170000000"
+  },
+  "resourceId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-07-31T12:00:00.000Z",
+  "durationMinutes": 5
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `PRACTITIONER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patient` | Sí | `WalkInPatientDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Lucía","middleName":"Andrea","lastName":"Mamani","motherLastName":"Quispe","nationalId":"00000000-0000-4000-8000-000000000001","issuerAdministrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","birthDate":"2026-07-31","phone":"+59170000000","occupationConceptId":"00000000-0000-4000-8000-000000000001","occupationFreeText":"valor-ejemplo","guardianName":"Nombre de ejemplo","guardianPhone":"+59170000000","guardianRelationshipConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `patient.name` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
+| `patient.middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Andrea` |
+| `patient.lastName` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mamani` |
+| `patient.motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Quispe` |
+| `patient.nationalId` | Sí | `string` | longitud mínima 4; longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad del paciente | `00000000-0000-4000-8000-000000000001` |
+| `patient.issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `patient.birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `patient.phone` | Sí | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres | `+59170000000` |
+| `patient.occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `patient.occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
+| `patient.guardianName` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del tutor o persona autorizada | `Nombre de ejemplo` |
+| `patient.guardianPhone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono del tutor, en formato E.164 o nacional | `+59170000000` |
+| `patient.guardianRelationshipConceptId` | No | `string` | formato `uuid` | Parentesco del contacto de emergencia (conjunto related-person-relationship) | `00000000-0000-4000-8000-000000000001` |
+| `resourceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `startAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `durationMinutes` | Sí | `number` | mínimo 5; máximo 480 | Sin descripción específica en el contrato OpenAPI. | `5` |
+| `reasonText` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `channel` | No | `string` | valores: `PRESENCIAL`, `TELECONSULTA`, `DOMICILIO` | Modalidad de la atención. Ausente = PRESENCIAL. No es el canal de la reserva. | `PRESENCIAL` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /scheduling/appointments/walk-in HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patient": {
+    "name": "Lucía",
+    "middleName": "Andrea",
+    "lastName": "Mamani",
+    "motherLastName": "Quispe",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+    "birthDate": "2026-07-31",
+    "phone": "+59170000000",
+    "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+    "occupationFreeText": "valor-ejemplo",
+    "guardianName": "Nombre de ejemplo",
+    "guardianPhone": "+59170000000",
+    "guardianRelationshipConceptId": "00000000-0000-4000-8000-000000000001"
+  },
+  "resourceId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-07-31T12:00:00.000Z",
+  "durationMinutes": 5,
+  "reasonText": "Texto descriptivo de ejemplo",
+  "channel": "PRESENCIAL"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WalkInAppointmentResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "personId": "00000000-0000-4000-8000-000000000001",
+  "patientCode": "CODIGO_EJEMPLO",
+  "bookingId": "00000000-0000-4000-8000-000000000001",
+  "bookableSlotId": "00000000-0000-4000-8000-000000000001",
+  "appointmentId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "retractedSlots": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | El perfil de paciente recién creado. | `00000000-0000-4000-8000-000000000001` |
+| `personId` | Sí | `string` | formato `uuid` | La persona recién creada. | `00000000-0000-4000-8000-000000000001` |
+| `patientCode` | Sí | `string` | Sin restricción adicional declarada | El código de paciente asignado. | `CODIGO_EJEMPLO` |
+| `bookingId` | Sí | `string` | formato `uuid` | La reserva creada, ya `IN_PROGRESS`. | `00000000-0000-4000-8000-000000000001` |
+| `bookableSlotId` | Sí | `string` | formato `uuid` | El cupo único que la respalda. | `00000000-0000-4000-8000-000000000001` |
+| `appointmentId` | Sí | `string` | formato `uuid` | La cita clínica que respalda la reserva. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | Sí | `string` | formato `uuid` | El encuentro abierto, listo para registrar la atención. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Estado de la reserva: nace `IN_PROGRESS`. | `00000000-0000-4000-8000-000000000001` |
+| `retractedSlots` | Sí | `number` | Sin restricción adicional declarada | Cupos ofrecidos que este turno retiró. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Un profesional solo puede asignar citas en su propia agenda. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene un turno confirmado en ese rato${           choque.resourceName ? ` en «${choque.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Tu vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no podés comprometer turnos suyos.'         : 'Tu vínculo con esta organización ya no está vigente, así que no ' +             'podés aceptar turnos suyos. Las citas que ya confirmaste siguen ' +             'en pie: hablá con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/appointments/walk-in"
+}
+```
+
+---
+
+## 4. POST /scheduling/booking-policies
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -469,7 +658,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /scheduling/bookings
+## 5. GET /scheduling/bookings
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -661,7 +850,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /scheduling/bookings/{id}
+## 6. GET /scheduling/bookings/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -838,7 +1027,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /scheduling/bookings/{id}/accept
+## 7. POST /scheduling/bookings/{id}/accept
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -976,7 +1165,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /scheduling/bookings/{id}/cancel
+## 8. POST /scheduling/bookings/{id}/cancel
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -1113,7 +1302,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /scheduling/bookings/{id}/check-in
+## 9. POST /scheduling/bookings/{id}/check-in
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -1225,7 +1414,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /scheduling/bookings/{id}/complete
+## 10. POST /scheduling/bookings/{id}/complete
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -1345,7 +1534,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /scheduling/bookings/{id}/delay
+## 11. POST /scheduling/bookings/{id}/delay
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -1482,7 +1671,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /scheduling/bookings/{id}/payment-state
+## 12. GET /scheduling/bookings/{id}/payment-state
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -1601,7 +1790,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. PUT /scheduling/bookings/{id}/payment-state
+## 13. PUT /scheduling/bookings/{id}/payment-state
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -1740,7 +1929,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /scheduling/bookings/{id}/propose-schedule
+## 14. POST /scheduling/bookings/{id}/propose-schedule
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -1880,7 +2069,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /scheduling/bookings/{id}/reject
+## 15. POST /scheduling/bookings/{id}/reject
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2013,7 +2202,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /scheduling/bookings/{id}/reminders
+## 16. POST /scheduling/bookings/{id}/reminders
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2147,7 +2336,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /scheduling/bookings/{id}/request-info
+## 17. POST /scheduling/bookings/{id}/request-info
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2286,7 +2475,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /scheduling/bookings/{id}/reschedule
+## 18. POST /scheduling/bookings/{id}/reschedule
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2421,7 +2610,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /scheduling/bookings/{id}/start
+## 19. POST /scheduling/bookings/{id}/start
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2541,7 +2730,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /scheduling/confirmation-rules
+## 20. GET /scheduling/confirmation-rules
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -2653,7 +2842,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /scheduling/confirmation-rules
+## 21. POST /scheduling/confirmation-rules
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -2803,7 +2992,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /scheduling/confirmation-rules/{id}/activate
+## 22. POST /scheduling/confirmation-rules/{id}/activate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -2925,7 +3114,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /scheduling/confirmation-rules/{id}/deactivate
+## 23. POST /scheduling/confirmation-rules/{id}/deactivate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -3047,7 +3236,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /scheduling/confirmation-rules/evaluate
+## 24. POST /scheduling/confirmation-rules/evaluate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -3195,7 +3384,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /scheduling/exception-types
+## 25. GET /scheduling/exception-types
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -3310,7 +3499,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. DELETE /scheduling/exceptions/{id}
+## 26. DELETE /scheduling/exceptions/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -3409,7 +3598,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. PATCH /scheduling/exceptions/{id}
+## 27. PATCH /scheduling/exceptions/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -3547,7 +3736,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /scheduling/holds/{holdToken}/confirm
+## 28. POST /scheduling/holds/{holdToken}/confirm
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -3696,7 +3885,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /scheduling/holds/{holdToken}/request
+## 29. POST /scheduling/holds/{holdToken}/request
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -3841,7 +4030,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /scheduling/internal/dispatch-reminders
+## 30. POST /scheduling/internal/dispatch-reminders
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -3960,7 +4149,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /scheduling/internal/expire-holds
+## 31. POST /scheduling/internal/expire-holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -4079,7 +4268,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /scheduling/internal/promote-waitlist/{slotId}
+## 32. POST /scheduling/internal/promote-waitlist/{slotId}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -4203,7 +4392,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /scheduling/internal/waitlist-candidates
+## 33. GET /scheduling/internal/waitlist-candidates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -4310,7 +4499,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /scheduling/resources
+## 34. GET /scheduling/resources
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-agenda`
@@ -4456,7 +4645,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /scheduling/resources
+## 35. POST /scheduling/resources
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -4600,7 +4789,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /scheduling/resources/{id}/close-slots
+## 36. POST /scheduling/resources/{id}/close-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -4744,7 +4933,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /scheduling/resources/{id}/delay
+## 37. POST /scheduling/resources/{id}/delay
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -4886,7 +5075,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /scheduling/resources/{id}/exceptions
+## 38. GET /scheduling/resources/{id}/exceptions
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5018,7 +5207,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /scheduling/resources/{id}/exceptions
+## 39. POST /scheduling/resources/{id}/exceptions
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5163,7 +5352,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /scheduling/resources/{id}/shift-slots
+## 40. POST /scheduling/resources/{id}/shift-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5305,7 +5494,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /scheduling/resources/{id}/slots
+## 41. GET /scheduling/resources/{id}/slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5453,7 +5642,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. GET /scheduling/resources/{id}/templates
+## 42. GET /scheduling/resources/{id}/templates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5598,7 +5787,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /scheduling/resources/{id}/templates
+## 43. POST /scheduling/resources/{id}/templates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5765,7 +5954,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /scheduling/resources/{resourceId}/waitlist
+## 44. GET /scheduling/resources/{resourceId}/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5898,7 +6087,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. GET /scheduling/slots
+## 45. GET /scheduling/slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-agenda`
@@ -6037,7 +6226,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. POST /scheduling/slots/{id}/holds
+## 46. POST /scheduling/slots/{id}/holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6169,7 +6358,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. DELETE /scheduling/templates/{id}
+## 47. DELETE /scheduling/templates/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6288,7 +6477,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. PATCH /scheduling/templates/{id}
+## 48. PATCH /scheduling/templates/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6446,7 +6635,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. POST /scheduling/templates/{id}/generate-slots
+## 49. POST /scheduling/templates/{id}/generate-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6581,7 +6770,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. POST /scheduling/templates/{id}/reactivate
+## 50. POST /scheduling/templates/{id}/reactivate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6697,7 +6886,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. GET /scheduling/waitlist
+## 51. GET /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6828,7 +7017,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. POST /scheduling/waitlist
+## 52. POST /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6962,7 +7151,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. GET /tenants/{tenantId}/agenda
+## 53. GET /tenants/{tenantId}/agenda
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-tenant-agenda`

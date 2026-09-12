@@ -31,6 +31,7 @@ import {
   SchedulingBookingsService,
   SchedulingDelayService,
   SchedulingWaitlistService,
+  SchedulingWalkInService,
 } from '../services';
 import {
   CreateResourceDto,
@@ -71,6 +72,8 @@ import {
   DelayNoticeResponseDto,
   CreateDirectAppointmentDto,
   DirectAppointmentResponseDto,
+  WalkInAppointmentDto,
+  WalkInAppointmentResponseDto,
 } from '../dto';
 
 /**
@@ -94,6 +97,7 @@ export class SchedulingController {
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
     private readonly delayService: SchedulingDelayService,
+    private readonly walkInService: SchedulingWalkInService,
   ) {}
 
   /**
@@ -553,6 +557,33 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DirectAppointmentResponseDto> {
     return this.bookingsService.createDirectAppointment(dto, actor);
+  }
+
+  /**
+   * AC-3.3 · El turno de mostrador atómico: quien llega sin cuenta de
+   * portal se registra, reserva y empieza a ser atendido en un solo paso.
+   *
+   * Registra al paciente sin cuenta, reserva la cita, abre el encuentro
+   * clínico y arranca la atención — todo en una sola transacción. La reserva
+   * nace `IN_PROGRESS`, no `CONFIRMED`: quien llegó al mostrador ya está ahí,
+   * no esperando un check-in posterior. 404 si el recurso no existe; 409 si
+   * el documento ya está registrado (retomar al paciente existente con
+   * `GET /profiles/patients?nationalId=`); 422 si el horario choca con otro
+   * turno del profesional o del paciente.
+   */
+  @Post('appointments/walk-in')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Turno de mostrador atómico (walk-in)',
+    description:
+      'Registra al paciente sin cuenta, reserva, abre el encuentro y arranca la atención en una sola transacción. 404 recurso; 409 documento ya registrado; 422 choque de horario.',
+  })
+  createWalkInAppointment(
+    @Body() dto: WalkInAppointmentDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<WalkInAppointmentResponseDto> {
+    return this.walkInService.createWalkInAppointment(dto, actor);
   }
 
   /** UC-41-05. */

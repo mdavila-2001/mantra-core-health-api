@@ -2,17 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
 import { SchedulingBookingsRepository } from '../repositories';
+import { SCHED } from '../scheduling.concepts';
 
 /**
  * Estados en los que una cita compromete el tiempo del profesional.
  *
- * Confirmada o con el paciente ya adentro: es la misma lista que «sigue ocupando
- * cupo» en las reservas. Lo pendiente NO compromete —es una pregunta sin
- * responder, y la política de #186 la desplaza, no la protege—.
+ * Confirmada, con el paciente ya adentro, o en curso: la consulta en curso
+ * también compromete —el médico la está atendiendo—. Lo pendiente NO
+ * compromete —es una pregunta sin responder, y la política de #186 la
+ * desplaza, no la protege—.
  */
 const ESTADOS_QUE_COMPROMETEN: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
   CONCEPTS.BOOKING_CHECKED_IN,
+  SCHED.BOOKING_IN_PROGRESS,
 ];
 
 /** Un rato ya comprometido del profesional, con lo que hay que contar de él. */

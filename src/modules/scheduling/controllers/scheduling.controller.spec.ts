@@ -34,11 +34,13 @@ describe('SchedulingController', () => {
     // P8: los avisos de demora cuelgan del recurso, así que el controlador de
     // configuración también los expone.
     const delayService = { delayResource: mockFn() };
+    const walkInService = { createWalkInAppointment: mockFn() };
     const controller = new SchedulingController(
       catalogService as any,
       bookingsService as any,
       waitlistService as any,
       delayService as any,
+      walkInService as any,
     );
     return {
       controller,
@@ -46,6 +48,7 @@ describe('SchedulingController', () => {
       bookingsService,
       waitlistService,
       delayService,
+      walkInService,
     };
   }
 

@@ -31,6 +31,7 @@ import { AppointmentsRepository } from '../../clinical/repositories';
 import { CLIN } from '../../clinical/clinical.concepts';
 import type {
   AppointmentBookings,
+  BookableSlots,
   CancellationPolicySnapshot,
 } from '../entities';
 // Va en un import de valor y no de tipo: `tx.create()` necesita la clase, no su forma.
@@ -86,10 +87,18 @@ import {
   type AppointmentChannel,
 } from '../dto';
 
-const CHANNEL_CONCEPT: Readonly<Record<BookingChannel, string>> = {
+/**
+ * Canal de reserva interno: además de los que el cliente puede elegir
+ * (`BookingChannel`), el mostrador atómico usa `WALK_IN`, que no es una opción
+ * del DTO público — lo decide el servidor, nunca el cuerpo del alta.
+ */
+type InternalBookingChannel = BookingChannel | 'WALK_IN';
+
+const CHANNEL_CONCEPT: Readonly<Record<InternalBookingChannel, string>> = {
   PORTAL: CONCEPTS.CHANNEL_PORTAL,
   DESK: CONCEPTS.CHANNEL_DESK,
   PHONE: CONCEPTS.CHANNEL_PHONE,
+  WALK_IN: CONCEPTS.CHANNEL_WALK_IN,
 };
 
 /**
@@ -853,9 +862,6 @@ export class SchedulingBookingsService {
     dto: CreateDirectAppointmentDto,
     actor: AuthenticatedUser,
   ): Promise<DirectAppointmentResponseDto> {
-    const startAt = new Date(dto.startAt);
-    const endAt = new Date(startAt.getTime() + dto.durationMinutes * 60_000);
-
     this.logger.info(
       {
         operation: 'scheduling.appointment.direct',
@@ -867,176 +873,15 @@ export class SchedulingBookingsService {
       'Creating direct appointment',
     );
 
-    const resultado = await this.em.transactional(async (tx) => {
-      const resource = await this.catalogRepo.findResourceById(
-        tx,
-        dto.resourceId,
-      );
-      if (!resource) {
-        throw new ResourceNotFoundException('Recurso no encontrado', {
-          resourceId: dto.resourceId,
-        });
-      }
-
-      // La agenda tiene que ser SUYA (o el actor administra agendas por
-      // oficio): mismo criterio de titularidad que operar una reserva.
-      const esSuAgenda =
-        actor.practitionerProfileId !== undefined &&
-        resource.resourceRefId === actor.practitionerProfileId &&
-        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType);
-      if (!this.operaCualquierAgenda(actor) && !esSuAgenda) {
-        throw new ForbiddenException(
-          'Un profesional solo puede asignar citas en su propia agenda.',
-        );
-      }
-
-      // El gating del vínculo, heredado: comprometer un turno en una
-      // organización exige que el vínculo siga vigente — misma regla que
-      // aceptar.
-      await this.assertVinculoVigente(resource.tenantId, actor);
-
-      // Anti-abuso mínimo: el paciente tiene que existir.
-      const nombres = await this.bookingsRepo.findPatientNames(tx, [
-        dto.patientProfileId,
-      ]);
-      if (!nombres.has(dto.patientProfileId)) {
-        throw new ResourceNotFoundException('Paciente no encontrado', {
-          patientProfileId: dto.patientProfileId,
-        });
-      }
-
-      // REGLA MADRE: nada se asigna sobre tiempo ya comprometido del
-      // profesional, en ninguna de sus sedes.
-      if (TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
-        await this.tiempoProfesional.assertRangoLibre(
-          tx,
-          resource.resourceRefId,
-          startAt,
-          endAt,
-        );
-      }
-
-      // Y el tiempo del PACIENTE también: la regla 1 vale igual cuando quien
-      // agenda es el doctor — el paciente tampoco puede estar en dos lugares.
-      const yaComprometido =
-        await this.bookingsRepo.findPatientBookingsOverlapping(
-          tx,
-          dto.patientProfileId,
-          startAt,
-          endAt,
-          ACTIVE_BOOKING_STATES,
-        );
-      if (yaComprometido.length > 0) {
-        const choque = yaComprometido[0];
-        throw new PreconditionFailedException(
-          `El paciente ya tiene un turno confirmado en ese rato${
-            choque.resourceName ? ` en «${choque.resourceName}»` : ''
-          }.`,
-          { bookingId: choque.id, startAt: choque.startAt },
-        );
-      }
-
-      // La retracción: los cupos libres del profesional que este rato pisa se
-      // retiran acá mismo, en cualquiera de sus sedes.
-      let retractedSlots = 0;
-      if (TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
-        const libres =
-          await this.catalogRepo.findOpenSlotsOfProfessionalInWindow(
-            tx,
-            resource.resourceRefId,
-            startAt,
-            endAt,
-            CONCEPTS.SLOT_OPEN,
-          );
-        for (const libre of libres) {
-          libre.statusConceptId = CONCEPTS.SLOT_BLOCKED;
-          touch(libre, actor.id);
-          retractedSlots += 1;
-        }
-      }
-
-      // El cupo único: nace ya tomado (capacity 1, remaining 0) y SIN
-      // plantilla — un cupo puntual no tiene patrón semanal. Nadie más puede
-      // reservarlo porque nunca estuvo ofrecido.
-      const slot = this.catalogRepo.createSlot(tx, {
-        resourceId: resource.id,
-        startAt,
-        endAt,
-        capacity: 1,
-        remainingCapacity: 0,
-        statusConceptId: CONCEPTS.SLOT_BOOKED,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
-
-      // La cita clínica que la respalda, ya reservada.
-      const appointment = this.crearCitaClinica(tx, {
-        tenantId: resource.tenantId,
-        patientProfileId: dto.patientProfileId,
-        resourceRefType: resource.resourceRefType,
-        resourceRefId: resource.resourceRefId,
-        startAt,
-        endAt,
-        reasonText: dto.reasonText,
-        statusConceptId: CLIN.APPOINTMENT_BOOKED,
-        // Ausente = presencial: no se escribe un valor que nadie eligió.
-        ...(dto.channel === undefined
-          ? {}
-          : { channelConceptId: APPOINTMENT_CHANNEL_CONCEPT[dto.channel] }),
-        actorUserId: actor.id,
-      });
-      await tx.flush();
-
-      const confirmedAt = new Date();
-      const booking = this.bookingsRepo.createBooking(tx, {
-        tenantId: resource.tenantId,
-        patientProfileId: dto.patientProfileId,
-        appointmentId: appointment.id,
-        bookableSlotId: slot.id,
-        resourceId: resource.id,
-        bookingChannelConceptId: CHANNEL_CONCEPT.DESK,
-        bookedByUserId: actor.id,
-        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
-        confirmedAt,
-        // Sin política publicada que congelar: los defaults del módulo, con la
-        // zona de la sede como dato de auditoría.
-        cancellationPolicySnapshot: {
-          cancellationWindowMinutes: DEFAULT_CANCELLATION_WINDOW_MINUTES,
-          timeZone: resource.timeZone ?? undefined,
-          capturedAt: new Date().toISOString(),
-        },
-        reasonText: dto.reasonText,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
-
-      // Los recordatorios de siempre: la cita puntual es una reserva más.
-      for (const offset of DEFAULT_REMINDER_OFFSETS) {
-        this.bookingsRepo.createReminder(tx, {
-          bookingId: booking.id,
-          channelConceptId: CONCEPTS.REMINDER_CH_SMS,
-          offsetMinutes: offset,
-          scheduledAt: new Date(startAt.getTime() - offset * 60_000),
-          statusConceptId: CONCEPTS.REMINDER_SCHEDULED,
-          actorUserId: actor.id,
-        });
-      }
-
-      await this.recordTransition(tx, booking, actor, {
-        bookingId: booking.id,
-        fromStateConceptId: CONCEPTS.BOOKING_CONFIRMED,
-        toStateConceptId: CONCEPTS.BOOKING_CONFIRMED,
-        reasonText: dto.reasonText,
-        actorKind: 'PROVIDER',
-      });
-
-      return {
-        bookingId: booking.id,
-        bookableSlotId: slot.id,
-        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
-        retractedSlots,
-      };
-    });
+    const { booking, slot, retractedSlots } = await this.em.transactional(
+      (tx) => this.crearCitaDirectaEnTransaccion(tx, dto, actor),
+    );
+    const resultado: DirectAppointmentResponseDto = {
+      bookingId: booking.id,
+      bookableSlotId: slot.id,
+      statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      retractedSlots,
+    };
 
     // Fuera de la transacción, como todos los avisos: que no salga la campana
     // no puede deshacer una cita que ya existe.
@@ -1047,6 +892,206 @@ export class SchedulingBookingsService {
       'PROVIDER',
     );
     return resultado;
+  }
+
+  /**
+   * El cuerpo transaccional de {@link createDirectAppointment}, para casos de
+   * uso que ya abrieron su propia transacción (el mostrador atómico, AC-3.3).
+   *
+   * Mismo camino que la cita puntual: recurso, titularidad de agenda, vínculo
+   * vigente, existencia del paciente, regla madre, solape del paciente,
+   * retracción de cupos libres, cupo único, cita clínica y reserva
+   * `BOOKING_CONFIRMED`. El canal de la reserva es parametrizable —por defecto
+   * `DESK`, como la cita puntual de siempre— porque el mostrador lo abre como
+   * `WALK_IN` sin que eso cambie ninguna otra regla.
+   *
+   * No dispara el aviso de campana: eso vive fuera de la transacción y es
+   * responsabilidad de quien la abrió.
+   *
+   * @param tx - Contexto transaccional ya abierto por el llamador.
+   * @param dto - Paciente, agenda, inicio, duración y motivo.
+   * @param actor - El doctor (su propia agenda) o quien administra agendas.
+   * @param opciones - Canal de reserva a grabar; por defecto `DESK`.
+   * @returns La reserva confirmada, el cupo, la cita clínica y cuántos cupos
+   *   ofrecidos retiró.
+   */
+  async crearCitaDirectaEnTransaccion(
+    tx: EntityManager,
+    dto: CreateDirectAppointmentDto,
+    actor: AuthenticatedUser,
+    opciones?: { bookingChannel?: 'DESK' | 'WALK_IN' },
+  ): Promise<{
+    booking: AppointmentBookings;
+    slot: BookableSlots;
+    appointment: Appointments;
+    retractedSlots: number;
+  }> {
+    const startAt = new Date(dto.startAt);
+    const endAt = new Date(startAt.getTime() + dto.durationMinutes * 60_000);
+
+    const resource = await this.catalogRepo.findResourceById(
+      tx,
+      dto.resourceId,
+    );
+    if (!resource) {
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId: dto.resourceId,
+      });
+    }
+
+    // La agenda tiene que ser SUYA (o el actor administra agendas por
+    // oficio): mismo criterio de titularidad que operar una reserva.
+    const esSuAgenda =
+      actor.practitionerProfileId !== undefined &&
+      resource.resourceRefId === actor.practitionerProfileId &&
+      TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType);
+    if (!this.operaCualquierAgenda(actor) && !esSuAgenda) {
+      throw new ForbiddenException(
+        'Un profesional solo puede asignar citas en su propia agenda.',
+      );
+    }
+
+    // El gating del vínculo, heredado: comprometer un turno en una
+    // organización exige que el vínculo siga vigente — misma regla que
+    // aceptar.
+    await this.assertVinculoVigente(resource.tenantId, actor);
+
+    // Anti-abuso mínimo: el paciente tiene que existir.
+    const nombres = await this.bookingsRepo.findPatientNames(tx, [
+      dto.patientProfileId,
+    ]);
+    if (!nombres.has(dto.patientProfileId)) {
+      throw new ResourceNotFoundException('Paciente no encontrado', {
+        patientProfileId: dto.patientProfileId,
+      });
+    }
+
+    // REGLA MADRE: nada se asigna sobre tiempo ya comprometido del
+    // profesional, en ninguna de sus sedes.
+    if (TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
+      await this.tiempoProfesional.assertRangoLibre(
+        tx,
+        resource.resourceRefId,
+        startAt,
+        endAt,
+      );
+    }
+
+    // Y el tiempo del PACIENTE también: la regla 1 vale igual cuando quien
+    // agenda es el doctor — el paciente tampoco puede estar en dos lugares.
+    const yaComprometido =
+      await this.bookingsRepo.findPatientBookingsOverlapping(
+        tx,
+        dto.patientProfileId,
+        startAt,
+        endAt,
+        ACTIVE_BOOKING_STATES,
+      );
+    if (yaComprometido.length > 0) {
+      const choque = yaComprometido[0];
+      throw new PreconditionFailedException(
+        `El paciente ya tiene un turno confirmado en ese rato${
+          choque.resourceName ? ` en «${choque.resourceName}»` : ''
+        }.`,
+        { bookingId: choque.id, startAt: choque.startAt },
+      );
+    }
+
+    // La retracción: los cupos libres del profesional que este rato pisa se
+    // retiran acá mismo, en cualquiera de sus sedes.
+    let retractedSlots = 0;
+    if (TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
+      const libres = await this.catalogRepo.findOpenSlotsOfProfessionalInWindow(
+        tx,
+        resource.resourceRefId,
+        startAt,
+        endAt,
+        CONCEPTS.SLOT_OPEN,
+      );
+      for (const libre of libres) {
+        libre.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+        touch(libre, actor.id);
+        retractedSlots += 1;
+      }
+    }
+
+    // El cupo único: nace ya tomado (capacity 1, remaining 0) y SIN
+    // plantilla — un cupo puntual no tiene patrón semanal. Nadie más puede
+    // reservarlo porque nunca estuvo ofrecido.
+    const slot = this.catalogRepo.createSlot(tx, {
+      resourceId: resource.id,
+      startAt,
+      endAt,
+      capacity: 1,
+      remainingCapacity: 0,
+      statusConceptId: CONCEPTS.SLOT_BOOKED,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+
+    // La cita clínica que la respalda, ya reservada.
+    const appointment = this.crearCitaClinica(tx, {
+      tenantId: resource.tenantId,
+      patientProfileId: dto.patientProfileId,
+      resourceRefType: resource.resourceRefType,
+      resourceRefId: resource.resourceRefId,
+      startAt,
+      endAt,
+      reasonText: dto.reasonText,
+      statusConceptId: CLIN.APPOINTMENT_BOOKED,
+      // Ausente = presencial: no se escribe un valor que nadie eligió.
+      ...(dto.channel === undefined
+        ? {}
+        : { channelConceptId: APPOINTMENT_CHANNEL_CONCEPT[dto.channel] }),
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+
+    const confirmedAt = new Date();
+    const booking = this.bookingsRepo.createBooking(tx, {
+      tenantId: resource.tenantId,
+      patientProfileId: dto.patientProfileId,
+      appointmentId: appointment.id,
+      bookableSlotId: slot.id,
+      resourceId: resource.id,
+      bookingChannelConceptId:
+        CHANNEL_CONCEPT[opciones?.bookingChannel ?? 'DESK'],
+      bookedByUserId: actor.id,
+      statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      confirmedAt,
+      // Sin política publicada que congelar: los defaults del módulo, con la
+      // zona de la sede como dato de auditoría.
+      cancellationPolicySnapshot: {
+        cancellationWindowMinutes: DEFAULT_CANCELLATION_WINDOW_MINUTES,
+        timeZone: resource.timeZone ?? undefined,
+        capturedAt: new Date().toISOString(),
+      },
+      reasonText: dto.reasonText,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+
+    // Los recordatorios de siempre: la cita puntual es una reserva más.
+    for (const offset of DEFAULT_REMINDER_OFFSETS) {
+      this.bookingsRepo.createReminder(tx, {
+        bookingId: booking.id,
+        channelConceptId: CONCEPTS.REMINDER_CH_SMS,
+        offsetMinutes: offset,
+        scheduledAt: new Date(startAt.getTime() - offset * 60_000),
+        statusConceptId: CONCEPTS.REMINDER_SCHEDULED,
+        actorUserId: actor.id,
+      });
+    }
+
+    await this.recordTransition(tx, booking, actor, {
+      bookingId: booking.id,
+      fromStateConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      toStateConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      reasonText: dto.reasonText,
+      actorKind: 'PROVIDER',
+    });
+
+    return { booking, slot, appointment, retractedSlots };
   }
 
   /**
@@ -2088,6 +2133,42 @@ export class SchedulingBookingsService {
         // Empezar la atención no desplaza nada: la regla 2 es de `accept`.
         desplazadas: [],
       };
+    });
+  }
+
+  /**
+   * El cuerpo transaccional de {@link start}, para casos de uso que ya
+   * cargaron la reserva y abrieron su propia transacción — el paso final del
+   * mostrador atómico (AC-3.3), que confirma y arranca en el mismo `tx`.
+   *
+   * No vuelve a cargar la reserva: el llamador ya la tiene (acaba de
+   * confirmarla), así que evita un `SELECT` redundante.
+   *
+   * @param tx - Contexto transaccional ya abierto por el llamador.
+   * @param booking - La reserva recién confirmada, en estado `CONFIRMED`.
+   * @param actor - Quien opera.
+   */
+  async iniciarEnTransaccion(
+    tx: EntityManager,
+    booking: AppointmentBookings,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const fromState = booking.statusConceptId;
+    this.assertTransition(fromState, SCHED.BOOKING_IN_PROGRESS);
+
+    booking.statusConceptId = SCHED.BOOKING_IN_PROGRESS;
+    touch(booking, actor.id);
+    await this.sincronizarCitaClinica(
+      tx,
+      booking,
+      CLIN.APPOINTMENT_CHECKED_IN,
+      actor,
+    );
+    await this.recordTransition(tx, booking, actor, {
+      bookingId: booking.id,
+      fromStateConceptId: fromState,
+      toStateConceptId: SCHED.BOOKING_IN_PROGRESS,
+      actorKind: 'PROVIDER',
     });
   }
 
