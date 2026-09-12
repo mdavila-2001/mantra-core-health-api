@@ -3,6 +3,7 @@ import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
+import { INS } from '../../modules/insurance/insurance.concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
 
 /**
@@ -145,6 +146,31 @@ export const CONCEPT_INDEX_BY_ID: ReadonlyMap<
  * no se podían pintar. Ampliarlo es añadir una entrada.
  */
 export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
+  // --- insurance: consola de planes y coberturas ---
+  {
+    code: 'insurance-plan-currency',
+    name: 'Moneda del plan de seguro',
+    description: 'Moneda en la que se expresan copagos, deducibles y topes.',
+    concepts: [CONCEPTS.CURRENCY_BOB, CONCEPTS.CURRENCY_USD],
+    defaultConceptId: CONCEPTS.CURRENCY_BOB,
+    targets: ['insurance.insurance_plans.currency_concept_id'],
+  },
+  {
+    code: 'insurance-benefit-category',
+    name: 'Categoría de cobertura',
+    description: 'Grupo asistencial al que pertenece una cobertura del plan.',
+    concepts: [
+      INS.BENEFIT_CATEGORY_GENERAL,
+      INS.BENEFIT_CATEGORY_OUTPATIENT,
+      INS.BENEFIT_CATEGORY_EMERGENCY,
+      INS.BENEFIT_CATEGORY_HOSPITALIZATION,
+      INS.BENEFIT_CATEGORY_LAB_IMAGING,
+      INS.BENEFIT_CATEGORY_PHARMACY,
+    ],
+    defaultConceptId: INS.BENEFIT_CATEGORY_GENERAL,
+    targets: ['insurance.insurance_plan_benefits.benefit_category_concept_id'],
+  },
+
   // --- profiles: persona y paciente ---
   {
     code: 'administrative-gender',

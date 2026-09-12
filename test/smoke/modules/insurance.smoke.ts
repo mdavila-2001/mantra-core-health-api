@@ -1,5 +1,6 @@
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
+import { INS } from '../../../src/modules/insurance/insurance.concepts';
 
 /**
  * Smoke del módulo insurance (26). Cubre la espina dorsal autocontenida
@@ -62,7 +63,7 @@ export const INSURANCE_SMOKE: SmokeCase[] = [
   // plan
   {
     module: 'Insurance',
-    endpoint: 'POST /insurance-products/:id/plans',
+    endpoint: 'POST /insurance-products/:productId/plans',
     name: 'happy: plan',
     method: 'post',
     path: (c) => `/insurance-products/${c.vars.insProductId}/plans`,
@@ -79,15 +80,15 @@ export const INSURANCE_SMOKE: SmokeCase[] = [
   // beneficio
   {
     module: 'Insurance',
-    endpoint: 'POST /insurance-plans/:id/benefits',
+    endpoint: 'POST /insurance-plans/:planId/benefits',
     name: 'happy: beneficio',
     method: 'post',
     path: (c) => `/insurance-plans/${c.vars.insPlanId}/benefits`,
     body: () => ({
-      name: 'Consulta externa',
+      benefitCategoryConceptId: INS.BENEFIT_CATEGORY_OUTPATIENT,
       effectiveFrom: '2024-01-01',
       requiresPriorAuthorization: false,
-      coveragePercent: 80,
+      coveragePercent: '80',
     }),
     expectedStatus: 201,
   },

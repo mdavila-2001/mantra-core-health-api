@@ -29,6 +29,26 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
       code: 'BENEFIT_CATEGORY_GENERAL',
       display: 'Beneficio general',
     },
+    BENEFIT_CATEGORY_OUTPATIENT: {
+      code: 'BENEFIT_CATEGORY_OUTPATIENT',
+      display: 'Consulta externa',
+    },
+    BENEFIT_CATEGORY_EMERGENCY: {
+      code: 'BENEFIT_CATEGORY_EMERGENCY',
+      display: 'Emergencias',
+    },
+    BENEFIT_CATEGORY_HOSPITALIZATION: {
+      code: 'BENEFIT_CATEGORY_HOSPITALIZATION',
+      display: 'Hospitalización',
+    },
+    BENEFIT_CATEGORY_LAB_IMAGING: {
+      code: 'BENEFIT_CATEGORY_LAB_IMAGING',
+      display: 'Laboratorio e imagen',
+    },
+    BENEFIT_CATEGORY_PHARMACY: {
+      code: 'BENEFIT_CATEGORY_PHARMACY',
+      display: 'Farmacia',
+    },
 
     // Redes y membresías
     NETWORK_ACTIVE: { code: 'NETWORK_ACTIVE', display: 'Red activa' },

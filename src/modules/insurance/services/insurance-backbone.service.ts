@@ -3,10 +3,14 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
+  requireTenantId,
   ResourceNotFoundException,
+  touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { TenantAdministrationService } from '../../directory/services';
 import { CatalogRepository } from '../repositories';
+import type { InsuranceCarriers } from '../entities';
 import { INS } from '../insurance.concepts';
 import {
   CreateCarrierDto,
@@ -18,8 +22,11 @@ import {
   CreateEmployerGroupDto,
   CreateBrokerAgreementDto,
   CreateMembershipDto,
+  OkResultDto,
   CreatedResourceDto,
   ResourceStatusDto,
+  UpdatePlanBenefitDto,
+  UpdatePlanBenefitRulesDto,
 } from '../dto';
 
 /**
@@ -43,6 +50,7 @@ export class InsuranceBackboneService {
   constructor(
     private readonly em: EntityManager,
     private readonly repo: CatalogRepository,
+    private readonly tenantAdministration: TenantAdministrationService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(InsuranceBackboneService.name);
@@ -130,7 +138,12 @@ export class InsuranceBackboneService {
     actor: AuthenticatedUser,
   ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
-      const product = await this.repo.findProduct(tx, productId);
+      const carrier = await this.administrableCarrier(tx, actor);
+      const product = await this.repo.findProductForCarrier(
+        tx,
+        productId,
+        carrier.id,
+      );
       if (!product)
         throw new ResourceNotFoundException('Producto no encontrado', {
           productId,
@@ -143,6 +156,7 @@ export class InsuranceBackboneService {
         effectiveFrom: dto.effectiveFrom
           ? new Date(dto.effectiveFrom)
           : undefined,
+        effectiveTo: dto.effectiveTo ? new Date(dto.effectiveTo) : undefined,
         statusConceptId: INS.PLAN_ACTIVE,
         actorUserId: actor.id,
       });
@@ -166,23 +180,117 @@ export class InsuranceBackboneService {
     actor: AuthenticatedUser,
   ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
-      const plan = await this.repo.findPlan(tx, planId);
+      const carrier = await this.administrableCarrier(tx, actor);
+      const plan = await this.repo.findPlanForCarrier(tx, planId, carrier.id);
       if (!plan)
         throw new ResourceNotFoundException('Plan no encontrado', { planId });
       const benefit = this.repo.createBenefit(tx, {
         insurancePlanId: planId,
-        benefitCategoryConceptId: INS.BENEFIT_CATEGORY_GENERAL,
+        benefitCategoryConceptId: dto.benefitCategoryConceptId,
+        serviceConceptId: dto.serviceConceptId,
         coveragePercent: dto.coveragePercent,
+        copayAmount: dto.copayAmount,
+        deductibleAmount: dto.deductibleAmount,
+        annualLimitAmount: dto.annualLimitAmount,
         requiresPriorAuthorization: dto.requiresPriorAuthorization ?? false,
         effectiveFrom: dto.effectiveFrom
           ? new Date(dto.effectiveFrom)
           : new Date(),
+        effectiveTo: dto.effectiveTo ? new Date(dto.effectiveTo) : undefined,
         statusConceptId: INS.BENEFIT_ACTIVE,
         actorUserId: actor.id,
       });
       await tx.flush();
       return { id: benefit.id };
     });
+  }
+
+  /** Reemplaza los cuatro valores económicos administrables de una cobertura. */
+  async updateBenefit(
+    planId: string,
+    benefitId: string,
+    dto: UpdatePlanBenefitDto,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const carrier = await this.administrableCarrier(tx, actor);
+      const benefit = await this.repo.findBenefitForPlanAndCarrier(
+        tx,
+        planId,
+        benefitId,
+        carrier.id,
+      );
+      if (!benefit) {
+        throw new ResourceNotFoundException('Beneficio no encontrado', {
+          planId,
+          benefitId,
+        });
+      }
+
+      Object.assign(benefit, {
+        coveragePercent: dto.coveragePercent,
+        copayAmount: dto.copayAmount,
+        deductibleAmount: dto.deductibleAmount,
+        annualLimitAmount: dto.annualLimitAmount,
+      });
+      touch(benefit, actor.id);
+      await tx.flush();
+      return { ok: true };
+    });
+  }
+
+  /** Reemplaza las reglas tipadas y conserva cualquier clave ajena ya persistida. */
+  async updateBenefitRules(
+    planId: string,
+    benefitId: string,
+    dto: UpdatePlanBenefitRulesDto,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const carrier = await this.administrableCarrier(tx, actor);
+      const benefit = await this.repo.findBenefitForPlanAndCarrier(
+        tx,
+        planId,
+        benefitId,
+        carrier.id,
+      );
+      if (!benefit) {
+        throw new ResourceNotFoundException('Beneficio no encontrado', {
+          planId,
+          benefitId,
+        });
+      }
+
+      const current = plainObject(benefit.eligibilityRuleJson);
+      const next: Record<string, unknown> = {
+        ...current,
+        requiredDocuments: [...dto.requiredDocuments],
+      };
+      if (dto.exclusionNotes === null) delete next.exclusionNotes;
+      else next.exclusionNotes = dto.exclusionNotes;
+
+      benefit.requiresPriorAuthorization = dto.requiresPriorAuthorization;
+      benefit.eligibilityRuleJson = next;
+      touch(benefit, actor.id);
+      await tx.flush();
+      return { ok: true };
+    });
+  }
+
+  /** Exige tenant y administración antes de resolver recursos del catálogo. */
+  private async administrableCarrier(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<InsuranceCarriers> {
+    const tenantId = requireTenantId();
+    await this.tenantAdministration.assertCanAdminister(tx, tenantId, actor);
+    const carrier = await this.repo.findCarrierByTenantId(tx, tenantId);
+    if (!carrier) {
+      throw new ResourceNotFoundException('Aseguradora no encontrada', {
+        tenantId,
+      });
+    }
+    return carrier;
   }
 
   /**
@@ -362,4 +470,11 @@ export class InsuranceBackboneService {
       };
     });
   }
+}
+
+/** Normaliza JSON desconocido a un objeto propio seguro para extender. */
+function plainObject(value: unknown): Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? { ...(value as Record<string, unknown>) }
+    : {};
 }

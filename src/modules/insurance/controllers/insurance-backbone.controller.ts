@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
@@ -22,6 +23,9 @@ import {
   CreateMembershipDto,
   CreatedResourceDto,
   ResourceStatusDto,
+  OkResultDto,
+  UpdatePlanBenefitDto,
+  UpdatePlanBenefitRulesDto,
 } from '../dto';
 
 /**
@@ -86,16 +90,15 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create plan conforme al contrato `Promise<CreatedResourceDto>`.
    */
-  @Post('insurance-products/:id/plans')
-  @Roles('SECURITY_ADMIN')
+  @Post('insurance-products/:productId/plans')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Alta de plan (soporte)' })
+  @ApiOperation({ summary: 'Crear un plan del carrier del tenant activo' })
   createPlan(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('productId', ParseUUIDPipe) productId: string,
     @Body() dto: CreatePlanDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CreatedResourceDto> {
-    return this.service.createPlan(id, dto, actor);
+    return this.service.createPlan(productId, dto, actor);
   }
 
   /**
@@ -106,16 +109,39 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create benefit conforme al contrato `Promise<CreatedResourceDto>`.
    */
-  @Post('insurance-plans/:id/benefits')
-  @Roles('SECURITY_ADMIN')
+  @Post('insurance-plans/:planId/benefits')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Alta de beneficio de plan (soporte)' })
+  @ApiOperation({ summary: 'Crear una cobertura de un plan administrable' })
   createBenefit(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('planId', ParseUUIDPipe) planId: string,
     @Body() dto: CreatePlanBenefitDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CreatedResourceDto> {
-    return this.service.createBenefit(id, dto, actor);
+    return this.service.createBenefit(planId, dto, actor);
+  }
+
+  /** Reemplaza los importes administrables de una cobertura. */
+  @Put('insurance-plans/:planId/benefits/:benefitId')
+  @ApiOperation({ summary: 'Editar importes de una cobertura' })
+  updateBenefit(
+    @Param('planId', ParseUUIDPipe) planId: string,
+    @Param('benefitId', ParseUUIDPipe) benefitId: string,
+    @Body() dto: UpdatePlanBenefitDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.service.updateBenefit(planId, benefitId, dto, actor);
+  }
+
+  /** Reemplaza autorización previa, documentos y exclusión. */
+  @Put('insurance-plans/:planId/benefits/:benefitId/rules')
+  @ApiOperation({ summary: 'Editar reglas de aprobación de una cobertura' })
+  updateBenefitRules(
+    @Param('planId', ParseUUIDPipe) planId: string,
+    @Param('benefitId', ParseUUIDPipe) benefitId: string,
+    @Body() dto: UpdatePlanBenefitRulesDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.service.updateBenefitRules(planId, benefitId, dto, actor);
   }
 
   /**

@@ -1,13 +1,59 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
+  ArrayUnique,
+  IsArray,
   IsBoolean,
+  IsDateString,
+  IsIn,
   IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   MinLength,
+  registerDecorator,
+  ValidateIf,
+  type ValidationArguments,
+  type ValidationOptions,
 } from 'class-validator';
+
+const MONEY_PATTERN = /^\d+(?:\.\d{1,2})?$/;
+const COVERAGE_PATTERN = /^(?:100(?:\.0{1,2})?|\d{1,2}(?:\.\d{1,2})?)$/;
+
+export const APPROVAL_DOCUMENT_CODES = [
+  'FIRMA_MEDICO',
+  'SELLO_MEDICO',
+  'ORDEN_MEDICA',
+  'INFORME_CLINICO',
+] as const;
+
+export type ApprovalDocumentCode = (typeof APPROVAL_DOCUMENT_CODES)[number];
+
+function IsOnOrAfter(
+  property: string,
+  options?: ValidationOptions,
+): PropertyDecorator {
+  return (target, propertyName) => {
+    registerDecorator({
+      name: 'isOnOrAfter',
+      target: target.constructor,
+      propertyName: propertyName.toString(),
+      constraints: [property],
+      options,
+      validator: {
+        validate(value: unknown, args: ValidationArguments): boolean {
+          if (value === undefined || value === null) return true;
+          const start = (args.object as Record<string, unknown>)[property];
+          if (start === undefined || start === null) return true;
+          if (typeof value !== 'string' || typeof start !== 'string')
+            return false;
+          return new Date(value).getTime() >= new Date(start).getTime();
+        },
+      },
+    });
+  };
+}
 
 /** Alta de aseguradora (backbone de soporte para los casos de uso). */
 export class CreateCarrierDto {
@@ -97,8 +143,17 @@ export class CreatePlanDto {
     description: 'Vigencia desde (ISO date)',
   })
   @IsOptional()
-  @IsString()
+  @IsDateString()
   effectiveFrom?: string;
+
+  /** Fin de vigencia del plan. */
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  @IsOptional()
+  @IsDateString()
+  @IsOnOrAfter('effectiveFrom', {
+    message: 'effectiveTo debe ser igual o posterior a effectiveFrom',
+  })
+  effectiveTo?: string;
 
   /**
    * Moneda del plan.
@@ -120,13 +175,33 @@ export class CreatePlanDto {
 
 /** Alta de beneficio de plan. */
 export class CreatePlanBenefitDto {
+  /** Categoría de cobertura administrada. */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  benefitCategoryConceptId!: string;
+
+  /** Servicio concreto; se omite cuando la cobertura aplica a la categoría. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  serviceConceptId?: string;
+
   /**
    * Valor de effective from mantenido por la instancia.
    */
   @ApiPropertyOptional({ type: String, format: 'date' })
   @IsOptional()
-  @IsString()
+  @IsDateString()
   effectiveFrom?: string;
+
+  /** Fin de vigencia de la cobertura. */
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  @IsOptional()
+  @IsDateString()
+  @IsOnOrAfter('effectiveFrom', {
+    message: 'effectiveTo debe ser igual o posterior a effectiveFrom',
+  })
+  effectiveTo?: string;
 
   /**
    * Valor de requires prior authorization mantenido por la instancia.
@@ -145,7 +220,95 @@ export class CreatePlanBenefitDto {
   })
   @IsOptional()
   @IsNumberString()
+  @Matches(COVERAGE_PATTERN, {
+    message: 'coveragePercent debe estar entre 0 y 100 con hasta dos decimales',
+  })
   coveragePercent?: string;
+
+  /** Copago fijo. */
+  @ApiPropertyOptional({ example: '25.00' })
+  @IsOptional()
+  @IsNumberString()
+  @Matches(MONEY_PATTERN, {
+    message: 'copayAmount debe ser no negativo y tener hasta dos decimales',
+  })
+  copayAmount?: string;
+
+  /** Deducible aplicable. */
+  @ApiPropertyOptional({ example: '100.00' })
+  @IsOptional()
+  @IsNumberString()
+  @Matches(MONEY_PATTERN, {
+    message:
+      'deductibleAmount debe ser no negativo y tener hasta dos decimales',
+  })
+  deductibleAmount?: string;
+
+  /** Tope anual de la cobertura. */
+  @ApiPropertyOptional({ example: '5000.00' })
+  @IsOptional()
+  @IsNumberString()
+  @Matches(MONEY_PATTERN, {
+    message:
+      'annualLimitAmount debe ser no negativo y tener hasta dos decimales',
+  })
+  annualLimitAmount?: string;
+}
+
+/** Reemplazo del subconjunto económico de una cobertura. */
+export class UpdatePlanBenefitDto {
+  @ApiProperty({ nullable: true, type: String, example: '80.00' })
+  @ValidateIf((_object, value) => value !== null)
+  @IsNumberString()
+  @Matches(COVERAGE_PATTERN, {
+    message: 'coveragePercent debe estar entre 0 y 100 con hasta dos decimales',
+  })
+  coveragePercent!: string | null;
+
+  @ApiProperty({ nullable: true, type: String, example: '25.00' })
+  @ValidateIf((_object, value) => value !== null)
+  @IsNumberString()
+  @Matches(MONEY_PATTERN, {
+    message: 'copayAmount debe ser no negativo y tener hasta dos decimales',
+  })
+  copayAmount!: string | null;
+
+  @ApiProperty({ nullable: true, type: String, example: '100.00' })
+  @ValidateIf((_object, value) => value !== null)
+  @IsNumberString()
+  @Matches(MONEY_PATTERN, {
+    message:
+      'deductibleAmount debe ser no negativo y tener hasta dos decimales',
+  })
+  deductibleAmount!: string | null;
+
+  @ApiProperty({ nullable: true, type: String, example: '5000.00' })
+  @ValidateIf((_object, value) => value !== null)
+  @IsNumberString()
+  @Matches(MONEY_PATTERN, {
+    message:
+      'annualLimitAmount debe ser no negativo y tener hasta dos decimales',
+  })
+  annualLimitAmount!: string | null;
+}
+
+/** Reglas administrables de autorización y documentación. */
+export class UpdatePlanBenefitRulesDto {
+  @ApiProperty()
+  @IsBoolean()
+  requiresPriorAuthorization!: boolean;
+
+  @ApiProperty({ enum: APPROVAL_DOCUMENT_CODES, isArray: true })
+  @IsArray()
+  @ArrayUnique()
+  @IsIn(APPROVAL_DOCUMENT_CODES, { each: true })
+  requiredDocuments!: ApprovalDocumentCode[];
+
+  @ApiProperty({ nullable: true, type: String, maxLength: 1000 })
+  @ValidateIf((_object, value) => value !== null)
+  @IsString()
+  @MaxLength(1000)
+  exclusionNotes!: string | null;
 }
 
 /** Alta de red de prestadores. */

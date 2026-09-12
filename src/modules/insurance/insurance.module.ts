@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PracticeModule } from '../practice/practice.module';
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import * as entities from './entities';
 import {
   InsuranceBackboneController,
@@ -51,6 +52,7 @@ import {
     // organización activa a sus prácticas; sin él, `insurance` tendría que
     // importar la entidad persistente de otro dominio.
     PracticeModule,
+    DirectoryAuthorizationModule,
   ],
   controllers: [
     InsuranceBackboneController,

@@ -79,6 +79,18 @@ export class CatalogRepository {
   ): Promise<InsuranceProducts | null> {
     return em.findOne(InsuranceProducts, { id });
   }
+
+  /** Producto identificado y perteneciente a la aseguradora indicada. */
+  findProductForCarrier(
+    em: EntityManager,
+    id: string,
+    carrierId: string,
+  ): Promise<InsuranceProducts | null> {
+    return em.findOne(InsuranceProducts, {
+      id,
+      insuranceCarrierId: carrierId,
+    });
+  }
   /**
    * Crea create product.
    *
@@ -106,6 +118,37 @@ export class CatalogRepository {
    */
   findPlan(em: EntityManager, id: string): Promise<InsurancePlans | null> {
     return em.findOne(InsurancePlans, { id });
+  }
+
+  /** Plan identificado y encadenado a un producto de la aseguradora. */
+  async findPlanForCarrier(
+    em: EntityManager,
+    id: string,
+    carrierId: string,
+  ): Promise<InsurancePlans | null> {
+    const plan = await em.findOne(InsurancePlans, { id });
+    if (!plan) return null;
+    const product = await this.findProductForCarrier(
+      em,
+      plan.insuranceProductId,
+      carrierId,
+    );
+    return product ? plan : null;
+  }
+
+  /** Beneficio cuyo plan pertenece a la aseguradora y coincide con la ruta. */
+  async findBenefitForPlanAndCarrier(
+    em: EntityManager,
+    planId: string,
+    benefitId: string,
+    carrierId: string,
+  ): Promise<InsurancePlanBenefits | null> {
+    const plan = await this.findPlanForCarrier(em, planId, carrierId);
+    if (!plan) return null;
+    return em.findOne(InsurancePlanBenefits, {
+      id: benefitId,
+      insurancePlanId: planId,
+    });
   }
   /**
    * Crea create plan.
