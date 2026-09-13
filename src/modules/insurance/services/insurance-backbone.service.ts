@@ -13,6 +13,7 @@ import { CatalogRepository } from '../repositories';
 import type { InsuranceCarriers } from '../entities';
 import { INS } from '../insurance.concepts';
 import {
+  CarrierContactChannelsDto,
   CreateCarrierDto,
   CreateProductDto,
   CreatePlanDto,
@@ -25,6 +26,7 @@ import {
   OkResultDto,
   CreatedResourceDto,
   ResourceStatusDto,
+  UpdateCarrierContactChannelsDto,
   UpdatePlanBenefitDto,
   UpdatePlanBenefitRulesDto,
 } from '../dto';
@@ -86,6 +88,57 @@ export class InsuranceBackboneService {
         id: carrier.id,
         status: carrier.statusConceptId,
         createdAt: carrier.createdAt,
+      };
+    });
+  }
+
+  /**
+   * Reemplaza los tres canales de contacto directo de la aseguradora del
+   * tenant activo (subtarea 2.3).
+   *
+   * `administrableCarrier()` resuelve el carrier por tenant, no por `:id`:
+   * el 404 por un `:id` ajeno al carrier del tenant activo se comprueba acá,
+   * explícito, para que administrar la aseguradora de otro tenant no filtre
+   * su existencia ni la pise por accidente.
+   *
+   * @param id - Aseguradora a editar; debe ser la del tenant activo.
+   * @param dto - Los tres canales, reemplazo completo (`null` = quitar).
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Los canales resultantes.
+   * @throws ResourceNotFoundException si `id` no es el carrier del tenant activo.
+   */
+  async updateContactChannels(
+    id: string,
+    dto: UpdateCarrierContactChannelsDto,
+    actor: AuthenticatedUser,
+  ): Promise<CarrierContactChannelsDto> {
+    return this.em.transactional(async (tx) => {
+      const carrier = await this.administrableCarrier(tx, actor);
+      if (carrier.id !== id) {
+        throw new ResourceNotFoundException('Aseguradora no encontrada', {
+          carrierId: id,
+        });
+      }
+
+      carrier.whatsappNumber = dto.whatsappNumber ?? undefined;
+      carrier.callCenterPhone = dto.callCenterPhone ?? undefined;
+      carrier.supportEmail = dto.supportEmail ?? undefined;
+      touch(carrier, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'insurance.carrier.updateContactChannels',
+          carrierId: carrier.id,
+        },
+        'Carrier contact channels updated',
+      );
+
+      return {
+        id: carrier.id,
+        whatsappNumber: carrier.whatsappNumber ?? null,
+        callCenterPhone: carrier.callCenterPhone ?? null,
+        supportEmail: carrier.supportEmail ?? null,
       };
     });
   }
