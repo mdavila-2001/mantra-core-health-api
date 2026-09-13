@@ -15,7 +15,8 @@
 #     devolvía 500 en la primera escritura. Que el modelo tenga repositorio
 #     propio (B-2, commit 19ef5a17) arregla el versionado, no el despliegue.
 #     `database/` es la copia versionada AQUÍ; se refresca con `yarn db:vendor`
-#     y CI la verifica con `yarn db:vendor:check`.
+#     y CI la verifica con `yarn db:vendor:check`. Desde el punto 7 no se monta:
+#     viaja dentro de las imágenes `*-init`.
 #
 #  2. HAY UN PASO DE MIGRACIÓN EXPLÍCITO (`api-migrate`) ANTES DE LA API.
 #     Medido contra una base recién construida desde `database/SQL` (modelo del
@@ -74,6 +75,27 @@
 #     matrícula profesional. `assertMockProviderNotInProduction` aborta el
 #     arranque de cualquier worker si `MOCK_PROVIDER_BASE_URL` trae valor en
 #     producción; la variable se fija vacía explícitamente más abajo.
+#
+#  7. LOS `*-init` NO MONTAN NADA DEL REPOSITORIO: LO HORNEAN.
+#     Coolify clona el repositorio DENTRO de un contenedor auxiliar
+#     (`/artifacts/<uuid>`) y desde ahí lanza `docker compose up` contra el
+#     socket del host. Un `volumes: ./docker/db-init:/init/bin` lo resuelve el
+#     DEMONIO, que corre en el host y donde esa ruta NO existe: Docker crea el
+#     directorio vacío y lo monta igual, sin avisar. El despliegue moría así:
+#
+#         bash: /init/bin/init-postgres.sh: No such file or directory
+#         service "postgres-init" didn't complete successfully: exit 127
+#
+#     —127 es «orden no encontrada», y bash lo devuelve también cuando el
+#     script que se le pasa no existe—. En local NO se reproduce, porque ahí el
+#     demonio ve el mismo disco que el checkout; de ahí que el compose de
+#     desarrollo siga montando el DDL y este NO pueda.
+#
+#     El contexto de build sí viaja del contenedor auxiliar al demonio, que es
+#     como se construyen `api`, `api-migrate` y los workers. Por eso el script
+#     y `database/` van dentro de la imagen: `docker/db-init/Dockerfile`, una
+#     etapa por servicio. `minio-init` no aparece ahí porque su entrypoint es
+#     literal en este archivo y no lee nada del repositorio.
 #
 # -------------------------------------------------------------------------
 # RECURSOS. Con los 22 workers el stack pide del orden de **8 GB de RAM**.
@@ -358,18 +380,20 @@ services:
 
   # One-shot: aplica el DDL canónico versionado en `database/`.
   postgres-init:
-    image: timescale/timescaledb-ha:pg18
+    # El DDL y el script van HORNEADOS, no montados. Ver el punto 7 de la
+    # cabecera y `docker/db-init/Dockerfile`: en Coolify un bind del
+    # repositorio llega vacío y esto moría con `exit 127`.
+    image: ${DB_INIT_PG_IMAGE:-alovida-postgres-init:coolify}
+    build:
+      context: .
+      dockerfile: docker/db-init/Dockerfile
+      target: postgres-init
     restart: "no"
     entrypoint: ["bash", "/init/bin/init-postgres.sh"]
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      # RUTAS DENTRO DEL REPOSITORIO. Ver el punto 1 de la cabecera.
-      - ./database/SQL:/init/SQL:ro
-      - ./database/NoSQL:/init/NoSQL:ro
-      - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -391,14 +415,16 @@ services:
       - alovida
 
   mongo-init:
-    image: mongo:8.2.12
+    # Horneado, igual que `postgres-init`. Ver el punto 7 de la cabecera.
+    image: ${DB_INIT_MONGO_IMAGE:-alovida-mongo-init:coolify}
+    build:
+      context: .
+      dockerfile: docker/db-init/Dockerfile
+      target: mongo-init
     restart: "no"
     entrypoint: ["bash", "/init/bin/init-mongo.sh"]
     environment:
       MONGO_DB: ${MONGO_DB:-alovida_document_store}
-    volumes:
-      - ./database/NoSQL/55_document_store_mongodb:/init/mongo:ro
-      - ./docker/db-init:/init/bin:ro
     depends_on:
       mongodb:
         condition: service_healthy
@@ -451,12 +477,14 @@ services:
       - alovida
 
   opensearch-init:
-    image: curlimages/curl:8.21.0
+    # Horneado, igual que `postgres-init`. Ver el punto 7 de la cabecera.
+    image: ${DB_INIT_OS_IMAGE:-alovida-opensearch-init:coolify}
+    build:
+      context: .
+      dockerfile: docker/db-init/Dockerfile
+      target: opensearch-init
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
-    volumes:
-      - ./database/NoSQL/57_search_platform_opensearch:/init/os:ro
-      - ./docker/db-init:/init/bin:ro
     depends_on:
       opensearch:
         condition: service_healthy

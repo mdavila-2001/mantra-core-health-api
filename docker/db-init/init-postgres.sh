@@ -42,48 +42,14 @@ else
     "${PSQL[@]}" -f /init/SQL/apply_deferred.sql
 fi
 
-# Migraciones posteriores a la generación de SQL/ (tablas y columnas que los
-# módulos añadieron después). Todas son ADITIVAS e idempotentes por contrato
-# (IF NOT EXISTS), así que se aplican siempre y en orden de nombre — que al ser
-# `YYYY-MM-DD_*.sql` es también orden cronológico.
-#
-# **El directorio se llama `patches/`.** Esto buscaba en `99_migrations/`, que no
-# existe en ninguno de los dos montajes —ni en `SQL/` del repositorio del modelo
-# ni en la copia versionada de `database/SQL/`—, así que el glob no encontraba
-# nada. Y como `nullglob` convierte un glob sin coincidencias en la lista vacía,
-# el bucle daba CERO vueltas sin una línea de aviso: las 24 migraciones llevaban
-# semanas sin aplicarse y el arranque decía «completado» igual.
-#
-# El síntoma no aparece en el arranque sino mucho después y en otro sitio: con
-# `ORM_SCHEMA_SYNC=safe` la entidad crea por su cuenta las columnas que sabe
-# declarar, así que la falta sólo se nota en lo que NINGUNA entidad puede
-# reconstruir —datos de arranque, backfills, restricciones— y revienta al
-# escribir. `insurance_carriers.sigla` fue justo eso.
-#
-# Por eso el paso ya no puede quedarse callado: si no hay ni un archivo, aborta.
-MIGRACIONES=/init/SQL/patches
-# `99_migrations/` se sigue aceptando por si algún despliegue lo tiene con el
-# nombre viejo; el que exista de los dos manda, y `patches/` tiene prioridad.
-[ -d "$MIGRACIONES" ] || MIGRACIONES=/init/SQL/99_migrations
-
-shopt -s nullglob
-migraciones=("$MIGRACIONES"/*.sql)
-shopt -u nullglob
-
-if [ ${#migraciones[@]} -eq 0 ]; then
-    echo "!!! No hay una sola migración en $MIGRACIONES."
-    echo "!!! Eso NO es un caso normal: el repositorio trae dos docenas y sin ellas"
-    echo "!!! la base queda a medias de una forma que no se nota hasta la primera"
-    echo "!!! escritura. Revisá que el montaje del DDL apunte a un 'SQL/' con"
-    echo "!!! 'patches/' dentro (compose: ../mantra-core-health-model/SQL o ./database/SQL)."
-    exit 4
-fi
-
-echo ">>> $(basename "$MIGRACIONES"): ${#migraciones[@]} migraciones"
-for migration in "${migraciones[@]}"; do
-    echo ">>> $(basename "$MIGRACIONES")/$(basename "$migration")"
-    "${PSQL[@]}" -f "$migration"
-done
+# ORDEN: los stores PG de NoSQL/ van ANTES que patches/, y no es cosmético.
+# `2026-07-25_v407_nullable_embedding_model_versions.sql` hace un ALTER sobre
+# `vector_rag.embedding_model_versions`, tabla que crea el DDL 59. Con patches/
+# delante, sobre una base recién creada eso es
+# «ERROR: schema "vector_rag" does not exist» y, con ON_ERROR_STOP=1,
+# `postgres-init` sale con 3 y se lleva por delante a `api-migrate` y a la API.
+# No se notaba en una base ya poblada —donde vector_rag existía de un arranque
+# anterior—, solo en la PRIMERA puesta en marcha, que es justo la del servidor.
 
 # 58/59 son extensiones PG en esta misma instancia — se aplican siempre.
 echo ">>> NoSQL 58: time_series (TimescaleDB)"
@@ -121,5 +87,101 @@ else
     echo "!!! 'vector(N)', que es una decisión del modelo."
     grep -v 'USING hnsw' "$DDL_59" | "${PSQL[@]}" -f -
 fi
+
+# Migraciones posteriores a la generación de SQL/ (tablas y columnas que los
+# módulos añadieron después). Todas son ADITIVAS e idempotentes por contrato
+# (IF NOT EXISTS), así que se aplican siempre y en orden de nombre — que al ser
+# `YYYY-MM-DD_*.sql` es también orden cronológico.
+#
+# **El directorio se llama `patches/`.** Esto buscaba en `99_migrations/`, que no
+# existe en ninguno de los dos montajes —ni en `SQL/` del repositorio del modelo
+# ni en la copia versionada de `database/SQL/`—, así que el glob no encontraba
+# nada. Y como `nullglob` convierte un glob sin coincidencias en la lista vacía,
+# el bucle daba CERO vueltas sin una línea de aviso: las 24 migraciones llevaban
+# semanas sin aplicarse y el arranque decía «completado» igual.
+#
+# El síntoma no aparece en el arranque sino mucho después y en otro sitio: con
+# `ORM_SCHEMA_SYNC=safe` la entidad crea por su cuenta las columnas que sabe
+# declarar, así que la falta sólo se nota en lo que NINGUNA entidad puede
+# reconstruir —datos de arranque, backfills, restricciones— y revienta al
+# escribir. `insurance_carriers.sigla` fue justo eso.
+#
+# Por eso el paso ya no puede quedarse callado: si no hay ni un archivo, aborta.
+MIGRACIONES=/init/SQL/patches
+# `99_migrations/` se sigue aceptando por si algún despliegue lo tiene con el
+# nombre viejo; el que exista de los dos manda, y `patches/` tiene prioridad.
+[ -d "$MIGRACIONES" ] || MIGRACIONES=/init/SQL/99_migrations
+
+shopt -s nullglob
+migraciones=("$MIGRACIONES"/*.sql)
+shopt -u nullglob
+
+if [ ${#migraciones[@]} -eq 0 ]; then
+    echo "!!! No hay una sola migración en $MIGRACIONES."
+    echo "!!! Eso NO es un caso normal: el repositorio trae dos docenas y sin ellas"
+    echo "!!! la base queda a medias de una forma que no se nota hasta la primera"
+    echo "!!! escritura. Revisá que el montaje del DDL apunte a un 'SQL/' con"
+    echo "!!! 'patches/' dentro (compose: ../mantra-core-health-model/SQL o ./database/SQL)."
+    exit 4
+fi
+
+# NO TODO LO QUE HAY EN patches/ ES UNA MIGRACIÓN DE ESQUEMA.
+# Hay tres clases de archivo mezcladas, y dos de ellas NO pueden correr acá:
+#
+#   a) Migraciones de esquema (la inmensa mayoría). Aditivas e idempotentes;
+#      se aplican siempre y son las que justifican este paso.
+#
+#   b) `*_dev_seed.sql` — datos de ejemplo. El propio archivo dice «se aplica a
+#      mano cuando se lo necesita» y «prohibido usarlo para decisión clínica o
+#      en producción». Se aplican SOLO si se piden: APPLY_DEV_SEEDS=1.
+#
+#   c) Patches de DATOS sobre una base viva: backfills que reparan filas que
+#      quedaron mal ANTES del despliegue. Dependen del catálogo de terminología,
+#      que siembra `api-migrate` DESPUÉS de este contenedor, y traen una guarda
+#      que lo comprueba y aborta en voz alta. En una base recién creada no hay
+#      nada que reparar —el propio backfill lo dice: «este patch NO hace falta
+#      en un rebuild desde cero»— pero su guarda salta igual, y con
+#      ON_ERROR_STOP=1 eso es salida 3 y el despliegue entero abajo. Fue
+#      exactamente lo que pasó con `..._backfill_membresias_asistenciales.sql`:
+#      «Falta el concepto directory:ROLE_PRACTITIONER … Desplegá la API antes».
+#
+# El criterio para (c) NO es «si falla, seguimos» —eso es lo que dejaba la base
+# a medias sin avisar— sino el estado real de la base: si el catálogo todavía
+# no está sembrado, la base es NUEVA y esos patches no tienen sujeto; se omiten
+# nombrándolos. Si ya está sembrado —redespliegue sobre una base viva, que es
+# donde sí reparan algo— se aplican como siempre, bajo ON_ERROR_STOP.
+APPLY_DEV_SEEDS="${APPLY_DEV_SEEDS:-0}"
+
+CATALOGO_SEMBRADO=0
+if pg_true "SELECT to_regclass('terminology.catalog_concepts') IS NOT NULL"; then
+    if pg_true "SELECT EXISTS (SELECT 1 FROM terminology.catalog_concepts)"; then
+        CATALOGO_SEMBRADO=1
+    fi
+fi
+[ "$CATALOGO_SEMBRADO" = 1 ] \
+    && echo ">>> Catálogo de terminología: sembrado (base viva)" \
+    || echo ">>> Catálogo de terminología: vacío — base nueva, sin nada que reparar"
+
+echo ">>> $(basename "$MIGRACIONES"): ${#migraciones[@]} archivos"
+for migration in "${migraciones[@]}"; do
+    nombre="$(basename "$migration")"
+
+    if [[ "$nombre" == *_dev_seed.sql && "$APPLY_DEV_SEEDS" != "1" ]]; then
+        echo "=== $nombre: seed de desarrollo — se omite."
+        echo "=== Para aplicarlo: APPLY_DEV_SEEDS=1, con el catálogo ya sembrado"
+        echo "=== (necesita los conceptos de idioma, que siembra api-migrate)."
+        continue
+    fi
+
+    if [[ "$nombre" == *backfill* && "$CATALOGO_SEMBRADO" != "1" ]]; then
+        echo "=== $nombre: backfill sobre base viva — se omite en una base nueva."
+        echo "=== No hay filas anteriores que reparar, y su guarda de orden exige"
+        echo "=== conceptos que siembra api-migrate después de este paso."
+        continue
+    fi
+
+    echo ">>> $(basename "$MIGRACIONES")/$nombre"
+    "${PSQL[@]}" -f "$migration"
+done
 
 echo "=== postgres-init completado"
