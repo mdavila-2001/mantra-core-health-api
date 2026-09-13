@@ -130,6 +130,14 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- Fase 4 · FK cross-schema (equivalente a 90_fk_deferred; aplicadas ya porque
 -- todos los schemas destino existen en cualquier base sobre la que este patch
 -- pueda correr).
+--
+-- Los perfiles se referencian por `profile_id`, NO por `id`: en
+-- `profiles.health_practitioner_profiles` y `profiles.patient_profiles` la
+-- clave primaria ES `profile_id` (heredan la identidad del perfil base). Con
+-- `("id")` esto moría en «column "id" referenced in foreign key constraint does
+-- not exist», y como nunca llegó a aplicarse —el bucle de migraciones apuntaba
+-- a un directorio inexistente y daba cero vueltas— el error no salió hasta la
+-- primera base construida de cero.
 -- ---------------------------------------------------------------------------
 DO $$ BEGIN
     ALTER TABLE "medical_groups"."groups"
@@ -153,13 +161,13 @@ DO $$ BEGIN
     ALTER TABLE "medical_groups"."groups"
         ADD CONSTRAINT "fk_medical_groups_groups_requesting_practitioner_id"
         FOREIGN KEY ("requesting_practitioner_id")
-        REFERENCES "profiles"."health_practitioner_profiles" ("id");
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "medical_groups"."groups"
         ADD CONSTRAINT "fk_medical_groups_groups_patient_profile_id"
-        FOREIGN KEY ("patient_profile_id") REFERENCES "profiles"."patient_profiles" ("id");
+        FOREIGN KEY ("patient_profile_id") REFERENCES "profiles"."patient_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -172,7 +180,7 @@ DO $$ BEGIN
     ALTER TABLE "medical_groups"."groups"
         ADD CONSTRAINT "fk_medical_groups_groups_proposed_by_practitioner_id"
         FOREIGN KEY ("proposed_by_practitioner_id")
-        REFERENCES "profiles"."health_practitioner_profiles" ("id");
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -191,7 +199,7 @@ DO $$ BEGIN
     ALTER TABLE "medical_groups"."group_members"
         ADD CONSTRAINT "fk_medical_groups_group_members_practitioner_profile_id"
         FOREIGN KEY ("practitioner_profile_id")
-        REFERENCES "profiles"."health_practitioner_profiles" ("id");
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
