@@ -69,6 +69,12 @@ export class JurisdictionAuthorizations {
   validTo?: Date;
 
   /**
+   * Identificador asociado a file.
+   */
+  @Property({ fieldName: 'file_id', type: 'uuid', nullable: true }) // FK → common.files
+  fileId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
