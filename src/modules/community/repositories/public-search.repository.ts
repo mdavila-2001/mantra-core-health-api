@@ -9,6 +9,7 @@ import {
 } from '../entities';
 import { COMM } from '../community.concepts';
 import { PROF } from '../../profiles/profiles.concepts';
+import { PRAC } from '../../practice/practice.concepts';
 
 /**
  * Los estados de un vínculo laboral que se publican en la ficha pública.
@@ -196,6 +197,177 @@ export interface ProfileAffiliation {
   readonly startDate: string;
   /** Fin del vínculo, o `null` si sigue vigente. */
   readonly endDate: string | null;
+}
+
+/**
+ * Un lugar donde atiende un profesional, ya proyectado para la ficha pública.
+ *
+ * Es el `PublicPracticeSiteDto` del contrato, sin decoradores.
+ */
+export interface ProfilePracticeSite {
+  readonly id: string;
+  readonly name: string;
+  /** Dirección en una línea, o `null` si la sede no cargó ninguna. */
+  readonly addressText: string | null;
+  /** Punto de la sede, o `null` si le falta cualquiera de las coordenadas. */
+  readonly location: { readonly lat: number; readonly lng: number } | null;
+  /** Consultorio propio del profesional, no sede de una organización. */
+  readonly isOwn: boolean;
+}
+
+/**
+ * Una fila de {@link PublicSearchRepository.practiceSitesByPractitioner}: una
+ * asignación de rol con su sede, la práctica de esa sede, su dirección y **uno**
+ * de los vínculos de cuenta de la persona. Sin vínculos, los dos últimos van en
+ * nulo.
+ *
+ * Trae hechos y no decisiones: qué asignación cuenta y qué sede es propia lo
+ * resuelve {@link sedesPublicasDe}, que así se puede probar sin base.
+ */
+export interface FilaSedePublica {
+  readonly practitioner_profile_id: string;
+  readonly assignment_status_concept_id: string;
+  readonly assignment_valid_to: string | Date | null;
+  readonly site_id: string;
+  readonly site_name: string;
+  readonly practice_type_concept_id: string;
+  readonly practice_admin_user_id: string;
+  readonly lines: string | null;
+  readonly city: string | null;
+  readonly postal_code: string | null;
+  readonly latitude: string | null;
+  readonly longitude: string | null;
+  readonly link_user_id: string | null;
+  readonly link_status_concept_id: string | null;
+}
+
+/**
+ * Las sedes públicas de cada profesional, a partir de las filas de la consulta.
+ *
+ * ## Qué asignación cuenta
+ *
+ * La misma que `PractitionerRoleAssignmentsRepository.findCurrentWithSite`, que
+ * es la que responde «¿dónde atiende hoy?» con sesión: estado
+ * `ROLE_ASSIGNMENT_ACTIVE`, `valid_to` nulo y sede declarada —esto último lo
+ * garantiza el `JOIN` de la consulta—. No se agrega ningún criterio que aquélla
+ * no tenga. Lo único que **no** se copia es el filtro de tenant: esta superficie
+ * lee a través de todos (`openapi/CONTRATO-PUBLICO.md` §0, regla 1).
+ *
+ * ## Qué sede es propia
+ *
+ * La regla de `PracticesRepository.findOwnOffice`, sin el tenant: la práctica
+ * es de tipo consultorio (`PRACTICE_TYPE_OFFICE`) **y** la administra la cuenta
+ * que encarna al profesional —la de un vínculo de cuenta activo—. El tipo solo
+ * no alcanza, porque `POST /practices` acepta cualquier concepto; y el tipo de
+ * **sede** no sirve, porque el alta de unidades diagnósticas también usa
+ * `SITE_TYPE_OFFICE`.
+ *
+ * ## Orden
+ *
+ * Los consultorios propios primero, que es lo único que el contrato pide. Entre
+ * iguales, por identificador de sede: no significa nada, y por eso mismo no
+ * cambia de una lectura a la siguiente.
+ *
+ * @param filas - Lo que devolvió la consulta, para uno o varios profesionales.
+ * @returns Mapa `practitionerProfileId → sedes`; quien no tiene ninguna no aparece.
+ */
+export function sedesPublicasDe(
+  filas: readonly FilaSedePublica[],
+): Map<string, ProfilePracticeSite[]> {
+  // Las cuentas que hoy encarnan a cada profesional. Se juntan de todas sus
+  // filas y no sólo de las vigentes: el vínculo es de la persona, no de la
+  // asignación.
+  const cuentasActivas = new Map<string, Set<string>>();
+  for (const fila of filas) {
+    if (
+      fila.link_user_id === null ||
+      fila.link_status_concept_id !== PROF.ACCOUNT_LINK_ACTIVE
+    )
+      continue;
+    const cuentas =
+      cuentasActivas.get(fila.practitioner_profile_id) ?? new Set<string>();
+    cuentas.add(fila.link_user_id);
+    cuentasActivas.set(fila.practitioner_profile_id, cuentas);
+  }
+
+  const porProfesional = new Map<string, Map<string, ProfilePracticeSite>>();
+  for (const fila of filas) {
+    if (
+      fila.assignment_status_concept_id !== PRAC.ROLE_ASSIGNMENT_ACTIVE ||
+      fila.assignment_valid_to !== null
+    )
+      continue;
+    const sedes =
+      porProfesional.get(fila.practitioner_profile_id) ??
+      new Map<string, ProfilePracticeSite>();
+    // Dos asignaciones vigentes en la misma sede —dos cargos, por ejemplo— son
+    // un solo lugar al que ir.
+    if (!sedes.has(fila.site_id)) {
+      sedes.set(fila.site_id, {
+        id: fila.site_id,
+        name: fila.site_name,
+        addressText: textoDeDireccion(fila),
+        location: puntoDe(fila),
+        isOwn:
+          fila.practice_type_concept_id === PRAC.PRACTICE_TYPE_OFFICE &&
+          (cuentasActivas
+            .get(fila.practitioner_profile_id)
+            ?.has(fila.practice_admin_user_id) ??
+            false),
+      });
+    }
+    porProfesional.set(fila.practitioner_profile_id, sedes);
+  }
+
+  const salida = new Map<string, ProfilePracticeSite[]>();
+  for (const [practitionerProfileId, sedes] of porProfesional) {
+    salida.set(
+      practitionerProfileId,
+      [...sedes.values()].sort(
+        (a, b) => Number(b.isOwn) - Number(a.isOwn) || compararIds(a.id, b.id),
+      ),
+    );
+  }
+  return salida;
+}
+
+/**
+ * La dirección en una línea, o `null` si no tiene nada que decir.
+ *
+ * Compuesta igual que `addressText` de `PractitionerSitesService` —calle,
+ * ciudad, código postal—, para que la ficha anónima diga lo mismo que la
+ * lectura de sedes con sesión.
+ */
+function textoDeDireccion(fila: FilaSedePublica): string | null {
+  const partes = [fila.lines, fila.city, fila.postal_code]
+    .map((parte) => parte?.trim())
+    .filter((parte): parte is string => Boolean(parte));
+  return partes.length === 0 ? null : partes.join(', ');
+}
+
+/**
+ * El punto de la sede, o `null` si le falta cualquiera de las dos coordenadas.
+ *
+ * Mismo criterio que `locationsByOwner`: media coordenada no es un lugar, y
+ * convertir un nulo en `0` dibujaría un pin en medio del océano.
+ */
+function puntoDe(fila: FilaSedePublica): ProfilePracticeSite['location'] {
+  const lat = fila.latitude === null ? null : Number(fila.latitude);
+  const lng = fila.longitude === null ? null : Number(fila.longitude);
+  if (
+    lat === null ||
+    lng === null ||
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng)
+  )
+    return null;
+  return { lat, lng };
+}
+
+/** Orden por unidad de código, sin depender del idioma de la máquina. */
+function compararIds(a: string, b: string): number {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
 }
 
 @Injectable()
@@ -686,6 +858,52 @@ export class PublicSearchRepository {
       salida.set(fila.practitioner_profile_id, previas);
     }
     return salida;
+  }
+
+  /**
+   * Dónde atiende cada profesional, para su ficha pública (P16).
+   *
+   * Una sola consulta para el lote, acotada a los sujetos pedidos: la ficha la
+   * llama con el único profesional que ya resolvió por slug, y nada de acá lee
+   * de otro. Qué asignación cuenta, qué sede es propia y en qué orden salen lo
+   * decide {@link sedesPublicasDe}, no el SQL.
+   *
+   * Los vínculos de cuenta entran con `LEFT JOIN` y multiplican las filas por
+   * vínculo: una persona tiene casi siempre uno solo, y la deduplicación por
+   * sede hace falta de todos modos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileIds - Sujetos de los perfiles del lote.
+   * @returns Mapa `practitionerProfileId → sedes`, los consultorios propios primero.
+   */
+  async practiceSitesByPractitioner(
+    em: EntityManager,
+    practitionerProfileIds: string[],
+  ): Promise<Map<string, ProfilePracticeSite[]>> {
+    if (practitionerProfileIds.length === 0) return new Map();
+
+    const filas = await em.getConnection().execute<FilaSedePublica[]>(
+      `SELECT pra.practitioner_profile_id,
+              pra.status_concept_id AS assignment_status_concept_id,
+              pra.valid_to AS assignment_valid_to,
+              ps.id AS site_id,
+              ps.name AS site_name,
+              p.type_concept_id AS practice_type_concept_id,
+              p.admin_user_id AS practice_admin_user_id,
+              a.lines, a.city, a.postal_code, a.latitude, a.longitude,
+              pal.user_id AS link_user_id,
+              pal.status_concept_id AS link_status_concept_id
+         FROM practice.practitioner_role_assignments pra
+         JOIN practice.practice_sites ps ON ps.id = pra.practice_site_id
+         JOIN practice.practices p ON p.id = ps.practice_id
+         LEFT JOIN common.addresses a ON a.id = ps.address_id
+         LEFT JOIN profiles.person_account_links pal
+                ON pal.person_id = pra.practitioner_profile_id
+        WHERE pra.practitioner_profile_id IN (?)`,
+      [practitionerProfileIds],
+      'all',
+    );
+    return sedesPublicasDe(filas);
   }
 
   /**
