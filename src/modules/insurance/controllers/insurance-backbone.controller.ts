@@ -8,10 +8,16 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { InsuranceBackboneService } from '../services';
 import {
+  CarrierContactChannelsDto,
   CreateCarrierDto,
   CreateProductDto,
   CreatePlanDto,
@@ -24,6 +30,7 @@ import {
   CreatedResourceDto,
   ResourceStatusDto,
   OkResultDto,
+  UpdateCarrierContactChannelsDto,
   UpdatePlanBenefitDto,
   UpdatePlanBenefitRulesDto,
 } from '../dto';
@@ -60,6 +67,34 @@ export class InsuranceBackboneController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ResourceStatusDto> {
     return this.service.createCarrier(dto, actor);
+  }
+
+  /**
+   * Configura los canales de contacto directo de la aseguradora del tenant
+   * activo (subtarea 2.3 — registro de procesos, Aseguradora 6.2 · ítem 5).
+   *
+   * Sin `@Roles`, igual que `createPlan`/`updateBenefit`: los roles
+   * "ADMINISTRATOR"/"OWNER" que pediría un pedido literal no existen en
+   * `role-mapping.ts`. La barrera es la membresía OWNER/ADMIN del tenant de
+   * la aseguradora (o ser plataforma), que resuelve el servicio.
+   *
+   * @param id - Aseguradora a editar; tiene que ser la del tenant activo.
+   * @param dto - Los tres canales, reemplazo completo.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Los canales resultantes.
+   */
+  @Put('insurance-carriers/:id/contact-channels')
+  @ApiOperation({
+    summary:
+      'Configurar los canales de contacto de la aseguradora del tenant activo',
+  })
+  @ApiOkResponse({ type: CarrierContactChannelsDto })
+  updateContactChannels(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCarrierContactChannelsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CarrierContactChannelsDto> {
+    return this.service.updateContactChannels(id, dto, actor);
   }
 
   /**

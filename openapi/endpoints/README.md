@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1265 de 1265 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1266 de 1266 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -76,7 +76,7 @@ Esta referencia documenta **1265 de 1265 operaciones HTTP** registradas en `open
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 31 | `iam-auth`, `iam-users` | 2 |
 | [identity_assurance](identity-assurance.md) | 25 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
-| [insurance](insurance.md) | 33 | `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 10 |
+| [insurance](insurance.md) | 34 | `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 10 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
 | [lakehouse](lakehouse.md) | 13 | `lakehouse` | 2 |
@@ -117,4 +117,4 @@ Esta referencia documenta **1265 de 1265 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1265 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1266 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

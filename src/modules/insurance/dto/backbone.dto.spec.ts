@@ -3,6 +3,7 @@ import { validate } from 'class-validator';
 import {
   CreatePlanBenefitDto,
   CreatePlanDto,
+  UpdateCarrierContactChannelsDto,
   UpdatePlanBenefitDto,
   UpdatePlanBenefitRulesDto,
 } from './backbone.dto';
@@ -84,6 +85,81 @@ describe('DTOs administrativos de planes y coberturas', () => {
     const errors = await validate(dto);
     expect(errors.map((error) => error.property)).toEqual(
       expect.arrayContaining(['requiredDocuments', 'exclusionNotes']),
+    );
+  });
+});
+
+describe('UpdateCarrierContactChannelsDto', () => {
+  it('rechaza un WhatsApp sin el signo +', async () => {
+    const dto = plainToInstance(UpdateCarrierContactChannelsDto, {
+      whatsappNumber: '59171548278',
+      callCenterPhone: null,
+      supportEmail: null,
+    });
+
+    const errors = await validate(dto);
+    expect(errors.map((error) => error.property)).toEqual(
+      expect.arrayContaining(['whatsappNumber']),
+    );
+    expect(
+      Object.values(
+        errors.find((e) => e.property === 'whatsappNumber')?.constraints ?? {},
+      ),
+    ).toEqual(expect.arrayContaining([expect.stringContaining('E.164')]));
+  });
+
+  it('normaliza espacios y separadores del WhatsApp antes de validar', async () => {
+    const dto = plainToInstance(UpdateCarrierContactChannelsDto, {
+      whatsappNumber: '+591 715-48278',
+      callCenterPhone: null,
+      supportEmail: null,
+    });
+
+    expect(dto.whatsappNumber).toBe('+59171548278');
+    expect(await validate(dto)).toEqual([]);
+  });
+
+  it('rechaza un WhatsApp con letras', async () => {
+    const dto = plainToInstance(UpdateCarrierContactChannelsDto, {
+      whatsappNumber: '+591abc48278',
+      callCenterPhone: null,
+      supportEmail: null,
+    });
+
+    expect((await validate(dto)).map((e) => e.property)).toEqual(
+      expect.arrayContaining(['whatsappNumber']),
+    );
+  });
+
+  it('acepta los tres canales en null (borrado)', async () => {
+    const dto = plainToInstance(UpdateCarrierContactChannelsDto, {
+      whatsappNumber: null,
+      callCenterPhone: null,
+      supportEmail: null,
+    });
+
+    expect(await validate(dto)).toEqual([]);
+  });
+
+  it('acepta una línea de call center boliviana (no es E.164)', async () => {
+    const dto = plainToInstance(UpdateCarrierContactChannelsDto, {
+      whatsappNumber: null,
+      callCenterPhone: '800-10-6060',
+      supportEmail: null,
+    });
+
+    expect(await validate(dto)).toEqual([]);
+  });
+
+  it('rechaza un correo inválido', async () => {
+    const dto = plainToInstance(UpdateCarrierContactChannelsDto, {
+      whatsappNumber: null,
+      callCenterPhone: null,
+      supportEmail: 'no-es-un-correo',
+    });
+
+    expect((await validate(dto)).map((e) => e.property)).toEqual(
+      expect.arrayContaining(['supportEmail']),
     );
   });
 });

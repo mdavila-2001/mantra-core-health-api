@@ -1,9 +1,11 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   ArrayUnique,
   IsArray,
   IsBoolean,
   IsDateString,
+  IsEmail,
   IsIn,
   IsNumberString,
   IsOptional,
@@ -309,6 +311,91 @@ export class UpdatePlanBenefitRulesDto {
   @IsString()
   @MaxLength(1000)
   exclusionNotes!: string | null;
+}
+
+/**
+ * Canales de contacto directo de la aseguradora (subtarea 2.3): a dónde
+ * escribir o llamar para resolver dudas de copagos, exclusiones o para
+ * enviar documentación complementaria (registro de procesos, Aseguradora
+ * 6.2 · ítem 5; T-23). Ninguno reemplaza al motivo TIPIFICADO del rechazo
+ * (`reason_concept_id`) ni a la cita de la cláusula contractual
+ * (`policy_clause_reference`, v4.2.9): son el cómo comunicarse, no el
+ * porqué de un rechazo.
+ */
+export class UpdateCarrierContactChannelsDto {
+  /**
+   * Número de WhatsApp con el que la aseguradora atiende reclamos y dudas
+   * de cobertura. Formato internacional E.164, con el signo "+": sin el
+   * código de país el enlace `wa.me` no sabe a qué número abrir el chat.
+   * `null` quita el canal ya cargado.
+   */
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    example: '+59171548278',
+    description: 'Número de WhatsApp de atención al cliente, en formato E.164',
+  })
+  @ValidateIf((_object, value) => value !== null)
+  @Transform(({ value }: { value: unknown }): unknown =>
+    typeof value === 'string' ? value.replace(/[\s().-]/g, '') : value,
+  )
+  @IsString()
+  @MaxLength(32)
+  @Matches(/^\+[1-9]\d{6,14}$/, {
+    message:
+      'El número de WhatsApp debe tener formato internacional E.164 (ej. +59171234567)',
+  })
+  whatsappNumber!: string | null;
+
+  /**
+   * Teléfono o línea gratuita del call center de la aseguradora, tal cual
+   * ella lo publica. No se exige formato E.164: las líneas gratuitas
+   * bolivianas son del tipo "800-10-xxxx" y no lo son.
+   */
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    example: '800-10-6060',
+    description: 'Teléfono o línea gratuita de atención al cliente',
+  })
+  @ValidateIf((_object, value) => value !== null)
+  @IsString()
+  @MaxLength(32)
+  @Matches(/^[+\d][\d\s().-]{4,31}$/, {
+    message:
+      'El teléfono del call center sólo admite dígitos, "+", espacios y separadores',
+  })
+  callCenterPhone!: string | null;
+
+  /** Correo del área de siniestros o atención al cliente de la aseguradora. */
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    example: 'siniestros@aseguradora.com.bo',
+  })
+  @ValidateIf((_object, value) => value !== null)
+  @IsEmail()
+  @MaxLength(120)
+  supportEmail!: string | null;
+}
+
+/** Respuesta con los canales de contacto vigentes de la aseguradora. */
+export class CarrierContactChannelsDto {
+  /** Identificador de la aseguradora. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Número de WhatsApp de atención, o `null` si no lo registró. */
+  @ApiProperty({ nullable: true, type: String })
+  whatsappNumber!: string | null;
+
+  /** Teléfono del call center, o `null` si no lo registró. */
+  @ApiProperty({ nullable: true, type: String })
+  callCenterPhone!: string | null;
+
+  /** Correo de siniestros/atención, o `null` si no lo registró. */
+  @ApiProperty({ nullable: true, type: String })
+  supportEmail!: string | null;
 }
 
 /** Alta de red de prestadores. */

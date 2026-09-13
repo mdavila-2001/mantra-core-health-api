@@ -16,6 +16,7 @@
 
 import { deterministicId } from '../constants/concepts';
 import dataset from './data/bolivia/insurance-carriers.dataset.json';
+import contactChannelsDataset from './data/bolivia/insurance-carrier-contact-channels.dataset.json';
 
 /** Una aseguradora tal como la declara el listado del stakeholder. */
 export interface BoliviaCarrierSeed {
@@ -44,6 +45,53 @@ export interface BoliviaCarrierSeed {
  * mitad y otra es el ramo, y eso queda en `ramo`.
  */
 export const BOLIVIA_CARRIERS = dataset.datos as readonly BoliviaCarrierSeed[];
+
+/**
+ * Un canal de contacto directo publicado por una aseguradora en su propio
+ * dominio oficial (subtarea 2.3): a dónde escribir por WhatsApp, llamar al
+ * call center, o mandar un correo de siniestros. Vive en un archivo aparte
+ * de `BOLIVIA_CARRIERS` — ese se regenera desde el listado del stakeholder
+ * (`extract_datasets.py`), que no trae teléfonos; éste es curado a mano,
+ * compañía por compañía, y cada valor cita su fuente y la fecha en que se
+ * confirmó (regla 70: sin publicación confirmada, `null`).
+ */
+export interface BoliviaCarrierContactChannels {
+  /** Código de la aseguradora; coincide con `BoliviaCarrierSeed.code`. */
+  readonly code: string;
+  /** WhatsApp en E.164, o `null` si no se pudo confirmar. */
+  readonly whatsapp: string | null;
+  /** Teléfono o línea gratuita del call center, tal cual lo publica. */
+  readonly callCenter: string | null;
+  /** Correo de siniestros/atención, si lo publica. */
+  readonly supportEmail: string | null;
+  /** Dónde se leyó (dominio oficial), o `null` si no se confirmó ninguno. */
+  readonly sourceUrl: string | null;
+  /** Fecha (ISO) en que se confirmó, o `null`. */
+  readonly obtenido: string | null;
+}
+
+const BOLIVIA_CARRIER_CONTACT_CHANNELS =
+  contactChannelsDataset.datos as readonly BoliviaCarrierContactChannels[];
+
+/**
+ * Los canales de contacto confirmados de una aseguradora, por su código.
+ *
+ * @param code - Código de la aseguradora (`BoliviaCarrierSeed.code`).
+ * @returns Sus canales, o los tres en `null` si no hay fila para ese código.
+ */
+export function contactChannelsOf(
+  code: string,
+): Pick<
+  BoliviaCarrierContactChannels,
+  'whatsapp' | 'callCenter' | 'supportEmail'
+> {
+  const entry = BOLIVIA_CARRIER_CONTACT_CHANNELS.find((c) => c.code === code);
+  return {
+    whatsapp: entry?.whatsapp ?? null,
+    callCenter: entry?.callCenter ?? null,
+    supportEmail: entry?.supportEmail ?? null,
+  };
+}
 
 /**
  * Los planes de salud que los propios listados de red nombran.

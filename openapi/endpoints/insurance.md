@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `insurance`
 
-Referencia exhaustiva de 33 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 34 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`
 - **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsuranceReadController`, `PriorAuthController`, `ReconciliationController`
@@ -25,25 +25,26 @@ Referencia exhaustiva de 33 operación(es) del módulo `insurance`, derivada del
 12. [GET /insurance-carriers](#12-get-insurance-carriers) — Listar las aseguradoras del tenant activo
 13. [POST /insurance-carriers](#13-post-insurance-carriers) — Alta de aseguradora (soporte)
 14. [GET /insurance-carriers/{id}](#14-get-insurance-carriers-id) — Consultar el catálogo y la red de una aseguradora
-15. [POST /insurance-carriers/{id}/products](#15-post-insurance-carriers-id-products) — Alta de producto de aseguradora (soporte)
-16. [GET /insurance-claims](#16-get-insurance-claims) — Listar las solicitudes de seguro presentadas (cursor)
-17. [POST /insurance-claims](#17-post-insurance-claims) — Enviar reclamo con líneas (837)
-18. [GET /insurance-claims/{id}](#18-get-insurance-claims-id) — Consultar una solicitud de seguro con sus ítems y su dictamen
-19. [POST /insurance-claims/{id}/adjudications](#19-post-insurance-claims-id-adjudications) — Adjudicar reclamo por línea (835)
-20. [POST /insurance-claims/{id}/disputes](#20-post-insurance-claims-id-disputes) — Abrir disputa sobre adjudicación
-21. [POST /insurance-claims/{id}/eob](#21-post-insurance-claims-id-eob) — Publicar Explicación de Beneficios (EOB)
-22. [POST /insurance-claims/{id}/reversals](#22-post-insurance-claims-id-reversals) — Registrar reversión de reclamo
-23. [POST /insurance-plans/{planId}/benefits](#23-post-insurance-plans-planid-benefits) — Crear una cobertura de un plan administrable
-24. [PUT /insurance-plans/{planId}/benefits/{benefitId}](#24-put-insurance-plans-planid-benefits-benefitid) — Editar importes de una cobertura
-25. [PUT /insurance-plans/{planId}/benefits/{benefitId}/rules](#25-put-insurance-plans-planid-benefits-benefitid-rules) — Editar reglas de aprobación de una cobertura
-26. [POST /insurance-products/{productId}/plans](#26-post-insurance-products-productid-plans) — Crear un plan del carrier del tenant activo
-27. [POST /patient-coverages](#27-post-patient-coverages) — Registrar cobertura de paciente y dependientes
-28. [POST /prior-authorization-requests](#28-post-prior-authorization-requests) — Solicitar autorización previa con items
-29. [POST /prior-authorization-requests/{id}/determinations](#29-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
-30. [POST /provider-networks](#30-post-provider-networks) — Alta de red de prestadores (soporte)
-31. [POST /provider-networks/{id}/memberships](#31-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
-32. [POST /reconciliation-batches](#32-post-reconciliation-batches) — Abrir lote de conciliación
-33. [POST /reconciliation-batches/{id}/items](#33-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
+15. [PUT /insurance-carriers/{id}/contact-channels](#15-put-insurance-carriers-id-contact-channels) — Configurar los canales de contacto de la aseguradora del tenant activo
+16. [POST /insurance-carriers/{id}/products](#16-post-insurance-carriers-id-products) — Alta de producto de aseguradora (soporte)
+17. [GET /insurance-claims](#17-get-insurance-claims) — Listar las solicitudes de seguro presentadas (cursor)
+18. [POST /insurance-claims](#18-post-insurance-claims) — Enviar reclamo con líneas (837)
+19. [GET /insurance-claims/{id}](#19-get-insurance-claims-id) — Consultar una solicitud de seguro con sus ítems y su dictamen
+20. [POST /insurance-claims/{id}/adjudications](#20-post-insurance-claims-id-adjudications) — Adjudicar reclamo por línea (835)
+21. [POST /insurance-claims/{id}/disputes](#21-post-insurance-claims-id-disputes) — Abrir disputa sobre adjudicación
+22. [POST /insurance-claims/{id}/eob](#22-post-insurance-claims-id-eob) — Publicar Explicación de Beneficios (EOB)
+23. [POST /insurance-claims/{id}/reversals](#23-post-insurance-claims-id-reversals) — Registrar reversión de reclamo
+24. [POST /insurance-plans/{planId}/benefits](#24-post-insurance-plans-planid-benefits) — Crear una cobertura de un plan administrable
+25. [PUT /insurance-plans/{planId}/benefits/{benefitId}](#25-put-insurance-plans-planid-benefits-benefitid) — Editar importes de una cobertura
+26. [PUT /insurance-plans/{planId}/benefits/{benefitId}/rules](#26-put-insurance-plans-planid-benefits-benefitid-rules) — Editar reglas de aprobación de una cobertura
+27. [POST /insurance-products/{productId}/plans](#27-post-insurance-products-productid-plans) — Crear un plan del carrier del tenant activo
+28. [POST /patient-coverages](#28-post-patient-coverages) — Registrar cobertura de paciente y dependientes
+29. [POST /prior-authorization-requests](#29-post-prior-authorization-requests) — Solicitar autorización previa con items
+30. [POST /prior-authorization-requests/{id}/determinations](#30-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
+31. [POST /provider-networks](#31-post-provider-networks) — Alta de red de prestadores (soporte)
+32. [POST /provider-networks/{id}/memberships](#32-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
+33. [POST /reconciliation-batches](#33-post-reconciliation-batches) — Abrir lote de conciliación
+34. [POST /reconciliation-batches/{id}/items](#34-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
 
 ---
 
@@ -1605,6 +1606,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "carrierCode": "ASEG-001",
       "legalName": "Nombre de ejemplo",
       "regulatorIdentifier": "valor-ejemplo",
+      "whatsappNumber": "valor-ejemplo",
+      "callCenterPhone": "+59170000000",
+      "supportEmail": "usuario@example.com",
       "jurisdiction": {
         "code": "CARRIER_ACTIVE",
         "display": "Aseguradora activa"
@@ -1632,11 +1636,14 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<CarrierSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierCode":"ASEG-001","legalName":"Nombre de ejemplo","regulatorIdentifier":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"productCount":1,"planCount":1,"networkCount":1,"createdAt":"2026-07-31T12:00:00.000Z","canAdminister":true}]` |
+| `items` | Sí | `array<CarrierSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierCode":"ASEG-001","legalName":"Nombre de ejemplo","regulatorIdentifier":"valor-ejemplo","whatsappNumber":"valor-ejemplo","callCenterPhone":"+59170000000","supportEmail":"usuario@example.com","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"productCount":1,"planCount":1,"networkCount":1,"createdAt":"2026-07-31T12:00:00.000Z","canAdminister":true}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].carrierCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ASEG-001` |
 | `items[].legalName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `items[].regulatorIdentifier` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].whatsappNumber` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].callCenterPhone` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `items[].supportEmail` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
 | `items[].jurisdiction` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
 | `items[].jurisdiction.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
 | `items[].jurisdiction.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
@@ -1884,6 +1891,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "carrierCode": "ASEG-001",
   "legalName": "Nombre de ejemplo",
   "regulatorIdentifier": "valor-ejemplo",
+  "whatsappNumber": "valor-ejemplo",
+  "callCenterPhone": "+59170000000",
+  "supportEmail": "usuario@example.com",
   "jurisdiction": {
     "code": "CARRIER_ACTIVE",
     "display": "Aseguradora activa"
@@ -1997,6 +2007,9 @@ Campos de la respuesta:
 | `carrierCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ASEG-001` |
 | `legalName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `regulatorIdentifier` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `whatsappNumber` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `callCenterPhone` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `supportEmail` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
 | `jurisdiction` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
 | `jurisdiction.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
 | `jurisdiction.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
@@ -2099,7 +2112,144 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /insurance-carriers/{id}/products
+## 15. PUT /insurance-carriers/{id}/contact-channels
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-backbone`
+- **Nombre:** Configurar los canales de contacto de la aseguradora del tenant activo
+- **Operation ID:** `InsuranceBackboneController_updateContactChannels`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InsuranceBackboneController.updateContactChannels](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+
+### Descripción de negocio
+
+Configurar los canales de contacto de la aseguradora del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Configura los canales de contacto directo de la aseguradora del tenant activo (subtarea 2.3 — registro de procesos, Aseguradora 6.2 · ítem 5). Sin `@Roles`, igual que `createPlan`/`updateBenefit`: los roles "ADMINISTRATOR"/"OWNER" que pediría un pedido literal no existen en `role-mapping.ts`. La barrera es la membresía OWNER/ADMIN del tenant de la aseguradora (o ser plataforma), que resuelve el servicio.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /insurance-carriers/{id}/contact-channels` en `InsuranceBackboneController_updateContactChannels`. El controlador delega en `InsuranceBackboneService.updateContactChannels`. Valida el body como `UpdateCarrierContactChannelsDto` y consume `application/json`. El tipo de retorno estático es `Promise<CarrierContactChannelsDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateCarrierContactChannelsDto`; los campos opcionales se omiten.
+
+```http
+PUT /insurance-carriers/00000000-0000-4000-8000-000000000001/contact-channels HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "whatsappNumber": "+59171548278",
+  "callCenterPhone": "800-10-6060",
+  "supportEmail": "siniestros@aseguradora.com.bo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `whatsappNumber` | Sí | `string` | longitud máxima 32; patrón runtime `/^\+[1-9]\d{6,14}$/`; admite null | Número de WhatsApp de atención al cliente, en formato E.164 | `+59171548278` |
+| `callCenterPhone` | Sí | `string` | longitud máxima 32; patrón runtime `/^[+\d][\d\s().-]{4,31}$/`; admite null | Teléfono o línea gratuita de atención al cliente | `800-10-6060` |
+| `supportEmail` | Sí | `string` | formato `email`; longitud máxima 120; admite null | Sin descripción específica en el contrato OpenAPI. | `siniestros@aseguradora.com.bo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /insurance-carriers/00000000-0000-4000-8000-000000000001/contact-channels HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "whatsappNumber": "+59171548278",
+  "callCenterPhone": "800-10-6060",
+  "supportEmail": "siniestros@aseguradora.com.bo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CarrierContactChannelsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CarrierContactChannelsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "whatsappNumber": "valor-ejemplo",
+  "callCenterPhone": "+59170000000",
+  "supportEmail": "usuario@example.com"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `whatsappNumber` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `callCenterPhone` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `supportEmail` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/insurance-carriers/{id}/contact-channels"
+}
+```
+
+---
+
+## 16. POST /insurance-carriers/{id}/products
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -2227,7 +2377,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /insurance-claims
+## 17. GET /insurance-claims
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-claims-read`
@@ -2313,6 +2463,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       },
       "carrierName": "La Boliviana Ciacruz",
       "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+      "carrierWhatsappNumber": "valor-ejemplo",
+      "carrierCallCenterPhone": "+59170000000",
+      "carrierSupportEmail": "usuario@example.com",
       "policyIdentifier": "POL-88213",
       "policyBrokerName": "Nombre de ejemplo",
       "billedTotal": {
@@ -2345,7 +2498,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ClaimListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"CLM-2026-000123","patient":{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","memberIdentifier":"valor-ejemplo"},"carrierName":"La Boliviana Ciacruz","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","policyIdentifier":"POL-88213","policyBrokerName":"Nombre de ejemplo","billedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"approvedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"submittedAt":"2026-07-31T12:00:00.000Z","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"hasOpenDispute":false}]` |
+| `items` | Sí | `array<ClaimListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"CLM-2026-000123","patient":{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","memberIdentifier":"valor-ejemplo"},"carrierName":"La Boliviana Ciacruz","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","carrierSupportEmail":"usuario@example.com","policyIdentifier":"POL-88213","policyBrokerName":"Nombre de ejemplo","billedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"approvedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"submittedAt":"2026-07-31T12:00:00.000Z","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"hasOpenDispute":false}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CLM-2026-000123` |
 | `items[].patient` | Sí | `ClaimPatientDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","memberIdentifier":"valor-ejemplo"}` |
@@ -2355,6 +2508,9 @@ Campos de la respuesta:
 | `items[].patient.memberIdentifier` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `La Boliviana Ciacruz` |
 | `items[].insuranceCarrierId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].carrierWhatsappNumber` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].carrierCallCenterPhone` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `items[].carrierSupportEmail` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
 | `items[].policyIdentifier` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `POL-88213` |
 | `items[].policyBrokerName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `items[].billedTotal` | Sí | `MoneyDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}}` |
@@ -2400,7 +2556,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /insurance-claims
+## 18. POST /insurance-claims
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-claims`
@@ -2562,7 +2718,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /insurance-claims/{id}
+## 19. GET /insurance-claims/{id}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-claims-read`
@@ -2644,6 +2800,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     },
     "carrierName": "La Boliviana Ciacruz",
     "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+    "carrierWhatsappNumber": "valor-ejemplo",
+    "carrierCallCenterPhone": "+59170000000",
+    "carrierSupportEmail": "usuario@example.com",
     "policyIdentifier": "POL-88213",
     "policyBrokerName": "Nombre de ejemplo",
     "billedTotal": {
@@ -2821,7 +2980,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `header` | Sí | `ClaimListItemDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"CLM-2026-000123","patient":{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","memberIdentifier":"valor-ejemplo"},"carrierName":"La Boliviana Ciacruz","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","policyIdentifier":"POL-88213","policyBrokerName":"Nombre de ejemplo","billedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"approvedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"submittedAt":"2026-07-31T12:00:00.000Z","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"hasOpenDispute":false}` |
+| `header` | Sí | `ClaimListItemDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"CLM-2026-000123","patient":{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","memberIdentifier":"valor-ejemplo"},"carrierName":"La Boliviana Ciacruz","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","carrierSupportEmail":"usuario@example.com","policyIdentifier":"POL-88213","policyBrokerName":"Nombre de ejemplo","billedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"approvedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"submittedAt":"2026-07-31T12:00:00.000Z","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"hasOpenDispute":false}` |
 | `header.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `header.claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CLM-2026-000123` |
 | `header.patient` | Sí | `ClaimPatientDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","memberIdentifier":"valor-ejemplo"}` |
@@ -2831,6 +2990,9 @@ Campos de la respuesta:
 | `header.patient.memberIdentifier` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `header.carrierName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `La Boliviana Ciacruz` |
 | `header.insuranceCarrierId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `header.carrierWhatsappNumber` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `header.carrierCallCenterPhone` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `header.carrierSupportEmail` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
 | `header.policyIdentifier` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `POL-88213` |
 | `header.policyBrokerName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `header.billedTotal` | Sí | `MoneyDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}}` |
@@ -2980,7 +3142,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /insurance-claims/{id}/adjudications
+## 20. POST /insurance-claims/{id}/adjudications
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-claims`
@@ -3141,7 +3303,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /insurance-claims/{id}/disputes
+## 21. POST /insurance-claims/{id}/disputes
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-claims`
@@ -3274,7 +3436,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /insurance-claims/{id}/eob
+## 22. POST /insurance-claims/{id}/eob
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-claims`
@@ -3398,7 +3560,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /insurance-claims/{id}/reversals
+## 23. POST /insurance-claims/{id}/reversals
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-claims`
@@ -3528,7 +3690,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /insurance-plans/{planId}/benefits
+## 24. POST /insurance-plans/{planId}/benefits
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -3670,7 +3832,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. PUT /insurance-plans/{planId}/benefits/{benefitId}
+## 25. PUT /insurance-plans/{planId}/benefits/{benefitId}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -3806,7 +3968,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. PUT /insurance-plans/{planId}/benefits/{benefitId}/rules
+## 26. PUT /insurance-plans/{planId}/benefits/{benefitId}/rules
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -3943,7 +4105,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /insurance-products/{productId}/plans
+## 27. POST /insurance-products/{productId}/plans
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -4078,7 +4240,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /patient-coverages
+## 28. POST /patient-coverages
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-coverage`
@@ -4225,7 +4387,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /prior-authorization-requests
+## 29. POST /prior-authorization-requests
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -4368,7 +4530,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /prior-authorization-requests/{id}/determinations
+## 30. POST /prior-authorization-requests/{id}/determinations
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -4501,7 +4663,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /provider-networks
+## 31. POST /provider-networks
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -4632,7 +4794,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /provider-networks/{id}/memberships
+## 32. POST /provider-networks/{id}/memberships
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -4766,7 +4928,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /reconciliation-batches
+## 33. POST /reconciliation-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
@@ -4899,7 +5061,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /reconciliation-batches/{id}/items
+## 34. POST /reconciliation-batches/{id}/items
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`

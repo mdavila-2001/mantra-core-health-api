@@ -17816,6 +17816,80 @@
         "description": "Listar las aseguradoras del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/insurance-carriers/{id}/contact-channels": {
+      "put": {
+        "operationId": "InsuranceBackboneController_updateContactChannels",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCarrierContactChannelsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarrierContactChannelsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Configurar los canales de contacto de la aseguradora del tenant activo",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Configurar los canales de contacto de la aseguradora del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/insurance-carriers/{id}/products": {
       "post": {
         "operationId": "InsuranceBackboneController_createProduct",
@@ -84888,6 +84962,60 @@
           "legalName"
         ]
       },
+      "UpdateCarrierContactChannelsDto": {
+        "type": "object",
+        "properties": {
+          "whatsappNumber": {
+            "type": "string",
+            "nullable": true,
+            "example": "+59171548278",
+            "description": "Número de WhatsApp de atención al cliente, en formato E.164"
+          },
+          "callCenterPhone": {
+            "type": "string",
+            "nullable": true,
+            "example": "800-10-6060",
+            "description": "Teléfono o línea gratuita de atención al cliente"
+          },
+          "supportEmail": {
+            "type": "string",
+            "nullable": true,
+            "example": "siniestros@aseguradora.com.bo"
+          }
+        },
+        "required": [
+          "whatsappNumber",
+          "callCenterPhone",
+          "supportEmail"
+        ]
+      },
+      "CarrierContactChannelsDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "whatsappNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "callCenterPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "supportEmail": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "whatsappNumber",
+          "callCenterPhone",
+          "supportEmail"
+        ]
+      },
       "InsuranceCreateProductDto": {
         "type": "object",
         "properties": {
@@ -85689,6 +85817,18 @@
             "type": "string",
             "format": "uuid"
           },
+          "carrierWhatsappNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrierCallCenterPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrierSupportEmail": {
+            "type": "string",
+            "nullable": true
+          },
           "policyIdentifier": {
             "type": "string",
             "nullable": true,
@@ -85735,6 +85875,9 @@
           "patient",
           "carrierName",
           "insuranceCarrierId",
+          "carrierWhatsappNumber",
+          "carrierCallCenterPhone",
+          "carrierSupportEmail",
           "policyIdentifier",
           "policyBrokerName",
           "billedTotal",
@@ -86181,6 +86324,18 @@
             "type": "string",
             "nullable": true
           },
+          "whatsappNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "callCenterPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "supportEmail": {
+            "type": "string",
+            "nullable": true
+          },
           "jurisdiction": {
             "nullable": true,
             "type": "object",
@@ -86218,6 +86373,9 @@
           "carrierCode",
           "legalName",
           "regulatorIdentifier",
+          "whatsappNumber",
+          "callCenterPhone",
+          "supportEmail",
           "jurisdiction",
           "status",
           "verification",
@@ -86514,6 +86672,18 @@
             "type": "string",
             "nullable": true
           },
+          "whatsappNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "callCenterPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "supportEmail": {
+            "type": "string",
+            "nullable": true
+          },
           "jurisdiction": {
             "nullable": true,
             "type": "object",
@@ -86563,6 +86733,9 @@
           "carrierCode",
           "legalName",
           "regulatorIdentifier",
+          "whatsappNumber",
+          "callCenterPhone",
+          "supportEmail",
           "jurisdiction",
           "status",
           "verification",

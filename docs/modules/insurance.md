@@ -35,6 +35,7 @@ JWT:
 | `POST /insurance-plans/:planId/benefits` | Categoría, servicio opcional, vigencia e importes | `{ id }` |
 | `PUT /insurance-plans/:planId/benefits/:benefitId` | Porcentaje, copago, deducible y tope anual; `null` borra | `{ ok: true }` |
 | `PUT /insurance-plans/:planId/benefits/:benefitId/rules` | Autorización previa, documentos y exclusión | `{ ok: true }` |
+| `PUT /insurance-carriers/:id/contact-channels` | WhatsApp (E.164), teléfono de call center y correo de siniestros; `null` borra (subtarea 2.3) | Los tres canales resultantes |
 
 Todos los identificadores se resuelven por la cadena
 tenant → carrier → producto → plan → beneficio. Un recurso inexistente, ajeno

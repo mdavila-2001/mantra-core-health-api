@@ -85,6 +85,12 @@ describe('Insurance controllers (delegación)', () => {
       createBroker: mockFn().mockResolvedValue({ id: ID }),
       createAgreement: mockFn().mockResolvedValue({ id: ID }),
       createEmployerGroup: mockFn().mockResolvedValue({ id: ID }),
+      updateContactChannels: mockFn().mockResolvedValue({
+        id: ID,
+        whatsappNumber: '+59171548278',
+        callCenterPhone: '800-10-6060',
+        supportEmail: null,
+      }),
     };
     const c = new InsuranceBackboneController(service as never) as any;
     await c.createCarrier(dto, actor);
@@ -103,6 +109,8 @@ describe('Insurance controllers (delegación)', () => {
     expect(service.createBroker).toHaveBeenCalledWith(dto, actor);
     await c.createEmployerGroup(dto, actor);
     expect(service.createEmployerGroup).toHaveBeenCalledWith(dto, actor);
+    await c.updateContactChannels(ID, dto, actor);
+    expect(service.updateContactChannels).toHaveBeenCalledWith(ID, dto, actor);
   });
 
   it('PriorAuthController delega en PriorAuthService', async () => {

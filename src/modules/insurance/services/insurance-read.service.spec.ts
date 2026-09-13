@@ -252,6 +252,37 @@ describe('InsuranceReadService', () => {
     ).not.toHaveProperty('eligibilityRuleJson');
   });
 
+  it('la ficha de la aseguradora incluye sus canales de contacto (subtarea 2.3)', async () => {
+    const d = build();
+    d.repo.findCarrierByTenant.mockResolvedValue({
+      ...carrier('c1'),
+      whatsappNumber: '+59171548278',
+      callCenterPhone: '800-10-6060',
+      supportEmail: 'siniestros@aseguradora.com.bo',
+    });
+
+    const result = await runWithTenant(TENANT, () =>
+      d.service.getCarrier('c1', ACTOR),
+    );
+
+    expect(result.whatsappNumber).toBe('+59171548278');
+    expect(result.callCenterPhone).toBe('800-10-6060');
+    expect(result.supportEmail).toBe('siniestros@aseguradora.com.bo');
+  });
+
+  it('sin canales registrados, la ficha los devuelve en null', async () => {
+    const d = build();
+    d.repo.findCarrierByTenant.mockResolvedValue(carrier('c1'));
+
+    const result = await runWithTenant(TENANT, () =>
+      d.service.getCarrier('c1', ACTOR),
+    );
+
+    expect(result.whatsappNumber).toBeNull();
+    expect(result.callCenterPhone).toBeNull();
+    expect(result.supportEmail).toBeNull();
+  });
+
   it('normaliza reglas ausentes o malformadas a valores vacíos', async () => {
     const d = build();
     d.repo.findCarrierByTenant.mockResolvedValue(carrier('c1'));

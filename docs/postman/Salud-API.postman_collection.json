@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1265 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1265 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1266 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1266 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -39046,7 +39046,7 @@
       ]
     },
     {
-      "name": "insurance-carriers (4)",
+      "name": "insurance-carriers (5)",
       "item": [
         {
           "name": "GET /insurance-carriers · Listar las aseguradoras del tenant activo",
@@ -39268,6 +39268,66 @@
                   "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                   "  if (first && first.id) pm.environment.set('insuranceCarrierId', first.id);",
                   "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /insurance-carriers/{id}/contact-channels · Configurar los canales de contacto de la aseguradora del tenant activo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-carriers/:id/contact-channels",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-carriers",
+                ":id",
+                "contact-channels"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{insuranceCarrierId}}",
+                  "description": "Identificador de ruta · variable `{{insuranceCarrierId}}`"
+                }
+              ]
+            },
+            "description": "Configurar los canales de contacto de la aseguradora del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /insurance-carriers/{id}/contact-channels`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceBackboneController_updateContactChannels`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"whatsappNumber\": \"+59171548278\",\n  \"callCenterPhone\": \"800-10-6060\",\n  \"supportEmail\": \"siniestros@aseguradora.com.bo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }
