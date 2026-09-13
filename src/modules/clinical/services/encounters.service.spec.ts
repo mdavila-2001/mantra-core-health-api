@@ -36,6 +36,7 @@ function build() {
     findAppointmentForUpdate: mockFn().mockResolvedValue(null),
     findByAppointmentId: mockFn().mockResolvedValue([]),
     findLatestIdsByAppointmentIds: mockFn().mockResolvedValue(new Map()),
+    findIdsByAppointmentIds: mockFn().mockResolvedValue(new Map()),
   };
   const episodesRepo = { findById: mockFn() };
   // Carril P1: el aviso in-app del cierre. Se dobla con un espía que no hace

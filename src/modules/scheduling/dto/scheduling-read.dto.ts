@@ -191,6 +191,38 @@ export class BookingDelayNoticeDto {
   announcedAt!: Date;
 }
 
+/**
+ * La solicitud de seguro de una cita, lo justo para pintarla en la agenda.
+ *
+ * Es un resumen y no el reclamo: para montos, ítems y adjudicaciones está
+ * `GET /insurance/claims/{id}`, con su propio alcance.
+ */
+export class BookingInsuranceClaimDto {
+  /** `insurance.insurance_claims.id`: con esto se abre el detalle. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Número de la solicitud, el que se le dicta a la aseguradora. */
+  @ApiProperty()
+  claimIdentifier!: string;
+
+  /**
+   * Código del concepto de estado (`CLAIM_SUBMITTED`, `CLAIM_ADJUDICATED`,
+   * `CLAIM_PAID`, `CLAIM_REVERSED`…). Es la clave estable para decidir color o
+   * icono; la lista puede crecer, así que un código desconocido no es error.
+   */
+  @ApiProperty({ example: 'CLAIM_SUBMITTED' })
+  statusCode!: string;
+
+  /** Etiqueta del estado en castellano, tal como está en el catálogo. */
+  @ApiProperty({ example: 'Reclamo enviado' })
+  statusDisplay!: string;
+
+  /** Cuándo se envió, en ISO 8601; `null` si todavía no se envió. */
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  submittedAt!: string | null;
+}
+
 /** Una cita, tal como la devuelven el listado y el detalle (UC-41-15). */
 export class BookingItemDto {
   /**
@@ -367,6 +399,30 @@ export class BookingItemDto {
    */
   @ApiPropertyOptional({ type: String, nullable: true })
   insuranceCarrierName?: string | null;
+
+  /**
+   * La solicitud de seguro más reciente de la cita, o `null` si no tiene.
+   *
+   * El vínculo es cita → encuentro clínico → solicitud
+   * (`appointment_bookings.appointment_id` = `encounters.appointment_id`, y
+   * `insurance_claims.encounter_id` = `encounters.id`). Si la cita tuvo más de
+   * un encuentro, o más de una solicitud, viaja la más reciente por
+   * `submittedAt` y, entre las no enviadas, por fecha de alta.
+   *
+   * Viaja con la **misma regla que `insuranceCarrierName`**: que alguien tenga
+   * un reclamo abierto con su seguro es un dato del paciente, y lo ve quien ya
+   * puede verlo a él. `null` es la respuesta comprobada —«se buscó y la cita
+   * no tiene solicitud»—; **ausente** es que no se comprobó porque quien mira
+   * no tiene el permiso. Hoy sólo lo trae el listado; el detalle lo omite, igual
+   * que la aseguradora.
+   *
+   * Se resuelve en lote para toda la página, no una consulta por fila.
+   */
+  @ApiPropertyOptional({
+    type: () => BookingInsuranceClaimDto,
+    nullable: true,
+  })
+  insuranceClaim?: BookingInsuranceClaimDto | null;
 
   /**
    * De cuándo se movió, si la cita se reprogramó.

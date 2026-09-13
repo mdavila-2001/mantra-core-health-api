@@ -10,6 +10,28 @@ import {
   PatientCoverages,
 } from '../entities';
 import { INS } from '../insurance.concepts';
+import { CatalogConcepts } from '../../terminology/entities';
+
+/**
+ * Lo mínimo de una solicitud para nombrarla desde afuera del módulo: la agenda
+ * la muestra junto a la cita, sin abrir el detalle del reclamo.
+ */
+export interface EncounterClaimSummary {
+  /** `insurance_claims.id`. */
+  readonly id: string;
+  /** Encuentro clínico que la solicitud factura. */
+  readonly encounterId: string;
+  /** Número de la solicitud, el que se le dicta a la aseguradora. */
+  readonly claimIdentifier: string;
+  /** `code` del concepto de estado (p. ej. `CLAIM_SUBMITTED`). */
+  readonly statusCode: string;
+  /** `display` del concepto de estado, para la pantalla. */
+  readonly statusDisplay: string;
+  /** Cuándo se envió; `null` si todavía no se envió. */
+  readonly submittedAt: Date | null;
+  /** Cuándo se creó la fila; desempata a las no enviadas. */
+  readonly createdAt: Date;
+}
 
 /** Filtros con los que se recorre el listado de solicitudes. */
 export interface ClaimListFilters {
@@ -251,5 +273,69 @@ export class ClaimReadRepository {
       { insuranceClaimId: { $in: [...claimIds] } },
       { orderBy: { createdAt: QueryOrder.DESC } },
     );
+  }
+
+  /**
+   * Las solicitudes de los encuentros dados, de la más reciente a la más vieja,
+   * con el estado ya traducido a código y etiqueta.
+   *
+   * En lote: la agenda (`GET /scheduling/bookings`) pide esto para toda una
+   * página de citas, y una consulta por fila convertiría un listado en cien.
+   * Son dos consultas fijas —solicitudes y conceptos— sin importar el tamaño.
+   *
+   * El orden es `submitted_at DESC NULLS LAST, created_at DESC, id DESC`: la
+   * enviada más nueva primero, y las que todavía no se enviaron detrás, por
+   * fecha de alta. Quien consume se queda con la primera de cada encuentro (o
+   * de cada cita) y listo, sin volver a ordenar.
+   *
+   * **No filtra por prácticas** como `findClaimsPage`: acá el alcance lo pone
+   * quien llama, que ya decidió que el actor puede ver a ese paciente (el
+   * titular o el profesional de la agenda). Este método sólo lee.
+   *
+   * @param em - Contexto de persistencia.
+   * @param encounterIds - Encuentros cuyas solicitudes se necesitan.
+   * @returns Resúmenes ordenados; vacío si no hay encuentros o solicitudes.
+   */
+  async findSummariesByEncounterIds(
+    em: EntityManager,
+    encounterIds: readonly string[],
+  ): Promise<EncounterClaimSummary[]> {
+    if (encounterIds.length === 0) return [];
+    const solicitudes = await em.find(
+      InsuranceClaims,
+      { encounterId: { $in: [...new Set(encounterIds)] } },
+      {
+        orderBy: [
+          { submittedAt: QueryOrder.DESC_NULLS_LAST },
+          { createdAt: QueryOrder.DESC },
+          { id: QueryOrder.DESC },
+        ],
+      },
+    );
+    if (solicitudes.length === 0) return [];
+
+    const conceptos = await em.find(CatalogConcepts, {
+      id: { $in: [...new Set(solicitudes.map((s) => s.statusConceptId))] },
+    });
+    const conceptoPorId = new Map(conceptos.map((c) => [c.id, c]));
+
+    const resumenes: EncounterClaimSummary[] = [];
+    for (const solicitud of solicitudes) {
+      if (solicitud.encounterId == null) continue;
+      const estado = conceptoPorId.get(solicitud.statusConceptId);
+      resumenes.push({
+        id: solicitud.id,
+        encounterId: solicitud.encounterId,
+        claimIdentifier: solicitud.claimIdentifier,
+        // La columna es FK a `catalog_concepts`, así que el concepto existe;
+        // el `?? ''` es sólo para no romper la página entera si una siembra
+        // quedara a medias.
+        statusCode: estado?.code ?? '',
+        statusDisplay: estado?.display ?? '',
+        submittedAt: solicitud.submittedAt ?? null,
+        createdAt: solicitud.createdAt,
+      });
+    }
+    return resumenes;
   }
 }

@@ -152,6 +152,12 @@ function build() {
   // tiene encuentro: las pruebas que lo comprueban devuelven el mapa a propósito.
   const encountersRepo = {
     findLatestIdsByAppointmentIds: mockFn().mockResolvedValue(new Map()),
+    findIdsByAppointmentIds: mockFn().mockResolvedValue(new Map()),
+  };
+  // La solicitud de seguro de la cita. Por omisión ninguna: las pruebas que la
+  // comprueban devuelven los resúmenes a propósito.
+  const claimReadRepo = {
+    findSummariesByEncounterIds: mockFn().mockResolvedValue([]),
   };
   const service = new SchedulingBookingsService(
     em as any,
@@ -167,8 +173,10 @@ function build() {
     coverageRepo as any,
     waitlist as any,
     encountersRepo as any,
+    claimReadRepo as any,
   );
   return {
+    claimReadRepo,
     service,
     tx,
     vinculos,
@@ -2327,6 +2335,240 @@ describe('SchedulingBookingsService', () => {
 
       expect(res.items[0].insuranceCarrierName).toBeUndefined();
       expect(JSON.stringify(res)).not.toContain('Illimani');
+    });
+
+    /* ------------------------------------------------------------------
+       La solicitud de seguro de la cita viaja en la fila
+       ------------------------------------------------------------------ */
+
+    /** Una página con citas clínicas en el recurso `res-1`. */
+    function paginaConCitas(
+      filas: ReadonlyArray<{ id: string; appointmentId: string | null }>,
+    ) {
+      return {
+        rows: filas.map(({ id, appointmentId }) => ({
+          booking: { ...guardada, id, resourceId: 'res-1', appointmentId },
+          slot: null,
+        })),
+        fetchCapReached: false,
+      };
+    }
+
+    /** Un resumen de solicitud como lo devuelve el repositorio de insurance. */
+    function resumen(over: Record<string, unknown>) {
+      return {
+        id: 'claim-1',
+        encounterId: 'enc-1',
+        claimIdentifier: 'SOL-0001',
+        statusCode: 'CLAIM_SUBMITTED',
+        statusDisplay: 'Reclamo enviado',
+        submittedAt: new Date('2026-09-01T12:00:00Z'),
+        createdAt: new Date('2026-09-01T11:00:00Z'),
+        ...over,
+      };
+    }
+
+    it('con solicitud, la fila trae la más reciente con su estado legible', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(
+        paginaConCitas([{ id: 'b1', appointmentId: 'appt-1' }]),
+      );
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
+        new Map([['appt-1', ['enc-2', 'enc-1']]]),
+      );
+      // Ya ordenadas por el repositorio: la primera de la cita es la que gana,
+      // aunque cuelgue de un encuentro más viejo.
+      d.claimReadRepo.findSummariesByEncounterIds.mockResolvedValue([
+        resumen({ id: 'claim-nueva', encounterId: 'enc-1' }),
+        resumen({
+          id: 'claim-vieja',
+          encounterId: 'enc-2',
+          claimIdentifier: 'SOL-0000',
+          submittedAt: new Date('2026-08-01T12:00:00Z'),
+        }),
+      ]);
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      expect(res.items[0].insuranceClaim).toEqual({
+        id: 'claim-nueva',
+        claimIdentifier: 'SOL-0001',
+        statusCode: 'CLAIM_SUBMITTED',
+        statusDisplay: 'Reclamo enviado',
+        submittedAt: '2026-09-01T12:00:00.000Z',
+      });
+    });
+
+    it('una solicitud sin enviar viaja con submittedAt null', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(
+        paginaConCitas([{ id: 'b1', appointmentId: 'appt-1' }]),
+      );
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
+        new Map([['appt-1', ['enc-1']]]),
+      );
+      d.claimReadRepo.findSummariesByEncounterIds.mockResolvedValue([
+        resumen({ submittedAt: null }),
+      ]);
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      expect(res.items[0].insuranceClaim?.submittedAt).toBeNull();
+    });
+
+    it('sin solicitud, la fila dice `null` — se buscó y no hay', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(
+        paginaConCitas([
+          { id: 'b1', appointmentId: 'appt-1' },
+          { id: 'b2', appointmentId: null },
+        ]),
+      );
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
+        new Map([['appt-1', ['enc-1']]]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      // Con cita y sin solicitud, y sin cita clínica: las dos son `null`, no
+      // ausencia.
+      expect(res.items[0]).toHaveProperty('insuranceClaim', null);
+      expect(res.items[1]).toHaveProperty('insuranceClaim', null);
+    });
+
+    it('el titular ve la solicitud de su propia cita', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(
+        paginaConCitas([{ id: 'b1', appointmentId: 'appt-1' }]),
+      );
+      d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
+        new Map([['appt-1', ['enc-1']]]),
+      );
+      d.claimReadRepo.findSummariesByEncounterIds.mockResolvedValue([
+        resumen({}),
+      ]);
+
+      const res = await d.service.searchBookings(
+        { patientProfileId: PATIENT, includeCancelled: false },
+        50,
+        { id: 'u-pac', roles: ['PATIENT'], patientProfileId: PATIENT } as any,
+      );
+
+      expect(res.items[0].insuranceClaim?.id).toBe('claim-1');
+    });
+
+    it('un profesional ajeno no ve la solicitud: el campo se omite', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(
+        paginaConCitas([{ id: 'b1', appointmentId: 'appt-1' }]),
+      );
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-DE-OTRO',
+      });
+      d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
+        new Map([['appt-1', ['enc-1']]]),
+      );
+      d.claimReadRepo.findSummariesByEncounterIds.mockResolvedValue([
+        resumen({}),
+      ]);
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-propio') as any,
+      );
+
+      expect(res.items[0]).not.toHaveProperty('insuranceClaim');
+      expect(JSON.stringify(res)).not.toContain('SOL-0001');
+    });
+
+    it('sin actor que pueda ver al paciente, ni siquiera se consulta', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(
+        paginaConCitas([{ id: 'b1', appointmentId: 'appt-1' }]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+      );
+
+      expect(res.items[0]).not.toHaveProperty('insuranceClaim');
+      expect(d.encountersRepo.findIdsByAppointmentIds).not.toHaveBeenCalled();
+      expect(
+        d.claimReadRepo.findSummariesByEncounterIds,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('la solicitud se resuelve en lote: una consulta por salto para toda la página', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(
+        paginaConCitas([
+          { id: 'b1', appointmentId: 'appt-1' },
+          { id: 'b2', appointmentId: 'appt-2' },
+          { id: 'b3', appointmentId: 'appt-3' },
+        ]),
+      );
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
+        new Map([
+          ['appt-1', ['enc-1']],
+          ['appt-2', ['enc-2']],
+        ]),
+      );
+      d.claimReadRepo.findSummariesByEncounterIds.mockResolvedValue([
+        resumen({ id: 'claim-2', encounterId: 'enc-2' }),
+        resumen({ id: 'claim-1', encounterId: 'enc-1' }),
+      ]);
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      expect(d.encountersRepo.findIdsByAppointmentIds).toHaveBeenCalledTimes(1);
+      const [, citas] = d.encountersRepo.findIdsByAppointmentIds.mock.calls[0];
+      expect(citas).toEqual(['appt-1', 'appt-2', 'appt-3']);
+      expect(d.claimReadRepo.findSummariesByEncounterIds).toHaveBeenCalledTimes(
+        1,
+      );
+      const [, encuentros] =
+        d.claimReadRepo.findSummariesByEncounterIds.mock.calls[0];
+      expect([...encuentros].sort()).toEqual(['enc-1', 'enc-2']);
+      expect(res.items.map((i: any) => i.insuranceClaim?.id ?? null)).toEqual([
+        'claim-1',
+        'claim-2',
+        null,
+      ]);
     });
 
     it('el estado de pago viaja en la página, en UNA sola consulta', async () => {
