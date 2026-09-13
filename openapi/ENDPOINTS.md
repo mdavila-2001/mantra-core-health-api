@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1265 de 1265 endpoints** en **66 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1266 de 1266 endpoints** en **66 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -38,7 +38,7 @@ Se documentan **1265 de 1265 endpoints** en **66 módulos**. La referencia compl
 | `health_data` | 16 | [Abrir referencia](endpoints/health-data.md) |
 | `iam` | 31 | [Abrir referencia](endpoints/iam.md) |
 | `identity_assurance` | 25 | [Abrir referencia](endpoints/identity-assurance.md) |
-| `insurance` | 33 | [Abrir referencia](endpoints/insurance.md) |
+| `insurance` | 34 | [Abrir referencia](endpoints/insurance.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
