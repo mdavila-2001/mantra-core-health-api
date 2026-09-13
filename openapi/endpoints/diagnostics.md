@@ -807,7 +807,7 @@ Authorization: Bearer <access_token_jwt>
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
+| 200 | Operación completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | Sí |
 | 400 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
 | 401 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
 | 403 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
@@ -821,6 +821,32 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
   "items": [
     {
+      "insuranceSettlement": {
+        "claimId": "00000000-0000-4000-8000-000000000001",
+        "claimIdentifier": "valor-ejemplo",
+        "adjudicationVersionId": "00000000-0000-4000-8000-000000000001",
+        "adjudicationVersion": 1,
+        "eobId": "00000000-0000-4000-8000-000000000001",
+        "carrierName": "Nombre de ejemplo",
+        "policyIdentifier": "valor-ejemplo",
+        "totalBilledAmount": "valor-ejemplo",
+        "totalApprovedAmount": "valor-ejemplo",
+        "totalPatientAmount": "valor-ejemplo",
+        "totalDeniedAmount": "valor-ejemplo",
+        "currencyCode": "BOB",
+        "result": "APPROVED",
+        "exclusions": [
+          {
+            "claimLineId": "00000000-0000-4000-8000-000000000001",
+            "itemId": "00000000-0000-4000-8000-000000000001",
+            "itemName": "Nombre de ejemplo",
+            "amount": "valor-ejemplo",
+            "policyClauseReference": "valor-ejemplo",
+            "denialRationale": "valor-ejemplo"
+          }
+        ]
+      },
+      "insuranceSettlementAvailability": "AVAILABLE",
       "id": "00000000-0000-4000-8000-000000000001",
       "encounterId": "00000000-0000-4000-8000-000000000001",
       "codeConceptId": "00000000-0000-4000-8000-000000000001",
@@ -842,20 +868,42 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente leído. | `00000000-0000-4000-8000-000000000001` |
-| `items` | Sí | `array<PatientOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","preparationInstructions":"valor-ejemplo","hasReleasedResult":true,"reportId":"00000000-0000-4000-8000-000000000001"}]` |
-| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la orden. | `00000000-0000-4000-8000-000000000001` |
-| `items[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se pidió, si se pidió durante uno. | `00000000-0000-4000-8000-000000000001` |
-| `items[].codeConceptId` | Sí | `string` | formato `uuid` | Qué se pidió (concept id). | `00000000-0000-4000-8000-000000000001` |
-| `items[].categoryConceptId` | No | `string` | formato `uuid` | Laboratorio o imagenología (concept id). | `00000000-0000-4000-8000-000000000001` |
-| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la orden (concept id). | `00000000-0000-4000-8000-000000000001` |
-| `items[].priorityConceptId` | No | `string` | formato `uuid` | Prioridad (concept id). | `00000000-0000-4000-8000-000000000001` |
-| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se pidió. | `2026-07-31T12:00:00.000Z` |
-| `items[].preparationInstructions` | No | `string` | Sin restricción adicional declarada | Cómo prepararse: ayunas, horarios, qué llevar. Sale del catálogo de estudios (`diagnostic_study_offerings`), emparejado por concepto. Ausente cuando ningún centro publicó preparación para ese estudio — que es distinto de «no hay que prepararse», y por eso la pantalla no debe inventar un texto tranquilizador cuando falta. | `valor-ejemplo` |
-| `items[].hasReleasedResult` | Sí | `boolean` | Sin restricción adicional declarada | Ya hay un resultado liberado y visible para esta orden. | `true` |
-| `items[].reportId` | No | `string` | formato `uuid` | El informe a abrir, cuando es verdadero. | `00000000-0000-4000-8000-000000000001` |
-| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado. | `1` |
-| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | La lista quedó recortada por el tope. | `true` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items` | Sí | `array<PatientOrderSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","preparationInstructions":"valor-ejemplo","hasReleasedResult":true,"reportId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].insuranceSettlement` | Sí | `PatientInsuranceSettlementDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]}` |
+| `items[].insuranceSettlement.claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].insuranceSettlement.claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].insuranceSettlement.adjudicationVersionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].insuranceSettlement.adjudicationVersion` | Sí | `number` | formato `int32`; mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].insuranceSettlement.eobId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].insuranceSettlement.carrierName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].insuranceSettlement.policyIdentifier` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].insuranceSettlement.totalBilledAmount` | Sí | `string` | Sin restricción adicional declarada | Total facturado, decimal exacto | `valor-ejemplo` |
+| `items[].insuranceSettlement.totalApprovedAmount` | Sí | `string` | Sin restricción adicional declarada | Aporte del seguro, decimal exacto | `valor-ejemplo` |
+| `items[].insuranceSettlement.totalPatientAmount` | Sí | `string` | Sin restricción adicional declarada | Cargo confirmado al paciente, decimal exacto | `valor-ejemplo` |
+| `items[].insuranceSettlement.totalDeniedAmount` | Sí | `string` | Sin restricción adicional declarada | Importe excluido sin asignar, decimal exacto | `valor-ejemplo` |
+| `items[].insuranceSettlement.currencyCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `items[].insuranceSettlement.result` | Sí | `string` | valores: `APPROVED`, `PARTIALLY_APPROVED`, `DENIED` | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `items[].insuranceSettlement.exclusions` | Sí | `array<PatientInsuranceSettlementExclusionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]` |
+| `items[].insuranceSettlement.exclusions[].claimLineId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].insuranceSettlement.exclusions[].itemId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].insuranceSettlement.exclusions[].itemName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].insuranceSettlement.exclusions[].amount` | Sí | `string` | Sin restricción adicional declarada | Importe decimal exacto excluido | `valor-ejemplo` |
+| `items[].insuranceSettlement.exclusions[].policyClauseReference` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].insuranceSettlement.exclusions[].denialRationale` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].insuranceSettlementAvailability` | Sí | `string` | valores: `AVAILABLE`, `PENDING_PUBLICATION`, `UNDER_REVIEW`, `NOT_AVAILABLE` | Sin descripción específica en el contrato OpenAPI. | `AVAILABLE` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].categoryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].priorityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].preparationInstructions` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].hasReleasedResult` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].reportId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

@@ -1,0 +1,408 @@
+{
+  "status": "PASS",
+  "artifact": "openapi/openapi.json",
+  "sha256": "ab2a70f4ba5fa1493580bc2f239026902a482bd01b3551773d8619e2ae972c2b",
+  "observedCounts": {
+    "paths": 1168,
+    "operations": 1266,
+    "allSchemas": 1153,
+    "reachableSchemas": 10,
+    "newSchemas": 9,
+    "previouslyPresentSharedSchema": "InventoryConceptDto"
+  },
+  "responses": {
+    "/pharmacy/orders/{id}": {
+      "method": "GET",
+      "status": 200,
+      "schema": "PharmacyOrderDto"
+    },
+    "/pharmacy/orders/me": {
+      "method": "GET",
+      "status": 200,
+      "schema": "PharmacyOrderListResponseDto"
+    },
+    "/diagnostic-results/me/orders": {
+      "method": "GET",
+      "status": 200,
+      "schema": "PatientOwnOrdersResponseDto"
+    }
+  },
+  "checks": {
+    "allResponseReferencesMatchDTOs": true,
+    "allReachableDTOPropertiesPresent": true,
+    "noDanglingSchemaReferences": true,
+    "scalarAndArrayTypesMatchDTOs": true,
+    "nullabilityMatchesDTOs": true,
+    "allNewFinancialAndPortionFieldsRequired": true,
+    "exactFinancialAmountsAreStrings": true,
+    "availabilityAndResultEnumsMatchDTOs": true
+  },
+  "schemas": {
+    "PharmacyOrderDto": {
+      "propertyCount": 20,
+      "types": {
+        "reservationLines": "array",
+        "insuranceSettlement": "object",
+        "insuranceSettlementAvailability": "string",
+        "id": "string",
+        "status": "reference",
+        "createdAt": "string",
+        "expiresAt": "string",
+        "siteId": "string",
+        "siteName": "string",
+        "pharmacyId": "string",
+        "pharmacyName": "string",
+        "medicationRequestId": "string",
+        "patientName": "string",
+        "deliveryMode": "object",
+        "pickupCode": "string",
+        "totalAmount": "string",
+        "currency": "object",
+        "rejectionReasonText": "string",
+        "substitutions": "array",
+        "lines": "array"
+      },
+      "required": [
+        "reservationLines",
+        "insuranceSettlement",
+        "insuranceSettlementAvailability",
+        "id",
+        "status",
+        "createdAt",
+        "expiresAt",
+        "siteId",
+        "siteName",
+        "pharmacyId",
+        "pharmacyName",
+        "substitutions",
+        "lines"
+      ],
+      "nullable": [
+        "insuranceSettlement",
+        "medicationRequestId",
+        "patientName",
+        "deliveryMode",
+        "pickupCode",
+        "totalAmount",
+        "currency",
+        "rejectionReasonText"
+      ],
+      "references": {
+        "reservationLines": [
+          "PharmacyOrderReservationLineDto"
+        ],
+        "insuranceSettlement": [
+          "PatientInsuranceSettlementDto"
+        ],
+        "status": [
+          "InventoryConceptDto"
+        ],
+        "deliveryMode": [
+          "InventoryConceptDto"
+        ],
+        "currency": [
+          "InventoryConceptDto"
+        ],
+        "substitutions": [
+          "PharmacyOrderSubstitutionDto"
+        ],
+        "lines": [
+          "PharmacyOrderLineDto"
+        ]
+      }
+    },
+    "PharmacyOrderListResponseDto": {
+      "propertyCount": 2,
+      "types": {
+        "items": "array",
+        "count": "number"
+      },
+      "required": [
+        "items",
+        "count"
+      ],
+      "nullable": [],
+      "references": {
+        "items": [
+          "PharmacyOrderDto"
+        ]
+      }
+    },
+    "PharmacyOrderLineDto": {
+      "propertyCount": 14,
+      "types": {
+        "productId": "string",
+        "medicationConceptId": "string",
+        "productCode": "string",
+        "brandName": "string",
+        "genericName": "string",
+        "strengthText": "string",
+        "packageSizeText": "string",
+        "medication": "object",
+        "requestedQuantity": "number",
+        "reservedQuantity": "number",
+        "fulfilledQuantity": "number",
+        "unitPriceAmount": "string",
+        "currency": "object",
+        "status": "reference"
+      },
+      "required": [
+        "productId",
+        "productCode",
+        "requestedQuantity",
+        "reservedQuantity",
+        "fulfilledQuantity",
+        "status"
+      ],
+      "nullable": [
+        "medicationConceptId",
+        "brandName",
+        "genericName",
+        "strengthText",
+        "packageSizeText",
+        "medication",
+        "unitPriceAmount",
+        "currency"
+      ],
+      "references": {
+        "medication": [
+          "InventoryConceptDto"
+        ],
+        "currency": [
+          "InventoryConceptDto"
+        ],
+        "status": [
+          "InventoryConceptDto"
+        ]
+      }
+    },
+    "PharmacyOrderReservationLineDto": {
+      "propertyCount": 6,
+      "types": {
+        "id": "string",
+        "productId": "string",
+        "quantity": "string",
+        "unitPriceAmount": "string",
+        "billedAmount": "string",
+        "currencyConceptId": "string"
+      },
+      "required": [
+        "id",
+        "productId",
+        "quantity",
+        "unitPriceAmount",
+        "billedAmount",
+        "currencyConceptId"
+      ],
+      "nullable": [
+        "unitPriceAmount",
+        "billedAmount",
+        "currencyConceptId"
+      ]
+    },
+    "PharmacyOrderSubstitutionDto": {
+      "propertyCount": 10,
+      "types": {
+        "id": "string",
+        "originalProductId": "string",
+        "originalName": "string",
+        "originalUnitPriceAmount": "string",
+        "proposedProductId": "string",
+        "proposedName": "string",
+        "proposedUnitPriceAmount": "string",
+        "currency": "object",
+        "status": "reference",
+        "decidedAt": "string"
+      },
+      "required": [
+        "id",
+        "originalProductId",
+        "originalName",
+        "proposedProductId",
+        "proposedName",
+        "status"
+      ],
+      "nullable": [
+        "originalUnitPriceAmount",
+        "proposedUnitPriceAmount",
+        "currency",
+        "decidedAt"
+      ],
+      "references": {
+        "currency": [
+          "InventoryConceptDto"
+        ],
+        "status": [
+          "InventoryConceptDto"
+        ]
+      }
+    },
+    "PatientOwnOrdersResponseDto": {
+      "propertyCount": 4,
+      "types": {
+        "patientProfileId": "string",
+        "items": "array",
+        "limit": "number",
+        "truncated": "boolean"
+      },
+      "required": [
+        "patientProfileId",
+        "items",
+        "limit",
+        "truncated"
+      ],
+      "nullable": [],
+      "references": {
+        "items": [
+          "PatientOrderSummaryDto"
+        ]
+      }
+    },
+    "PatientOrderSummaryDto": {
+      "propertyCount": 12,
+      "types": {
+        "insuranceSettlement": "object",
+        "insuranceSettlementAvailability": "string",
+        "id": "string",
+        "encounterId": "string",
+        "codeConceptId": "string",
+        "categoryConceptId": "string",
+        "statusConceptId": "string",
+        "priorityConceptId": "string",
+        "createdAt": "string",
+        "preparationInstructions": "string",
+        "hasReleasedResult": "boolean",
+        "reportId": "string"
+      },
+      "required": [
+        "insuranceSettlement",
+        "insuranceSettlementAvailability",
+        "id",
+        "codeConceptId",
+        "statusConceptId",
+        "createdAt",
+        "hasReleasedResult"
+      ],
+      "nullable": [
+        "insuranceSettlement"
+      ],
+      "references": {
+        "insuranceSettlement": [
+          "PatientInsuranceSettlementDto"
+        ]
+      }
+    },
+    "PatientInsuranceSettlementDto": {
+      "propertyCount": 14,
+      "types": {
+        "claimId": "string",
+        "claimIdentifier": "string",
+        "adjudicationVersionId": "string",
+        "adjudicationVersion": "number",
+        "eobId": "string",
+        "carrierName": "string",
+        "policyIdentifier": "string",
+        "totalBilledAmount": "string",
+        "totalApprovedAmount": "string",
+        "totalPatientAmount": "string",
+        "totalDeniedAmount": "string",
+        "currencyCode": "string",
+        "result": "string",
+        "exclusions": "array"
+      },
+      "required": [
+        "claimId",
+        "claimIdentifier",
+        "adjudicationVersionId",
+        "adjudicationVersion",
+        "eobId",
+        "carrierName",
+        "policyIdentifier",
+        "totalBilledAmount",
+        "totalApprovedAmount",
+        "totalPatientAmount",
+        "totalDeniedAmount",
+        "currencyCode",
+        "result",
+        "exclusions"
+      ],
+      "nullable": [
+        "policyIdentifier"
+      ],
+      "references": {
+        "exclusions": [
+          "PatientInsuranceSettlementExclusionDto"
+        ]
+      }
+    },
+    "PatientInsuranceSettlementExclusionDto": {
+      "propertyCount": 6,
+      "types": {
+        "claimLineId": "string",
+        "itemId": "string",
+        "itemName": "string",
+        "amount": "string",
+        "policyClauseReference": "string",
+        "denialRationale": "string"
+      },
+      "required": [
+        "claimLineId",
+        "itemId",
+        "itemName",
+        "amount",
+        "policyClauseReference",
+        "denialRationale"
+      ],
+      "nullable": [
+        "denialRationale"
+      ]
+    },
+    "InventoryConceptDto": {
+      "propertyCount": 2,
+      "types": {
+        "code": "string",
+        "display": "string"
+      },
+      "required": [
+        "code",
+        "display"
+      ],
+      "nullable": []
+    }
+  },
+  "observations": {
+    "legacyNullableFieldsRemainOptionalUnderExistingSwaggerDecorators": {
+      "PharmacyOrderDto": [
+        "medicationRequestId",
+        "patientName",
+        "deliveryMode",
+        "pickupCode",
+        "totalAmount",
+        "currency",
+        "rejectionReasonText"
+      ],
+      "PharmacyOrderLineDto": [
+        "medicationConceptId",
+        "brandName",
+        "genericName",
+        "strengthText",
+        "packageSizeText",
+        "medication",
+        "unitPriceAmount",
+        "currency"
+      ],
+      "PharmacyOrderSubstitutionDto": [
+        "originalUnitPriceAmount",
+        "proposedUnitPriceAmount",
+        "currency",
+        "decidedAt"
+      ]
+    },
+    "adjudicationVersion": {
+      "type": "number",
+      "format": "int32",
+      "minimum": 1
+    },
+    "scope": "Generated response schemas verified against source DTO declarations; this does not verify HTTP authorization, PostgreSQL behavior or browser rendering."
+  }
+}

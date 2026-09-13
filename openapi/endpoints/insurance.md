@@ -2569,10 +2569,11 @@ Ejemplo de error normalizado:
 
 Enviar reclamo con líneas (837). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
+Contexto declarado en el controlador: UC-26-06. El servicio exige membresía OWNER/ADMIN por origen; conserva roles históricos para reclamos genéricos.
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /insurance-claims` en `ClaimsController_submit`. El controlador delega en `ClaimsService.submitClaim`. Valida el body como `CreateClaimDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceStatusDto>`.
+NestJS resuelve `POST /insurance-claims` en `ClaimsController_submit`. El controlador delega en `ClaimsService.submitClaim`. Valida el body como `CreateClaimDto` y consume `application/json`. El tipo de retorno estático es `Promise<CreatedClaimDto>`.
 
 ### Parámetros
 
@@ -2616,13 +2617,18 @@ Content-Type: application/json
 | `patientCoverageId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `billingProviderEntityId` | Sí | `string` | formato `uuid` | Entidad facturadora | `00000000-0000-4000-8000-000000000001` |
 | `claimIdentifier` | Sí | `string` | longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `inventoryReservationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceRequestId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `currencyConceptId` | No | `string` | formato `uuid` | Moneda declarada por el prestador diagnóstico | `00000000-0000-4000-8000-000000000001` |
 | `priorAuthorizationRequestId` | No | `string` | formato `uuid` | Autorización previa vinculada | `00000000-0000-4000-8000-000000000001` |
 | `idempotencyKey` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `lines` | Sí | `array<ClaimLineDto>` | mínimo 1 elemento(s) | 1..N líneas | `[{"lineSequence":1,"serviceConceptId":"00000000-0000-4000-8000-000000000001","quantity":"1","billedAmount":"100.00","supportingClinicalReference":"ENC-2026-00412","patientResponsibilityAmount":"20.00"}]` |
+| `lines` | Sí | `array<ClaimLineDto>` | mínimo 1 elemento(s) | 1..N líneas | `[{"lineSequence":1,"serviceConceptId":"00000000-0000-4000-8000-000000000001","quantity":"1","billedAmount":"100.00","inventoryReservationLineId":"00000000-0000-4000-8000-000000000001","diagnosticStudyOfferingId":"00000000-0000-4000-8000-000000000001","supportingClinicalReference":"ENC-2026-00412","patientResponsibilityAmount":"20.00"}]` |
 | `lines[].lineSequence` | Sí | `number` | mínimo 1 | Secuencia única dentro del reclamo | `1` |
 | `lines[].serviceConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].quantity` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `lines[].billedAmount` | Sí | `string` | Sin restricción adicional declarada | Monto facturado | `100.00` |
+| `lines[].inventoryReservationLineId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].diagnosticStudyOfferingId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].supportingClinicalReference` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ENC-2026-00412` |
 | `lines[].patientResponsibilityAmount` | No | `string` | Sin restricción adicional declarada | Responsabilidad del paciente | `20.00` |
 
@@ -2641,6 +2647,9 @@ Content-Type: application/json
   "patientCoverageId": "00000000-0000-4000-8000-000000000001",
   "billingProviderEntityId": "00000000-0000-4000-8000-000000000001",
   "claimIdentifier": "valor-ejemplo",
+  "inventoryReservationId": "00000000-0000-4000-8000-000000000001",
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
   "priorAuthorizationRequestId": "00000000-0000-4000-8000-000000000001",
   "idempotencyKey": "valor-ejemplo",
   "lines": [
@@ -2649,6 +2658,8 @@ Content-Type: application/json
       "serviceConceptId": "00000000-0000-4000-8000-000000000001",
       "quantity": "1",
       "billedAmount": "100.00",
+      "inventoryReservationLineId": "00000000-0000-4000-8000-000000000001",
+      "diagnosticStudyOfferingId": "00000000-0000-4000-8000-000000000001",
       "supportingClinicalReference": "ENC-2026-00412",
       "patientResponsibilityAmount": "20.00"
     }
@@ -2660,23 +2671,26 @@ Content-Type: application/json
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 201 | Recurso creado o acción registrada correctamente. | `Promise<ResourceStatusDto>` | No |
-| 400 | Operación completada correctamente. | `Promise<ResourceStatusDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<ResourceStatusDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<ResourceStatusDto>` | No |
-| 409 | Operación completada correctamente. | `Promise<ResourceStatusDto>` | No |
-| 413 | Operación completada correctamente. | `Promise<ResourceStatusDto>` | No |
-| 422 | Operación completada correctamente. | `Promise<ResourceStatusDto>` | No |
-| 429 | Operación completada correctamente. | `Promise<ResourceStatusDto>` | No |
-| 500 | Operación completada correctamente. | `Promise<ResourceStatusDto>` | No |
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<CreatedClaimDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<CreatedClaimDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CreatedClaimDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CreatedClaimDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<CreatedClaimDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<CreatedClaimDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CreatedClaimDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CreatedClaimDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CreatedClaimDto>` | No |
 
-Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceStatusDto`. Ejemplo completo derivado de ese DTO:
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CreatedClaimDto`. Ejemplo completo derivado de ese DTO:
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "status": "00000000-0000-4000-8000-000000000001",
-  "createdAt": "2026-07-31T12:00:00.000Z"
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "lineIds": [
+    "valor-ejemplo"
+  ]
 }
 ```
 
@@ -2684,9 +2698,10 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Concepto de estado del recurso | `00000000-0000-4000-8000-000000000001` |
-| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `lineIds` | No | `array<string>` | Sin restricción adicional declarada | IDs de líneas vinculadas en orden de lineSequence | `["valor-ejemplo"]` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2697,10 +2712,24 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 404 | `NOT_FOUND` | Cobertura no encontrada | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 409 | `CONFLICT` | El pedido ya tiene un reclamo activo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
 | 409 | `CONFLICT` | Reclamo duplicado | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia corresponde a otro reclamo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia requiere las mismas líneas | Excepción explícita en src/modules/insurance/services/claims.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las secuencias de líneas deben ser únicas | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los ítems vinculados requieren el pedido completo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda del importe diagnóstico debe declararse | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido debe estar confirmado y sin sustituciones pendientes antes del retiro | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | El reclamo debe representar exactamente el pedido y su prestador | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las líneas deben coincidir con las cantidades e importes del pedido | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La autorización previa debe pertenecer a la misma cobertura y pedido | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar verificada y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3282,10 +3311,15 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Reclamo no encontrado | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 404 | `NOT_FOUND` | Línea de reclamo no encontrada | Excepción explícita en src/modules/insurance/services/claims.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El reclamo no está en estado adjudicable | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar verificada y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3316,7 +3350,7 @@ Ejemplo de error normalizado:
 
 Abrir disputa sobre adjudicación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: UC-26-11. **Único método de este controlador que cambia de rol** (TAREA-16 · D1.b, decisión de Justin del 2026-09-04): reclamar es un acto del prestador que presentó la solicitud, así que lo ejecuta `BILLING_OPERATOR` —con `SECURITY_ADMIN` como acceso administrativo y `SUPERADMIN` por comodín—. El `@Roles` del método **sobreescribe** el de la clase (`getAllAndOverride` en `RolesGuard`), así que enviar, adjudicar, publicar EOB y revertir siguen exigiendo lo que exigían: son decisiones de quien paga, no de quien reclama.
+Contexto declarado en el controlador: UC-26-11. Conserva el alcance del prestador definido por TAREA-16 para disputas. Las otras escrituras delegan la autorización en el servicio, según el origen vinculado y las membresías activas de prestador o aseguradora.
 
 ### Descripción del sistema
 
@@ -3539,10 +3573,17 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Reclamo no encontrado | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 409 | `CONFLICT` | La EOB ya fue publicada para esta versión | Excepción explícita en src/modules/insurance/services/claims.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | No existe adjudicación in_force para publicar EOB | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | No existe adjudicación vigente para publicar | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | El reclamo está revertido | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura del paciente no existe | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar verificada y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3669,10 +3710,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Reclamo no encontrado | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 404 | `NOT_FOUND` | Versión de adjudicación no encontrada | Excepción explícita en src/modules/insurance/services/claims.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El reclamo no está en estado reversible | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo puede revertirse la versión vigente | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4400,6 +4443,7 @@ Ejemplo de error normalizado:
 
 Solicitar autorización previa con items. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
+Contexto declarado en el controlador: UC-26-04. El servicio autoriza por membresía del prestador; mantiene el guard histórico para solicitudes genéricas.
 
 ### Descripción del sistema
 
@@ -4439,10 +4483,16 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientCoverageId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `inventoryReservationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `medicationRequestId` | No | `string` | formato `uuid` | Receta del pedido vinculado | `00000000-0000-4000-8000-000000000001` |
+| `serviceRequestId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `requestingProviderEntityId` | Sí | `string` | formato `uuid` | Entidad prestadora solicitante | `00000000-0000-4000-8000-000000000001` |
 | `idempotencyKey` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `items` | Sí | `array<PriorAuthItemDto>` | mínimo 1 elemento(s) | 1..N ítems solicitados | `[{"serviceConceptId":"00000000-0000-4000-8000-000000000001","requestedQuantity":"1","requestedAmount":"250.00"}]` |
+| `items` | Sí | `array<PriorAuthItemDto>` | mínimo 1 elemento(s) | 1..N ítems solicitados | `[{"serviceConceptId":"00000000-0000-4000-8000-000000000001","pharmacyProductId":"00000000-0000-4000-8000-000000000001","diagnosticStudyOfferingId":"00000000-0000-4000-8000-000000000001","requestedQuantity":"1","requestedAmount":"250.00"}]` |
 | `items[].serviceConceptId` | No | `string` | formato `uuid` | Servicio solicitado | `00000000-0000-4000-8000-000000000001` |
+| `items[].pharmacyProductId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].diagnosticStudyOfferingId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].requestedQuantity` | No | `string` | Sin restricción adicional declarada | Cantidad solicitada | `1` |
 | `items[].requestedAmount` | No | `string` | Sin restricción adicional declarada | Monto solicitado | `250.00` |
 
@@ -4458,11 +4508,17 @@ Content-Type: application/json
 
 {
   "patientCoverageId": "00000000-0000-4000-8000-000000000001",
+  "inventoryReservationId": "00000000-0000-4000-8000-000000000001",
+  "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
   "requestingProviderEntityId": "00000000-0000-4000-8000-000000000001",
   "idempotencyKey": "valor-ejemplo",
   "items": [
     {
       "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+      "pharmacyProductId": "00000000-0000-4000-8000-000000000001",
+      "diagnosticStudyOfferingId": "00000000-0000-4000-8000-000000000001",
       "requestedQuantity": "1",
       "requestedAmount": "250.00"
     }
@@ -4511,8 +4567,20 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 404 | `NOT_FOUND` | Cobertura no encontrada | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La receta requiere su pedido de farmacia vinculado | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La autorización debe representar un pedido confirmado del prestador | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La receta debe pertenecer al mismo pedido | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda no coincide con la cobertura | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La autorización debe incluir todos los productos del pedido | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los productos e importes deben coincidir con el pedido | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La autorización diagnóstica requiere una oferta, cantidad uno y moneda | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar verificada y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4643,9 +4711,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Solicitud de autorización no encontrada | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La solicitud no admite determinación en su estado actual | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
