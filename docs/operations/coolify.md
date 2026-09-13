@@ -210,8 +210,15 @@ base sin una sola tabla y la aplicación devolviendo 500 en la primera
 escritura. Que el modelo tenga repositorio propio (B-2) arregla el versionado;
 el despliegue sigue viendo un solo `git clone`.
 
-Por eso `docker-compose.coolify.yml` monta `./database/SQL`, que es la copia
-versionada dentro de este repositorio. **Después de tocar el DDL:**
+Por eso `docker-compose.coolify.yml` usa `./database/SQL`, la copia versionada
+dentro de este repositorio. Y no la **monta**: la **hornea** en la imagen
+(`docker/db-init/Dockerfile`). Coolify clona el repositorio dentro de un
+contenedor auxiliar y lanza `docker compose` contra el socket del host, así que
+un `volumes: ./docker/db-init:/init/bin` lo resuelve el demonio —en el host, donde
+esa ruta no existe—: Docker crea el directorio VACÍO, lo monta igual y el
+arranque muere con `exit 127` (`bash: /init/bin/init-postgres.sh: No such file or
+directory`). El contexto de build sí viaja, que es como se construyen `api` y los
+workers. **Después de tocar el DDL:**
 
 ```bash
 yarn db:vendor         # copia el modelo a database/
@@ -387,6 +394,9 @@ túnel SSH: `ssh -L 5432:localhost:5432 usuario@servidor`.
 | `"WEBHOOK_SIGNING_KEY" is required` | Falta uno de los cinco secretos de producción |
 | `AUDIO_TTS_DATA_KEY (>=32 caracteres) es obligatoria` | Ídem, y sorprende porque el TTS está apagado |
 | `MOCK_PROVIDER_BASE_URL está configurada en producción` | Alguien heredó la variable de un `.env` de desarrollo. El emulador da por verificado a cualquiera; el arranque se niega a propósito |
+| `service "postgres-init" didn't complete successfully: exit 127` | El script no llegó al contenedor: alguien volvió a montar `./docker/db-init` en vez de hornearlo. 127 es «orden no encontrada», y bash lo devuelve también cuando el archivo que se le pasa no existe. Ver § 4 |
+| `postgres-init` sale con **3** | Un `.sql` falló bajo `ON_ERROR_STOP=1`. El error real está en el log del contenedor, unas líneas antes; el nombre del archivo lo dice la línea `>>> patches/…` anterior |
+| `role "mantra" does not exist` | Un patch con el nombre del rol del stack viejo escrito a mano. El dueño es `POSTGRES_USER`; se resuelve con `current_user`, no renombrando roles en el servidor |
 | `column "…" of relation "…" does not exist` en un alta | `api-migrate` no corrió o falló |
 | `relation "pharma_lab.…" does not exist` | Lo mismo |
 | `host not found in upstream "api"` | El frontend se desplegó antes que el backend, que es quien crea la red `alovida`. Desplegar el backend y volver a lanzar éste |
