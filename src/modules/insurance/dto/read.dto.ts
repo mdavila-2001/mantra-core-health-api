@@ -42,6 +42,21 @@ export class CarrierSummaryDto {
   @ApiProperty({ nullable: true, type: String })
   regulatorIdentifier!: string | null;
 
+  /**
+   * Número de WhatsApp de atención al cliente (subtarea 2.3), o `null` si la
+   * aseguradora no lo publicó.
+   */
+  @ApiProperty({ nullable: true, type: String })
+  whatsappNumber!: string | null;
+
+  /** Teléfono del call center de la aseguradora, o `null` si no lo publicó. */
+  @ApiProperty({ nullable: true, type: String })
+  callCenterPhone!: string | null;
+
+  /** Correo de siniestros/atención de la aseguradora, o `null` si no lo publicó. */
+  @ApiProperty({ nullable: true, type: String })
+  supportEmail!: string | null;
+
   /** Jurisdicción bajo la que opera, si se declaró. */
   @ApiProperty({ nullable: true, type: InsuranceConceptDto })
   jurisdiction!: InsuranceConceptDto | null;

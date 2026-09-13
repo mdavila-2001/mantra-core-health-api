@@ -137,6 +137,22 @@ export class ClaimListItemDto {
   @ApiProperty({ format: 'uuid' })
   insuranceCarrierId!: string;
 
+  /**
+   * Número de WhatsApp con el que la aseguradora atiende reclamos y dudas de
+   * cobertura (subtarea 2.3). `null` cuando no lo publicó. Viaja en la
+   * cabecera de la solicitud porque el detalle **es** la fila.
+   */
+  @ApiProperty({ nullable: true, type: String })
+  carrierWhatsappNumber!: string | null;
+
+  /** Teléfono del call center de la aseguradora. `null` cuando no lo publicó. */
+  @ApiProperty({ nullable: true, type: String })
+  carrierCallCenterPhone!: string | null;
+
+  /** Correo de siniestros/atención de la aseguradora. `null` cuando no lo publicó. */
+  @ApiProperty({ nullable: true, type: String })
+  carrierSupportEmail!: string | null;
+
   /** Póliza concreta bajo la que se presentó. */
   @ApiProperty({ nullable: true, type: String, example: 'POL-88213' })
   policyIdentifier!: string | null;
