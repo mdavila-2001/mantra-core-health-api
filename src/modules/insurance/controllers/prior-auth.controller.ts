@@ -33,8 +33,9 @@ export class PriorAuthController {
    */
   constructor(private readonly service: PriorAuthService) {}
 
-  /** UC-26-04. */
+  /** UC-26-04. El servicio autoriza por membresía del prestador; mantiene el guard histórico para solicitudes genéricas. */
   @Post('prior-authorization-requests')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Solicitar autorización previa con items' })
   submit(
@@ -46,6 +47,7 @@ export class PriorAuthController {
 
   /** UC-26-05. */
   @Post('prior-authorization-requests/:id/determinations')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Emitir determinación de autorización previa' })
   determine(

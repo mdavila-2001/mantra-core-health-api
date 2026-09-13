@@ -71,6 +71,10 @@ function build() {
     patientProfilesRepo as any,
     grantsRepo as any,
     logger as any,
+    {
+      forOrders: mockFn(async () => new Map()),
+      activeClaimForDispensation: mockFn(async () => undefined),
+    } as any,
   );
   return { service, ordersRepo, reportsRepo, accountLinksRepo, fork };
 }

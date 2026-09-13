@@ -1,3 +1,7 @@
+import {
+  patientCoverageReferenceDate,
+  patientCoverageValidity,
+} from '../patient-coverage-validity';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -71,6 +75,7 @@ import {
   OwnPatientProfileResponseDto,
   OwnAddressDto,
   OwnCoverageDto,
+  CoverageBenefitSummaryDto,
   OwnGuardianDto,
   UpdateOwnPatientProfileDto,
   SetOwnPatientPhotoDto,
@@ -888,50 +893,157 @@ export class ProfilesPatientsService {
     em: EntityManager,
     patientProfileId: string,
   ): Promise<OwnCoverageDto[]> {
+    const referenceDate = patientCoverageReferenceDate();
     const filas = await em.getConnection().execute<
       {
+        coverage_id: string;
         carrier_id: string;
         carrier_name: string;
         plan_name: string | null;
         member_identifier: string | null;
+        policy_identifier: string | null;
         verification_status_concept_id: string | null;
+        status_display: string | null;
+        status_code: string | null;
+        plan_status_code: string | null;
+        plan_effective_from: string | null;
+        plan_effective_to: string | null;
+        effective_from: string | null;
+        effective_to: string | null;
         insurance_plan_id: string;
+        currency_code: string | null;
+        whatsapp_number: string | null;
+        call_center_phone: string | null;
         coverage_order: number | null;
       }[]
     >(
-      // El vínculo pasa por `insurance_products`: un plan cuelga de un producto
-      // y el producto de la aseguradora. Saltarse el intermedio fallaba con
-      // «column pl.insurance_carrier_id does not exist».
-      `select ca.id         as carrier_id,
-              ca.legal_name as carrier_name,
-              pl.name       as plan_name,
-              c.member_identifier,
-              c.verification_status_concept_id,
+      `select c.id as coverage_id, ca.id as carrier_id, ca.legal_name as carrier_name,
+              pl.name as plan_name, c.member_identifier, c.policy_identifier,
+              c.verification_status_concept_id, coverage_status.display as status_display,
+              coverage_status.code as status_code, plan_status.code as plan_status_code,
+              to_char(c.effective_from, 'YYYY-MM-DD') as effective_from,
+              to_char(c.effective_to, 'YYYY-MM-DD') as effective_to,
+              to_char(pl.effective_from, 'YYYY-MM-DD') as plan_effective_from,
+              to_char(pl.effective_to, 'YYYY-MM-DD') as plan_effective_to,
               c.insurance_plan_id,
+              currency.code as currency_code, ca.whatsapp_number, ca.call_center_phone,
               c.coverage_order
          from insurance.patient_coverages c
          join insurance.insurance_plans pl on pl.id = c.insurance_plan_id
          join insurance.insurance_products pr on pr.id = pl.insurance_product_id
          join insurance.insurance_carriers ca on ca.id = pr.insurance_carrier_id
+         left join terminology.catalog_concepts coverage_status on coverage_status.id = c.status_concept_id
+         left join terminology.catalog_concepts plan_status on plan_status.id = pl.status_concept_id
+         left join terminology.catalog_concepts currency on currency.id = pl.currency_concept_id
         where c.patient_profile_id = ?
-        order by c.coverage_order nulls last`,
+        order by c.coverage_order nulls last, c.id`,
       [patientProfileId],
     );
-    return filas.map((f) => ({
-      carrierName: f.carrier_name,
-      ...(f.plan_name === null ? {} : { planName: f.plan_name }),
-      isPublic: isPublicCarrierId(f.carrier_id),
-      ...(f.member_identifier === null
-        ? {}
-        : { memberIdentifier: f.member_identifier }),
-      verified: f.verification_status_concept_id === INS.VERIFY_VERIFIED,
-      // El uuid del plan, para que el editor del perfil preseleccione el mismo
-      // `<select>` que ofreció el alta — ver el JSDoc de `planId` en el DTO.
-      planId: f.insurance_plan_id,
-      coverageOrder: f.coverage_order ?? 0,
-    }));
-  }
+    if (filas.length === 0) return [];
 
+    const planIds = [...new Set(filas.map((fila) => fila.insurance_plan_id))];
+    const beneficios = await em.getConnection().execute<
+      {
+        id: string;
+        insurance_plan_id: string;
+        status_code: string | null;
+        category_code: string | null;
+        category_name: string | null;
+        service_concept_id: string | null;
+        service_name: string | null;
+        coverage_percent: string | null;
+        copay_amount: string | null;
+        deductible_amount: string | null;
+        effective_from: string | null;
+        effective_to: string | null;
+      }[]
+    >(
+      `select b.id, b.insurance_plan_id, category.code as category_code,
+              category.display as category_name, b.service_concept_id,
+              service.display as service_name, b.coverage_percent, b.copay_amount,
+              b.deductible_amount, benefit_status.code as status_code,
+              to_char(b.effective_from, 'YYYY-MM-DD') as effective_from,
+              to_char(b.effective_to, 'YYYY-MM-DD') as effective_to
+         from insurance.insurance_plan_benefits b
+         left join terminology.catalog_concepts benefit_status on benefit_status.id = b.status_concept_id
+         left join terminology.catalog_concepts category on category.id = b.benefit_category_concept_id
+         left join terminology.catalog_concepts service on service.id = b.service_concept_id
+        where b.insurance_plan_id = any(?)
+        order by b.insurance_plan_id, b.created_at, b.id`,
+      [planIds],
+    );
+    const benefitsByPlan = new Map<string, CoverageBenefitSummaryDto[]>();
+    for (const beneficio of beneficios) {
+      const current = benefitsByPlan.get(beneficio.insurance_plan_id) ?? [];
+      current.push(
+        sinCamposAusentes({
+          id: beneficio.id,
+          statusCode: beneficio.status_code,
+          categoryCode: beneficio.category_code,
+          categoryName: beneficio.category_name,
+          serviceConceptId: beneficio.service_concept_id,
+          serviceName: beneficio.service_name,
+          coveragePercent: beneficio.coverage_percent,
+          copayAmount: beneficio.copay_amount,
+          deductibleAmount: beneficio.deductible_amount,
+          effectiveFrom: beneficio.effective_from,
+          effectiveTo: beneficio.effective_to,
+        }) as CoverageBenefitSummaryDto,
+      );
+      benefitsByPlan.set(beneficio.insurance_plan_id, current);
+    }
+
+    return filas.map((fila) => {
+      const periods = [
+        {
+          statusCode: fila.status_code,
+          activeCode: 'COVERAGE_ACTIVE',
+          effectiveFrom: fila.effective_from,
+          effectiveTo: fila.effective_to,
+        },
+        {
+          statusCode: fila.plan_status_code,
+          activeCode: 'PLAN_ACTIVE',
+          effectiveFrom: fila.plan_effective_from,
+          effectiveTo: fila.plan_effective_to,
+        },
+      ];
+      return sinCamposAusentes({
+        id: fila.coverage_id,
+        carrierName: fila.carrier_name,
+        planName: fila.plan_name,
+        isPublic: isPublicCarrierId(fila.carrier_id),
+        policyIdentifier: fila.policy_identifier,
+        memberIdentifier: fila.member_identifier,
+        verified: fila.verification_status_concept_id === INS.VERIFY_VERIFIED,
+        status: fila.status_display,
+        statusCode: fila.status_code,
+        validityStatus: patientCoverageValidity(referenceDate, periods),
+        referenceDate,
+        effectiveFrom: fila.effective_from,
+        effectiveTo: fila.effective_to,
+        currencyCode: fila.currency_code,
+        carrierWhatsappNumber: fila.whatsapp_number,
+        carrierCallCenterPhone: fila.call_center_phone,
+        benefits: (benefitsByPlan.get(fila.insurance_plan_id) ?? []).map(
+          (benefit) => ({
+            ...benefit,
+            validityStatus: patientCoverageValidity(referenceDate, [
+              ...periods,
+              {
+                statusCode: benefit.statusCode,
+                activeCode: 'BENEFIT_ACTIVE',
+                effectiveFrom: benefit.effectiveFrom,
+                effectiveTo: benefit.effectiveTo,
+              },
+            ]),
+          }),
+        ),
+        planId: fila.insurance_plan_id,
+        coverageOrder: fila.coverage_order ?? 0,
+      }) as OwnCoverageDto;
+    });
+  }
   /** Tutores y personas autorizadas, con su nombre y su teléfono. */
   private async leerTutores(
     em: EntityManager,

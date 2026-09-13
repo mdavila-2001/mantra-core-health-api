@@ -1,3 +1,7 @@
+import {
+  PatientInsuranceSettlementDto,
+  type PatientSettlementProjection,
+} from '../../insurance/dto/patient-settlement.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -127,7 +131,15 @@ export class PatientDiagnosticResultsResponseDto {
  * reimplementarse en la pantalla sin arriesgar mostrar un borrador como
  * resultado.
  */
-export class PatientOrderSummaryDto {
+export class PatientOrderSummaryDto implements PatientSettlementProjection {
+  @ApiProperty({ nullable: true, type: PatientInsuranceSettlementDto })
+  insuranceSettlement!: PatientSettlementProjection['insuranceSettlement'];
+
+  @ApiProperty({
+    enum: ['AVAILABLE', 'PENDING_PUBLICATION', 'UNDER_REVIEW', 'NOT_AVAILABLE'],
+  })
+  insuranceSettlementAvailability!: PatientSettlementProjection['insuranceSettlementAvailability'];
+
   /** Identificador de la orden. */
   @ApiProperty({ format: 'uuid' }) id!: string;
 

@@ -918,6 +918,91 @@ describe('ProfilesPatientsService', () => {
       });
     });
 
+    it('reads policies and benefits in batches preserving exact nullable amounts and identities', async () => {
+      const d = conPaciente();
+      const execute = mockFn(async (sql: string) => {
+        if (sql.includes('from insurance.patient_coverages'))
+          return ['coverage-a', 'coverage-b'].map((id, index) => ({
+            coverage_id: id,
+            carrier_id: 'carrier',
+            carrier_name: 'Andina',
+            plan_name: 'Integral',
+            insurance_plan_id: 'plan',
+            coverage_order: index + 1,
+            policy_identifier: `POL-${index}`,
+            member_identifier: 'DECLARED',
+            verification_status_concept_id: INS.VERIFY_PENDING,
+            status_code: 'COVERAGE_ACTIVE',
+            status_display: 'Activa',
+            plan_status_code: 'PLAN_ACTIVE',
+            effective_from: '2026-01-01',
+            effective_to: '2026-12-31',
+            currency_code: 'USD',
+            whatsapp_number: null,
+            call_center_phone: '800-10-6060',
+          }));
+        if (sql.includes('from insurance.insurance_plan_benefits'))
+          return [
+            {
+              id: 'general',
+              insurance_plan_id: 'plan',
+              category_name: 'Consulta',
+              status_code: 'BENEFIT_ACTIVE',
+              coverage_percent: '80.50',
+              copay_amount: '0.00',
+              deductible_amount: null,
+              effective_from: '2026-01-01',
+            },
+            {
+              id: 'specific',
+              insurance_plan_id: 'plan',
+              category_name: 'Consulta',
+              service_concept_id: 'service',
+              service_name: 'Seguimiento',
+              status_code: 'BENEFIT_ACTIVE',
+              coverage_percent: null,
+              copay_amount: null,
+              deductible_amount: '120.00',
+              effective_from: '2027-01-01',
+            },
+          ];
+        return [];
+      });
+      d.tx.getConnection.mockReturnValue({ execute });
+      const response = await d.service.getOwnProfile(titular);
+      expect(response.coverages.map((coverage) => coverage.id)).toEqual([
+        'coverage-a',
+        'coverage-b',
+      ]);
+      expect(response.coverages[0]).toMatchObject({
+        planId: 'plan',
+        coverageOrder: 1,
+        currencyCode: 'USD',
+        carrierCallCenterPhone: '800-10-6060',
+        verified: false,
+      });
+      expect(response.coverages[0].carrierWhatsappNumber).toBeUndefined();
+      expect(response.coverages[0].benefits[0]).toMatchObject({
+        id: 'general',
+        coveragePercent: '80.50',
+        copayAmount: '0.00',
+      });
+      expect(
+        response.coverages[0].benefits[0].deductibleAmount,
+      ).toBeUndefined();
+      expect(response.coverages[0].benefits[1]).toMatchObject({
+        id: 'specific',
+        serviceConceptId: 'service',
+        deductibleAmount: '120.00',
+      });
+      expect(response.coverages[0].benefits[1].coveragePercent).toBeUndefined();
+      const benefitReads = execute.mock.calls.filter(([sql]: [string]) =>
+        sql.includes('from insurance.insurance_plan_benefits'),
+      );
+      expect(benefitReads).toHaveLength(1);
+      expect(benefitReads[0][1]).toEqual([['plan']]);
+    });
+
     it('sin nada declarado, las listas llegan vacías y no ausentes', async () => {
       // Quien las pinta distingue «no declaró ninguna» de «esta respuesta no
       // las trae»; por eso viajan siempre.

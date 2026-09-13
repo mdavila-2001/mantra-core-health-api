@@ -51,7 +51,7 @@ export class ClaimRepository {
     return em.findOne(
       InsuranceClaims,
       { id },
-      { lockMode: LockMode.PESSIMISTIC_WRITE },
+      { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true },
     );
   }
 

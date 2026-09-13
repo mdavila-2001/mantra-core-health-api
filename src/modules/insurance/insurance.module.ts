@@ -3,6 +3,8 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PracticeModule } from '../practice/practice.module';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import * as entities from './entities';
+import { LinkedClaimOrderService } from './services/linked-claim-order.service';
+import { LinkedClaimAccessService } from './services/linked-claim-access.service';
 import {
   InsuranceBackboneController,
   CoverageController,
@@ -76,6 +78,8 @@ import {
     ClaimReadRepository,
     DisputeRepository,
     SettlementRepository,
+    LinkedClaimOrderService,
+    LinkedClaimAccessService,
     // Servicios
     InsuranceBackboneService,
     CoverageService,

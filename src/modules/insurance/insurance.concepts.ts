@@ -98,6 +98,15 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
       display: 'Solicitante: práctica',
     },
 
+    ELIG_PROVIDER_TYPE_PHARMACY: {
+      code: 'ELIG_PROVIDER_TYPE_PHARMACY',
+      display: 'Solicitante: farmacia',
+    },
+    ELIG_PROVIDER_TYPE_DIAGNOSTIC_UNIT: {
+      code: 'ELIG_PROVIDER_TYPE_DIAGNOSTIC_UNIT',
+      display: 'Solicitante: unidad diagnóstica',
+    },
+
     // Autorización previa
     PRIOR_AUTH_SUBMITTED: {
       code: 'PRIOR_AUTH_SUBMITTED',
@@ -126,6 +135,14 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
     BILLING_PROVIDER_TYPE_PRACTICE: {
       code: 'BILLING_PROVIDER_TYPE_PRACTICE',
       display: 'Facturador: práctica',
+    },
+    BILLING_PROVIDER_TYPE_PHARMACY: {
+      code: 'BILLING_PROVIDER_TYPE_PHARMACY',
+      display: 'Facturador: farmacia',
+    },
+    BILLING_PROVIDER_TYPE_DIAGNOSTIC_UNIT: {
+      code: 'BILLING_PROVIDER_TYPE_DIAGNOSTIC_UNIT',
+      display: 'Facturador: unidad diagnóstica',
     },
     ADJ_OUTCOME_APPROVED: {
       code: 'ADJUDICATION_APPROVED',

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -27,9 +28,8 @@ import type {
   DiagnosticResultSharesResponseDto,
   PatientDiagnosticResultDto,
   PatientDiagnosticResultsResponseDto,
-  PatientOwnOrdersResponseDto,
 } from '../dto';
-import { ShareDiagnosticResultDto } from '../dto';
+import { PatientOwnOrdersResponseDto, ShareDiagnosticResultDto } from '../dto';
 
 /**
  * Los resultados diagnósticos del titular de la sesión.
@@ -118,6 +118,7 @@ export class DiagnosticsPatientResultsController {
     required: false,
     description: 'Tope de órdenes (por defecto 50)',
   })
+  @ApiOkResponse({ type: PatientOwnOrdersResponseDto })
   listOwnOrders(
     @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,

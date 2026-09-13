@@ -15,6 +15,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ResourceStatusDto } from './common.dto';
 
 /** Línea de un reclamo (UC-26-06). */
 export class ClaimLineDto {
@@ -52,6 +53,16 @@ export class ClaimLineDto {
   @IsNumberString()
   billedAmount!: string;
 
+  /** Línea congelada del pedido de farmacia que este ítem representa. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  inventoryReservationLineId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  diagnosticStudyOfferingId?: string;
   /**
    * Documento clínico que respalda el ítem, como texto.
    *
@@ -114,6 +125,25 @@ export class CreateClaimDto {
   @MaxLength(80)
   claimIdentifier!: string;
 
+  /** Pedido de farmacia de este reclamo. Incompatible con una orden diagnóstica. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  inventoryReservationId?: string;
+
+  /** Orden diagnóstica de este reclamo. Incompatible con un pedido de farmacia. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  serviceRequestId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Moneda declarada por el prestador diagnóstico',
+  })
+  @IsOptional()
+  @IsUUID()
+  currencyConceptId?: string;
   /**
    * Identificador asociado a prior authorization request.
    */
@@ -417,4 +447,13 @@ export class CreateDisputeDto {
   @IsOptional()
   @IsString()
   filingDeadline?: string;
+}
+
+/** Permite adjudicar las líneas creadas sin inspeccionar la base de datos. */
+export class CreatedClaimDto extends ResourceStatusDto {
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'IDs de líneas vinculadas en orden de lineSequence',
+  })
+  lineIds?: string[];
 }

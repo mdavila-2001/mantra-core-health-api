@@ -230,13 +230,8 @@ describe('Insurance controllers (delegación)', () => {
     expect(roles).toEqual(['BILLING_OPERATOR', 'SECURITY_ADMIN']);
   });
 
-  /**
-   * El rol nuevo alcanza **sólo** a reclamar. Adjudicar, publicar EOB, revertir
-   * y enviar son decisiones de quien paga: si alguien las abriera al operador de
-   * facturación del prestador, los dos lados volverían a la misma pantalla —
-   * que es justo lo que corrigió D1.a.
-   */
-  it('reclamar cambia de rol; el resto del ciclo conserva el suyo', () => {
+  /** Las membresías se resuelven por origen; las disputas conservan su política. */
+  it('delega las seis escrituras en la autorización de servicio y conserva disputas', () => {
     const metodo = (nombre: string): string[] | undefined =>
       Reflect.getMetadata(
         'requiredRoles',
@@ -248,10 +243,24 @@ describe('Insurance controllers (delegación)', () => {
       'SECURITY_ADMIN',
     ]);
 
-    // Sin `@Roles` propio heredan el de la clase, que no cambió.
+    // Los servicios distinguen OWNER/ADMIN por tenant de los roles genéricos históricos.
     for (const escritura of ['submit', 'adjudicate', 'publishEob', 'reverse']) {
-      expect(metodo(escritura)).toBeUndefined();
+      expect(metodo(escritura)).toEqual([]);
     }
+    for (const operation of ['submit', 'determine']) {
+      expect(
+        Reflect.getMetadata(
+          'requiredRoles',
+          (PriorAuthController.prototype as unknown as Record<string, object>)[
+            operation
+          ],
+        ),
+      ).toEqual([]);
+    }
+    expect(Reflect.getMetadata('requiredRoles', PriorAuthController)).toEqual([
+      'BILLING',
+      'FINANCE',
+    ]);
     expect(Reflect.getMetadata('requiredRoles', ClaimsController)).toEqual([
       'BILLING',
       'FINANCE',

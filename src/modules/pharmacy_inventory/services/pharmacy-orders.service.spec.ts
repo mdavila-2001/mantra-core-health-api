@@ -1,3 +1,8 @@
+import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
+import { DIR } from '../../directory/directory.concepts';
+import { PharmacyOrdersController } from '../controllers/pharmacy-orders.controller';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
+import { IS_PUBLIC_KEY } from '../../../common/auth/public.decorator';
 import { jest } from '@jest/globals';
 import {
   ConflictException,
@@ -147,6 +152,14 @@ function build() {
     expiredToPrescriber: mockFn(async () => ({ suppressed: false })),
     dispensedToPrescriber: mockFn(async () => ({ suppressed: false })),
   };
+  const settlements = {
+    forOrders: mockFn(async () => new Map()),
+    activeClaimForDispensation: mockFn(async () => undefined),
+  };
+  const membershipsRepo = { findActiveByUserTenant: mockFn(async () => null) };
+  const tenantAdministration = new TenantAdministrationService(
+    membershipsRepo as any,
+  );
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new PharmacyOrdersService(
     em as any,
@@ -162,9 +175,14 @@ function build() {
     outbox as any,
     orderNotifications as any,
     logger as any,
+    settlements as any,
+    tenantAdministration as any,
   );
   return {
     service,
+    settlements,
+    tenantAdministration,
+    membershipsRepo,
     tx,
     fork,
     em,
@@ -504,6 +522,264 @@ describe('PharmacyOrdersService', () => {
   });
 
   describe('getOrder', () => {
+    it('delegates detail authorization without exposing a public route or changing mutation roles', () => {
+      const controller = PharmacyOrdersController.prototype;
+      expect(
+        Reflect.getMetadata(ROLES_KEY, Reflect.get(controller, 'getOrder')),
+      ).toBeUndefined();
+      expect(
+        Reflect.getMetadata(IS_PUBLIC_KEY, Reflect.get(controller, 'getOrder')),
+      ).not.toBe(true);
+      expect(
+        Reflect.getMetadata(IS_PUBLIC_KEY, PharmacyOrdersController),
+      ).not.toBe(true);
+      for (const handler of [
+        'listForTenant',
+        'openReview',
+        'confirm',
+        'reject',
+        'ready',
+        'dispense',
+      ]) {
+        expect(
+          Reflect.getMetadata(ROLES_KEY, Reflect.get(controller, handler)),
+        ).toEqual(['SECURITY_ADMIN']);
+      }
+      for (const handler of [
+        'create',
+        'listMine',
+        'cancel',
+        'acceptSubstitutions',
+        'preferOriginal',
+      ]) {
+        expect(
+          Reflect.getMetadata(ROLES_KEY, Reflect.get(controller, handler)),
+        ).toEqual(['PATIENT']);
+      }
+    });
+
+    it.each([
+      { label: 'OWNER', role: DIR.ROLE_OWNER },
+      { label: 'ADMIN', role: DIR.ROLE_ADMIN },
+    ])(
+      'lets an active $label read frozen reservation lines without private settlement',
+      async ({ role }) => {
+        const d = build();
+        const provider = { id: 'user-provider', roles: ['USER'] };
+        d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+          tenantRoleConceptId: role,
+        });
+        conLectura(d, pedido(), [
+          {
+            id: 'line-1',
+            inventoryReservationId: 'order-1',
+            pharmacyProductId: 'prod-1',
+            requestedQuantity: '1',
+            reservedQuantity: '1',
+            unitPriceAmount: '10.00',
+            currencyConceptId: 'currency-bob',
+            statusConceptId: PINV.RES_LINE_CONFIRMED,
+          },
+        ]);
+
+        const result = await runWithTenant('tenant-a', () =>
+          d.service.getOrder('order-1', provider),
+        );
+
+        expect(d.membershipsRepo.findActiveByUserTenant).toHaveBeenCalledWith(
+          d.fork,
+          provider.id,
+          'tenant-a',
+          DIR.MEMBERSHIP_ACTIVE,
+        );
+        expect(result.reservationLines).toEqual([
+          expect.objectContaining({
+            id: 'line-1',
+            quantity: '1',
+            billedAmount: '10.00',
+          }),
+        ]);
+        expect(result.insuranceSettlement).toBeNull();
+        expect(result.insuranceSettlementAvailability).toBe('NOT_AVAILABLE');
+        expect(d.settlements.forOrders).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each([
+      {
+        label: 'STAFF membership',
+        membership: { tenantRoleConceptId: DIR.ROLE_STAFF },
+      },
+      { label: 'inactive membership', membership: null },
+    ])(
+      'returns the same 404 for $label and a missing order',
+      async ({ membership }) => {
+        const d = build();
+        const provider = { id: 'user-provider', roles: ['USER'] };
+        d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(membership);
+        conLectura(d, pedido({ expiresAt: new Date(Date.now() - 1_000) }), []);
+        const denied = await runWithTenant('tenant-a', () =>
+          d.service
+            .getOrder('order-1', provider)
+            .catch((error: unknown) => error),
+        );
+        d.ordersRepo.findOrderById.mockResolvedValue(null);
+        const missing = await runWithTenant('tenant-a', () =>
+          d.service
+            .getOrder('order-1', provider)
+            .catch((error: unknown) => error),
+        );
+
+        expect(denied).toBeInstanceOf(ResourceNotFoundException);
+        expect((denied as any).getResponse()).toEqual(
+          (missing as any).getResponse(),
+        );
+        expect(d.membershipsRepo.findActiveByUserTenant).toHaveBeenCalledWith(
+          d.fork,
+          provider.id,
+          'tenant-a',
+          DIR.MEMBERSHIP_ACTIVE,
+        );
+        expect(d.em.transactional).not.toHaveBeenCalled();
+        expect(d.ordersRepo.findLinesByReservationIds).not.toHaveBeenCalled();
+        expect(d.settlements.forOrders).not.toHaveBeenCalled();
+      },
+    );
+
+    it('hides another tenant order before expiry, membership checks or private enrichment', async () => {
+      const d = build();
+      const provider = { id: 'user-provider', roles: ['USER'] };
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+        tenantRoleConceptId: DIR.ROLE_OWNER,
+      });
+      conLectura(d, pedido({ expiresAt: new Date(Date.now() - 1_000) }), []);
+      d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([]);
+      const denied = await runWithTenant('tenant-b', () =>
+        d.service
+          .getOrder('order-1', provider)
+          .catch((error: unknown) => error),
+      );
+      d.ordersRepo.findOrderById.mockResolvedValue(null);
+      const missing = await runWithTenant('tenant-b', () =>
+        d.service
+          .getOrder('order-1', provider)
+          .catch((error: unknown) => error),
+      );
+
+      expect(denied).toBeInstanceOf(ResourceNotFoundException);
+      expect((denied as any).getResponse()).toEqual(
+        (missing as any).getResponse(),
+      );
+      expect(d.ordersRepo.findPharmaciesByIdsInTenant).toHaveBeenCalledWith(
+        d.fork,
+        'tenant-b',
+        ['ph-1'],
+      );
+      expect(d.membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.ordersRepo.findLinesByReservationIds).not.toHaveBeenCalled();
+      expect(d.settlements.forOrders).not.toHaveBeenCalled();
+    });
+
+    it.each(['SECURITY_ADMIN', 'SUPERADMIN'])(
+      'keeps %s detail access without consulting patient settlements',
+      async (role) => {
+        const d = build();
+        conLectura(d, pedido(), []);
+        const result = await runWithTenant('tenant-a', () =>
+          d.service.getOrder('order-1', { id: 'platform', roles: [role] }),
+        );
+        expect(result.id).toBe('order-1');
+        expect(d.membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+        expect(d.settlements.forOrders).not.toHaveBeenCalled();
+      },
+    );
+
+    it('keeps private enrichment exclusive to the patient owner', async () => {
+      const d = build();
+      conLectura(d, pedido(), []);
+      await runWithTenant('tenant-a', () =>
+        d.service.getOrder('order-1', paciente),
+      );
+      expect(d.settlements.forOrders).toHaveBeenCalledWith(
+        d.fork,
+        paciente.id,
+        'PHARMACY',
+        ['order-1'],
+      );
+      expect(d.membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+    });
+
+    it('exposes stable physical portions with exact frozen amounts after order authorization', async () => {
+      const d = build();
+      const portion = {
+        inventoryReservationId: 'order-1',
+        pharmacyProductId: 'prod-1',
+        requestedQuantity: '0.5',
+        reservedQuantity: '0.5',
+        statusConceptId: PINV.RES_LINE_CONFIRMED,
+        currencyConceptId: 'currency-bob',
+      };
+      conLectura(d, pedido(), [
+        {
+          ...portion,
+          id: 'line-b',
+          unitPriceAmount: '20.001',
+          statusConceptId: PINV.RES_LINE_FULFILLED,
+        },
+        {
+          ...portion,
+          id: 'released',
+          unitPriceAmount: '20.001',
+          statusConceptId: PINV.RES_LINE_RELEASED,
+        },
+        {
+          ...portion,
+          id: 'out-of-stock',
+          unitPriceAmount: '20.001',
+          statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
+        },
+        { ...portion, id: 'line-a', unitPriceAmount: '20.001' },
+        {
+          ...portion,
+          id: 'line-c',
+          unitPriceAmount: null,
+          currencyConceptId: null,
+        },
+      ]);
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.getOrder('order-1', staff),
+      );
+      expect(result.reservationLines).toEqual([
+        {
+          id: 'line-a',
+          productId: 'prod-1',
+          quantity: '0.5',
+          unitPriceAmount: '20.001',
+          billedAmount: '10.00',
+          currencyConceptId: 'currency-bob',
+        },
+        {
+          id: 'line-b',
+          productId: 'prod-1',
+          quantity: '0.5',
+          unitPriceAmount: '20.001',
+          billedAmount: '10.00',
+          currencyConceptId: 'currency-bob',
+        },
+        {
+          id: 'line-c',
+          productId: 'prod-1',
+          quantity: '0.5',
+          unitPriceAmount: null,
+          billedAmount: null,
+          currencyConceptId: null,
+        },
+      ]);
+      expect(result.insuranceSettlement).toBeNull();
+      expect(result.insuranceSettlementAvailability).toBe('NOT_AVAILABLE');
+    });
+
     it('another patient gets the exact same 404 as a missing order', async () => {
       const d = build();
       // Pedido de otro titular.

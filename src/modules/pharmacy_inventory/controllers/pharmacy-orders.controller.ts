@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -111,20 +112,24 @@ export class PharmacyOrdersController {
   @ApiOperation({
     summary: 'Mis pedidos de farmacia, más nuevos primero (FAR-E1)',
   })
+  @ApiOkResponse({ type: PharmacyOrderListResponseDto })
   listMine(
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmacyOrderListResponseDto> {
     return this.orders.listMine(actor);
   }
 
-  /** FAR-E1: un pedido (titular o staff del tenant; terceros: 404). */
+  /**
+   * Titular, plataforma o OWNER/ADMIN activo del tenant; terceros: 404.
+   * La membresía se autoriza en el servicio; se mantiene el guard JWT global.
+   */
   @Get(':id')
-  @Roles('PATIENT', 'SECURITY_ADMIN')
   @ApiOperation({
     summary: 'Consultar un pedido de farmacia (FAR-E1)',
     description:
-      'Lo ve su titular o el staff del tenant de la farmacia; cualquier tercero recibe el mismo 404.',
+      'Lo ve su titular, la plataforma o un OWNER/ADMIN activo del tenant de la farmacia; cualquier tercero recibe el mismo 404. La liquidación privada sólo se incluye para el titular.',
   })
+  @ApiOkResponse({ type: PharmacyOrderDto })
   getOrder(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() actor: AuthenticatedUser,

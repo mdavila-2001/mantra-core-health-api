@@ -1,3 +1,4 @@
+import { InsurancePatientSettlementModule } from '../insurance/insurance-patient-settlement.module';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
@@ -44,6 +45,7 @@ import {
  */
 @Module({
   imports: [
+    InsurancePatientSettlementModule,
     MikroOrmModule.forFeature([
       ...Object.values(entities),
       ServiceRequests,
