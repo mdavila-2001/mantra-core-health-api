@@ -18,6 +18,7 @@ import {
   carrierId,
   carrierPlanId,
   carrierProductId,
+  contactChannelsOf,
 } from './bolivia-insurance.catalog';
 
 /**
@@ -243,6 +244,12 @@ export class BoliviaInsuranceSeedService {
     for (const carrier of todas) {
       const id = carrierId(carrier.code);
       if (existentes.has(id)) continue;
+      // Canales de contacto (subtarea 2.3): con fuente pública, curados a
+      // mano en un dataset aparte (`contactChannelsOf`); `null` para la
+      // compañía sin canal confirmado en su dominio oficial. Este seed es
+      // ADD-only: no reescribe las 9 filas que ya existan en una base viva
+      // — el backfill sourced de esas filas va en el patch v4.2.10.
+      const canales = contactChannelsOf(carrier.code);
       em.create(
         InsuranceCarriers,
         {
@@ -252,6 +259,9 @@ export class BoliviaInsuranceSeedService {
           legalName: carrier.legalName,
           sigla: carrier.sigla,
           address: carrier.address,
+          whatsappNumber: canales.whatsapp ?? undefined,
+          callCenterPhone: canales.callCenter ?? undefined,
+          supportEmail: canales.supportEmail ?? undefined,
           // El NIT es el identificador con el que el regulador y la facturación
           // la reconocen; las cajas públicas no lo traen en el listado y quedan
           // sin él en vez de con uno inventado.
