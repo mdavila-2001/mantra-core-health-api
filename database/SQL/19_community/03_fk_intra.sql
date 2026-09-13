@@ -331,3 +331,9 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_feedback_ticket_events_feedback_ticket_id" FOREIGN KEY ("feedback_ticket_id")
         REFERENCES "community"."feedback_tickets" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "community"."comment_media"
+        ADD CONSTRAINT "fk_comment_media_comment_id" FOREIGN KEY ("comment_id")
+        REFERENCES "community"."comments" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;

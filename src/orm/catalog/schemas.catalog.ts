@@ -1,7 +1,7 @@
 import type { SchemaSpec } from './catalog.types';
 
 /**
- * Registro de los 60 esquemas PostgreSQL que compone el modelo canónico.
+ * Registro de los 61 esquemas PostgreSQL que compone el modelo canónico.
  * La capa 02 del arranque crea cada uno con CREATE SCHEMA IF NOT EXISTS antes de
  * que MikroORM sincronice tablas: sin el schema, el DDL de tablas fallaría.
  * Generado desde la bóveda SALUD; regenerar con `yarn orm:catalog`.
@@ -20,7 +20,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['clinical', 8, 'clinical', 22],
   ['clinical_ext', 18, 'clinical_ext', 13],
   ['common', 2, 'common', 7],
-  ['community', 19, 'community', 38],
+  ['community', 19, 'community', 40],
   ['consent', 7, 'consent', 10],
   ['crm', 49, 'crm', 32],
   ['cross_store_consistency', 62, 'cross_store_consistency', 20],
@@ -42,6 +42,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['integrations', 12, 'integrations', 10],
   ['lakehouse', 63, 'lakehouse', 18],
   ['marketing', 50, 'marketing', 14],
+  ['medical_groups', 66, 'medical_groups', 2],
   ['messaging', 35, 'messaging', 22],
   ['object_storage', 60, 'object_storage', 17],
   ['organization_extensions', 22, 'organization_extensions', 6],
@@ -58,7 +59,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['qa_lab', 36, 'qa_lab', 13],
   ['read_models', 30, 'read_models', 13],
   ['reporting', 39, 'reporting', 12],
-  ['scheduling', 41, 'scheduling', 16],
+  ['scheduling', 41, 'scheduling', 17],
   ['surveys', 65, 'surveys', 7],
   ['system_context', 45, 'system_context', 9],
   ['system_ops', 11, 'system_ops', 30],

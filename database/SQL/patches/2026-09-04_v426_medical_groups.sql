@@ -1,3 +1,4 @@
+-- Reconciliado al modelo canónico módulo66 (2026-09-13); FK CTI usa profile_id.
 -- ============================================================================
 -- SALUD · patch v4.2.6 (medical_groups · nuevo módulo 21) sobre una BD viva
 -- Fecha: 2026-09-04
@@ -153,13 +154,13 @@ DO $$ BEGIN
     ALTER TABLE "medical_groups"."groups"
         ADD CONSTRAINT "fk_medical_groups_groups_requesting_practitioner_id"
         FOREIGN KEY ("requesting_practitioner_id")
-        REFERENCES "profiles"."health_practitioner_profiles" ("id");
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     ALTER TABLE "medical_groups"."groups"
         ADD CONSTRAINT "fk_medical_groups_groups_patient_profile_id"
-        FOREIGN KEY ("patient_profile_id") REFERENCES "profiles"."patient_profiles" ("id");
+        FOREIGN KEY ("patient_profile_id") REFERENCES "profiles"."patient_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -172,7 +173,7 @@ DO $$ BEGIN
     ALTER TABLE "medical_groups"."groups"
         ADD CONSTRAINT "fk_medical_groups_groups_proposed_by_practitioner_id"
         FOREIGN KEY ("proposed_by_practitioner_id")
-        REFERENCES "profiles"."health_practitioner_profiles" ("id");
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -191,7 +192,7 @@ DO $$ BEGIN
     ALTER TABLE "medical_groups"."group_members"
         ADD CONSTRAINT "fk_medical_groups_group_members_practitioner_profile_id"
         FOREIGN KEY ("practitioner_profile_id")
-        REFERENCES "profiles"."health_practitioner_profiles" ("id");
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

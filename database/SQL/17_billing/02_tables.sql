@@ -371,10 +371,6 @@ CREATE TABLE IF NOT EXISTS "billing"."dunning_items" (
     CONSTRAINT "pk_dunning_items" PRIMARY KEY ("id")
 );
 
--- FT-24 · Creación de cotizaciones: presupuesto ofrecido a un paciente sobre un
--- servicio del catálogo, con plan de pagos simulado y condiciones congeladas
--- (snapshot) para trazabilidad — si el catálogo cambia después, la cotización
--- ya emitida no se ve afectada.
 CREATE TABLE IF NOT EXISTS "billing"."quotations" (
     "id" uuid NOT NULL,
     "practice_id" uuid NOT NULL,
@@ -396,11 +392,9 @@ CREATE TABLE IF NOT EXISTS "billing"."quotations" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
-    CONSTRAINT "pk_quotations" PRIMARY KEY ("id"),
-    CONSTRAINT "chk_quotations_interest_method" CHECK ("interest_calculation_method" IN ('FLAT', 'FRENCH'))
+    CONSTRAINT "pk_quotations" PRIMARY KEY ("id")
 );
 
--- Cuota del plan de pagos simulado, congelada al momento de crear la cotización.
 CREATE TABLE IF NOT EXISTS "billing"."quotation_installments" (
     "id" uuid NOT NULL,
     "quotation_id" uuid NOT NULL,

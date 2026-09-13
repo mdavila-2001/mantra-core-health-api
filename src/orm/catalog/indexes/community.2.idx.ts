@@ -2,11 +2,17 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `community` (parte 2/2).
- * 57 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 63 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const communityIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['reactions', 'ix_reactions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['reactions', 'ix_reactions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['reactions', 'uq_reactions_actor_target_type', ['actor_profile_id', 'reactable_type_concept_id', 'reactable_ref_id', 'reaction_type_concept_id'], true, 'btree'],
+  ['review_dimension_scores', 'ix_review_dimension_scores_review_id', ['review_id'], false, 'btree'],
+  ['review_dimension_scores', 'ix_review_dimension_scores_dimension_concept_id', ['dimension_concept_id'], false, 'btree'],
+  ['review_responses', 'ix_review_responses_review_id', ['review_id'], false, 'btree'],
   ['review_responses', 'ix_review_responses_responder_public_profile_id', ['responder_public_profile_id'], false, 'btree'],
   ['review_responses', 'ix_review_responses_moderation_status_concept_id', ['moderation_status_concept_id'], false, 'btree'],
   ['review_responses', 'ix_review_responses_created_by_user_id', ['created_by_user_id'], false, 'btree'],

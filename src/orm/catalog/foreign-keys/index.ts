@@ -42,6 +42,7 @@ import { insuranceForeignKeys2 } from './insurance.2.fk';
 import { integrationContractsForeignKeys } from './integration_contracts.fk';
 import { integrationsForeignKeys } from './integrations.fk';
 import { marketingForeignKeys } from './marketing.fk';
+import { medicalGroupsForeignKeys } from './medical_groups.fk';
 import { messagingForeignKeys } from './messaging.fk';
 import { organizationExtensionsForeignKeys } from './organization_extensions.fk';
 import { paymentsForeignKeys1 } from './payments.1.fk';
@@ -60,6 +61,7 @@ import { qaLabForeignKeys } from './qa_lab.fk';
 import { readModelsForeignKeys } from './read_models.fk';
 import { reportingForeignKeys } from './reporting.fk';
 import { schedulingForeignKeys } from './scheduling.fk';
+import { surveysForeignKeys } from './surveys.fk';
 import { systemContextForeignKeys } from './system_context.fk';
 import { systemOpsForeignKeys } from './system_ops.fk';
 import { telemetryForeignKeys } from './telemetry.fk';
@@ -103,6 +105,7 @@ export const foreignKeyCatalog: Readonly<Record<string, readonly (readonly Forei
   integration_contracts: [integrationContractsForeignKeys],
   integrations: [integrationsForeignKeys],
   marketing: [marketingForeignKeys],
+  medical_groups: [medicalGroupsForeignKeys],
   messaging: [messagingForeignKeys],
   organization_extensions: [organizationExtensionsForeignKeys],
   payments: [paymentsForeignKeys1, paymentsForeignKeys2],
@@ -118,6 +121,7 @@ export const foreignKeyCatalog: Readonly<Record<string, readonly (readonly Forei
   read_models: [readModelsForeignKeys],
   reporting: [reportingForeignKeys],
   scheduling: [schedulingForeignKeys],
+  surveys: [surveysForeignKeys],
   system_context: [systemContextForeignKeys],
   system_ops: [systemOpsForeignKeys],
   telemetry: [telemetryForeignKeys],

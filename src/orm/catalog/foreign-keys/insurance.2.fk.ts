@@ -2,11 +2,15 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `insurance` (parte 2/2).
- * 7 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 11 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const insuranceForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['prior_authorization_requests', 'patient_coverage_id', 'insurance', 'patient_coverages', 'id'],
+  ['prior_authorization_requests', 'priority_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prior_authorization_requests', 'requesting_provider_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prior_authorization_requests', 'service_request_id', 'clinical', 'service_requests', 'id'],
   ['prior_authorization_requests', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['prior_authorization_requests', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['provider_networks', 'created_by_user_id', 'iam', 'users', 'id'],

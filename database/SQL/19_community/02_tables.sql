@@ -646,3 +646,15 @@ CREATE TABLE IF NOT EXISTS "community"."feedback_ticket_events" (
     "recorded_at" timestamptz NOT NULL,
     CONSTRAINT "pk_feedback_ticket_events" PRIMARY KEY ("history_id")
 );
+
+CREATE TABLE IF NOT EXISTS "community"."comment_media" (
+    "id" uuid NOT NULL,
+    "comment_id" uuid NOT NULL,
+    "file_id" uuid NOT NULL,
+    "media_role_concept_id" uuid NOT NULL,
+    "alt_text" varchar,
+    "ordinal" integer,
+    "created_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    CONSTRAINT "pk_comment_media" PRIMARY KEY ("id")
+);

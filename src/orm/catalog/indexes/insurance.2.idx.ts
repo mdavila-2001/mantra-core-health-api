@@ -2,11 +2,14 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `insurance` (parte 2/2).
- * 25 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 29 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const insuranceIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_patient_profile_id__2239c1f8', ['patient_profile_id', 'created_at desc'], false, 'btree'],
   ['prior_authorization_determinations', 'ix_prior_authorization_determinations_prior_authorizat_9b22376b', ['prior_authorization_request_id'], false, 'btree'],
   ['prior_authorization_determinations', 'ix_prior_authorization_determinations_prior_authorizat_3c8c8cdf', ['prior_authorization_item_id'], false, 'btree'],
   ['prior_authorization_determinations', 'ix_prior_authorization_determinations_decision_concept_id', ['decision_concept_id'], false, 'btree'],
@@ -21,6 +24,7 @@ export const insuranceIndexes2: readonly IndexTuple[] = [
   ['prior_authorization_requests', 'ix_prior_authorization_requests_patient_coverage_id', ['patient_coverage_id'], false, 'btree'],
   ['prior_authorization_requests', 'ix_prior_authorization_requests_service_request_id', ['service_request_id'], false, 'btree'],
   ['prior_authorization_requests', 'ix_prior_authorization_requests_medication_request_id', ['medication_request_id'], false, 'btree'],
+  ['prior_authorization_requests', 'ix_prior_authorization_requests_inventory_reservation_id', ['inventory_reservation_id'], false, 'btree'],
   ['prior_authorization_requests', 'ix_prior_authorization_requests_requesting_provider_ty_ace534e5', ['requesting_provider_type_concept_id'], false, 'btree'],
   ['prior_authorization_requests', 'ix_prior_authorization_requests_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['prior_authorization_requests', 'ix_prior_authorization_requests_priority_concept_id', ['priority_concept_id'], false, 'btree'],
