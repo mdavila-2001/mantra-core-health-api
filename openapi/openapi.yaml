@@ -53157,6 +53157,10 @@ components:
           type: string
           description: Vigente hasta (ISO date)
           format: date
+        fileId:
+          type: string
+          description: Archivo de la matrícula (debe haberlo subido el mismo usuario)
+          format: uuid
       required:
         - licenseNumber
     CreateAffiliationDto:

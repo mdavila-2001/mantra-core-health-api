@@ -38,6 +38,10 @@ export interface CreateJurisdictionAuthorizationData {
    */
   validTo?: Date;
   /**
+   * El respaldo de la matrícula, ya subido por `POST /common/files/upload`.
+   */
+  fileId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -100,6 +104,7 @@ export class JurisdictionAuthorizationsRepository {
         stateConceptId: data.stateConceptId,
         validFrom: data.validFrom,
         validTo: data.validTo,
+        fileId: data.fileId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

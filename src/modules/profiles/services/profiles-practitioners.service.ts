@@ -1583,6 +1583,26 @@ export class ProfilesPractitionersService {
         });
       }
 
+      // Dentro de la MISMA transacción que la escritura: comprobar el archivo
+      // contra un estado y escribir sobre otro no comprueba nada. `assertUsableBy`
+      // es también lo que impide colgarse del archivo de otro. Mismo camino que
+      // el título en `addOwnCredential`.
+      if (dto.fileId !== undefined) {
+        await this.attachableFiles.assertUsableBy(
+          tx,
+          dto.fileId,
+          actor,
+          {
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.DOCUMENT,
+            operation: 'profiles.authorization.add',
+          },
+          {
+            subject: 'El archivo de la matrícula',
+            notFound: 'El archivo de la matrícula no existe',
+          },
+        );
+      }
+
       const authorization = this.authorizationsRepo.create(tx, {
         practitionerProfileId: profileId,
         jurisdictionConceptId:
@@ -1593,6 +1613,7 @@ export class ProfilesPractitionersService {
         stateConceptId: PROF.AUTH_ACTIVE,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
+        fileId: dto.fileId,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -1602,6 +1623,7 @@ export class ProfilesPractitionersService {
         practitionerProfileId: profileId,
         licenseNumber: authorization.licenseNumber,
         state: authorization.stateConceptId,
+        fileId: authorization.fileId,
         createdAt: authorization.createdAt,
       };
     });

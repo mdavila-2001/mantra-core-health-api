@@ -74,6 +74,30 @@ export class CreateJurisdictionAuthorizationDto {
   @IsOptional()
   @IsDateString()
   validTo?: string;
+
+  /**
+   * El PDF o la foto del carnet de matrícula, ya subido por
+   * `POST /common/files/upload`.
+   *
+   * Va como referencia y no como adjunto en este cuerpo: la subida tiene su
+   * propio camino —con escaneo antivirus y deducción del tipo real a partir de
+   * los bytes—, y repetirlo acá sería una segunda puerta con otras reglas.
+   * Mismo campo, mismo destino y mismas reglas que `fileId` en
+   * `AddOwnCredentialDto`: es el mismo gesto —declarar una credencial y
+   * adjuntar lo que la prueba—.
+   *
+   * Opcional a propósito: el padrón se **declara**, no se prueba. Exigir el
+   * escaneo dejaría fuera a quien todavía no lo tenga a mano y convertiría un
+   * trámite de un minuto en uno de una tarde.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Archivo de la matrícula (debe haberlo subido el mismo usuario)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  fileId?: string;
 }
 
 /** Respuesta de autorización jurisdiccional. */
@@ -104,6 +128,13 @@ export class JurisdictionAuthorizationResponseDto {
     format: 'uuid',
   })
   state!: string;
+
+  /**
+   * El respaldo adjuntado, si se adjuntó uno. Se devuelve para que quien
+   * acaba de cargarla pueda mostrarlo sin releer el perfil entero.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  fileId?: string;
 
   /**
    * Fecha y hora en que se creó el registro.
