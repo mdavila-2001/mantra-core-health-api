@@ -1,4 +1,8 @@
 import { describe, expect, it } from '@jest/globals';
+import { CONCEPTS } from '../../../common/constants/concepts';
+import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
+import { PHARM } from '../../pharmacy/pharmacy.concepts';
+import { PINV } from '../../pharmacy_inventory/pharmacy_inventory.concepts';
 import {
   ClaimAdjudicationVersions,
   ClaimLineAdjudications,
@@ -17,7 +21,10 @@ import type { PatientSettlementBatch } from '../repositories/patient-settlement.
 import type { LinkedOrderSnapshot } from './linked-claim-validation';
 import { projectPatientSettlement } from './patient-settlement-projection';
 
-function fixture() {
+function fixture(
+  currencyConceptId = CONCEPTS.CURRENCY_BOB,
+  currencyCode = 'BOB',
+) {
   const claim: InsuranceClaims = Object.assign(new InsuranceClaims(), {
     id: 'claim',
     inventoryReservationId: 'order',
@@ -25,7 +32,7 @@ function fixture() {
     insuranceCarrierId: 'carrier',
     billingProviderEntityId: 'pharmacy',
     billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PHARMACY,
-    currencyConceptId: 'bob',
+    currencyConceptId,
     totalAmount: '100.005',
     claimIdentifier: 'CLAIM-1',
     statusConceptId: INS.CLAIM_ADJUDICATED,
@@ -91,7 +98,7 @@ function fixture() {
       Object.assign(new InsurancePlans(), {
         id: 'plan',
         insuranceProductId: 'product',
-        currencyConceptId: 'bob',
+        currencyConceptId,
       }),
     ],
     products: [
@@ -107,7 +114,10 @@ function fixture() {
       }),
     ],
     concepts: [
-      Object.assign(new CatalogConcepts(), { id: 'bob', code: 'BOB' }),
+      Object.assign(new CatalogConcepts(), {
+        id: currencyConceptId,
+        code: currencyCode,
+      }),
     ],
     itemNames: new Map([['portion', 'Medicamento de prueba']]),
   };
@@ -118,7 +128,7 @@ function fixture() {
     providerTenantId: 'provider',
     billingProviderTypeConceptId: claim.billingProviderTypeConceptId,
     billingProviderEntityId: 'pharmacy',
-    currencyConceptId: 'bob',
+    currencyConceptId,
     totalAmount: '100.005',
     validForSettlement: true,
     canSubmit: false,
@@ -139,6 +149,66 @@ function fixture() {
 }
 
 describe('Published patient settlement', () => {
+  it.each([
+    ['BOB', CONCEPTS.CURRENCY_BOB, 'BOB'],
+    ['USD', CONCEPTS.CURRENCY_USD, 'USD'],
+    ['diagnostic_units:CURRENCY_BOB', DUNIT.CURRENCY_BOB, 'BOB'],
+    ['pharmacy:CURRENCY_USD', PHARM.CURRENCY_USD, 'USD'],
+    ['pharmacy_inventory:CURRENCY_USD', PINV.CURRENCY_USD, 'USD'],
+  ])(
+    'resolves registered currency %s by its canonical identity',
+    (code, id, expected) => {
+      expect(fixture(id, code).run().insuranceSettlement).toMatchObject({
+        currencyCode: expected,
+        totalBilledAmount: '100.005',
+        totalPatientAmount: '10.001',
+      });
+    },
+  );
+  it.each(['EUR', 'external:CURRENCY_USD'])(
+    'preserves unknown registered currency %s without inferring a suffix',
+    (code) => {
+      const f = fixture('00000000-0000-4000-8000-000000000099', code);
+      expect(f.run().insuranceSettlement?.currencyCode).toBe(code);
+    },
+  );
+  it.each(['', '   '])(
+    'does not infer a missing currency code from a known identity (%j)',
+    (code) => {
+      expect(fixture(PHARM.CURRENCY_USD, code).run()).toEqual({
+        insuranceSettlementAvailability: 'UNDER_REVIEW',
+        insuranceSettlement: null,
+      });
+    },
+  );
+  it('preserves a zero-valued settlement in the resolved legacy currency', () => {
+    const f = fixture(PHARM.CURRENCY_USD, 'pharmacy:CURRENCY_USD');
+    f.claim.totalAmount = '0';
+    f.line.billedAmount = '0';
+    f.snapshot.totalAmount = '0';
+    Object.assign(f.adjudication, {
+      approvedAmount: '0',
+      patientAmount: '0',
+      deniedAmount: '0',
+      policyClauseReference: undefined,
+    });
+    Object.assign(f.version, {
+      totalApprovedAmount: '0',
+      totalPatientAmount: '0',
+      totalDeniedAmount: '0',
+    });
+    expect(f.run()).toMatchObject({
+      insuranceSettlementAvailability: 'AVAILABLE',
+      insuranceSettlement: {
+        currencyCode: 'USD',
+        totalBilledAmount: '0',
+        totalApprovedAmount: '0',
+        totalPatientAmount: '0',
+        totalDeniedAmount: '0',
+        exclusions: [],
+      },
+    });
+  });
   it('preserves exact amounts and distinguishes patient responsibility from excluded amounts', () => {
     expect(fixture().run()).toMatchObject({
       insuranceSettlementAvailability: 'AVAILABLE',

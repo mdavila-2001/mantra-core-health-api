@@ -2,6 +2,7 @@ import { mismosDecimales, PreconditionFailedException } from '../../../common';
 import type { PatientSettlementProjection } from '../dto/patient-settlement.dto';
 import type { InsuranceClaims } from '../entities';
 import { INS } from '../insurance.concepts';
+import { resolveInsuranceCurrencyCode } from '../insurance-currency';
 import type { PatientSettlementBatch } from '../repositories/patient-settlement.repository';
 import {
   matchesLinkedClaimSnapshot,
@@ -100,9 +101,10 @@ export function projectPatientSettlement(
       return hidden('UNDER_REVIEW');
     throw error;
   }
-  const currencyCode = batch.concepts.find(
-    (row) => row.id === claim.currencyConceptId,
-  )?.code;
+  const currencyCode = resolveInsuranceCurrencyCode(
+    claim.currencyConceptId,
+    batch.concepts.find((row) => row.id === claim.currencyConceptId)?.code,
+  );
   if (
     !currencyCode ||
     claim.totalAmount == null ||
