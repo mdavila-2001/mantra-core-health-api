@@ -27,7 +27,10 @@ import {
 // su cita clínica, porque son la misma cosa vista desde dos módulos. Ver
 // `crearCitaClinica`.
 import type { Appointments } from '../../clinical/entities';
-import { AppointmentsRepository } from '../../clinical/repositories';
+import {
+  AppointmentsRepository,
+  EncountersRepository,
+} from '../../clinical/repositories';
 import { CLIN } from '../../clinical/clinical.concepts';
 import type {
   AppointmentBookings,
@@ -329,6 +332,7 @@ export class SchedulingBookingsService {
    * @param historyRepo - Valor de history repo requerido por la operación.
    * @param appointmentsRepo - Citas clínicas que respaldan las reservas.
    * @param logger - Valor de logger requerido por la operación.
+   * @param encountersRepo - Encuentros clínicos de las citas que respaldan las reservas.
    */
   constructor(
     private readonly em: EntityManager,
@@ -348,6 +352,7 @@ export class SchedulingBookingsService {
     // transacción, marca a los candidatos y les avisa— y reimplementarlo acá
     // sería tener dos dueños de la misma regla.
     private readonly waitlist: SchedulingWaitlistService,
+    private readonly encountersRepo: EncountersRepository,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
   }
@@ -2621,13 +2626,21 @@ export class SchedulingBookingsService {
     // La tipología de la página, en lote. Sólo las citas que llegaron a tener
     // contraparte clínica la tienen: una reserva sin confirmar no crea
     // `clinical.appointments`, así que su id no entra en la consulta.
-    const tipos = await this.appointmentsRepo.findTypesByIds(em, [
+    const idsDeCitas = [
       ...new Set(
         page
           .map(({ booking }) => booking.appointmentId)
           .filter((id): id is string => id != null),
       ),
-    ]);
+    ];
+    const tipos = await this.appointmentsRepo.findTypesByIds(em, idsDeCitas);
+
+    // El encuentro clínico de cada cita, en lote (subtarea 4.3): mismos ids
+    // que la tipología, misma razón — cien consultas más por página, no.
+    const encuentros = await this.encountersRepo.findLatestIdsByAppointmentIds(
+      em,
+      idsDeCitas,
+    );
 
     // Los nombres, en lote y sólo cuando alguien va a poder verlos: si el actor
     // no es profesional ni titular, la proyección los descartaría igual y la
@@ -2676,6 +2689,9 @@ export class SchedulingBookingsService {
             : tipos.get(booking.appointmentId),
           pagos.get(booking.id),
           aseguradoras,
+          booking.appointmentId == null
+            ? undefined
+            : encuentros.get(booking.appointmentId),
         ),
       ),
       count: page.length,
@@ -2737,6 +2753,14 @@ export class SchedulingBookingsService {
             booking.appointmentId,
           ]);
 
+    // El encuentro de la cita, mismo criterio (subtarea 4.3): lote de uno.
+    const encuentros =
+      booking.appointmentId == null
+        ? new Map<string, string>()
+        : await this.encountersRepo.findLatestIdsByAppointmentIds(em, [
+            booking.appointmentId,
+          ]);
+
     return this.aBookingItem(
       booking,
       slot,
@@ -2749,6 +2773,11 @@ export class SchedulingBookingsService {
       booking.appointmentId == null
         ? undefined
         : tipos.get(booking.appointmentId),
+      undefined,
+      undefined,
+      booking.appointmentId == null
+        ? undefined
+        : encuentros.get(booking.appointmentId),
     );
   }
 
@@ -2810,6 +2839,7 @@ export class SchedulingBookingsService {
     tipoDeLaCita?: string,
     estadoDePago?: AppointmentPaymentStates,
     aseguradoraPorPaciente?: Map<string, string>,
+    encuentroDeLaCita?: string,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -2821,6 +2851,10 @@ export class SchedulingBookingsService {
       // contrato lo declara nullable y omitirlo obligaría a distinguir «no
       // hay cita» de «no me lo dijeron», que acá son lo mismo.
       appointmentId: booking.appointmentId ?? null,
+      // Siempre presente, igual que `appointmentId`: `null` es «sin cita» o
+      // «cita sin encuentro» — el frente cruza este id con
+      // `ChartNote.encounterId` sin estimar por fecha.
+      encounterId: encuentroDeLaCita ?? null,
       // Se OMITE cuando nadie lo marcó, y no viaja como «pendiente»: pendiente
       // de pago es una afirmación que alguien firmó, y la ausencia es que del
       // pago todavía no se dijo nada. Comprobalo con `if (item.paymentState)`.
