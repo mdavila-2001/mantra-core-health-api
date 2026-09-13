@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { PostgreSqlPlatform } from '@mikro-orm/postgresql';
 import { ForbiddenException } from '@nestjs/common';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
@@ -1000,8 +1001,61 @@ describe('ProfilesPatientsService', () => {
         sql.includes('from insurance.insurance_plan_benefits'),
       );
       expect(benefitReads).toHaveLength(1);
-      expect(benefitReads[0][1]).toEqual([['plan']]);
+      expect(benefitReads[0][1]).toEqual(['plan']);
     });
+
+    it.each([
+      {
+        label: 'several policies sharing one plan',
+        planIds: [
+          '11111111-1111-4111-8111-111111111111',
+          '11111111-1111-4111-8111-111111111111',
+        ],
+        predicate:
+          "where b.insurance_plan_id in ('11111111-1111-4111-8111-111111111111')",
+      },
+      {
+        label: 'several policies with different plans',
+        planIds: [
+          '11111111-1111-4111-8111-111111111111',
+          '22222222-2222-4222-8222-222222222222',
+          '11111111-1111-4111-8111-111111111111',
+        ],
+        predicate:
+          "where b.insurance_plan_id in ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222')",
+      },
+    ])(
+      'renders a valid PostgreSQL benefit batch for $label',
+      async ({ planIds, predicate }) => {
+        const d = conPaciente();
+        const platform = new PostgreSqlPlatform();
+        const benefitQueries: string[] = [];
+        const execute = mockFn(
+          async (sql: string, bindings: unknown[] = []) => {
+            if (sql.includes('from insurance.patient_coverages')) {
+              return planIds.map((planId, index) => ({
+                coverage_id: `coverage-${index}`,
+                insurance_plan_id: planId,
+                carrier_id: 'carrier',
+                carrier_name: 'Andina',
+                plan_name: 'Integral',
+              }));
+            }
+            if (sql.includes('from insurance.insurance_plan_benefits')) {
+              benefitQueries.push(platform.formatQuery(sql, bindings));
+            }
+            return [];
+          },
+        );
+        d.tx.getConnection.mockReturnValue({ execute });
+
+        const response = await d.service.getOwnProfile(titular);
+
+        expect(response.coverages).toHaveLength(planIds.length);
+        expect(benefitQueries).toHaveLength(1);
+        expect(benefitQueries[0]).toContain(predicate);
+      },
+    );
 
     it('sin nada declarado, las listas llegan vacías y no ausentes', async () => {
       // Quien las pinta distingue «no declaró ninguna» de «esta respuesta no

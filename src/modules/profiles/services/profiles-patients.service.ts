@@ -968,9 +968,9 @@ export class ProfilesPatientsService {
          left join terminology.catalog_concepts benefit_status on benefit_status.id = b.status_concept_id
          left join terminology.catalog_concepts category on category.id = b.benefit_category_concept_id
          left join terminology.catalog_concepts service on service.id = b.service_concept_id
-        where b.insurance_plan_id = any(?)
+        where b.insurance_plan_id in (${planIds.map(() => '?').join(', ')})
         order by b.insurance_plan_id, b.created_at, b.id`,
-      [planIds],
+      planIds,
     );
     const benefitsByPlan = new Map<string, CoverageBenefitSummaryDto[]>();
     for (const beneficio of beneficios) {
