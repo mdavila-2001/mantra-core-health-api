@@ -103,6 +103,7 @@ export {
   ResourceAgendaResponseDto,
   BookingStatusReasonDto,
   BookingDelayNoticeDto,
+  BookingInsuranceClaimDto,
   BookingItemDto,
   SearchBookingsResponseDto,
 } from './scheduling-read.dto';

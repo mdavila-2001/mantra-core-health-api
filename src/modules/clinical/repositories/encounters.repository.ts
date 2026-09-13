@@ -323,6 +323,39 @@ export class EncountersRepository {
   }
 
   /**
+   * **Todos** los encuentros de cada cita, indexados por `appointmentId`.
+   *
+   * Hermano de {@link findLatestIdsByAppointmentIds}, pero sin quedarse con el
+   * último: la solicitud de seguro cuelga del encuentro, y si una cita tuvo dos
+   * (un check-in repetido, una atención partida), la solicitud puede estar en
+   * cualquiera. Mirar sólo el último la escondería. En lote, por lo mismo que
+   * el hermano.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param appointmentIds - Citas cuyos encuentros se necesitan.
+   * @returns Mapa `appointmentId` → ids de `encounters`, del más nuevo al más viejo.
+   */
+  async findIdsByAppointmentIds(
+    em: EntityManager,
+    appointmentIds: readonly string[],
+  ): Promise<Map<string, string[]>> {
+    const mapa = new Map<string, string[]>();
+    if (appointmentIds.length === 0) return mapa;
+    const encuentros = await em.find(
+      Encounters,
+      { appointmentId: { $in: [...appointmentIds] } },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+    for (const encuentro of encuentros) {
+      if (encuentro.appointmentId == null) continue;
+      const ids = mapa.get(encuentro.appointmentId) ?? [];
+      ids.push(encuentro.id);
+      mapa.set(encuentro.appointmentId, ids);
+    }
+    return mapa;
+  }
+
+  /**
    * Obtiene find active participants.
    *
    * @param em - Contexto de persistencia o transacción activa.

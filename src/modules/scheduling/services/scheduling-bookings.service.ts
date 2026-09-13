@@ -40,6 +40,7 @@ import type {
 // Va en un import de valor y no de tipo: `tx.create()` necesita la clase, no su forma.
 import { AppointmentPaymentStates } from '../entities';
 import { CoverageRepository } from '../../insurance/repositories/coverage.repository';
+import { ClaimReadRepository } from '../../insurance/repositories/claim-read.repository';
 import { SCHED } from '../scheduling.concepts';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
 import {
@@ -80,6 +81,7 @@ import {
   CancelBookingResponseDto,
   CheckInResponseDto,
   WorkerBatchResultDto,
+  BookingInsuranceClaimDto,
   BookingItemDto,
   BookingStatusReasonDto,
   BookingDelayNoticeDto,
@@ -333,6 +335,7 @@ export class SchedulingBookingsService {
    * @param appointmentsRepo - Citas clínicas que respaldan las reservas.
    * @param logger - Valor de logger requerido por la operación.
    * @param encountersRepo - Encuentros clínicos de las citas que respaldan las reservas.
+   * @param claimReadRepo - Solicitudes de seguro de esos encuentros, de sólo lectura.
    */
   constructor(
     private readonly em: EntityManager,
@@ -353,6 +356,9 @@ export class SchedulingBookingsService {
     // sería tener dos dueños de la misma regla.
     private readonly waitlist: SchedulingWaitlistService,
     private readonly encountersRepo: EncountersRepository,
+    // La solicitud de seguro de cada cita, en la agenda. Mismo patrón que
+    // `coverageRepo`: repositorio de lectura que exporta `InsuranceModule`.
+    private readonly claimReadRepo: ClaimReadRepository,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
   }
@@ -2671,6 +2677,15 @@ export class SchedulingBookingsService {
           ])
         : new Map<string, string>();
 
+    // La solicitud de seguro de cada cita, en lote y con la misma compuerta
+    // que la aseguradora: es otro dato del paciente, y pedirlo para quien no lo
+    // va a ver sería trabajo tirado. Tres consultas fijas por página.
+    const solicitudes =
+      actor?.practitionerProfileId !== undefined ||
+      actor?.patientProfileId !== undefined
+        ? await this.solicitudesDeSeguroPorCita(em, idsDeCitas)
+        : new Map<string, BookingInsuranceClaimDto>();
+
     return {
       items: page.map(({ booking, slot }) =>
         this.aBookingItem(
@@ -2692,6 +2707,7 @@ export class SchedulingBookingsService {
           booking.appointmentId == null
             ? undefined
             : encuentros.get(booking.appointmentId),
+          solicitudes,
         ),
       ),
       count: page.length,
@@ -2827,6 +2843,59 @@ export class SchedulingBookingsService {
     );
   }
 
+  /**
+   * La solicitud de seguro más reciente de cada cita, indexada por `appointmentId`.
+   *
+   * El camino es cita → encuentros → solicitudes, y se recorre en lote: una
+   * consulta por salto, no una por fila. Se miran **todos** los encuentros de
+   * la cita y no sólo el último, porque la solicitud puede colgar de
+   * cualquiera. El repositorio ya devuelve las solicitudes ordenadas de la más
+   * reciente a la más vieja, así que la primera que aparece por cita es la que
+   * gana.
+   *
+   * Una cita sin solicitud no entra en el mapa: quien proyecta traduce esa
+   * ausencia a `null`.
+   *
+   * @param em - Contexto de persistencia.
+   * @param idsDeCitas - Citas clínicas de la página, sin repetidos.
+   * @returns Mapa `appointmentId` → resumen de la solicitud.
+   */
+  private async solicitudesDeSeguroPorCita(
+    em: EntityManager,
+    idsDeCitas: readonly string[],
+  ): Promise<Map<string, BookingInsuranceClaimDto>> {
+    const porCita = new Map<string, BookingInsuranceClaimDto>();
+    if (idsDeCitas.length === 0) return porCita;
+
+    const encuentrosPorCita = await this.encountersRepo.findIdsByAppointmentIds(
+      em,
+      idsDeCitas,
+    );
+    const citaPorEncuentro = new Map<string, string>();
+    for (const [cita, encuentros] of encuentrosPorCita) {
+      for (const encuentro of encuentros) {
+        citaPorEncuentro.set(encuentro, cita);
+      }
+    }
+    if (citaPorEncuentro.size === 0) return porCita;
+
+    const resumenes = await this.claimReadRepo.findSummariesByEncounterIds(em, [
+      ...citaPorEncuentro.keys(),
+    ]);
+    for (const resumen of resumenes) {
+      const cita = citaPorEncuentro.get(resumen.encounterId);
+      if (cita === undefined || porCita.has(cita)) continue;
+      porCita.set(cita, {
+        id: resumen.id,
+        claimIdentifier: resumen.claimIdentifier,
+        statusCode: resumen.statusCode,
+        statusDisplay: resumen.statusDisplay,
+        submittedAt: resumen.submittedAt?.toISOString() ?? null,
+      });
+    }
+    return porCita;
+  }
+
   private aBookingItem(
     booking: AppointmentBookings,
     slot: { startAt: Date; endAt?: Date } | null,
@@ -2840,6 +2909,7 @@ export class SchedulingBookingsService {
     estadoDePago?: AppointmentPaymentStates,
     aseguradoraPorPaciente?: Map<string, string>,
     encuentroDeLaCita?: string,
+    solicitudPorCita?: Map<string, BookingInsuranceClaimDto>,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -2890,6 +2960,19 @@ export class SchedulingBookingsService {
         ? {
             insuranceCarrierName:
               aseguradoraPorPaciente.get(booking.patientProfileId) ?? null,
+          }
+        : {}),
+      // La solicitud de seguro de la cita, con la misma compuerta y el mismo
+      // trato del `null` que la aseguradora: `null` es «se buscó y no hay»
+      // —también cuando la reserva todavía no tiene cita clínica, que no puede
+      // tener solicitud—; ausente es «quien mira no puede verlo».
+      ...(solicitudPorCita !== undefined &&
+      this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
+        ? {
+            insuranceClaim:
+              booking.appointmentId == null
+                ? null
+                : (solicitudPorCita.get(booking.appointmentId) ?? null),
           }
         : {}),
       // La tipología viaja siempre que exista: no es dato clínico —es qué

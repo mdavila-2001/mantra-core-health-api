@@ -92,6 +92,8 @@ import {
   // misma transacción en la que se da de alta el tenant de ese tipo.
   // `CoverageRepository` lo necesita iam: el alta de paciente anota en la misma
   // transacción el seguro que la persona declara tener.
-  exports: [CatalogRepository, CoverageRepository],
+  // `ClaimReadRepository` lo lee `scheduling`: la agenda muestra la solicitud
+  // de seguro de cada cita, en lote, sin reimplementar la consulta.
+  exports: [CatalogRepository, CoverageRepository, ClaimReadRepository],
 })
 export class InsuranceModule {}
