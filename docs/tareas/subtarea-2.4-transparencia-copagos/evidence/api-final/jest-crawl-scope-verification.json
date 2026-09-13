@@ -1,0 +1,51 @@
+{
+  "status": "CONFIGURED_NOT_RUNTIME_VERIFIED",
+  "configuration": "test/jest-copays-integration.cjs",
+  "previousRoots": ["<rootDir>"],
+  "newRoots": ["<rootDir>/src", "<rootDir>/test"],
+  "observedFileCounts": {
+    "generatedDist": 11065,
+    "generatedDistSrc": 11064,
+    "source": 4742,
+    "test": 111,
+    "repositoryManualMocks": 0,
+    "manualMocksOutsideNewRoots": 0
+  },
+  "installedJestSourceEvidence": [
+    {
+      "file": "node_modules/jest-config/build/index.js",
+      "line": 99,
+      "fact": "Default roots contains the repository root; the inherited integration configuration does not override it."
+    },
+    {
+      "file": "node_modules/jest-runtime/build/index.js",
+      "line": 3608,
+      "fact": "createHasteMap uses modulePathIgnorePatterns and passes config.roots to the crawler; no generated dist exclusion was configured."
+    }
+  ],
+  "timingsObservedDuringPreviousConfiguration": {
+    "processStartedAt": "2026-09-13T22:37:38Z",
+    "firstBeforeAllStageAt": "2026-09-13T22:41:01.099Z",
+    "harnessImportStartedAt": "2026-09-13T22:41:01.106Z",
+    "harnessImportCompletedAt": "2026-09-13T22:43:06.046Z",
+    "harnessImportDurationMs": 124940,
+    "applicationBootstrapCompletedAt": "2026-09-13T22:44:25.847Z",
+    "applicationBootstrapDurationMs": 79801,
+    "localLog": "integration-bootstrap-final.log"
+  },
+  "checks": {
+    "nodeCheckCommand": "node --check test/jest-copays-integration.cjs",
+    "nodeCheckExitCode": 0,
+    "diffCheckExitCode": 0,
+    "activeRunInterrupted": false,
+    "mapperChanged": false,
+    "harnessChanged": false,
+    "productionImportsChanged": false
+  },
+  "limitations": [
+    "The active run retained its previously loaded configuration; the new roots require a subsequent invocation.",
+    "The crawler previously considered 11065 additional generated files. This may contribute to startup delay; these observations do not establish it as the sole cause.",
+    "The interval before beforeAll also includes test discovery and static imports. No profiler isolated their respective costs.",
+    "No runtime improvement is claimed before executing and measuring the scoped configuration."
+  ]
+}
