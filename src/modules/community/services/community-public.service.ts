@@ -12,6 +12,7 @@ import type { FileContentDto } from '../../common/dto';
 import type {
   ProfileAffiliation,
   ProfileLocation,
+  ProfilePracticeSite,
   PublicCommentRow,
   PublicSocialActorRow,
 } from '../repositories/public-search.repository';
@@ -145,6 +146,7 @@ export const PUBLIC_PROFILE_KEYS = [
   'location',
   'specialties',
   'trajectory',
+  'practiceSites',
   'ratingAverage',
   'ratingCount',
   'acceptsReviews',
@@ -826,18 +828,22 @@ export class CommunityPublicService {
       throw new ResourceNotFoundException('No encontrado', { slug });
 
     const kind = this.kindOf(profile) as PublicDirectoryProfileDto['kind'];
-    // Sólo un profesional tiene especialidad y trayectoria laboral; pedirlas
-    // para el resto sería un viaje que siempre vuelve vacío.
-    const [señales, posts, especialidades, trayectoria] = await Promise.all([
-      this.señalesDe(em, [profile]),
-      this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
-      kind === 'PRACTITIONER'
-        ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
-        : Promise.resolve(new Map<string, string[]>()),
-      kind === 'PRACTITIONER'
-        ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
-        : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
-    ]);
+    // Sólo un profesional tiene especialidad, trayectoria laboral y sedes;
+    // pedirlas para el resto sería un viaje que siempre vuelve vacío.
+    const [señales, posts, especialidades, trayectoria, sedes] =
+      await Promise.all([
+        this.señalesDe(em, [profile]),
+        this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
+        kind === 'PRACTITIONER'
+          ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
+          : Promise.resolve(new Map<string, string[]>()),
+        kind === 'PRACTITIONER'
+          ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
+          : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
+        kind === 'PRACTITIONER'
+          ? this.repo.practiceSitesByPractitioner(em, [profile.targetId])
+          : Promise.resolve(new Map<string, ProfilePracticeSite[]>()),
+      ]);
     // La interacción de cada publicación: sus imágenes, y cuántas reacciones y
     // comentarios lleva. Un solo viaje para todo el lote.
     const engagement = await this.repo.engagementByPost(
@@ -874,6 +880,19 @@ export class CommunityPublicService {
           : null,
       specialties: especialidades.get(profile.targetId) ?? [],
       trajectory: trayectoria.get(profile.targetId) ?? [],
+      // Campo por campo y no el objeto de la lectura tal cual: es la misma
+      // lista blanca que el resto de la ficha, bajando un nivel. Si la lectura
+      // suma algo mañana, acá no llega solo.
+      practiceSites: (sedes.get(profile.targetId) ?? []).map((sede) => ({
+        id: sede.id,
+        name: sede.name,
+        addressText: sede.addressText,
+        location:
+          sede.location === null
+            ? null
+            : { lat: sede.location.lat, lng: sede.location.lng },
+        isOwn: sede.isOwn,
+      })),
       ratingAverage: rating?.average ?? null,
       ratingCount: rating?.count ?? 0,
       acceptsReviews: profile.acceptsReviews ?? false,

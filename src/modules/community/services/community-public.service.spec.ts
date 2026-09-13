@@ -88,6 +88,7 @@ function build(opciones?: {
     locationsByOwner: mockFn().mockResolvedValue(new Map()),
     specialtiesByPractitioner: mockFn().mockResolvedValue(new Map()),
     affiliationsByPractitioner: mockFn().mockResolvedValue(new Map()),
+    practiceSitesByPractitioner: mockFn().mockResolvedValue(new Map()),
     practitionerIdsBySpecialty: mockFn().mockResolvedValue([]),
     isPostPublic: mockFn().mockResolvedValue(true),
     listPostReactors: mockFn().mockResolvedValue([]),
@@ -282,6 +283,160 @@ describe('CommunityPublicService', () => {
 
       expect(res.trajectory).toEqual([]);
       expect(d.repo.affiliationsByPractitioner).not.toHaveBeenCalled();
+    });
+
+    // 2.1 — dónde atiende. Qué asignación cuenta y qué sede es propia se prueba
+    // contra la regla en `public-search.repository.spec.ts`; acá, que la ficha
+    // la sirva sólo para un profesional, con sus cinco campos y sin tocar el
+    // resto de la respuesta.
+    const SEDE_PROPIA = {
+      id: 'sede-propia',
+      name: 'Consultorio Dra. Quispe',
+      addressText: 'Calle Sucre 45, La Paz',
+      location: { lat: -16.5, lng: -68.13 },
+      isOwn: true,
+    };
+    const SEDE_CLINICA = {
+      id: 'sede-clinica',
+      name: 'Clínica Los Olivos',
+      addressText: null,
+      location: null,
+      isOwn: false,
+    };
+    const UBICACION = {
+      address: 'Av. Arce 2345',
+      city: 'La Paz',
+      lat: -16.5,
+      lng: -68.1,
+    };
+
+    it('un profesional sirve sus sedes en el orden de la lectura, pedidas sólo para él', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.practiceSitesByPractitioner.mockResolvedValue(
+        new Map([['sujeto-interno', [SEDE_PROPIA, SEDE_CLINICA]]]),
+      );
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(res.practiceSites).toEqual([SEDE_PROPIA, SEDE_CLINICA]);
+      expect(d.repo.practiceSitesByPractitioner).toHaveBeenCalledTimes(1);
+      expect(d.repo.practiceSitesByPractitioner).toHaveBeenCalledWith(
+        expect.anything(),
+        ['sujeto-interno'],
+      );
+    });
+
+    it('A · sin sedes sirve [] y deja intactos address, city y location', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.locationsByOwner.mockResolvedValue(
+        new Map([['sujeto-interno', UBICACION]]),
+      );
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(res.practiceSites).toEqual([]);
+      expect(res.address).toBe('Av. Arce 2345');
+      expect(res.city).toBe('La Paz');
+      expect(res.location).toEqual({ lat: -16.5, lng: -68.1 });
+    });
+
+    it('con sedes, address, city y location siguen siendo el respaldo de siempre', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.locationsByOwner.mockResolvedValue(
+        new Map([['sujeto-interno', UBICACION]]),
+      );
+      d.repo.practiceSitesByPractitioner.mockResolvedValue(
+        new Map([['sujeto-interno', [SEDE_CLINICA]]]),
+      );
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(res.address).toBe('Av. Arce 2345');
+      expect(res.city).toBe('La Paz');
+      expect(res.location).toEqual({ lat: -16.5, lng: -68.1 });
+    });
+
+    it('I · quien no es profesional no pide sedes y sirve []', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue({
+        ...perfilCompleto,
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+      });
+
+      const res = await d.service.getBySlug('clinica-del-sur');
+
+      expect(res.practiceSites).toEqual([]);
+      expect(d.repo.practiceSitesByPractitioner).not.toHaveBeenCalled();
+    });
+
+    it('J · la lista blanca de la ficha sumó practiceSites y ninguna otra clave', () => {
+      // Literal a propósito: comparar la salida contra `PUBLIC_PROFILE_KEYS`
+      // prueba que coinciden, no qué contienen. Abrir otra clave obliga a
+      // editar esta lista, que es el momento de pensarlo.
+      expect([...PUBLIC_PROFILE_KEYS].sort()).toEqual(
+        [
+          'kind',
+          'slug',
+          'displayName',
+          'headline',
+          'biography',
+          'avatarUrl',
+          'coverUrl',
+          'verified',
+          'city',
+          'address',
+          'location',
+          'specialties',
+          'trajectory',
+          'practiceSites',
+          'ratingAverage',
+          'ratingCount',
+          'acceptsReviews',
+          'verifiedBadge',
+          'hasPublishedAgenda',
+          'nextAvailableDate',
+          'posts',
+          'updatedAt',
+        ].sort(),
+      );
+    });
+
+    it('J · cada sede sale con sus cinco campos aunque la lectura traiga más', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.practiceSitesByPractitioner.mockResolvedValue(
+        new Map([
+          [
+            'sujeto-interno',
+            [
+              {
+                ...SEDE_PROPIA,
+                practiceId: 'practica-interna',
+                tenantId: 't-secreto',
+                adminUserId: 'user-interno',
+                location: { lat: -16.5, lng: -68.13, precision: 'interna' },
+              },
+            ],
+          ],
+        ]),
+      );
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(Object.keys(res.practiceSites[0]).sort()).toEqual([
+        'addressText',
+        'id',
+        'isOwn',
+        'location',
+        'name',
+      ]);
+      expect(Object.keys(res.practiceSites[0].location!).sort()).toEqual([
+        'lat',
+        'lng',
+      ]);
     });
 
     // Enumerados uno por uno y no con un `not.toContain` genérico: si mañana se

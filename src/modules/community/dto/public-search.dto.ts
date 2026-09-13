@@ -356,6 +356,43 @@ export class PublicAffiliationDto {
   endDate!: string | null;
 }
 
+/**
+ * Un lugar donde atiende un profesional, tal como lo muestra su ficha pública.
+ *
+ * Es la forma que congeló P16 de `PENDIENTES-BACKEND.md` (repositorio del
+ * frontend) y que la pantalla ya consume. Más angosta que `PractitionerSiteDto`
+ * (`GET /practitioners/:profileId/sites`) a propósito: aquélla es la sede de
+ * quien la administra —práctica, código, huso horario, estado—; ésta es lo que
+ * un anónimo necesita para ir. Sin práctica, sin tenant y sin quién la
+ * administra.
+ */
+export class PublicPracticeSiteDto {
+  @ApiProperty({ format: 'uuid', description: 'Identificador de la sede' })
+  id!: string;
+
+  @ApiProperty({ description: 'Nombre de la sede' })
+  name!: string;
+
+  @ApiProperty({
+    nullable: true,
+    description: 'Dirección en una línea, o null si la sede no cargó ninguna',
+  })
+  addressText!: string | null;
+
+  @ApiProperty({
+    type: PublicLocationDto,
+    nullable: true,
+    description: 'Punto de la sede; null si su dirección no tiene coordenadas',
+  })
+  location!: PublicLocationDto | null;
+
+  @ApiProperty({
+    description:
+      'Si es un consultorio propio del profesional y no la sede de una organización',
+  })
+  isOwn!: boolean;
+}
+
 export class PublicDirectoryProfileDto {
   @ApiProperty()
   kind!: Exclude<PublicResultKind, 'MEDICATION'>;
@@ -399,6 +436,13 @@ export class PublicDirectoryProfileDto {
       'Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional',
   })
   trajectory!: PublicAffiliationDto[];
+
+  @ApiProperty({
+    type: [PublicPracticeSiteDto],
+    description:
+      'Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional',
+  })
+  practiceSites!: PublicPracticeSiteDto[];
 
   @ApiProperty({ nullable: true })
   ratingAverage!: number | null;
