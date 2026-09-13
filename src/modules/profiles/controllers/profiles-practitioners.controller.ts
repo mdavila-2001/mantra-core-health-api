@@ -520,6 +520,27 @@ export class ProfilesPractitionersController {
     return this.practitionersService.addSpecialty(profileId, dto, actor);
   }
 
+  /**
+   * UC-05-06·P: cambiar cuál de las especialidades propias es la principal.
+   *
+   * El sujeto sale de la sesión: el id de una especialidad ajena responde
+   * `404`, igual que uno inexistente.
+   */
+  @Patch('practitioners/me/specialties/:specialtyId/primary')
+  @ApiOperation({
+    summary: 'Marcar una especialidad propia como la principal',
+    description:
+      'Baja la primaria anterior y sube ésta, en la misma transacción. ' +
+      'Idempotente: marcar la que ya lo es devuelve la especialidad sin escribir. ' +
+      '`412` si la especialidad ya no se ejerce (`validTo`).',
+  })
+  setOwnPrimarySpecialty(
+    @Param('specialtyId', ParseUUIDPipe) specialtyId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SpecialtyResponseDto> {
+    return this.practitionersService.setOwnPrimarySpecialty(specialtyId, actor);
+  }
+
   /** UC-05-05. */
   @Post('credentials/:credentialId/verify')
   @Roles('SECURITY_ADMIN')

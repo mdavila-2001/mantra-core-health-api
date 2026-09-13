@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1266 de 1266 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1267 de 1267 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -92,7 +92,7 @@ Esta referencia documenta **1266 de 1266 operaciones HTTP** registradas en `open
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
 | [practice](practice.md) | 26 | `practice` | 6 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
-| [profiles](profiles.md) | 40 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 3 |
+| [profiles](profiles.md) | 41 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 3 |
 | [promotions](promotions.md) | 15 | `loyalty`, `promotions` | 2 |
 | [qa_lab](qa-lab.md) | 13 | `qa`, `qa-internal` | 2 |
 | [quotations](quotations.md) | 4 | `quotations` | 1 |
@@ -117,4 +117,4 @@ Esta referencia documenta **1266 de 1266 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1266 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1267 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

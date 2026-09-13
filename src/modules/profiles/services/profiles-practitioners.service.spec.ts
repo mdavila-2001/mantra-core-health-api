@@ -78,6 +78,7 @@ function build() {
     findProfileIdsBySpecialty: mockFn().mockResolvedValue([]),
     findCurrentSpecialtyPairs: mockFn().mockResolvedValue([]),
     demotePrimary: mockFn().mockResolvedValue(0),
+    findById: mockFn(),
   };
   const languagesRepo = {
     create: mockFn(),
@@ -289,6 +290,109 @@ describe('ProfilesPractitionersService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  /**
+   * Cambiar cuál es la principal (UC-05-06·P) — el bloqueo del 2026-09-10.
+   *
+   * Al adaptar el editor al formulario del alta salieron los dos interruptores
+   * sueltos de «Agregar una especialidad», y con ellos la única forma de marcar
+   * una principal después del registro. Este camino la devuelve como gesto
+   * sobre una especialidad que ya existe.
+   */
+  describe('setOwnPrimarySpecialty (UC-05-06·P)', () => {
+    const vigente = (over: Record<string, unknown> = {}) => ({
+      id: 'esp-2',
+      practitionerProfileId: 'pp1',
+      specialtyConceptId: CARDIO,
+      isPrimary: false,
+      verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+      createdAt: new Date('2026-09-01T00:00:00Z'),
+      ...over,
+    });
+
+    it('baja la anterior y sube ésta, en la misma transacción', async () => {
+      const d = build();
+      const especialidad = vigente();
+      d.specialtiesRepo.findById.mockResolvedValue(especialidad);
+
+      const res = await d.service.setOwnPrimarySpecialty('esp-2', actor);
+
+      expect(d.specialtiesRepo.demotePrimary).toHaveBeenCalledWith(
+        d.tx,
+        'pp1',
+        expect.any(Date),
+      );
+      expect(especialidad.isPrimary).toBe(true);
+      expect(res).toMatchObject({ id: 'esp-2', isPrimary: true });
+    });
+
+    it('el sujeto sale de la sesión, nunca de la petición', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(vigente());
+
+      await d.service.setOwnPrimarySpecialty('esp-2', actor);
+
+      expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+      );
+    });
+
+    /**
+     * La ajena responde lo mismo que la inexistente: decir «existe pero no es
+     * tuya» ya es contar algo del perfil de otro.
+     */
+    it('una especialidad de otro profesional responde 404, como una inexistente', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(
+        vigente({ practitionerProfileId: 'OTRO-PERFIL' }),
+      );
+
+      await expect(
+        d.service.setOwnPrimarySpecialty('esp-2', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.specialtiesRepo.demotePrimary).not.toHaveBeenCalled();
+    });
+
+    it('una especialidad inexistente responde 404', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.setOwnPrimarySpecialty('esp-9', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    /**
+     * El modelo lo dejaría pasar —`is_primary` no mira `valid_to`—, así que la
+     * regla vive en el servicio.
+     */
+    it('una especialidad que ya no se ejerce no puede ser la principal', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(
+        vigente({ validTo: new Date('2025-12-31') }),
+      );
+
+      await expect(
+        d.service.setOwnPrimarySpecialty('esp-2', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.specialtiesRepo.demotePrimary).not.toHaveBeenCalled();
+    });
+
+    /** Dos clics seguidos en la misma fila no tienen por qué fallar. */
+    it('marcar la que ya es principal no escribe nada', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(
+        vigente({ isPrimary: true }),
+      );
+
+      const res = await d.service.setOwnPrimarySpecialty('esp-2', actor);
+
+      expect(res.isPrimary).toBe(true);
+      expect(d.specialtiesRepo.demotePrimary).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
     });
   });
 

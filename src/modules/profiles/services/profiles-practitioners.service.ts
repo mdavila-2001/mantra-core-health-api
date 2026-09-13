@@ -1922,6 +1922,95 @@ export class ProfilesPractitionersService {
     });
   }
 
+  /**
+   * Cambia cuál de las especialidades propias es la principal (UC-05-06·P).
+   *
+   * ## Por qué hace falta un camino aparte
+   *
+   * `isPrimary` sólo se podía fijar **al agregar** una especialidad, y el alta
+   * de médico la elige en un `select` al registrarse. Cuando el editor del
+   * perfil se adaptó al formulario del alta —pedido del propietario del
+   * 2026-09-10— los dos interruptores sueltos de «Agregar una especialidad»
+   * salieron con él, y con ellos la única forma de marcar una principal. Desde
+   * entonces toda especialidad agregada después del alta entraba como
+   * adicional y **no había pantalla para cambiarlo**; quedó anotado como
+   * bloqueo en `mantra-core-health/docs/progress/BLOCKERS.md`.
+   *
+   * Es un gesto sobre algo que **ya existe** —«ésta pasa a ser la principal»—,
+   * no una casilla más en un formulario de alta. Por eso vive acá y no en
+   * `addSpecialty`.
+   *
+   * ## Autoservicio
+   *
+   * El sujeto sale de la sesión: el id de una especialidad ajena responde
+   * `404`, igual que uno inexistente. Mismo criterio que el historial laboral.
+   *
+   * ## Idempotente
+   *
+   * Marcar como principal la que ya lo es no es un error ni una escritura:
+   * devuelve la especialidad tal cual está. Dos clics seguidos en la misma
+   * fila no tienen por qué fallar.
+   *
+   * @param specialtyId - La especialidad que pasa a ser la principal.
+   * @param actor - El profesional titular.
+   * @returns La especialidad, ya primaria.
+   */
+  async setOwnPrimarySpecialty(
+    specialtyId: string,
+    actor: AuthenticatedUser,
+  ): Promise<SpecialtyResponseDto> {
+    this.logger.info(
+      {
+        operation: 'profiles.specialty.setPrimary',
+        specialtyId,
+        actorId: actor.id,
+      },
+      'Setting primary specialty',
+    );
+    return this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+      const specialty = await this.specialtiesRepo.findById(tx, specialtyId);
+      // La ajena y la inexistente responden lo mismo: decir «existe pero no es
+      // tuya» ya es contar algo del perfil de otro.
+      if (!specialty || specialty.practitionerProfileId !== profileId) {
+        throw new ResourceNotFoundException('Especialidad no encontrada', {
+          specialtyId,
+        });
+      }
+
+      // Una que ya no se ejerce no puede ser con la que uno se presenta. El
+      // modelo lo deja pasar —`is_primary` no mira `valid_to`— así que la regla
+      // vive acá, que es donde se decide.
+      if (specialty.validTo) {
+        throw new PreconditionFailedException(
+          'Una especialidad que ya no ejercés no puede ser la principal',
+          { specialtyId, validTo: specialty.validTo },
+        );
+      }
+
+      if (specialty.isPrimary !== true) {
+        const now = new Date();
+        // Primero se baja la anterior: hay una sola vigente, y dejar dos
+        // marcadas aunque sea por un instante rompe la lectura del perfil.
+        await this.specialtiesRepo.demotePrimary(tx, profileId, now);
+        specialty.isPrimary = true;
+        touch(specialty, actor.id);
+        await tx.flush();
+      }
+
+      return {
+        id: specialty.id,
+        specialtyConceptId: specialty.specialtyConceptId,
+        isPrimary: specialty.isPrimary ?? false,
+        verificationStatus: specialty.verificationStatusConceptId,
+        createdAt: specialty.createdAt,
+      };
+    });
+  }
+
   /* -- UC-05-16: historial laboral del profesional -------------------------- */
 
   /**
