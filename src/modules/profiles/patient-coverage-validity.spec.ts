@@ -20,8 +20,8 @@ describe('patient coverage civil dates', () => {
     expect(
       patientCoverageValidity(reference, [
         {
-          statusCode: 'ACTIVE',
-          activeCode: 'ACTIVE',
+          statusConceptId: 'ACTIVE',
+          activeConceptId: 'ACTIVE',
           effectiveFrom: '2026-09-13',
           effectiveTo: '2026-09-13',
         },
@@ -31,17 +31,17 @@ describe('patient coverage civil dates', () => {
   it('does not call an inactive plan or unknown dates current', () => {
     expect(
       patientCoverageValidity('2026-09-13', [
-        { activeCode: 'ACTIVE', statusCode: 'CLOSED' },
+        { activeConceptId: 'ACTIVE', statusConceptId: 'CLOSED' },
       ]),
     ).toBe('INACTIVE');
     expect(
       patientCoverageValidity('2026-09-13', [
-        { activeCode: 'ACTIVE', statusCode: 'ACTIVE' },
+        { activeConceptId: 'ACTIVE', statusConceptId: 'ACTIVE' },
       ]),
     ).toBe('UNKNOWN');
   });
   it('intersects the coverage, plan and benefit dates', () => {
-    const active = { statusCode: 'ACTIVE', activeCode: 'ACTIVE' };
+    const active = { statusConceptId: 'ACTIVE', activeConceptId: 'ACTIVE' };
     expect(
       patientCoverageValidity('2026-09-13', [
         { ...active, effectiveFrom: '2026-01-01' },

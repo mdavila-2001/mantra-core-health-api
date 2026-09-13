@@ -82,6 +82,7 @@ import {
 } from '../dto';
 import { Addresses, Identifiers } from '../../common/entities';
 import { INS } from '../../insurance/insurance.concepts';
+import { resolveInsuranceCurrencyCode } from '../../insurance/insurance-currency';
 import { createDeclaredCoverage } from '../../insurance/services/declared-coverage';
 import {
   CatalogRepository,
@@ -905,13 +906,15 @@ export class ProfilesPatientsService {
         verification_status_concept_id: string | null;
         status_display: string | null;
         status_code: string | null;
-        plan_status_code: string | null;
+        status_concept_id: string | null;
+        plan_status_concept_id: string | null;
         plan_effective_from: string | null;
         plan_effective_to: string | null;
         effective_from: string | null;
         effective_to: string | null;
         insurance_plan_id: string;
         currency_code: string | null;
+        currency_concept_id: string | null;
         whatsapp_number: string | null;
         call_center_phone: string | null;
         coverage_order: number | null;
@@ -920,20 +923,21 @@ export class ProfilesPatientsService {
       `select c.id as coverage_id, ca.id as carrier_id, ca.legal_name as carrier_name,
               pl.name as plan_name, c.member_identifier, c.policy_identifier,
               c.verification_status_concept_id, coverage_status.display as status_display,
-              coverage_status.code as status_code, plan_status.code as plan_status_code,
+              coverage_status.code as status_code, c.status_concept_id,
+              pl.status_concept_id as plan_status_concept_id,
               to_char(c.effective_from, 'YYYY-MM-DD') as effective_from,
               to_char(c.effective_to, 'YYYY-MM-DD') as effective_to,
               to_char(pl.effective_from, 'YYYY-MM-DD') as plan_effective_from,
               to_char(pl.effective_to, 'YYYY-MM-DD') as plan_effective_to,
               c.insurance_plan_id,
-              currency.code as currency_code, ca.whatsapp_number, ca.call_center_phone,
+              currency.code as currency_code, pl.currency_concept_id,
+              ca.whatsapp_number, ca.call_center_phone,
               c.coverage_order
          from insurance.patient_coverages c
          join insurance.insurance_plans pl on pl.id = c.insurance_plan_id
          join insurance.insurance_products pr on pr.id = pl.insurance_product_id
          join insurance.insurance_carriers ca on ca.id = pr.insurance_carrier_id
          left join terminology.catalog_concepts coverage_status on coverage_status.id = c.status_concept_id
-         left join terminology.catalog_concepts plan_status on plan_status.id = pl.status_concept_id
          left join terminology.catalog_concepts currency on currency.id = pl.currency_concept_id
         where c.patient_profile_id = ?
         order by c.coverage_order nulls last, c.id`,
@@ -947,6 +951,7 @@ export class ProfilesPatientsService {
         id: string;
         insurance_plan_id: string;
         status_code: string | null;
+        status_concept_id: string | null;
         category_code: string | null;
         category_name: string | null;
         service_concept_id: string | null;
@@ -961,7 +966,7 @@ export class ProfilesPatientsService {
       `select b.id, b.insurance_plan_id, category.code as category_code,
               category.display as category_name, b.service_concept_id,
               service.display as service_name, b.coverage_percent, b.copay_amount,
-              b.deductible_amount, benefit_status.code as status_code,
+              b.deductible_amount, benefit_status.code as status_code, b.status_concept_id,
               to_char(b.effective_from, 'YYYY-MM-DD') as effective_from,
               to_char(b.effective_to, 'YYYY-MM-DD') as effective_to
          from insurance.insurance_plan_benefits b
@@ -972,38 +977,24 @@ export class ProfilesPatientsService {
         order by b.insurance_plan_id, b.created_at, b.id`,
       planIds,
     );
-    const benefitsByPlan = new Map<string, CoverageBenefitSummaryDto[]>();
+    const benefitsByPlan = new Map<string, typeof beneficios>();
     for (const beneficio of beneficios) {
       const current = benefitsByPlan.get(beneficio.insurance_plan_id) ?? [];
-      current.push(
-        sinCamposAusentes({
-          id: beneficio.id,
-          statusCode: beneficio.status_code,
-          categoryCode: beneficio.category_code,
-          categoryName: beneficio.category_name,
-          serviceConceptId: beneficio.service_concept_id,
-          serviceName: beneficio.service_name,
-          coveragePercent: beneficio.coverage_percent,
-          copayAmount: beneficio.copay_amount,
-          deductibleAmount: beneficio.deductible_amount,
-          effectiveFrom: beneficio.effective_from,
-          effectiveTo: beneficio.effective_to,
-        }) as CoverageBenefitSummaryDto,
-      );
+      current.push(beneficio);
       benefitsByPlan.set(beneficio.insurance_plan_id, current);
     }
 
     return filas.map((fila) => {
       const periods = [
         {
-          statusCode: fila.status_code,
-          activeCode: 'COVERAGE_ACTIVE',
+          statusConceptId: fila.status_concept_id,
+          activeConceptId: INS.COVERAGE_ACTIVE,
           effectiveFrom: fila.effective_from,
           effectiveTo: fila.effective_to,
         },
         {
-          statusCode: fila.plan_status_code,
-          activeCode: 'PLAN_ACTIVE',
+          statusConceptId: fila.plan_status_concept_id,
+          activeConceptId: INS.PLAN_ACTIVE,
           effectiveFrom: fila.plan_effective_from,
           effectiveTo: fila.plan_effective_to,
         },
@@ -1022,22 +1013,36 @@ export class ProfilesPatientsService {
         referenceDate,
         effectiveFrom: fila.effective_from,
         effectiveTo: fila.effective_to,
-        currencyCode: fila.currency_code,
+        currencyCode: resolveInsuranceCurrencyCode(
+          fila.currency_concept_id,
+          fila.currency_code,
+        ),
         carrierWhatsappNumber: fila.whatsapp_number,
         carrierCallCenterPhone: fila.call_center_phone,
         benefits: (benefitsByPlan.get(fila.insurance_plan_id) ?? []).map(
-          (benefit) => ({
-            ...benefit,
-            validityStatus: patientCoverageValidity(referenceDate, [
-              ...periods,
-              {
-                statusCode: benefit.statusCode,
-                activeCode: 'BENEFIT_ACTIVE',
-                effectiveFrom: benefit.effectiveFrom,
-                effectiveTo: benefit.effectiveTo,
-              },
-            ]),
-          }),
+          (benefit) =>
+            sinCamposAusentes({
+              id: benefit.id,
+              statusCode: benefit.status_code,
+              categoryCode: benefit.category_code,
+              categoryName: benefit.category_name,
+              serviceConceptId: benefit.service_concept_id,
+              serviceName: benefit.service_name,
+              coveragePercent: benefit.coverage_percent,
+              copayAmount: benefit.copay_amount,
+              deductibleAmount: benefit.deductible_amount,
+              effectiveFrom: benefit.effective_from,
+              effectiveTo: benefit.effective_to,
+              validityStatus: patientCoverageValidity(referenceDate, [
+                ...periods,
+                {
+                  statusConceptId: benefit.status_concept_id,
+                  activeConceptId: INS.BENEFIT_ACTIVE,
+                  effectiveFrom: benefit.effective_from,
+                  effectiveTo: benefit.effective_to,
+                },
+              ]),
+            }) as CoverageBenefitSummaryDto,
         ),
         planId: fila.insurance_plan_id,
         coverageOrder: fila.coverage_order ?? 0,

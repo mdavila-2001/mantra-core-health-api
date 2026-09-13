@@ -2,8 +2,8 @@ export type CoverageValidity =
   'CURRENT' | 'UPCOMING' | 'EXPIRED' | 'INACTIVE' | 'UNKNOWN';
 
 export interface CoveragePeriod {
-  readonly statusCode?: string | null;
-  readonly activeCode: string;
+  readonly statusConceptId?: string | null;
+  readonly activeConceptId: string;
   readonly effectiveFrom?: string | null;
   readonly effectiveTo?: string | null;
 }
@@ -15,7 +15,9 @@ export function patientCoverageValidity(
 ): CoverageValidity {
   if (
     periods.some(
-      (period) => period.statusCode && period.statusCode !== period.activeCode,
+      (period) =>
+        period.statusConceptId &&
+        period.statusConceptId !== period.activeConceptId,
     )
   )
     return 'INACTIVE';
@@ -28,7 +30,7 @@ export function patientCoverageValidity(
   if (ends.some((date) => date < referenceDate)) return 'EXPIRED';
   if (starts.some((date) => date > referenceDate)) return 'UPCOMING';
   if (
-    periods.some((period) => !period.statusCode) ||
+    periods.some((period) => !period.statusConceptId) ||
     starts.length + ends.length === 0
   )
     return 'UNKNOWN';
