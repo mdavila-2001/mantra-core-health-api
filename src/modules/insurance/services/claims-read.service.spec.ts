@@ -449,5 +449,37 @@ describe('ClaimsReadService', () => {
       expect(detalle.lines[0].policyClauseReference).toBeNull();
       expect(detalle.lines[0].denialRationale).toBeNull();
     });
+
+    it('trae los canales de contacto de la aseguradora en la cabecera (subtarea 2.3)', async () => {
+      const r = repo({
+        findCarriersByIds: mockFn().mockResolvedValue([
+          {
+            id: CARRIER,
+            legalName: 'Aseguradora X',
+            whatsappNumber: '+59171548278',
+            callCenterPhone: '800-10-6060',
+            supportEmail: 'siniestros@aseguradora.com.bo',
+          },
+        ]),
+      });
+
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+
+      expect(detalle.header.carrierWhatsappNumber).toBe('+59171548278');
+      expect(detalle.header.carrierCallCenterPhone).toBe('800-10-6060');
+      expect(detalle.header.carrierSupportEmail).toBe(
+        'siniestros@aseguradora.com.bo',
+      );
+    });
+
+    it('sin canales registrados por la aseguradora, los tres quedan en null', async () => {
+      const r = repo();
+
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+
+      expect(detalle.header.carrierWhatsappNumber).toBeNull();
+      expect(detalle.header.carrierCallCenterPhone).toBeNull();
+      expect(detalle.header.carrierSupportEmail).toBeNull();
+    });
   });
 });

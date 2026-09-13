@@ -193,3 +193,97 @@ describe('InsuranceBackboneService (administración del catálogo)', () => {
     });
   });
 });
+
+describe('InsuranceBackboneService.updateContactChannels (subtarea 2.3)', () => {
+  it('persiste los tres canales y marca la aseguradora como tocada', async () => {
+    const { service, repo } = build();
+
+    const resultado = await runWithTenant(TENANT_ID, () =>
+      service.updateContactChannels(
+        'carrier-a',
+        {
+          whatsappNumber: '+59171548278',
+          callCenterPhone: '800-10-6060',
+          supportEmail: 'siniestros@aseguradora.com.bo',
+        } as never,
+        ACTOR,
+      ),
+    );
+
+    expect(resultado).toEqual({
+      id: 'carrier-a',
+      whatsappNumber: '+59171548278',
+      callCenterPhone: '800-10-6060',
+      supportEmail: 'siniestros@aseguradora.com.bo',
+    });
+    expect(repo.findCarrierByTenantId).toHaveBeenCalled();
+  });
+
+  it('rechaza con 404 cuando el :id no es el carrier del tenant activo', async () => {
+    const { service } = build();
+
+    await expect(
+      runWithTenant(TENANT_ID, () =>
+        service.updateContactChannels(
+          'carrier-ajeno',
+          {
+            whatsappNumber: null,
+            callCenterPhone: null,
+            supportEmail: null,
+          } as never,
+          ACTOR,
+        ),
+      ),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  it('propaga 403 antes de leer el carrier si el actor no puede administrar', async () => {
+    const { service, tenantAdministration } = build();
+    tenantAdministration.assertCanAdminister.mockRejectedValue(
+      new ForbiddenException('no autorizado'),
+    );
+
+    await expect(
+      runWithTenant(TENANT_ID, () =>
+        service.updateContactChannels(
+          'carrier-a',
+          {
+            whatsappNumber: null,
+            callCenterPhone: null,
+            supportEmail: null,
+          } as never,
+          ACTOR,
+        ),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('null en los tres borra los canales ya cargados', async () => {
+    const { service, repo } = build();
+    (repo.findCarrierByTenantId as any).mockResolvedValue({
+      id: 'carrier-a',
+      whatsappNumber: '+59171548278',
+      callCenterPhone: '800-10-6060',
+      supportEmail: 'siniestros@aseguradora.com.bo',
+    });
+
+    const resultado = await runWithTenant(TENANT_ID, () =>
+      service.updateContactChannels(
+        'carrier-a',
+        {
+          whatsappNumber: null,
+          callCenterPhone: null,
+          supportEmail: null,
+        } as never,
+        ACTOR,
+      ),
+    );
+
+    expect(resultado).toEqual({
+      id: 'carrier-a',
+      whatsappNumber: null,
+      callCenterPhone: null,
+      supportEmail: null,
+    });
+  });
+});
