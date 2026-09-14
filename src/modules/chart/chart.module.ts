@@ -29,6 +29,11 @@ import {
 // contra `ClinicalReadService`; importar `AuthzModule` directamente acá sería
 // redundante.
 import { ClinicalModule } from '../clinical/clinical.module';
+// El vínculo gobernado de `POST /charts/documents` necesita comprobar, dentro
+// de su propia transacción, que cada `fileId` existe y es del actor
+// (`AttachableFileService`); la descarga contextual del documento pide los
+// bytes ya autorizados (`FileUploadService`). `CommonModule` exporta ambos.
+import { CommonModule } from '../common/common.module';
 
 /**
  * Módulo Chart (15): notas clínicas versionadas y firmadas, liberación al
@@ -36,7 +41,11 @@ import { ClinicalModule } from '../clinical/clinical.module';
  * y asignación de plantillas por especialidad.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), ClinicalModule],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    ClinicalModule,
+    CommonModule,
+  ],
   controllers: [
     ChartNotesController,
     ChartDocumentsController,
