@@ -402,6 +402,15 @@ byte a byte idéntico, al revés de lo que documenta `CLAUDE.md`. La salida can�
 las notas del módulo 65 en la bóveda (entidades + FKs + `<<INDEX_SET>>`), no volver a editar el
 catálogo a mano. Es trabajo de bóveda, con su propia tarjeta.
 
+**Cerrado 2026-09-13 (mitad).** El commit de bóveda `68f79037` (subtarea 2.4) agregó las 14 notas
+`E surveys.*` que faltaban, pero dejó la mitad de FK sin hacer: **sólo 1 nota `FK surveys.*` de
+36**, y de paso borró el aviso de este defecto de `diagnostic_units.idx.ts` sin haberlo resuelto.
+Bóveda PR #75 (`justin/b10-notas-fk-surveys`) agrega las 35 notas FK faltantes, contrastadas 1:1
+contra `SQL/65_surveys/03_fk_intra.sql` + `90_fk_deferred.sql`. Con esa bóveda,
+`yarn orm:catalog` emite `surveys.fk.ts` con **36/36** (`fkDescartadas: 0`) tocando **sólo** ese
+archivo del catálogo — verificado con `git status src/orm/catalog/`. B-10 cierra cuando el PR #75
+mergee a `dev` y esta rama incorpore ese merge.
+
 **B-11 · Ampliar un value set deja su propia ficha diciendo el número viejo.** `upsert_rows` de
 `gen_seeds.py` sólo inserta filas con PK nueva y **nunca actualiza una existente**. Los ids de
 `value_sets` y `code_system_versions` son estables por value set, así que al agregarle miembros:
