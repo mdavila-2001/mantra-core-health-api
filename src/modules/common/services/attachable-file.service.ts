@@ -148,6 +148,30 @@ export class AttachableFileService {
   }
 
   /**
+   * Valida estado y versión cuando otro módulo ya probó el derecho contextual.
+   * No comprueba propiedad: sólo debe llamarse después de autorizar el contexto.
+   */
+  async assertUsableForAuthorizedContext(
+    em: EntityManager,
+    fileId: string,
+    options: AttachableFileOptions = {},
+    labels: AttachableFileLabels = DEFAULT_LABELS,
+  ): Promise<{ file: Files; version: FileVersions }> {
+    const file = await this.filesRepo.findById(em, fileId);
+    if (!file) {
+      throw new ResourceNotFoundException(labels.notFound, { fileId });
+    }
+    const version = await this.assertVersionUsable(
+      em,
+      file,
+      fileId,
+      options,
+      labels,
+    );
+    return { file, version };
+  }
+
+  /**
    * Reclama un archivo subido de forma anónima (pre-carga pública del
    * registro de organizaciones, subtarea 1.2), asignándole el tenant y el
    * dueño recién creados.

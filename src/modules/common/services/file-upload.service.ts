@@ -15,10 +15,11 @@ import {
   type SniffedMimeType,
 } from '../../../common';
 
-/** Roles cuyo trabajo exige leer archivos que no subieron ellos mismos (p. ej. revisar evidencia de identidad). */
-const FILE_REVIEWER_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
 import { FileVersionsRepository, FilesRepository } from '../repositories';
+import { AttachableFileService } from './attachable-file.service';
+import { canActorReadOwnFile } from './file-access';
 import { FilesService } from './files.service';
+import type { Files } from '../entities';
 import type { FileContentDto, FileResponseDto, UploadFileDto } from '../dto';
 
 /** Lo que llega del interceptor de multer, acotado a lo que aquí se usa. */
@@ -86,6 +87,7 @@ export class FileUploadService {
     private readonly filesService: FilesService,
     private readonly filesRepo: FilesRepository,
     private readonly fileVersionsRepo: FileVersionsRepository,
+    private readonly attachableFiles: AttachableFileService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(FileUploadService.name);
@@ -287,15 +289,13 @@ export class FileUploadService {
   }
 
   /**
-   * Devuelve el contenido de la versión vigente de un archivo.
+   * Devuelve el contenido de la versión vigente de un archivo **propio**.
    *
-   * Rechaza lo que se sabe infectado, pero **sí** sirve una versión con el
-   * escaneo todavía pendiente: en este despliegue no hay antivirus cableado
-   * (`recordScanResult` espera un callback que nadie emite), así que exigir
-   * `SCAN_CLEAN` dejaría ilegible para siempre todo lo que se suba. La URL
-   * firmada de `FilesService.generateDownloadUrl` sí mantiene la regla estricta,
-   * porque una vez emitida ya no se puede revisar; esta ruta revalida en cada
-   * petición.
+   * Autoriza por propiedad o rol de revisión (`canActorReadOwnFile`). Para el
+   * archivo que el actor puede ver por **contexto** —el adjunto que le mandaron
+   * en una conversación, la foto de un comentario de un post que sí puede
+   * leer— esta ruta responde 403 y es correcto que lo haga: quien conoce ese
+   * contexto es otro módulo. Ver {@link downloadForAuthorizedContext}.
    *
    * @param fileId - Identificador del archivo.
    * @param actor - Usuario autenticado que pide el contenido.
@@ -322,49 +322,99 @@ export class FileUploadService {
     // ninguna comprobación de propiedad, sólo autenticación. Los roles de
     // revisión existen porque alguien (no necesariamente quien subió el
     // archivo) tiene que poder ver la evidencia para aprobarla o rechazarla.
-    if (
-      file.createdByUserId !== actor.id &&
-      !actor.roles.some((role) => FILE_REVIEWER_ROLES.includes(role))
-    ) {
+    if (!canActorReadOwnFile(file, actor)) {
       throw new ForbiddenException('No tiene acceso a este archivo');
     }
-    if (
-      file.deletedAt ||
-      file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
-    ) {
-      throw new PreconditionFailedException('El archivo está borrado', {
-        fileId,
-      });
-    }
-    if (!file.currentVersionId) {
-      throw new PreconditionFailedException(
-        'El archivo no tiene una versión vigente',
-        { fileId },
-      );
+
+    return this.serveCurrentVersion(forked, file, 'common.file.download');
+  }
+
+  /**
+   * Bytes de un archivo cuya lectura **ya autorizó el módulo dueño del
+   * contexto** (5.1 · FT-32-R02).
+   *
+   * No es `download()` sin el chequeo de dueño: es la mitad de abajo, la que
+   * resuelve la versión vigente y trae los bytes, expuesta para que quien sí
+   * sabe de contexto la invoque **después** de decidir. La diferencia importa
+   * porque en este sistema «puede verlo» casi nunca significa «lo subió»: el
+   * receptor de un mensaje no subió el adjunto que le mandaron, y aun así es
+   * exactamente quien tiene derecho a abrirlo.
+   *
+   * **Contrato con quien llama, y no es negociable:** esta función **no
+   * autoriza nada**. Invocarla sin haber comprobado el contexto convierte
+   * cualquier `fileId` en público para toda sesión. El único llamador legítimo
+   * hoy, `CommunityMessagingReadService`, comprueba antes perfil propio,
+   * participación activa y asociación a un mensaje vivo. Cualquier llamador
+   * nuevo debe aportar una prueba contextual equivalente.
+   *
+   * Tampoco es `downloadPublicMedia()`: aquélla autoriza por **lo que el
+   * archivo es** (imagen, sensibilidad normal) y por eso no sirve acá — un
+   * adjunto de chat se sube como `PHI` y puede ser un PDF, así que aquella
+   * ruta lo rechazaría con un 404 que no explica nada.
+   *
+   * @param fileId - Archivo cuyo contexto ya fue autorizado por el llamador.
+   * @param operation - Operación del llamador, para el registro.
+   * @returns Bytes y tipo MIME para servirlos por HTTP.
+   * @throws ResourceNotFoundException si el archivo o su versión no existen.
+   * @throws PreconditionFailedException si está borrado o su versión vigente
+   *   resultó infectada.
+   */
+  async downloadForAuthorizedContext(
+    fileId: string,
+    operation: string,
+  ): Promise<FileContentDto> {
+    const forked = this.em.fork();
+
+    const file = await this.filesRepo.findById(forked, fileId);
+    if (!file) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
     }
 
-    const version = await this.fileVersionsRepo.findById(
-      forked,
-      file.currentVersionId,
-    );
-    if (!version) {
-      throw new ResourceNotFoundException('Versión vigente no encontrada', {
+    return this.serveCurrentVersion(forked, file, operation);
+  }
+
+  /**
+   * La versión vigente de un archivo ya autorizado, lista para servir.
+   *
+   * **Quién valida qué, y por qué no se valida acá.** El estado del archivo
+   * —borrado, sin versión vigente, versión infectada— lo decide
+   * `AttachableFileService`, que ya era el dueño de esa pregunta para todo el
+   * sistema (`assertUsableBy` la contesta en perfiles, community y adjuntos
+   * clínicos). Cuando 5.1 necesitó servir bytes autorizados por contexto, esa
+   * comprobación estuvo un rato escrita **dos veces**, acá y allá, con dos
+   * juegos de mensajes; que coincidieran era cuestión de suerte. Esta función
+   * conserva una sola responsabilidad: traer los bytes de una versión que otro
+   * ya declaró utilizable.
+   *
+   * Se sirve una versión con el escaneo **pendiente** —no infectada— porque en
+   * este despliegue no hay antivirus cableado (`recordScanResult` espera un
+   * callback que nadie emite) y exigir `SCAN_CLEAN` dejaría ilegible para
+   * siempre todo lo que se suba. Queda el aviso en el registro. La URL firmada
+   * de `FilesService.generateDownloadUrl` sí mantiene la regla estricta, porque
+   * una vez emitida ya no se puede revisar; esta ruta revalida en cada
+   * petición.
+   *
+   * @param forked - Contexto de persistencia ya abierto por quien llama.
+   * @param file - Archivo cuya lectura ya fue autorizada.
+   * @param operation - Operación del llamador, para el registro.
+   * @returns Bytes y tipo MIME para servirlos por HTTP.
+   */
+  private async serveCurrentVersion(
+    forked: EntityManager,
+    file: Files,
+    operation: string,
+  ): Promise<FileContentDto> {
+    const fileId = file.id;
+    const { version } =
+      await this.attachableFiles.assertUsableForAuthorizedContext(
+        forked,
         fileId,
-      });
-    }
-    if (version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED) {
-      this.logger.warn(
-        { operation: 'common.file.download', fileId, versionId: version.id },
-        'Refused download of an infected version',
+        { operation },
       );
-      throw new PreconditionFailedException(
-        'La versión vigente resultó infectada',
-        { fileId },
-      );
-    }
+
     if (version.malwareScanStatusConceptId === CONCEPTS.SCAN_PENDING) {
       this.logger.warn(
-        { operation: 'common.file.download', fileId, versionId: version.id },
+        { operation, fileId, versionId: version.id },
         'Serving a version whose malware scan is still pending',
       );
     }

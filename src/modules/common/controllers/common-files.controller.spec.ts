@@ -123,8 +123,8 @@ describe('CommonFilesController', () => {
       url: 'u',
       expiresAt: new Date(),
     });
-    const result = await controller.downloadUrl('file-1');
-    expect(service.generateDownloadUrl).toHaveBeenCalledWith('file-1');
+    const result = await controller.downloadUrl('file-1', user);
+    expect(service.generateDownloadUrl).toHaveBeenCalledWith('file-1', user);
     expect(result.url).toBe('u');
   });
 });

@@ -195,6 +195,45 @@ export class ConversationsRepository {
   }
 
   /**
+   * Los mensajes **vivos** que llevan un archivo como adjunto (5.1 · FT-32-R02).
+   *
+   * Es la consulta inversa que la autorización contextual necesita: a quien
+   * pide los bytes con un `fileId` en la mano no se le puede preguntar de qué
+   * conversación es —el `fileId` solo no lo dice—, y es la conversación la que
+   * decide si puede verlo. Sin este paso, autorizar un adjunto de chat exigiría
+   * confiar en un `conversationId` que manda el propio cliente, que es
+   * justamente el parámetro que un atacante controla.
+   *
+   * `deletedAt: null` a propósito: borrar un mensaje tiene que dejar de dar
+   * acceso a su adjunto. La lectura del hilo ya oculta el contenido de los
+   * mensajes borrados; si acá no se filtrara, el archivo seguiría siendo
+   * descargable por su id después de que la burbuja dijera «Se eliminó este
+   * mensaje».
+   *
+   * Devuelve **todos** los vivos y no el primero: el mismo archivo puede estar
+   * adjunto en más de un mensaje (un reenvío), y el lector puede participar en
+   * una de esas conversaciones y no en las otras. Quedarse con uno arbitrario
+   * daría un 404 correcto para el archivo equivocado.
+   *
+   * Va por `ix_direct_messages_attachment_file_id`, que el modelo canónico ya
+   * declara (`SQL/19_community/04_indexes.sql:309`): no hace falta índice nuevo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param attachmentFileId - Archivo del que se piden los mensajes.
+   * @returns Los mensajes vivos que lo llevan adjunto, del más reciente al más antiguo.
+   */
+  findLiveMessagesByAttachmentFileId(
+    em: EntityManager,
+    attachmentFileId: string,
+  ): Promise<DirectMessages[]> {
+    return em.find(
+      DirectMessages,
+      { attachmentFileId, deletedAt: null },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' } },
+    );
+  }
+
+  /**
    * Obtiene find participants.
    *
    * @param em - Contexto de persistencia o transacción activa.

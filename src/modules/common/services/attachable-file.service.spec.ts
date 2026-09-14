@@ -67,6 +67,20 @@ describe('AttachableFileService', () => {
     expect(version.id).toBe('v1');
   });
 
+  it('contextual validation checks state/version without requiring uploader ownership', async () => {
+    const d = build();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'f1',
+      createdByUserId: 'otro-usuario',
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.assertUsableForAuthorizedContext(em, 'f1'),
+    ).resolves.toMatchObject({ file: { id: 'f1' }, version: { id: 'v1' } });
+  });
+
   it('accepts a file whose scan has not run yet', async () => {
     // En este despliegue no hay antivirus cableado: exigir SCAN_CLEAN dejaría
     // inservible toda la media. Lo pendiente pasa; lo infectado no.

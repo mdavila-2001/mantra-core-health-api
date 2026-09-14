@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -8,6 +8,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { AttachableFileService } from '../../common/services';
 import { ConversationsRepository, BlocksRepository } from '../repositories';
 import { CommunityMessageNotificationsService } from './community-message-notifications.service';
 // Import directo del archivo (no del barrel `../gateways`): rompe el ciclo
@@ -73,6 +74,7 @@ export class CommunityMessagingService {
     private readonly gateway: CommunityMessagingGateway,
     private readonly autoReply: CommunityChatAutoReplyService,
     private readonly visibility: CommunityVisibilityService,
+    private readonly attachableFiles: AttachableFileService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityMessagingService.name);
@@ -158,7 +160,7 @@ export class CommunityMessagingService {
     dto: SendMessageDto,
     actor: AuthenticatedUser,
   ): Promise<MessageResponseDto> {
-    return this.enviar(conversationId, dto, actor.id, true);
+    return this.enviar(conversationId, dto, actor.id, true, actor);
   }
 
   /**
@@ -181,12 +183,20 @@ export class CommunityMessagingService {
     dto: SendMessageDto,
     actorUserId: string | undefined,
     evaluarRespuestaAutomatica: boolean,
+    authorizingActor?: AuthenticatedUser,
   ): Promise<MessageResponseDto> {
     this.logger.info(
       { operation: 'community.message.send', conversationId },
       'Sending direct message',
     );
     const enviado = await this.em.transactional(async (tx) => {
+      if (authorizingActor) {
+        await this.visibility.assertActsAsProfile(
+          tx,
+          dto.senderProfileId,
+          authorizingActor,
+        );
+      }
       const conversation = await this.conversationsRepo.findConversationById(
         tx,
         conversationId,
@@ -233,6 +243,44 @@ export class CommunityMessagingService {
             },
           );
         }
+      }
+
+      // FT-32-R12 · sin actor que lo autorice, no se adjunta. Falla cerrado.
+      //
+      // La condición natural era `if (attachmentFileId && authorizingActor)`, y
+      // con ella un envío **sin** actor se saltaba la validación entera en
+      // silencio. Hoy no es explotable —el único camino sin actor es la
+      // respuesta automática por inactividad, que manda `{ senderProfileId,
+      // bodyText }` y nunca adjunta—, pero la forma del fallo es la peligrosa:
+      // el día que cualquier camino sin sesión llevara un adjunto, el hueco no
+      // daría un error, daría acceso. Como la lectura de un adjunto se autoriza
+      // por participar en la conversación, asociar un archivo es justo lo que
+      // hay que custodiar, y éste es el único punto donde nace ese vínculo.
+      //
+      // El rechazo va acá y la comprobación de derecho sigue entera en
+      // `assertAttachmentCanBeAssociated`: esto no es una segunda validación de
+      // propiedad, es la guarda que garantiza que aquélla siempre se ejecute.
+      if (dto.attachmentFileId) {
+        if (!authorizingActor) {
+          this.logger.warn(
+            {
+              operation: 'community.message.attachment.associate',
+              conversationId,
+              attachmentFileId: dto.attachmentFileId,
+            },
+            'Refused an attachment on a message sent without an authorizing actor',
+          );
+          throw new PreconditionFailedException(
+            'No se puede adjuntar un archivo sin un actor que lo autorice',
+            { attachmentFileId: dto.attachmentFileId },
+          );
+        }
+        await this.assertAttachmentCanBeAssociated(
+          tx,
+          dto.senderProfileId,
+          dto.attachmentFileId,
+          authorizingActor,
+        );
       }
 
       const now = new Date();
@@ -335,6 +383,70 @@ export class CommunityMessagingService {
       conversationId: enviado.conversationId,
       sentAt: enviado.sentAt,
     };
+  }
+
+  /** Autoriza archivo propio o reenvío desde un contexto ya visible. */
+  private async assertAttachmentCanBeAssociated(
+    tx: EntityManager,
+    senderProfileId: string,
+    fileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const options = { operation: 'community.message.attachment.associate' };
+    try {
+      await this.attachableFiles.assertUsableBy(tx, fileId, actor, options);
+      return;
+    } catch (error) {
+      if (!(error instanceof ForbiddenException)) throw error;
+    }
+
+    const sources =
+      await this.conversationsRepo.findLiveMessagesByAttachmentFileId(
+        tx,
+        fileId,
+      );
+    for (const source of sources) {
+      const participant = await this.conversationsRepo.findActiveParticipant(
+        tx,
+        source.conversationId,
+        senderProfileId,
+        CONCEPTS.STATE_ACTIVE,
+      );
+      if (!participant) continue;
+
+      const sourceParticipants = await this.conversationsRepo.findParticipants(
+        tx,
+        source.conversationId,
+      );
+      let blocked = false;
+      for (const sourceParticipant of sourceParticipants) {
+        if (sourceParticipant.participantProfileId === senderProfileId)
+          continue;
+        if (
+          await this.blocksRepo.existsBetween(
+            tx,
+            senderProfileId,
+            sourceParticipant.participantProfileId,
+            CONCEPTS.STATE_ACTIVE,
+          )
+        ) {
+          blocked = true;
+          break;
+        }
+      }
+      if (blocked) continue;
+
+      await this.attachableFiles.assertUsableForAuthorizedContext(
+        tx,
+        fileId,
+        options,
+      );
+      return;
+    }
+
+    throw new ResourceNotFoundException('Archivo adjunto no encontrado', {
+      fileId,
+    });
   }
 
   /**

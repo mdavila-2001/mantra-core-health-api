@@ -9,7 +9,11 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityMessagingReadService } from './community-messaging-read.service';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 import { COMM } from '../community.concepts';
 
 const actor = { id: 'user-1', roles: ['USER'] } as any;
@@ -32,6 +36,7 @@ function build() {
     // en `null`, que es lo que ven las pruebas que no lo ejercitan.
     findConversationById: mockFn().mockResolvedValue(null),
     findMessageById: mockFn().mockResolvedValue(null),
+    findLiveMessagesByAttachmentFileId: mockFn().mockResolvedValue([]),
   };
   // Carril P2: la bandeja nombra al otro lado. Por defecto no hay perfiles
   // que resolver, que es lo que ven las pruebas que no miran los nombres.
@@ -53,6 +58,13 @@ function build() {
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const files = {
+    downloadForAuthorizedContext: mockFn().mockResolvedValue({
+      buffer: Buffer.from('adjunto'),
+      mimeType: 'application/pdf',
+      originalName: 'resultado.pdf',
+    }),
+  };
 
   const service = new CommunityMessagingReadService(
     em as any,
@@ -60,9 +72,17 @@ function build() {
     profilesRepo as any,
     visibility as any,
     presence as any,
+    files as any,
     logger as any,
   );
-  return { service, conversationsRepo, profilesRepo, visibility, presence };
+  return {
+    service,
+    conversationsRepo,
+    profilesRepo,
+    visibility,
+    presence,
+    files,
+  };
 }
 
 /** Una bandeja de tres conversaciones, para las pruebas de F4.3/F4.4. */
@@ -128,6 +148,97 @@ function conTresConversaciones(d: ReturnType<typeof build>) {
 }
 
 describe('CommunityMessagingReadService', () => {
+  describe('getAttachmentContent (5.1 · FT-32)', () => {
+    it('permite al receptor participante aunque no sea quien subió', async () => {
+      const d = build();
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue([
+        { conversationId: 'c-1', attachmentFileId: 'f-1' },
+      ]);
+
+      const content = await d.service.getAttachmentContent(
+        'c-1',
+        'f-1',
+        'p-receptor',
+        actor,
+      );
+
+      expect(content.buffer).toEqual(Buffer.from('adjunto'));
+      expect(d.files.downloadForAuthorizedContext).toHaveBeenCalledWith(
+        'f-1',
+        'community.conversation.attachment',
+      );
+    });
+
+    it('rechaza actor externo antes de tocar archivo o storage', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue(null);
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-externo', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(
+        d.conversationsRepo.findLiveMessagesByAttachmentFileId,
+      ).not.toHaveBeenCalled();
+      expect(d.files.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('no acepta un archivo que sólo está asociado a otra conversación', async () => {
+      const d = build();
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue([
+        { conversationId: 'c-otra', attachmentFileId: 'f-1' },
+      ]);
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.files.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('mismo tenant no sustituye perfil propio ni membresía', async () => {
+      const d = build();
+      d.visibility.assertOwnProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-ajeno', {
+          ...actor,
+          tenantIds: ['tenant-compartido'],
+        }),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.files.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['inexistente', []],
+      ['huérfano', []],
+      ['mensaje removido', []],
+    ])('uniforma el 404 para %s', async (_caso, mensajes) => {
+      const d = build();
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue(
+        mensajes,
+      );
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-1', actor),
+      ).rejects.toMatchObject({ message: 'Archivo adjunto no encontrado' });
+    });
+
+    it('uniforma como 404 un archivo removido después de asociarse', async () => {
+      const d = build();
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue([
+        { conversationId: 'c-1', attachmentFileId: 'f-1' },
+      ]);
+      d.files.downloadForAuthorizedContext.mockRejectedValue(
+        new PreconditionFailedException('borrado', {}),
+      );
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-1', actor),
+      ).rejects.toMatchObject({ message: 'Archivo adjunto no encontrado' });
+    });
+  });
+
   describe('listConversations', () => {
     it('arma la bandeja con vista previa y no leídos', async () => {
       const d = build();
