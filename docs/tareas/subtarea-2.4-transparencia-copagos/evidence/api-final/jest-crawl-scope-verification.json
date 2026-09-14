@@ -1,8 +1,13 @@
 {
-  "status": "CONFIGURED_NOT_RUNTIME_VERIFIED",
+  "status": "DISCOVERY_VERIFIED_INTEGRATION_NOT_RERUN",
   "configuration": "test/jest-copays-integration.cjs",
-  "previousRoots": ["<rootDir>"],
-  "newRoots": ["<rootDir>/src", "<rootDir>/test"],
+  "previousRoots": [
+    "<rootDir>"
+  ],
+  "newRoots": [
+    "<rootDir>/src",
+    "<rootDir>/test"
+  ],
   "observedFileCounts": {
     "generatedDist": 11065,
     "generatedDistSrc": 11064,
@@ -40,12 +45,23 @@
     "activeRunInterrupted": false,
     "mapperChanged": false,
     "harnessChanged": false,
-    "productionImportsChanged": false
+    "productionImportsChanged": false,
+    "listTests": {
+      "command": "node node_modules/jest-cli/bin/jest.js --config test/jest-copays-integration.cjs --listTests",
+      "exitCode": 0,
+      "discoveredSpecs": 1,
+      "output": [
+        "D:\\Trabajos Secundarios\\Mantra Core Technologies\\mantra-core-health-api\\test\\integration\\patient-coverage-copays.int-spec.ts"
+      ],
+      "localLog": "jest-scope-list.log",
+      "appLoaded": false,
+      "integrationExecuted": false
+    }
   },
   "limitations": [
-    "The active run retained its previously loaded configuration; the new roots require a subsequent invocation.",
+    "The previous active integration run retained its old configuration; the subsequent --listTests invocation verified discovery using roots src/test.",
     "The crawler previously considered 11065 additional generated files. This may contribute to startup delay; these observations do not establish it as the sole cause.",
     "The interval before beforeAll also includes test discovery and static imports. No profiler isolated their respective costs.",
-    "No runtime improvement is claimed before executing and measuring the scoped configuration."
+    "Only test discovery is verified for the scoped configuration. No startup-speed improvement or integration-suite execution is claimed."
   ]
 }

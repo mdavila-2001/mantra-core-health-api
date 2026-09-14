@@ -4,7 +4,7 @@ Esta guía describe el contrato implementado para asociar un reclamo al pedido e
 
 ## Estado de la entrega
 
-Al redactar esta guía, el cierre de runtime completo y del recorrido integrado navegador → API → PostgreSQL sigue pendiente. Los contratos y ejemplos siguientes describen el código; no acreditan por sí solos una aprobación ni una entrega terminada.
+La lectura real de `GET /profiles/patients/me` sobre API compilada y PostgreSQL aislado responde 200, con identidades estables, cobertura 80.25, copago 0 y deducible 10.50. La corrección del parámetro PostgreSQL pasó 114 pruebas, lint y compilación. El contrato OpenAPI final está generado y auditado. El primer recorrido de perfil real pasó 2/2, pero la inspección encontró un estado contradictorio por el prefijo de códigos de catálogo; la corrección posterior pasó 148 pruebas, lint, compilación y lectura HTTP de dos pacientes. Póliza y beneficio están CURRENT; el segundo paciente conserva su identidad sin recibir la póliza o el plan del primero. El recorrido final de perfil pasó 2/2 en 26.6 s y ambas capturas (1440×900 y 390×844) fueron inspeccionadas: contenido vigente, importes legibles y sin desbordes. El tráfico comprobó login/perfil 200 vía proxy 4215 y cero intentos al puerto 3000, usando exclusivamente participantes sintéticos creados por HTTP. El recorrido financiero completo tampoco está acreditado; estos resultados parciales no representan una entrega terminada.
 
 Sigue pendiente la confirmación solicitada después del bloqueo de revisión automática sobre retirar la condición `verificationStatusConceptId === INS.VERIFY_VERIFIED`, añadida accidentalmente al alta vinculada. El código actual todavía exige esa condición en `LinkedClaimAccessService.coverageForOrder(..., requireCurrent: true)`; no se presenta aquí como decisión funcional aprobada. También comprueba estado activo y vigencia de cobertura/plan.
 
@@ -191,5 +191,7 @@ Cancelar el pedido, cambiar cantidades/importes/moneda, cambiar la orden/oferta 
 - [Selección de EOB vigente](../../src/modules/insurance/services/patient-settlement-projection.ts).
 
 La regeneración conserva las 72 definiciones de índices de `diagnostic_units`. El diff de ese archivo retira nueve líneas de comentario sobre la antigua excepción B-10; no elimina índices. Las notas canónicas de encuestas incorporadas en la bóveda permiten conservar su módulo 65 e índices al regenerar el catálogo.
+
+Los patches operativos de API #397 se conservan en el [seguimiento de modelo #21](https://github.com/mantra-core-technologies/mantra-core-health-model/pull/21) (`70abc7d`), posterior a la integración de #19 y su copia API (`1f8851d1`): privilegios futuros con `current_user` y comentarios sobre las FK `profile_id` ya correctas. La sincronización oficial y el control de fuentes terminaron con exit 0; el patch completo no se aplicó. Sus dos sentencias de privilegios se comprobaron en PostgreSQL aislado con BEGIN/ROLLBACK; permisos y rol volvieron exactamente a la línea base, sin tocar políticas ni bases remotas. [Evidencia de fidelidad](../tareas/subtarea-2.4-transparencia-copagos/evidence/api-final/deployment-patch-fidelity.json).
 
 Orden de despliegue: **patch del modelo → API → frontend**. La reversión de aplicación conserva las columnas aditivas y el historial financiero; no elimina ni reasocia los reclamos históricos.

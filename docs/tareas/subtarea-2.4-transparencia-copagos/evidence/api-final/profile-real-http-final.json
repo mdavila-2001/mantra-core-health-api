@@ -1,0 +1,19 @@
+{
+  "loginStatus": 200,
+  "profileStatus": 200,
+  "profileIdMatchesFixture": true,
+  "planPresent": true,
+  "stableCoverageIdentity": true,
+  "coverageValidity": "CURRENT",
+  "currencyCode": "BOB",
+  "specificBenefitPresent": true,
+  "stableBenefitIdentity": true,
+  "benefitValidity": "CURRENT",
+  "coveragePercent": "80.25",
+  "copayAmount": "0",
+  "deductibleAmount": "10.50",
+  "secondPatientLoginStatus": 200,
+  "secondPatientProfileStatus": 200,
+  "secondPatientOwnIdentity": true,
+  "secondPatientHasFirstPolicyOrPlan": false
+}
