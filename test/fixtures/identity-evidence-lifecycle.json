@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "task": "7.2",
+  "status": "SYNTHETIC_SPEC_NOT_EXECUTED",
+  "contains_real_personal_data": false,
+  "runId": "07200000-0000-4000-8000-000000000001",
+  "destructiveRuntimeGate": "BLOCKED",
+  "sourceManifest": "sourceProof() in tools/e2e/identity-evidence/prepare.mjs; bound again before each run",
+  "dataProvenance": "Only literal synthetic UTF-8 bytes and fresh test UUIDs; no copied data, existing evidence, historical PHI or external locators.",
+  "creationPreconditions": [
+    "Full LOCAL_TEST stack proved and reported before fixture creation",
+    "Real API/build identity, isolated DB/storage, mocks OFF, production endpoints absent",
+    "Every declared runtime record ID absent; collision aborts without reuse or cleanup",
+    "Canonical model/bootstrap and seeds complete; exact registry/rowVersion bindings proved",
+    "Separate authorization before any destructive lifecycle or physical delete"
+  ],
+  "tenantIds": [
+    "07200000-0000-4000-8000-000000000101",
+    "07200000-0000-4000-8000-000000000102"
+  ],
+  "ownerUserIds": [
+    "07200000-0000-4000-8000-000000000601",
+    "07200000-0000-4000-8000-000000000602"
+  ],
+  "membershipIds": [
+    "07200000-0000-4000-8000-000000000701",
+    "07200000-0000-4000-8000-000000000702"
+  ],
+  "subjectTypeConceptCode": "IDA_SUBJECT_TENANT_IDENTITY",
+  "caseStatusConceptCode": "IDA_CASE_VERIFIED",
+  "evidenceTypeConceptCode": "IDA_EVIDENCE_TYPE_INSTITUTION_DOCUMENT",
+  "evidenceStatusConceptCode": "IDA_EVIDENCE_PENDING",
+  "createdAt": "2000-01-01T00:00:00.000Z",
+  "anonymizationTest": {
+    "evidenceId": "07200000-0000-4000-8000-000000000301",
+    "column": "evidence_identifier_hash",
+    "syntheticIdentifier": "SYNTHETIC-7.2-IDENTIFIER-NOT-A-PERSON",
+    "storageDisposition": "PRESERVE"
+  },
+  "graphs": [
+    {
+      "name": "target",
+      "subjectId": "07200000-0000-4000-8000-000000000101",
+      "tenantId": "07200000-0000-4000-8000-000000000101",
+      "ownerUserId": "07200000-0000-4000-8000-000000000601",
+      "caseId": "07200000-0000-4000-8000-000000000201",
+      "evidenceId": "07200000-0000-4000-8000-000000000301",
+      "fileId": "07200000-0000-4000-8000-000000000401",
+      "versionId": "07200000-0000-4000-8000-000000000501",
+      "fileCategory": "DOCUMENT",
+      "filename": "SYNTHETIC-7.2-target.txt",
+      "mimeType": "text/plain",
+      "object": {
+        "adapter": "local",
+        "bytesUtf8": "SYNTHETIC|7.2|07200000-0000-4000-8000-000000000001|target",
+        "sha256": "608be925e4325484d28391eb8f89f660cd74e298fd6320bf6f992378d31a1911",
+        "keyRelativeToVerifiedRoot": "60/608be925e4325484d28391eb8f89f660cd74e298fd6320bf6f992378d31a1911",
+        "binding": "REQUIRE_VERIFIED_RUNTIME_BINDING; hash alone never proves physical identity"
+      },
+      "externalReference": null,
+      "consentId": null
+    },
+    {
+      "name": "non_target",
+      "subjectId": "07200000-0000-4000-8000-000000000102",
+      "tenantId": "07200000-0000-4000-8000-000000000102",
+      "ownerUserId": "07200000-0000-4000-8000-000000000602",
+      "caseId": "07200000-0000-4000-8000-000000000202",
+      "evidenceId": "07200000-0000-4000-8000-000000000302",
+      "fileId": "07200000-0000-4000-8000-000000000402",
+      "versionId": "07200000-0000-4000-8000-000000000502",
+      "fileCategory": "DOCUMENT",
+      "filename": "SYNTHETIC-7.2-non_target.txt",
+      "mimeType": "text/plain",
+      "object": {
+        "adapter": "local",
+        "bytesUtf8": "SYNTHETIC|7.2|07200000-0000-4000-8000-000000000001|no-target",
+        "sha256": "dfabcf69aebec67d3134ff6152943cacea268d54b78c75e99295938d94b07611",
+        "keyRelativeToVerifiedRoot": "df/dfabcf69aebec67d3134ff6152943cacea268d54b78c75e99295938d94b07611",
+        "binding": "REQUIRE_VERIFIED_RUNTIME_BINDING; hash alone never proves physical identity"
+      },
+      "externalReference": null,
+      "consentId": null
+    },
+    {
+      "name": "shared_a",
+      "subjectId": "07200000-0000-4000-8000-000000000101",
+      "tenantId": "07200000-0000-4000-8000-000000000101",
+      "ownerUserId": "07200000-0000-4000-8000-000000000601",
+      "caseId": "07200000-0000-4000-8000-000000000203",
+      "evidenceId": "07200000-0000-4000-8000-000000000303",
+      "fileId": "07200000-0000-4000-8000-000000000403",
+      "versionId": "07200000-0000-4000-8000-000000000503",
+      "fileCategory": "DOCUMENT",
+      "filename": "SYNTHETIC-7.2-shared_a.txt",
+      "mimeType": "text/plain",
+      "object": {
+        "adapter": "local",
+        "bytesUtf8": "SYNTHETIC|7.2|07200000-0000-4000-8000-000000000001|shared",
+        "sha256": "c3af2ed0617c4796c8d682601227145780d3de251737d87acca3f84f5f2e49d4",
+        "keyRelativeToVerifiedRoot": "c3/c3af2ed0617c4796c8d682601227145780d3de251737d87acca3f84f5f2e49d4",
+        "binding": "REQUIRE_VERIFIED_RUNTIME_BINDING; hash alone never proves physical identity"
+      },
+      "externalReference": null,
+      "consentId": null
+    },
+    {
+      "name": "hold",
+      "subjectId": "07200000-0000-4000-8000-000000000101",
+      "tenantId": "07200000-0000-4000-8000-000000000101",
+      "ownerUserId": "07200000-0000-4000-8000-000000000601",
+      "caseId": "07200000-0000-4000-8000-000000000204",
+      "evidenceId": "07200000-0000-4000-8000-000000000304",
+      "fileId": "07200000-0000-4000-8000-000000000404",
+      "versionId": "07200000-0000-4000-8000-000000000504",
+      "fileCategory": "DOCUMENT",
+      "filename": "SYNTHETIC-7.2-hold.txt",
+      "mimeType": "text/plain",
+      "object": {
+        "adapter": "local",
+        "bytesUtf8": "SYNTHETIC|7.2|07200000-0000-4000-8000-000000000001|hold",
+        "sha256": "bc50e8dc4027f047a0ab5dcc1e944ecb99f9f9c19382cc8c960bbb6c06440b3a",
+        "keyRelativeToVerifiedRoot": "bc/bc50e8dc4027f047a0ab5dcc1e944ecb99f9f9c19382cc8c960bbb6c06440b3a",
+        "binding": "REQUIRE_VERIFIED_RUNTIME_BINDING; hash alone never proves physical identity"
+      },
+      "externalReference": null,
+      "consentId": null
+    },
+    {
+      "name": "shared_b",
+      "subjectId": "07200000-0000-4000-8000-000000000102",
+      "tenantId": "07200000-0000-4000-8000-000000000102",
+      "ownerUserId": "07200000-0000-4000-8000-000000000602",
+      "caseId": "07200000-0000-4000-8000-000000000205",
+      "evidenceId": "07200000-0000-4000-8000-000000000305",
+      "fileId": "07200000-0000-4000-8000-000000000405",
+      "versionId": "07200000-0000-4000-8000-000000000505",
+      "fileCategory": "DOCUMENT",
+      "filename": "SYNTHETIC-7.2-shared_b.txt",
+      "mimeType": "text/plain",
+      "object": {
+        "adapter": "local",
+        "bytesUtf8": "SYNTHETIC|7.2|07200000-0000-4000-8000-000000000001|shared",
+        "sha256": "c3af2ed0617c4796c8d682601227145780d3de251737d87acca3f84f5f2e49d4",
+        "keyRelativeToVerifiedRoot": "c3/c3af2ed0617c4796c8d682601227145780d3de251737d87acca3f84f5f2e49d4",
+        "binding": "REQUIRE_VERIFIED_RUNTIME_BINDING; hash alone never proves physical identity"
+      },
+      "externalReference": null,
+      "consentId": null
+    }
+  ],
+  "hold": {
+    "id": "07200000-0000-4000-8000-000000000901",
+    "tenantId": "07200000-0000-4000-8000-000000000101",
+    "targetTypeConceptCode": "SO_HOLD_TARGET_RECORD",
+    "targetId": "07200000-0000-4000-8000-000000000204",
+    "reasonConceptCode": "SO_HOLD_REASON_INVESTIGATION",
+    "status": "CONCEPTS.STATE_ACTIVE",
+    "authorityReference": "SYNTHETIC_ONLY:07200000-0000-4000-8000-000000000001",
+    "startsAt": "2000-01-01T00:00:00.000Z",
+    "endsAt": null
+  },
+  "auditBaseline": {
+    "table": "audit.identity_verification_access_log",
+    "rows": [
+      {
+        "id": "07200000-0000-4000-8000-000000000801",
+        "verificationCaseId": "07200000-0000-4000-8000-000000000201",
+        "actorUserId": "07200000-0000-4000-8000-000000000601",
+        "actionConceptCode": "AUDIT_ACTION_READ",
+        "purposeOfUseConceptCode": "AUDIT_PURPOSE_VERIFICATION",
+        "outcome": "CONCEPTS.OUTCOME_SUCCESS",
+        "evidenceTypeConceptCode": "IDA_EVIDENCE_TYPE_INSTITUTION_DOCUMENT",
+        "occurredAt": "2000-01-01T00:00:00.000Z"
+      },
+      {
+        "id": "07200000-0000-4000-8000-000000000802",
+        "verificationCaseId": "07200000-0000-4000-8000-000000000202",
+        "actorUserId": "07200000-0000-4000-8000-000000000602",
+        "actionConceptCode": "AUDIT_ACTION_READ",
+        "purposeOfUseConceptCode": "AUDIT_PURPOSE_VERIFICATION",
+        "outcome": "CONCEPTS.OUTCOME_SUCCESS",
+        "evidenceTypeConceptCode": "IDA_EVIDENCE_TYPE_INSTITUTION_DOCUMENT",
+        "occurredAt": "2000-01-01T00:00:00.000Z"
+      },
+      {
+        "id": "07200000-0000-4000-8000-000000000803",
+        "verificationCaseId": "07200000-0000-4000-8000-000000000203",
+        "actorUserId": "07200000-0000-4000-8000-000000000601",
+        "actionConceptCode": "AUDIT_ACTION_READ",
+        "purposeOfUseConceptCode": "AUDIT_PURPOSE_VERIFICATION",
+        "outcome": "CONCEPTS.OUTCOME_SUCCESS",
+        "evidenceTypeConceptCode": "IDA_EVIDENCE_TYPE_INSTITUTION_DOCUMENT",
+        "occurredAt": "2000-01-01T00:00:00.000Z"
+      },
+      {
+        "id": "07200000-0000-4000-8000-000000000804",
+        "verificationCaseId": "07200000-0000-4000-8000-000000000204",
+        "actorUserId": "07200000-0000-4000-8000-000000000601",
+        "actionConceptCode": "AUDIT_ACTION_READ",
+        "purposeOfUseConceptCode": "AUDIT_PURPOSE_VERIFICATION",
+        "outcome": "CONCEPTS.OUTCOME_SUCCESS",
+        "evidenceTypeConceptCode": "IDA_EVIDENCE_TYPE_INSTITUTION_DOCUMENT",
+        "occurredAt": "2000-01-01T00:00:00.000Z"
+      },
+      {
+        "id": "07200000-0000-4000-8000-000000000805",
+        "verificationCaseId": "07200000-0000-4000-8000-000000000205",
+        "actorUserId": "07200000-0000-4000-8000-000000000602",
+        "actionConceptCode": "AUDIT_ACTION_READ",
+        "purposeOfUseConceptCode": "AUDIT_PURPOSE_VERIFICATION",
+        "outcome": "CONCEPTS.OUTCOME_SUCCESS",
+        "evidenceTypeConceptCode": "IDA_EVIDENCE_TYPE_INSTITUTION_DOCUMENT",
+        "occurredAt": "2000-01-01T00:00:00.000Z"
+      }
+    ],
+    "assertion": "Capture all columns of these synthetic rows after creation; byte-equivalent canonical snapshots and same case IDs after any disposition. Existing WORM rows must never be edited/deleted.",
+    "revisionBaseline": "No record_revisions for declared evidence IDs before lifecycle; capture/reconcile technical outcomes only."
+  },
+  "operationPlan": {
+    "target": "PURGE only under the exact synthetic policy binding and separately approved runtime grant",
+    "non_target": "No rule for tenant 102; must survive",
+    "shared_a": "DENY while shared_b remains valid in tenant 102",
+    "shared_b": "Not targeted; must survive",
+    "hold": "DENY while hold is ACTIVE",
+    "missingConfig": "RETAIN / DO NOTHING"
+  },
+  "syntheticPolicyVector": {
+    "enabled": false,
+    "retentionPeriodDays": 0,
+    "baseEvent": "evidence.createdAt",
+    "additionalWaitSeconds": 0,
+    "allowedCaseStatusConceptCodes": ["IDA_CASE_VERIFIED"],
+    "metadataDisposition": "REMOVE",
+    "storageDisposition": "PURGE",
+    "dispositionConceptCode": "SO_DISP_DELETE",
+    "note": "Test vector only, not a legal period or enabling product seed. createIdentityFixture binds the existing policy/registry and exact rowVersion. The default product configuration stays disabled."
+  },
+  "harnessExecution": "node tools/e2e/identity-evidence/prepare.mjs --validate",
+  "storageBackendCreated": false,
+  "fixtureCreated": false
+}

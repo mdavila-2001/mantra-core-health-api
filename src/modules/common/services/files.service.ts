@@ -1,4 +1,10 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Optional } from '@nestjs/common';
+import {
+  StoragePublicationService,
+  type PublicationContext,
+} from '../../../common/storage/storage-publication.service';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
+import { loadStorageEnv } from '../../../common/storage/storage.env';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHmac } from 'node:crypto';
@@ -134,6 +140,7 @@ export class FilesService {
     private readonly fileDerivativesRepo: FileDerivativesRepository,
     private readonly fileLinksRepo: FileLinksRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly publication?: StoragePublicationService,
   ) {
     this.logger.setContext(FilesService.name);
   }
@@ -150,14 +157,23 @@ export class FilesService {
   async createFile(
     dto: CreateFileDto,
     actor: AuthenticatedUser | null,
+    publicationContext?: PublicationContext,
   ): Promise<FileResponseDto> {
     this.logger.info(
       { operation: 'common.file.create', category: dto.category },
       'Creating file',
     );
 
-    return this.em.transactional(async (tx) => {
+    const create = async (tx: EntityManager) => {
+      this.assertLifecycleWired();
+      const identity = await this.publication?.guardLocator(
+        tx,
+        dto.storageUri,
+        { contentHash: dto.contentHash, sizeBytes: dto.sizeBytes },
+        publicationContext?.reservation,
+      );
       const file = this.filesRepo.create(tx, {
+        ...(publicationContext ? { id: publicationContext.targetId } : {}),
         tenantId: SEED.tenantId,
         categoryConceptId: CONCEPTS[`FILE_CATEGORY_${dto.category}`],
         sensitivityConceptId: CONCEPTS[`SENSITIVITY_${dto.sensitivity}`],
@@ -169,6 +185,12 @@ export class FilesService {
       await tx.flush();
 
       const version = this.fileVersionsRepo.create(tx, {
+        bucketOrContainer: identity?.physicalContainer,
+        objectKey: identity?.exactObjectKey,
+        objectVersion:
+          identity?.versionSelector.kind === 'VERSION'
+            ? identity.versionSelector.providerVersionId
+            : undefined,
         fileId: file.id,
         versionNumber: 1,
         storageProviderConceptId: CONCEPTS.STORAGE_PROVIDER_S3,
@@ -200,7 +222,10 @@ export class FilesService {
       // La versión recién creada ya está en mano: su tipo y tamaño viajan sin
       // una lectura más (5.2 · AC-5.2-2).
       return this.fileToResponse(file, dto.category, dto.sensitivity, version);
-    });
+    };
+    return publicationContext
+      ? create(publicationContext.tx)
+      : this.em.transactional(create);
   }
 
   /** UC-02-06: añade una nueva versión y la promociona como vigente. */
@@ -215,6 +240,13 @@ export class FilesService {
     );
 
     return this.em.transactional(async (tx) => {
+      this.assertLifecycleWired();
+      await this.publication?.guardFile(tx, fileId);
+      const identity = await this.publication?.guardLocator(
+        tx,
+        dto.storageUri,
+        { contentHash: dto.contentHash, sizeBytes: dto.sizeBytes },
+      );
       const file = await this.filesRepo.findById(tx, fileId);
       if (!file) {
         throw new ResourceNotFoundException('Archivo no encontrado');
@@ -223,6 +255,12 @@ export class FilesService {
       const nextNumber =
         (await this.fileVersionsRepo.maxVersionNumber(tx, fileId)) + 1;
       const version = this.fileVersionsRepo.create(tx, {
+        bucketOrContainer: identity?.physicalContainer,
+        objectKey: identity?.exactObjectKey,
+        objectVersion:
+          identity?.versionSelector.kind === 'VERSION'
+            ? identity.versionSelector.providerVersionId
+            : undefined,
         fileId,
         versionNumber: nextNumber,
         storageProviderConceptId: CONCEPTS.STORAGE_PROVIDER_S3,
@@ -275,6 +313,13 @@ export class FilesService {
     );
 
     return this.em.transactional(async (tx) => {
+      this.assertLifecycleWired();
+      await this.publication?.guardFile(tx, fileId);
+      const identity = await this.publication?.guardLocator(
+        tx,
+        dto.storageUri,
+        { contentHash: dto.contentHash, sizeBytes: dto.sizeBytes },
+      );
       const source = await this.fileVersionsRepo.findByFileAndId(
         tx,
         fileId,
@@ -300,6 +345,12 @@ export class FilesService {
       const nextNumber =
         (await this.fileVersionsRepo.maxVersionNumber(tx, fileId)) + 1;
       const derivativeVersion = this.fileVersionsRepo.create(tx, {
+        bucketOrContainer: identity?.physicalContainer,
+        objectKey: identity?.exactObjectKey,
+        objectVersion:
+          identity?.versionSelector.kind === 'VERSION'
+            ? identity.versionSelector.providerVersionId
+            : undefined,
         fileId,
         versionNumber: nextNumber,
         storageProviderConceptId: CONCEPTS.STORAGE_PROVIDER_S3,
@@ -353,6 +404,8 @@ export class FilesService {
     );
 
     return this.em.transactional(async (tx) => {
+      this.assertLifecycleWired();
+      await this.publication?.guardFile(tx, fileId);
       const file = await this.filesRepo.findById(tx, fileId);
       if (!file) {
         throw new ResourceNotFoundException('Archivo no encontrado');
@@ -470,6 +523,8 @@ export class FilesService {
     );
 
     return this.em.transactional(async (tx) => {
+      this.assertLifecycleWired();
+      await this.publication?.guardFile(tx, fileId);
       const file = await this.filesRepo.findById(tx, fileId);
       if (!file) {
         throw new ResourceNotFoundException('Archivo no encontrado');
@@ -498,6 +553,11 @@ export class FilesService {
       );
       return { id: file.id, deletedAt };
     });
+  }
+
+  private assertLifecycleWired(): void {
+    if (loadStorageEnv().lifecycleBinding && !this.publication)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
   }
 
   /**

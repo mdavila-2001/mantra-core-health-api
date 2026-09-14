@@ -9,6 +9,13 @@ import { CONCEPTS, createdBy } from '../../../common';
  */
 @Injectable()
 export class LegalHoldRepository {
+  /** Includes foreign-tenant and revoked/unknown rows: applicability is not a SQL omission. */
+  findForLifecycleGraph(
+    em: EntityManager,
+    targetIds: string[],
+  ): Promise<LegalHolds[]> {
+    return em.find(LegalHolds, { targetId: { $in: targetIds } });
+  }
   /**
    * Obtiene find by id.
    *

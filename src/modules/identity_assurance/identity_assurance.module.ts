@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { IdentityEvidenceLifecycleModule } from './identity-evidence-lifecycle.module';
+import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { ProfilesModule } from '../profiles/profiles.module';
@@ -46,6 +48,8 @@ import {
  */
 @Module({
   imports: [
+    IdentityEvidenceLifecycleModule,
+    StorageLifecycleModule,
     MikroOrmModule.forFeature(Object.values(entities)),
     // Verificar una matrícula o una institución cambia el estado de esos
     // dominios, no del propio caso: el efecto lo aplica

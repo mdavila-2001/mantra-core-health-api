@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { ObjectStorageController, DicomWebController } from './controllers';
@@ -20,7 +21,10 @@ import {
  * (UC-60-01 … 12).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    StorageLifecycleModule,
+  ],
   controllers: [ObjectStorageController, DicomWebController],
   providers: [
     ObjectStorageRepository,

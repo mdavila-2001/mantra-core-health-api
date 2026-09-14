@@ -287,3 +287,84 @@ describe('InsuranceBackboneService.updateContactChannels (subtarea 2.3)', () => 
     });
   });
 });
+
+describe('InsuranceBackboneService.updatePlanPremium (subtarea 3.1, v4.2.14)', () => {
+  it('persiste la prima de lista mensual y actualiza auditoría', async () => {
+    const { service, repo, tx } = build();
+    const plan = {
+      id: 'plan-a',
+      monthlyPremiumAmount: undefined,
+      updatedAt: new Date('2020-01-01'),
+      updatedByUserId: 'old-user',
+    };
+    (repo.findPlanForCarrier as any).mockResolvedValue(plan);
+
+    const resultado = await runWithTenant(TENANT_ID, () =>
+      service.updatePlanPremium(
+        'plan-a',
+        { monthlyPremiumAmount: '350.00' } as never,
+        ACTOR,
+      ),
+    );
+
+    expect(repo.findPlanForCarrier).toHaveBeenCalledWith(
+      tx,
+      'plan-a',
+      'carrier-a',
+    );
+    expect(plan.monthlyPremiumAmount).toBe('350.00');
+    expect(plan.updatedByUserId).toBe('user-a');
+    expect(resultado).toEqual({ id: 'plan-a', monthlyPremiumAmount: '350.00' });
+  });
+
+  it('null quita la prima declarada', async () => {
+    const { service, repo } = build();
+    (repo.findPlanForCarrier as any).mockResolvedValue({
+      id: 'plan-a',
+      monthlyPremiumAmount: '350.00',
+    });
+
+    const resultado = await runWithTenant(TENANT_ID, () =>
+      service.updatePlanPremium(
+        'plan-a',
+        { monthlyPremiumAmount: null } as never,
+        ACTOR,
+      ),
+    );
+
+    expect(resultado).toEqual({ id: 'plan-a', monthlyPremiumAmount: null });
+  });
+
+  it('rechaza con 404 un plan ajeno al carrier del tenant activo', async () => {
+    const { service, repo } = build();
+    (repo.findPlanForCarrier as any).mockResolvedValue(null);
+
+    await expect(
+      runWithTenant(TENANT_ID, () =>
+        service.updatePlanPremium(
+          'plan-foreign',
+          { monthlyPremiumAmount: '350.00' } as never,
+          ACTOR,
+        ),
+      ),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  it('propaga 403 antes de consultar el plan si el actor no administra el tenant', async () => {
+    const { service, repo, tenantAdministration } = build();
+    tenantAdministration.assertCanAdminister.mockRejectedValue(
+      new ForbiddenException(),
+    );
+
+    await expect(
+      runWithTenant(TENANT_ID, () =>
+        service.updatePlanPremium(
+          'plan-a',
+          { monthlyPremiumAmount: '350.00' } as never,
+          ACTOR,
+        ),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(repo.findPlanForCarrier).not.toHaveBeenCalled();
+  });
+});

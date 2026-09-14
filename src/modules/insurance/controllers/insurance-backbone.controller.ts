@@ -28,11 +28,13 @@ import {
   CreateBrokerAgreementDto,
   CreateMembershipDto,
   CreatedResourceDto,
+  PlanPremiumDto,
   ResourceStatusDto,
   OkResultDto,
   UpdateCarrierContactChannelsDto,
   UpdatePlanBenefitDto,
   UpdatePlanBenefitRulesDto,
+  UpdatePlanPremiumDto,
 } from '../dto';
 
 /**
@@ -177,6 +179,25 @@ export class InsuranceBackboneController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.service.updateBenefitRules(planId, benefitId, dto, actor);
+  }
+
+  /**
+   * Subtarea 3.1 (v4.2.14) — la aseguradora declara la prima de lista mensual
+   * de un plan que ya existe. Reemplazo completo de un solo valor; `null` la
+   * quita. Sin `@Roles`, como `createPlan`: la barrera es la membresía
+   * OWNER/ADMIN del tenant de la aseguradora (`administrableCarrier`).
+   */
+  @Put('insurance-plans/:planId/premium')
+  @ApiOperation({
+    summary: 'Declarar la prima de lista mensual de un plan administrable',
+  })
+  @ApiOkResponse({ type: PlanPremiumDto })
+  updatePlanPremium(
+    @Param('planId', ParseUUIDPipe) planId: string,
+    @Body() dto: UpdatePlanPremiumDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PlanPremiumDto> {
+    return this.service.updatePlanPremium(planId, dto, actor);
   }
 
   /**

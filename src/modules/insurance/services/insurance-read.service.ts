@@ -495,6 +495,7 @@ function toPlan(
     name: plan.name,
     planType: optionalConcept(concepts, plan.planTypeConceptId),
     currency: optionalConcept(concepts, plan.currencyConceptId),
+    monthlyPremiumAmount: plan.monthlyPremiumAmount ?? null,
     effectiveFrom: dateOnly(plan.effectiveFrom),
     effectiveTo: dateOnly(plan.effectiveTo),
     status: concept(concepts, plan.statusConceptId),

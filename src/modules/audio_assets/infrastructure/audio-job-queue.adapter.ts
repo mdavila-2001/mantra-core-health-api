@@ -16,10 +16,12 @@ export class AudioJobQueueAdapter {
     assetId: string,
     assetKey: string,
     actor: AuthenticatedUser,
+    tenantId?: string,
   ): Promise<string> {
     const result = await this.queues.enqueueJob(
       AUDIO_GENERATION_QUEUE,
       {
+        tenantId,
         jobType: AUDIO_GENERATION_JOB_TYPE,
         dedupeKey: `${AUDIO_GENERATION_JOB_TYPE}:${assetKey}`,
         payloadJson: { assetId },

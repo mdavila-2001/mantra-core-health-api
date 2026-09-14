@@ -16,10 +16,11 @@ JWT:
 
 | Método y ruta | Cuerpo administrado | Respuesta |
 | --- | --- | --- |
-| `POST /insurance-products/:productId/plans` | Código, nombre, vigencia y moneda opcional | `{ id }` |
+| `POST /insurance-products/:productId/plans` | Código, nombre, vigencia, moneda opcional y prima de lista mensual opcional | `{ id }` |
 | `POST /insurance-plans/:planId/benefits` | Categoría, servicio opcional, vigencia e importes | `{ id }` |
 | `PUT /insurance-plans/:planId/benefits/:benefitId` | Porcentaje, copago, deducible y tope anual; `null` borra | `{ ok: true }` |
 | `PUT /insurance-plans/:planId/benefits/:benefitId/rules` | Autorización previa, documentos y exclusión | `{ ok: true }` |
+| `PUT /insurance-plans/:planId/premium` | Prima de lista mensual del plan; `null` la quita | `{ id, monthlyPremiumAmount }` |
 
 Todos los identificadores se resuelven por la cadena
 tenant → carrier → producto → plan → beneficio. Un recurso inexistente, ajeno

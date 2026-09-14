@@ -13,6 +13,7 @@ import { AppealsController } from './appeals.controller';
 import { BrokerCommissionController } from './broker-commission.controller';
 import { InsuranceReadController } from './insurance-read.controller';
 import { ClaimsReadController } from './claims-read.controller';
+import { InsuranceAnalyticsController } from './insurance-analytics.controller';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as never;
 const dto = {} as never;
@@ -91,6 +92,10 @@ describe('Insurance controllers (delegación)', () => {
         callCenterPhone: '800-10-6060',
         supportEmail: null,
       }),
+      updatePlanPremium: mockFn().mockResolvedValue({
+        id: ID,
+        monthlyPremiumAmount: '350.00',
+      }),
     };
     const c = new InsuranceBackboneController(service as never) as any;
     await c.createCarrier(dto, actor);
@@ -111,6 +116,8 @@ describe('Insurance controllers (delegación)', () => {
     expect(service.createEmployerGroup).toHaveBeenCalledWith(dto, actor);
     await c.updateContactChannels(ID, dto, actor);
     expect(service.updateContactChannels).toHaveBeenCalledWith(ID, dto, actor);
+    await c.updatePlanPremium(ID, dto, actor);
+    expect(service.updatePlanPremium).toHaveBeenCalledWith(ID, dto, actor);
   });
 
   it('PriorAuthController delega en PriorAuthService', async () => {
@@ -214,6 +221,7 @@ describe('Insurance controllers (delegación)', () => {
       'createBenefit',
       'updateBenefit',
       'updateBenefitRules',
+      'updatePlanPremium',
     ]) {
       expect(roles(method)).toBeUndefined();
     }
@@ -265,5 +273,33 @@ describe('Insurance controllers (delegación)', () => {
       'BILLING',
       'FINANCE',
     ]);
+  });
+
+  /**
+   * Subtarea 3.1 (v4.2.14): el tablero de siniestralidad de la aseguradora.
+   * Sin `@Roles` — la barrera es membresía-o-rol, resuelta en el servicio
+   * porque depende de a QUÉ aseguradora pertenece el actor.
+   */
+  it('InsuranceAnalyticsController delega en su servicio y no declara @Roles', async () => {
+    const service = {
+      getLossRatioAnalytics: mockFn().mockResolvedValue({ carrierId: ID }),
+    };
+    const c = new InsuranceAnalyticsController(service as never) as any;
+
+    const query = {} as never;
+    await c.getLossRatioAnalytics(query, actor);
+    expect(service.getLossRatioAnalytics).toHaveBeenCalledWith(query, actor);
+
+    expect(
+      Reflect.getMetadata(
+        'requiredRoles',
+        (
+          InsuranceAnalyticsController.prototype as never as Record<
+            string,
+            object
+          >
+        )['getLossRatioAnalytics'],
+      ),
+    ).toBeUndefined();
   });
 });

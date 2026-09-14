@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import {
+  StoragePublicationService,
+  guardStorageMutation,
+} from '../../../common/storage/storage-publication.service';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -60,6 +64,7 @@ export class ObjectGovernanceService {
     private readonly governanceRepo: ObjectGovernanceRepository,
     private readonly storageRepo: ObjectStorageRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly publication?: StoragePublicationService,
   ) {
     this.logger.setContext(ObjectGovernanceService.name);
   }
@@ -87,6 +92,7 @@ export class ObjectGovernanceService {
     }
 
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const version = await this.storageRepo.findVersionById(tx, versionId);
       if (!version) {
         throw new ResourceNotFoundException('Versión no encontrada', {
@@ -173,6 +179,7 @@ export class ObjectGovernanceService {
     actor: AuthenticatedUser,
   ): Promise<LegalHoldResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const version = await this.storageRepo.findVersionById(tx, versionId);
       if (!version) {
         throw new ResourceNotFoundException('Versión no encontrada', {
@@ -239,6 +246,7 @@ export class ObjectGovernanceService {
     actor: AuthenticatedUser,
   ): Promise<LegalHoldResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const hold = await this.governanceRepo.findLegalHoldForUpdate(tx, holdId);
       if (!hold) {
         throw new ResourceNotFoundException('Retención legal no encontrada', {
@@ -418,6 +426,7 @@ export class ObjectGovernanceService {
     dto: BuildArchiveJobDto,
   ): Promise<ArchiveJobResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const manifest = await this.storageRepo.findManifestForUpdate(
         tx,
         dto.objectManifestId,
@@ -512,6 +521,7 @@ export class ObjectGovernanceService {
     actor: AuthenticatedUser,
   ): Promise<DeletionMarkerResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const manifest = await this.storageRepo.findManifestForUpdate(
         tx,
         manifestId,
