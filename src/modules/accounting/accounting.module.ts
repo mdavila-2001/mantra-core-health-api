@@ -14,6 +14,7 @@ import {
   AccountingLiabilityController,
   AccountingExchangeRateController,
   AccountingPractitionerController,
+  AccountingCockpitController,
 } from './controllers';
 import {
   LedgerReadService,
@@ -26,6 +27,7 @@ import {
   ExchangeRateService,
   PostingHelper,
   PractitionerAccountingService,
+  AccountingReadService,
 } from './services';
 import {
   JournalRepository,
@@ -66,6 +68,7 @@ import {
     AccountingLiabilityController,
     AccountingExchangeRateController,
     AccountingPractitionerController,
+    AccountingCockpitController,
   ],
   providers: [
     // Repositorios
@@ -89,6 +92,7 @@ import {
     LiabilityService,
     ExchangeRateService,
     PractitionerAccountingService,
+    AccountingReadService,
   ],
 })
 export class AccountingModule {}

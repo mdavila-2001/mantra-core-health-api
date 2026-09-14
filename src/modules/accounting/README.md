@@ -38,6 +38,47 @@ centésimas enteras (`services/money.ts`) para evitar ruido de coma flotante.
 > parámetro), se adoptan sub-rutas por slash, la convención ya usada en el repo
 > (`terminology/versions/:id/publish`, etc.).
 
+## Lecturas del cockpit (subtarea 6.3)
+
+Seis `GET`, proyecciones de solo lectura sobre lo que el módulo ya escribe —
+ninguna cambia el comportamiento de las lecturas del mayor ni agrega DDL.
+Roles `SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER` (el mismo trío de las
+lecturas del mayor), controlador `AccountingCockpitController`, servicio
+`AccountingReadService`.
+
+| Ruta | Descripción |
+|------|-------------|
+| `GET /accounting/fiscal-years?practiceId=` | El ejercicio fiscal vigente (el que cubre hoy, o el más reciente) con sus periodos. 404 si la práctica no tiene ejercicios |
+| `GET /accounting/open-items?practiceId=&side=` | Cartera abierta (excluye partidas saldadas) con antigüedad en cinco tramos fijos, siempre presentes |
+| `GET /accounting/dimensions?practiceId=` | Debe/haber/resultado por centro de coste, centro de beneficio y segmento, sólo asientos POSTEADOS |
+| `GET /accounting/journal-transactions/:id/document-flow` | El asiento, su origen si es una reversa, y su reversión si la tiene |
+| `GET /accounting/assets?practiceId=` | Registro de activos fijos con la cuota de la próxima corrida de depreciación |
+| `GET /accounting/accrual-objects?practiceId=` | Registro de devengos con el avance de cada cronograma |
+
+**Alcance por práctica (D-1).** `open_items`, `subledger_accounts`,
+`accrual_objects`, `profit_centers` y `segments` son tablas por `tenant_id`, no
+por práctica: el `tenant_id` sale de la práctica ya verificada y se acota, donde
+el esquema da un puente, contra las cuentas de esa práctica
+(`subledger_accounts.reconciliation_account_id` / `accrual_objects.expense_account_id`
+y `accrual_account_id` → `accounts.practice_id`). Para centros de beneficio y
+segmentos **no hay puente**: se listan los del tenant completo.
+
+**`SEGMENT` da `0.00` en casi todos los casos.** El camino de escritura del
+módulo (`PostingHelper.post`) no imputa `segment_id` en `journal_entry_assignments`
+al postear: sólo lo llena la reversa, copiando la asignación del asiento
+original. No es un defecto de esta lectura.
+
+**Derivaciones que no tienen columna propia:** `fiscal_periods` no tiene `name`
+ni `period_number` (se derivan del `code` y de la posición dentro del ejercicio);
+`accrual_objects` no tiene `name` (se repite `object_number`); `assets` no tiene
+una FK a `asset_classes` (la clase sale de `asset_type_concept_id`).
+`closedAt` de un periodo se omite siempre: no existe la columna.
+
+**Tope interno.** `openItems` corta en 5 000 partidas por respuesta
+(`OPEN_ITEMS_MAX`); `dimensions` agrega hasta 10 000 asientos POSTEADOS
+(`DIMENSIONS_MAX_TRANSACTIONS`). Ninguna de las seis pagina: los tipos del
+front no declaran cursor.
+
 ## Entidades (esquema `accounting`)
 
 `journal_transactions`, `ledger_entries`, `journal_entry_assignments` (GOD NODE de
@@ -76,7 +117,11 @@ secretos ni PHI.
 ## Tests
 
 - Unit (Jest, mockean repos/em/posting): `services/*.spec.ts`,
-  `controllers/*.spec.ts` — 9 suites / 49 casos.
+  `controllers/*.spec.ts` — 14 suites / 120 casos (incluye
+  `accounting-read.service.spec.ts` y `accounting-cockpit.controller.spec.ts`).
+- Integration: `test/integration/fx14-cockpit-contable.int-spec.ts` siembra por
+  la API (dos filas sin ruta de alta —`subledger_accounts` y `cost_centers`— nacen
+  por `EntityManager`) y ejercita las seis lecturas contra la base real.
 - Smoke (contrato transversal): `test/smoke/modules/accounting.smoke.ts`
   (`ACCOUNTING_SMOKE`), encadena cuentas → asiento → reversa/devengo/activo con
   `ctx.vars` y ejercita casos límite 401/400/404/409/422.

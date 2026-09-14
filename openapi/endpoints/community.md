@@ -8558,6 +8558,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -8610,6 +8622,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -9582,6 +9602,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -9634,6 +9666,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -9772,6 +9812,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -9824,6 +9876,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -9962,6 +10022,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -10014,6 +10086,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -10712,6 +10792,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -10764,6 +10856,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -11570,6 +11670,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -11622,6 +11734,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |

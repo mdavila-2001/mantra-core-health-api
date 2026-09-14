@@ -3303,6 +3303,7 @@ Content-Type: application/json
 | `practiceScopeConceptId` | No | `string` | formato `uuid` | Concept id del alcance de práctica | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date` | Vigente desde (ISO date) | `2026-07-31` |
 | `validTo` | No | `string` | formato `date` | Vigente hasta (ISO date) | `2026-07-31` |
+| `fileId` | No | `string` | formato `uuid` | Archivo de la matrícula (debe haberlo subido el mismo usuario) | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -3320,7 +3321,8 @@ Content-Type: application/json
   "regulatoryAuthority": "valor-ejemplo",
   "practiceScopeConceptId": "00000000-0000-4000-8000-000000000001",
   "validFrom": "2026-07-31",
-  "validTo": "2026-07-31"
+  "validTo": "2026-07-31",
+  "fileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -3347,6 +3349,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
   "licenseNumber": "valor-ejemplo",
   "state": "00000000-0000-4000-8000-000000000001",
+  "fileId": "00000000-0000-4000-8000-000000000001",
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -3359,6 +3362,7 @@ Campos de la respuesta:
 | `practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
 | `licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Valor de license number mantenido por la instancia. | `valor-ejemplo` |
 | `state` | Sí | `string` | formato `uuid` | Concept id del estado de la licencia | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | No | `string` | formato `uuid` | El respaldo adjuntado, si se adjuntó uno. Se devuelve para que quien acaba de cargarla pueda mostrarlo sin releer el perfil entero. | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -3371,8 +3375,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

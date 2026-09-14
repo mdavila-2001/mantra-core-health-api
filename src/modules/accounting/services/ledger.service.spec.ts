@@ -50,6 +50,9 @@ function build() {
     assignmentForEntry: mockFn().mockResolvedValue(null),
     createLink: mockFn(),
     createFile: mockFn(() => ({ id: 'f1' })),
+    findTransactionsByIds: mockFn().mockResolvedValue([]),
+    findReversalLinksForTransaction: mockFn().mockResolvedValue([]),
+    findPostedEntriesWithAssignments: mockFn().mockResolvedValue([]),
   };
   const accountsRepo = {
     findByCode: mockFn().mockResolvedValue(null),

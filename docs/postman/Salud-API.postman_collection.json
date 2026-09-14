@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1266 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1266 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1273 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1273 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -1739,7 +1739,7 @@
       ]
     },
     {
-      "name": "accounting (38)",
+      "name": "accounting (44)",
       "item": [
         {
           "name": "accounting-accruals",
@@ -1982,6 +1982,348 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.runId);",
                       "  if (id) pm.environment.set('runId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "accounting-cockpit",
+          "item": [
+            {
+              "name": "GET /accounting/accrual-objects · Registro de devengos de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/accrual-objects?practiceId=practiceId-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "accrual-objects"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "practiceId-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Registro de devengos de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /accounting/accrual-objects`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AccountingCockpitController_accrualObjects`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.accrualObjects || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('accrualObjectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/assets · Registro de activos fijos de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/assets?practiceId=practiceId-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "assets"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "practiceId-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "La cuota mensual es la que costaría la próxima corrida en un período todavía no corrido, no una amortización ya asentada.\n\n`GET /accounting/assets`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AccountingCockpitController_fixedAssets`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.assets || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('assetId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/dimensions · Dimensiones analíticas de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/dimensions?practiceId=practiceId-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "dimensions"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "practiceId-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Sólo asientos POSTEADOS. El segmento da 0.00 en casi todos los casos: el camino de escritura del módulo no imputa segmento hoy.\n\n`GET /accounting/dimensions`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AccountingCockpitController_dimensions`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.dimensions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('dimensionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/fiscal-years · Ejercicio fiscal vigente de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/fiscal-years?practiceId=practiceId-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "fiscal-years"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "practiceId-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "El ejercicio que cubre hoy, o el más reciente si ninguno la cubre. 404 si la práctica no tiene ejercicios fiscales todavía.\n\n`GET /accounting/fiscal-years`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AccountingCockpitController_fiscalYear`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.fiscalYears || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('fiscalYearId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/open-items · Cartera abierta de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/open-items?practiceId={{practiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "open-items"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "{{practiceId}}",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "side",
+                      "value": "RECEIVABLE",
+                      "description": "Lado de la cartera a listar; sin filtro, ambos",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Excluye las partidas saldadas. Sin paginación (el contrato del front no declara cursor); tope interno de 5000 partidas por respuesta.\n\n`GET /accounting/open-items`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AccountingCockpitController_openItems`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.openItems || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('openItemId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/journal-transactions/{id}/document-flow · Flujo del documento de un asiento",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/journal-transactions/:id/document-flow",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "journal-transactions",
+                    ":id",
+                    "document-flow"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{journalTransactionId}}",
+                      "description": "Identificador de ruta · variable `{{journalTransactionId}}`"
+                    }
+                  ]
+                },
+                "description": "Sólo reversiones (`ACCT_REL_REVERSES`): es lo único que el catálogo declara y ejerce hoy.\n\n`GET /accounting/journal-transactions/{id}/document-flow`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `AccountingCockpitController_documentFlow`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.journalTransactions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('journalTransactionId', first.id);",
                       "}"
                     ]
                   }
@@ -59663,7 +60005,7 @@
       ]
     },
     {
-      "name": "profiles (36)",
+      "name": "profiles (37)",
       "item": [
         {
           "name": "profiles-patients",
@@ -61325,7 +61667,7 @@
                 "description": "Registrar/renovar autorización jurisdiccional (licencia). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/practitioners/{profileId}/jurisdiction-authorizations`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_addJurisdictionAuthorization`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"validFrom\": \"2026-01-01\",\n  \"validTo\": \"2026-01-01\"\n}",
+                  "raw": "{\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"validFrom\": \"2026-01-01\",\n  \"validTo\": \"2026-01-01\",\n  \"fileId\": \"{{fileId}}\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -61578,6 +61920,56 @@
                     }
                   }
                 }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary · Marcar una especialidad propia como la principal",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/me/specialties/:specialtyId/primary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    "me",
+                    "specialties",
+                    ":specialtyId",
+                    "primary"
+                  ],
+                  "variable": [
+                    {
+                      "key": "specialtyId",
+                      "value": "{{specialtyId}}",
+                      "description": "Identificador de ruta · variable `{{specialtyId}}`"
+                    }
+                  ]
+                },
+                "description": "Baja la primaria anterior y sube ésta, en la misma transacción. Idempotente: marcar la que ya lo es devuelve la especialidad sin escribir. `412` si la especialidad ya no se ejerce (`validTo`).\n\n`PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_setOwnPrimarySpecialty`"
               },
               "response": [],
               "event": [

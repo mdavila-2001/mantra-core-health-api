@@ -16603,6 +16603,39 @@ paths:
       description: >-
         Abrir un ejercicio fiscal y sus periodos. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      description: >-
+        El ejercicio que cubre hoy, o el más reciente si ninguno la cubre. 404 si la práctica no tiene ejercicios
+        fiscales todavía.
+      operationId: AccountingCockpitController_fiscalYear
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CockpitFiscalYearDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Ejercicio fiscal vigente de una práctica
+      tags:
+        - accounting-cockpit
   /accounting/fiscal-periods/{id}/lock:
     post:
       operationId: AccountingFiscalController_lockPeriod
@@ -16684,6 +16717,39 @@ paths:
       description: >-
         Crear objeto de devengo y su cronograma. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: AccountingCockpitController_accrualObjects
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CockpitAccrualsDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registro de devengos de una práctica
+      tags:
+        - accounting-cockpit
+      description: >-
+        Registro de devengos de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /accounting/accruals/run:
     post:
       operationId: AccountingAccrualController_runAccruals
@@ -16758,6 +16824,49 @@ paths:
       description: >-
         Generar partida abierta en subledger. Requiere JWT y los roles o alcances declarados por el controlador. Todas
         las respuestas de error usan el envelope ErrorResponse.
+    get:
+      description: >-
+        Excluye las partidas saldadas. Sin paginación (el contrato del front no declara cursor); tope interno de 5000
+        partidas por respuesta.
+      operationId: AccountingCockpitController_openItems
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: side
+          required: false
+          in: query
+          description: Lado de la cartera a listar; sin filtro, ambos
+          schema:
+            type: string
+            enum:
+              - RECEIVABLE
+              - PAYABLE
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CockpitOpenItemsPageDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Cartera abierta de una práctica
+      tags:
+        - accounting-cockpit
   /accounting/clearing-documents:
     post:
       operationId: AccountingSubledgerController_clearOpenItems
@@ -17362,6 +17471,108 @@ paths:
       description: >-
         Registrar el avance (pago de cuota) de un pasivo. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /accounting/dimensions:
+    get:
+      description: >-
+        Sólo asientos POSTEADOS. El segmento da 0.00 en casi todos los casos: el camino de escritura del módulo no
+        imputa segmento hoy.
+      operationId: AccountingCockpitController_dimensions
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CockpitDimensionsDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Dimensiones analíticas de una práctica
+      tags:
+        - accounting-cockpit
+  /accounting/journal-transactions/{id}/document-flow:
+    get:
+      description: 'Sólo reversiones (`ACCT_REL_REVERSES`): es lo único que el catálogo declara y ejerce hoy.'
+      operationId: AccountingCockpitController_documentFlow
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CockpitDocumentFlowDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Flujo del documento de un asiento
+      tags:
+        - accounting-cockpit
+  /accounting/assets:
+    get:
+      description: >-
+        La cuota mensual es la que costaría la próxima corrida en un período todavía no corrido, no una amortización ya
+        asentada.
+      operationId: AccountingCockpitController_fixedAssets
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CockpitFixedAssetsDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registro de activos fijos de una práctica
+      tags:
+        - accounting-cockpit
   /billing/invoices:issue-from-encounter:
     post:
       operationId: BillingReceivablesController_issueFromEncounter
@@ -50158,6 +50369,10 @@ tags:
     description: >-
       Operaciones del dominio funcional accounting assets. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: accounting-cockpit
+    description: >-
+      Operaciones del dominio funcional accounting cockpit. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: accounting-fiscal
     description: >-
       Operaciones del dominio funcional accounting fiscal. Consulte el catálogo Markdown de endpoints para payloads
@@ -61113,6 +61328,372 @@ components:
       required:
         - bankAccountId
         - interestExpenseAccountId
+    CockpitFiscalPeriodDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        periodNumber:
+          type: number
+          example: 1
+        name:
+          type: string
+        startsOn:
+          type: string
+          format: date
+        endsOn:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+            - CLOSED
+            - OPEN
+            - PLANNED
+      required:
+        - id
+        - periodNumber
+        - name
+        - startsOn
+        - endsOn
+        - status
+    CockpitFiscalYearDto:
+      type: object
+      properties:
+        fiscalYearId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        startsOn:
+          type: string
+          format: date
+        endsOn:
+          type: string
+          format: date
+        currentPeriodId:
+          type: string
+        periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/CockpitFiscalPeriodDto'
+        count:
+          type: number
+      required:
+        - fiscalYearId
+        - name
+        - startsOn
+        - endsOn
+        - currentPeriodId
+        - periods
+        - count
+    CockpitOpenItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        documentNumber:
+          type: string
+        accountCode:
+          type: string
+        accountName:
+          type: string
+        partnerName:
+          type: string
+        side:
+          type: string
+          enum:
+            - RECEIVABLE
+            - PAYABLE
+        documentDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        amount:
+          type: string
+        clearedAmount:
+          type: string
+        openAmount:
+          type: string
+        overdueDays:
+          type: number
+          example: 0
+        agingBucket:
+          type: string
+      required:
+        - id
+        - documentNumber
+        - accountCode
+        - accountName
+        - partnerName
+        - side
+        - documentDate
+        - dueDate
+        - amount
+        - clearedAmount
+        - openAmount
+        - overdueDays
+        - agingBucket
+    CockpitAgingBucketDto:
+      type: object
+      properties:
+        bucket:
+          type: string
+        label:
+          type: string
+        receivable:
+          type: string
+        payable:
+          type: string
+        count:
+          type: number
+      required:
+        - bucket
+        - label
+        - receivable
+        - payable
+        - count
+    CockpitOpenItemsPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CockpitOpenItemDto'
+        aging:
+          type: array
+          items:
+            $ref: '#/components/schemas/CockpitAgingBucketDto'
+        totalReceivable:
+          type: string
+        totalPayable:
+          type: string
+        count:
+          type: number
+      required:
+        - items
+        - aging
+        - totalReceivable
+        - totalPayable
+        - count
+    CockpitDimensionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        kind:
+          type: string
+          enum:
+            - COST_CENTER
+            - PROFIT_CENTER
+            - SEGMENT
+        debit:
+          type: string
+        credit:
+          type: string
+        result:
+          type: string
+      required:
+        - id
+        - code
+        - name
+        - kind
+        - debit
+        - credit
+        - result
+    CockpitDimensionsDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CockpitDimensionDto'
+        count:
+          type: number
+      required:
+        - items
+        - count
+    CockpitDocumentFlowNodeDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum:
+            - ORIGEN
+            - ACTUAL
+            - REVERSION
+        transactionNumber:
+          type: string
+        transactionDate:
+          format: date-time
+          type: string
+        totalAmount:
+          type: string
+        status:
+          type: string
+      required:
+        - id
+        - role
+        - transactionNumber
+        - transactionDate
+        - totalAmount
+        - status
+    CockpitDocumentFlowDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CockpitDocumentFlowNodeDto'
+      required:
+        - items
+    CockpitFixedAssetDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        className:
+          type: string
+        classCode:
+          type: string
+        usefulLifeMonths:
+          type: number
+          example: 60
+        acquisitionCost:
+          type: string
+        accumulatedDepreciation:
+          type: string
+        netBookValue:
+          type: string
+        monthlyDepreciation:
+          type: string
+        depreciable:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - RETIRED
+      required:
+        - id
+        - code
+        - name
+        - className
+        - classCode
+        - usefulLifeMonths
+        - acquisitionCost
+        - accumulatedDepreciation
+        - netBookValue
+        - monthlyDepreciation
+        - depreciable
+        - status
+    CockpitFixedAssetsDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CockpitFixedAssetDto'
+        totalAcquisition:
+          type: string
+        totalAccumulated:
+          type: string
+        totalNetBookValue:
+          type: string
+        monthlyCharge:
+          type: string
+        count:
+          type: number
+      required:
+        - items
+        - totalAcquisition
+        - totalAccumulated
+        - totalNetBookValue
+        - monthlyCharge
+        - count
+    CockpitAccrualObjectDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        kind:
+          type: string
+          enum:
+            - EXPENSE
+            - REVENUE
+        totalAmount:
+          type: string
+        periods:
+          type: number
+        postedPeriods:
+          type: number
+        remainingPeriods:
+          type: number
+        periodAmount:
+          type: string
+        recognizedAmount:
+          type: string
+        pendingAmount:
+          type: string
+        startsOn:
+          type: string
+          format: date
+        completed:
+          type: boolean
+      required:
+        - id
+        - code
+        - name
+        - kind
+        - totalAmount
+        - periods
+        - postedPeriods
+        - remainingPeriods
+        - periodAmount
+        - recognizedAmount
+        - pendingAmount
+        - startsOn
+        - completed
+    CockpitAccrualsDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CockpitAccrualObjectDto'
+        pendingTotal:
+          type: string
+        periodCharge:
+          type: string
+        count:
+          type: number
+      required:
+        - items
+        - pendingTotal
+        - periodCharge
+        - count
     InvoiceLineInputDto:
       type: object
       properties:

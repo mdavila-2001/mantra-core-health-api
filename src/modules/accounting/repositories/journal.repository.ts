@@ -484,6 +484,104 @@ export class JournalRepository {
   }
 
   /**
+   * Los asientos de un lote de ids, sin orden garantizado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Identificadores a resolver.
+   * @returns Los asientos encontrados.
+   */
+  findTransactionsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<JournalTransactions[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(JournalTransactions, { id: { $in: [...ids] } });
+  }
+
+  /**
+   * Los vínculos de reversión de un asiento, en cualquier dirección (D-5):
+   * los que lo tienen como origen (fue reversado) y los que lo tienen como
+   * destino (es la reversa de otro).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param transactionId - Asiento cuyo flujo se reconstruye.
+   * @param relationTypeConceptId - El concepto `RELATION_REVERSES`.
+   * @returns Los vínculos de reversión donde el asiento participa.
+   */
+  findReversalLinksForTransaction(
+    em: EntityManager,
+    transactionId: string,
+    relationTypeConceptId: string,
+  ): Promise<AccountingDocumentLinks[]> {
+    return em.find(AccountingDocumentLinks, {
+      relationTypeConceptId,
+      $or: [
+        { sourceTransactionId: transactionId },
+        { targetTransactionId: transactionId },
+      ],
+    });
+  }
+
+  /**
+   * Las líneas POSTEADAS de una práctica con su asignación analítica, para
+   * agregar por centro de coste, centro de beneficio y segmento (D-9). Nunca
+   * suma además `ledger_entries.cost_center_id`: la imputación vive en
+   * `journal_entry_assignments`, y sumar las dos contaría doble.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica cuyas líneas se agregan.
+   * @param postedStatusConceptId - El concepto `TXN_POSTED`.
+   * @param limit - Tope de asientos a leer.
+   * @returns Cada línea posteada con su dimensión (si tiene) y su importe.
+   */
+  async findPostedEntriesWithAssignments(
+    em: EntityManager,
+    practiceId: string,
+    postedStatusConceptId: string,
+    limit: number,
+  ): Promise<
+    Array<{
+      directionConceptId: string;
+      amount: string;
+      amountBase: string | null;
+      costCenterId: string | null;
+      profitCenterId: string | null;
+      segmentId: string | null;
+    }>
+  > {
+    const asientos = await em.find(
+      JournalTransactions,
+      { practiceId, statusConceptId: postedStatusConceptId },
+      { limit },
+    );
+    if (asientos.length === 0) return [];
+
+    const entries = await em.find(LedgerEntries, {
+      transactionId: { $in: asientos.map((a) => a.id) },
+    });
+    if (entries.length === 0) return [];
+
+    const assignments = await em.find(JournalEntryAssignments, {
+      ledgerEntryId: { $in: entries.map((e) => e.id) },
+    });
+    const asignacionPorLinea = new Map(
+      assignments.map((a) => [a.ledgerEntryId, a]),
+    );
+
+    return entries.map((entry) => {
+      const asignacion = asignacionPorLinea.get(entry.id);
+      return {
+        directionConceptId: entry.directionConceptId,
+        amount: entry.amount,
+        amountBase: entry.amountBase ?? null,
+        costCenterId: asignacion?.costCenterId ?? null,
+        profitCenterId: asignacion?.profitCenterId ?? null,
+        segmentId: asignacion?.segmentId ?? null,
+      };
+    });
+  }
+
+  /**
    * Ejecuta la operación ledger entries for transaction.
    *
    * @param em - Contexto de persistencia o transacción activa.
