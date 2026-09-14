@@ -2,13 +2,20 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { ROOT, sourceProof, hash, validateFixture } from './prepare.mjs';
+import {
+  ROOT,
+  sourceProof,
+  hash,
+  validateFixture,
+  validateProjectName,
+} from './prepare.mjs';
 const [mode, manifestPath, approvalPath] = process.argv.slice(2);
 if (!['inspect', 'prepare', 'execute-approved'].includes(mode) || !manifestPath)
   throw new Error(
     'Usage: node tools/e2e/identity-evidence/run.mjs inspect|prepare|execute-approved <preparation.json> [approval.json]',
   );
 const manifest = JSON.parse(readFileSync(resolve(manifestPath), 'utf8'));
+const project = validateProjectName(manifest.project ?? 'mantra-7-2-synthetic');
 const fixture = JSON.parse(
   readFileSync(
     join(ROOT, 'test/fixtures/identity-evidence-lifecycle.json'),
@@ -28,11 +35,11 @@ const docker = (...args) =>
     maxBuffer: 16 * 1024 * 1024,
   }).trim();
 const network = JSON.parse(
-  docker('network', 'inspect', 'mantra-7-2-synthetic_default'),
+  docker('network', 'inspect', `${project}_default`),
 )[0];
 if (
   network.Internal !== true ||
-  network.Labels['com.docker.compose.project'] !== 'mantra-7-2-synthetic'
+  network.Labels['com.docker.compose.project'] !== project
 )
   throw new Error('NETWORK_ISOLATION_UNKNOWN');
 const services = [
@@ -41,9 +48,7 @@ const services = [
   'mongodb',
   'redis',
   'opensearch',
-].map(
-  (name) => JSON.parse(docker('inspect', `mantra-7-2-synthetic-${name}-1`))[0],
-);
+].map((name) => JSON.parse(docker('inspect', `${project}-${name}-1`))[0]);
 for (const service of services) {
   if (
     service.Config.Labels['mantra.synthetic-only'] !== 'true' ||
@@ -69,7 +74,7 @@ for (const service of services) {
     )
       throw new Error('VOLUME_NOT_NEW_AND_EXCLUSIVE');
     if (
-      !mount.Name.startsWith('mantra-7-2-synthetic_') &&
+      !mount.Name.startsWith(`${project}_`) &&
       !(
         mount.Destination === '/data/configdb' &&
         service.Config.Volumes?.['/data/configdb']

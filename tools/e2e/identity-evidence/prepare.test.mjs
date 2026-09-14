@@ -2,7 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT, validateFixture, composeSpec } from './prepare.mjs';
+import {
+  ROOT,
+  validateFixture,
+  composeSpec,
+  validateProjectName,
+  sourceProof,
+} from './prepare.mjs';
 const fixture = () =>
   JSON.parse(
     readFileSync(
@@ -30,6 +36,11 @@ for (const variant of [
   'hold',
   'external',
   'shared',
+  'anon-missing',
+  'anon-foreign-target',
+  'anon-column',
+  'anon-storage-delete',
+  'anon-personal-data',
 ])
   test(`rejects ${variant}`, () => {
     const f = fixture();
@@ -41,6 +52,15 @@ for (const variant of [
     if (variant === 'hold') f.hold.endsAt = '2001-01-01';
     if (variant === 'external') f.graphs[0].externalReference = 'external';
     if (variant === 'shared') f.graphs[4].tenantId = f.tenantIds[0];
+    if (variant === 'anon-missing') delete f.anonymizationTest;
+    if (variant === 'anon-foreign-target')
+      f.anonymizationTest.evidenceId = f.graphs[1].evidenceId;
+    if (variant === 'anon-column')
+      f.anonymizationTest.column = 'identity_verification_case_id';
+    if (variant === 'anon-storage-delete')
+      f.anonymizationTest.storageDisposition = 'PURGE';
+    if (variant === 'anon-personal-data')
+      f.anonymizationTest.syntheticIdentifier = 'not-an-approved-literal';
     assert.throws(() => validateFixture(f));
   });
 test('compose uses fresh project-scoped volumes, loopback ports and supported read-only bootstrap, not manual DDL', () => {
@@ -59,4 +79,29 @@ test('compose uses fresh project-scoped volumes, loopback ports and supported re
     spec.services['postgres-init'].volumes.every((v) => v.endsWith(':ro')),
   );
   assert.ok(!JSON.stringify(spec).includes('external":true'));
+});
+test('fresh delivery project does not reuse the previous synthetic stack', () => {
+  assert.equal(
+    composeSpec('/synthetic/canonical', 'mantra-7-2-synthetic-final').name,
+    'mantra-7-2-synthetic-final',
+  );
+  for (const value of [
+    'production',
+    'mantra-redesa',
+    'mantra-7-2-synthetic/../prod',
+  ])
+    assert.throws(() => validateProjectName(value));
+});
+test('committed source still proves all runtime files and uses the integration merge base', () => {
+  const source = sourceProof();
+  assert.ok(
+    source.files.some(
+      (file) =>
+        file.path ===
+        'src/common/storage/storage-lifecycle-coordinator.service.ts',
+    ),
+  );
+  assert.ok(source.files.some((file) => file.path === 'src/app.module.ts'));
+  assert.match(source.integrationBaseSha, /^[0-9a-f]{40}$/);
+  assert.deepEqual(source.upstreamOverlap, []);
 });

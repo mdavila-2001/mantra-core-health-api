@@ -1,4 +1,5 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { createHash } from 'node:crypto';
 import { CONCEPTS as C } from '../../src/common/constants/concepts';
 import { DIR } from '../../src/modules/directory/directory.concepts';
 import { IDA } from '../../src/modules/identity_assurance/identity_assurance.concepts';
@@ -92,6 +93,23 @@ export function fixtureRows(concept: (code: string) => string): Row[] {
     state_concept_id: C.STATE_ACTIVE,
     ...stamp,
   });
+  add('system_ops.retention_policies', {
+    id: syntheticId(913),
+    code: 'SYNTHETIC-7.2-ANONYMIZATION',
+    name: 'SYNTHETIC anonymization test; no legal period',
+    retention_period_days: 0,
+    disposition_concept_id: SYSOPS.DISPOSITION_ANONYMIZE,
+    state_concept_id: C.STATE_ACTIVE,
+    ...stamp,
+  });
+  add('system_ops.anonymization_rules', {
+    id: syntheticId(915),
+    code: 'SYNTHETIC-7.2-CLEAR-IDENTIFIER',
+    technique_concept_id: SYSOPS.TECHNIQUE_MASK,
+    parameters_json: JSON.stringify({ schemaVersion: 1, operation: 'CLEAR' }),
+    description: 'SYNTHETIC field-only control; storage preserved',
+    ...stamp,
+  });
   for (const graph of spec.graphs) {
     add('identity_assurance.identity_verification_cases', {
       id: graph.caseId,
@@ -179,6 +197,7 @@ export async function createIdentityFixture(
     table: row.table,
     id: row.values.id,
   }));
+  identities.push({ table: 'system_ops.field_registry', id: syntheticId(914) });
   for (const g of spec.graphs)
     identities.push(
       { table: 'common.files', id: g.fileId },
@@ -233,6 +252,28 @@ export async function createIdentityFixture(
         });
       if (table === 'identity_evidence_records') evidenceRegistryId = id;
     }
+    const existingField = await t
+      .getConnection('write')
+      .execute(
+        'SELECT id FROM system_ops.field_registry WHERE entity_registry_id = ? AND column_name = ?',
+        [evidenceRegistryId, spec.anonymizationTest.column],
+        'all',
+        t.getTransactionContext(),
+      );
+    if (existingField.length)
+      throw new Error('FIXTURE_FIELD_ALREADY_CONFIGURED');
+    await insert(t, {
+      table: 'system_ops.field_registry',
+      values: {
+        id: syntheticId(914),
+        entity_registry_id: evidenceRegistryId,
+        column_name: spec.anonymizationTest.column,
+        anonymization_rule_id: syntheticId(915),
+        is_pii: true,
+        is_phi: false,
+        ...stamp,
+      },
+    });
   });
   for (const g of spec.graphs)
     await publication.publish(
@@ -299,6 +340,12 @@ export async function createIdentityFixture(
             identity_verification_case_id: g.caseId,
             evidence_type_concept_id: IDA.EVIDENCE_TYPE_INSTITUTION_DOCUMENT,
             evidence_file_id: g.fileId,
+            evidence_identifier_hash:
+              g.evidenceId === spec.anonymizationTest.evidenceId
+                ? createHash('sha256')
+                    .update(spec.anonymizationTest.syntheticIdentifier)
+                    .digest('hex')
+                : null,
             verification_status_concept_id: IDA.EVIDENCE_PENDING,
             created_at: spec.createdAt,
             created_by_user_id: g.ownerUserId,
@@ -327,6 +374,30 @@ export async function createIdentityFixture(
         metadataDisposition: 'REMOVE',
         preserveProfile: 'CASE_ANCHOR_WORM_TECHNICAL_REVISION',
         storageDisposition: 'PURGE',
+        authorizationRevision: 'ENDER-D01-D08:SYNTHETIC-7.2-v1',
+      },
+      {
+        tenantId: spec.tenantIds[0],
+        evidenceTypeConceptCode: spec.evidenceTypeConceptCode,
+        operation: 'ANONYMIZATION',
+        retentionPolicyCode: 'SYNTHETIC-7.2-ANONYMIZATION',
+        expectedRowVersion: 1,
+        expectedDispositionConceptCode: 'SO_DISP_ANONYMIZE',
+        entityRegistryId: evidenceRegistryId,
+        baseEvent: 'evidence.createdAt',
+        allowedCaseStatusConceptCodes: [spec.caseStatusConceptCode],
+        additionalWaitSeconds: 0,
+        fieldRules: [
+          {
+            fieldRegistryId: syntheticId(914),
+            expectedRowVersion: 1,
+            anonymizationRuleId: syntheticId(915),
+            expectedRuleRowVersion: 1,
+          },
+        ],
+        metadataDisposition: 'MINIMIZE',
+        preserveProfile: 'CASE_ANCHOR_WORM_TECHNICAL_REVISION',
+        storageDisposition: 'PRESERVE',
         authorizationRevision: 'ENDER-D01-D08:SYNTHETIC-7.2-v1',
       },
     ],

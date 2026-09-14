@@ -18,6 +18,8 @@ export const REQUIRED_TABLES = [
   'system_ops.legal_holds',
   'system_ops.entity_registry',
   'system_ops.retention_policies',
+  'system_ops.field_registry',
+  'system_ops.anonymization_rules',
   'system_ops.record_revisions',
   'messaging.message_queues',
   'messaging.queued_jobs',
@@ -113,6 +115,14 @@ export function validateFixture(spec) {
   );
   const held = spec.graphs.find((g) => g.name === 'hold');
   requireFact(
+    spec.anonymizationTest?.evidenceId === spec.graphs[0].evidenceId &&
+      spec.anonymizationTest.column === 'evidence_identifier_hash' &&
+      spec.anonymizationTest.syntheticIdentifier ===
+        'SYNTHETIC-7.2-IDENTIFIER-NOT-A-PERSON' &&
+      spec.anonymizationTest.storageDisposition === 'PRESERVE',
+    'ANONYMIZATION_CONTROL_INVALID',
+  );
+  requireFact(
     spec.hold.targetId === held.caseId &&
       spec.hold.tenantId === held.tenantId &&
       spec.hold.endsAt === null &&
@@ -141,11 +151,31 @@ export function sourceProof() {
       patch.includes('REFERENCES "common"."files" ("id")'),
     'UPSTREAM_SCHEMA_UNPROVEN',
   );
+  const integrationBaseSha = git('merge-base', 'HEAD', 'origin/dev');
+  const ownPaths = [
+    ...new Set(
+      [
+        ...git('diff', '--name-only', integrationBaseSha).split('\n'),
+        ...git('ls-files', '--others', '--exclude-standard').split('\n'),
+      ].filter(Boolean),
+    ),
+  ].sort();
+  // Hash the executable snapshot even when the slice is already committed.
+  // A clean tree must not produce an empty runtime provenance manifest.
   const paths = [
     ...new Set(
       [
-        ...git('diff', '--name-only', 'HEAD').split('\n'),
-        ...git('ls-files', '--others', '--exclude-standard').split('\n'),
+        ...git(
+          'ls-files',
+          '--',
+          'src',
+          'test',
+          'tools',
+          'tsconfig.json',
+          'tsconfig.build.json',
+          '.swcrc',
+        ).split('\n'),
+        ...ownPaths.filter((path) => /^(src|test|tools)\//.test(path)),
       ].filter(Boolean),
     ),
   ].sort();
@@ -153,13 +183,16 @@ export function sourceProof() {
     path,
     sha256: hash(readFileSync(join(ROOT, path))),
   }));
-  const upstreamFiles = git('diff', '--name-only', 'HEAD..origin/dev').split(
-    '\n',
-  );
-  const overlap = paths.filter((path) => upstreamFiles.includes(path));
+  const upstreamFiles = git(
+    'diff',
+    '--name-only',
+    `${integrationBaseSha}..origin/dev`,
+  ).split('\n');
+  const overlap = ownPaths.filter((path) => upstreamFiles.includes(path));
   requireFact(overlap.length === 0, `UPSTREAM_OVERLAP:${overlap.join(',')}`);
   return {
     apiBaseSha: git('rev-parse', 'HEAD'),
+    integrationBaseSha,
     upstreamSha,
     upstreamCommit: UPSTREAM_COMMIT,
     diffHash: hash(JSON.stringify(files)),
@@ -167,7 +200,14 @@ export function sourceProof() {
     upstreamOverlap: overlap,
   };
 }
-export function composeSpec(bundle) {
+export function validateProjectName(project) {
+  requireFact(
+    /^mantra-7-2-synthetic(?:-[a-z0-9-]{1,24})?$/.test(project),
+    'PROJECT_NOT_SCOPED_TO_SYNTHETIC_7_2',
+  );
+  return project;
+}
+export function composeSpec(bundle, project = 'mantra-7-2-synthetic') {
   const labels = { 'mantra.synthetic-only': 'true', 'mantra.task': '7.2' };
   const environment = {
     POSTGRES_DB: 'identity_evidence_7_2_test',
@@ -175,7 +215,7 @@ export function composeSpec(bundle) {
     POSTGRES_PASSWORD: 'SYNTHETIC-LOCAL-ONLY-7.2',
   };
   return {
-    name: 'mantra-7-2-synthetic',
+    name: validateProjectName(project),
     services: {
       postgres: {
         image: 'timescale/timescaledb-ha:pg18',
@@ -249,9 +289,12 @@ function main() {
   );
   const fixture = validateFixture(spec);
   const mode = process.argv[2] ?? '--validate';
+  const project = validateProjectName(
+    process.argv[3] ?? 'mantra-7-2-synthetic',
+  );
   requireFact(
     ['--validate', '--prepare'].includes(mode),
-    'Usage: node tools/e2e/identity-evidence/prepare.mjs --validate|--prepare',
+    'Usage: node tools/e2e/identity-evidence/prepare.mjs --validate|--prepare [mantra-7-2-synthetic-<suffix>]',
   );
   const source = sourceProof();
   if (mode === '--validate') {
@@ -275,23 +318,16 @@ function main() {
       'ps',
       '-aq',
       '--filter',
-      'label=com.docker.compose.project=mantra-7-2-synthetic',
+      `label=com.docker.compose.project=${project}`,
     ) === '',
     'EXISTING_STACK_DO_NOT_REUSE',
   );
   requireFact(
-    docker('volume', 'ls', '-q', '--filter', 'name=mantra-7-2-synthetic_') ===
-      '',
+    docker('volume', 'ls', '-q', '--filter', `name=${project}_`) === '',
     'EXISTING_VOLUME_DO_NOT_REUSE',
   );
   requireFact(
-    docker(
-      'network',
-      'ls',
-      '-q',
-      '--filter',
-      'name=mantra-7-2-synthetic_default',
-    ) === '',
+    docker('network', 'ls', '-q', '--filter', `name=${project}_default`) === '',
     'EXISTING_NETWORK_DO_NOT_REUSE',
   );
   const directory = mkdtempSync(join(tmpdir(), 'mantra-7.2-'));
@@ -316,10 +352,11 @@ function main() {
   const compose = join(directory, 'compose.json');
   writeFileSync(
     compose,
-    JSON.stringify(composeSpec(bundle.replaceAll('\\', '/')), null, 2),
+    JSON.stringify(composeSpec(bundle.replaceAll('\\', '/'), project), null, 2),
     { flag: 'wx' },
   );
   const manifest = {
+    project,
     source,
     fixture,
     fixtureHash: hash(JSON.stringify(spec)),

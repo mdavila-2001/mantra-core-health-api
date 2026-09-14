@@ -16,6 +16,10 @@ import {
   createIdentityFixture,
 } from './identity-evidence-fixture';
 import type { IdentityLifecycleConfig } from '../../src/modules/identity_assurance/identity-evidence-lifecycle.config';
+import {
+  verifyAnonymizationControl,
+  type FixtureSnapshot,
+} from './identity-evidence-anonymization';
 
 const proofPath = process.env.IDENTITY_7_2_LIVE_PROOF;
 const suite = proofPath ? describe : describe.skip;
@@ -26,7 +30,7 @@ interface Proof {
   networkId: string;
   approval?: import('../../src/common/storage/storage-lifecycle.protocol').LocalSyntheticDispositionGrant;
 }
-type Snapshot = Record<string, unknown[]>;
+type Snapshot = FixtureSnapshot;
 interface FixtureState {
   sourceHash: string;
   fixtureHash: string;
@@ -156,6 +160,8 @@ suite('7.2 explicit local synthetic real-stack journey', () => {
         'system_ops.legal_holds',
         'system_ops.entity_registry',
         'system_ops.retention_policies',
+        'system_ops.field_registry',
+        'system_ops.anonymization_rules',
         'system_ops.record_revisions',
         'messaging.message_queues',
         'messaging.queued_jobs',
@@ -293,6 +299,25 @@ suite('7.2 explicit local synthetic real-stack journey', () => {
         status: 'DESTRUCTIVE_BOUNDARY',
         reasonCode: 'DESTRUCTIVE_RUNTIME_GATE_BLOCKED',
       });
+      expect(
+        await lifecycle.execute(
+          spec.graphs[0].evidenceId,
+          spec.tenantIds[1],
+          spec.evidenceTypeConceptCode,
+          'ANONYMIZATION',
+        ),
+      ).toMatchObject({ status: 'DENIED' });
+      expect(
+        await lifecycle.execute(
+          spec.graphs[0].evidenceId,
+          spec.tenantIds[0],
+          spec.evidenceTypeConceptCode,
+          'ANONYMIZATION',
+        ),
+      ).toMatchObject({
+        status: 'DESTRUCTIVE_BOUNDARY',
+        reasonCode: 'DESTRUCTIVE_RUNTIME_GATE_BLOCKED',
+      });
       await em.transactional(async (tx) => {
         const refs = await current
           .get(StorageReferenceRepository)
@@ -334,6 +359,15 @@ suite('7.2 explicit local synthetic real-stack journey', () => {
         return;
       }
       expect(proof.approval).toBeDefined();
+      // Separate operation through the SAME service/grant; no physical purge review.
+      await withLocalSyntheticDispositionGrant(proof.approval!, () =>
+        verifyAnonymizationControl({
+          snapshot: () => snapshot(em),
+          lifecycle,
+          storage,
+        }),
+      );
+      expect((await download()).status).toBeLessThan(300);
       await withLocalSyntheticDispositionGrant(proof.approval!, async () => {
         expect(await execute('target')).toMatchObject({
           status: 'METADATA_RETIRED',
@@ -379,6 +413,7 @@ suite('7.2 explicit local synthetic real-stack journey', () => {
         data_snapshot: { outcome: string };
       }[];
       expect(revisions.map((r) => r.data_snapshot.outcome).sort()).toEqual([
+        'ANONYMIZED',
         'METADATA_RETIRED',
         'PURGED',
       ]);
@@ -398,6 +433,7 @@ suite('7.2 explicit local synthetic real-stack journey', () => {
           status: 'PASS',
           contains_real_personal_data: false,
           destructiveRuntimeExecuted: true,
+          anonymization: 'PASS_FIELD_ONLY_STORAGE_PRESERVED_IDEMPOTENT',
           baselineHash: hash(state.baseline),
           afterHash: completed,
         }),

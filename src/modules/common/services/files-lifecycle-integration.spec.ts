@@ -104,18 +104,19 @@ function build() {
     logger as never,
     publication as never,
   );
+  const attachable = new AttachableFileService(
+    files as never,
+    versions as never,
+    logger as never,
+    publication as never,
+  );
   const uploads = new FileUploadService(
     em as never,
     storage as never,
     service,
     files as never,
     versions as never,
-    logger as never,
-    publication as never,
-  );
-  const attachable = new AttachableFileService(
-    files as never,
-    versions as never,
+    attachable,
     logger as never,
     publication as never,
   );

@@ -31,6 +31,12 @@
   "evidenceTypeConceptCode": "IDA_EVIDENCE_TYPE_INSTITUTION_DOCUMENT",
   "evidenceStatusConceptCode": "IDA_EVIDENCE_PENDING",
   "createdAt": "2000-01-01T00:00:00.000Z",
+  "anonymizationTest": {
+    "evidenceId": "07200000-0000-4000-8000-000000000301",
+    "column": "evidence_identifier_hash",
+    "syntheticIdentifier": "SYNTHETIC-7.2-IDENTIFIER-NOT-A-PERSON",
+    "storageDisposition": "PRESERVE"
+  },
   "graphs": [
     {
       "name": "target",
@@ -224,9 +230,7 @@
     "retentionPeriodDays": 0,
     "baseEvent": "evidence.createdAt",
     "additionalWaitSeconds": 0,
-    "allowedCaseStatusConceptCodes": [
-      "IDA_CASE_VERIFIED"
-    ],
+    "allowedCaseStatusConceptCodes": ["IDA_CASE_VERIFIED"],
     "metadataDisposition": "REMOVE",
     "storageDisposition": "PURGE",
     "dispositionConceptCode": "SO_DISP_DELETE",
