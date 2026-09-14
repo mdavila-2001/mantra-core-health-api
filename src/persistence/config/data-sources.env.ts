@@ -63,9 +63,19 @@ export interface ResolvedDataSources {
  * duplicar la validación produciría dos mensajes distintos para el mismo fallo.
  */
 export const dataSourcesEnvSchema = Joi.object({
-  POSTGRES_WRITE_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }),
-  POSTGRES_READ_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }),
-  POSTGRES_ADMIN_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }),
+  // `.allow('')` porque Coolify materializa toda variable declarada en su
+  // panel dentro del contenedor, la use el compose o no; cuando el operador
+  // la deja en blanco (el caso normal, ya que las tres son opcionales)
+  // llega como cadena vacía, no como variable ausente.
+  POSTGRES_WRITE_URL: Joi.string()
+    .uri({ scheme: ['postgres', 'postgresql'] })
+    .allow(''),
+  POSTGRES_READ_URL: Joi.string()
+    .uri({ scheme: ['postgres', 'postgresql'] })
+    .allow(''),
+  POSTGRES_ADMIN_URL: Joi.string()
+    .uri({ scheme: ['postgres', 'postgresql'] })
+    .allow(''),
 
   DB_READ_HOST: Joi.string().hostname(),
   DB_READ_PORT: Joi.number().port(),
