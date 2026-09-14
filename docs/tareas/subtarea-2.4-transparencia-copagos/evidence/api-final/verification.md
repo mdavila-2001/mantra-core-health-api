@@ -27,6 +27,7 @@ Los archivos `.log` y la lista de archivos de lint se conservan localmente en es
 | Regeneración OpenAPI y documentación final | ExitCode 0; 1168 paths, 1266 operaciones, 1153 esquemas; 66 módulos y 67 documentos | `openapi-final.log`, `endpoints-final.log` |
 | Auditoría del contrato de los tres GET de pedidos | ExitCode 0; 90 propiedades, 10 clases alcanzables, 9 nuevas; tipos y nulabilidad coinciden | [JSON del contrato](openapi-contract-verification.json) |
 | Regresión de perfil y vigencias tras corregir el parámetro PostgreSQL | 2 suites y 114 pruebas PASS; 6.456 s; lint de dos archivos e incremental compile ExitCode 0 | `profile-array-regression-after-corrected.log`, `profile-array-lint.log`, `profile-array-compile.log` |
+| Typecheck global final tras perfil/FK/moneda | `yarn.cmd typecheck`: ExitCode 0; incluye specs y últimas fuentes; `API_FINAL_TYPECHECK_EXIT=0` | `typecheck-final-profile-currency.log`, sesión 28684 |
 | Perfil real final de dos pacientes | Ambos login/perfil 200; póliza y beneficio CURRENT; identidades estables; 80.25/0/10.50 BOB; segundo paciente sin póliza/plan del primero | [JSON HTTP final](profile-real-http-final.json) |
 | Estado del perfil por FK | 2 suites, 115 PASS; 76.966 s; lote separado del de 114 casos | `profile-status-fk-tests.log` |
 | Descubrimiento Jest acotado | --listTests exit 0, 1 spec; no ejecuta integración ni acredita mejora de velocidad | [JSON de descubrimiento](jest-crawl-scope-verification.json) |
@@ -74,11 +75,13 @@ Autorización final:
 yarn.cmd test --runInBand src/modules/insurance/services/linked-claim-access.service.spec.ts src/modules/insurance/services/claims-linked.service.spec.ts src/modules/insurance/services/prior-auth-linked.service.spec.ts
 ```
 
+La evidencia de navegador, los logs y el historial se archivan en el [seguimiento de bóveda #74](https://github.com/mdavila-2001/mantra_core_technologies_health_docs/pull/74), separado de #73 ya integrado. Los PNG de participantes sintéticos permanecen en esa bóveda privada.
+
 ## Pendiente y alcance de la evidencia
 
 El primer recorrido de perfil real en navegador pasó 2/2; la inspección posterior detectó un estado contradictorio por el prefijo de códigos de catálogo. La corrección posterior tiene 148 pruebas, lint, compilación y HTTP final de dos pacientes aprobados; el recorrido final de perfil pasó 2/2 en 26.6 s y ambas capturas nuevas fueron inspeccionadas. La ejecución anterior se conserva como antecedente del hallazgo. Los PR originales modelo #19 y bóveda #73 ya están integrados; los dos patches operativos se integraron mediante [modelo #21](https://github.com/mantra-core-technologies/mantra-core-health-model/pull/21).
 
-El typecheck global de la sesión 41321 terminó con ExitCode 0 e incluye las mejoras de respuesta, replay, indistinguibilidad y acceso OWNER/ADMIN al detalle de farmacia. Las dos suites de ese acceso finalizaron con 84 pruebas correctas. Las unitarias usan dobles de EntityManager y no acreditan PostgreSQL, FK, concurrencia entre conexiones o navegación real.
+El typecheck global final `yarn.cmd typecheck` (sesión 28684) terminó con ExitCode 0 después de las correcciones de perfil/FK/moneda; incluye specs y todas las últimas fuentes. El typecheck anterior de la sesión 41321 también terminó con ExitCode 0 e incluye las mejoras de respuesta, replay, indistinguibilidad y acceso OWNER/ADMIN al detalle de farmacia. Las dos suites de ese acceso finalizaron con 84 pruebas correctas. Las unitarias usan dobles de EntityManager y no acreditan PostgreSQL, FK, concurrencia entre conexiones o navegación real.
 
 El bootstrap HTTP de la sesión 2066 terminó con ExitCode 1: `beforeAll` excedió 300000 ms y la ejecución completa duró 434.074 s. El primer `SELECT` de MikroORM apareció después del timeout; el cierre posterior también produjo un error de socket. No se completó el fixture ni se obtuvo evidencia de un recorrido financiero. Estos datos no identifican por sí solos qué etapa del arranque consumió el tiempo.
 
