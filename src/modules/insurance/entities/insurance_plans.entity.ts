@@ -43,6 +43,24 @@ export class InsurancePlans {
   currencyConceptId?: string;
 
   /**
+   * Prima de lista MENSUAL del plan, en la moneda del plan (`currencyConceptId`).
+   *
+   * Es el denominador **estimado** del loss ratio del tablero de siniestralidad
+   * (v4.2.14, subtarea 3.1): primas devengadas = coberturas vigentes × prima ×
+   * meses prorrateados. No es la prima de cada póliza. `undefined` = la
+   * aseguradora todavía no la declaró; el tablero lo informa como «sin prima
+   * registrada» y deja el loss ratio en `null`, nunca en cero. La carga la
+   * consola de planes (`POST .../plans`, `PUT /insurance-plans/:id/premium`);
+   * ningún seed la inventa. Cadena decimal, como todo importe del módulo.
+   */
+  @Property({
+    fieldName: 'monthly_premium_amount',
+    columnType: 'numeric',
+    nullable: true,
+  })
+  monthlyPremiumAmount?: string;
+
+  /**
    * Valor de effective from mantenido por la instancia.
    */
   @Property({ fieldName: 'effective_from', columnType: 'date', nullable: true })

@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1273 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1273 requests en 140 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1276 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1276 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -17933,7 +17933,7 @@
       ]
     },
     {
-      "name": "community (61)",
+      "name": "community (62)",
       "item": [
         {
           "name": "community-groups",
@@ -18936,6 +18936,77 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.conversationId);",
                       "  if (id) pm.environment.set('conversationId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /community/conversations/{conversationId}/attachments/{fileId}/content · Descargar el adjunto de una conversación (participante activo)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/community/conversations/:conversationId/attachments/:fileId/content?profileId=profileId-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "community",
+                    "conversations",
+                    ":conversationId",
+                    "attachments",
+                    ":fileId",
+                    "content"
+                  ],
+                  "variable": [
+                    {
+                      "key": "conversationId",
+                      "value": "{{conversationId}}",
+                      "description": "Identificador de ruta · variable `{{conversationId}}`"
+                    },
+                    {
+                      "key": "fileId",
+                      "value": "{{fileId}}",
+                      "description": "Identificador de ruta · variable `{{fileId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "profileId",
+                      "value": "profileId-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Descargar el adjunto de una conversación (participante activo). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /community/conversations/{conversationId}/attachments/{fileId}/content`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `CommunityMessagingController_getAttachmentContent`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.attachments || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('attachmentId', first.id);",
                       "}"
                     ]
                   }
@@ -39052,6 +39123,79 @@
       ]
     },
     {
+      "name": "insurance (1)",
+      "item": [
+        {
+          "name": "GET /insurance/analytics/loss-ratio · Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance/analytics/loss-ratio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance",
+                "analytics",
+                "loss-ratio"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01",
+                  "description": "Fecha de inicio del periodo (inclusive). Sin ella: 12 meses atrás.",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-12-31",
+                  "description": "Fecha de fin del periodo (inclusive). Sin ella: hoy en La Paz.",
+                  "disabled": true
+                },
+                {
+                  "key": "planId",
+                  "value": "{{planId}}",
+                  "description": "Acota el tablero a un plan del carrier del tenant activo.",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance/analytics/loss-ratio`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `InsuranceAnalyticsController_getLossRatioAnalytics`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.analytics || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('analyticId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "insurance-brokers (5)",
       "item": [
         {
@@ -39792,7 +39936,7 @@
             "description": "Enviar reclamo con líneas (837). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_submit`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"insuranceCarrierId\": \"{{insuranceCarrierId}}\",\n  \"patientCoverageId\": \"{{patientCoverageId}}\",\n  \"billingProviderEntityId\": \"<billingProviderEntityId: uuid existente>\",\n  \"claimIdentifier\": \"claimIdentifier-ejemplo\",\n  \"priorAuthorizationRequestId\": \"{{priorAuthorizationRequestId}}\",\n  \"idempotencyKey\": \"idempotencyKey-ejemplo\",\n  \"lines\": [\n    {\n      \"lineSequence\": 1,\n      \"serviceConceptId\": \"<serviceConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"quantity\": \"1\",\n      \"billedAmount\": \"100.00\",\n      \"supportingClinicalReference\": \"ENC-2026-00412\",\n      \"patientResponsibilityAmount\": \"20.00\"\n    }\n  ]\n}",
+              "raw": "{\n  \"insuranceCarrierId\": \"{{insuranceCarrierId}}\",\n  \"patientCoverageId\": \"{{patientCoverageId}}\",\n  \"billingProviderEntityId\": \"<billingProviderEntityId: uuid existente>\",\n  \"claimIdentifier\": \"claimIdentifier-ejemplo\",\n  \"serviceRequestId\": \"{{serviceRequestId}}\",\n  \"priorAuthorizationRequestId\": \"{{priorAuthorizationRequestId}}\",\n  \"idempotencyKey\": \"idempotencyKey-ejemplo\",\n  \"lines\": [\n    {\n      \"lineSequence\": 1,\n      \"serviceConceptId\": \"<serviceConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"quantity\": \"1\",\n      \"billedAmount\": \"100.00\",\n      \"inventoryReservationLineId\": \"<inventoryReservationLineId: uuid existente>\",\n      \"diagnosticStudyOfferingId\": \"{{diagnosticStudyOfferingId}}\",\n      \"supportingClinicalReference\": \"ENC-2026-00412\",\n      \"patientResponsibilityAmount\": \"20.00\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -40138,7 +40282,7 @@
       ]
     },
     {
-      "name": "insurance-plans (3)",
+      "name": "insurance-plans (4)",
       "item": [
         {
           "name": "POST /insurance-plans/{planId}/benefits · Crear una cobertura de un plan administrable",
@@ -40339,6 +40483,66 @@
               }
             }
           ]
+        },
+        {
+          "name": "PUT /insurance-plans/{planId}/premium · Declarar la prima de lista mensual de un plan administrable",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-plans/:planId/premium",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-plans",
+                ":planId",
+                "premium"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "{{planId}}",
+                  "description": "Identificador de ruta · variable `{{planId}}`"
+                }
+              ]
+            },
+            "description": "Declarar la prima de lista mensual de un plan administrable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /insurance-plans/{planId}/premium`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceBackboneController_updatePlanPremium`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"monthlyPremiumAmount\": \"350.00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -40382,7 +40586,7 @@
             "description": "Crear un plan del carrier del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-products/{productId}/plans`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceBackboneController_createPlan`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"planCode\": \"planCode-ejemplo\",\n  \"name\": \"name-ejemplo\",\n  \"effectiveFrom\": \"2026-01-01\",\n  \"effectiveTo\": \"2026-01-01\"\n}",
+              "raw": "{\n  \"planCode\": \"planCode-ejemplo\",\n  \"name\": \"name-ejemplo\",\n  \"effectiveFrom\": \"2026-01-01\",\n  \"effectiveTo\": \"2026-01-01\",\n  \"monthlyPremiumAmount\": \"350.00\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -49621,7 +49825,7 @@
             "description": "Registrar cobertura de paciente y dependientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /patient-coverages`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `CoverageController_enroll`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"insurancePlanId\": \"<insurancePlanId: uuid existente>\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"memberIdentifier\": \"memberIdentifier-ejemplo\",\n  \"policyIdentifier\": \"policyIdentifier-ejemplo\",\n  \"coverageOrder\": 1,\n  \"insuranceBrokerId\": \"{{insuranceBrokerId}}\",\n  \"dependents\": [\n    {\n      \"dependentPatientProfileId\": \"<dependentPatientProfileId: uuid existente>\",\n      \"relationship\": \"SPOUSE\"\n    }\n  ]\n}",
+              "raw": "{\n  \"insurancePlanId\": \"{{insurancePlanId}}\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"memberIdentifier\": \"memberIdentifier-ejemplo\",\n  \"policyIdentifier\": \"policyIdentifier-ejemplo\",\n  \"coverageOrder\": 1,\n  \"insuranceBrokerId\": \"{{insuranceBrokerId}}\",\n  \"dependents\": [\n    {\n      \"dependentPatientProfileId\": \"<dependentPatientProfileId: uuid existente>\",\n      \"relationship\": \"SPOUSE\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -56115,7 +56319,7 @@
                     }
                   ]
                 },
-                "description": "Lo ve su titular o el staff del tenant de la farmacia; cualquier tercero recibe el mismo 404.\n\n`GET /pharmacy/orders/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `PharmacyOrdersController_getOrder`"
+                "description": "Lo ve su titular, la plataforma o un OWNER/ADMIN activo del tenant de la farmacia; cualquier tercero recibe el mismo 404. La liquidación privada sólo se incluye para el titular.\n\n`GET /pharmacy/orders/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `PharmacyOrdersController_getOrder`"
               },
               "response": [],
               "event": [
@@ -57982,7 +58186,7 @@
             "description": "Solicitar autorización previa con items. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /prior-authorization-requests`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `PriorAuthController_submit`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"patientCoverageId\": \"{{patientCoverageId}}\",\n  \"requestingProviderEntityId\": \"<requestingProviderEntityId: uuid existente>\",\n  \"idempotencyKey\": \"idempotencyKey-ejemplo\",\n  \"items\": [\n    {\n      \"serviceConceptId\": \"<serviceConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"requestedQuantity\": \"1\",\n      \"requestedAmount\": \"250.00\"\n    }\n  ]\n}",
+              "raw": "{\n  \"patientCoverageId\": \"{{patientCoverageId}}\",\n  \"medicationRequestId\": \"{{medicationRequestId}}\",\n  \"serviceRequestId\": \"{{serviceRequestId}}\",\n  \"requestingProviderEntityId\": \"<requestingProviderEntityId: uuid existente>\",\n  \"idempotencyKey\": \"idempotencyKey-ejemplo\",\n  \"items\": [\n    {\n      \"serviceConceptId\": \"<serviceConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"pharmacyProductId\": \"<pharmacyProductId: uuid existente>\",\n      \"diagnosticStudyOfferingId\": \"{{diagnosticStudyOfferingId}}\",\n      \"requestedQuantity\": \"1\",\n      \"requestedAmount\": \"250.00\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"

@@ -449,6 +449,19 @@ async function main() {
     console.log('    plan reutilizado');
   }
 
+  // Subtarea 3.1 (v4.2.14): el tablero de siniestralidad necesita una prima
+  // de lista para calcular el loss ratio; sin ella el KPI queda en null sobre
+  // Neon. Es un dato de DEMOSTRACIÓN declarado como tal — la aseguradora real
+  // lo carga por este mismo PUT. Reemplazo completo al mismo valor en cada
+  // corrida: idempotente, no acumula ni cambia estado entre ejecuciones.
+  const prima = await call(
+    'prima de lista del plan (demostración)',
+    'PUT',
+    `/insurance-plans/${planId}/premium`,
+    { body: { monthlyPremiumAmount: '350.00' }, expect: 200 },
+  );
+  if (!prima.ok) return fallar();
+
   const brokersExistentes = await call('corredores del tenant', 'GET', '/insurance-brokers', {
     expect: 200,
   });

@@ -6,6 +6,7 @@ import {
   UpdateCarrierContactChannelsDto,
   UpdatePlanBenefitDto,
   UpdatePlanBenefitRulesDto,
+  UpdatePlanPremiumDto,
 } from './backbone.dto';
 
 describe('DTOs administrativos de planes y coberturas', () => {
@@ -85,6 +86,78 @@ describe('DTOs administrativos de planes y coberturas', () => {
     const errors = await validate(dto);
     expect(errors.map((error) => error.property)).toEqual(
       expect.arrayContaining(['requiredDocuments', 'exclusionNotes']),
+    );
+  });
+
+  it('acepta una prima de lista mensual con hasta dos decimales al crear el plan', async () => {
+    const dto = plainToInstance(CreatePlanDto, {
+      planCode: 'ORO',
+      name: 'Plan Oro',
+      monthlyPremiumAmount: '350.00',
+    });
+
+    expect(await validate(dto)).toEqual([]);
+  });
+
+  it('rechaza una prima de lista con más de dos decimales o negativa', async () => {
+    const negativo = plainToInstance(CreatePlanDto, {
+      planCode: 'ORO',
+      name: 'Plan Oro',
+      monthlyPremiumAmount: '-1',
+    });
+    const conMasDecimales = plainToInstance(CreatePlanDto, {
+      planCode: 'ORO',
+      name: 'Plan Oro',
+      monthlyPremiumAmount: '350.001',
+    });
+
+    expect((await validate(negativo)).map((e) => e.property)).toEqual(
+      expect.arrayContaining(['monthlyPremiumAmount']),
+    );
+    expect((await validate(conMasDecimales)).map((e) => e.property)).toEqual(
+      expect.arrayContaining(['monthlyPremiumAmount']),
+    );
+  });
+});
+
+describe('UpdatePlanPremiumDto (v4.2.14, subtarea 3.1)', () => {
+  it('acepta un valor decimal válido', async () => {
+    const dto = plainToInstance(UpdatePlanPremiumDto, {
+      monthlyPremiumAmount: '350.00',
+    });
+
+    expect(await validate(dto)).toEqual([]);
+  });
+
+  it('acepta null para quitar la prima declarada', async () => {
+    const dto = plainToInstance(UpdatePlanPremiumDto, {
+      monthlyPremiumAmount: null,
+    });
+
+    expect(await validate(dto)).toEqual([]);
+  });
+
+  it('rechaza un valor no numérico o con más de dos decimales', async () => {
+    const noNumerico = plainToInstance(UpdatePlanPremiumDto, {
+      monthlyPremiumAmount: 'abc',
+    });
+    const conMasDecimales = plainToInstance(UpdatePlanPremiumDto, {
+      monthlyPremiumAmount: '350.001',
+    });
+
+    expect((await validate(noNumerico)).map((e) => e.property)).toEqual(
+      expect.arrayContaining(['monthlyPremiumAmount']),
+    );
+    expect((await validate(conMasDecimales)).map((e) => e.property)).toEqual(
+      expect.arrayContaining(['monthlyPremiumAmount']),
+    );
+  });
+
+  it('la ausencia de la propiedad es un error de validación (reemplazo completo)', async () => {
+    const dto = plainToInstance(UpdatePlanPremiumDto, {});
+
+    expect((await validate(dto)).map((e) => e.property)).toEqual(
+      expect.arrayContaining(['monthlyPremiumAmount']),
     );
   });
 });

@@ -8,3 +8,4 @@ export * from './broker-commission.controller';
 export * from './insurance-read.controller';
 export * from './insurance-catalog.controller';
 export * from './claims-read.controller';
+export * from './insurance-analytics.controller';

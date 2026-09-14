@@ -25,10 +25,12 @@ import {
   CreateMembershipDto,
   OkResultDto,
   CreatedResourceDto,
+  PlanPremiumDto,
   ResourceStatusDto,
   UpdateCarrierContactChannelsDto,
   UpdatePlanBenefitDto,
   UpdatePlanBenefitRulesDto,
+  UpdatePlanPremiumDto,
 } from '../dto';
 
 /**
@@ -206,6 +208,7 @@ export class InsuranceBackboneService {
         planCode: dto.planCode,
         name: dto.name,
         currencyConceptId: dto.currencyConceptId,
+        monthlyPremiumAmount: dto.monthlyPremiumAmount,
         effectiveFrom: dto.effectiveFrom
           ? new Date(dto.effectiveFrom)
           : undefined,
@@ -255,6 +258,43 @@ export class InsuranceBackboneService {
       });
       await tx.flush();
       return { id: benefit.id };
+    });
+  }
+
+  /**
+   * Declara (o quita, con `null`) la prima de lista mensual de un plan del
+   * carrier del tenant activo — v4.2.14, subtarea 3.1.
+   *
+   * `administrableCarrier()` no mira el `:planId`: la pertenencia del plan a la
+   * aseguradora la resuelve `findPlanForCarrier`, y un plan ajeno o inexistente
+   * responde el mismo 404 (no se filtra existencia).
+   */
+  async updatePlanPremium(
+    planId: string,
+    dto: UpdatePlanPremiumDto,
+    actor: AuthenticatedUser,
+  ): Promise<PlanPremiumDto> {
+    return this.em.transactional(async (tx) => {
+      const carrier = await this.administrableCarrier(tx, actor);
+      const plan = await this.repo.findPlanForCarrier(tx, planId, carrier.id);
+      if (!plan) {
+        throw new ResourceNotFoundException('Plan no encontrado', { planId });
+      }
+      plan.monthlyPremiumAmount = dto.monthlyPremiumAmount ?? undefined;
+      touch(plan, actor.id);
+      await tx.flush();
+      this.logger.info(
+        {
+          planId,
+          carrierId: carrier.id,
+          hasPremium: dto.monthlyPremiumAmount !== null,
+        },
+        'Prima de lista del plan actualizada',
+      );
+      return {
+        id: plan.id,
+        monthlyPremiumAmount: plan.monthlyPremiumAmount ?? null,
+      };
     });
   }
 

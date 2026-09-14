@@ -8422,6 +8422,48 @@ paths:
       description: >-
         Soltar el mensaje fijado de la conversación. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /community/conversations/{conversationId}/attachments/{fileId}/content:
+    get:
+      operationId: CommunityMessagingController_getAttachmentContent
+      parameters:
+        - name: conversationId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: fileId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: profileId
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el adjunto de una conversación (participante activo)
+      tags:
+        - community-messaging
+      description: >-
+        Descargar el adjunto de una conversación (participante activo). Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /community/conversations/{conversationId}/presence:
     get:
       operationId: CommunityMessagingController_conversationPresence
@@ -12197,6 +12239,54 @@ paths:
       description: >-
         Editar reglas de aprobación de una cobertura. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /insurance-plans/{planId}/premium:
+    put:
+      operationId: InsuranceBackboneController_updatePlanPremium
+      parameters:
+        - name: planId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlanPremiumDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanPremiumDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Declarar la prima de lista mensual de un plan administrable
+      tags:
+        - insurance-backbone
+      description: >-
+        Declarar la prima de lista mensual de un plan administrable. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /provider-networks:
     post:
       operationId: InsuranceBackboneController_createProviderNetwork
@@ -13231,6 +13321,61 @@ paths:
       description: >-
         Catálogo público de aseguradoras y sus planes de salud. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /insurance/analytics/loss-ratio:
+    get:
+      operationId: InsuranceAnalyticsController_getLossRatioAnalytics
+      parameters:
+        - name: startDate
+          required: false
+          in: query
+          description: 'Fecha de inicio del periodo (inclusive). Sin ella: 12 meses atrás.'
+          schema:
+            format: date
+            example: '2026-01-01'
+            type: string
+        - name: endDate
+          required: false
+          in: query
+          description: 'Fecha de fin del periodo (inclusive). Sin ella: hoy en La Paz.'
+          schema:
+            format: date
+            example: '2026-12-31'
+            type: string
+        - name: planId
+          required: false
+          in: query
+          description: Acota el tablero a un plan del carrier del tenant activo.
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceDashboardAnalyticsResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no administra el tenant de la aseguradora ni tiene rol INSURANCE_OPERATOR/SECURITY_ADMIN.
+        '404':
+          description: El tenant activo no tiene aseguradora, o planId no pertenece a la aseguradora.
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo
+      tags:
+        - insurance-analytics
+      description: >-
+        Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo. Requiere JWT y
+        los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope
+        ErrorResponse.
   /practices:
     get:
       operationId: PracticesController_listPractices
@@ -50867,6 +51012,10 @@ tags:
     description: >-
       Operaciones del dominio funcional identity_assurance. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: insurance-analytics
+    description: >-
+      Operaciones del dominio funcional insurance analytics. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: insurance-appeals
     description: >-
       Operaciones del dominio funcional insurance appeals. Consulte el catálogo Markdown de endpoints para payloads
@@ -57376,6 +57525,10 @@ components:
         currencyConceptId:
           type: string
           format: uuid
+        monthlyPremiumAmount:
+          type: string
+          example: '350.00'
+          description: Prima de lista mensual del plan, en la moneda del plan
       required:
         - planCode
         - name
@@ -57458,6 +57611,28 @@ components:
         - requiresPriorAuthorization
         - requiredDocuments
         - exclusionNotes
+    UpdatePlanPremiumDto:
+      type: object
+      properties:
+        monthlyPremiumAmount:
+          type: string
+          nullable: true
+          example: '350.00'
+      required:
+        - monthlyPremiumAmount
+    PlanPremiumDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        monthlyPremiumAmount:
+          type: string
+          nullable: true
+          example: '350.00'
+      required:
+        - id
+        - monthlyPremiumAmount
     CreateProviderNetworkDto:
       type: object
       properties:
@@ -58488,6 +58663,10 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/InsuranceConceptDto'
+        monthlyPremiumAmount:
+          type: string
+          nullable: true
+          example: '350.00'
         effectiveFrom:
           type: string
           nullable: true
@@ -58510,6 +58689,7 @@ components:
         - name
         - planType
         - currency
+        - monthlyPremiumAmount
         - effectiveFrom
         - effectiveTo
         - status
@@ -58845,6 +59025,232 @@ components:
             $ref: '#/components/schemas/CarrierCatalogEntryDto'
       required:
         - carriers
+    LossRatioKpiDto:
+      type: object
+      properties:
+        totalClaimsCount:
+          type: number
+          example: 42
+        adjudicatedClaimsCount:
+          type: number
+          example: 38
+        pendingClaimsCount:
+          type: number
+          example: 4
+        otherCurrencyClaimsCount:
+          type: number
+          example: 0
+        totalBilledAmount:
+          type: string
+          example: '350000.00'
+        totalApprovedAmount:
+          type: string
+          example: '280000.00'
+        totalPatientCopayAmount:
+          type: string
+          example: '55000.00'
+        totalDeniedAmount:
+          type: string
+          example: '15000.00'
+        approvalRatePercent:
+          type: string
+          nullable: true
+          example: '80.00'
+        activeAffiliatesCount:
+          type: number
+          example: 1250
+        periodMonths:
+          type: string
+          example: '3.00'
+        averageMonthlyPerCapitaExpense:
+          type: string
+          nullable: true
+          example: '224.00'
+        averageAnnualPerCapitaExpense:
+          type: string
+          nullable: true
+          example: '2688.00'
+        estimatedPremiumsTotal:
+          type: string
+          example: '400000.00'
+        coveragesWithoutPremiumCount:
+          type: number
+          example: 3
+        lossRatioPercent:
+          type: string
+          nullable: true
+          example: '70.00'
+      required:
+        - totalClaimsCount
+        - adjudicatedClaimsCount
+        - pendingClaimsCount
+        - otherCurrencyClaimsCount
+        - totalBilledAmount
+        - totalApprovedAmount
+        - totalPatientCopayAmount
+        - totalDeniedAmount
+        - approvalRatePercent
+        - activeAffiliatesCount
+        - periodMonths
+        - averageMonthlyPerCapitaExpense
+        - averageAnnualPerCapitaExpense
+        - estimatedPremiumsTotal
+        - coveragesWithoutPremiumCount
+        - lossRatioPercent
+    MonthlyTrendDto:
+      type: object
+      properties:
+        period:
+          type: string
+          example: 2026-01
+        billedAmount:
+          type: string
+          example: '28000.00'
+        approvedAmount:
+          type: string
+          example: '22400.00'
+        claimsCount:
+          type: number
+          example: 35
+      required:
+        - period
+        - billedAmount
+        - approvedAmount
+        - claimsCount
+    TopMedicationDto:
+      type: object
+      properties:
+        medicationCode:
+          type: string
+          example: MED-001
+          nullable: true
+        medicationName:
+          type: string
+          example: Losartán Potásico 50mg
+        dispensationsCount:
+          type: string
+          example: '180'
+        totalExpenseAmount:
+          type: string
+          example: '14400.00'
+        sharePercent:
+          type: string
+          example: '12.50'
+      required:
+        - medicationCode
+        - medicationName
+        - dispensationsCount
+        - totalExpenseAmount
+        - sharePercent
+    SpecialtyDistributionDto:
+      type: object
+      properties:
+        specialtyCode:
+          type: string
+          example: MED_GEN
+          nullable: true
+        specialtyName:
+          type: string
+          example: Medicina General
+        consultationsCount:
+          type: number
+          example: 150
+        totalExpenseAmount:
+          type: string
+          nullable: true
+      required:
+        - specialtyCode
+        - specialtyName
+        - consultationsCount
+        - totalExpenseAmount
+    PrevalentPathologyDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: I10
+        description:
+          type: string
+          example: Hipertensión Esencial (Primaria)
+        casesCount:
+          type: number
+          example: 95
+        percentage:
+          type: string
+          example: '22.60'
+      required:
+        - code
+        - description
+        - casesCount
+        - percentage
+    ImmunizationRateDto:
+      type: object
+      properties:
+        vaccinatedCount:
+          type: number
+          example: 980
+        unvaccinatedCount:
+          type: number
+          example: 270
+        vaccinationRatePercent:
+          type: string
+          nullable: true
+          example: '78.40'
+      required:
+        - vaccinatedCount
+        - unvaccinatedCount
+        - vaccinationRatePercent
+    InsuranceDashboardAnalyticsResponseDto:
+      type: object
+      properties:
+        carrierId:
+          type: string
+        carrierLegalName:
+          type: string
+          example: Seguros Andina
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        currency:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/InsuranceConceptDto'
+        kpis:
+          $ref: '#/components/schemas/LossRatioKpiDto'
+        monthlyTrends:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyTrendDto'
+        topMedications:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopMedicationDto'
+        specialties:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialtyDistributionDto'
+        prevalentPathologies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrevalentPathologyDto'
+        immunization:
+          $ref: '#/components/schemas/ImmunizationRateDto'
+      required:
+        - carrierId
+        - carrierLegalName
+        - startDate
+        - endDate
+        - currency
+        - kpis
+        - monthlyTrends
+        - topMedications
+        - specialties
+        - prevalentPathologies
+        - immunization
     CreatePracticeDto:
       type: object
       properties:
