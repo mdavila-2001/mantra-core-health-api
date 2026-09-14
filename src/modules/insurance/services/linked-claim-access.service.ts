@@ -104,15 +104,16 @@ export class LinkedClaimAccessService {
         'La moneda de la cobertura y del pedido debe coincidir',
       );
     }
+    // Una cobertura declarada (VERIFY_PENDING) basta: ninguna escritura produce
+    // VERIFY_VERIFIED y la aseguradora adjudica de todos modos (decisión 2026-09-13).
     if (
       requireCurrent &&
       (coverage.statusConceptId !== INS.COVERAGE_ACTIVE ||
-        coverage.verificationStatusConceptId !== INS.VERIFY_VERIFIED ||
         !withinDates(coverage) ||
         !withinDates(plan))
     ) {
       throw new PreconditionFailedException(
-        'La cobertura debe estar verificada y vigente para presentar el reclamo',
+        'La cobertura debe estar activa y vigente para presentar el reclamo',
       );
     }
     return { coverage, plan, insuranceCarrierId: product.insuranceCarrierId };

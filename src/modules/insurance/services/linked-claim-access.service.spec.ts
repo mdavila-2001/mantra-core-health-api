@@ -176,18 +176,28 @@ describe('LinkedClaimAccessService', () => {
       f.service.coverageForOrder({} as never, 'coverage', snapshot, 'carrier'),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
+  it('acepta una cobertura declarada (VERIFY_PENDING) activa y vigente', async () => {
+    const f = fixture();
+    f.coverage.verificationStatusConceptId = INS.VERIFY_PENDING;
+    await expect(
+      f.service.coverageForOrder(
+        {} as never,
+        'coverage',
+        snapshot,
+        'carrier',
+        true,
+      ),
+    ).resolves.toMatchObject({ insuranceCarrierId: 'carrier' });
+  });
   it.each([
     'other-carrier',
     'wrong-currency',
-    'unverified',
     'expired',
     'future',
   ])('rechaza cobertura incoherente %s', async (reason) => {
     const f = fixture();
     if (reason === 'other-carrier') f.product.insuranceCarrierId = 'other';
     if (reason === 'wrong-currency') f.plan.currencyConceptId = 'usd';
-    if (reason === 'unverified')
-      f.coverage.verificationStatusConceptId = INS.VERIFY_PENDING;
     if (reason === 'expired')
       f.coverage.effectiveTo = new Date('2000-01-01T00:00:00Z');
     if (reason === 'future')

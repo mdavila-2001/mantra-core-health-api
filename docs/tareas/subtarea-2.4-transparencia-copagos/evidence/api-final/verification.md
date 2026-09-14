@@ -91,4 +91,6 @@ El build oficial de la sesión 50586 y la compilación incremental 21892 termina
 
 `coverageForOrder(requireCurrent=true)` todavía exige `VERIFY_VERIFIED`. La revisión automática rechazó retirar ese requisito introducido durante esta implementación, alegando que ampliaba elegibilidad financiera sin autorización suficientemente explícita. La autorización del usuario para retirarlo sigue pendiente. La escritura actual `POST /patient-coverages` crea `VERIFY_PENDING`; ese desacuerdo bloquea el recorrido financiero completo mediante las escrituras existentes. No se atribuye este bloqueo a una skill.
 
+**Actualización 2026-09-13 (autorizada):** el usuario confirmó que una cobertura declarada (`VERIFY_PENDING`) basta. `LinkedClaimAccessService.coverageForOrder` ya no exige `VERIFY_VERIFIED`; sigue exigiendo `COVERAGE_ACTIVE` y vigencia de cobertura/plan. El bloqueo anterior queda como antecedente; el recorrido financiero completo se reintenta con esta corrección — ver la fila nueva en la tabla de este documento con su resultado.
+
 Los logs contienen avisos previos de VM Modules e imports JSON sin atributos. Los códigos de salida indicados proceden de los procesos finalizados, no de sesiones todavía activas.
