@@ -197,7 +197,9 @@ export class FilesService {
         },
         'File created with version 1',
       );
-      return this.fileToResponse(file, dto.category, dto.sensitivity);
+      // La versión recién creada ya está en mano: su tipo y tamaño viajan sin
+      // una lectura más (5.2 · AC-5.2-2).
+      return this.fileToResponse(file, dto.category, dto.sensitivity, version);
     });
   }
 
@@ -635,7 +637,7 @@ export class FilesService {
       LINKED_FILES_PAGE_SIZE,
     );
 
-    const items: LinkedFileResponseDto[] = [];
+    const vivos: { link: (typeof links)[number]; file: Files }[] = [];
     for (const link of links) {
       const file = await this.filesRepo.findById(forked, link.fileId);
       if (
@@ -645,40 +647,80 @@ export class FilesService {
       ) {
         continue;
       }
-
-      items.push({
-        linkId: link.id,
-        ownerId: link.ownerId,
-        ownerType: query.ownerType,
-        linkedAt: link.createdAt,
-        file: this.fileToResponse(
-          file,
-          categoryFromConcept(file.categoryConceptId),
-          sensitivityFromConcept(file.sensitivityConceptId),
-        ),
-      });
+      vivos.push({ link, file });
     }
+
+    // 5.2 · AC-5.2-2: el tipo y el tamaño viven en la versión vigente. Se
+    // resuelven **todas juntas, en una consulta**, y no una por adjunto: diez
+    // adjuntos no pueden costar diez lecturas más de las que ya costaban.
+    const versiones = await this.fileVersionsRepo.findByIds(
+      forked,
+      vivos
+        .map(({ file }) => file.currentVersionId)
+        .filter((id): id is string => typeof id === 'string'),
+    );
+    const versionPorId = new Map(versiones.map((v) => [v.id, v]));
+
+    const items: LinkedFileResponseDto[] = vivos.map(({ link, file }) => ({
+      linkId: link.id,
+      ownerId: link.ownerId,
+      ownerType: query.ownerType,
+      linkedAt: link.createdAt,
+      file: this.fileToResponse(
+        file,
+        categoryFromConcept(file.categoryConceptId),
+        sensitivityFromConcept(file.sensitivityConceptId),
+        file.currentVersionId
+          ? versionPorId.get(file.currentVersionId)
+          : undefined,
+      ),
+    }));
 
     return { items, count: items.length };
   }
 
   /**
-   * Ejecuta la operación file to response.
+   * La representación segura de un archivo, con la metadata de su versión
+   * vigente cuando se conoce.
    *
-   * @param file - Valor de file requerido por la operación.
-   * @param category - Valor de category requerido por la operación.
-   * @param sensitivity - Valor de sensitivity requerido por la operación.
-   * @returns Resultado de file to response conforme al contrato `FileResponseDto`.
+   * ## Qué sale de la versión, y qué no
+   *
+   * Sólo `mimeType` y `sizeBytes`. Nada de `storageUri`, `objectKey`,
+   * `bucketOrContainer` ni `contentHash`: dicen dónde viven los bytes o cómo
+   * reconocerlos, y el modelo prohíbe publicarlos (nota `FILE_SECURITY` de
+   * `diagram_02_common.puml`). Por eso se copian dos campos con nombre y no se
+   * esparce la entidad.
+   *
+   * ## Falla cerrado ante una versión que no es de este archivo
+   *
+   * Si la versión recibida no pertenece al archivo, **no se usa**: se responde
+   * sin tipo ni tamaño antes que con los de otro archivo. Con los datos sanos
+   * no ocurre —`currentVersionId` apunta a una versión propia—, pero una
+   * metadata equivocada en una lista clínica es peor que una ausente.
+   *
+   * @param file - El archivo.
+   * @param category - Categoría ya traducida del concepto.
+   * @param sensitivity - Sensibilidad ya traducida del concepto.
+   * @param version - Su versión vigente, si se resolvió.
+   * @returns El contrato `FileResponseDto`.
    */
   private fileToResponse(
     file: Files,
     category: FileCategory,
     sensitivity: FileSensitivity,
+    version?: Pick<FileVersions, 'fileId' | 'mimeType' | 'sizeBytes'>,
   ): FileResponseDto {
+    const vigente = version?.fileId === file.id ? version : undefined;
     return {
       id: file.id,
       currentVersionId: file.currentVersionId,
       originalName: file.originalName,
+      ...(vigente
+        ? {
+            mimeType: vigente.mimeType,
+            sizeBytes: Number(vigente.sizeBytes),
+          }
+        : {}),
       category,
       sensitivity,
       lifecycleStatusConceptId: file.lifecycleStatusConceptId,

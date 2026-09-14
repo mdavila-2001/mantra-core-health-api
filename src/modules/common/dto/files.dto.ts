@@ -291,6 +291,40 @@ export class FileResponseDto {
   originalName?: string;
 
   /**
+   * Tipo MIME de la **versión vigente** (5.2 · AC-5.2-2).
+   *
+   * Vive en `common.file_versions`, no en `common.files`: por eso hasta ahora
+   * no viajaba, y quien listaba adjuntos tenía que bajar los bytes sólo para
+   * saber qué eran. Es el tipo que el backend dedujo de los primeros bytes al
+   * recibir el archivo, no el que declaró quien lo subió.
+   *
+   * Ausente cuando el archivo no tiene versión vigente resoluble: no se
+   * rellena con un tipo genérico.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Tipo MIME de la versión vigente. Ausente si no hay versión vigente.',
+  })
+  mimeType?: string;
+
+  /**
+   * Tamaño en bytes de la **versión vigente** (5.2 · AC-5.2-2).
+   *
+   * Número y no el `bigint` serializado como texto de
+   * `FileVersionResponseDto`, porque es el tipo que ya usan los contratos de
+   * archivo que se componen con éste (`AnonymousUploadResult`,
+   * `RegistrationDocumentUploadResponseDto`): declararlo texto acá haría que
+   * esas intersecciones resolvieran `sizeBytes` a `never`. La conversión es
+   * segura: el tamaño de subida está acotado por `FILE_STORAGE_MAX_SIZE_BYTES`,
+   * muy lejos de `Number.MAX_SAFE_INTEGER`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Tamaño en bytes de la versión vigente. Ausente si no hay versión vigente.',
+  })
+  sizeBytes?: number;
+
+  /**
    * Valor de category mantenido por la instancia.
    */
   @ApiProperty({ enum: FileCategory })
