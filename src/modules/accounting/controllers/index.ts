@@ -6,3 +6,4 @@ export { AccountingAssetController } from './accounting-asset.controller';
 export { AccountingLiabilityController } from './accounting-liability.controller';
 export { AccountingExchangeRateController } from './accounting-exchange-rate.controller';
 export { AccountingPractitionerController } from './accounting-practitioner.controller';
+export { AccountingCockpitController } from './accounting-cockpit.controller';

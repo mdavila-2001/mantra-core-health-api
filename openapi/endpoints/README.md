@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1267 de 1267 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1273 de 1273 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -44,7 +44,7 @@ Esta referencia documenta **1267 de 1267 operaciones HTTP** registradas en `open
 
 | Módulo | Endpoints | Etiquetas OpenAPI | Controladores |
 |---|---:|---|---:|
-| [accounting](accounting.md) | 38 | `accounting-accruals`, `accounting-assets`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger` | 8 |
+| [accounting](accounting.md) | 44 | `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger` | 9 |
 | [ads](ads.md) | 18 | `ads` | 1 |
 | [app](app.md) | 6 | `app` | 2 |
 | [audio_assets](audio-assets.md) | 10 | `audio-assets`, `audio-assets-internal` | 2 |
@@ -117,4 +117,4 @@ Esta referencia documenta **1267 de 1267 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1267 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1273 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

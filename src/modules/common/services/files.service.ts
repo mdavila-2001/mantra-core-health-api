@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHmac } from 'node:crypto';
@@ -16,6 +16,7 @@ import {
   FileVersionsRepository,
   FilesRepository,
 } from '../repositories';
+import { canActorReadOwnFile } from './file-access';
 import { FileVersions, Files } from '../entities';
 import {
   CreateFileDerivativeDto,
@@ -503,8 +504,35 @@ export class FilesService {
    * Se construye una URL determinista firmada con HMAC en lugar de integrar el SDK
    * de almacenamiento; un presign real de S3 (`getSignedUrl`) reemplazaría este
    * bloque conservando el mismo contrato de respuesta.
+   *
+   * ## Por qué exige actor (5.1 · FT-32-R12)
+   *
+   * Porque hasta ahora **no exigía ninguno**. El handler no inyectaba
+   * `@CurrentUser` y este método no recibía actor: con sólo tener sesión y un
+   * uuid, cualquiera obtenía la URL firmada del archivo de otra persona —el
+   * camino paralelo exacto que `download()` sí cerraba—. La regla que se
+   * aplica es **la misma** que la del contenido, y vive en un solo sitio
+   * (`canActorReadOwnFile`) justamente para que las dos superficies no puedan
+   * volver a divergir.
+   *
+   * ## Por qué la URL ya no lleva la `storage_uri`
+   *
+   * Porque la llevaba entera: `s3://<bucket>/<key>` en S3, `file://local/<sha256>`
+   * en disco. Eso publicaba el bucket, la clave del objeto y el hash del
+   * contenido a cualquiera que pidiera la URL — y el modelo lo prohíbe
+   * explícitamente («`storage_uri` es una URI interna estable, no una URL
+   * pública ni firmada», nota `FILE_SECURITY` de `diagram_02_common.puml`).
+   * Además no servía para nada: ningún navegador abre `file://local/…`, así que
+   * lo único que esa URL lograba era filtrar la ubicación interna.
+   *
+   * Lo que se emite ahora es la ruta **de la propia API** para ese archivo, con
+   * el mismo par `expires`/`signature`. El día que se integre un presign real,
+   * lo que cambia es de dónde sale la URL, no este contrato.
    */
-  async generateDownloadUrl(fileId: string): Promise<DownloadUrlResponseDto> {
+  async generateDownloadUrl(
+    fileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<DownloadUrlResponseDto> {
     this.logger.info(
       { operation: 'common.file.downloadUrl', fileId },
       'Generating download URL',
@@ -515,6 +543,9 @@ export class FilesService {
     const file = await this.filesRepo.findById(forked, fileId);
     if (!file) {
       throw new ResourceNotFoundException('Archivo no encontrado');
+    }
+    if (!canActorReadOwnFile(file, actor)) {
+      throw new ForbiddenException('No tiene acceso a este archivo');
     }
     if (
       file.deletedAt ||
@@ -546,9 +577,10 @@ export class FilesService {
     const signature = createHmac('sha256', downloadUrlSecret())
       .update(`${file.id}:${version.id}:${expiry}`)
       .digest('hex');
+    // Nunca `version.storageUri`: ver el porqué en el encabezado del método.
     const url =
-      `${version.storageUri}?fileId=${file.id}&versionId=${version.id}` +
-      `&expires=${expiry}&signature=${signature}`;
+      `/common/files/${file.id}/content` +
+      `?versionId=${version.id}&expires=${expiry}&signature=${signature}`;
 
     this.logger.info(
       { operation: 'common.file.downloadUrl', fileId, versionId: version.id },

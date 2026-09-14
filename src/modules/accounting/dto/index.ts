@@ -9,3 +9,4 @@ export * from './liability.dto';
 export * from './exchange-rate.dto';
 export * from './practitioner-entry.dto';
 export * from './practitioner-assets-liabilities.dto';
+export * from './accounting-cockpit.dto';

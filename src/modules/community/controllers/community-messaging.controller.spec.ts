@@ -30,6 +30,7 @@ function build() {
     listConversations: mockFn(),
     listMessages: mockFn(),
     conversationPresence: mockFn(),
+    getAttachmentContent: mockFn(),
   };
   return {
     controller: new CommunityMessagingController(
@@ -54,6 +55,36 @@ describe('CommunityMessagingController', () => {
     const dto = { senderProfileId: 'p1', bodyText: 'hi' };
     await d.controller.sendMessage('conv1', dto, actor);
     expect(d.service.sendMessage).toHaveBeenCalledWith('conv1', dto, actor);
+  });
+
+  it('sirve el adjunto por la ruta contextual con no-store', async () => {
+    const d = build();
+    d.readService.getAttachmentContent.mockResolvedValue({
+      buffer: Buffer.from('bytes'),
+      mimeType: 'application/pdf',
+      originalName: 'resultado.pdf',
+    });
+    const res = { setHeader: mockFn(), send: mockFn() } as any;
+
+    await d.controller.getAttachmentContent(
+      'conv1',
+      'file1',
+      'profile1',
+      res,
+      actor,
+    );
+
+    expect(d.readService.getAttachmentContent).toHaveBeenCalledWith(
+      'conv1',
+      'file1',
+      'profile1',
+      actor,
+    );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Content-Type',
+      'application/pdf',
+    );
+    expect(res.send).toHaveBeenCalledWith(Buffer.from('bytes'));
   });
 
   it('delegates markRead (UC-19-07)', async () => {

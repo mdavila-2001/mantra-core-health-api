@@ -193,13 +193,21 @@ export class CommonFilesController {
     return this.filesService.softDelete(id, user);
   }
 
-  /** UC-02-11: emite una URL de descarga firmada. */
+  /**
+   * UC-02-11: emite una URL de descarga firmada.
+   *
+   * Lleva `@CurrentUser` desde 5.1: sin él el servicio no tenía a quién
+   * autorizar, y esta ruta era el camino paralelo que rodeaba el control de
+   * `:id/content`. La regla que aplica es la misma que la del contenido.
+   */
   @Post(':id/download-url')
   @HttpCode(HttpStatus.CREATED)
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Emitir una URL de descarga firmada (UC-02-11)' })
   downloadUrl(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DownloadUrlResponseDto> {
-    return this.filesService.generateDownloadUrl(id);
+    return this.filesService.generateDownloadUrl(id, actor);
   }
 }

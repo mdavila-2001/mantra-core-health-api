@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { FileUploadService } from './file-upload.service';
+import { AttachableFileService } from './attachable-file.service';
 import { ForbiddenException } from '@nestjs/common';
 import {
   CONCEPTS,
@@ -47,12 +48,18 @@ describe('FileUploadService', () => {
     const filesService = { createFile: fn() };
     const filesRepo = { findById: fn() };
     const fileVersionsRepo = { findById: fn() };
+    const attachableFiles = new AttachableFileService(
+      filesRepo as never,
+      fileVersionsRepo as never,
+      logger as never,
+    );
     const service = new FileUploadService(
       em as never,
       storage,
       filesService as never,
       filesRepo as never,
       fileVersionsRepo as never,
+      attachableFiles,
       logger as never,
     );
     return { service, storage, filesService, filesRepo, fileVersionsRepo };
@@ -401,6 +408,67 @@ describe('FileUploadService', () => {
       await expect(
         context.service.download('file-1', reviewer),
       ).resolves.toMatchObject({ mimeType: 'image/jpeg' });
+    });
+
+    it('sirve bytes tras autorización contextual sin convertir al receptor en dueño', async () => {
+      const context = build();
+      withVersion(context, CONCEPTS.SCAN_CLEAN);
+      context.storage.retrieve.mockResolvedValue(Buffer.from('bytes'));
+
+      await expect(
+        context.service.downloadForAuthorizedContext(
+          'file-1',
+          'community.conversation.attachment',
+        ),
+      ).resolves.toMatchObject({
+        buffer: Buffer.from('bytes'),
+        mimeType: 'image/jpeg',
+      });
+    });
+  });
+
+  describe('downloadPublicMedia', () => {
+    function publicImage(
+      { filesRepo, fileVersionsRepo }: ReturnType<typeof build>,
+      sensitivityConceptId: string,
+    ) {
+      filesRepo.findById.mockResolvedValue({
+        id: 'file-public',
+        currentVersionId: 'ver-public',
+        originalName: 'avatar.jpg',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        sensitivityConceptId,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      fileVersionsRepo.findById.mockResolvedValue({
+        id: 'ver-public',
+        storageUri: 'file://local/public',
+        mimeType: 'image/jpeg',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
+      });
+    }
+
+    it('preserva una imagen pública NORMAL limpia', async () => {
+      const context = build();
+      publicImage(context, CONCEPTS.SENSITIVITY_NORMAL);
+      context.storage.retrieve.mockResolvedValue(Buffer.from('public-image'));
+
+      await expect(
+        context.service.downloadPublicMedia('file-public'),
+      ).resolves.toMatchObject({
+        buffer: Buffer.from('public-image'),
+        mimeType: 'image/jpeg',
+      });
+    });
+
+    it('no vuelve pública una imagen PHI', async () => {
+      const context = build();
+      publicImage(context, CONCEPTS.SENSITIVITY_PHI);
+
+      await expect(
+        context.service.downloadPublicMedia('file-public'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(context.storage.retrieve).not.toHaveBeenCalled();
     });
   });
 });

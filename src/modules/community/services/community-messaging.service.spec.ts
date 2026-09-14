@@ -12,6 +12,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 
 const actor = { id: 'admin-1', roles: [] } as any;
 
@@ -36,6 +37,7 @@ function build() {
     // devuelven explícitamente.
     findDirectBetween: mockFn().mockResolvedValue(null),
     findMessageInConversation: mockFn().mockResolvedValue(null),
+    findLiveMessagesByAttachmentFileId: mockFn().mockResolvedValue([]),
   };
   const blocksRepo = { existsBetween: mockFn().mockResolvedValue(null) };
   // El aviso in-app del carril P1, doblado: enviar un mensaje se prueba acá,
@@ -63,6 +65,10 @@ function build() {
   const autoReply = {
     textoParaResponder: mockFn().mockResolvedValue(null),
   };
+  const attachableFiles = {
+    assertUsableBy: mockFn().mockResolvedValue({}),
+    assertUsableForAuthorizedContext: mockFn().mockResolvedValue({}),
+  };
   const service = new CommunityMessagingService(
     em as any,
     conversationsRepo as any,
@@ -71,6 +77,7 @@ function build() {
     gateway as any,
     autoReply as any,
     visibility as any,
+    attachableFiles as any,
     logger as any,
   );
   return {
@@ -82,6 +89,7 @@ function build() {
     messageNotifications,
     gateway,
     visibility,
+    attachableFiles,
   };
 }
 
@@ -153,6 +161,172 @@ describe('CommunityMessagingService', () => {
   });
 
   describe('sendMessage (UC-19-06)', () => {
+    it('exige que el perfil remitente pertenezca al actor', async () => {
+      const d = build();
+      d.visibility.assertActsAsProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+
+      await expect(
+        d.service.sendMessage(
+          'conv1',
+          { senderProfileId: 'p-ajeno' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.conversationsRepo.findConversationById).not.toHaveBeenCalled();
+    });
+
+    it('rechaza asociar un fileId ajeno sin contexto previo', async () => {
+      const d = build();
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'conv1',
+        messageCount: 0,
+        updatedAt: new Date(),
+      });
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part1',
+      });
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+      ]);
+      d.attachableFiles.assertUsableBy.mockRejectedValue(
+        new ForbiddenException('ajeno'),
+      );
+
+      await expect(
+        d.service.sendMessage(
+          'conv1',
+          { senderProfileId: 'p1', attachmentFileId: 'f-ajeno' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
+    });
+
+    /**
+     * FT-32-R12 · falla cerrado sin actor.
+     *
+     * Se invoca `enviar` directamente porque **no hay camino público que llegue
+     * acá**, y ése es justamente el punto: el único llamador sin actor es la
+     * respuesta automática por inactividad, que hoy manda `{ senderProfileId,
+     * bodyText }` y nunca adjunta. La guarda existe para el día que eso cambie
+     * — y sin prueba, «el día que eso cambie» es el día en que nadie se entera.
+     * Con la condición anterior (`attachmentFileId && authorizingActor`) este
+     * mismo envío se guardaba sin validar nada.
+     */
+    it('no adjunta sin un actor que lo autorice, y no valida a medias', async () => {
+      const d = build();
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'conv1',
+        messageCount: 0,
+        updatedAt: new Date(),
+      });
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part1',
+      });
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+      ]);
+
+      await expect(
+        (d.service as any).enviar(
+          'conv1',
+          { senderProfileId: 'p1', attachmentFileId: 'f-1' },
+          undefined,
+          false,
+          undefined,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      // Ni se guarda el mensaje ni se consulta la primitiva de asociación: el
+      // rechazo es anterior, no el resultado de una comprobación que pasó.
+      expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
+      expect(d.attachableFiles.assertUsableBy).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Un archivo sin dueño es una pre-carga anónima que nadie reclamó: no es de
+     * quien lo cita. `assertUsableBy` lo rechaza porque compara
+     * `createdByUserId !== actor.id` y `undefined` nunca es un id real — pero
+     * conviene fijarlo, porque la comparación inversa (con el actor opcional)
+     * sí tendría el agujero `undefined === undefined`.
+     */
+    it('un archivo huérfano no es asociable ni por reenvío', async () => {
+      const d = build();
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'conv1',
+        messageCount: 0,
+        updatedAt: new Date(),
+      });
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part1',
+      });
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+      ]);
+      // Lo que hace el servicio real ante `created_by_user_id` nulo.
+      d.attachableFiles.assertUsableBy.mockRejectedValue(
+        new ForbiddenException('no le pertenece'),
+      );
+      // Y no viaja en ninguna conversación: tampoco hay reenvío que lo salve.
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue(
+        [],
+      );
+
+      await expect(
+        d.service.sendMessage(
+          'conv1',
+          { senderProfileId: 'p1', attachmentFileId: 'f-huerfano' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
+    });
+
+    it('preserva el reenvío si el perfil participa en el contexto fuente', async () => {
+      const d = build();
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'conv-destino',
+        messageCount: 0,
+        updatedAt: new Date(),
+      });
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+      ]);
+      d.conversationsRepo.findActiveParticipant.mockImplementation(
+        (_tx: unknown, conversationId: string) =>
+          Promise.resolve(
+            conversationId === 'conv-destino' ||
+              conversationId === 'conv-fuente'
+              ? { id: `part-${conversationId}` }
+              : null,
+          ),
+      );
+      d.attachableFiles.assertUsableBy.mockRejectedValue(
+        new ForbiddenException('no uploader'),
+      );
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue([
+        { conversationId: 'conv-fuente', attachmentFileId: 'f-1' },
+      ]);
+      d.conversationsRepo.createMessage.mockReturnValue({
+        id: 'm-1',
+        senderProfileId: 'p1',
+        attachmentFileId: 'f-1',
+      });
+
+      await expect(
+        d.service.sendMessage(
+          'conv-destino',
+          { senderProfileId: 'p1', attachmentFileId: 'f-1' } as any,
+          actor,
+        ),
+      ).resolves.toMatchObject({ id: 'm-1' });
+      expect(
+        d.attachableFiles.assertUsableForAuthorizedContext,
+      ).toHaveBeenCalled();
+    });
+
     it('throws when the conversation does not exist', async () => {
       const d = build();
       d.conversationsRepo.findConversationById.mockResolvedValue(null);
