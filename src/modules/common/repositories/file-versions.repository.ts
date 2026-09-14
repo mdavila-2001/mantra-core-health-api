@@ -8,6 +8,9 @@ import { FileVersions } from '../entities';
  * no tiene `updated_at` ni `row_version`, solo `recorded_at` + autor.
  */
 export interface CreateFileVersionData {
+  bucketOrContainer?: string;
+  objectKey?: string;
+  objectVersion?: string;
   /**
    * Identificador asociado a file.
    */
@@ -117,6 +120,9 @@ export class FileVersionsRepository {
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateFileVersionData): FileVersions {
     return em.create(FileVersions, {
+      bucketOrContainer: data.bucketOrContainer,
+      objectKey: data.objectKey,
+      objectVersion: data.objectVersion,
       fileId: data.fileId,
       versionNumber: data.versionNumber,
       storageProviderConceptId: data.storageProviderConceptId,

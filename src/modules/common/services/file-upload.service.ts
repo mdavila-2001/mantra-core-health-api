@@ -1,4 +1,13 @@
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { SEED } from '../../../common/constants/concepts';
+import { StoragePublicationService } from '../../../common/storage/storage-publication.service';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -89,6 +98,7 @@ export class FileUploadService {
     private readonly fileVersionsRepo: FileVersionsRepository,
     private readonly attachableFiles: AttachableFileService,
     private readonly logger: PinoLogger,
+    @Optional() private readonly publication?: StoragePublicationService,
   ) {
     this.logger.setContext(FileUploadService.name);
   }
@@ -161,6 +171,17 @@ export class FileUploadService {
       );
     }
 
+    if (this.publication) {
+      const result = await this.publishUpload(
+        file,
+        dto,
+        detectedMimeType,
+        actor,
+      );
+      return result.created;
+    }
+    if (loadStorageEnv().lifecycleBinding)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
     const stored = await this.storage.store({
       buffer: file.buffer,
       originalName: file.originalname,
@@ -254,6 +275,21 @@ export class FileUploadService {
       });
     }
 
+    if (this.publication) {
+      const result = await this.publishUpload(
+        file,
+        dto,
+        detectedMimeType,
+        null,
+      );
+      return {
+        ...result.created,
+        sizeBytes: result.stored.sizeBytes,
+        mimeType: detectedMimeType,
+      };
+    }
+    if (loadStorageEnv().lifecycleBinding)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
     const stored = await this.storage.store({
       buffer: file.buffer,
       originalName: file.originalname,
@@ -286,6 +322,41 @@ export class FileUploadService {
       sizeBytes: stored.sizeBytes,
       mimeType: detectedMimeType,
     };
+  }
+
+  private async publishUpload(
+    file: UploadedFileBytes,
+    dto: UploadFileDto,
+    mimeType: SniffedMimeType,
+    actor: AuthenticatedUser | null,
+  ) {
+    if (!this.publication)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+    return this.publication.publish(
+      { buffer: file.buffer, originalName: file.originalname, mimeType },
+      // This is the existing technical upload tenant, NOT proof of evidence ownership.
+      {
+        tenantId: SEED.tenantId,
+        producer: actor ? 'common.upload' : 'common.anonymous-upload',
+        targetId: randomUUID(),
+      },
+      async (context) => ({
+        stored: context.stored,
+        created: await this.filesService.createFile(
+          {
+            originalName: file.originalname,
+            category: dto.category,
+            sensitivity: dto.sensitivity,
+            mimeType,
+            sizeBytes: context.stored.sizeBytes,
+            contentHash: context.stored.contentHash,
+            storageUri: context.stored.storageUri,
+          },
+          actor,
+          context,
+        ),
+      }),
+    );
   }
 
   /**

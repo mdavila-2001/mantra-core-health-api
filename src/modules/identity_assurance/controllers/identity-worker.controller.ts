@@ -8,7 +8,16 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  Optional,
 } from '@nestjs/common';
+import { IsOptional, IsUUID } from 'class-validator';
+import { IdentityEvidenceLifecycleService } from '../services/identity-evidence-lifecycle.service';
+import { IdentityEvidenceStoragePurgeService } from '../services/identity-evidence-storage-purge.service';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
+
+export class EvidenceLifecycleScanDto {
+  @IsOptional() @IsUUID() cursor?: string;
+}
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
@@ -43,7 +52,35 @@ export class IdentityWorkerController {
    *
    * @param checksService - Valor de checks service requerido por la operación.
    */
-  constructor(private readonly checksService: IdentityChecksService) {}
+  constructor(
+    private readonly checksService: IdentityChecksService,
+    @Optional() private readonly lifecycle?: IdentityEvidenceLifecycleService,
+    @Optional()
+    private readonly storagePurge?: IdentityEvidenceStoragePurgeService,
+  ) {}
+
+  @Post('evidence/storage-purge-review')
+  @Roles('SYSTEM')
+  @ApiOperation({
+    summary: 'Recheck retired evidence objects; never grants physical delete',
+  })
+  storagePurgeReview() {
+    if (!this.storagePurge)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+    return this.storagePurge.review();
+  }
+
+  @Post('evidence/lifecycle-scan')
+  @Roles('SYSTEM')
+  @ApiOperation({
+    summary:
+      'Evaluate configured evidence lifecycle; destructive runtime remains blocked',
+  })
+  lifecycleScan(@Body() dto: EvidenceLifecycleScanDto) {
+    if (!this.lifecycle)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+    return this.lifecycle.scan(dto.cursor);
+  }
 
   /** Descubrimiento: qué checks hay que despachar o seguir esperando. */
   @Get('checks/dispatchable')

@@ -481,7 +481,7 @@ export class IdentitySelfServiceService {
     // Las FK son columnas uuid planas: persistir el caso antes de sus hijos.
     await tx.flush();
 
-    this.evidenceRepo.create(tx, {
+    await this.evidenceRepo.create(tx, {
       identityVerificationCaseId: kase.id,
       evidenceTypeConceptId: vertical.evidenceTypeConceptId,
       evidenceFileId,

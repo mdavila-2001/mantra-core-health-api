@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
+import { InternalStorageLifecycleController } from './controllers/internal-storage-lifecycle.controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import {
@@ -32,8 +34,12 @@ import {
  * archivos con versionado, derivados, vínculos, escaneo y borrado lógico).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    StorageLifecycleModule,
+  ],
   controllers: [
+    InternalStorageLifecycleController,
     CommonIdentifiersController,
     CommonContactPointsController,
     CommonAddressesController,

@@ -1,5 +1,10 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'node:crypto';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
+import {
+  isKnownPhysicalIdentity,
+  samePhysicalObject,
+} from '../../../common/storage/physical-object-identity';
 import type {
   AudioDynamicField,
   AudioSynthesisProfile,
@@ -138,29 +143,61 @@ export async function reserveAudioGenerationBudget(
 export async function markAudioAssetReady(
   em: EntityManager,
   input: MarkAudioAssetReadyInput,
+  publicationTx?: EntityManager,
 ): Promise<AudioAssets> {
-  await em.transactional(async (tx) => {
+  const publish = async (tx: EntityManager) => {
     const rows = await tx.getConnection().execute<
       Array<{
         generation_status: string;
         budget_reserved_units: number | null;
         budget_period_key: string | null;
         provider: string;
+        storage_key: string | null;
+        checksum_sha256: string | null;
+        bytes: number | null;
+        metadata: { storagePhysicalIdentity?: unknown } | null;
       }>
-    >(`select generation_status, budget_reserved_units, budget_period_key, provider from audio_assets.audio_assets where id=? for update`, [input.assetId], 'all', tx.getTransactionContext());
+    >(`select generation_status, budget_reserved_units, budget_period_key, provider, storage_key, checksum_sha256, bytes, metadata from audio_assets.audio_assets where id=? for update`, [input.assetId], 'all', tx.getTransactionContext());
     const asset = rows[0];
-    if (!asset || asset.generation_status === 'READY') return;
+    if (!asset) throw new StorageLifecycleDenied('PUBLICATION_TARGET_MISSING');
+    if (asset.generation_status === 'READY') {
+      if (
+        asset.storage_key !== input.storageUri ||
+        asset.checksum_sha256 !== input.checksum ||
+        Number(asset.bytes) !== input.bytes
+      )
+        throw new StorageLifecycleDenied('PUBLICATION_REPLAY_MISMATCH');
+      if (
+        input.physicalIdentity &&
+        (!isKnownPhysicalIdentity(asset.metadata?.storagePhysicalIdentity) ||
+          !samePhysicalObject(
+            input.physicalIdentity,
+            asset.metadata.storagePhysicalIdentity,
+          ) ||
+          input.physicalIdentity.bindingRevision !==
+            asset.metadata.storagePhysicalIdentity.bindingRevision)
+      )
+        throw new StorageLifecycleDenied(
+          'PUBLICATION_REPLAY_IDENTITY_MISMATCH',
+        );
+      return;
+    }
     await tx.getConnection().execute(
       // `budget_reserved_units` se pone a NULL en el mismo paso: es lo que hace
       // que la devolución de reserva sea exactamente-una-vez. Un fallo posterior
       // sobre un asset ya READY leería NULL y no devolvería nada al presupuesto.
-      `update audio_assets.audio_assets set storage_provider=?, storage_key=?, bytes=?, duration_ms=?, checksum_sha256=?, generation_status='READY', failure_code=null, budget_reserved_units=null, generated_at=now(), updated_at=now() where id=?`,
+      `update audio_assets.audio_assets set storage_provider=?, storage_key=?, bytes=?, duration_ms=?, checksum_sha256=?, metadata=coalesce(metadata, '{}'::jsonb) || ?::jsonb, generation_status='READY', failure_code=null, budget_reserved_units=null, generated_at=now(), updated_at=now() where id=?`,
       [
         input.storageUri.startsWith('s3://') ? 's3' : 'local',
         input.storageUri,
         input.bytes,
         input.durationMs ?? null,
         input.checksum,
+        JSON.stringify(
+          input.physicalIdentity
+            ? { storagePhysicalIdentity: input.physicalIdentity }
+            : {},
+        ),
         input.assetId,
       ],
       'run',
@@ -178,8 +215,14 @@ export async function markAudioAssetReady(
       'run',
       tx.getTransactionContext(),
     );
-  });
-  const result = await em.findOne(AudioAssets, { id: input.assetId });
+  };
+  if (publicationTx) await publish(publicationTx);
+  else await em.transactional(publish);
+  const result = await (publicationTx ?? em).findOne(
+    AudioAssets,
+    { id: input.assetId },
+    { refresh: true },
+  );
   if (!result) throw new Error('Asset READY no encontrado');
   return result;
 }

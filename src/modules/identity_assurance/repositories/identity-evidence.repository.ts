@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import {
+  StoragePublicationService,
+  guardStorageMutation,
+} from '../../../common/storage/storage-publication.service';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { IdentityEvidenceRecords } from '../entities';
 
@@ -57,6 +61,9 @@ export interface CreateEvidenceData {
 /** Acceso a datos de `identity_assurance.identity_evidence_records`. */
 @Injectable()
 export class IdentityEvidenceRecordsRepository {
+  constructor(
+    @Optional() private readonly publication?: StoragePublicationService,
+  ) {}
   /**
    * Crea create.
    *
@@ -64,7 +71,13 @@ export class IdentityEvidenceRecordsRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `IdentityEvidenceRecords`.
    */
-  create(em: EntityManager, data: CreateEvidenceData): IdentityEvidenceRecords {
+  async create(
+    em: EntityManager,
+    data: CreateEvidenceData,
+  ): Promise<IdentityEvidenceRecords> {
+    await guardStorageMutation(em, this.publication);
+    if (data.evidenceFileId)
+      await this.publication?.guardFile(em, data.evidenceFileId);
     return em.create(
       IdentityEvidenceRecords,
       {
