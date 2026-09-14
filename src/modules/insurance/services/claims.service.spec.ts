@@ -13,7 +13,7 @@ const PRACTICE = '88888888-8888-8888-8888-888888888888';
 const OTRA_PRACTICE = '99999999-9999-9999-9999-999999999999';
 const VERSION = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
-const actor = { id: 'user-1', roles: ['BILLING_OPERATOR'] } as never;
+const actor = { id: 'user-1', roles: ['SUPERADMIN'] } as never;
 
 /** Un reclamo presentado por `PRACTICE`. */
 function reclamo(over: Record<string, unknown> = {}) {
@@ -69,6 +69,8 @@ function servicioCon(
     {} as never,
     practiceLookup(practicas) as never,
     logger,
+    {} as never,
+    {} as never,
   );
 }
 
@@ -238,6 +240,7 @@ describe('ClaimsService.adjudicate', () => {
   function repoDeAdjudicacion(over: Record<string, unknown> = {}) {
     return {
       findClaim: mockFn().mockResolvedValue(reclamoSubmitted()),
+      findClaimForUpdate: mockFn().mockResolvedValue(null),
       findLine: mockFn().mockResolvedValue({
         id: LINEA,
         insuranceClaimId: CLAIM,

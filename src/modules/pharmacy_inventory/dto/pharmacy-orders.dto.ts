@@ -1,3 +1,7 @@
+import {
+  PatientInsuranceSettlementDto,
+  type PatientSettlementProjection,
+} from '../../insurance/dto/patient-settlement.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -120,7 +124,7 @@ export class PharmacyOrderLineDto {
   /**
    * Concepto de medicamento asociado al producto, cuando fue publicado.
    */
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
   medicationConceptId!: string | null;
 
   /**
@@ -132,25 +136,25 @@ export class PharmacyOrderLineDto {
   /**
    * Nombre comercial.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   brandName!: string | null;
 
   /**
    * Nombre genérico.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   genericName!: string | null;
 
   /**
    * Concentración, legible.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   strengthText!: string | null;
 
   /**
    * Presentación, legible.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   packageSizeText!: string | null;
 
   /**
@@ -184,7 +188,7 @@ export class PharmacyOrderLineDto {
    * publicaba precio: el GET no recalcula — un precio congelado que se
    * recalcula contra listas nuevas reescribe un pedido histórico.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   unitPriceAmount!: string | null;
 
   /**
@@ -201,8 +205,43 @@ export class PharmacyOrderLineDto {
   status!: InventoryConceptDto;
 }
 
+/** Physical frozen portions used to submit an exact order claim. */
+export class PharmacyOrderReservationLineDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  productId!: string;
+
+  @ApiProperty({ type: String })
+  quantity!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  unitPriceAmount!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  billedAmount!: string | null;
+
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  currencyConceptId!: string | null;
+}
+
 /** Un pedido de farmacia del paciente, resuelto a palabras. */
-export class PharmacyOrderDto {
+export class PharmacyOrderDto implements PatientSettlementProjection {
+  @ApiProperty({
+    type: [PharmacyOrderReservationLineDto],
+    description: 'Porciones confirmadas o entregadas vigentes para facturación',
+  })
+  reservationLines!: PharmacyOrderReservationLineDto[];
+
+  @ApiProperty({ nullable: true, type: PatientInsuranceSettlementDto })
+  insuranceSettlement!: PatientSettlementProjection['insuranceSettlement'];
+
+  @ApiProperty({
+    enum: ['AVAILABLE', 'PENDING_PUBLICATION', 'UNDER_REVIEW', 'NOT_AVAILABLE'],
+  })
+  insuranceSettlementAvailability!: PatientSettlementProjection['insuranceSettlementAvailability'];
+
   /**
    * Identificador único del pedido.
    */
@@ -255,7 +294,7 @@ export class PharmacyOrderDto {
   /**
    * Receta que respalda el pedido, si la hay.
    */
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
   medicationRequestId!: string | null;
 
   /**
@@ -263,7 +302,7 @@ export class PharmacyOrderDto {
    * FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene
    * nombre cargado.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   patientName!: string | null;
 
   /**
@@ -281,7 +320,7 @@ export class PharmacyOrderDto {
    * `null` — el mostrador no valida mirándolo, valida enviándolo en
    * `POST /pharmacy/orders/:id/dispense`.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   pickupCode!: string | null;
 
   /**
@@ -292,7 +331,7 @@ export class PharmacyOrderDto {
    * re-congela cuando el pedido cambia (línea no disponible, sustitución
    * aceptada); jamás se recalcula en una lectura.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   totalAmount!: string | null;
 
   /**
@@ -305,7 +344,7 @@ export class PharmacyOrderDto {
    * Motivo del rechazo, en palabras, cuando el estado es `RECHAZADO` (v4.2.1
    * lo persiste). `null` en cualquier otro estado.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   rejectionReasonText!: string | null;
 
   /**
@@ -346,7 +385,7 @@ export class PharmacyOrderSubstitutionDto {
   /**
    * Precio congelado del original al proponer, o `null` sin precio publicado.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   originalUnitPriceAmount!: string | null;
 
   /**
@@ -364,7 +403,7 @@ export class PharmacyOrderSubstitutionDto {
   /**
    * Precio congelado del propuesto: la oferta que el paciente decidió.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   proposedUnitPriceAmount!: string | null;
 
   /**
@@ -382,7 +421,7 @@ export class PharmacyOrderSubstitutionDto {
   /**
    * Cuándo se decidió (aceptó/rechazó/retiró), ISO 8601; `null` en pie.
    */
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   decidedAt!: string | null;
 }
 

@@ -1,3 +1,5 @@
+import { PatientSettlementService } from '../../insurance/services/patient-settlement.service';
+import { unavailableSettlement } from '../../insurance/dto/patient-settlement.dto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -94,6 +96,7 @@ export class DiagnosticsPatientResultsService {
     private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly grantsRepo: ResourceScopeGrantsRepository,
     private readonly logger: PinoLogger,
+    private readonly settlements: PatientSettlementService,
   ) {
     this.logger.setContext(DiagnosticsPatientResultsService.name);
   }
@@ -168,7 +171,13 @@ export class DiagnosticsPatientResultsService {
     const truncated = rows.length > limit;
     const page = rows.slice(0, limit);
 
-    const [preparacion, informePorOrden] = await Promise.all([
+    const [settlements, preparacion, informePorOrden] = await Promise.all([
+      this.settlements.forOrders(
+        em,
+        actor.id,
+        'DIAGNOSTIC',
+        page.map((order) => order.id),
+      ),
       this.preparacionPorConcepto(
         em,
         page.map((orden) => orden.codeConceptId),
@@ -183,6 +192,7 @@ export class DiagnosticsPatientResultsService {
       const reportId = informePorOrden.get(orden.id);
       return {
         id: orden.id,
+        ...(settlements.get(orden.id) ?? unavailableSettlement()),
         encounterId: orden.encounterId,
         codeConceptId: orden.codeConceptId,
         categoryConceptId: orden.categoryConceptId,

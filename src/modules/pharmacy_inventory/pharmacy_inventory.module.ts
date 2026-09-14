@@ -1,3 +1,5 @@
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
+import { InsurancePatientSettlementModule } from '../insurance/insurance-patient-settlement.module';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PharmacyModule } from '../pharmacy/pharmacy.module';
@@ -57,6 +59,8 @@ import {
  */
 @Module({
   imports: [
+    DirectoryAuthorizationModule,
+    InsurancePatientSettlementModule,
     MikroOrmModule.forFeature(Object.values(entities)),
     // La cara de lectura del directorio de farmacias (módulo 24): la
     // disponibilidad reutiliza sus filtros de publicación y precios en vez de

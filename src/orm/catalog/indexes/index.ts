@@ -46,6 +46,7 @@ import { integrationContractsIndexes } from './integration_contracts.idx';
 import { integrationsIndexes } from './integrations.idx';
 import { lakehouseIndexes } from './lakehouse.idx';
 import { marketingIndexes } from './marketing.idx';
+import { medicalGroupsIndexes } from './medical_groups.idx';
 import { messagingIndexes } from './messaging.idx';
 import { objectStorageIndexes } from './object_storage.idx';
 import { organizationExtensionsIndexes } from './organization_extensions.idx';
@@ -66,6 +67,7 @@ import { qaLabIndexes } from './qa_lab.idx';
 import { readModelsIndexes } from './read_models.idx';
 import { reportingIndexes } from './reporting.idx';
 import { schedulingIndexes } from './scheduling.idx';
+import { surveysIndexes } from './surveys.idx';
 import { systemContextIndexes } from './system_context.idx';
 import { systemOpsIndexes1 } from './system_ops.1.idx';
 import { systemOpsIndexes2 } from './system_ops.2.idx';
@@ -113,6 +115,7 @@ export const indexCatalog: Readonly<Record<string, readonly (readonly IndexTuple
   integrations: [integrationsIndexes],
   lakehouse: [lakehouseIndexes],
   marketing: [marketingIndexes],
+  medical_groups: [medicalGroupsIndexes],
   messaging: [messagingIndexes],
   object_storage: [objectStorageIndexes],
   organization_extensions: [organizationExtensionsIndexes],
@@ -129,6 +132,7 @@ export const indexCatalog: Readonly<Record<string, readonly (readonly IndexTuple
   read_models: [readModelsIndexes],
   reporting: [reportingIndexes],
   scheduling: [schedulingIndexes],
+  surveys: [surveysIndexes],
   system_context: [systemContextIndexes],
   system_ops: [systemOpsIndexes1, systemOpsIndexes2],
   telemetry: [telemetryIndexes],

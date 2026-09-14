@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiOperation,
   ApiTags,
@@ -17,6 +18,7 @@ import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ClaimsService } from '../services';
 import {
   CreateClaimDto,
+  CreatedClaimDto,
   CreateAdjudicationDto,
   PublishEobDto,
   CreateReversalDto,
@@ -41,19 +43,22 @@ export class ClaimsController {
    */
   constructor(private readonly service: ClaimsService) {}
 
-  /** UC-26-06. */
+  /** UC-26-06. El servicio exige membresía OWNER/ADMIN por origen; conserva roles históricos para reclamos genéricos. */
   @Post()
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enviar reclamo con líneas (837)' })
+  @ApiCreatedResponse({ type: CreatedClaimDto })
   submit(
     @Body() dto: CreateClaimDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<ResourceStatusDto> {
+  ): Promise<CreatedClaimDto> {
     return this.service.submitClaim(dto, actor);
   }
 
   /** UC-26-07. */
   @Post(':id/adjudications')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjudicar reclamo por línea (835)' })
   adjudicate(
@@ -66,6 +71,7 @@ export class ClaimsController {
 
   /** UC-26-08. */
   @Post(':id/eob')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar Explicación de Beneficios (EOB)' })
   publishEob(
@@ -78,6 +84,7 @@ export class ClaimsController {
 
   /** UC-26-10. */
   @Post(':id/reversals')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar reversión de reclamo' })
   reverse(
@@ -91,14 +98,9 @@ export class ClaimsController {
   /**
    * UC-26-11.
    *
-   * **Único método de este controlador que cambia de rol** (TAREA-16 · D1.b,
-   * decisión de Justin del 2026-09-04): reclamar es un acto del prestador que
-   * presentó la solicitud, así que lo ejecuta `BILLING_OPERATOR` —con
-   * `SECURITY_ADMIN` como acceso administrativo y `SUPERADMIN` por comodín—.
-   * El `@Roles` del método **sobreescribe** el de la clase (`getAllAndOverride`
-   * en `RolesGuard`), así que enviar, adjudicar, publicar EOB y revertir siguen
-   * exigiendo lo que exigían: son decisiones de quien paga, no de quien
-   * reclama.
+   * Conserva el alcance del prestador definido por TAREA-16 para disputas.
+   * Las otras escrituras delegan la autorización en el servicio, según el
+   * origen vinculado y las membresías activas de prestador o aseguradora.
    */
   @Post(':id/disputes')
   @Roles('BILLING_OPERATOR', 'SECURITY_ADMIN')

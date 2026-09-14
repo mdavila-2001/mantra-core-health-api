@@ -22,6 +22,16 @@ export class PriorAuthItemDto {
   @IsUUID()
   serviceConceptId?: string;
 
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  pharmacyProductId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  diagnosticStudyOfferingId?: string;
+
   /**
    * Valor de requested quantity mantenido por la instancia.
    */
@@ -47,6 +57,29 @@ export class CreatePriorAuthRequestDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   patientCoverageId!: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  inventoryReservationId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Receta del pedido vinculado',
+  })
+  @IsOptional()
+  @IsUUID()
+  medicationRequestId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  serviceRequestId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  currencyConceptId?: string;
 
   /**
    * Identificador asociado a requesting provider entity.

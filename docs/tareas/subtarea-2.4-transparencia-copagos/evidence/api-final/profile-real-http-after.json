@@ -1,0 +1,15 @@
+{
+  "loginStatus": 200,
+  "profileStatus": 200,
+  "profileIdMatchesFixture": true,
+  "planPresent": true,
+  "stableCoverageIdentity": true,
+  "currencyCode": "BOB",
+  "specificBenefitPresent": true,
+  "stableBenefitIdentity": true,
+  "benefitCount": 1,
+  "serviceName": "Complete blood count",
+  "coveragePercent": "80.25",
+  "copayAmount": "0",
+  "deductibleAmount": "10.50"
+}

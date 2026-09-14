@@ -1,3 +1,4 @@
+import type { CoverageValidity } from '../patient-coverage-validity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
@@ -345,47 +346,110 @@ export class OwnAddressDto {
   longitude?: number;
 }
 
-/**
- * Un seguro declarado por el paciente.
- *
- * Se devuelve el NOMBRE de la aseguradora y del plan, no sus identificadores:
- * quien lee su propio perfil necesita ver «Alianza · Salud Flexible», y pedirle
- * a la pantalla que resuelva dos catálogos más para pintar una línea sería
- * mover trabajo sin motivo.
- */
+/** Regla del plan con su vigencia explícita para el paciente. */
+export class CoverageBenefitSummaryDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiPropertyOptional()
+  categoryCode?: string;
+
+  @ApiPropertyOptional()
+  categoryName?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  serviceConceptId?: string;
+
+  @ApiPropertyOptional()
+  serviceName?: string;
+
+  /** `null` en persistencia se serializa como ausencia: no significa 0 %. */
+  @ApiPropertyOptional({ example: '80.00' })
+  coveragePercent?: string;
+
+  @ApiPropertyOptional({ example: '20.00' })
+  copayAmount?: string;
+
+  @ApiPropertyOptional({ example: '0.00' })
+  deductibleAmount?: string;
+
+  @ApiPropertyOptional()
+  statusCode?: string;
+
+  @ApiProperty({
+    enum: ['CURRENT', 'UPCOMING', 'EXPIRED', 'INACTIVE', 'UNKNOWN'],
+  })
+  validityStatus!: CoverageValidity;
+
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  effectiveFrom?: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  effectiveTo?: string;
+}
+
+/** Un seguro declarado por el paciente, con la información que puede verificar por sí mismo. */
 export class OwnCoverageDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
   @ApiProperty({ description: 'Aseguradora, en palabras' })
   carrierName!: string;
 
   @ApiPropertyOptional({ description: 'Plan contratado, en palabras' })
   planName?: string;
 
-  @ApiProperty({
-    description:
-      'Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador.',
-  })
+  @ApiProperty({ description: 'Si el seguro es público o privado' })
   isPublic!: boolean;
+
+  @ApiPropertyOptional({ description: 'Número de póliza declarado' })
+  policyIdentifier?: string;
 
   @ApiPropertyOptional({ description: 'Con qué documento figura afiliado' })
   memberIdentifier?: string;
 
   @ApiProperty({
-    description:
-      'Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar.',
+    description: 'Si la plataforma confirmó la cobertura con la aseguradora',
   })
   verified!: boolean;
 
-  /**
-   * El plan elegido, para que el editor del perfil pueda preseleccionarlo.
-   *
-   * `carrierName`/`planName` son para mostrar; nada en la respuesta hasta acá
-   * traía el uuid del plan, así que un formulario no tenía con qué armar el
-   * `<select>` ya elegido — sólo podía mostrar el texto.
-   */
+  @ApiPropertyOptional({ description: 'Estado legible de la cobertura' })
+  status?: string;
+
+  @ApiPropertyOptional()
+  statusCode?: string;
+
+  @ApiProperty({
+    enum: ['CURRENT', 'UPCOMING', 'EXPIRED', 'INACTIVE', 'UNKNOWN'],
+  })
+  validityStatus!: CoverageValidity;
+
+  @ApiProperty({ type: String, format: 'date' })
+  referenceDate!: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  effectiveFrom?: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  effectiveTo?: string;
+
+  @ApiPropertyOptional({ description: 'Código de moneda del plan' })
+  currencyCode?: string;
+
+  @ApiPropertyOptional({
+    description: 'Canal oficial de WhatsApp de la aseguradora',
+  })
+  carrierWhatsappNumber?: string;
+
+  @ApiPropertyOptional({ description: 'Call center oficial de la aseguradora' })
+  carrierCallCenterPhone?: string;
+
+  @ApiProperty({ type: [CoverageBenefitSummaryDto] })
+  benefits!: CoverageBenefitSummaryDto[];
+
   @ApiPropertyOptional({ format: 'uuid', description: 'Plan de salud elegido' })
   planId?: string;
 
-  /** 1 para la cobertura privada, 2 para la pública. */
   @ApiProperty({ description: 'Orden de la cobertura: 1 privada, 2 pública' })
   coverageOrder!: number;
 }

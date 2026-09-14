@@ -1,3 +1,6 @@
+import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
+import { PatientSettlementService } from '../../insurance/services/patient-settlement.service';
+import { unavailableSettlement } from '../../insurance/dto/patient-settlement.dto';
 import { randomInt } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { UniqueConstraintViolationException } from '@mikro-orm/core';
@@ -316,6 +319,8 @@ export class PharmacyOrdersService {
     private readonly outbox: OutboxService,
     private readonly orderNotifications: PharmacyOrderNotificationsService,
     private readonly logger: PinoLogger,
+    private readonly settlements: PatientSettlementService,
+    private readonly tenantAdministration: TenantAdministrationService,
   ) {
     this.logger.setContext(PharmacyOrdersService.name);
   }
@@ -497,13 +502,26 @@ export class PharmacyOrdersService {
     }
 
     const items = await this.composeOrders(em, tenantId, orders, 'owner');
-    return { items, count: items.length };
+    const settlements = await this.settlements.forOrders(
+      em,
+      actor.id,
+      'PHARMACY',
+      items.map((item) => item.id),
+    );
+    return {
+      items: items.map((item) => ({
+        ...item,
+        ...(settlements.get(item.id) ?? unavailableSettlement()),
+      })),
+      count: items.length,
+    };
   }
 
   /**
    * FAR-E1: un pedido concreto.
    *
-   * Lo ve su titular (claim `pid`) o el staff del tenant de la farmacia.
+   * Lo ve su titular (claim `pid`), la plataforma o un OWNER/ADMIN activo
+   * del tenant de la farmacia.
    * Cualquier tercero —otro paciente, otro tenant, un id inexistente— recibe
    * exactamente el mismo 404. La lectura de un pedido vivo ya vencido dispara
    * su expiración perezosa antes de responder.
@@ -518,11 +536,29 @@ export class PharmacyOrdersService {
     let order = await this.ordersRepo.findOrderById(em, id, ORDER_STATUS_IDS);
     if (!order) throw orderNotFound(id);
 
+    // El aislamiento precede tanto a la composición como a la expiración perezosa.
+    const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
+      em,
+      tenantId,
+      [order.pharmacyId],
+    );
+    if (!pharmacy) throw orderNotFound(id);
+
     const isOwner =
       actor.patientProfileId !== undefined &&
       order.patientProfileId === actor.patientProfileId;
     const isStaff = actor.roles.some((role) => STAFF_READ_ROLES.includes(role));
-    if (!isOwner && !isStaff) throw orderNotFound(id);
+    if (
+      !isOwner &&
+      !isStaff &&
+      !(await this.tenantAdministration.canAdminister(
+        em,
+        pharmacy.tenantId,
+        actor,
+      ))
+    ) {
+      throw orderNotFound(id);
+    }
 
     if (this.isDue(order)) {
       await this.expireDue(actor, [id]);
@@ -540,6 +576,15 @@ export class PharmacyOrdersService {
       isOwner ? 'owner' : 'staff',
     );
     if (!dto) throw orderNotFound(id);
+    if (isOwner) {
+      const settlements = await this.settlements.forOrders(
+        em,
+        actor.id,
+        'PHARMACY',
+        [id],
+      );
+      return { ...dto, ...(settlements.get(id) ?? unavailableSettlement()) };
+    }
     return dto;
   }
 
@@ -1309,7 +1354,10 @@ export class PharmacyOrdersService {
         );
       }
 
+      const insuranceClaimId =
+        await this.settlements.activeClaimForDispensation(tx, order.id);
       const dispensation = this.dispensationsRepo.create(tx, {
+        insuranceClaimId,
         pharmacyId: order.pharmacyId,
         pharmacySiteId: order.pharmacySiteId,
         // Un pedido siempre nace con titular (claim `pid`); el fallback es
@@ -2433,6 +2481,25 @@ function toOrderDto(
     );
 
   return {
+    ...unavailableSettlement(),
+    reservationLines: [...lines]
+      .filter((line) =>
+        [PINV.RES_LINE_CONFIRMED, PINV.RES_LINE_FULFILLED].includes(
+          line.statusConceptId,
+        ),
+      )
+      .sort((a, b) => (a.id > b.id ? 1 : a.id < b.id ? -1 : 0))
+      .map((line) => ({
+        id: line.id,
+        productId: line.pharmacyProductId,
+        quantity: line.reservedQuantity,
+        unitPriceAmount: line.unitPriceAmount ?? null,
+        billedAmount:
+          line.unitPriceAmount == null
+            ? null
+            : multiplyAmounts(line.unitPriceAmount, line.reservedQuantity),
+        currencyConceptId: line.currencyConceptId ?? null,
+      })),
     id: order.id,
     status: moduleConcept(order.reservationStatusConceptId),
     createdAt: order.createdAt.toISOString(),

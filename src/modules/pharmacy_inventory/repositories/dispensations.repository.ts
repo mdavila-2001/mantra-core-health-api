@@ -8,6 +8,7 @@ import { createdBy } from '../../../common';
 
 /** Datos de cabecera de una dispensación de medicamentos. */
 export interface CreateDispensationData {
+  insuranceClaimId?: string;
   /**
    * Identificador asociado a pharmacy.
    */
@@ -151,6 +152,7 @@ export class DispensationsRepository {
         patientProfileId: data.patientProfileId,
         medicationRequestId: data.medicationRequestId,
         inventoryReservationId: data.inventoryReservationId,
+        insuranceClaimId: data.insuranceClaimId,
         dispensationStatusConceptId: data.dispensationStatusConceptId,
         dispensedAt: data.dispensedAt,
         dispenserPractitionerProfileId: data.dispenserPractitionerProfileId,

@@ -162,6 +162,11 @@ function build() {
     expiredToPrescriber: mockFn(async () => ({ suppressed: false })),
     dispensedToPrescriber: mockFn(async () => ({ suppressed: false })),
   };
+  const settlements = {
+    forOrders: mockFn(async () => new Map()),
+    activeClaimForDispensation: mockFn(async () => undefined),
+  };
+  const tenantAdministration = { canAdminister: mockFn(async () => false) };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new PharmacyOrdersService(
     em as any,
@@ -177,9 +182,13 @@ function build() {
     outbox as any,
     orderNotifications as any,
     logger as any,
+    settlements as any,
+    tenantAdministration as any,
   );
   return {
     service,
+    settlements,
+    tenantAdministration,
     tx,
     fork,
     em,

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `billing`.
- * 157 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 167 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingIndexes: readonly IndexTuple[] = [
@@ -128,6 +128,16 @@ export const billingIndexes: readonly IndexTuple[] = [
   ['payments_received', 'ix_payments_received_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['payments_received', 'ix_payments_received_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['payments_received', 'ix_payments_received_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['quotations', 'ix_quotations_practice_id', ['practice_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_created_by_practitioner_profile_id', ['created_by_practitioner_profile_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_appointment_id', ['appointment_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_service_catalog_id', ['service_catalog_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_currency_concept_id', ['currency_concept_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['quotation_installments', 'ix_quotation_installments_quotation_id', ['quotation_id'], false, 'btree'],
   ['receivable_payment_allocations', 'uq_receivable_payment_allocations_payment_received_id__c1caeee3', ['payment_received_id', 'invoice_id', 'open_item_id'], true, 'btree'],
   ['receivable_payment_allocations', 'ix_receivable_payment_allocations_payment_received_id', ['payment_received_id'], false, 'btree'],
   ['receivable_payment_allocations', 'ix_receivable_payment_allocations_invoice_id', ['invoice_id'], false, 'btree'],

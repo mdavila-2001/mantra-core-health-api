@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `billing`.
- * 141 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 150 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -114,6 +114,15 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['payments_received', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['payments_received', 'transaction_id', 'payments', 'payment_transactions', 'id'],
   ['payments_received', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['quotations', 'created_by_practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['quotations', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['quotations', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['quotations', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['quotations', 'practice_id', 'practice', 'practices', 'id'],
+  ['quotations', 'service_catalog_id', 'billing', 'service_catalog', 'id'],
+  ['quotations', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['quotations', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['quotation_installments', 'quotation_id', 'billing', 'quotations', 'id'],
   ['receivable_payment_allocations', 'clearing_item_id', 'accounting', 'clearing_items', 'id'],
   ['receivable_payment_allocations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['receivable_payment_allocations', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],

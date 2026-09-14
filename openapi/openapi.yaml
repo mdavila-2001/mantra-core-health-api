@@ -12629,6 +12629,10 @@ paths:
       responses:
         '201':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedClaimDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -25320,6 +25324,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientOwnOrdersResponseDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -38437,6 +38445,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyOrderListResponseDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -38457,7 +38469,9 @@ paths:
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /pharmacy/orders/{id}:
     get:
-      description: Lo ve su titular o el staff del tenant de la farmacia; cualquier tercero recibe el mismo 404.
+      description: >-
+        Lo ve su titular, la plataforma o un OWNER/ADMIN activo del tenant de la farmacia; cualquier tercero recibe el
+        mismo 404. La liquidación privada sólo se incluye para el titular.
       operationId: PharmacyOrdersController_getOrder
       parameters:
         - name: id
@@ -38468,6 +38482,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyOrderDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -52763,9 +52781,55 @@ components:
         longitude:
           type: number
           description: Longitud; viaja siempre junto a la latitud
+    CoverageBenefitSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        categoryCode:
+          type: string
+        categoryName:
+          type: string
+        serviceConceptId:
+          type: string
+          format: uuid
+        serviceName:
+          type: string
+        coveragePercent:
+          type: string
+          example: '80.00'
+        copayAmount:
+          type: string
+          example: '20.00'
+        deductibleAmount:
+          type: string
+          example: '0.00'
+        statusCode:
+          type: string
+        validityStatus:
+          type: string
+          enum:
+            - CURRENT
+            - UPCOMING
+            - EXPIRED
+            - INACTIVE
+            - UNKNOWN
+        effectiveFrom:
+          type: string
+          format: date
+        effectiveTo:
+          type: string
+          format: date
+      required:
+        - id
+        - validityStatus
     OwnCoverageDto:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         carrierName:
           type: string
           description: Aseguradora, en palabras
@@ -52774,15 +52838,51 @@ components:
           description: Plan contratado, en palabras
         isPublic:
           type: boolean
-          description: >-
-            Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo
-            todavía no persiste el tipo de pagador.
+          description: Si el seguro es público o privado
+        policyIdentifier:
+          type: string
+          description: Número de póliza declarado
         memberIdentifier:
           type: string
           description: Con qué documento figura afiliado
         verified:
           type: boolean
-          description: Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar.
+          description: Si la plataforma confirmó la cobertura con la aseguradora
+        status:
+          type: string
+          description: Estado legible de la cobertura
+        statusCode:
+          type: string
+        validityStatus:
+          type: string
+          enum:
+            - CURRENT
+            - UPCOMING
+            - EXPIRED
+            - INACTIVE
+            - UNKNOWN
+        referenceDate:
+          type: string
+          format: date
+        effectiveFrom:
+          type: string
+          format: date
+        effectiveTo:
+          type: string
+          format: date
+        currencyCode:
+          type: string
+          description: Código de moneda del plan
+        carrierWhatsappNumber:
+          type: string
+          description: Canal oficial de WhatsApp de la aseguradora
+        carrierCallCenterPhone:
+          type: string
+          description: Call center oficial de la aseguradora
+        benefits:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoverageBenefitSummaryDto'
         planId:
           type: string
           format: uuid
@@ -52791,9 +52891,13 @@ components:
           type: number
           description: 'Orden de la cobertura: 1 privada, 2 pública'
       required:
+        - id
         - carrierName
         - isPublic
         - verified
+        - validityStatus
+        - referenceDate
+        - benefits
         - coverageOrder
     OwnGuardianDto:
       type: object
@@ -57540,6 +57644,12 @@ components:
           type: string
           format: uuid
           description: Servicio solicitado
+        pharmacyProductId:
+          type: string
+          format: uuid
+        diagnosticStudyOfferingId:
+          type: string
+          format: uuid
         requestedQuantity:
           type: string
           description: Cantidad solicitada
@@ -57552,6 +57662,19 @@ components:
       type: object
       properties:
         patientCoverageId:
+          type: string
+          format: uuid
+        inventoryReservationId:
+          type: string
+          format: uuid
+        medicationRequestId:
+          type: string
+          format: uuid
+          description: Receta del pedido vinculado
+        serviceRequestId:
+          type: string
+          format: uuid
+        currencyConceptId:
           type: string
           format: uuid
         requestingProviderEntityId:
@@ -57610,6 +57733,12 @@ components:
           type: string
           description: Monto facturado
           example: '100.00'
+        inventoryReservationLineId:
+          type: string
+          format: uuid
+        diagnosticStudyOfferingId:
+          type: string
+          format: uuid
         supportingClinicalReference:
           type: string
           maxLength: 200
@@ -57637,6 +57766,16 @@ components:
         claimIdentifier:
           type: string
           maxLength: 80
+        inventoryReservationId:
+          type: string
+          format: uuid
+        serviceRequestId:
+          type: string
+          format: uuid
+        currencyConceptId:
+          type: string
+          format: uuid
+          description: Moneda declarada por el prestador diagnóstico
         priorAuthorizationRequestId:
           type: string
           format: uuid
@@ -57655,6 +57794,28 @@ components:
         - billingProviderEntityId
         - claimIdentifier
         - lines
+    CreatedClaimDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          format: uuid
+          description: Concepto de estado del recurso
+        createdAt:
+          type: string
+          format: date-time
+        lineIds:
+          description: IDs de líneas vinculadas en orden de lineSequence
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - status
+        - createdAt
     LineAdjudicationDto:
       type: object
       properties:
@@ -66976,6 +67137,165 @@ components:
       required:
         - targetId
         - ruleCode
+    PatientInsuranceSettlementExclusionDto:
+      type: object
+      properties:
+        claimLineId:
+          type: string
+          format: uuid
+        itemId:
+          type: string
+          format: uuid
+        itemName:
+          type: string
+        amount:
+          type: string
+          description: Importe decimal exacto excluido
+        policyClauseReference:
+          type: string
+        denialRationale:
+          type: string
+          nullable: true
+      required:
+        - claimLineId
+        - itemId
+        - itemName
+        - amount
+        - policyClauseReference
+        - denialRationale
+    PatientInsuranceSettlementDto:
+      type: object
+      properties:
+        claimId:
+          type: string
+          format: uuid
+        claimIdentifier:
+          type: string
+        adjudicationVersionId:
+          type: string
+          format: uuid
+        adjudicationVersion:
+          type: number
+          format: int32
+          minimum: 1
+        eobId:
+          type: string
+          format: uuid
+        carrierName:
+          type: string
+        policyIdentifier:
+          type: string
+          nullable: true
+        totalBilledAmount:
+          type: string
+          description: Total facturado, decimal exacto
+        totalApprovedAmount:
+          type: string
+          description: Aporte del seguro, decimal exacto
+        totalPatientAmount:
+          type: string
+          description: Cargo confirmado al paciente, decimal exacto
+        totalDeniedAmount:
+          type: string
+          description: Importe excluido sin asignar, decimal exacto
+        currencyCode:
+          type: string
+          example: BOB
+        result:
+          type: string
+          enum:
+            - APPROVED
+            - PARTIALLY_APPROVED
+            - DENIED
+        exclusions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientInsuranceSettlementExclusionDto'
+      required:
+        - claimId
+        - claimIdentifier
+        - adjudicationVersionId
+        - adjudicationVersion
+        - eobId
+        - carrierName
+        - policyIdentifier
+        - totalBilledAmount
+        - totalApprovedAmount
+        - totalPatientAmount
+        - totalDeniedAmount
+        - currencyCode
+        - result
+        - exclusions
+    PatientOrderSummaryDto:
+      type: object
+      properties:
+        insuranceSettlement:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PatientInsuranceSettlementDto'
+        insuranceSettlementAvailability:
+          type: string
+          enum:
+            - AVAILABLE
+            - PENDING_PUBLICATION
+            - UNDER_REVIEW
+            - NOT_AVAILABLE
+        id:
+          type: string
+          format: uuid
+        encounterId:
+          type: string
+          format: uuid
+        codeConceptId:
+          type: string
+          format: uuid
+        categoryConceptId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+        priorityConceptId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        preparationInstructions:
+          type: string
+        hasReleasedResult:
+          type: boolean
+        reportId:
+          type: string
+          format: uuid
+      required:
+        - insuranceSettlement
+        - insuranceSettlementAvailability
+        - id
+        - codeConceptId
+        - statusConceptId
+        - createdAt
+        - hasReleasedResult
+    PatientOwnOrdersResponseDto:
+      type: object
+      properties:
+        patientProfileId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientOrderSummaryDto'
+        limit:
+          type: number
+        truncated:
+          type: boolean
+      required:
+        - patientProfileId
+        - items
+        - limit
+        - truncated
     ShareDiagnosticResultDto:
       type: object
       properties:
@@ -74620,6 +74940,234 @@ components:
       required:
         - siteId
         - lines
+    PharmacyOrderReservationLineDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: string
+        unitPriceAmount:
+          type: string
+          nullable: true
+        billedAmount:
+          type: string
+          nullable: true
+        currencyConceptId:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+        - id
+        - productId
+        - quantity
+        - unitPriceAmount
+        - billedAmount
+        - currencyConceptId
+    InventoryConceptDto:
+      type: object
+      properties:
+        code:
+          type: string
+        display:
+          type: string
+      required:
+        - code
+        - display
+    PharmacyOrderSubstitutionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        originalProductId:
+          type: string
+          format: uuid
+        originalName:
+          type: string
+        originalUnitPriceAmount:
+          type: string
+          nullable: true
+        proposedProductId:
+          type: string
+          format: uuid
+        proposedName:
+          type: string
+        proposedUnitPriceAmount:
+          type: string
+          nullable: true
+        currency:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/InventoryConceptDto'
+        status:
+          $ref: '#/components/schemas/InventoryConceptDto'
+        decidedAt:
+          type: string
+          nullable: true
+      required:
+        - id
+        - originalProductId
+        - originalName
+        - proposedProductId
+        - proposedName
+        - status
+    PharmacyOrderLineDto:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        medicationConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        productCode:
+          type: string
+        brandName:
+          type: string
+          nullable: true
+        genericName:
+          type: string
+          nullable: true
+        strengthText:
+          type: string
+          nullable: true
+        packageSizeText:
+          type: string
+          nullable: true
+        medication:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/InventoryConceptDto'
+        requestedQuantity:
+          type: number
+        reservedQuantity:
+          type: number
+        fulfilledQuantity:
+          type: number
+        unitPriceAmount:
+          type: string
+          nullable: true
+        currency:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/InventoryConceptDto'
+        status:
+          $ref: '#/components/schemas/InventoryConceptDto'
+      required:
+        - productId
+        - productCode
+        - requestedQuantity
+        - reservedQuantity
+        - fulfilledQuantity
+        - status
+    PharmacyOrderDto:
+      type: object
+      properties:
+        reservationLines:
+          description: Porciones confirmadas o entregadas vigentes para facturación
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyOrderReservationLineDto'
+        insuranceSettlement:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PatientInsuranceSettlementDto'
+        insuranceSettlementAvailability:
+          type: string
+          enum:
+            - AVAILABLE
+            - PENDING_PUBLICATION
+            - UNDER_REVIEW
+            - NOT_AVAILABLE
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/InventoryConceptDto'
+        createdAt:
+          type: string
+        expiresAt:
+          type: string
+        siteId:
+          type: string
+          format: uuid
+        siteName:
+          type: string
+        pharmacyId:
+          type: string
+          format: uuid
+        pharmacyName:
+          type: string
+        medicationRequestId:
+          type: string
+          format: uuid
+          nullable: true
+        patientName:
+          type: string
+          nullable: true
+        deliveryMode:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/InventoryConceptDto'
+        pickupCode:
+          type: string
+          nullable: true
+        totalAmount:
+          type: string
+          nullable: true
+        currency:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/InventoryConceptDto'
+        rejectionReasonText:
+          type: string
+          nullable: true
+        substitutions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyOrderSubstitutionDto'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyOrderLineDto'
+      required:
+        - reservationLines
+        - insuranceSettlement
+        - insuranceSettlementAvailability
+        - id
+        - status
+        - createdAt
+        - expiresAt
+        - siteId
+        - siteName
+        - pharmacyId
+        - pharmacyName
+        - substitutions
+        - lines
+    PharmacyOrderListResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyOrderDto'
+        count:
+          type: number
+      required:
+        - items
+        - count
     ConfirmOrderAdjustmentDto:
       type: object
       properties:
@@ -74781,16 +75329,6 @@ components:
         - pharmacyIntegrationConnectionId
         - sourceBatchIdentifier
         - items
-    InventoryConceptDto:
-      type: object
-      properties:
-        code:
-          type: string
-        display:
-          type: string
-      required:
-        - code
-        - display
     SiteStockItemDto:
       type: object
       properties:

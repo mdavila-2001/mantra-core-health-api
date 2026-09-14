@@ -1,3 +1,4 @@
+-- Reconciliado al modelo canónico módulo66 (2026-09-13); FK CTI usa profile_id.
 -- ============================================================================
 -- SALUD · patch v4.2.6 (medical_groups · nuevo módulo 21) sobre una BD viva
 -- Fecha: 2026-09-04

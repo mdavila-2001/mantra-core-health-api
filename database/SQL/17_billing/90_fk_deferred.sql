@@ -876,9 +876,6 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- FT-24 · quotations: FK sin destino canónico (no forzada, temperatura-0):
---   quotations.appointment_id (scheduling; evita anillo de datos entre módulos)
-
 -- destino: practice.practices (requiere schema practice)
 DO $$ BEGIN
     ALTER TABLE "billing"."quotations"

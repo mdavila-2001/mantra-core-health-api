@@ -2,11 +2,16 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `community` (parte 2/2).
- * 53 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 58 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const communityForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['reactions', 'reaction_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['reactions', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['review_dimension_scores', 'dimension_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['review_dimension_scores', 'review_id', 'community', 'service_reviews', 'id'],
+  ['review_responses', 'created_by_user_id', 'iam', 'users', 'id'],
   ['review_responses', 'moderation_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['review_responses', 'responder_public_profile_id', 'community', 'public_profiles', 'id'],
   ['review_responses', 'review_id', 'community', 'service_reviews', 'id'],

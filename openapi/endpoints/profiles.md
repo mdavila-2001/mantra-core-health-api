@@ -1159,11 +1159,38 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   },
   "coverages": [
     {
+      "id": "00000000-0000-4000-8000-000000000001",
       "carrierName": "Nombre de ejemplo",
       "planName": "Nombre de ejemplo",
       "isPublic": true,
+      "policyIdentifier": "valor-ejemplo",
       "memberIdentifier": "valor-ejemplo",
       "verified": true,
+      "status": "ok",
+      "statusCode": "CODIGO_EJEMPLO",
+      "validityStatus": "CURRENT",
+      "referenceDate": "2026-07-31",
+      "effectiveFrom": "2026-07-31",
+      "effectiveTo": "2026-07-31",
+      "currencyCode": "BOB",
+      "carrierWhatsappNumber": "valor-ejemplo",
+      "carrierCallCenterPhone": "+59170000000",
+      "benefits": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "categoryCode": "CODIGO_EJEMPLO",
+          "categoryName": "Nombre de ejemplo",
+          "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+          "serviceName": "Nombre de ejemplo",
+          "coveragePercent": "80.00",
+          "copayAmount": "20.00",
+          "deductibleAmount": "0.00",
+          "statusCode": "CODIGO_EJEMPLO",
+          "validityStatus": "CURRENT",
+          "effectiveFrom": "2026-07-31",
+          "effectiveTo": "2026-07-31"
+        }
+      ],
       "planId": "00000000-0000-4000-8000-000000000001",
       "coverageOrder": 1
     }
@@ -1219,12 +1246,36 @@ Campos de la respuesta:
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"memberIdentifier":"valor-ejemplo","verified":true,"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Aseguradora, en palabras | `Nombre de ejemplo` |
 | `coverages[].planName` | No | `string` | Sin restricción adicional declarada | Plan contratado, en palabras | `Nombre de ejemplo` |
-| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador. | `true` |
+| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si el seguro es público o privado | `true` |
+| `coverages[].policyIdentifier` | No | `string` | Sin restricción adicional declarada | Número de póliza declarado | `valor-ejemplo` |
 | `coverages[].memberIdentifier` | No | `string` | Sin restricción adicional declarada | Con qué documento figura afiliado | `valor-ejemplo` |
-| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar. | `true` |
+| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora | `true` |
+| `coverages[].status` | No | `string` | Sin restricción adicional declarada | Estado legible de la cobertura | `ok` |
+| `coverages[].statusCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].validityStatus` | Sí | `string` | valores: `CURRENT`, `UPCOMING`, `EXPIRED`, `INACTIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `CURRENT` |
+| `coverages[].referenceDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].effectiveFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].currencyCode` | No | `string` | Sin restricción adicional declarada | Código de moneda del plan | `BOB` |
+| `coverages[].carrierWhatsappNumber` | No | `string` | Sin restricción adicional declarada | Canal oficial de WhatsApp de la aseguradora | `valor-ejemplo` |
+| `coverages[].carrierCallCenterPhone` | No | `string` | Sin restricción adicional declarada | Call center oficial de la aseguradora | `+59170000000` |
+| `coverages[].benefits` | Sí | `array<CoverageBenefitSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}]` |
+| `coverages[].benefits[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].benefits[].categoryCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].benefits[].categoryName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `coverages[].benefits[].serviceConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].benefits[].serviceName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `coverages[].benefits[].coveragePercent` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `80.00` |
+| `coverages[].benefits[].copayAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `20.00` |
+| `coverages[].benefits[].deductibleAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `0.00` |
+| `coverages[].benefits[].statusCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].benefits[].validityStatus` | Sí | `string` | valores: `CURRENT`, `UPCOMING`, `EXPIRED`, `INACTIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `CURRENT` |
+| `coverages[].benefits[].effectiveFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].benefits[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
 | `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
@@ -1432,11 +1483,38 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   },
   "coverages": [
     {
+      "id": "00000000-0000-4000-8000-000000000001",
       "carrierName": "Nombre de ejemplo",
       "planName": "Nombre de ejemplo",
       "isPublic": true,
+      "policyIdentifier": "valor-ejemplo",
       "memberIdentifier": "valor-ejemplo",
       "verified": true,
+      "status": "ok",
+      "statusCode": "CODIGO_EJEMPLO",
+      "validityStatus": "CURRENT",
+      "referenceDate": "2026-07-31",
+      "effectiveFrom": "2026-07-31",
+      "effectiveTo": "2026-07-31",
+      "currencyCode": "BOB",
+      "carrierWhatsappNumber": "valor-ejemplo",
+      "carrierCallCenterPhone": "+59170000000",
+      "benefits": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "categoryCode": "CODIGO_EJEMPLO",
+          "categoryName": "Nombre de ejemplo",
+          "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+          "serviceName": "Nombre de ejemplo",
+          "coveragePercent": "80.00",
+          "copayAmount": "20.00",
+          "deductibleAmount": "0.00",
+          "statusCode": "CODIGO_EJEMPLO",
+          "validityStatus": "CURRENT",
+          "effectiveFrom": "2026-07-31",
+          "effectiveTo": "2026-07-31"
+        }
+      ],
       "planId": "00000000-0000-4000-8000-000000000001",
       "coverageOrder": 1
     }
@@ -1492,12 +1570,36 @@ Campos de la respuesta:
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"memberIdentifier":"valor-ejemplo","verified":true,"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Aseguradora, en palabras | `Nombre de ejemplo` |
 | `coverages[].planName` | No | `string` | Sin restricción adicional declarada | Plan contratado, en palabras | `Nombre de ejemplo` |
-| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador. | `true` |
+| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si el seguro es público o privado | `true` |
+| `coverages[].policyIdentifier` | No | `string` | Sin restricción adicional declarada | Número de póliza declarado | `valor-ejemplo` |
 | `coverages[].memberIdentifier` | No | `string` | Sin restricción adicional declarada | Con qué documento figura afiliado | `valor-ejemplo` |
-| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar. | `true` |
+| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora | `true` |
+| `coverages[].status` | No | `string` | Sin restricción adicional declarada | Estado legible de la cobertura | `ok` |
+| `coverages[].statusCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].validityStatus` | Sí | `string` | valores: `CURRENT`, `UPCOMING`, `EXPIRED`, `INACTIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `CURRENT` |
+| `coverages[].referenceDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].effectiveFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].currencyCode` | No | `string` | Sin restricción adicional declarada | Código de moneda del plan | `BOB` |
+| `coverages[].carrierWhatsappNumber` | No | `string` | Sin restricción adicional declarada | Canal oficial de WhatsApp de la aseguradora | `valor-ejemplo` |
+| `coverages[].carrierCallCenterPhone` | No | `string` | Sin restricción adicional declarada | Call center oficial de la aseguradora | `+59170000000` |
+| `coverages[].benefits` | Sí | `array<CoverageBenefitSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}]` |
+| `coverages[].benefits[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].benefits[].categoryCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].benefits[].categoryName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `coverages[].benefits[].serviceConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].benefits[].serviceName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `coverages[].benefits[].coveragePercent` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `80.00` |
+| `coverages[].benefits[].copayAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `20.00` |
+| `coverages[].benefits[].deductibleAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `0.00` |
+| `coverages[].benefits[].statusCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].benefits[].validityStatus` | Sí | `string` | valores: `CURRENT`, `UPCOMING`, `EXPIRED`, `INACTIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `CURRENT` |
+| `coverages[].benefits[].effectiveFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].benefits[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
 | `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
@@ -1643,11 +1745,38 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   },
   "coverages": [
     {
+      "id": "00000000-0000-4000-8000-000000000001",
       "carrierName": "Nombre de ejemplo",
       "planName": "Nombre de ejemplo",
       "isPublic": true,
+      "policyIdentifier": "valor-ejemplo",
       "memberIdentifier": "valor-ejemplo",
       "verified": true,
+      "status": "ok",
+      "statusCode": "CODIGO_EJEMPLO",
+      "validityStatus": "CURRENT",
+      "referenceDate": "2026-07-31",
+      "effectiveFrom": "2026-07-31",
+      "effectiveTo": "2026-07-31",
+      "currencyCode": "BOB",
+      "carrierWhatsappNumber": "valor-ejemplo",
+      "carrierCallCenterPhone": "+59170000000",
+      "benefits": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "categoryCode": "CODIGO_EJEMPLO",
+          "categoryName": "Nombre de ejemplo",
+          "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+          "serviceName": "Nombre de ejemplo",
+          "coveragePercent": "80.00",
+          "copayAmount": "20.00",
+          "deductibleAmount": "0.00",
+          "statusCode": "CODIGO_EJEMPLO",
+          "validityStatus": "CURRENT",
+          "effectiveFrom": "2026-07-31",
+          "effectiveTo": "2026-07-31"
+        }
+      ],
       "planId": "00000000-0000-4000-8000-000000000001",
       "coverageOrder": 1
     }
@@ -1703,12 +1832,36 @@ Campos de la respuesta:
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"memberIdentifier":"valor-ejemplo","verified":true,"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Aseguradora, en palabras | `Nombre de ejemplo` |
 | `coverages[].planName` | No | `string` | Sin restricción adicional declarada | Plan contratado, en palabras | `Nombre de ejemplo` |
-| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador. | `true` |
+| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si el seguro es público o privado | `true` |
+| `coverages[].policyIdentifier` | No | `string` | Sin restricción adicional declarada | Número de póliza declarado | `valor-ejemplo` |
 | `coverages[].memberIdentifier` | No | `string` | Sin restricción adicional declarada | Con qué documento figura afiliado | `valor-ejemplo` |
-| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar. | `true` |
+| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora | `true` |
+| `coverages[].status` | No | `string` | Sin restricción adicional declarada | Estado legible de la cobertura | `ok` |
+| `coverages[].statusCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].validityStatus` | Sí | `string` | valores: `CURRENT`, `UPCOMING`, `EXPIRED`, `INACTIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `CURRENT` |
+| `coverages[].referenceDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].effectiveFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].currencyCode` | No | `string` | Sin restricción adicional declarada | Código de moneda del plan | `BOB` |
+| `coverages[].carrierWhatsappNumber` | No | `string` | Sin restricción adicional declarada | Canal oficial de WhatsApp de la aseguradora | `valor-ejemplo` |
+| `coverages[].carrierCallCenterPhone` | No | `string` | Sin restricción adicional declarada | Call center oficial de la aseguradora | `+59170000000` |
+| `coverages[].benefits` | Sí | `array<CoverageBenefitSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}]` |
+| `coverages[].benefits[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].benefits[].categoryCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].benefits[].categoryName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `coverages[].benefits[].serviceConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].benefits[].serviceName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `coverages[].benefits[].coveragePercent` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `80.00` |
+| `coverages[].benefits[].copayAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `20.00` |
+| `coverages[].benefits[].deductibleAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `0.00` |
+| `coverages[].benefits[].statusCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].benefits[].validityStatus` | Sí | `string` | valores: `CURRENT`, `UPCOMING`, `EXPIRED`, `INACTIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `CURRENT` |
+| `coverages[].benefits[].effectiveFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].benefits[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
 | `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
@@ -1866,11 +2019,38 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   },
   "coverages": [
     {
+      "id": "00000000-0000-4000-8000-000000000001",
       "carrierName": "Nombre de ejemplo",
       "planName": "Nombre de ejemplo",
       "isPublic": true,
+      "policyIdentifier": "valor-ejemplo",
       "memberIdentifier": "valor-ejemplo",
       "verified": true,
+      "status": "ok",
+      "statusCode": "CODIGO_EJEMPLO",
+      "validityStatus": "CURRENT",
+      "referenceDate": "2026-07-31",
+      "effectiveFrom": "2026-07-31",
+      "effectiveTo": "2026-07-31",
+      "currencyCode": "BOB",
+      "carrierWhatsappNumber": "valor-ejemplo",
+      "carrierCallCenterPhone": "+59170000000",
+      "benefits": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "categoryCode": "CODIGO_EJEMPLO",
+          "categoryName": "Nombre de ejemplo",
+          "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+          "serviceName": "Nombre de ejemplo",
+          "coveragePercent": "80.00",
+          "copayAmount": "20.00",
+          "deductibleAmount": "0.00",
+          "statusCode": "CODIGO_EJEMPLO",
+          "validityStatus": "CURRENT",
+          "effectiveFrom": "2026-07-31",
+          "effectiveTo": "2026-07-31"
+        }
+      ],
       "planId": "00000000-0000-4000-8000-000000000001",
       "coverageOrder": 1
     }
@@ -1926,12 +2106,36 @@ Campos de la respuesta:
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"memberIdentifier":"valor-ejemplo","verified":true,"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
+| `coverages[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Aseguradora, en palabras | `Nombre de ejemplo` |
 | `coverages[].planName` | No | `string` | Sin restricción adicional declarada | Plan contratado, en palabras | `Nombre de ejemplo` |
-| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si es un seguro público (CNS, CPS, SUS…) o privado. Se deriva del catálogo, no de una columna: el modelo todavía no persiste el tipo de pagador. | `true` |
+| `coverages[].isPublic` | Sí | `boolean` | Sin restricción adicional declarada | Si el seguro es público o privado | `true` |
+| `coverages[].policyIdentifier` | No | `string` | Sin restricción adicional declarada | Número de póliza declarado | `valor-ejemplo` |
 | `coverages[].memberIdentifier` | No | `string` | Sin restricción adicional declarada | Con qué documento figura afiliado | `valor-ejemplo` |
-| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora. Lo declarado al registrarse nace SIN verificar. | `true` |
+| `coverages[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la plataforma confirmó la cobertura con la aseguradora | `true` |
+| `coverages[].status` | No | `string` | Sin restricción adicional declarada | Estado legible de la cobertura | `ok` |
+| `coverages[].statusCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].validityStatus` | Sí | `string` | valores: `CURRENT`, `UPCOMING`, `EXPIRED`, `INACTIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `CURRENT` |
+| `coverages[].referenceDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].effectiveFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].currencyCode` | No | `string` | Sin restricción adicional declarada | Código de moneda del plan | `BOB` |
+| `coverages[].carrierWhatsappNumber` | No | `string` | Sin restricción adicional declarada | Canal oficial de WhatsApp de la aseguradora | `valor-ejemplo` |
+| `coverages[].carrierCallCenterPhone` | No | `string` | Sin restricción adicional declarada | Call center oficial de la aseguradora | `+59170000000` |
+| `coverages[].benefits` | Sí | `array<CoverageBenefitSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}]` |
+| `coverages[].benefits[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].benefits[].categoryCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].benefits[].categoryName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `coverages[].benefits[].serviceConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `coverages[].benefits[].serviceName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `coverages[].benefits[].coveragePercent` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `80.00` |
+| `coverages[].benefits[].copayAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `20.00` |
+| `coverages[].benefits[].deductibleAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `0.00` |
+| `coverages[].benefits[].statusCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `coverages[].benefits[].validityStatus` | Sí | `string` | valores: `CURRENT`, `UPCOMING`, `EXPIRED`, `INACTIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `CURRENT` |
+| `coverages[].benefits[].effectiveFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `coverages[].benefits[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
 | `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
