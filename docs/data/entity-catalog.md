@@ -8,8 +8,8 @@
 > repositorio. **1195/1246** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
-> Este es el catálogo de lo **implementado**. La bóveda describe 1343 entidades en total
-> — la diferencia (97) son entidades diseñadas pero no materializadas aún en
+> Este es el catálogo de lo **implementado**. La bóveda describe 1353 entidades en total
+> — la diferencia (107) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
 ## Por schema (61 schemas · 1246 entidades)
@@ -875,10 +875,10 @@
 | `employer_groups` | `EmployerGroups` | 11 | `id` | ✅ | employer_groups es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_brokers` | `InsuranceBrokers` | 14 | `id` | ✅ | insurance_brokers es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_carriers` | `InsuranceCarriers` | 19 | `id` | ✅ | insurance_carriers es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `insurance_claim_lines` | `InsuranceClaimLines` | 11 | `id` | — | insurance_claim_lines es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `insurance_claims` | `InsuranceClaims` | 18 | `id` | ✅ | insurance_claims es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
+| `insurance_claim_lines` | `InsuranceClaimLines` | 12 | `id` | — | insurance_claim_lines es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
+| `insurance_claims` | `InsuranceClaims` | 20 | `id` | ✅ | insurance_claims es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_plan_benefits` | `InsurancePlanBenefits` | 18 | `id` | ✅ | insurance_plan_benefits es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `insurance_plans` | `InsurancePlans` | 15 | `id` | ✅ | insurance_plans es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
+| `insurance_plans` | `InsurancePlans` | 16 | `id` | ✅ | insurance_plans es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_products` | `InsuranceProducts` | 13 | `id` | ✅ | insurance_products es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_reconciliation_batches` | `InsuranceReconciliationBatches` | 16 | `id` | ✅ | insurance_reconciliation_batches es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_reconciliation_items` | `InsuranceReconciliationItems` | 14 | `id` | ✅ | insurance_reconciliation_items es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
@@ -887,7 +887,7 @@
 | `patient_explanations_of_benefit` | `PatientExplanationsOfBenefit` | 9 | `id` | — | patient_explanations_of_benefit es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `prior_authorization_determinations` | `PriorAuthorizationDeterminations` | 13 | `id` | — | prior_authorization_determinations guarda reglas y configuración de gobierno del módulo 26 · insurance (dominio Financiero y ERP): parametriza el comportamiento del negocio sin tocar código. |
 | `prior_authorization_items` | `PriorAuthorizationItems` | 10 | `id` | — | prior_authorization_items es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `prior_authorization_requests` | `PriorAuthorizationRequests` | 15 | `id` | ✅ | prior_authorization_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 26 · insurance (dominio Financiero y ERP): responde a '¿qué está pasando ahora mismo?'. |
+| `prior_authorization_requests` | `PriorAuthorizationRequests` | 16 | `id` | ✅ | prior_authorization_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 26 · insurance (dominio Financiero y ERP): responde a '¿qué está pasando ahora mismo?'. |
 | `provider_networks` | `ProviderNetworks` | 13 | `id` | ✅ | provider_networks es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 
 ### `integration_contracts` (9 entidades, módulo `integration_contracts`)
@@ -1296,7 +1296,7 @@
 | `emergency_staff_profiles` | `EmergencyStaffProfiles` | 8 | `profile_id` | ✅ | emergency_staff_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `health_practitioner_profiles` | `HealthPractitionerProfiles` | 15 | `profile_id` | ✅ | health_practitioner_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `insurance_representative_profiles` | `InsuranceRepresentativeProfiles` | 8 | `profile_id` | ✅ | insurance_representative_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `jurisdiction_authorizations` | `JurisdictionAuthorizations` | 14 | `id` | ✅ | jurisdiction_authorizations es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `jurisdiction_authorizations` | `JurisdictionAuthorizations` | 15 | `id` | ✅ | jurisdiction_authorizations es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `patient_identity_links` | `PatientIdentityLinks` | 15 | `id` | ✅ | patient_identity_links es una tabla de asociación del módulo 05 · profiles (dominio Núcleo y Terminología): conecta entidades (`patient_profiles`) para representar relaciones muchos-a-muchos. |
 | `patient_merge_events` | `PatientMergeEvents` | 9 | `id` | — | patient_merge_events registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 05 · profiles (dominio Núcleo y Terminología): responde a '¿qué está pasando ahora mismo?'. |
 | `patient_portal_proxies` | `PatientPortalProxies` | 14 | `id` | ✅ | patient_portal_proxies es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |

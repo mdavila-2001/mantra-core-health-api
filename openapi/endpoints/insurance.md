@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `insurance`
 
-Referencia exhaustiva de 34 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 36 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`
-- **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsuranceReadController`, `PriorAuthController`, `ReconciliationController`
+- **Etiquetas OpenAPI:** `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`
+- **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceAnalyticsController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsuranceReadController`, `PriorAuthController`, `ReconciliationController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -37,14 +37,16 @@ Referencia exhaustiva de 34 operación(es) del módulo `insurance`, derivada del
 24. [POST /insurance-plans/{planId}/benefits](#24-post-insurance-plans-planid-benefits) — Crear una cobertura de un plan administrable
 25. [PUT /insurance-plans/{planId}/benefits/{benefitId}](#25-put-insurance-plans-planid-benefits-benefitid) — Editar importes de una cobertura
 26. [PUT /insurance-plans/{planId}/benefits/{benefitId}/rules](#26-put-insurance-plans-planid-benefits-benefitid-rules) — Editar reglas de aprobación de una cobertura
-27. [POST /insurance-products/{productId}/plans](#27-post-insurance-products-productid-plans) — Crear un plan del carrier del tenant activo
-28. [POST /patient-coverages](#28-post-patient-coverages) — Registrar cobertura de paciente y dependientes
-29. [POST /prior-authorization-requests](#29-post-prior-authorization-requests) — Solicitar autorización previa con items
-30. [POST /prior-authorization-requests/{id}/determinations](#30-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
-31. [POST /provider-networks](#31-post-provider-networks) — Alta de red de prestadores (soporte)
-32. [POST /provider-networks/{id}/memberships](#32-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
-33. [POST /reconciliation-batches](#33-post-reconciliation-batches) — Abrir lote de conciliación
-34. [POST /reconciliation-batches/{id}/items](#34-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
+27. [PUT /insurance-plans/{planId}/premium](#27-put-insurance-plans-planid-premium) — Declarar la prima de lista mensual de un plan administrable
+28. [POST /insurance-products/{productId}/plans](#28-post-insurance-products-productid-plans) — Crear un plan del carrier del tenant activo
+29. [GET /insurance/analytics/loss-ratio](#29-get-insurance-analytics-loss-ratio) — Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo
+30. [POST /patient-coverages](#30-post-patient-coverages) — Registrar cobertura de paciente y dependientes
+31. [POST /prior-authorization-requests](#31-post-prior-authorization-requests) — Solicitar autorización previa con items
+32. [POST /prior-authorization-requests/{id}/determinations](#32-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
+33. [POST /provider-networks](#33-post-provider-networks) — Alta de red de prestadores (soporte)
+34. [POST /provider-networks/{id}/memberships](#34-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
+35. [POST /reconciliation-batches](#35-post-reconciliation-batches) — Abrir lote de conciliación
+36. [POST /reconciliation-batches/{id}/items](#36-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
 
 ---
 
@@ -1941,6 +1943,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             "code": "CARRIER_ACTIVE",
             "display": "Aseguradora activa"
           },
+          "monthlyPremiumAmount": "350.00",
           "effectiveFrom": "valor-ejemplo",
           "effectiveTo": "valor-ejemplo",
           "status": {
@@ -2024,7 +2027,7 @@ Campos de la respuesta:
 | `networkCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `canAdminister` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `products` | Sí | `array<ProductDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","productType":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"marketSegment":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"plans":[{"id":"00000000-0000-4000-8000-000000000001","planCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","planType":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"policyDocumentFileId":"00000000-0000-4000-8000-000000000001","benefits":[{"id":"00000000-0000-4000-8000-000000000001","category":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"service":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"coveragePercent":"valor-ejemplo","copayAmount":"valor-ejemplo","deductibleAmount":"valor-ejemplo","annualLimitAmount":"valor-ejemplo","requiresPriorAuthorization":true,"approvalRules":{"requiredDocuments":["FIRMA_MEDICO"],"exclusionNotes":"Texto descriptivo de ejemplo"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo"}]}]}]` |
+| `products` | Sí | `array<ProductDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","productType":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"marketSegment":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"plans":[{"id":"00000000-0000-4000-8000-000000000001","planCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","planType":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"monthlyPremiumAmount":"350.00","effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"policyDocumentFileId":"00000000-0000-4000-8000-000000000001","benefits":[{"id":"00000000-0000-4000-8000-000000000001","category":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"service":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"coveragePercent":"valor-ejemplo","copayAmount":"valor-ejemplo","deductibleAmount":"valor-ejemplo","annualLimitAmount":"valor-ejemplo","requiresPriorAuthorization":true,"approvalRules":{"requiredDocuments":["FIRMA_MEDICO"],"exclusionNotes":"Texto descriptivo de ejemplo"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo"}]}]}]` |
 | `products[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `products[].productCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `products[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -2037,7 +2040,7 @@ Campos de la respuesta:
 | `products[].status` | Sí | `InsuranceConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
 | `products[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
 | `products[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
-| `products[].plans` | Sí | `array<PlanDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","planCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","planType":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"policyDocumentFileId":"00000000-0000-4000-8000-000000000001","benefits":[{"id":"00000000-0000-4000-8000-000000000001","category":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"service":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"coveragePercent":"valor-ejemplo","copayAmount":"valor-ejemplo","deductibleAmount":"valor-ejemplo","annualLimitAmount":"valor-ejemplo","requiresPriorAuthorization":true,"approvalRules":{"requiredDocuments":["FIRMA_MEDICO"],"exclusionNotes":"Texto descriptivo de ejemplo"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo"}]}]` |
+| `products[].plans` | Sí | `array<PlanDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","planCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","planType":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"monthlyPremiumAmount":"350.00","effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"policyDocumentFileId":"00000000-0000-4000-8000-000000000001","benefits":[{"id":"00000000-0000-4000-8000-000000000001","category":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"service":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"coveragePercent":"valor-ejemplo","copayAmount":"valor-ejemplo","deductibleAmount":"valor-ejemplo","annualLimitAmount":"valor-ejemplo","requiresPriorAuthorization":true,"approvalRules":{"requiredDocuments":["FIRMA_MEDICO"],"exclusionNotes":"Texto descriptivo de ejemplo"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo"}]}]` |
 | `products[].plans[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `products[].plans[].planCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `products[].plans[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -2047,6 +2050,7 @@ Campos de la respuesta:
 | `products[].plans[].currency` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
 | `products[].plans[].currency.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
 | `products[].plans[].currency.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `products[].plans[].monthlyPremiumAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `350.00` |
 | `products[].plans[].effectiveFrom` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `products[].plans[].effectiveTo` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `products[].plans[].status` | Sí | `InsuranceConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
@@ -2729,7 +2733,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Las líneas deben coincidir con las cantidades e importes del pedido | Excepción explícita en src/modules/insurance/services/claims.service.ts |
 | 422 | `PRECONDITION_FAILED` | La autorización previa debe pertenecer a la misma cobertura y pedido | Excepción explícita en src/modules/insurance/services/claims.service.ts |
 | 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura debe estar verificada y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3319,7 +3323,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura debe estar verificada y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3583,7 +3587,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura debe estar verificada y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4148,7 +4152,135 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /insurance-products/{productId}/plans
+## 27. PUT /insurance-plans/{planId}/premium
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-backbone`
+- **Nombre:** Declarar la prima de lista mensual de un plan administrable
+- **Operation ID:** `InsuranceBackboneController_updatePlanPremium`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InsuranceBackboneController.updatePlanPremium](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+
+### Descripción de negocio
+
+Declarar la prima de lista mensual de un plan administrable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Subtarea 3.1 (v4.2.14) — la aseguradora declara la prima de lista mensual de un plan que ya existe. Reemplazo completo de un solo valor; `null` la quita. Sin `@Roles`, como `createPlan`: la barrera es la membresía OWNER/ADMIN del tenant de la aseguradora (`administrableCarrier`).
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /insurance-plans/{planId}/premium` en `InsuranceBackboneController_updatePlanPremium`. El controlador delega en `InsuranceBackboneService.updatePlanPremium`. Valida el body como `UpdatePlanPremiumDto` y consume `application/json`. El tipo de retorno estático es `Promise<PlanPremiumDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `planId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdatePlanPremiumDto`; los campos opcionales se omiten.
+
+```http
+PUT /insurance-plans/00000000-0000-4000-8000-000000000001/premium HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "monthlyPremiumAmount": "350.00"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `planId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `monthlyPremiumAmount` | Sí | `string` | patrón runtime `MONEY_PATTERN`; admite null | Sin descripción específica en el contrato OpenAPI. | `350.00` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /insurance-plans/00000000-0000-4000-8000-000000000001/premium HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "monthlyPremiumAmount": "350.00"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PlanPremiumDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PlanPremiumDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "monthlyPremiumAmount": "350.00"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `monthlyPremiumAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `350.00` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/insurance-plans/{planId}/premium"
+}
+```
+
+---
+
+## 28. POST /insurance-products/{productId}/plans
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -4204,6 +4336,7 @@ Content-Type: application/json
 | `effectiveFrom` | No | `string` | formato `date` | Vigencia desde (ISO date) | `2026-07-31` |
 | `effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `monthlyPremiumAmount` | No | `string` | patrón runtime `MONEY_PATTERN` | Prima de lista mensual del plan, en la moneda del plan | `350.00` |
 
 ### Payload completo de ejemplo
 
@@ -4220,7 +4353,8 @@ Content-Type: application/json
   "name": "Nombre de ejemplo",
   "effectiveFrom": "2026-07-31",
   "effectiveTo": "2026-07-31",
-  "currencyConceptId": "00000000-0000-4000-8000-000000000001"
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "monthlyPremiumAmount": "350.00"
 }
 ```
 
@@ -4283,7 +4417,229 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /patient-coverages
+## 29. GET /insurance/analytics/loss-ratio
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-analytics`
+- **Nombre:** Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo
+- **Operation ID:** `InsuranceAnalyticsController_getLossRatioAnalytics`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InsuranceAnalyticsController.getLossRatioAnalytics](../../src/modules/insurance/controllers/insurance-analytics.controller.ts)
+
+### Descripción de negocio
+
+Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Loss ratio estimado, gasto per cápita, reclamos, afiliados, tendencia mensual, top de medicamentos, especialidades, patologías CIE-10 e inmunización de la aseguradora del tenant activo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /insurance/analytics/loss-ratio` en `InsuranceAnalyticsController_getLossRatioAnalytics`. El controlador delega en `InsuranceAnalyticsService.getLossRatioAnalytics`. No recibe body. El tipo de retorno estático es `Promise<InsuranceDashboardAnalyticsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `startDate` | query | No | `string` | formato `date` | Fecha de inicio del periodo (inclusive). Sin ella: 12 meses atrás. | `2026-01-01` |
+| `endDate` | query | No | `string` | formato `date` | Fecha de fin del periodo (inclusive). Sin ella: hoy en La Paz. | `2026-12-31` |
+| `planId` | query | No | `string` | formato `uuid` | Acota el tablero a un plan del carrier del tenant activo. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /insurance/analytics/loss-ratio HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /insurance/analytics/loss-ratio?startDate=2026-01-01&endDate=2026-12-31&planId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<InsuranceDashboardAnalyticsResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<InsuranceDashboardAnalyticsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<InsuranceDashboardAnalyticsResponseDto>` | No |
+| 403 | El actor no administra el tenant de la aseguradora ni tiene rol INSURANCE_OPERATOR/SECURITY_ADMIN. | `Promise<InsuranceDashboardAnalyticsResponseDto>` | No |
+| 404 | El tenant activo no tiene aseguradora, o planId no pertenece a la aseguradora. | `Promise<InsuranceDashboardAnalyticsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<InsuranceDashboardAnalyticsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<InsuranceDashboardAnalyticsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InsuranceDashboardAnalyticsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "carrierId": "00000000-0000-4000-8000-000000000001",
+  "carrierLegalName": "Seguros Andina",
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31",
+  "currency": {
+    "code": "CARRIER_ACTIVE",
+    "display": "Aseguradora activa"
+  },
+  "kpis": {
+    "totalClaimsCount": 42,
+    "adjudicatedClaimsCount": 38,
+    "pendingClaimsCount": 4,
+    "otherCurrencyClaimsCount": 0,
+    "totalBilledAmount": "350000.00",
+    "totalApprovedAmount": "280000.00",
+    "totalPatientCopayAmount": "55000.00",
+    "totalDeniedAmount": "15000.00",
+    "approvalRatePercent": "80.00",
+    "activeAffiliatesCount": 1250,
+    "periodMonths": "3.00",
+    "averageMonthlyPerCapitaExpense": "224.00",
+    "averageAnnualPerCapitaExpense": "2688.00",
+    "estimatedPremiumsTotal": "400000.00",
+    "coveragesWithoutPremiumCount": 3,
+    "lossRatioPercent": "70.00"
+  },
+  "monthlyTrends": [
+    {
+      "period": "2026-01",
+      "billedAmount": "28000.00",
+      "approvedAmount": "22400.00",
+      "claimsCount": 35
+    }
+  ],
+  "topMedications": [
+    {
+      "medicationCode": "MED-001",
+      "medicationName": "Losartán Potásico 50mg",
+      "dispensationsCount": "180",
+      "totalExpenseAmount": "14400.00",
+      "sharePercent": "12.50"
+    }
+  ],
+  "specialties": [
+    {
+      "specialtyCode": "MED_GEN",
+      "specialtyName": "Medicina General",
+      "consultationsCount": 150,
+      "totalExpenseAmount": "valor-ejemplo"
+    }
+  ],
+  "prevalentPathologies": [
+    {
+      "code": "I10",
+      "description": "Hipertensión Esencial (Primaria)",
+      "casesCount": 95,
+      "percentage": "22.60"
+    }
+  ],
+  "immunization": {
+    "vaccinatedCount": 980,
+    "unvaccinatedCount": 270,
+    "vaccinationRatePercent": "78.40"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `carrierId` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `carrierLegalName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Seguros Andina` |
+| `startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `endDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `currency` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `currency.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `currency.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `kpis` | Sí | `LossRatioKpiDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"totalClaimsCount":42,"adjudicatedClaimsCount":38,"pendingClaimsCount":4,"otherCurrencyClaimsCount":0,"totalBilledAmount":"350000.00","totalApprovedAmount":"280000.00","totalPatientCopayAmount":"55000.00","totalDeniedAmount":"15000.00","approvalRatePercent":"80.00","activeAffiliatesCount":1250,"periodMonths":"3.00","averageMonthlyPerCapitaExpense":"224.00","averageAnnualPerCapitaExpense":"2688.00","estimatedPremiumsTotal":"400000.00","coveragesWithoutPremiumCount":3,"lossRatioPercent":"70.00"}` |
+| `kpis.totalClaimsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `42` |
+| `kpis.adjudicatedClaimsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `38` |
+| `kpis.pendingClaimsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `4` |
+| `kpis.otherCurrencyClaimsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `0` |
+| `kpis.totalBilledAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `350000.00` |
+| `kpis.totalApprovedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `280000.00` |
+| `kpis.totalPatientCopayAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `55000.00` |
+| `kpis.totalDeniedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `15000.00` |
+| `kpis.approvalRatePercent` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `80.00` |
+| `kpis.activeAffiliatesCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1250` |
+| `kpis.periodMonths` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `3.00` |
+| `kpis.averageMonthlyPerCapitaExpense` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `224.00` |
+| `kpis.averageAnnualPerCapitaExpense` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `2688.00` |
+| `kpis.estimatedPremiumsTotal` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `400000.00` |
+| `kpis.coveragesWithoutPremiumCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `3` |
+| `kpis.lossRatioPercent` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `70.00` |
+| `monthlyTrends` | Sí | `array<MonthlyTrendDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"period":"2026-01","billedAmount":"28000.00","approvedAmount":"22400.00","claimsCount":35}]` |
+| `monthlyTrends[].period` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026-01` |
+| `monthlyTrends[].billedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `28000.00` |
+| `monthlyTrends[].approvedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `22400.00` |
+| `monthlyTrends[].claimsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `35` |
+| `topMedications` | Sí | `array<TopMedicationDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"medicationCode":"MED-001","medicationName":"Losartán Potásico 50mg","dispensationsCount":"180","totalExpenseAmount":"14400.00","sharePercent":"12.50"}]` |
+| `topMedications[].medicationCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `MED-001` |
+| `topMedications[].medicationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Losartán Potásico 50mg` |
+| `topMedications[].dispensationsCount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `180` |
+| `topMedications[].totalExpenseAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `14400.00` |
+| `topMedications[].sharePercent` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `12.50` |
+| `specialties` | Sí | `array<SpecialtyDistributionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"specialtyCode":"MED_GEN","specialtyName":"Medicina General","consultationsCount":150,"totalExpenseAmount":"valor-ejemplo"}]` |
+| `specialties[].specialtyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `MED_GEN` |
+| `specialties[].specialtyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Medicina General` |
+| `specialties[].consultationsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `150` |
+| `specialties[].totalExpenseAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `prevalentPathologies` | Sí | `array<PrevalentPathologyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"I10","description":"Hipertensión Esencial (Primaria)","casesCount":95,"percentage":"22.60"}]` |
+| `prevalentPathologies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `I10` |
+| `prevalentPathologies[].description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Hipertensión Esencial (Primaria)` |
+| `prevalentPathologies[].casesCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `95` |
+| `prevalentPathologies[].percentage` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `22.60` |
+| `immunization` | Sí | `ImmunizationRateDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"vaccinatedCount":980,"unvaccinatedCount":270,"vaccinationRatePercent":"78.40"}` |
+| `immunization.vaccinatedCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `980` |
+| `immunization.unvaccinatedCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `270` |
+| `immunization.vaccinationRatePercent` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `78.40` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Rol insuficiente para ver la analítica de la aseguradora | Excepción explícita en src/modules/insurance/services/insurance-analytics.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-analytics.service.ts |
+| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/services/insurance-analytics.service.ts |
+| 422 | `PRECONDITION_FAILED` | startDate debe ser anterior o igual a endDate | Excepción explícita en src/modules/insurance/services/insurance-analytics.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/insurance/analytics/loss-ratio"
+}
+```
+
+---
+
+## 30. POST /patient-coverages
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-coverage`
@@ -4430,7 +4786,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /prior-authorization-requests
+## 31. POST /prior-authorization-requests
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -4580,7 +4936,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura debe estar verificada y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4598,7 +4954,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /prior-authorization-requests/{id}/determinations
+## 32. POST /prior-authorization-requests/{id}/determinations
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -4732,7 +5088,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /provider-networks
+## 33. POST /provider-networks
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -4863,7 +5219,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /provider-networks/{id}/memberships
+## 34. POST /provider-networks/{id}/memberships
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -4997,7 +5353,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /reconciliation-batches
+## 35. POST /reconciliation-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
@@ -5130,7 +5486,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /reconciliation-batches/{id}/items
+## 36. POST /reconciliation-batches/{id}/items
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
