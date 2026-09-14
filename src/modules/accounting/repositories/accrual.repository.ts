@@ -185,6 +185,49 @@ export class AccrualRepository {
     );
   }
 
+  /**
+   * Los objetos de devengo de un tenant cuya cuenta de gasto o de devengo es
+   * de la práctica consultada, o que no tienen ninguna de las dos (D-1: se
+   * incluyen igual, es un devengo sin cuentas — la corrida lo rechaza, pero el
+   * registro no debe esconderlo).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant dueño de los devengos.
+   * @param practiceAccountIds - Cuentas de la práctica consultada.
+   * @returns Los objetos de devengo alcanzados por la práctica.
+   */
+  findObjectsByPractice(
+    em: EntityManager,
+    tenantId: string,
+    practiceAccountIds: readonly string[],
+  ): Promise<AccrualObjects[]> {
+    return em.find(AccrualObjects, {
+      tenantId,
+      $or: [
+        { expenseAccountId: { $in: [...practiceAccountIds] } },
+        { accrualAccountId: { $in: [...practiceAccountIds] } },
+        { expenseAccountId: null, accrualAccountId: null },
+      ],
+    });
+  }
+
+  /**
+   * El cronograma de un lote de objetos de devengo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param accrualObjectIds - Objetos cuyas líneas se leen.
+   * @returns Las líneas de cronograma de esos objetos.
+   */
+  findScheduleLinesByObjectIds(
+    em: EntityManager,
+    accrualObjectIds: readonly string[],
+  ): Promise<AccrualScheduleLines[]> {
+    if (accrualObjectIds.length === 0) return Promise.resolve([]);
+    return em.find(AccrualScheduleLines, {
+      accrualObjectId: { $in: [...accrualObjectIds] },
+    });
+  }
+
   /** Líneas PENDIENTES del objeto para un periodo dado (batch idempotente). */
   pendingLinesForPeriod(
     em: EntityManager,

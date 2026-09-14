@@ -36,6 +36,8 @@ function build() {
     findObjectById: mockFn(),
     pendingLinesForPeriod: mockFn().mockResolvedValue([]),
     createPosting: mockFn(),
+    findObjectsByPractice: mockFn().mockResolvedValue([]),
+    findScheduleLinesByObjectIds: mockFn().mockResolvedValue([]),
   };
   const posting = {
     post: mockFn().mockResolvedValue({

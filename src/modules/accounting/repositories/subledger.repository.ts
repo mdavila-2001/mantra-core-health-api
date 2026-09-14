@@ -8,6 +8,14 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/** Una partida abierta con su subledger, para resolverla contra la práctica. */
+export interface OpenItemWithSubledger {
+  /** La partida abierta. */
+  openItem: OpenItems;
+  /** El subledger sobre el que reconcilia. */
+  subledger: SubledgerAccounts;
+}
+
 /** Acceso a subledgers, partidas abiertas y documentos de compensación. */
 @Injectable()
 export class SubledgerRepository {
@@ -129,6 +137,51 @@ export class SubledgerRepository {
       },
       { partial: true },
     );
+  }
+
+  /**
+   * Las partidas abiertas cuyo subledger reconcilia contra una de las cuentas
+   * dadas (el puente por práctica de D-1: `subledger_accounts` y `open_items`
+   * son por tenant, no por práctica).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant dueño de los subledgers.
+   * @param reconciliationAccountIds - Cuentas de la práctica consultada.
+   * @param excludedStatusConceptId - Estado a excluir (partida saldada).
+   * @param limit - Tope de filas.
+   * @returns Cada partida abierta junto con su subledger.
+   */
+  async findOpenItemsByReconciliationAccounts(
+    em: EntityManager,
+    tenantId: string,
+    reconciliationAccountIds: readonly string[],
+    excludedStatusConceptId: string,
+    limit: number,
+  ): Promise<OpenItemWithSubledger[]> {
+    if (reconciliationAccountIds.length === 0) return [];
+
+    const subledgers = await em.find(SubledgerAccounts, {
+      tenantId,
+      reconciliationAccountId: { $in: [...reconciliationAccountIds] },
+    });
+    if (subledgers.length === 0) return [];
+
+    const porId = new Map(subledgers.map((s) => [s.id, s]));
+    const items = await em.find(
+      OpenItems,
+      {
+        subledgerAccountId: { $in: subledgers.map((s) => s.id) },
+        statusConceptId: { $ne: excludedStatusConceptId },
+      },
+      { limit },
+    );
+
+    return items
+      .map((openItem) => {
+        const subledger = porId.get(openItem.subledgerAccountId);
+        return subledger ? { openItem, subledger } : null;
+      })
+      .filter((x): x is OpenItemWithSubledger => x !== null);
   }
 
   /**

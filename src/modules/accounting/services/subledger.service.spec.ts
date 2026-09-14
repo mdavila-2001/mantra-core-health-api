@@ -38,6 +38,7 @@ function build() {
       clearingNumber: d.clearingNumber,
     })),
     createClearingItem: mockFn(),
+    findOpenItemsByReconciliationAccounts: mockFn().mockResolvedValue([]),
   };
   const posting = {
     post: mockFn().mockResolvedValue({

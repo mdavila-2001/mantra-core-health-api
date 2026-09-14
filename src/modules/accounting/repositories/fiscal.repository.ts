@@ -174,4 +174,55 @@ export class FiscalRepository {
   findPeriodById(em: EntityManager, id: string): Promise<FiscalPeriods | null> {
     return em.findOne(FiscalPeriods, { id });
   }
+
+  /**
+   * Los ejercicios fiscales de una práctica, del más reciente al más antiguo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica dueña de los ejercicios.
+   * @returns Los ejercicios de la práctica, ordenados por `startDate` descendente.
+   */
+  findYearsByPractice(
+    em: EntityManager,
+    practiceId: string,
+  ): Promise<FiscalYears[]> {
+    return em.find(
+      FiscalYears,
+      { practiceId },
+      { orderBy: { startDate: 'DESC' } },
+    );
+  }
+
+  /**
+   * Los períodos de un ejercicio, en orden cronológico.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fiscalYearId - Ejercicio dueño de los períodos.
+   * @returns Los períodos del ejercicio, ordenados por `startDate` ascendente.
+   */
+  findPeriodsByYear(
+    em: EntityManager,
+    fiscalYearId: string,
+  ): Promise<FiscalPeriods[]> {
+    return em.find(
+      FiscalPeriods,
+      { fiscalYearId },
+      { orderBy: { startDate: 'ASC' } },
+    );
+  }
+
+  /**
+   * Períodos por lote de ids, sin orden garantizado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Identificadores a resolver.
+   * @returns Los períodos encontrados.
+   */
+  findPeriodsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<FiscalPeriods[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(FiscalPeriods, { id: { $in: [...ids] } });
+  }
 }
