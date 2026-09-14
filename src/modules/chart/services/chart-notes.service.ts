@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHash } from 'node:crypto';
@@ -9,6 +9,9 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+
+/** Rol comodín que puede firmar en nombre de cualquier perfil profesional. */
+const SUPERADMIN_ROLE = 'SUPERADMIN';
 import { ClinicalNotesRepository } from '../repositories';
 import { CHART } from '../chart.concepts';
 import {
@@ -180,6 +183,7 @@ export class ChartNotesService {
       'Signing note version',
     );
     return this.em.transactional(async (tx) => {
+      this.assertFirmaConPerfilPropio(actor, dto.signerProfileId);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
@@ -230,6 +234,7 @@ export class ChartNotesService {
       'Cosigning note version',
     );
     return this.em.transactional(async (tx) => {
+      this.assertFirmaConPerfilPropio(actor, dto.signerProfileId);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
@@ -492,6 +497,33 @@ export class ChartNotesService {
       }
       return { versionId, recordedFindings: dto.findings.length };
     });
+  }
+
+  /**
+   * D-7: una nota la firma su propio profesional; nadie firma en nombre de
+   * otro perfil. `SUPERADMIN` tiene paso franco, igual que en el resto del
+   * sistema de roles.
+   *
+   * @param actor - Sesión que pide firmar o cofirmar.
+   * @param signerProfileId - Perfil profesional que el DTO declara como firmante.
+   * @throws ForbiddenException si la sesión no tiene perfil profesional, o si
+   *   el perfil declarado no es el suyo.
+   */
+  private assertFirmaConPerfilPropio(
+    actor: AuthenticatedUser,
+    signerProfileId: string,
+  ): void {
+    if (actor.roles.includes(SUPERADMIN_ROLE)) return;
+    if (!actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'La sesión no tiene un perfil profesional con el que firmar.',
+      );
+    }
+    if (signerProfileId !== actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'Una nota la firma su profesional: no se puede firmar en nombre de otro perfil.',
+      );
+    }
   }
 
   /** Carga versión y cabecera comprobando que la versión pertenece a la nota. */

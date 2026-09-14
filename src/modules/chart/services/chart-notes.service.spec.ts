@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
 import { ChartNotesService } from './chart-notes.service';
 import { CHART } from '../chart.concepts';
 import {
@@ -16,7 +17,18 @@ import {
   ConflictException,
 } from '../../../common';
 
-const actor = { id: 'clin-1', roles: [] } as any;
+const actor = {
+  id: 'clin-1',
+  roles: [],
+  practitionerProfileId: 's1',
+} as any;
+// D-7: quien cofirma es otro perfil; el que firma como autor no puede ser
+// también el cofirmante (la propia regla del cofirmante repetido lo impide).
+const actor2 = {
+  id: 'clin-2',
+  roles: [],
+  practitionerProfileId: 's2',
+} as any;
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -189,6 +201,49 @@ describe('ChartNotesService', () => {
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
+
+    it('D-7: rechaza con 403 firmar con el perfil de otro profesional', async () => {
+      const d = build();
+      d.notesRepo.findVersionById.mockResolvedValue({
+        id: 'v1',
+        clinicalNoteId: 'h1',
+        statusConceptId: CHART.VERSION_DRAFT,
+      });
+      await expect(
+        d.service.signVersion(
+          'h1',
+          'v1',
+          { signerProfileId: 'perfil-ajeno' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.notesRepo.createSignature).not.toHaveBeenCalled();
+    });
+
+    it('D-7: SUPERADMIN firma con cualquier perfil', async () => {
+      const d = build();
+      const superadmin = { id: 'admin-1', roles: ['SUPERADMIN'] } as any;
+      const version: any = {
+        id: 'v1',
+        clinicalNoteId: 'h1',
+        statusConceptId: CHART.VERSION_DRAFT,
+      };
+      const header: any = {
+        id: 'h1',
+        lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+        updatedAt: new Date(),
+      };
+      d.notesRepo.findVersionById.mockResolvedValue(version);
+      d.notesRepo.findHeaderById.mockResolvedValue(header);
+
+      await d.service.signVersion(
+        'h1',
+        'v1',
+        { signerProfileId: 'perfil-ajeno' },
+        superadmin,
+      );
+      expect(version.statusConceptId).toBe(CHART.VERSION_SIGNED);
+    });
   });
 
   describe('cosignVersion (UC-15-04)', () => {
@@ -216,7 +271,7 @@ describe('ChartNotesService', () => {
           'h1',
           'v1',
           { signerProfileId: 's2' } as any,
-          actor,
+          actor2,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
@@ -245,7 +300,7 @@ describe('ChartNotesService', () => {
         'h1',
         'v1',
         { signerProfileId: 's2' },
-        actor,
+        actor2,
       );
       expect(version.statusConceptId).toBe(CHART.VERSION_COSIGNED);
       expect(version.releaseEligibilityConceptId).toBe(
