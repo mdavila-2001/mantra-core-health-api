@@ -16,6 +16,7 @@ import {
   BrokerCommissionController,
   InsuranceReadController,
   InsuranceCatalogController,
+  InsuranceAnalyticsController,
 } from './controllers';
 import {
   InsuranceBackboneService,
@@ -28,6 +29,7 @@ import {
   BrokerCommissionService,
   InsuranceReadService,
   InsuranceCatalogService,
+  InsuranceAnalyticsService,
 } from './services';
 import {
   CatalogRepository,
@@ -38,6 +40,7 @@ import {
   DisputeRepository,
   SettlementRepository,
   InsuranceReadRepository,
+  InsuranceAnalyticsRepository,
 } from './repositories';
 
 /**
@@ -67,6 +70,7 @@ import {
     BrokerCommissionController,
     InsuranceReadController,
     InsuranceCatalogController,
+    InsuranceAnalyticsController,
   ],
   providers: [
     // Repositorios
@@ -78,6 +82,7 @@ import {
     ClaimReadRepository,
     DisputeRepository,
     SettlementRepository,
+    InsuranceAnalyticsRepository,
     LinkedClaimOrderService,
     LinkedClaimAccessService,
     // Servicios
@@ -91,6 +96,7 @@ import {
     BrokerCommissionService,
     InsuranceReadService,
     InsuranceCatalogService,
+    InsuranceAnalyticsService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.

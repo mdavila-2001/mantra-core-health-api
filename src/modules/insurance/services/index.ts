@@ -9,3 +9,4 @@ export * from './insurance-read.service';
 export * from './insurance-catalog.service';
 export * from './declared-coverage';
 export * from './claims-read.service';
+export * from './insurance-analytics.service';

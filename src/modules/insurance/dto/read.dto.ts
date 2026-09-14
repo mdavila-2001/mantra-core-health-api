@@ -191,6 +191,13 @@ export class PlanDto {
   @ApiProperty({ nullable: true, type: InsuranceConceptDto })
   currency!: InsuranceConceptDto | null;
 
+  /**
+   * Prima de lista mensual del plan, en su moneda (v4.2.14). `null` cuando la
+   * aseguradora no la declaró — que no es lo mismo que cero.
+   */
+  @ApiProperty({ nullable: true, type: String, example: '350.00' })
+  monthlyPremiumAmount!: string | null;
+
   /** Inicio de vigencia. */
   @ApiProperty({ nullable: true, type: String })
   effectiveFrom!: string | null;

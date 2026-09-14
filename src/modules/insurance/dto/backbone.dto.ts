@@ -173,6 +173,25 @@ export class CreatePlanDto {
   @IsOptional()
   @IsUUID()
   currencyConceptId?: string;
+
+  /**
+   * Prima de lista MENSUAL del plan, en la moneda del plan (v4.2.14).
+   *
+   * Es el denominador estimado del loss ratio del tablero de siniestralidad.
+   * Opcional y sin valor por defecto a propósito: poner `0.00` afirmaría una
+   * prima que nadie declaró, y el tablero distingue «sin prima» de «prima cero».
+   */
+  @ApiPropertyOptional({
+    example: '350.00',
+    description: 'Prima de lista mensual del plan, en la moneda del plan',
+  })
+  @IsOptional()
+  @IsNumberString()
+  @Matches(MONEY_PATTERN, {
+    message:
+      'monthlyPremiumAmount debe ser no negativo y tener hasta dos decimales',
+  })
+  monthlyPremiumAmount?: string;
 }
 
 /** Alta de beneficio de plan. */
@@ -292,6 +311,34 @@ export class UpdatePlanBenefitDto {
       'annualLimitAmount debe ser no negativo y tener hasta dos decimales',
   })
   annualLimitAmount!: string | null;
+}
+
+/**
+ * Reemplazo de la prima de lista mensual de un plan (v4.2.14, subtarea 3.1).
+ *
+ * Un solo valor y reemplazo completo, como `UpdatePlanBenefitDto`: `null`
+ * quita la prima («la aseguradora dejó de declararla»), y la ausencia de la
+ * propiedad es un 400 de la `ValidationPipe`, no un «no cambiar».
+ */
+export class UpdatePlanPremiumDto {
+  @ApiProperty({ nullable: true, type: String, example: '350.00' })
+  @ValidateIf((_object, value) => value !== null)
+  @IsNumberString()
+  @Matches(MONEY_PATTERN, {
+    message:
+      'monthlyPremiumAmount debe ser no negativo y tener hasta dos decimales',
+  })
+  monthlyPremiumAmount!: string | null;
+}
+
+/** La prima de lista de un plan, tal como quedó persistida. */
+export class PlanPremiumDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Prima de lista mensual; `null` cuando la aseguradora no la declaró. */
+  @ApiProperty({ nullable: true, type: String, example: '350.00' })
+  monthlyPremiumAmount!: string | null;
 }
 
 /** Reglas administrables de autorización y documentación. */

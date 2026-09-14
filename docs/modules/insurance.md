@@ -9,7 +9,7 @@
 # Módulo `insurance`
 
 **Fuente:** [`src/modules/insurance/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/insurance/README.md)
-· 10 controllers · 13 services · 9 repositories · 29 entidades · 12 DTO
+· 11 controllers · 14 services · 10 repositories · 29 entidades · 13 DTO
 
 ---
 
@@ -31,10 +31,11 @@ JWT:
 
 | Método y ruta | Cuerpo administrado | Respuesta |
 | --- | --- | --- |
-| `POST /insurance-products/:productId/plans` | Código, nombre, vigencia y moneda opcional | `{ id }` |
+| `POST /insurance-products/:productId/plans` | Código, nombre, vigencia, moneda opcional y prima de lista mensual opcional | `{ id }` |
 | `POST /insurance-plans/:planId/benefits` | Categoría, servicio opcional, vigencia e importes | `{ id }` |
 | `PUT /insurance-plans/:planId/benefits/:benefitId` | Porcentaje, copago, deducible y tope anual; `null` borra | `{ ok: true }` |
 | `PUT /insurance-plans/:planId/benefits/:benefitId/rules` | Autorización previa, documentos y exclusión | `{ ok: true }` |
+| `PUT /insurance-plans/:planId/premium` | Prima de lista mensual del plan; `null` la quita | `{ id, monthlyPremiumAmount }` |
 
 Todos los identificadores se resuelven por la cadena
 tenant → carrier → producto → plan → beneficio. Un recurso inexistente, ajeno
