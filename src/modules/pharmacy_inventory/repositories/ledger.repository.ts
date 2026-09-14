@@ -98,6 +98,10 @@ export class LedgerRepository {
     await em.execute('select pg_advisory_xact_lock(hashtext(?))', [
       `pharmacy_inventory.ledger:${pharmacyId}`,
     ]);
+    // `max()` es SQL crudo: no ve los asientos que `append` dejó en la unidad de
+    // trabajo sin escribir. Sin este flush, dos líneas del mismo pedido reciben
+    // la misma secuencia y el índice único la rechaza al confirmar.
+    await em.flush();
     const rows = await em.execute<
       {
         /**
