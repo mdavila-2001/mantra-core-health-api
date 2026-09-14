@@ -189,29 +189,27 @@ describe('LinkedClaimAccessService', () => {
       ),
     ).resolves.toMatchObject({ insuranceCarrierId: 'carrier' });
   });
-  it.each([
-    'other-carrier',
-    'wrong-currency',
-    'expired',
-    'future',
-  ])('rechaza cobertura incoherente %s', async (reason) => {
-    const f = fixture();
-    if (reason === 'other-carrier') f.product.insuranceCarrierId = 'other';
-    if (reason === 'wrong-currency') f.plan.currencyConceptId = 'usd';
-    if (reason === 'expired')
-      f.coverage.effectiveTo = new Date('2000-01-01T00:00:00Z');
-    if (reason === 'future')
-      f.plan.effectiveFrom = new Date('2099-01-01T00:00:00Z');
-    await expect(
-      f.service.coverageForOrder(
-        {} as never,
-        'coverage',
-        snapshot,
-        'carrier',
-        true,
-      ),
-    ).rejects.toThrow();
-  });
+  it.each(['other-carrier', 'wrong-currency', 'expired', 'future'])(
+    'rechaza cobertura incoherente %s',
+    async (reason) => {
+      const f = fixture();
+      if (reason === 'other-carrier') f.product.insuranceCarrierId = 'other';
+      if (reason === 'wrong-currency') f.plan.currencyConceptId = 'usd';
+      if (reason === 'expired')
+        f.coverage.effectiveTo = new Date('2000-01-01T00:00:00Z');
+      if (reason === 'future')
+        f.plan.effectiveFrom = new Date('2099-01-01T00:00:00Z');
+      await expect(
+        f.service.coverageForOrder(
+          {} as never,
+          'coverage',
+          snapshot,
+          'carrier',
+          true,
+        ),
+      ).rejects.toThrow();
+    },
+  );
   it('no relaja los roles del flujo genérico', () => {
     expect(() => assertLegacyClaimRoles(actor)).toThrow(ForbiddenException);
     expect(() =>
