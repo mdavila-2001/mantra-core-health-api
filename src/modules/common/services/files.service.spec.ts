@@ -293,6 +293,7 @@ describe('FilesService', () => {
       const { service, em, filesRepo, fileVersionsRepo } = build();
       filesRepo.findById.mockResolvedValue({
         id: 'file-1',
+        createdByUserId: actor.id,
         currentVersionId: 'ver-1',
         deletedAt: undefined,
         lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
@@ -303,10 +304,11 @@ describe('FilesService', () => {
         malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
       });
 
-      const result = await service.generateDownloadUrl('file-1');
+      const result = await service.generateDownloadUrl('file-1', actor);
 
       expect(em.fork).toHaveBeenCalled();
-      expect(result.url).toContain('fileId=file-1');
+      expect(result.url).toContain('/common/files/file-1/content');
+      expect(result.url).not.toContain('s3://bucket');
       expect(result.url).toContain('signature=');
       expect(result.expiresAt).toBeInstanceOf(Date);
     });
@@ -315,6 +317,7 @@ describe('FilesService', () => {
       const { service, filesRepo, fileVersionsRepo } = build();
       filesRepo.findById.mockResolvedValue({
         id: 'file-1',
+        createdByUserId: actor.id,
         currentVersionId: 'ver-1',
         deletedAt: undefined,
         lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
@@ -326,7 +329,7 @@ describe('FilesService', () => {
       });
 
       await expect(
-        service.generateDownloadUrl('file-1'),
+        service.generateDownloadUrl('file-1', actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -334,9 +337,95 @@ describe('FilesService', () => {
       const { service, filesRepo } = build();
       filesRepo.findById.mockResolvedValue(null);
       await expect(
-        service.generateDownloadUrl('missing'),
+        service.generateDownloadUrl('missing', actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
+
+    it('no emite URL para un actor que sólo conoce el UUID', async () => {
+      const { service, filesRepo } = build();
+      filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'otro',
+        currentVersionId: 'ver-1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        service.generateDownloadUrl('file-1', actor),
+      ).rejects.toThrow('No tiene acceso a este archivo');
+    });
+
+    it('preserva la descarga de un revisor de evidencia ajena', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'otro',
+        currentVersionId: 'ver-1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      fileVersionsRepo.findById.mockResolvedValue({
+        id: 'ver-1',
+        storageUri: 's3://bucket/identity.pdf',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
+      });
+
+      await expect(
+        service.generateDownloadUrl('file-1', {
+          id: 'reviewer-1',
+          roles: ['SECURITY_ADMIN'],
+        }),
+      ).resolves.toMatchObject({
+        url: expect.stringContaining('/common/files/file-1/content'),
+      });
+    });
+
+    /**
+     * 5.1 · la URL no puede publicar dónde viven los bytes.
+     *
+     * El modelo lo prohíbe explícitamente («`storage_uri` es una URI interna
+     * estable, no una URL pública ni firmada», nota `FILE_SECURITY` de
+     * `diagram_02_common.puml`) y la versión anterior la incrustaba entera. Se
+     * prueban las dos formas que emite el sistema, porque cada adaptador filtra
+     * una cosa distinta: S3 el **bucket y la clave del objeto**, el disco local
+     * el **hash del contenido**.
+     */
+    it.each([
+      ['s3', 's3://bucket-clinico/pacientes/2026/estudio-ana.pdf'],
+      [
+        'disco local',
+        'file://local/9f2c1ab34d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8',
+      ],
+    ])(
+      'la URL no revela la ubicación interna del adaptador %s',
+      async (_adaptador, storageUri) => {
+        const { service, filesRepo, fileVersionsRepo } = build();
+        filesRepo.findById.mockResolvedValue({
+          id: 'file-1',
+          createdByUserId: actor.id,
+          currentVersionId: 'ver-1',
+          deletedAt: undefined,
+          lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        });
+        fileVersionsRepo.findById.mockResolvedValue({
+          id: 'ver-1',
+          storageUri,
+          malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
+        });
+
+        const { url } = await service.generateDownloadUrl('file-1', actor);
+
+        expect(url).not.toContain(storageUri);
+        expect(url).not.toContain('s3://');
+        expect(url).not.toContain('file://');
+        expect(url).not.toContain('bucket-clinico');
+        expect(url).not.toContain('estudio-ana.pdf');
+        expect(url).not.toContain('9f2c1ab3');
+        // Lo que sí debe llevar: el recurso de la propia API y la firma.
+        expect(url).toBe(
+          `/common/files/file-1/content?versionId=ver-1&expires=${url.split('expires=')[1]?.split('&')[0]}&signature=${url.split('signature=')[1]}`,
+        );
+      },
+    );
   });
   describe('listLinkedFiles', () => {
     /**

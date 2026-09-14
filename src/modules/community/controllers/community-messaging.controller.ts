@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,7 +11,9 @@ import {
   Patch,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
@@ -164,6 +167,47 @@ export class CommunityMessagingController {
   }
 
   // --- Lecturas (UC-19-14, cara de lectura) ---
+
+  /**
+   * 5.1 · FT-32-R02: el contenido de un adjunto de la conversación, para quien
+   * participa en ella — no sólo para quien lo subió.
+   *
+   * La conversación forma parte de la ruta: ni conocer el archivo ni conocer
+   * una conversación por separado permite mezclar ambos contextos.
+   *
+   * `no-store` como en toda descarga autenticada: la caché del navegador no
+   * debe conservar un adjunto clínico después de cerrar sesión.
+   */
+  @Get(':conversationId/attachments/:fileId/content')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar el adjunto de una conversación (participante activo)',
+  })
+  async getAttachmentContent(
+    @Param('conversationId', ParseUUIDPipe) conversationId: string,
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Query('profileId', ParseUUIDPipe) profileId: string,
+    @Res() res: Response,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    res.setHeader('Cache-Control', 'private, no-store');
+    const contenido = await this.readService.getAttachmentContent(
+      conversationId,
+      fileId,
+      profileId,
+      actor,
+    );
+    res.setHeader('Content-Type', contenido.mimeType);
+    if (contenido.originalName) {
+      // Codificado, igual que en `CommonFilesController`: un nombre de archivo
+      // con comillas o saltos de línea podría inyectar cabeceras.
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent(contenido.originalName)}`,
+      );
+    }
+    res.send(contenido.buffer);
+  }
 
   /**
    * Bandeja del propio perfil, con vista previa y no leídos.

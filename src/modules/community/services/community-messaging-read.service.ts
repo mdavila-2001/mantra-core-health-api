@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
+  PreconditionFailedException,
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
@@ -12,9 +13,11 @@ import {
   ConversationsRepository,
   PublicProfilesRepository,
 } from '../repositories';
+import { FileUploadService } from '../../common/services';
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityPresenceService } from './community-presence.service';
 import { COMM } from '../community.concepts';
+import type { FileContentDto } from '../../common/dto';
 import type {
   ConversationListItemDto,
   ConversationPageDto,
@@ -66,9 +69,122 @@ export class CommunityMessagingReadService {
     private readonly profilesRepo: PublicProfilesRepository,
     private readonly visibility: CommunityVisibilityService,
     private readonly presence: CommunityPresenceService,
+    private readonly files: FileUploadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityMessagingReadService.name);
+  }
+
+  /**
+   * El contenido de un adjunto de conversación, para un participante activo
+   * (5.1 · FT-32-R02).
+   *
+   * ## Por qué existe
+   *
+   * `FileUploadService.download()` autoriza por **propiedad**: sólo quien subió
+   * el archivo, o un rol de revisión. En una conversación eso es exactamente el
+   * revés de lo que hace falta — el que necesita abrir el adjunto es **el que
+   * lo recibió**, que por definición no lo subió. Hasta ahora el hilo pedía los
+   * bytes por la ruta genérica, se llevaba un 403 y la burbuja mostraba
+   * «Archivo no disponible» para todo adjunto ajeno.
+   *
+   * ## Qué autoriza, y en qué orden
+   *
+   * Lo mismo que autoriza **leer el mensaje**: que el perfil sea del actor
+   * (`assertOwnProfile`) y que sea **participante activo** de una conversación
+   * donde ese archivo viaje en un mensaje **vivo**. Ni más ni menos: no se
+   * inventa una clasificación de archivo, no se mira la sensibilidad ni la
+   * categoría, y no se concede nada a quien no esté en la conversación.
+   *
+   * El orden importa: primero se comprueban perfil y participación activa;
+   * después la consulta inversa por `attachment_file_id` demuestra que el
+   * archivo pertenece a un mensaje vivo de **esa misma** conversación.
+   *
+   * ## Por qué 404 y nunca 403
+   *
+   * Un 403 confirmaría que el archivo existe. Quien enumera uuids ajenos
+   * recibe el mismo «no encontrado» tanto si el id no existe como si existe
+   * pero es de una conversación en la que no está — la misma regla que ya usan
+   * `listMessages` («confirmar que la conversación existe ya diría con quién
+   * habla el otro») y `getCommentMedia`.
+   *
+   * @param conversationId - Conversación contextual que contiene el adjunto.
+   * @param fileId - Adjunto pedido (`common.files`).
+   * @param profileId - Perfil con el que el actor dice participar.
+   * @param actor - Sesión que pide los bytes.
+   * @returns Bytes y tipo MIME para servir por HTTP.
+   * @throws ResourceNotFoundException para cualquier combinación inexistente,
+   *   ajena, huérfana o removida — el mismo 404 en todos esos casos.
+   */
+  async getAttachmentContent(
+    conversationId: string,
+    fileId: string,
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<FileContentDto> {
+    const em = this.em.fork();
+    try {
+      await this.visibility.assertOwnProfile(em, profileId, actor);
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw this.attachmentNotFound(fileId);
+      }
+      throw error;
+    }
+
+    const participant = await this.conversationsRepo.findActiveParticipant(
+      em,
+      conversationId,
+      profileId,
+      CONCEPTS.STATE_ACTIVE,
+    );
+    if (!participant) throw this.attachmentNotFound(fileId);
+
+    try {
+      await this.assertNoBlockWithPeers(em, conversationId, profileId);
+    } catch (error) {
+      if (error instanceof ResourceNotFoundException) {
+        throw this.attachmentNotFound(fileId);
+      }
+      throw error;
+    }
+
+    const mensajes =
+      await this.conversationsRepo.findLiveMessagesByAttachmentFileId(
+        em,
+        fileId,
+      );
+
+    if (
+      !mensajes.some((mensaje) => mensaje.conversationId === conversationId)
+    ) {
+      this.logger.warn(
+        {
+          operation: 'community.conversation.attachment',
+          conversationId,
+          fileId,
+          profileId,
+          actorId: actor.id,
+        },
+        'Refused a conversation attachment the reader does not participate in',
+      );
+      throw this.attachmentNotFound(fileId);
+    }
+
+    try {
+      return await this.files.downloadForAuthorizedContext(
+        fileId,
+        'community.conversation.attachment',
+      );
+    } catch (error) {
+      if (
+        error instanceof ResourceNotFoundException ||
+        error instanceof PreconditionFailedException
+      ) {
+        throw this.attachmentNotFound(fileId);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -504,6 +620,13 @@ export class CommunityMessagingReadService {
           conversationId,
         });
     }
+  }
+
+  /** Respuesta uniforme para archivo inexistente, ajeno, huérfano o removido. */
+  private attachmentNotFound(fileId: string): ResourceNotFoundException {
+    return new ResourceNotFoundException('Archivo adjunto no encontrado', {
+      fileId,
+    });
   }
 
   /**
