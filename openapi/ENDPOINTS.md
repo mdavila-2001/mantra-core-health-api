@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1273 de 1273 endpoints** en **66 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1281 de 1281 endpoints** en **66 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -15,11 +15,11 @@ Se documentan **1273 de 1273 endpoints** en **66 módulos**. La referencia compl
 | `authz` | 24 | [Abrir referencia](endpoints/authz.md) |
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 18 | [Abrir referencia](endpoints/billing.md) |
-| `chart` | 17 | [Abrir referencia](endpoints/chart.md) |
+| `chart` | 18 | [Abrir referencia](endpoints/chart.md) |
 | `clinical` | 27 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 26 | [Abrir referencia](endpoints/clinical-ext.md) |
-| `common` | 15 | [Abrir referencia](endpoints/common.md) |
-| `community` | 87 | [Abrir referencia](endpoints/community.md) |
+| `common` | 19 | [Abrir referencia](endpoints/common.md) |
+| `community` | 88 | [Abrir referencia](endpoints/community.md) |
 | `consent` | 15 | [Abrir referencia](endpoints/consent.md) |
 | `content_packs` | 2 | [Abrir referencia](endpoints/content-packs.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
@@ -37,7 +37,7 @@ Se documentan **1273 de 1273 endpoints** en **66 módulos**. La referencia compl
 | `health_context` | 13 | [Abrir referencia](endpoints/health-context.md) |
 | `health_data` | 16 | [Abrir referencia](endpoints/health-data.md) |
 | `iam` | 31 | [Abrir referencia](endpoints/iam.md) |
-| `identity_assurance` | 25 | [Abrir referencia](endpoints/identity-assurance.md) |
+| `identity_assurance` | 27 | [Abrir referencia](endpoints/identity-assurance.md) |
 | `insurance` | 34 | [Abrir referencia](endpoints/insurance.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |

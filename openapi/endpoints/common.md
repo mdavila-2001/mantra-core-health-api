@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `common`
 
-Referencia exhaustiva de 15 operación(es) del módulo `common`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 19 operación(es) del módulo `common`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files`
-- **Controladores:** `CommonAddressesController`, `CommonContactPointsController`, `CommonFilesController`, `CommonIdentifiersController`, `InternalFilesController`
+- **Etiquetas OpenAPI:** `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files`, `internal/storage-lifecycle`
+- **Controladores:** `CommonAddressesController`, `CommonContactPointsController`, `CommonFilesController`, `CommonIdentifiersController`, `InternalFilesController`, `InternalStorageLifecycleController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -26,6 +26,10 @@ Referencia exhaustiva de 15 operación(es) del módulo `common`, derivada del co
 13. [POST /common/identifiers](#13-post-common-identifiers) — Registrar un identificador oficial (UC-02-01)
 14. [POST /internal/files/versions/{vid}/scan-result](#14-post-internal-files-versions-vid-scan-result) — Registrar resultado de escaneo antimalware (UC-02-09)
 15. [GET /internal/files/versions/pending-scan](#15-get-internal-files-versions-pending-scan) — Listar versiones pendientes de escaneo antimalware
+16. [POST /internal/storage-lifecycle/audio/{assetId}/abort](#16-post-internal-storage-lifecycle-audio-assetid-abort) — InternalStorageLifecycleController_abort
+17. [POST /internal/storage-lifecycle/audio/{assetId}/begin](#17-post-internal-storage-lifecycle-audio-assetid-begin) — InternalStorageLifecycleController_begin
+18. [POST /internal/storage-lifecycle/audio/{assetId}/dispatch](#18-post-internal-storage-lifecycle-audio-assetid-dispatch) — InternalStorageLifecycleController_dispatch
+19. [POST /internal/storage-lifecycle/recover](#19-post-internal-storage-lifecycle-recover) — InternalStorageLifecycleController_recover
 
 ---
 
@@ -816,10 +820,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | No tiene acceso a este archivo | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 404 | `NOT_FOUND` | Versión vigente no encontrada | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | El archivo está borrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | El archivo no tiene una versión vigente | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | La versión vigente resultó infectada | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -850,7 +855,7 @@ Ejemplo de error normalizado:
 
 Emitir una URL de descarga firmada (UC-02-11). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: UC-02-11: emite una URL de descarga firmada.
+Contexto declarado en el controlador: UC-02-11: emite una URL de descarga firmada. Lleva `@CurrentUser` desde 5.1: sin él el servicio no tenía a quién autorizar, y esta ruta era el camino paralelo que rodeaba el control de `:id/content`. La regla que aplica es la misma que la del contenido.
 
 ### Descripción del sistema
 
@@ -930,6 +935,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No tiene acceso a este archivo | Excepción explícita en src/modules/common/services/files.service.ts |
 | 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/files.service.ts |
 | 404 | `NOT_FOUND` | Versión vigente no encontrada | Excepción explícita en src/modules/common/services/files.service.ts |
 | 422 | `PRECONDITION_FAILED` | El archivo está borrado | Excepción explícita en src/modules/common/services/files.service.ts |
@@ -2051,6 +2057,412 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/internal/files/versions/pending-scan"
+}
+```
+
+---
+
+## 16. POST /internal/storage-lifecycle/audio/{assetId}/abort
+
+- **Módulo:** `common`
+- **Etiqueta OpenAPI:** `internal/storage-lifecycle`
+- **Nombre:** InternalStorageLifecycleController_abort
+- **Operation ID:** `InternalStorageLifecycleController_abort`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InternalStorageLifecycleController.abort](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/storage-lifecycle/audio/{assetId}/abort` en `InternalStorageLifecycleController_abort`. El controlador delega en `StorageWorkerPublicationService.abortAudio`. Valida el body como `StorageReservationDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `assetId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `StorageReservationDto`; los campos opcionales se omiten.
+
+```http
+POST /internal/storage-lifecycle/audio/00000000-0000-4000-8000-000000000001/abort HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Deben ser UUID válidos: `assetId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+El body no declara campos documentables.
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /internal/storage-lifecycle/audio/00000000-0000-4000-8000-000000000001/abort HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/storage-lifecycle/audio/{assetId}/abort"
+}
+```
+
+---
+
+## 17. POST /internal/storage-lifecycle/audio/{assetId}/begin
+
+- **Módulo:** `common`
+- **Etiqueta OpenAPI:** `internal/storage-lifecycle`
+- **Nombre:** InternalStorageLifecycleController_begin
+- **Operation ID:** `InternalStorageLifecycleController_begin`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InternalStorageLifecycleController.begin](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/storage-lifecycle/audio/{assetId}/begin` en `InternalStorageLifecycleController_begin`. El controlador delega en `StorageWorkerPublicationService.beginAudio`. Valida el body como `BeginStoragePublicationDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `assetId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BeginStoragePublicationDto`; los campos opcionales se omiten.
+
+```http
+POST /internal/storage-lifecycle/audio/00000000-0000-4000-8000-000000000001/begin HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Deben ser UUID válidos: `assetId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+El body no declara campos documentables.
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /internal/storage-lifecycle/audio/00000000-0000-4000-8000-000000000001/begin HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/storage-lifecycle/audio/{assetId}/begin"
+}
+```
+
+---
+
+## 18. POST /internal/storage-lifecycle/audio/{assetId}/dispatch
+
+- **Módulo:** `common`
+- **Etiqueta OpenAPI:** `internal/storage-lifecycle`
+- **Nombre:** InternalStorageLifecycleController_dispatch
+- **Operation ID:** `InternalStorageLifecycleController_dispatch`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InternalStorageLifecycleController.dispatch](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/storage-lifecycle/audio/{assetId}/dispatch` en `InternalStorageLifecycleController_dispatch`. El controlador delega en `StorageWorkerPublicationService.dispatchAudio`. Valida el body como `StorageReservationDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `assetId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `StorageReservationDto`; los campos opcionales se omiten.
+
+```http
+POST /internal/storage-lifecycle/audio/00000000-0000-4000-8000-000000000001/dispatch HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Deben ser UUID válidos: `assetId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+El body no declara campos documentables.
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /internal/storage-lifecycle/audio/00000000-0000-4000-8000-000000000001/dispatch HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/storage-lifecycle/audio/{assetId}/dispatch"
+}
+```
+
+---
+
+## 19. POST /internal/storage-lifecycle/recover
+
+- **Módulo:** `common`
+- **Etiqueta OpenAPI:** `internal/storage-lifecycle`
+- **Nombre:** InternalStorageLifecycleController_recover
+- **Operation ID:** `InternalStorageLifecycleController_recover`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InternalStorageLifecycleController.recover](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/storage-lifecycle/recover` en `InternalStorageLifecycleController_recover`. El controlador delega en `StorageLifecycleCoordinator.recover`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /internal/storage-lifecycle/recover HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /internal/storage-lifecycle/recover HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/storage-lifecycle/recover"
 }
 ```
 

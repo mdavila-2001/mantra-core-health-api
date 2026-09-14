@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1273 de 1273 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1281 de 1281 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -53,11 +53,11 @@ Esta referencia documenta **1273 de 1273 operaciones HTTP** registradas en `open
 | [authz](authz.md) | 24 | `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-pdp`, `authz-policies`, `authz-roles` | 7 |
 | [automation](automation.md) | 17 | `automation` | 2 |
 | [billing](billing.md) | 18 | `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog` | 4 |
-| [chart](chart.md) | 17 | `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates` | 5 |
+| [chart](chart.md) | 18 | `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates` | 5 |
 | [clinical](clinical.md) | 27 | `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records` | 6 |
 | [clinical_ext](clinical-ext.md) | 26 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 8 |
-| [common](common.md) | 15 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files` | 5 |
-| [community](community.md) | 87 | `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline` | 12 |
+| [common](common.md) | 19 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files`, `internal/storage-lifecycle` | 6 |
+| [community](community.md) | 88 | `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline` | 12 |
 | [consent](consent.md) | 15 | `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents` | 9 |
 | [content_packs](content-packs.md) | 2 | `content-packs` | 1 |
 | [crm](crm.md) | 16 | `crm` | 1 |
@@ -75,7 +75,7 @@ Esta referencia documenta **1273 de 1273 operaciones HTTP** registradas en `open
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 31 | `iam-auth`, `iam-users` | 2 |
-| [identity_assurance](identity-assurance.md) | 25 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
+| [identity_assurance](identity-assurance.md) | 27 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
 | [insurance](insurance.md) | 34 | `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 10 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
@@ -117,4 +117,4 @@ Esta referencia documenta **1273 de 1273 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1273 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1281 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

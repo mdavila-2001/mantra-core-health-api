@@ -9,7 +9,7 @@
 # Módulo `insurance`
 
 **Fuente:** [`src/modules/insurance/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/insurance/README.md)
-· 10 controllers · 10 services · 8 repositories · 29 entidades · 11 DTO
+· 10 controllers · 13 services · 9 repositories · 29 entidades · 12 DTO
 
 ---
 
