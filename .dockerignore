@@ -12,5 +12,7 @@ graphify-out
 .claude
 .vscode
 .idea
-database/SQL
-database/NoSQL
+# `database/SQL` y `database/NoSQL` SÍ entran en el contexto: las imágenes de
+# `docker/db-init/Dockerfile` las hornean, porque en Coolify un bind del
+# repositorio llega vacío (ver la cabecera de ese archivo). Son 5 MB y la
+# imagen de la API no los copia al runtime — solo pasan por la etapa `build`.

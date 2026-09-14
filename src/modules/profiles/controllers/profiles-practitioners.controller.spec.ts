@@ -21,6 +21,7 @@ function build() {
     onboardPractitioner: mockFn(),
     addJurisdictionAuthorization: mockFn(),
     addSpecialty: mockFn(),
+    setOwnPrimarySpecialty: mockFn(),
     verifyCredential: mockFn(),
     setPractitionerPhoto: mockFn(),
     removePractitionerPhoto: mockFn(),
@@ -63,6 +64,17 @@ describe('ProfilesPractitionersController', () => {
     expect(
       d.practitionersService.addJurisdictionAuthorization,
     ).toHaveBeenCalledWith('pp1', dto, actor);
+  });
+
+  it('delegates setOwnPrimarySpecialty (UC-05-06·P) sin pasarle ningún profileId', async () => {
+    const d = build();
+    await d.controller.setOwnPrimarySpecialty('esp-2', actor);
+    // Sólo el id de la especialidad y la sesión: no hay perfil ajeno que
+    // marcar escribiendo una URL.
+    expect(d.practitionersService.setOwnPrimarySpecialty).toHaveBeenCalledWith(
+      'esp-2',
+      actor,
+    );
   });
 
   it('delegates addSpecialty (UC-05-06)', async () => {

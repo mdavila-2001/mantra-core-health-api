@@ -74,6 +74,24 @@ export class PractitionerSpecialtiesRepository {
     );
   }
 
+  /**
+   * Una especialidad por su identificador, sin filtrar por dueño.
+   *
+   * Quien la pide comprueba después de quién es: devolver `null` para la ajena
+   * y para la inexistente es la misma respuesta `404`, y eso se decide en el
+   * servicio, que es donde está la sesión.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la especialidad.
+   * @returns La especialidad, o `null` si no existe.
+   */
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PractitionerSpecialties | null> {
+    return em.findOne(PractitionerSpecialties, { id });
+  }
+
   /** Especialidad activa duplicada (uq_practitioner_specialty_active, valid_to IS NULL). */
   findActive(
     em: EntityManager,

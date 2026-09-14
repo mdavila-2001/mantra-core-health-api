@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 40 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 41 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`
 - **Controladores:** `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
@@ -45,12 +45,13 @@ Referencia exhaustiva de 40 operación(es) del módulo `profiles`, derivada del 
 32. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#32-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
 33. [GET /profiles/practitioners/me/linkable-organizations](#33-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
 34. [GET /profiles/practitioners/me/onboarding](#34-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
-35. [GET /profiles/practitioners/me/summary](#35-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
-36. [GET /profiles/practitioners/specialty-counts](#36-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
-37. [GET /tenants/{tenantId}/practitioner-requests](#37-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
-38. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#38-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
-39. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#39-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
-40. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#40-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
+35. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#35-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
+36. [GET /profiles/practitioners/me/summary](#36-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
+37. [GET /profiles/practitioners/specialty-counts](#37-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
+38. [GET /tenants/{tenantId}/practitioner-requests](#38-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
+39. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#39-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
+40. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#40-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
+41. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#41-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
 
 ---
 
@@ -6058,7 +6059,126 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /profiles/practitioners/me/summary
+## 35. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Marcar una especialidad propia como la principal
+- **Operation ID:** `ProfilesPractitionersController_setOwnPrimarySpecialty`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.setOwnPrimarySpecialty](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+Baja la primaria anterior y sube ésta, en la misma transacción. Idempotente: marcar la que ya lo es devuelve la especialidad sin escribir. `412` si la especialidad ya no se ejerce (`validTo`).
+
+Contexto declarado en el controlador: UC-05-06·P: cambiar cuál de las especialidades propias es la principal. El sujeto sale de la sesión: el id de una especialidad ajena responde `404`, igual que uno inexistente.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary` en `ProfilesPractitionersController_setOwnPrimarySpecialty`. El controlador delega en `ProfilesPractitionersService.setOwnPrimarySpecialty`. No recibe body. El tipo de retorno estático es `Promise<SpecialtyResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `specialtyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+PATCH /profiles/practitioners/me/specialties/00000000-0000-4000-8000-000000000001/primary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `specialtyId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+PATCH /profiles/practitioners/me/specialties/00000000-0000-4000-8000-000000000001/primary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SpecialtyResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+  "isPrimary": true,
+  "verificationStatus": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a specialty concept. | `00000000-0000-4000-8000-000000000001` |
+| `isPrimary` | Sí | `boolean` | Sin restricción adicional declarada | Valor de is primary mantenido por la instancia. | `true` |
+| `verificationStatus` | Sí | `string` | formato `uuid` | Concept id del estado de verificación | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Especialidad no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una especialidad que ya no ejercés no puede ser la principal | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/specialties/{specialtyId}/primary"
+}
+```
+
+---
+
+## 36. GET /profiles/practitioners/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6352,7 +6472,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /profiles/practitioners/specialty-counts
+## 37. GET /profiles/practitioners/specialty-counts
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6464,7 +6584,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /tenants/{tenantId}/practitioner-requests
+## 38. GET /tenants/{tenantId}/practitioner-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -6594,7 +6714,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 39. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -6694,7 +6814,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 40. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -6807,7 +6927,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 41. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`

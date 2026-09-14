@@ -78,6 +78,7 @@ function build() {
     findProfileIdsBySpecialty: mockFn().mockResolvedValue([]),
     findCurrentSpecialtyPairs: mockFn().mockResolvedValue([]),
     demotePrimary: mockFn().mockResolvedValue(0),
+    findById: mockFn(),
   };
   const languagesRepo = {
     create: mockFn(),
@@ -292,6 +293,109 @@ describe('ProfilesPractitionersService', () => {
     });
   });
 
+  /**
+   * Cambiar cuál es la principal (UC-05-06·P) — el bloqueo del 2026-09-10.
+   *
+   * Al adaptar el editor al formulario del alta salieron los dos interruptores
+   * sueltos de «Agregar una especialidad», y con ellos la única forma de marcar
+   * una principal después del registro. Este camino la devuelve como gesto
+   * sobre una especialidad que ya existe.
+   */
+  describe('setOwnPrimarySpecialty (UC-05-06·P)', () => {
+    const vigente = (over: Record<string, unknown> = {}) => ({
+      id: 'esp-2',
+      practitionerProfileId: 'pp1',
+      specialtyConceptId: CARDIO,
+      isPrimary: false,
+      verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+      createdAt: new Date('2026-09-01T00:00:00Z'),
+      ...over,
+    });
+
+    it('baja la anterior y sube ésta, en la misma transacción', async () => {
+      const d = build();
+      const especialidad = vigente();
+      d.specialtiesRepo.findById.mockResolvedValue(especialidad);
+
+      const res = await d.service.setOwnPrimarySpecialty('esp-2', actor);
+
+      expect(d.specialtiesRepo.demotePrimary).toHaveBeenCalledWith(
+        d.tx,
+        'pp1',
+        expect.any(Date),
+      );
+      expect(especialidad.isPrimary).toBe(true);
+      expect(res).toMatchObject({ id: 'esp-2', isPrimary: true });
+    });
+
+    it('el sujeto sale de la sesión, nunca de la petición', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(vigente());
+
+      await d.service.setOwnPrimarySpecialty('esp-2', actor);
+
+      expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+      );
+    });
+
+    /**
+     * La ajena responde lo mismo que la inexistente: decir «existe pero no es
+     * tuya» ya es contar algo del perfil de otro.
+     */
+    it('una especialidad de otro profesional responde 404, como una inexistente', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(
+        vigente({ practitionerProfileId: 'OTRO-PERFIL' }),
+      );
+
+      await expect(
+        d.service.setOwnPrimarySpecialty('esp-2', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.specialtiesRepo.demotePrimary).not.toHaveBeenCalled();
+    });
+
+    it('una especialidad inexistente responde 404', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.setOwnPrimarySpecialty('esp-9', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    /**
+     * El modelo lo dejaría pasar —`is_primary` no mira `valid_to`—, así que la
+     * regla vive en el servicio.
+     */
+    it('una especialidad que ya no se ejerce no puede ser la principal', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(
+        vigente({ validTo: new Date('2025-12-31') }),
+      );
+
+      await expect(
+        d.service.setOwnPrimarySpecialty('esp-2', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.specialtiesRepo.demotePrimary).not.toHaveBeenCalled();
+    });
+
+    /** Dos clics seguidos en la misma fila no tienen por qué fallar. */
+    it('marcar la que ya es principal no escribe nada', async () => {
+      const d = build();
+      d.specialtiesRepo.findById.mockResolvedValue(
+        vigente({ isPrimary: true }),
+      );
+
+      const res = await d.service.setOwnPrimarySpecialty('esp-2', actor);
+
+      expect(res.isPrimary).toBe(true);
+      expect(d.specialtiesRepo.demotePrimary).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+  });
+
   describe('addJurisdictionAuthorization (UC-05-04)', () => {
     it('throws when the practitioner does not exist', async () => {
       const d = build();
@@ -303,6 +407,124 @@ describe('ProfilesPractitionersService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    /**
+     * El respaldo de la matrícula (v4.2.11) — el bloqueo del 2026-09-10.
+     *
+     * Hasta que la columna existió, un selector de archivo en el formulario
+     * habría aceptado el PDF y lo habría tirado en silencio al guardar. Estas
+     * cuatro pruebas son la misma familia que las del diploma, y por el mismo
+     * motivo: la trampa de `em.create`, que sólo escribe lo que el repositorio
+     * NOMBRA, así que un campo que el repo no lista queda en NULL sin que nada
+     * se queje.
+     */
+    const matricula = {
+      licenseNumber: 'MAT-2024-88',
+      regulatoryAuthority: 'Colegio Médico de Santa Cruz',
+    };
+
+    const conArchivoPropio = (d: ReturnType<typeof build>) => {
+      d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
+      // El archivo lo subió el mismo que declara la matrícula. Decirlo
+      // explícito: el doble por defecto lo pone a nombre de otro usuario.
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: actor.id,
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.authorizationsRepo.create.mockReturnValue({
+        id: 'auth-9',
+        licenseNumber: matricula.licenseNumber,
+        stateConceptId: PROF.AUTH_ACTIVE,
+        fileId: 'file-1',
+        createdAt: new Date(),
+      });
+      return d;
+    };
+
+    it('el archivo de la matrícula llega hasta el repositorio, no se pierde', async () => {
+      const d = conArchivoPropio(build());
+
+      const creada = await d.service.addJurisdictionAuthorization(
+        'pp1',
+        { ...matricula, fileId: 'file-1' } as any,
+        actor,
+      );
+
+      expect(d.authorizationsRepo.create.mock.calls[0][1].fileId).toBe(
+        'file-1',
+      );
+      // Y vuelve en la respuesta: quien la acaba de cargar muestra su
+      // respaldo sin releer el perfil entero.
+      expect(creada.fileId).toBe('file-1');
+    });
+
+    /** Un carnet en PDF: el tipo va contra la lista de DOCUMENTO, no la de imagen. */
+    it('acepta un PDF como respaldo de la matrícula', async () => {
+      const d = conArchivoPropio(build());
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        mimeType: 'application/pdf',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      });
+
+      await expect(
+        d.service.addJurisdictionAuthorization(
+          'pp1',
+          { ...matricula, fileId: 'file-1' } as any,
+          actor,
+        ),
+      ).resolves.toBeDefined();
+    });
+
+    /**
+     * Sin esto, cualquiera podría colgar su matrícula del archivo de otro
+     * conociendo el id.
+     */
+    it('no se puede colgar la matrícula del archivo de otro', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'OTRO-USUARIO',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        d.service.addJurisdictionAuthorization(
+          'pp1',
+          { ...matricula, fileId: 'file-1' } as any,
+          actor,
+        ),
+      ).rejects.toThrow();
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    /**
+     * El padrón se declara, no se prueba: la matrícula sin adjunto tiene que
+     * seguir entrando, y sin pasar por la comprobación del archivo.
+     */
+    it('sigue aceptando una matrícula sin respaldo', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
+      d.authorizationsRepo.create.mockReturnValue({
+        id: 'auth-9',
+        licenseNumber: matricula.licenseNumber,
+        stateConceptId: PROF.AUTH_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      const creada = await d.service.addJurisdictionAuthorization(
+        'pp1',
+        matricula as any,
+        actor,
+      );
+
+      expect(creada.fileId).toBeUndefined();
+      expect(d.filesRepo.findById).not.toHaveBeenCalled();
     });
   });
 
