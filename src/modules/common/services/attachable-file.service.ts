@@ -1,4 +1,7 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Optional } from '@nestjs/common';
+import { StoragePublicationService } from '../../../common/storage/storage-publication.service';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
+import { loadStorageEnv } from '../../../common/storage/storage.env';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -83,6 +86,7 @@ export class AttachableFileService {
     private readonly filesRepo: FilesRepository,
     private readonly fileVersionsRepo: FileVersionsRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly publication?: StoragePublicationService,
   ) {
     this.logger.setContext(AttachableFileService.name);
   }
@@ -206,6 +210,9 @@ export class AttachableFileService {
     options: AttachableFileOptions = {},
     labels: AttachableFileLabels = DEFAULT_LABELS,
   ): Promise<{ file: Files; version: FileVersions }> {
+    if (loadStorageEnv().lifecycleBinding && !this.publication)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+    await this.publication?.guardFile(em, fileId);
     const file = await this.filesRepo.findById(em, fileId);
     // No se distingue «no existe» de «ya tiene dueño» ni de «no es del
     // tenant DEFAULT»: los tres mensajes serían indistinguibles para quien

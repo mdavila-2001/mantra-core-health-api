@@ -24,7 +24,12 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const repo = { findActive: mockFn(), create: mockFn(), findById: mockFn() };
+  const repo = {
+    findActive: mockFn(),
+    create: mockFn(),
+    findById: mockFn(),
+    findForLifecycleGraph: mockFn(),
+  };
   const governanceRepo = { recordChange: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new LegalHoldService(

@@ -218,7 +218,7 @@ export class IdentityCasesService {
         );
       }
 
-      const evidence = this.evidenceRepo.create(tx, {
+      const evidence = await this.evidenceRepo.create(tx, {
         identityVerificationCaseId: kase.id,
         evidenceTypeConceptId: dto.evidenceTypeConceptId,
         issuerAuthorityId: dto.issuerAuthorityId,

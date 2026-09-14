@@ -1,3 +1,46 @@
+import type {
+  KnownPhysicalObjectIdentity,
+  PhysicalObjectIdentity,
+  StorageReservationIdentity,
+} from './physical-object-identity';
+
+/** Server-only, one-use capability issued after the durable DELETE_DISPATCHED commit. */
+export interface StorageDeletePermit {
+  readonly identity: KnownPhysicalObjectIdentity;
+  readonly ioAttemptId: string;
+  consume(this: void, identity: KnownPhysicalObjectIdentity): void;
+}
+
+/** A resolved promise alone is not a deletion receipt. No raw provider error is persisted. */
+export interface StorageDeleteReceipt {
+  state: 'DELETED' | 'NOT_DELETED' | 'UNKNOWN';
+  identity: KnownPhysicalObjectIdentity;
+  ioAttemptId: string;
+}
+
+/** A coordinator-issued one-use closure. Never accepted from an HTTP DTO. */
+export interface StorageWritePermit {
+  consume(
+    target: StorageReservationIdentity,
+    contentHash: string,
+    sizeBytes: number,
+  ): Promise<void>;
+}
+
+export interface PlannedStoredFile {
+  storageUri: string;
+  contentHash: string;
+  sizeBytes: number;
+  identity:
+    | StorageReservationIdentity
+    | Extract<PhysicalObjectIdentity, { kind: 'UNKNOWN' }>;
+}
+
+export type StoragePresence =
+  | { state: 'ABSENT' }
+  | { state: 'UNKNOWN' }
+  | { state: 'PRESENT'; stored: StoredFile };
+
 /** Bytes recibidos más lo que se sabe de ellos antes de persistirlos. */
 export interface StoredFileInput {
   /**
@@ -16,6 +59,7 @@ export interface StoredFileInput {
 
 /** Lo que el almacenamiento devuelve una vez que los bytes están a salvo. */
 export interface StoredFile {
+  physicalIdentity?: PhysicalObjectIdentity;
   /**
    * URI con la que el backend vuelve a localizar el contenido. Su forma la
    * decide el adaptador (`file://…`, `s3://…`); ningún llamador debe
@@ -42,14 +86,30 @@ export interface StoredFile {
  * sólo persisten la URI opaca y nunca conocen el proveedor concreto.
  */
 export interface FileStorageAdapter {
+  plan?(input: StoredFileInput): PlannedStoredFile;
+  resolveReservationIdentity?(
+    storageUri: string,
+  ): PlannedStoredFile['identity'];
+  inspect?(storageUri: string): Promise<StoragePresence>;
+  /** Absence on a legacy adapter is UNKNOWN, never permission to delete. */
+  resolvePhysicalIdentity?(
+    storageUri: string,
+    providerVersionId?: string,
+  ): PhysicalObjectIdentity;
   /** Persiste el contenido y describe lo que quedó almacenado. */
-  store(input: StoredFileInput): Promise<StoredFile>;
+  store(
+    input: StoredFileInput,
+    permit?: StorageWritePermit,
+  ): Promise<StoredFile>;
   /** Recupera el contenido previamente almacenado bajo esa URI. */
   retrieve(storageUri: string): Promise<Buffer>;
   /** Comprueba existencia sin exponer detalles del proveedor. */
   exists(storageUri: string): Promise<boolean>;
   /** Elimina de forma idempotente un objeto cuya URI pertenece al adaptador. */
-  delete(storageUri: string): Promise<void>;
+  delete(
+    storageUri: string,
+    permit?: StorageDeletePermit,
+  ): Promise<StorageDeleteReceipt | void>;
 }
 
 /** Token de inyección del adaptador activo. */

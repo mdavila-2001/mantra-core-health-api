@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import { IdentityEvidenceLifecycleService } from '../../identity_assurance/services/identity-evidence-lifecycle.service';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -39,6 +41,8 @@ export class RetentionExecutionService {
     private readonly repo: RetentionExecutionRepository,
     private readonly governanceRepo: GovernanceRepository,
     private readonly logger: PinoLogger,
+    @Optional()
+    private readonly identityLifecycle?: IdentityEvidenceLifecycleService,
   ) {
     this.logger.setContext(RetentionExecutionService.name);
   }
@@ -95,6 +99,28 @@ export class RetentionExecutionService {
         recordedByUserId: actor.id,
       });
       await tx.flush();
+
+      if (
+        entity.schemaName === 'identity_assurance' &&
+        entity.tableName === 'identity_evidence_records'
+      ) {
+        if (!this.identityLifecycle)
+          throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+        const result = await this.identityLifecycle.scan(
+          undefined,
+          policy.code,
+        );
+        execution.statusConceptId = SYSOPS.EXEC_SUCCEEDED;
+        execution.finishedAt = new Date();
+        execution.totalScanned = String(result.scanned);
+        execution.totalDeleted = '0';
+        execution.totalAnonymized = '0';
+        execution.totalArchived = '0';
+        execution.errorText = result.boundary
+          ? 'DESTRUCTIVE_RUNTIME_GATE_BLOCKED'
+          : undefined;
+        return this.toResponse(execution, false);
+      }
 
       // Include UC-11-08: excluir objetivos bajo legal hold ACTIVE.
       const activeHolds = await this.repo.countActiveHoldsForTarget(

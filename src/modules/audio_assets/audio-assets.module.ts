@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { MessagingModule } from '../messaging/messaging.module';
 import * as entities from './entities';
@@ -19,6 +20,7 @@ import { AudioMetricsService } from './infrastructure/audio-metrics.service';
 
 @Module({
   imports: [
+    StorageLifecycleModule,
     MikroOrmModule.forFeature(Object.values(entities)),
     MessagingModule,
   ],

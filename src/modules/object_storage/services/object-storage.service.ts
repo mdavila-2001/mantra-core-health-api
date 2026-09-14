@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import {
+  StoragePublicationService,
+  guardStorageMutation,
+} from '../../../common/storage/storage-publication.service';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -54,6 +58,7 @@ export class ObjectStorageService {
     private readonly storageRepo: ObjectStorageRepository,
     private readonly dicomRepo: DicomRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly publication?: StoragePublicationService,
   ) {
     this.logger.setContext(ObjectStorageService.name);
   }
@@ -67,6 +72,7 @@ export class ObjectStorageService {
     dto: InitiateUploadDto,
   ): Promise<UploadResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const namespace = await this.storageRepo.findNamespaceByCode(
         tx,
         namespaceCode,
@@ -138,6 +144,7 @@ export class ObjectStorageService {
     );
 
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const upload = await this.storageRepo.findUploadForUpdate(tx, uploadId);
       if (!upload) {
         throw new ResourceNotFoundException('Carga no encontrada', {
@@ -256,6 +263,7 @@ export class ObjectStorageService {
     dto: CreateVersionDto,
   ): Promise<ObjectVersionResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const manifest = await this.storageRepo.findManifestForUpdate(
         tx,
         manifestId,
@@ -348,6 +356,7 @@ export class ObjectStorageService {
     dto: RegisterLargePayloadDto,
   ): Promise<LargePayloadResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const manifest = await this.storageRepo.findManifestForUpdate(
         tx,
         dto.objectManifestId,

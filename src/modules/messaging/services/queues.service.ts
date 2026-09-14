@@ -9,6 +9,7 @@ import {
 } from '../../../common';
 import { QueuesRepository } from '../repositories';
 import { OutboxService } from './outbox.service';
+import { isStorageJobType } from '../../../common/storage/storage-lifecycle.protocol';
 import {
   EnqueueJobDto,
   JobResponseDto,
@@ -62,6 +63,7 @@ export class QueuesService {
     dto: EnqueueJobDto,
     actor: AuthenticatedUser,
   ): Promise<JobResponseDto> {
+    this.assertGenericJob(dto.jobType, dto.dedupeKey);
     return this.em.transactional(async (tx) => {
       const queue = await this.queuesRepo.findQueueByCode(tx, queueCode);
       if (!queue) {
@@ -80,6 +82,7 @@ export class QueuesService {
         dto.dedupeKey,
       );
       if (existing) {
+        this.assertGenericJob(existing.jobType, existing.dedupeKey);
         return {
           id: existing.id,
           statusConceptId: existing.statusConceptId,
@@ -145,6 +148,7 @@ export class QueuesService {
 
       const lockExpiresAt = new Date(now.getTime() + visibility * 1000);
       const jobs: ClaimedJobDto[] = claimed.map((job) => {
+        this.assertGenericJob(job.jobType, job.dedupeKey);
         const attempts = (job.attempts ?? 0) + 1;
         job.statusConceptId = CONCEPTS.JOB_RUNNING;
         job.lockedBy = dto.workerId;
@@ -190,6 +194,7 @@ export class QueuesService {
       if (!job) {
         throw new ResourceNotFoundException('Trabajo no encontrado', { jobId });
       }
+      this.assertGenericJob(job.jobType, job.dedupeKey);
       if (job.statusConceptId !== CONCEPTS.JOB_RUNNING) {
         throw new PreconditionFailedException(
           'El trabajo no está en ejecución',
@@ -231,6 +236,7 @@ export class QueuesService {
       if (!job) {
         throw new ResourceNotFoundException('Trabajo no encontrado', { jobId });
       }
+      this.assertGenericJob(job.jobType, job.dedupeKey);
       if (job.statusConceptId !== CONCEPTS.JOB_RUNNING) {
         throw new PreconditionFailedException(
           'El trabajo no está en ejecución',
@@ -327,6 +333,18 @@ export class QueuesService {
         tx,
         dead.originalJobId,
       );
+      if (original) this.assertGenericJob(original.jobType, original.dedupeKey);
+      this.assertGenericJob('redrive', dto.dedupeKey);
+      if (
+        !original &&
+        dead.payloadJson &&
+        typeof dead.payloadJson === 'object' &&
+        'ownerToken' in dead.payloadJson &&
+        'identity' in dead.payloadJson
+      )
+        throw new PreconditionFailedException(
+          'Storage intent requires its lifecycle coordinator',
+        );
       const queue = await this.queuesRepo.findQueueById(
         tx,
         original?.queueId ?? dead.queueId,
@@ -350,6 +368,7 @@ export class QueuesService {
       const dedupeKey = dto.dedupeKey ?? `redrive:${deadLetterJobId}`;
       const already = await this.queuesRepo.findJobByDedupeKey(tx, dedupeKey);
       if (already) {
+        this.assertGenericJob(already.jobType, already.dedupeKey);
         return {
           jobId: already.id,
           deadLetterJobId,
@@ -393,6 +412,15 @@ export class QueuesService {
   }
 
   // --- Apoyo ---
+  private assertGenericJob(jobType: string, dedupeKey?: string): void {
+    if (
+      isStorageJobType(jobType) ||
+      dedupeKey?.startsWith('storage-lifecycle:')
+    )
+      throw new PreconditionFailedException(
+        'Storage intent requires its lifecycle coordinator',
+      );
+  }
 
   /**
    * Ejecuta la operación dead letter queue id.
