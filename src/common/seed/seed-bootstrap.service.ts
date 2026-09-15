@@ -5,6 +5,7 @@ import { AuthzPlatformPermissionsSeedService } from './authz-platform-permission
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
+import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
@@ -116,6 +117,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *
    * @param terminology - Catálogo padre de todos los conceptos.
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
+   * @param patientPortalProxy - Alcance y base legal del apoderamiento de portal.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
    * @param legalEntityTypes - País y categoría canónica de cada forma societaria
@@ -143,6 +145,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
   constructor(
     private readonly terminology: TerminologySeedService,
     private readonly dynamicEnums: DynamicEnumSeedService,
+    private readonly patientPortalProxy: PatientPortalProxySeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
     private readonly legalEntityTypes: LegalEntityTypesSeedService,
@@ -256,6 +259,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'enumeraciones dinámicas',
         kind: 'core',
         run: () => this.dynamicEnums.run(),
+      },
+      // Las dos filas sin las que no se puede escribir un apoderamiento de
+      // portal. Es `core` porque sin ellas el alta de un dependiente viola dos
+      // FK NOT NULL, y va acá porque depende del tenant y del propósito de
+      // procesamiento que el catálogo acaba de materializar.
+      {
+        name: 'apoderamiento de portal',
+        kind: 'core',
+        run: () => this.patientPortalProxy.run(),
       },
       // Depende de `SEED.codeSystemVersionId`, ya materializado por el catálogo
       // de conceptos. No depende de las enumeraciones dinámicas ni al revés,

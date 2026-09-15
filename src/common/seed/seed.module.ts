@@ -54,6 +54,7 @@ import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
+import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
@@ -138,6 +139,7 @@ import { PracticeDefaultServicesSeedService } from './practice-default-services-
   providers: [
     TerminologySeedService,
     DynamicEnumSeedService,
+    PatientPortalProxySeedService,
     GlossarySeedService,
     BoGeographySeedService,
     LegalEntityTypesSeedService,
@@ -162,6 +164,7 @@ import { PracticeDefaultServicesSeedService } from './practice-default-services-
     SeedBootstrapService,
     TerminologySeedService,
     DynamicEnumSeedService,
+    PatientPortalProxySeedService,
     GlossarySeedService,
     BoGeographySeedService,
     LegalEntityTypesSeedService,

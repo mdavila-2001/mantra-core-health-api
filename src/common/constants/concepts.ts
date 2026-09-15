@@ -82,6 +82,33 @@ export const SEED = {
   processingPurposeId: deterministicId('seed:processing-purpose:default'),
   processingPurposeCode: 'GENERAL_CARE',
   /**
+   * Alcance por defecto de un apoderamiento de portal. Existe porque
+   * `profiles.patient_portal_proxies.scope_value_set_id` es una FK NOT NULL a
+   * `terminology.value_sets` y nadie sembraba ninguno: hasta B.1 el único
+   * escritor de apoderamientos era una ruta de `SECURITY_ADMIN` a la que el
+   * identificador se lo pasaba el cliente, así que en la práctica no se podía
+   * usar. El conjunto no tiene miembros a propósito — qué puede hacer un
+   * apoderado todavía no está acotado, y sembrar unos pocos permisos daría por
+   * decidido algo que nadie decidió.
+   */
+  patientPortalProxyScopeValueSetId: deterministicId(
+    'seed:value-set:VS_PATIENT_PORTAL_PROXY_SCOPE',
+  ),
+  patientPortalProxyScopeVersionId: deterministicId(
+    'seed:value-set-version:VS_PATIENT_PORTAL_PROXY_SCOPE:1',
+  ),
+  patientPortalProxyScopeCode: 'VS_PATIENT_PORTAL_PROXY_SCOPE',
+  /**
+   * Base legal del apoderamiento que un tutor ejerce sobre su dependiente.
+   * Existe por lo mismo que la anterior: `legal_basis_record_id` es FK NOT NULL
+   * a `consent.processing_legal_bases`, y el módulo consent sólo crea bases
+   * legales por una ruta de administración que nadie llama al registrar a un
+   * hijo.
+   */
+  guardianProxyLegalBasisId: deterministicId(
+    'seed:processing-legal-basis:guardian-portal-proxy',
+  ),
+  /**
    * Cuenta de servicio de los 17 procesos worker (`src/worker-<dominio>.ts`,
    * `src/worker/bootstrap.ts`). No tiene
    * credencial de login: el worker firma su propio access token con
