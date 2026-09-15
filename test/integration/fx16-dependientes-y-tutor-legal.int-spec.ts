@@ -347,7 +347,18 @@ describe('B.1 · dependientes y tutor legal (integración)', () => {
         })
         .expect(201);
 
-      expect(reserva.body.patientProfileId).toBe(perfilHijo);
+      expect(reserva.body.id).toBeDefined();
+
+      // La respuesta del alta no lleva el paciente —`BookingResponseDto` sólo
+      // trae id, cupo, estado y recordatorios—, así que se lee de vuelta: eso
+      // prueba de paso que la fila quedó a nombre del dependiente y que la
+      // madre puede leerla.
+      const guardada = await http()
+        .get(`/scheduling/bookings/${reserva.body.id}`)
+        .set(bearer(tokenMadre))
+        .expect(200);
+
+      expect(guardada.body.patientProfileId).toBe(perfilHijo);
     });
 
     it('y ve en el listado el turno de su hijo, con el motivo que ella escribió', async () => {
@@ -437,7 +448,12 @@ describe('B.1 · dependientes y tutor legal (integración)', () => {
         .set(bearer(tokenAjeno))
         .expect(403);
 
-      expect(JSON.stringify(inventado.body)).toBe(JSON.stringify(ajeno.body));
+      // Se comparan el código y el mensaje, no el cuerpo entero: `correlationId`,
+      // `timestamp` y `path` son metadatos de cada petición y por definición
+      // difieren. Lo que no puede diferir es lo que el rechazo dice.
+      expect(inventado.body.code).toBe(ajeno.body.code);
+      expect(inventado.body.message).toBe(ajeno.body.message);
+      expect(inventado.status).toBe(ajeno.status);
     });
 
     it('y el titular sigue leyendo la suya', async () => {
