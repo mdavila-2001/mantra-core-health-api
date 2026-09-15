@@ -110,6 +110,40 @@ export class DocumentsRepository {
   }
 
   /**
+   * Un documento por id, sin sus archivos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del documento.
+   * @returns El documento, o `null` si no existe.
+   */
+  findRecordById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DocumentRecords | null> {
+    return em.findOne(DocumentRecords, { id });
+  }
+
+  /**
+   * Archivos gobernados de un lote de documentos, en una sola consulta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param recordIds - Documentos cuyos archivos se resuelven.
+   * @returns Archivos ordenados por `ordinal` ascendente; `[]` sin consultar
+   *   si `recordIds` viene vacío.
+   */
+  findFilesForRecords(
+    em: EntityManager,
+    recordIds: readonly string[],
+  ): Promise<DocumentRecordFiles[]> {
+    if (recordIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      DocumentRecordFiles,
+      { documentRecordId: { $in: recordIds } },
+      { orderBy: { ordinal: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create record.
    *
    * @param em - Contexto de persistencia o transacción activa.

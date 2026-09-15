@@ -6,8 +6,9 @@ import {
   ClinicalNotesRepository,
   DocumentsRepository,
 } from '../repositories';
-import type { PatientChartResponseDto } from '../dto';
+import type { ChartDocumentFileItemDto, PatientChartResponseDto } from '../dto';
 import { toChartNoteItem } from './chart-note-item.mapper';
+import { CHART } from '../chart.concepts';
 
 /**
  * Cara de lectura del expediente clínico (UC-40-14).
@@ -96,6 +97,24 @@ export class ChartReadService {
       activitiesByPlan.set(activity.carePlanId, bucket);
     }
 
+    const documentFiles = await this.documentsRepo.findFilesForRecords(
+      em,
+      documentsPage.map((document) => document.id),
+    );
+    const filesByDocument = new Map<string, ChartDocumentFileItemDto[]>();
+    for (const file of documentFiles) {
+      const bucket = filesByDocument.get(file.documentRecordId) ?? [];
+      bucket.push({
+        fileId: file.fileId,
+        contentRole:
+          file.contentRoleConceptId === CHART.CONTENT_ROLE_PRIMARY
+            ? 'PRIMARY'
+            : 'ATTACHMENT',
+        ordinal: file.ordinal,
+      });
+      filesByDocument.set(file.documentRecordId, bucket);
+    }
+
     return {
       patientProfileId,
       notes: notesPage.map((header) =>
@@ -130,6 +149,7 @@ export class ChartReadService {
         isExternal: document.isExternal,
         documentDate: document.documentDate,
         createdAt: document.createdAt,
+        files: filesByDocument.get(document.id) ?? [],
       })),
       limit,
       truncated,

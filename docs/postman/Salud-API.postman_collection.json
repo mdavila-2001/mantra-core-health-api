@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1276 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1276 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1283 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1283 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -14004,7 +14004,7 @@
       ]
     },
     {
-      "name": "charts (17)",
+      "name": "charts (18)",
       "item": [
         {
           "name": "chart-care-plans",
@@ -14193,6 +14193,69 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.documentId);",
                       "  if (id) pm.environment.set('documentId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /charts/documents/{documentId}/files/{fileId}/content · Descargar el archivo de un documento del expediente",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/charts/documents/:documentId/files/:fileId/content",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "charts",
+                    "documents",
+                    ":documentId",
+                    "files",
+                    ":fileId",
+                    "content"
+                  ],
+                  "variable": [
+                    {
+                      "key": "documentId",
+                      "value": "{{documentId}}",
+                      "description": "Identificador de ruta · variable `{{documentId}}`"
+                    },
+                    {
+                      "key": "fileId",
+                      "value": "{{fileId}}",
+                      "description": "Identificador de ruta · variable `{{fileId}}`"
+                    }
+                  ]
+                },
+                "description": "Autoriza a quien puede leer la historia del paciente dueño del documento, no sólo a quien subió el archivo.\n\n`GET /charts/documents/{documentId}/files/{fileId}/content`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `ChartDocumentsController_getDocumentFileContent`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.files || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('fileId', first.id);",
                       "}"
                     ]
                   }
@@ -42348,7 +42411,7 @@
       ]
     },
     {
-      "name": "internal (34)",
+      "name": "internal (40)",
       "item": [
         {
           "name": "audio-assets-internal",
@@ -42674,7 +42737,7 @@
                 "description": "Registra un asset de audio generado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/audio-assets/{assetId}/generated`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `AudioAssetsInternalController_generated`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"storageUri\": \"2026-01-01T00:00:00.000Z\",\n  \"checksumSha256\": \"checksumSha256-ejemplo\",\n  \"bytes\": 1,\n  \"durationMs\": 1,\n  \"credits\": 1\n}",
+                  "raw": "{\n  \"publication\": {},\n  \"storageUri\": \"2026-01-01T00:00:00.000Z\",\n  \"checksumSha256\": \"checksumSha256-ejemplo\",\n  \"bytes\": 1,\n  \"durationMs\": 1,\n  \"credits\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -43308,6 +43371,106 @@
               ]
             },
             {
+              "name": "POST /internal/identity/evidence/lifecycle-scan · Evaluate configured evidence lifecycle; destructive runtime remains blocked",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/identity/evidence/lifecycle-scan",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "identity",
+                    "evidence",
+                    "lifecycle-scan"
+                  ]
+                },
+                "description": "Evaluate configured evidence lifecycle; destructive runtime remains blocked. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/identity/evidence/lifecycle-scan`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IdentityWorkerController_lifecycleScan`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{lifecycleScanId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.lifecycleScanId);",
+                      "  if (id) pm.environment.set('lifecycleScanId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/identity/evidence/storage-purge-review · Recheck retired evidence objects; never grants physical delete",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/identity/evidence/storage-purge-review",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "identity",
+                    "evidence",
+                    "storage-purge-review"
+                  ]
+                },
+                "description": "Recheck retired evidence objects; never grants physical delete. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/identity/evidence/storage-purge-review`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `IdentityWorkerController_storagePurgeReview`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{storagePurgeReviewId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.storagePurgeReviewId);",
+                      "  if (id) pm.environment.set('storagePurgeReviewId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /internal/identity/checks/{id}/attempts · Registrar el intento del worker contra la autoridad externa",
               "request": {
                 "method": "POST",
@@ -43570,6 +43733,238 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.versionId);",
                       "  if (id) pm.environment.set('versionId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "internal/storage-lifecycle",
+          "item": [
+            {
+              "name": "POST /internal/storage-lifecycle/recover",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/storage-lifecycle/recover",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "storage-lifecycle",
+                    "recover"
+                  ]
+                },
+                "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/recover`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_recover`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{recoverId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.recoverId);",
+                      "  if (id) pm.environment.set('recoverId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/storage-lifecycle/audio/{assetId}/abort",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/storage-lifecycle/audio/:assetId/abort",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "storage-lifecycle",
+                    "audio",
+                    ":assetId",
+                    "abort"
+                  ],
+                  "variable": [
+                    {
+                      "key": "assetId",
+                      "value": "{{assetId}}",
+                      "description": "Identificador de ruta · variable `{{assetId}}`"
+                    }
+                  ]
+                },
+                "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/audio/{assetId}/abort`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_abort`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{abortId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.abortId);",
+                      "  if (id) pm.environment.set('abortId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/storage-lifecycle/audio/{assetId}/begin",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/storage-lifecycle/audio/:assetId/begin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "storage-lifecycle",
+                    "audio",
+                    ":assetId",
+                    "begin"
+                  ],
+                  "variable": [
+                    {
+                      "key": "assetId",
+                      "value": "{{assetId}}",
+                      "description": "Identificador de ruta · variable `{{assetId}}`"
+                    }
+                  ]
+                },
+                "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/audio/{assetId}/begin`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_begin`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{beginId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.beginId);",
+                      "  if (id) pm.environment.set('beginId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/storage-lifecycle/audio/{assetId}/dispatch",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/storage-lifecycle/audio/:assetId/dispatch",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "storage-lifecycle",
+                    "audio",
+                    ":assetId",
+                    "dispatch"
+                  ],
+                  "variable": [
+                    {
+                      "key": "assetId",
+                      "value": "{{assetId}}",
+                      "description": "Identificador de ruta · variable `{{assetId}}`"
+                    }
+                  ]
+                },
+                "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/audio/{assetId}/dispatch`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_dispatch`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{dispatchId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.dispatchId);",
+                      "  if (id) pm.environment.set('dispatchId', id);",
                       "}"
                     ]
                   }

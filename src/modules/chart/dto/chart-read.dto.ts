@@ -180,6 +180,27 @@ export class ChartCarePlanItemDto {
   createdAt!: Date;
 }
 
+/** Un archivo gobernado colgado de un documento del expediente. */
+export class ChartDocumentFileItemDto {
+  /**
+   * Identificador asociado a file.
+   */
+  @ApiProperty({ format: 'uuid' })
+  fileId!: string;
+
+  /**
+   * Rol del contenido: la pieza principal del documento o un adjunto suyo.
+   */
+  @ApiProperty({ enum: ['PRIMARY', 'ATTACHMENT'] })
+  contentRole!: 'PRIMARY' | 'ATTACHMENT';
+
+  /**
+   * Posición del archivo dentro del documento.
+   */
+  @ApiPropertyOptional()
+  ordinal?: number;
+}
+
 /** Un documento del expediente. */
 export class ChartDocumentItemDto {
   /**
@@ -229,6 +250,12 @@ export class ChartDocumentItemDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+
+  /**
+   * Archivos gobernados vinculados al documento, ordenados por `ordinal`.
+   */
+  @ApiProperty({ type: [ChartDocumentFileItemDto] })
+  files!: ChartDocumentFileItemDto[];
 }
 
 /**
