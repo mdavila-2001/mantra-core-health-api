@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -46,6 +47,8 @@ import {
   OwnPatientProfileResponseDto,
   UpdateOwnPatientProfileDto,
   SetOwnPatientPhotoDto,
+  CreateDependentDto,
+  DependentSummaryDto,
 } from '../dto';
 
 /**
@@ -174,6 +177,58 @@ export class ProfilesPatientsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<OwnPatientProfileResponseDto> {
     return this.patientsService.removeOwnPhoto(actor);
+  }
+
+  /**
+   * Los dependientes del titular: a quiénes puede representar en el portal.
+   *
+   * Sin `@Roles` por lo mismo que el resto de `patients/me/*`: el sujeto lo
+   * resuelve el servidor desde la sesión y no hay parámetro que apunte a otro.
+   *
+   * @param actor - Usuario autenticado, que es quien representa.
+   * @returns Sus dependientes; un arreglo vacío si no tiene ninguno.
+   */
+  @Get('patients/me/dependents')
+  @ApiOperation({
+    summary: 'Listar los dependientes a cargo del paciente autenticado',
+  })
+  @ApiOkResponse({
+    type: [DependentSummaryDto],
+    description:
+      'Los pacientes que esta cuenta representa con apoderamiento vigente. Sin dependientes, `[]`.',
+  })
+  getOwnDependents(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DependentSummaryDto[]> {
+    return this.patientsService.getOwnDependents(actor);
+  }
+
+  /**
+   * Registrar a un dependiente: un menor o un adulto mayor a cargo.
+   *
+   * Crea su persona y su perfil de paciente, y deja al titular como su
+   * representante. **No crea una cuenta**: el dependiente no inicia sesión, que
+   * es justamente el caso.
+   *
+   * @param dto - Datos de filiación y parentesco declarado.
+   * @param actor - Usuario autenticado, que pasa a representarlo.
+   * @returns El dependiente recién creado.
+   */
+  @Post('patients/me/dependents')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrar un dependiente (menor o adulto mayor tutelado)',
+  })
+  @ApiCreatedResponse({
+    type: DependentSummaryDto,
+    description:
+      'El dependiente creado, ya con el apoderamiento que habilita a pedirle turno y a leer su historia.',
+  })
+  registerOwnDependent(
+    @Body() dto: CreateDependentDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DependentSummaryDto> {
+    return this.patientsService.registerOwnDependent(dto, actor);
   }
 
   /**
