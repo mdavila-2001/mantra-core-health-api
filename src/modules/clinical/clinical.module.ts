@@ -64,9 +64,16 @@ import {
 // ciclo: `profiles` ya cuenta lo que un profesional dejó asentado en `clinical`.
 import {
   HealthPractitionerProfilesRepository,
+  PatientPortalProxiesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../profiles/repositories';
+// B.1 — la historia de un menor la lee también quien lo representa, y quién
+// representa a quién lo sabe `profiles`. Mismo criterio que los repositorios de
+// arriba: es una clase sin estado que recibe el `EntityManager` por parámetro,
+// así que se provee suelta. Importar `ProfilesModule` cerraría el ciclo que el
+// comentario anterior ya explica.
+import { PatientRepresentationService } from '../profiles/services/patient-representation.service';
 // v4.2.2 — el permiso de lectura de la historia nace del turno, así que la lectura
 // clínica necesita preguntarle a la agenda. Mismo criterio de arriba: es una clase
 // sin estado que recibe el `EntityManager` por parámetro. El cruce inverso ya
@@ -105,6 +112,8 @@ import { CareRelationshipsRepository } from '../authz/repositories';
     // Repositorios
     PersonAccountLinksRepository,
     PatientProfilesRepository,
+    PatientPortalProxiesRepository,
+    PatientRepresentationService,
     HealthPractitionerProfilesRepository,
     SchedulingBookingsRepository,
     CareRelationshipsRepository,

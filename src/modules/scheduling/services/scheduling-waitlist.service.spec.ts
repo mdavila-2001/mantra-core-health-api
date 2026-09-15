@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { ForbiddenException } from '@nestjs/common';
 
 /**
  * Ejecuta la operación mock fn.
@@ -66,14 +67,33 @@ function build() {
     avisarRecordatorios: mockFn().mockResolvedValue(0),
   };
 
+  // B.1 — quién puede actuar por un paciente. Por omisión no representa a
+  // nadie: el permiso sale entonces del rol o de ser el titular, que es lo que
+  // estas pruebas miran. Las del apoderamiento lo pisan a propósito.
+  const representation = {
+    representsPatient: mockFn().mockResolvedValue(false),
+    assertMayActForPatient: mockFn().mockResolvedValue(undefined),
+    findActiveProxiedPatientIds: mockFn().mockResolvedValue(new Set<string>()),
+  };
+
   const service = new SchedulingWaitlistService(
     session as any,
     reader as any,
     writer as any,
     avisos as any,
     logger as any,
+    representation as any,
   );
-  return { service, session, transaction, reader, writer, avisos, logger };
+  return {
+    service,
+    session,
+    transaction,
+    reader,
+    writer,
+    avisos,
+    logger,
+    representation,
+  };
 }
 
 describe('SchedulingWaitlistService', () => {
@@ -256,7 +276,7 @@ describe('SchedulingWaitlistService', () => {
 
       const res = await d.service.enroll(
         { tenantId: 'ten-1', patientProfileId: 'pat-1', priority: 5 } as any,
-        { id: 'user-1' } as any,
+        { id: 'user-1', roles: ['PATIENT'], patientProfileId: 'pat-1' } as any,
       );
 
       expect(res).toEqual({
@@ -272,7 +292,7 @@ describe('SchedulingWaitlistService', () => {
 
       const res = await d.service.enroll(
         { tenantId: 'ten-1', patientProfileId: 'pat-1' } as any,
-        { id: 'user-1' } as any,
+        { id: 'user-1', roles: ['PATIENT'], patientProfileId: 'pat-1' } as any,
       );
 
       expect(res.priority).toBe(0);
@@ -547,6 +567,83 @@ describe('SchedulingWaitlistService', () => {
         undefined,
         10,
       );
+    });
+  });
+
+  describe('quién puede anotar y ver la cola (B.1)', () => {
+    /** Una cuenta de paciente que no es el titular ni lo representa. */
+    const intruso = {
+      id: 'user-intruso',
+      roles: ['PATIENT'],
+      patientProfileId: 'pat-otro',
+    } as any;
+
+    it('un paciente no puede anotar a otro en la cola', async () => {
+      // Antes no había comprobación ninguna: con el uuid de un perfil ajeno
+      // cualquiera lo metía en la cola de una agenda y le disparaba avisos.
+      const d = build();
+
+      await expect(
+        d.service.enroll(
+          { tenantId: 'ten-1', patientProfileId: 'pat-1' } as any,
+          intruso,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.writer.enroll).not.toHaveBeenCalled();
+    });
+
+    it('quien lo representa sí puede anotarlo', async () => {
+      const d = build();
+      d.representation.representsPatient.mockResolvedValue(true);
+      d.writer.enroll.mockResolvedValue({ id: 'wl-3' });
+
+      const res = await d.service.enroll(
+        { tenantId: 'ten-1', patientProfileId: 'pat-hijo' } as any,
+        { id: 'user-madre', roles: ['PATIENT'], patientProfileId: 'pat-madre' } as any,
+      );
+
+      expect(res.id).toBe('wl-3');
+      expect(d.representation.representsPatient).toHaveBeenCalledWith(
+        'pat-hijo',
+        expect.objectContaining({ id: 'user-madre' }),
+      );
+    });
+
+    it('el personal de agenda anota a cualquiera sin preguntar por apoderamientos', async () => {
+      // Es su oficio: repartir turnos entre pacientes que no son ellos.
+      const d = build();
+      d.writer.enroll.mockResolvedValue({ id: 'wl-4' });
+
+      await d.service.enroll(
+        { tenantId: 'ten-1', patientProfileId: 'pat-1' } as any,
+        { id: 'user-mostrador', roles: ['SCHEDULING_AGENT'] } as any,
+      );
+
+      expect(d.representation.representsPatient).not.toHaveBeenCalled();
+    });
+
+    it('quien representa al paciente también ve su cola', async () => {
+      const d = build();
+      d.representation.representsPatient.mockResolvedValue(true);
+      d.reader.findEntriesForPatient.mockResolvedValue([]);
+
+      await expect(
+        d.service.listForPatient(
+          { patientProfileId: 'pat-hijo' } as any,
+          { id: 'user-madre', roles: ['PATIENT'], patientProfileId: 'pat-madre' } as any,
+        ),
+      ).resolves.toEqual({ items: [] });
+    });
+
+    it('sin apoderamiento, la cola ajena se rechaza', async () => {
+      const d = build();
+
+      await expect(
+        d.service.listForPatient(
+          { patientProfileId: 'pat-1' } as any,
+          intruso,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 });

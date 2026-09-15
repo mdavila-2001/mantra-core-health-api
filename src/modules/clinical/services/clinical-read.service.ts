@@ -34,6 +34,7 @@ import { AuthzPdpService } from '../../authz/services';
 // archivo: es una clase sin estado que recibe el `EntityManager` por
 // parámetro, y `authz` no depende de `clinical`, así que no cierra ciclo.
 import { CareRelationshipsRepository } from '../../authz/repositories';
+import { PatientRepresentationService } from '../../profiles/services/patient-representation.service';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
 
 /**
@@ -119,6 +120,9 @@ export class ClinicalReadService {
     private readonly pdp: AuthzPdpService,
     private readonly careRelationshipsRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
+    // B.1 — la historia de un menor la lee también quien lo representa. Quién
+    // representa a quién lo sabe `profiles`; acá sólo se pregunta.
+    private readonly representation: PatientRepresentationService,
   ) {
     this.logger.setContext(ClinicalReadService.name);
   }
@@ -453,6 +457,14 @@ export class ClinicalReadService {
     );
 
     if (!link || !perfil || perfil.profileId !== link.personId) {
+      // No es la suya, pero puede ser la de alguien a quien representa (B.1):
+      // la madre que pidió el turno de su hijo tiene que poder leer lo que el
+      // pediatra escribió. Se pregunta recién acá —y no antes— para que el caso
+      // normal, el titular leyendo lo suyo, no pague una consulta de más.
+      if (await this.representation.representsPatient(patientProfileId, actor)) {
+        return;
+      }
+
       this.logger.warn(
         {
           operation: 'clinical.patient.read.denied',
@@ -461,6 +473,9 @@ export class ClinicalReadService {
         },
         'Intento de leer una historia clínica ajena',
       );
+      // El mensaje no cambia: quien no puede leerla no tiene por qué distinguir
+      // «no sos el titular» de «no lo representás» ni de «ese paciente no
+      // existe». Las tres cosas se dicen igual.
       throw new ForbiddenException(
         'Sólo podés consultar tu propia historia clínica.',
       );

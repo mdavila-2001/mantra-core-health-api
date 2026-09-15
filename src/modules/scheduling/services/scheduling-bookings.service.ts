@@ -41,6 +41,7 @@ import type {
 import { AppointmentPaymentStates } from '../entities';
 import { CoverageRepository } from '../../insurance/repositories/coverage.repository';
 import { ClaimReadRepository } from '../../insurance/repositories/claim-read.repository';
+import { PatientRepresentationService } from '../../profiles/services/patient-representation.service';
 import { SCHED } from '../scheduling.concepts';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
 import {
@@ -359,8 +360,61 @@ export class SchedulingBookingsService {
     // La solicitud de seguro de cada cita, en la agenda. Mismo patrón que
     // `coverageRepo`: repositorio de lectura que exporta `InsuranceModule`.
     private readonly claimReadRepo: ClaimReadRepository,
+    // B.1 — quién puede actuar por un paciente. Hasta acá la agenda no lo
+    // preguntaba: cualquier cuenta con rol `PATIENT` podía retener un cupo y
+    // confirmar una cita a nombre de un perfil ajeno con sólo escribir su uuid
+    // en el cuerpo. La regla vive en `profiles` porque la representación es un
+    // dato de perfiles, y este módulo ya importa ese módulo.
+    private readonly representation: PatientRepresentationService,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
+  }
+
+  /**
+   * ¿Este actor tiene forma de paciente?
+   *
+   * Es quien no opera cualquier agenda —mostrador, administración de agenda,
+   * `SUPERADMIN`— y tampoco atiende. La distinción importa porque el candado
+   * de abajo no puede alcanzar a quien atiende: la agenda del médico y el
+   * formulario de cotización listan las citas de sus pacientes por
+   * `patientProfileId`, y exigirles apoderamiento rompería las dos pantallas.
+   *
+   * Que un profesional pueda listar las citas de cualquier paciente es un hueco
+   * anterior a esto y sigue abierto; cerrarlo exige decidir contra qué se acota
+   * —organización, relación asistencial— y no se resuelve de paso.
+   *
+   * @param actor - Quien pide, si hay sesión.
+   * @returns `true` si es una cuenta de paciente sin más oficio.
+   */
+  private esUnPaciente(actor?: AuthenticatedUser): boolean {
+    if (!actor) return false;
+    if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return false;
+    return actor.practitionerProfileId === undefined;
+  }
+
+  /**
+   * Exige que el actor pueda actuar por ese paciente, si es una cuenta de paciente.
+   *
+   * El mostrador y la administración de agenda pasan sin preguntar: su oficio es
+   * repartir turnos entre pacientes que no son ellos. A quien entra como
+   * paciente se le exige ser el titular o tener apoderamiento vigente.
+   *
+   * @param patientProfileId - El paciente sobre el que se quiere actuar.
+   * @param actor - Quien pide.
+   * @param em - Transacción activa, si la hay.
+   * @throws ForbiddenException si es una cuenta de paciente sin título sobre él.
+   */
+  private async assertPuedeActuarPorElPaciente(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+    em?: EntityManager,
+  ): Promise<void> {
+    if (!this.esUnPaciente(actor)) return;
+    await this.representation.assertMayActForPatient(
+      patientProfileId,
+      actor,
+      em,
+    );
   }
 
   /**
@@ -380,6 +434,13 @@ export class SchedulingBookingsService {
       { operation: 'scheduling.hold.place', slotId },
       'Placing hold on bookable slot',
     );
+
+    // Antes de abrir la transacción: la comprobación lee de otra tabla y
+    // sostener el `FOR UPDATE` del cupo mientras tanto serializaría a todos los
+    // que piden ese mismo horario detrás de una consulta que no es del cupo.
+    if (dto.patientProfileId !== undefined) {
+      await this.assertPuedeActuarPorElPaciente(dto.patientProfileId, actor);
+    }
 
     return this.em.transactional(async (tx) => {
       const slot = await this.bookingsRepo.findSlotForUpdate(tx, slotId);
@@ -649,6 +710,12 @@ export class SchedulingBookingsService {
     },
     actor: AuthenticatedUser,
   ): Promise<BookingResponseDto> {
+    // Segundo cinturón del candado de B.1, y el que de verdad importa: el hold
+    // puede haberse tomado sin declarar paciente —el cuerpo lo trae recién
+    // acá—, así que comprobarlo sólo al retener dejaría la puerta abierta.
+    // Cubre a la vez confirmar y solicitar, que es por lo que vive acá.
+    await this.assertPuedeActuarPorElPaciente(plan.patientProfileId, actor);
+
     return this.em.transactional(async (tx) => {
       const hold = await this.bookingsRepo.findHoldByTokenForUpdate(
         tx,
@@ -1395,9 +1462,19 @@ export class SchedulingBookingsService {
       //
       // Quien atiende cancela siempre —una urgencia no espera a la ventana— y
       // su cancelación dispara el aviso al paciente (P8).
+      // Quien pide el turno de su hijo también lo cancela, y le toca la misma
+      // ventana: la regla protege el hueco del consultorio, y el hueco es el
+      // mismo lo pida quien lo pida. Se pregunta por el apoderamiento sólo si no
+      // es el titular, para no pagar una consulta en el caso normal.
       const esElPacienteTitular =
-        actor.patientProfileId !== undefined &&
-        actor.patientProfileId === booking.patientProfileId;
+        (actor.patientProfileId !== undefined &&
+          actor.patientProfileId === booking.patientProfileId) ||
+        (this.esUnPaciente(actor) &&
+          (await this.representation.representsPatient(
+            booking.patientProfileId,
+            actor,
+            tx,
+          )));
 
       if (esElPacienteTitular && withinWindow && !isNoShow) {
         throw new PreconditionFailedException(
@@ -2554,6 +2631,16 @@ export class SchedulingBookingsService {
         'Indique al menos patientProfileId o resourceId para listar citas',
       );
     }
+    // Una cuenta de paciente sólo lista lo suyo y lo de quienes representa. Sin
+    // esto, el filtro por paciente era una enumeración de la agenda ajena a
+    // quien supiera un uuid: los turnos de alguien dicen a qué médico va y por
+    // qué. No alcanza a quien atiende ni al mostrador — ver `esUnPaciente`.
+    if (filters.patientProfileId && actor) {
+      await this.assertPuedeActuarPorElPaciente(
+        filters.patientProfileId,
+        actor,
+      );
+    }
     if (filters.from && filters.to && !(filters.from < filters.to)) {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',
@@ -2648,6 +2735,14 @@ export class SchedulingBookingsService {
       idsDeCitas,
     );
 
+    // A quiénes representa el actor, una vez para toda la página (B.1). Decide
+    // si el motivo de consulta de la cita de un dependiente se le muestra a
+    // quien lo pidió. Sólo se pregunta a una cuenta de paciente: al mostrador y
+    // a quien atiende el motivo ya se les decide por otro camino.
+    const pacientesRepresentados = this.esUnPaciente(actor)
+      ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
+      : undefined;
+
     // Los nombres, en lote y sólo cuando alguien va a poder verlos: si el actor
     // no es profesional ni titular, la proyección los descartaría igual y la
     // consulta sería trabajo tirado.
@@ -2708,6 +2803,7 @@ export class SchedulingBookingsService {
             ? undefined
             : encuentros.get(booking.appointmentId),
           solicitudes,
+          pacientesRepresentados,
         ),
       ),
       count: page.length,
@@ -2777,6 +2873,12 @@ export class SchedulingBookingsService {
             booking.appointmentId,
           ]);
 
+    // El detalle dice lo mismo que el listado también en esto: quien representa
+    // al paciente ve el motivo que él mismo escribió al pedir el turno.
+    const pacientesRepresentados = this.esUnPaciente(actor)
+      ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
+      : undefined;
+
     return this.aBookingItem(
       booking,
       slot,
@@ -2794,6 +2896,8 @@ export class SchedulingBookingsService {
       booking.appointmentId == null
         ? undefined
         : encuentros.get(booking.appointmentId),
+      undefined,
+      pacientesRepresentados,
     );
   }
 
@@ -2825,6 +2929,7 @@ export class SchedulingBookingsService {
     booking: AppointmentBookings,
     actor?: AuthenticatedUser,
     profesionalDeLaAgenda?: string,
+    pacientesRepresentados?: ReadonlySet<string>,
   ): boolean {
     if (!actor) return false;
     if (
@@ -2833,6 +2938,11 @@ export class SchedulingBookingsService {
     ) {
       return true;
     }
+    // Y quien lo representa (B.1): el motivo del turno de un hijo lo escribió
+    // su madre al pedirlo. Ocultárselo le escondería lo que ella misma tipeó.
+    // El conjunto lo aporta quien proyecta, que lo pidió una vez para toda la
+    // página en vez de una consulta por fila.
+    if (pacientesRepresentados?.has(booking.patientProfileId)) return true;
     // El profesional que atiende. La cita no lo guarda: cuelga del recurso
     // (`resource_ref_id`), así que lo aporta quien proyecta — que es el único
     // que sabe si ya lo tenía cargado o no vale la pena buscarlo.
@@ -2910,6 +3020,7 @@ export class SchedulingBookingsService {
     aseguradoraPorPaciente?: Map<string, string>,
     encuentroDeLaCita?: string,
     solicitudPorCita?: Map<string, BookingInsuranceClaimDto>,
+    pacientesRepresentados?: ReadonlySet<string>,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -2941,7 +3052,12 @@ export class SchedulingBookingsService {
       // El motivo de consulta se omite salvo para el titular y su médico. Se
       // omite, no se vacía: un `''` diría «no escribió motivo», que es una
       // afirmación distinta y falsa.
-      ...(this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
+      ...(this.puedeVerElMotivo(
+        booking,
+        actor,
+        profesionalDeLaAgenda,
+        pacientesRepresentados,
+      )
         ? { reasonText: booking.reasonText }
         : {}),
       // El nombre viaja con la MISMA regla que el motivo: lo ve el titular y el
@@ -2949,14 +3065,24 @@ export class SchedulingBookingsService {
       // necesita saber a quién espera —es el pedido explícito del registro del
       // cliente— y la organización ya opera con el identificador.
       ...(nombreDelPaciente !== undefined &&
-      this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
+      this.puedeVerElMotivo(
+        booking,
+        actor,
+        profesionalDeLaAgenda,
+        pacientesRepresentados,
+      )
         ? { patientName: nombreDelPaciente }
         : {}),
       // ALV-021: misma compuerta que el nombre. `null` es «se buscó y no
       // tiene» —Particular—; el campo entero se omite cuando quien mira no
       // puede ver al paciente, que es una pregunta distinta.
       ...(aseguradoraPorPaciente !== undefined &&
-      this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
+      this.puedeVerElMotivo(
+        booking,
+        actor,
+        profesionalDeLaAgenda,
+        pacientesRepresentados,
+      )
         ? {
             insuranceCarrierName:
               aseguradoraPorPaciente.get(booking.patientProfileId) ?? null,
@@ -2967,7 +3093,12 @@ export class SchedulingBookingsService {
       // —también cuando la reserva todavía no tiene cita clínica, que no puede
       // tener solicitud—; ausente es «quien mira no puede verlo».
       ...(solicitudPorCita !== undefined &&
-      this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
+      this.puedeVerElMotivo(
+        booking,
+        actor,
+        profesionalDeLaAgenda,
+        pacientesRepresentados,
+      )
         ? {
             insuranceClaim:
               booking.appointmentId == null

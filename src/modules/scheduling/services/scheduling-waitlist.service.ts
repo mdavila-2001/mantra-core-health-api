@@ -11,6 +11,7 @@ import {
 } from '../../../persistence';
 import { SCHEDULING_MODULE } from '../scheduling.tokens';
 import { SchedulingAgendaNoticesService } from './scheduling-agenda-notices.service';
+import { PatientRepresentationService } from '../../profiles/services/patient-representation.service';
 import {
   WAITLIST_READ_PORT,
   WAITLIST_WRITE_PORT,
@@ -75,6 +76,9 @@ export class SchedulingWaitlistService {
     // la migración a puertos de este módulo.
     private readonly avisos: SchedulingAgendaNoticesService,
     private readonly logger: PinoLogger,
+    // B.1 — quién puede actuar por un paciente. La regla vive en `profiles`;
+    // acá sólo se consulta, igual que en el servicio de reservas.
+    private readonly representation: PatientRepresentationService,
   ) {
     this.logger.setContext(SchedulingWaitlistService.name);
   }
@@ -91,6 +95,11 @@ export class SchedulingWaitlistService {
       },
       'Enrolling patient in waitlist',
     );
+
+    // Anotarse en la lista de espera de otro no tenía ninguna comprobación: con
+    // el uuid de un perfil ajeno, cualquiera lo metía en la cola de una agenda y
+    // le disparaba avisos. Va antes de abrir la transacción.
+    await this.assertPuedeVerAlPaciente(dto.patientProfileId, actor);
 
     const priority = dto.priority ?? DEFAULT_PRIORITY;
     return this.session.transaction('enroll', async (_em, transaction) => {
@@ -127,7 +136,7 @@ export class SchedulingWaitlistService {
     query: ListWaitlistQueryDto,
     actor: AuthenticatedUser,
   ): Promise<ListWaitlistResponseDto> {
-    this.assertPuedeVerAlPaciente(query.patientProfileId, actor);
+    await this.assertPuedeVerAlPaciente(query.patientProfileId, actor);
 
     const estados =
       query.includeClosed === 'true' ? undefined : [CONCEPTS.WAITLIST_ACTIVE];
@@ -221,12 +230,18 @@ export class SchedulingWaitlistService {
    * sólo lo suyo. Un profesional que quiera saber quién espera **su** agenda no
    * pasa por acá: para eso está `listForResource`, que autoriza por el recurso.
    */
-  private assertPuedeVerAlPaciente(
+  private async assertPuedeVerAlPaciente(
     patientProfileId: string,
     actor: AuthenticatedUser,
-  ): void {
+  ): Promise<void> {
     if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return;
     if (actor.patientProfileId === patientProfileId) return;
+    // Quien lo representa (B.1): la madre que anota a su hijo en la cola tiene
+    // que poder verla. Se pregunta al final y sólo si hizo falta, para no pagar
+    // una consulta en el caso normal —el titular mirando lo suyo—.
+    if (await this.representation.representsPatient(patientProfileId, actor)) {
+      return;
+    }
 
     throw new ForbiddenException(
       'Sólo el titular y el personal de agenda pueden ver esta lista de espera.',

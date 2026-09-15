@@ -158,6 +158,15 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const pdp = { evaluate: mockFn().mockResolvedValue({ decision: 'DENY' }) };
 
+  // B.1 — quién representa a quién. Por omisión nadie representa a nadie: el
+  // permiso sale entonces del turno, de la relación asistencial o de ser el
+  // titular, que es lo que el resto de estas pruebas mira.
+  const representation = {
+    representsPatient: mockFn().mockResolvedValue(false),
+    assertMayActForPatient: mockFn().mockResolvedValue(undefined),
+    findActiveProxiedPatientIds: mockFn().mockResolvedValue(new Set<string>()),
+  };
+
   const service = new ClinicalReadService(
     em as any,
     {} as any,
@@ -173,10 +182,12 @@ function build() {
     pdp as any,
     careRelationshipsRepo as any,
     logger as any,
+    representation as any,
   );
 
   return {
     service,
+    representation,
     accountLinksRepo,
     patientProfilesRepo,
     practitionerProfilesRepo,
@@ -290,6 +301,58 @@ describe('ClinicalReadService · assertOwnRecord', () => {
     await expect(
       d.service.assertOwnRecord(PERSONA_AJENA, mentiroso),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  describe('la historia del dependiente (B.1)', () => {
+    it('deja pasar a quien representa al paciente', async () => {
+      // La madre que pidió el turno de su hijo tiene que poder leer lo que el
+      // pediatra escribió: si no, la consulta que ella gestionó no le sirve.
+      const d = build();
+      d.darDeAltaPaciente(PERSONA_DEL_TITULAR);
+      d.darDeAltaPaciente(PERSONA_AJENA);
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: PERSONA_DEL_TITULAR,
+      });
+      d.representation.representsPatient.mockResolvedValue(true);
+
+      await expect(
+        d.service.assertOwnRecord(PERSONA_AJENA, titular),
+      ).resolves.toBeUndefined();
+      expect(d.representation.representsPatient).toHaveBeenCalledWith(
+        PERSONA_AJENA,
+        titular,
+      );
+    });
+
+    it('al titular que lee lo suyo no se le pregunta por apoderamientos', async () => {
+      // El caso normal no paga una consulta de más sobre una tabla que para
+      // casi todo el mundo está vacía.
+      const d = build();
+      d.darDeAltaPaciente(PERSONA_DEL_TITULAR);
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: PERSONA_DEL_TITULAR,
+      });
+
+      await d.service.assertOwnRecord(PERSONA_DEL_TITULAR, titular);
+
+      expect(d.representation.representsPatient).not.toHaveBeenCalled();
+    });
+
+    it('sin apoderamiento el rechazo es el de siempre, con el mismo mensaje', async () => {
+      // Quien no puede leerla no tiene por qué distinguir «no sos el titular»
+      // de «no lo representás»: las dos cosas se dicen igual.
+      const d = build();
+      d.darDeAltaPaciente(PERSONA_DEL_TITULAR);
+      d.darDeAltaPaciente(PERSONA_AJENA);
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: PERSONA_DEL_TITULAR,
+      });
+      d.representation.representsPatient.mockResolvedValue(false);
+
+      await expect(
+        d.service.assertOwnRecord(PERSONA_AJENA, titular),
+      ).rejects.toThrow('Sólo podés consultar tu propia historia clínica.');
+    });
   });
 });
 
