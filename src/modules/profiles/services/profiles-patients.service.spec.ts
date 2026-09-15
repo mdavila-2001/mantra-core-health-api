@@ -12,7 +12,7 @@ import { ForbiddenException } from '@nestjs/common';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ProfilesPatientsService } from './profiles-patients.service';
 import { PROF } from '../profiles.concepts';
-import { CONCEPTS } from '../../../common';
+import { CONCEPTS, SEED } from '../../../common';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -117,6 +117,11 @@ function build() {
     revokeActiveForProxyUser: mockFn().mockResolvedValue(0),
     revokeActiveForPatient: mockFn().mockResolvedValue(0),
     reassignPatientProfile: mockFn().mockResolvedValue(0),
+    // Por defecto la cuenta no representa a nadie: es el caso de quien todavía
+    // no registró ningún dependiente, que son casi todos.
+    findActiveByProxyUser: mockFn().mockResolvedValue([]),
+    findActiveByProxyUserAndPatient: mockFn().mockResolvedValue(null),
+    listActiveDependentsOfUser: mockFn().mockResolvedValue([]),
   };
   // El teléfono y el domicilio del paciente viven en `common`: el perfil propio
   // los lee y los reemplaza, y sin estos dobles no se puede probar ni que cierre
@@ -136,7 +141,11 @@ function build() {
     create: mockFn(),
   };
   // El NIT vive en `common.identifiers` como un tipo más, igual que el CI.
-  const identifiersRepo = { create: mockFn() };
+  const identifiersRepo = {
+    create: mockFn(),
+    // Por defecto ningún documento está tomado: es el caso normal del alta.
+    findActiveDuplicate: mockFn().mockResolvedValue(null),
+  };
   // El municipio se valida contra la base, no contra el catálogo estático:
   // cualquier id que llegue acá se resuelve como sembrado, salvo que la
   // prueba lo pise explícitamente — las pruebas de `reemplazarDireccion` no
@@ -2290,6 +2299,229 @@ describe('ProfilesPatientsService', () => {
 
       expect(perfil.homeAddress?.latitude).toBe(-17.758);
       expect(perfil.homeAddress?.longitude).toBe(-63.178);
+    });
+  });
+
+  describe('dependientes (B.1)', () => {
+    /** Lo que el formulario manda para registrar a un hijo. */
+    const hijo = {
+      name: 'Mateo',
+      lastName: 'Quispe',
+      birthDate: '2018-03-14',
+      sexAtBirth: 'MALE' as const,
+      // El titular declara qué es ÉL para el dependiente: «soy su madre».
+      relationshipConceptId: PROF.RELATIONSHIP_MOTHER,
+    };
+
+    /**
+     * Deja el doble listo para un alta: la cuenta es de un paciente y las
+     * escrituras devuelven filas con id, como haría la base.
+     */
+    function prepararAlta(b: ReturnType<typeof build>) {
+      b.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'person-titular',
+      });
+      b.personsRepo.findById.mockResolvedValue({ id: 'person-titular' });
+      b.patientProfilesRepo.findById.mockResolvedValue({
+        profileId: 'person-titular',
+      });
+      b.personsRepo.create.mockReturnValue({
+        id: 'person-hijo',
+        displayName: 'Mateo Quispe',
+      });
+      b.patientProfilesRepo.create.mockReturnValue({
+        profileId: 'person-hijo',
+      });
+      b.relatedPersonsRepo.create.mockReturnValue({ id: 'related-1' });
+      b.portalProxiesRepo.create.mockReturnValue({ id: 'proxy-1' });
+    }
+
+    it('escribe la persona, el perfil, el parentesco y el apoderamiento', async () => {
+      const b = build();
+      prepararAlta(b);
+
+      const res = await b.service.registerOwnDependent(hijo as never, actor);
+
+      // El parentesco cuelga del DEPENDIENTE y nombra al TITULAR, que es lo que
+      // significa esa columna en todas las filas que ya existen.
+      expect(b.relatedPersonsRepo.create).toHaveBeenCalledWith(
+        b.tx,
+        expect.objectContaining({
+          patientProfileId: 'person-hijo',
+          personId: 'person-titular',
+          relationshipConceptId: PROF.RELATIONSHIP_MOTHER,
+          isLegalGuardian: true,
+          statusConceptId: PROF.RELATED_ACTIVE,
+        }),
+      );
+      // El apoderamiento es lo que después habilita a pedir turno y a leer la
+      // historia: sin él el perfil recién creado no lo podría abrir nadie.
+      expect(b.portalProxiesRepo.create).toHaveBeenCalledWith(
+        b.tx,
+        expect.objectContaining({
+          patientProfileId: 'person-hijo',
+          proxyUserId: actor.id,
+          relatedPersonId: 'related-1',
+          scopeValueSetId: SEED.patientPortalProxyScopeValueSetId,
+          legalBasisRecordId: SEED.guardianProxyLegalBasisId,
+          statusConceptId: PROF.PROXY_ACTIVE,
+        }),
+      );
+      expect(res.patientProfileId).toBe('person-hijo');
+      expect(res.id).toBe('proxy-1');
+    });
+
+    it('la respuesta dice «Hijo/a», no «Madre»', async () => {
+      const b = build();
+      prepararAlta(b);
+
+      const res = await b.service.registerOwnDependent(hijo as never, actor);
+
+      expect(res.relationshipCode).toBe('CHILD');
+      expect(res.relationshipDisplay).toBe('Hijo/a');
+      expect(res.isLegalGuardian).toBe(true);
+    });
+
+    it('el apoderamiento nace sin fecha de fin', async () => {
+      // La representación de una madre sobre su hijo no vence: se revoca.
+      const b = build();
+      prepararAlta(b);
+
+      await b.service.registerOwnDependent(hijo as never, actor);
+
+      const [, datos] = b.portalProxiesRepo.create.mock.calls[0];
+      expect(datos.validFrom).toBeInstanceOf(Date);
+      expect(datos.validTo).toBeUndefined();
+    });
+
+    it('sin documento no escribe identificador: un recién nacido no tiene cédula', async () => {
+      const b = build();
+      prepararAlta(b);
+
+      await b.service.registerOwnDependent(hijo as never, actor);
+
+      expect(b.identifiersRepo.create).not.toHaveBeenCalled();
+      expect(b.identifiersRepo.findActiveDuplicate).not.toHaveBeenCalled();
+    });
+
+    it('con documento lo registra y comprueba el departamento que lo expidió', async () => {
+      const b = build();
+      prepararAlta(b);
+      b.identifiersRepo.findActiveDuplicate.mockResolvedValue(null);
+
+      await b.service.registerOwnDependent(
+        {
+          ...hijo,
+          nationalId: 'CI-9876543',
+          issuerAdministrativeAreaConceptId: 'dep-scz',
+        } as never,
+        actor,
+      );
+
+      expect(b.administrativeAreas.assertIsAdministrativeArea).toHaveBeenCalledWith(
+        b.tx,
+        'dep-scz',
+      );
+      expect(b.identifiersRepo.create).toHaveBeenCalledWith(
+        b.tx,
+        expect.objectContaining({
+          ownerId: 'person-hijo',
+          value: 'CI-9876543',
+          issuerAdministrativeAreaConceptId: 'dep-scz',
+        }),
+      );
+    });
+
+    it('rechaza un documento que ya es de otra persona', async () => {
+      // Dos perfiles con el mismo documento son dos historias clínicas de la
+      // misma persona, que es lo que la fusión existe para deshacer.
+      const b = build();
+      prepararAlta(b);
+      b.identifiersRepo.findActiveDuplicate.mockResolvedValue({ id: 'ident-1' });
+
+      await expect(
+        b.service.registerOwnDependent(
+          { ...hijo, nationalId: 'CI-9876543' } as never,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(b.personsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza una fecha de nacimiento futura antes de tocar nada', async () => {
+      const b = build();
+      prepararAlta(b);
+      const manana = new Date(Date.now() + 86_400_000)
+        .toISOString()
+        .slice(0, 10);
+
+      await expect(
+        b.service.registerOwnDependent(
+          { ...hijo, birthDate: manana } as never,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(b.personsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('una cuenta sin perfil de paciente no puede registrar dependientes', async () => {
+      // El apoderamiento cuelga de su cuenta y el parentesco de su persona: sin
+      // ninguna de las dos no hay de dónde colgar nada.
+      const b = build();
+      b.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+      await expect(
+        b.service.registerOwnDependent(hijo as never, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('lista los dependientes con el parentesco ya dado vuelta y la edad', async () => {
+      const b = build();
+      b.portalProxiesRepo.listActiveDependentsOfUser.mockResolvedValue([
+        {
+          proxy_id: 'proxy-1',
+          patient_profile_id: 'person-hijo',
+          person_id: 'person-hijo',
+          name: 'Mateo',
+          middle_name: null,
+          last_name: 'Quispe',
+          mother_last_name: null,
+          display_name: 'Mateo Quispe',
+          birth_date: '2018-03-14',
+          relationship_concept_id: PROF.RELATIONSHIP_MOTHER,
+          is_legal_guardian: true,
+          national_id: null,
+        },
+      ]);
+
+      const [dependiente] = await b.service.getOwnDependents(actor);
+
+      expect(dependiente).toMatchObject({
+        id: 'proxy-1',
+        patientProfileId: 'person-hijo',
+        fullName: 'Mateo Quispe',
+        relationshipCode: 'CHILD',
+        relationshipDisplay: 'Hijo/a',
+        isLegalGuardian: true,
+      });
+      // La edad la calcula el servidor: dejarla al navegador daría edades
+      // distintas según la hora del aparato.
+      expect(dependiente.ageYears).toBe(
+        new Date().getUTCFullYear() -
+          2018 -
+          (new Date() <
+          new Date(Date.UTC(new Date().getUTCFullYear(), 2, 14))
+            ? 1
+            : 0),
+      );
+      // Lo que no hay no viaja vacío.
+      expect(dependiente).not.toHaveProperty('nationalId');
+    });
+
+    it('sin dependientes devuelve una lista vacía, no un error', async () => {
+      const b = build();
+
+      expect(await b.service.getOwnDependents(actor)).toEqual([]);
     });
   });
 });

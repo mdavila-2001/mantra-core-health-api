@@ -21,3 +21,5 @@ export * from './list-practitioners.dto';
 export * from './practitioner-onboarding.dto';
 export * from './affiliation-request.dto';
 export * from './linkable-organization.dto';
+export * from './create-dependent.dto';
+export * from './dependent-summary.dto';

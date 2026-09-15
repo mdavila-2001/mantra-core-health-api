@@ -132,9 +132,22 @@ export const { seeds: CONSENT_CONCEPT_SEEDS, ids: CONS } = defineModuleConcepts(
     },
     DATA_CLASS_ALL: { code: 'DATA_CLASS_ALL', display: 'All data classes' },
     JURISDICTION_PE: { code: 'JURISDICTION_PE', display: 'Peru jurisdiction' },
+    // Bolivia. El módulo nació con Perú como única jurisdicción y es el valor
+    // por defecto de `ProcessingLegalBasesService`; la base legal que ampara la
+    // representación de un menor por su madre o su padre es boliviana, así que
+    // no puede heredar esa.
+    JURISDICTION_BO: { code: 'JURISDICTION_BO', display: 'Bolivia jurisdiction' },
     LEGAL_BASIS_CONSENT: {
       code: 'GEN_LEGAL_BASIS_CONSENT',
       display: 'Consent legal basis',
+    },
+    // Lo que ampara que un tutor vea los datos de su dependiente. NO es
+    // consentimiento: un menor de tres años no consiente nada, y llamar
+    // consentimiento a lo que decide otro por él sería registrar en la base una
+    // afirmación falsa. Es la representación legal, que es su propia base.
+    LEGAL_BASIS_LEGAL_REPRESENTATION: {
+      code: 'GEN_LEGAL_BASIS_LEGAL_REPRESENTATION',
+      display: 'Legal representation legal basis',
     },
     EXPIRATION_TYPE_DATE: {
       code: 'EXPIRATION_TYPE_DATE',

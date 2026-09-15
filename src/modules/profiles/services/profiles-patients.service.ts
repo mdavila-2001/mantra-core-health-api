@@ -2,6 +2,7 @@ import {
   patientCoverageReferenceDate,
   patientCoverageValidity,
 } from '../patient-coverage-validity';
+import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -14,6 +15,7 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
   touch,
+  SEED,
   type AuthenticatedUser,
 } from '../../../common';
 import { AttachableFileService } from '../../common/services';
@@ -39,6 +41,7 @@ import {
   PROF,
 } from '../profiles.concepts';
 import { composePersonDisplayName } from '../person-name';
+import { describeDependentRelationship } from '../dependent-relationship';
 import type { Persons, PatientProfiles } from '../entities';
 import {
   PersonsRepository,
@@ -49,6 +52,7 @@ import {
   PatientMergeEventsRepository,
   RelatedPersonsRepository,
   PatientPortalProxiesRepository,
+  type DependentRow,
 } from '../repositories';
 import {
   CreatePatientDto,
@@ -79,6 +83,8 @@ import {
   OwnGuardianDto,
   UpdateOwnPatientProfileDto,
   SetOwnPatientPhotoDto,
+  CreateDependentDto,
+  DependentSummaryDto,
 } from '../dto';
 import { Addresses, Identifiers } from '../../common/entities';
 import { INS } from '../../insurance/insurance.concepts';
@@ -250,6 +256,32 @@ function aDireccion(fila?: Addresses | null): OwnAddressDto | undefined {
       ? {}
       : { latitude: Number(fila.latitude), longitude: Number(fila.longitude) }),
   };
+}
+
+/**
+ * Edad cumplida, en años, a partir de una fecha `YYYY-MM-DD`.
+ *
+ * La calcula el servidor y no el navegador: es lo que decide si la tarjeta dice
+ * «3 años» o «78 años», y dejarlo del lado del cliente haría que la misma
+ * persona tuviera edades distintas según la hora del aparato.
+ *
+ * Cuenta cumpleaños, no divide días: restar milisegundos y dividir por un año
+ * medio se equivoca con quien cumple años esta semana y con todo bisiesto.
+ *
+ * @param fecha - Fecha de nacimiento en `YYYY-MM-DD`, o nada.
+ * @returns Los años cumplidos, o `undefined` si no hay fecha o no es válida.
+ */
+function edadEnAnios(fecha?: string | null): number | undefined {
+  if (!fecha) return undefined;
+  const nacimiento = new Date(fecha);
+  if (Number.isNaN(nacimiento.getTime())) return undefined;
+  const hoy = new Date();
+  let anios = hoy.getUTCFullYear() - nacimiento.getUTCFullYear();
+  const mes = hoy.getUTCMonth() - nacimiento.getUTCMonth();
+  if (mes < 0 || (mes === 0 && hoy.getUTCDate() < nacimiento.getUTCDate())) {
+    anios -= 1;
+  }
+  return anios < 0 ? undefined : anios;
 }
 
 @Injectable()
@@ -854,6 +886,270 @@ export class ProfilesPatientsService {
    * Los tres viven en `common.identifiers` distinguidos por tipo, así que
    * pedirlos por separado serían tres viajes por la misma fila-vecina.
    */
+  /**
+   * Los dependientes del titular: a quiénes representa en el portal.
+   *
+   * ## Por qué la pregunta es «a quién representa» y no «quién está a su cargo»
+   *
+   * Porque lo que habilita a pedir un turno o a abrir una historia es el
+   * apoderamiento (`patient_portal_proxies`), no el parentesco. Una fila de
+   * `related_persons` dice quién es quién —y cualquiera puede declarar a su
+   * madre como contacto de emergencia—; el apoderamiento dice quién puede
+   * actuar. Listar por parentesco mostraría gente sobre la que el titular no
+   * puede hacer nada.
+   *
+   * El parentesco sí se lee, pero para **nombrar** al dependiente, y sale de la
+   * fila que el propio apoderamiento nombra.
+   *
+   * @param actor - Usuario autenticado, que es quien representa.
+   * @returns Sus dependientes, del más reciente al más viejo; vacío si no tiene.
+   */
+  async getOwnDependents(
+    actor: AuthenticatedUser,
+  ): Promise<DependentSummaryDto[]> {
+    const em = this.em.fork();
+    const filas = await this.portalProxiesRepo.listActiveDependentsOfUser(
+      em,
+      actor.id,
+      new Date(),
+    );
+    return filas.map((fila) => this.aDependentSummary(fila));
+  }
+
+  /**
+   * Registra a un dependiente y deja al titular como su representante.
+   *
+   * ## Qué escribe, y por qué en una sola transacción
+   *
+   * Cinco filas en cuatro tablas: la persona, su clasificación, su perfil de
+   * paciente, su documento —si lo tiene— y el parentesco, más el apoderamiento.
+   * Van juntas o no va ninguna: un perfil de paciente sin apoderamiento sería
+   * una historia clínica que nadie puede abrir, ni siquiera quien la creó, y
+   * ningún camino de la API la podría reclamar después.
+   *
+   * Es la misma secuencia que el auto-registro público, sin la parte de la
+   * cuenta: el dependiente no inicia sesión. Los `flush` intermedios no son
+   * decorativos — las FK del modelo son columnas uuid planas y MikroORM no
+   * ordena inserts entre entidades que no se referencian como relación.
+   *
+   * ## Por qué la tutela se afirma acá y no en el alta propia
+   *
+   * `createGuardianRelatedPerson` deja `is_legal_guardian` en `false` a
+   * propósito: ahí el tutor es un nombre que el paciente escribió, y nadie
+   * verificó nada. Acá la dirección es la contraria — quien registra es el
+   * titular autenticado, y está declarando hacerse cargo —, así que la fila lo
+   * afirma. No lo hace verdadero ante la ley; lo hace **atribuible**: queda
+   * quién lo declaró y cuándo.
+   *
+   * @param dto - Los datos de filiación y el parentesco declarado.
+   * @param actor - Usuario autenticado, que pasa a representarlo.
+   * @returns El dependiente recién creado.
+   * @throws PreconditionFailedException si la fecha de nacimiento es futura o el
+   *   departamento de expedición no es uno.
+   * @throws ConflictException si el documento ya es de otra persona.
+   */
+  async registerOwnDependent(
+    dto: CreateDependentDto,
+    actor: AuthenticatedUser,
+  ): Promise<DependentSummaryDto> {
+    this.logger.info(
+      { operation: 'profiles.dependent.create', actorId: actor.id },
+      'Registering dependent',
+    );
+
+    const birthDate = new Date(dto.birthDate);
+    if (Number.isNaN(birthDate.getTime())) {
+      throw new PreconditionFailedException(
+        'La fecha de nacimiento no es una fecha válida',
+        { birthDate: dto.birthDate },
+      );
+    }
+    // Nadie nace mañana. Sin este freno, la edad saldría negativa y la tarjeta
+    // diría «-1 años» sobre un dato que el formulario dejó pasar.
+    if (birthDate.getTime() > Date.now()) {
+      throw new PreconditionFailedException(
+        'La fecha de nacimiento no puede ser futura',
+        { birthDate: dto.birthDate },
+      );
+    }
+
+    return this.em.transactional(async (tx) => {
+      // Quien registra tiene que ser un paciente él mismo: el apoderamiento
+      // cuelga de su cuenta, y el parentesco de su persona.
+      const { person: titular } = await this.resolveOwnPatient(tx, actor);
+
+      // La FK del documento acepta cualquier concepto, así que quién es un
+      // departamento boliviano lo decide el catálogo, no la base.
+      if (dto.issuerAdministrativeAreaConceptId !== undefined) {
+        await this.administrativeAreas.assertIsAdministrativeArea(
+          tx,
+          dto.issuerAdministrativeAreaConceptId,
+        );
+      }
+
+      if (dto.nationalId !== undefined) {
+        const duplicado = await this.identifiersRepo.findActiveDuplicate(tx, {
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: dto.nationalId,
+        });
+        if (duplicado) {
+          this.logger.warn(
+            {
+              operation: 'profiles.dependent.create',
+              reason: 'national-id-in-use',
+            },
+            'Rejected dependent creation: national id already registered',
+          );
+          throw new ConflictException(
+            'Ese documento ya está registrado en la plataforma',
+            { nationalId: dto.nationalId },
+          );
+        }
+      }
+
+      const dependiente = this.personsRepo.create(tx, {
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+        vitalStatusConceptId: PROF.VITAL_ALIVE,
+        name: dto.name,
+        middleName: dto.middleName,
+        lastName: dto.lastName,
+        motherLastName: dto.motherLastName,
+        birthDate,
+        sexAtBirthConceptId: dto.sexAtBirth
+          ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
+          : undefined,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.personProfilesRepo.create(tx, {
+        personId: dependiente.id,
+        profileTypeConceptId: PROF.PROFILE_TYPE_PATIENT,
+        statusConceptId: PROF.PROFILE_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      // `patient_profiles.profile_id` ES `persons.id`, igual que en el alta.
+      const paciente = this.patientProfilesRepo.create(tx, {
+        profileId: dependiente.id,
+        patientCode: `PAT-${randomUUID()}`,
+        recordLinkageStatusConceptId: PROF.LINKAGE_UNLINKED,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      if (dto.nationalId !== undefined) {
+        this.identifiersRepo.create(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+          ownerId: dependiente.id,
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: dto.nationalId,
+          useConceptId: CONCEPTS.USE_OFFICIAL,
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+          issuerAdministrativeAreaConceptId:
+            dto.issuerAdministrativeAreaConceptId,
+          actorUserId: actor.id,
+        });
+      }
+
+      // La fila cuelga del DEPENDIENTE y nombra al TITULAR, como todas las de
+      // esta tabla: «la persona relacionada con este paciente es su madre».
+      const parentesco = this.relatedPersonsRepo.create(tx, {
+        patientProfileId: paciente.profileId,
+        personId: titular.id,
+        relationshipConceptId: dto.relationshipConceptId,
+        isEmergencyContact: true,
+        isLegalGuardian: true,
+        statusConceptId: PROF.RELATED_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      const ahora = new Date();
+      const apoderamiento = this.portalProxiesRepo.create(tx, {
+        patientProfileId: paciente.profileId,
+        proxyUserId: actor.id,
+        relatedPersonId: parentesco.id,
+        // Las dos filas que el modelo exige y la plataforma siembra: sin ellas
+        // estas dos FK NOT NULL no tendrían a qué apuntar.
+        scopeValueSetId: SEED.patientPortalProxyScopeValueSetId,
+        legalBasisRecordId: SEED.guardianProxyLegalBasisId,
+        statusConceptId: PROF.PROXY_ACTIVE,
+        // Sin `validTo`: la representación de un padre sobre su hijo no tiene
+        // fecha de fin conocida. Se revoca, no se vence.
+        validFrom: ahora,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.dependent.create',
+          patientProfileId: paciente.profileId,
+        },
+        'Dependent registered',
+      );
+
+      const relacion = describeDependentRelationship(dto.relationshipConceptId);
+      return {
+        id: apoderamiento.id,
+        patientProfileId: paciente.profileId,
+        personId: dependiente.id,
+        fullName: dependiente.displayName ?? `${dto.name} ${dto.lastName}`,
+        name: dto.name,
+        lastName: dto.lastName,
+        birthDate: dto.birthDate,
+        ageYears: edadEnAnios(dto.birthDate),
+        ...(dto.nationalId === undefined ? {} : { nationalId: dto.nationalId }),
+        relationshipCode: relacion.code,
+        relationshipDisplay: relacion.display,
+        isLegalGuardian: true,
+      };
+    });
+  }
+
+  /**
+   * Traduce una fila del listado de dependientes al contrato del cliente.
+   *
+   * La consulta devuelve `snake_case` y `null` —es SQL cruda, no pasa por el
+   * mapeo del ORM—, y el contrato de cara al cliente omite lo que no hay en vez
+   * de mandarlo vacío, como el resto de las lecturas propias.
+   *
+   * @param fila - Lo que devolvió la consulta.
+   * @returns El dependiente tal como lo ve quien lo representa.
+   */
+  private aDependentSummary(fila: DependentRow): DependentSummaryDto {
+    const relacion = describeDependentRelationship(
+      fila.relationship_concept_id ?? '',
+    );
+    const edad = edadEnAnios(fila.birth_date);
+    return {
+      id: fila.proxy_id,
+      patientProfileId: fila.patient_profile_id,
+      personId: fila.person_id,
+      // El nombre compuesto es derivado y la base lo tiene; si una fila vieja no
+      // lo tuviera, se recompone antes que mostrar una tarjeta sin nombre.
+      fullName:
+        fila.display_name ??
+        composePersonDisplayName({
+          name: fila.name ?? undefined,
+          middleName: fila.middle_name ?? undefined,
+          lastName: fila.last_name ?? undefined,
+          motherLastName: fila.mother_last_name ?? undefined,
+        }) ??
+        '',
+      ...(fila.name === null ? {} : { name: fila.name }),
+      ...(fila.last_name === null ? {} : { lastName: fila.last_name }),
+      ...(fila.birth_date === null ? {} : { birthDate: fila.birth_date }),
+      ...(edad === undefined ? {} : { ageYears: edad }),
+      ...(fila.national_id === null ? {} : { nationalId: fila.national_id }),
+      relationshipCode: relacion.code,
+      relationshipDisplay: relacion.display,
+      isLegalGuardian: fila.is_legal_guardian ?? false,
+    };
+  }
+
   private async leerIdentificadores(
     em: EntityManager,
     personId: string,

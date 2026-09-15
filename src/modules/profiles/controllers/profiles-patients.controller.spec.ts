@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { readFileSync } from 'node:fs';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
 /**
@@ -30,6 +31,8 @@ function build() {
     updateOwnProfile: mockFn(),
     setOwnPhoto: mockFn(),
     removeOwnPhoto: mockFn(),
+    getOwnDependents: mockFn(),
+    registerOwnDependent: mockFn(),
   };
   const controller = new ProfilesPatientsController(patientsService as any);
   return { controller, patientsService };
@@ -167,5 +170,51 @@ describe('ProfilesPatientsController', () => {
       personId: 'per-1',
     });
     expect(d.patientsService.removeOwnPhoto).toHaveBeenCalledWith(titular);
+  });
+
+  it('delega getOwnDependents con el actor de la sesión', async () => {
+    const d = build();
+    d.patientsService.getOwnDependents.mockResolvedValue([]);
+
+    await expect(d.controller.getOwnDependents(titular)).resolves.toEqual([]);
+    // El sujeto lo resuelve el servidor: no hay parámetro que apunte a otro.
+    expect(d.patientsService.getOwnDependents).toHaveBeenCalledWith(titular);
+  });
+
+  it('delega registerOwnDependent con el cuerpo y el actor', async () => {
+    const d = build();
+    const dto = { name: 'Mateo', lastName: 'Quispe' } as any;
+    d.patientsService.registerOwnDependent.mockResolvedValue({
+      patientProfileId: 'pp-hijo',
+    });
+
+    await expect(
+      d.controller.registerOwnDependent(dto, titular),
+    ).resolves.toEqual({ patientProfileId: 'pp-hijo' });
+    expect(d.patientsService.registerOwnDependent).toHaveBeenCalledWith(
+      dto,
+      titular,
+    );
+  });
+
+  it('las rutas de dependientes se declaran antes que `patients/:profileId`', () => {
+    // Nest resuelve por orden de declaración: si `patients/:profileId` fuera
+    // primero, capturaría `patients/me/dependents` y respondería 400 por uuid
+    // mal formado en vez de la lista. Lo mismo que ya vale para `me/summary`.
+    // Ruta desde la raíz del repo: jest corre desde ahí, y `import.meta` no
+    // está disponible bajo el tsconfig raíz (compila a CommonJS).
+    const fuente = readFileSync(
+      'src/modules/profiles/controllers/profiles-patients.controller.ts',
+      'utf8',
+    );
+    const dependientes = fuente.indexOf("@Get('patients/me/dependents')");
+    const alta = fuente.indexOf("@Post('patients/me/dependents')");
+    const porId = fuente.indexOf("@Get('patients/:profileId')");
+
+    expect(dependientes).toBeGreaterThan(-1);
+    expect(alta).toBeGreaterThan(-1);
+    expect(porId).toBeGreaterThan(-1);
+    expect(dependientes).toBeLessThan(porId);
+    expect(alta).toBeLessThan(porId);
   });
 });

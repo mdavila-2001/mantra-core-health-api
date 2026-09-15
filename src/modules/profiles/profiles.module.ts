@@ -44,6 +44,7 @@ import {
   PatientPortalProxiesRepository,
 } from './repositories';
 import { ProfileOwnershipService } from './services';
+import { PatientRepresentationService } from './services/patient-representation.service';
 import { LinkableOrganizationsService } from './services/linkable-organizations.service';
 import { MessagingAffiliationNoticeAdapter } from './adapters/messaging-affiliation-notice.adapter';
 import { AFFILIATION_NOTICE_PORT } from './ports/affiliation-notice.port';
@@ -78,6 +79,7 @@ import { MessagingModule } from '../messaging/messaging.module';
   ],
   providers: [
     ProfileOwnershipService,
+    PatientRepresentationService,
     MedicalSpecialtyCatalogService,
     AdministrativeAreaCatalogService,
     ProfilesAffiliationsService,
@@ -135,6 +137,11 @@ import { MessagingModule } from '../messaging/messaging.module';
     // Y desde que el alta de paciente registra al tutor o persona autorizada
     // que lo acompaña, también la de personas relacionadas.
     RelatedPersonsRepository,
+    // Quién puede actuar por un paciente. Lo necesita `scheduling` para no
+    // dejar que una cuenta pida turno por alguien que no es ni representa; la
+    // regla vive acá porque la representación es un dato de perfiles.
+    PatientRepresentationService,
+    PatientPortalProxiesRepository,
   ],
 })
 export class ProfilesModule {}

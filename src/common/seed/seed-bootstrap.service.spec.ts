@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 
-/** Los dieciocho seeds de la cadena, en el orden en que el orquestador los corre. */
+/** Los seeds de la cadena, en el orden en que el orquestador los corre. */
 /**
  * Los pasos de la cadena, **en el orden real** de `pasosDependientes()`.
  *
@@ -13,6 +13,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
 const PASOS = [
   'terminology',
   'dynamicEnums',
+  'patientPortalProxy',
   'glossary',
   'boGeography',
   'legalEntityTypes',
@@ -46,7 +47,7 @@ function loggerFalso() {
 }
 
 /**
- * Arma el orquestador con los dieciocho seeds mockeados.
+ * Arma el orquestador con todos los seeds mockeados.
  *
  * @param fallan - Nombres de los seeds que deben lanzar en esta corrida.
  */
@@ -70,6 +71,7 @@ function armar(fallan: Paso[] = []) {
   const service = new SeedBootstrapService(
     dobles.terminology as never,
     dobles.dynamicEnums as never,
+    dobles.patientPortalProxy as never,
     dobles.glossary as never,
     dobles.boGeography as never,
     dobles.legalEntityTypes as never,

@@ -159,6 +159,15 @@ function build() {
   const claimReadRepo = {
     findSummariesByEncounterIds: mockFn().mockResolvedValue([]),
   };
+  // Quién puede actuar por un paciente (B.1). Por omisión el doble deja pasar:
+  // la regla tiene su propio spec y mezclarla acá haría que cada prueba de la
+  // agenda tuviera que montar un apoderamiento para hablar de otra cosa. Las
+  // pruebas del candado lo pisan a propósito.
+  const representation = {
+    assertMayActForPatient: mockFn().mockResolvedValue(undefined),
+    representsPatient: mockFn().mockResolvedValue(false),
+    findActiveProxiedPatientIds: mockFn().mockResolvedValue(new Set<string>()),
+  };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -174,9 +183,11 @@ function build() {
     waitlist as any,
     encountersRepo as any,
     claimReadRepo as any,
+    representation as any,
   );
   return {
     claimReadRepo,
+    representation,
     service,
     tx,
     vinculos,
@@ -3315,5 +3326,219 @@ describe('SchedulingBookingsService · el estado de pago', () => {
     await expect(
       service.getPaymentState(BOOKING, actor as any),
     ).resolves.toBeNull();
+  });
+});
+
+describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', () => {
+  /** Una cuenta de paciente que no es el titular ni lo representa. */
+  const intruso = {
+    id: 'user-intruso',
+    roles: ['PATIENT'],
+    patientProfileId: 'pat-propio',
+  } as any;
+
+  /** La madre que registró a su hijo: tiene apoderamiento vigente sobre él. */
+  const madre = {
+    id: 'user-madre',
+    roles: ['PATIENT'],
+    patientProfileId: 'pat-madre',
+  } as any;
+
+  /** El mostrador, cuyo oficio es repartir turnos de pacientes que no son él. */
+  const mostrador = { id: 'user-mostrador', roles: ['SCHEDULING_AGENT'] } as any;
+
+  /** Quien atiende: lista las citas de sus pacientes desde su propia agenda. */
+  const medico = {
+    id: 'user-medico',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'hp-1',
+  } as any;
+
+  /** Un cupo libre dentro de la ventana en la que se puede pedir. */
+  function cupoLibre() {
+    return {
+      id: 'slot-1',
+      statusConceptId: CONCEPTS.SLOT_FREE,
+      remainingCapacity: 2,
+      startAt: new Date(Date.now() + 86_400_000),
+      endAt: new Date(Date.now() + 88_000_000),
+      scheduleTemplateId: null,
+      resourceId: 'res-1',
+    };
+  }
+
+  describe('retener un cupo', () => {
+    it('un paciente no puede retener a nombre de un perfil ajeno', async () => {
+      // Hasta acá no se comprobaba nada: con el uuid de un perfil ajeno en el
+      // cuerpo, cualquiera con rol `PATIENT` le tomaba un cupo.
+      const d = build();
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        new ForbiddenException('No cuenta con autorización de tutoría'),
+      );
+
+      await expect(
+        d.service.placeHold(
+          'slot-1',
+          { patientProfileId: 'pat-ajeno' } as any,
+          intruso,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      // Y no llega a tocar el cupo: la comprobación va antes de la transacción
+      // para no sostener el `FOR UPDATE` mientras consulta otra tabla.
+      expect(d.bookingsRepo.findSlotForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('quien lo representa sí puede retener por él', async () => {
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(cupoLibre());
+      d.bookingsRepo.createHold.mockReturnValue({
+        id: 'hold-1',
+        expiresAt: new Date(Date.now() + 300_000),
+      });
+
+      await expect(
+        d.service.placeHold(
+          'slot-1',
+          { patientProfileId: 'pat-hijo' } as any,
+          madre,
+        ),
+      ).resolves.toMatchObject({ id: 'hold-1' });
+      expect(d.representation.assertMayActForPatient).toHaveBeenCalledWith(
+        'pat-hijo',
+        madre,
+        undefined,
+      );
+    });
+
+    it('al mostrador no se le pregunta: es su oficio', async () => {
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(cupoLibre());
+      d.bookingsRepo.createHold.mockReturnValue({
+        id: 'hold-2',
+        expiresAt: new Date(Date.now() + 300_000),
+      });
+
+      await d.service.placeHold(
+        'slot-1',
+        { patientProfileId: 'pat-cualquiera' } as any,
+        mostrador,
+      );
+
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+
+    it('sin paciente declarado no hay a quién comprobar', async () => {
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(cupoLibre());
+      d.bookingsRepo.createHold.mockReturnValue({
+        id: 'hold-3',
+        expiresAt: new Date(Date.now() + 300_000),
+      });
+
+      await d.service.placeHold('slot-1', {} as any, intruso);
+
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('confirmar y solicitar', () => {
+    it('el candado se vuelve a aplicar al materializar la reserva', async () => {
+      // Es el que de verdad importa: el hold puede haberse tomado sin declarar
+      // paciente —el cuerpo lo trae recién acá—, así que comprobarlo sólo al
+      // retener dejaría la puerta abierta.
+      const d = build();
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        new ForbiddenException('No cuenta con autorización de tutoría'),
+      );
+
+      await expect(
+        d.service.confirmBooking(
+          'hold-token',
+          {
+            tenantId: 'ten-1',
+            patientProfileId: 'pat-ajeno',
+            channel: 'PORTAL',
+          } as any,
+          intruso,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.findHoldByTokenForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('solicitar tiene el mismo candado que confirmar', async () => {
+      const d = build();
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        new ForbiddenException('No cuenta con autorización de tutoría'),
+      );
+
+      await expect(
+        d.service.requestBooking(
+          'hold-token',
+          {
+            tenantId: 'ten-1',
+            patientProfileId: 'pat-ajeno',
+            channel: 'PORTAL',
+          } as any,
+          intruso,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.findHoldByTokenForUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listar citas por paciente', () => {
+    it('un paciente no puede listar la agenda de otro', async () => {
+      // Los turnos de alguien dicen a qué médico va y por qué: sin este freno,
+      // el filtro por paciente era una enumeración para quien supiera un uuid.
+      const d = build();
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        new ForbiddenException('No cuenta con autorización de tutoría'),
+      );
+
+      await expect(
+        d.service.searchBookings(
+          { patientProfileId: 'pat-ajeno', includeCancelled: false },
+          50,
+          intruso,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+    });
+
+    it('a quien atiende no lo alcanza: su agenda lista por paciente', async () => {
+      // `agenda.ts` y el formulario de cotización listan las citas de sus
+      // pacientes por `patientProfileId`. Exigirles apoderamiento rompería las
+      // dos pantallas. Que un profesional pueda listar las de cualquiera es un
+      // hueco anterior, declarado como seguimiento.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [],
+        fetchCapReached: false,
+      });
+
+      await d.service.searchBookings(
+        { patientProfileId: 'pat-cualquiera', includeCancelled: false },
+        50,
+        medico,
+      );
+
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+
+    it('sin filtro por paciente no hay nada que comprobar', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [],
+        fetchCapReached: false,
+      });
+
+      await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        intruso,
+      );
+
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
   });
 });
