@@ -81,6 +81,13 @@ export class PracticeSites {
   managingTenantId?: string;
 
   /**
+   * Archivo del QR de cobro bancario de la sede, en `common.files`. Nulo si la
+   * sede no cobra por QR.
+   */
+  @Property({ fieldName: 'bank_qr_file_id', type: 'uuid', nullable: true }) // FK → common.files
+  bankQrFileId?: string;
+
+  /**
    * Identificador asociado a status concept.
    */
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
