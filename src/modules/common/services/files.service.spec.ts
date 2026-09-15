@@ -47,6 +47,9 @@ describe('FilesService', () => {
     const filesRepo = { findById: fn(), create: fn() };
     const fileVersionsRepo = {
       findById: fn(),
+      // 5.2: la lista resuelve versiones en lote. Por defecto no encuentra
+      // ninguna, que es lo que ven las pruebas escritas antes de la metadata.
+      findByIds: fn(() => Promise.resolve([])),
       findByFileAndId: fn(),
       maxVersionNumber: fn(),
       findPendingScan: fn(() => Promise.resolve([])),
@@ -552,6 +555,251 @@ describe('FilesService', () => {
       expect(tipo).toBe(CONCEPTS.OWNER_PATIENT);
       expect(owner).toBe('p-7');
       expect(typeof tope).toBe('number');
+    });
+
+    /**
+     * 5.2 · AC-5.2-2 — el tipo y el tamaño viajan con cada adjunto.
+     *
+     * Viven en `common.file_versions`, así que hasta ahora la lista los perdía
+     * y la pantalla tenía que bajar los bytes sólo para saber qué eran. Se
+     * comprueba también lo que **no** debe viajar: ni la ubicación interna ni
+     * el hash, aunque estén en la misma fila de la versión.
+     */
+    it('5.2: propaga tipo y tamaño de la versión vigente, sin internals de storage', async () => {
+      const { service, filesRepo, fileVersionsRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-1', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-1',
+        currentVersionId: 'v-1',
+        originalName: 'análisis.pdf',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.findByIds.mockResolvedValue([
+        {
+          id: 'v-1',
+          fileId: 'f-1',
+          mimeType: 'application/pdf',
+          sizeBytes: '20480',
+          storageUri: 's3://bucket-clinico/pacientes/estudio.pdf',
+          objectKey: 'pacientes/estudio.pdf',
+          bucketOrContainer: 'bucket-clinico',
+          contentHash: '9f2c1ab34d5e6f70',
+        },
+      ]);
+
+      const pagina = await service.listLinkedFiles({
+        ownerType: OwnerType.PATIENT,
+        ownerId: 'p-1',
+      });
+
+      const archivo = pagina.items[0]!.file;
+      expect(archivo).toMatchObject({
+        originalName: 'análisis.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 20480,
+      });
+      // El bigint de la versión llega como número, no como texto.
+      expect(typeof archivo.sizeBytes).toBe('number');
+      const serializado = JSON.stringify(pagina);
+      for (const interno of [
+        's3://',
+        'bucket-clinico',
+        'pacientes/estudio.pdf',
+        '9f2c1ab34d5e6f70',
+        'storageUri',
+        'objectKey',
+        'contentHash',
+      ]) {
+        expect(serializado).not.toContain(interno);
+      }
+    });
+
+    /**
+     * Diez adjuntos no pueden costar diez lecturas de versión. Las versiones
+     * vigentes de la página se piden **una sola vez**, todas juntas, y la
+     * lectura por id no se usa en este camino.
+     */
+    it('5.2: resuelve las versiones de toda la página en una sola consulta', async () => {
+      const { service, filesRepo, fileVersionsRepo, fileLinksRepo } = build();
+      const ids = ['f-1', 'f-2', 'f-3'];
+      fileLinksRepo.findByOwner.mockResolvedValue(
+        ids.map((fileId, i) => ({
+          id: `l-${i}`,
+          fileId,
+          ownerId: 'p-1',
+          createdAt: new Date(),
+        })),
+      );
+      filesRepo.findById.mockImplementation((_em: unknown, id: string) =>
+        Promise.resolve({
+          id,
+          currentVersionId: `v-${id}`,
+          categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+          sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+          lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+          createdAt: new Date(),
+        }),
+      );
+      fileVersionsRepo.findByIds.mockImplementation(
+        (_em: unknown, pedidos: string[]) =>
+          Promise.resolve(
+            pedidos.map((vid) => ({
+              id: vid,
+              fileId: vid.replace(/^v-/, ''),
+              mimeType: 'image/png',
+              sizeBytes: '10',
+            })),
+          ),
+      );
+
+      const pagina = await service.listLinkedFiles({
+        ownerType: OwnerType.PATIENT,
+        ownerId: 'p-1',
+      });
+
+      expect(fileVersionsRepo.findByIds).toHaveBeenCalledTimes(1);
+      expect(fileVersionsRepo.findByIds.mock.calls[0][1]).toEqual([
+        'v-f-1',
+        'v-f-2',
+        'v-f-3',
+      ]);
+      expect(fileVersionsRepo.findById).not.toHaveBeenCalled();
+      expect(pagina.items.map((i) => i.file.mimeType)).toEqual([
+        'image/png',
+        'image/png',
+        'image/png',
+      ]);
+    });
+
+    /**
+     * Metadata opcional: un archivo sin versión vigente, o cuya versión no
+     * aparece, sale **sin** tipo ni tamaño. No se inventa un tipo genérico ni
+     * un tamaño cero, que la pantalla leería como dato real.
+     */
+    it('5.2: sin versión vigente resoluble no inventa tipo ni tamaño', async () => {
+      const { service, filesRepo, fileVersionsRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-sin', ownerId: 'p-1', createdAt: new Date() },
+        {
+          id: 'l-2',
+          fileId: 'f-perdida',
+          ownerId: 'p-1',
+          createdAt: new Date(),
+        },
+      ]);
+      filesRepo.findById.mockImplementation((_em: unknown, id: string) =>
+        Promise.resolve({
+          id,
+          currentVersionId: id === 'f-perdida' ? 'v-que-no-existe' : undefined,
+          categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+          sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+          lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+          createdAt: new Date(),
+        }),
+      );
+      fileVersionsRepo.findByIds.mockResolvedValue([]);
+
+      const pagina = await service.listLinkedFiles({
+        ownerType: OwnerType.PATIENT,
+        ownerId: 'p-1',
+      });
+
+      for (const item of pagina.items) {
+        expect(item.file).not.toHaveProperty('mimeType');
+        expect(item.file).not.toHaveProperty('sizeBytes');
+      }
+      // Sólo se pidió la versión que existía como puntero.
+      expect(fileVersionsRepo.findByIds.mock.calls[0][1]).toEqual([
+        'v-que-no-existe',
+      ]);
+    });
+
+    /**
+     * Falla cerrado. Si la versión resuelta no es de ese archivo —con datos
+     * sanos no ocurre, pero una FK inconsistente existe—, se responde sin
+     * metadata antes que con la de otro archivo.
+     */
+    it('5.2: no usa una versión que pertenece a otro archivo', async () => {
+      const { service, filesRepo, fileVersionsRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-1', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-1',
+        currentVersionId: 'v-ajena',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.findByIds.mockResolvedValue([
+        {
+          id: 'v-ajena',
+          fileId: 'f-OTRO',
+          mimeType: 'text/plain',
+          sizeBytes: '99',
+        },
+      ]);
+
+      const pagina = await service.listLinkedFiles({
+        ownerType: OwnerType.PATIENT,
+        ownerId: 'p-1',
+      });
+
+      expect(pagina.items[0]!.file).not.toHaveProperty('mimeType');
+      expect(pagina.items[0]!.file).not.toHaveProperty('sizeBytes');
+    });
+
+    it('5.2: una página sin archivos vivos no consulta versiones', async () => {
+      const { service, fileVersionsRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([]);
+
+      await service.listLinkedFiles({
+        ownerType: OwnerType.PATIENT,
+        ownerId: 'p-1',
+      });
+
+      // El repositorio cortocircuita con la lista vacía; el servicio igual la
+      // entrega vacía y no inventa ids.
+      expect(fileVersionsRepo.findByIds.mock.calls[0]?.[1] ?? []).toEqual([]);
+    });
+  });
+
+  /**
+   * 5.2 · AC-5.2-2 en el alta: la versión 1 recién creada ya está en mano, así
+   * que su tipo y tamaño viajan en la respuesta sin una lectura más.
+   */
+  describe('createFile · metadata (5.2)', () => {
+    it('devuelve tipo y tamaño de la versión recién creada, sin storageUri', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.create.mockReturnValue({
+        id: 'file-1',
+        originalName: 'doc.pdf',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.create.mockReturnValue({
+        id: 'ver-1',
+        fileId: 'file-1',
+        mimeType: 'application/pdf',
+        sizeBytes: '1024',
+        storageUri: 's3://bucket/doc.pdf',
+      });
+
+      const result = await service.createFile(createFileDto, actor);
+
+      expect(result).toMatchObject({
+        mimeType: 'application/pdf',
+        sizeBytes: 1024,
+      });
+      expect(JSON.stringify(result)).not.toContain('s3://');
+      expect(fileVersionsRepo.findByIds).not.toHaveBeenCalled();
+      expect(fileVersionsRepo.findById).not.toHaveBeenCalled();
     });
   });
 });
