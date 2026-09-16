@@ -63069,7 +63069,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/public/nearby?lat=2026-01-01T00:00:00.000Z&lng=lng-ejemplo&radiusKm=radiusKm-ejemplo&limit=limit-ejemplo",
+                  "raw": "{{baseUrl}}/public/nearby?lat=2026-01-01T00:00:00.000Z&lng=lng-ejemplo&radiusKm=radiusKm-ejemplo&kind=kind-ejemplo&limit=limit-ejemplo",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -63093,6 +63093,12 @@
                     {
                       "key": "radiusKm",
                       "value": "radiusKm-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "kind",
+                      "value": "kind-ejemplo",
                       "description": "",
                       "disabled": false
                     },

@@ -31,6 +31,7 @@ Este archivo no los reemplaza: los indexa y los ordena por lo que cuesta que sig
 | R-5 | **No se podía saber qué código corre un contenedor.** Una imagen del 14/08 sin tres seeds pasó un día entera sin que nadie lo notara. | #108 |
 | R-6 | **`generateSlots` ignoraba la zona horaria de la sede** (H-02). Una agenda de La Paz (UTC−4) que publicaba «08:00–12:00» materializaba sus cupos a las 04:00–08:00 hora local. | #110 |
 | R-7 | **«Mis cuestionarios» daba 500 sin hacer nada** (F-14 de la analista). `GET /surveys/me/invitations` moría con `TableNotFoundException: relation "surveys.survey_invitations" does not exist`: no era el perfil del paciente (el claim `pid` viaja y se resuelve), era que **el módulo `surveys` nació con 7 entidades y sin DDL** (ver B-7). Mientras el esquema no exista el service responde `200 []` con aviso en el log (`TODO(F-14)` en `listInvitationsOf`), y una sesión sin perfil de paciente recibe **403** tipificado en vez de 422. | I-B |
+| R-8 | **`GET /public/nearby` descartaba `kind`.** El contrato (`CONTRATO-PUBLICO.md` §9) lo documenta, `CommunityPublicService.nearby` lo filtra y `PublicDirectoryClient.nearby` del front lo manda desde el 18/08, pero `CommunityPublicController.nearby` nunca lo declaraba como `@Query`: la frontera se lo comía en silencio y `/nearby-places` recibía los cuatro verticales mezclados en vez de sólo imagenología o sólo centros médicos. Destapado al cablear la subtarea B.2 (lugares guardados → búsqueda de proximidad). | `marcelo/feat-patient-leaflet-gps-addresses` |
 
 ---
 

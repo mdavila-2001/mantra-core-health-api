@@ -10457,7 +10457,7 @@ Ejemplo de error normalizado:
 
 Prestadores cercanos, en línea recta. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Lo más cercano a un punto.
+Contexto declarado en el controlador: Lo más cercano a un punto. `kind` acotaba en el servicio y en el cliente del front desde el 18/08, pero el controlador nunca lo declaraba: la frontera se lo comía en silencio y `/nearby-places` recibía los cuatro verticales mezclados en vez de sólo imagenología o sólo centros médicos. Mismo defecto que `specialty` tenía en `searchPractitioners` — ver su spec para el patrón.
 
 ### Descripción del sistema
 
@@ -10470,6 +10470,7 @@ NestJS resuelve `GET /public/nearby` en `CommunityPublicController_nearby`. El c
 | `lat` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `lng` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `radiusKm` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `kind` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
@@ -10477,7 +10478,7 @@ NestJS resuelve `GET /public/nearby` en `CommunityPublicController_nearby`. El c
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&kind=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
@@ -10494,7 +10495,7 @@ Host: localhost:3000
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&kind=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
