@@ -2568,12 +2568,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
@@ -2594,7 +2588,8 @@
         "tags": [
           "iam-auth"
         ],
-        "description": "Pre-cargar un documento legal (PDF) del registro de organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Pre-cargar un documento legal (PDF) del registro de organización. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/iam/auth/register-practitioner": {
@@ -3315,6 +3310,112 @@
           "profiles-patients"
         ],
         "description": "Quitar la propia foto de perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/me/dependents": {
+      "get": {
+        "operationId": "ProfilesPatientsController_getOwnDependents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Los pacientes que esta cuenta representa con apoderamiento vigente. Sin dependientes, `[]`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DependentSummaryDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar los dependientes a cargo del paciente autenticado",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Listar los dependientes a cargo del paciente autenticado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "post": {
+        "operationId": "ProfilesPatientsController_registerOwnDependent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDependentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "El dependiente creado, ya con el apoderamiento que habilita a pedirle turno y a leer su historia.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependentSummaryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar un dependiente (menor o adulto mayor tutelado)",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Registrar un dependiente (menor o adulto mayor tutelado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/profiles/patients": {
@@ -8491,10 +8592,11 @@
             "bearer": []
           }
         ],
+        "summary": "Reservar la publicación de un audio en almacenamiento",
         "tags": [
           "internal/storage-lifecycle"
         ],
-        "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Reservar la publicación de un audio en almacenamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/internal/storage-lifecycle/audio/{assetId}/dispatch": {
@@ -8557,10 +8659,11 @@
             "bearer": []
           }
         ],
+        "summary": "Despachar la subida reservada de un audio",
         "tags": [
           "internal/storage-lifecycle"
         ],
-        "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Despachar la subida reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/internal/storage-lifecycle/audio/{assetId}/abort": {
@@ -8623,10 +8726,11 @@
             "bearer": []
           }
         ],
+        "summary": "Abortar la publicación reservada de un audio",
         "tags": [
           "internal/storage-lifecycle"
         ],
-        "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Abortar la publicación reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/internal/storage-lifecycle/recover": {
@@ -8664,10 +8768,11 @@
             "bearer": []
           }
         ],
+        "summary": "Recuperar publicaciones de almacenamiento pendientes",
         "tags": [
           "internal/storage-lifecycle"
         ],
-        "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Recuperar publicaciones de almacenamiento pendientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/common/identifiers": {
@@ -13749,6 +13854,61 @@
         "description": "Responder una reseña de la propia vitrina. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/patients/me/reviews": {
+      "post": {
+        "description": "El destinatario sale del encuentro declarado: no hace falta conocer el identificador de la vitrina del profesional.",
+        "operationId": "PatientReviewsController_publishOwnReview",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommunityCreateReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Calificar una atención recibida",
+        "tags": [
+          "community-reviews"
+        ]
+      }
+    },
     "/community/groups": {
       "post": {
         "operationId": "CommunityGroupsController_createGroup",
@@ -14024,7 +14184,7 @@
         "description": "Integrantes de un grupo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/community/groups/{groupId}/members/{memberId}": {
+    "/community/groups/{groupId}/members/{member}": {
       "patch": {
         "operationId": "CommunityGroupsController_updateMember",
         "parameters": [
@@ -14037,10 +14197,12 @@
             }
           },
           {
-            "name": "memberId",
+            "name": "member",
             "required": true,
             "in": "path",
+            "description": "Id de la membresía (`group_members.id`).",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -14097,9 +14259,7 @@
           "community-groups"
         ],
         "description": "Aprobar/rechazar un alta o cambiar el rol. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/community/groups/{groupId}/members/{memberProfileId}": {
+      },
       "delete": {
         "operationId": "CommunityGroupsController_leaveGroup",
         "parameters": [
@@ -14112,10 +14272,12 @@
             }
           },
           {
-            "name": "memberProfileId",
+            "name": "member",
             "required": true,
             "in": "path",
+            "description": "Id del perfil del integrante que sale del grupo.",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -14830,12 +14992,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "429": {
             "$ref": "#/components/responses/RateLimited"
           },
@@ -14847,7 +15003,8 @@
         "tags": [
           "community-public"
         ],
-        "description": "Últimas publicaciones de todos los profesionales. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Últimas publicaciones de todos los profesionales. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/public/posts/{postId}/reactions": {
@@ -14886,12 +15043,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -14906,7 +15057,8 @@
         "tags": [
           "community-public"
         ],
-        "description": "Quiénes reaccionaron a una publicación pública. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Quiénes reaccionaron a una publicación pública. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/public/posts/{postId}/comments": {
@@ -14945,12 +15097,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -14965,7 +15111,8 @@
         "tags": [
           "community-public"
         ],
-        "description": "Comentarios raíz de una publicación pública. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Comentarios raíz de una publicación pública. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/public/comments/{commentId}/replies": {
@@ -15004,12 +15151,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -15024,7 +15165,8 @@
         "tags": [
           "community-public"
         ],
-        "description": "Respuestas de un comentario público. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Respuestas de un comentario público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/public/search": {
@@ -15505,12 +15647,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -15525,7 +15661,70 @@
         "tags": [
           "community-public"
         ],
-        "description": "Ficha pública por prefijo de vertical. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Ficha pública por prefijo de vertical. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/public/profiles/{prefijo}/{slug}/reviews": {
+      "get": {
+        "operationId": "CommunityPublicController_listPublicProfileReviews",
+        "parameters": [
+          {
+            "name": "prefijo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "summary": "Opiniones publicadas de una ficha pública",
+        "tags": [
+          "community-public"
+        ],
+        "security": [],
+        "description": "Opiniones publicadas de una ficha pública. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/public/media/{id}": {
@@ -15548,12 +15747,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -15568,7 +15761,8 @@
         "tags": [
           "community-public"
         ],
-        "description": "Servir una imagen pública (avatar, portada o post). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Servir una imagen pública (avatar, portada o post). Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/p/{slug}": {
@@ -19691,6 +19885,16 @@
           }
         },
         "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceStatusDto"
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
@@ -20213,12 +20417,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "429": {
             "$ref": "#/components/responses/RateLimited"
           },
@@ -20230,7 +20428,8 @@
         "tags": [
           "insurance-catalog"
         ],
-        "description": "Catálogo público de aseguradoras y sus planes de salud. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Catálogo público de aseguradoras y sus planes de salud. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/insurance/analytics/loss-ratio": {
@@ -21421,6 +21620,71 @@
       }
     },
     "/practitioners/me/sites/{siteId}": {
+      "patch": {
+        "description": "Cambia nombre, huso horario o dirección sin retirar la sede: el id se conserva, y es el que la agenda referencia en cada turno.",
+        "operationId": "PractitionerSitesController_updateOwnSite",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOwnSiteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Corregir un consultorio propio",
+        "tags": [
+          "practice"
+        ]
+      },
       "delete": {
         "operationId": "PractitionerSitesController_deleteOwnSite",
         "parameters": [
@@ -21472,6 +21736,73 @@
           "practice"
         ],
         "description": "Retirar un consultorio propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practitioners/me/sites/{siteId}/bank-qr": {
+      "put": {
+        "description": "Asocia un archivo ya subido como QR de cobro de esa sede. `fileId: null` lo quita.",
+        "operationId": "PractitionerSitesController_setSiteBankQr",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetSiteBankQrDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fijar o quitar el QR bancario de una sede",
+        "tags": [
+          "practice"
+        ]
       }
     },
     "/role-assignments/{roleId}/support-assignments": {
@@ -57982,12 +58313,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "429": {
             "$ref": "#/components/responses/RateLimited"
           },
@@ -57999,7 +58324,8 @@
         "tags": [
           "pharmacy-public"
         ],
-        "description": "Vitrina pública de medicamentos con disponibilidad por farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Vitrina pública de medicamentos con disponibilidad por farmacia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/public/medications/{conceptId}/availability": {
@@ -58056,12 +58382,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -58076,7 +58396,8 @@
         "tags": [
           "pharmacy-public"
         ],
-        "description": "Farmacias que publican un medicamento, con precio y distancia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Farmacias que publican un medicamento, con precio y distancia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/pharmacy/{pharmacyId}/suppliers": {
@@ -80683,6 +81004,136 @@
           "fileId"
         ]
       },
+      "DependentSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "personId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Nombre para mostrar, ya compuesto"
+          },
+          "name": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2018-03-14"
+          },
+          "ageYears": {
+            "type": "number",
+            "description": "Edad cumplida en años"
+          },
+          "nationalId": {
+            "type": "string"
+          },
+          "relationshipCode": {
+            "type": "string",
+            "description": "Parentesco visto desde el dependiente",
+            "enum": [
+              "CHILD",
+              "PARENT",
+              "SPOUSE",
+              "WARD",
+              "OTHER"
+            ]
+          },
+          "relationshipDisplay": {
+            "type": "string",
+            "description": "Rótulo en castellano",
+            "example": "Hijo/a"
+          },
+          "isLegalGuardian": {
+            "type": "boolean",
+            "description": "Si el vínculo afirma la tutela legal"
+          }
+        },
+        "required": [
+          "id",
+          "patientProfileId",
+          "personId",
+          "fullName",
+          "relationshipCode",
+          "relationshipDisplay",
+          "isLegalGuardian"
+        ]
+      },
+      "CreateDependentDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre de pila",
+            "maxLength": 100
+          },
+          "middleName": {
+            "type": "string",
+            "description": "Segundo nombre",
+            "maxLength": 100
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Apellido paterno",
+            "maxLength": 100
+          },
+          "motherLastName": {
+            "type": "string",
+            "description": "Apellido materno",
+            "maxLength": 100
+          },
+          "birthDate": {
+            "type": "string",
+            "description": "Fecha de nacimiento (ISO date, YYYY-MM-DD)",
+            "format": "date",
+            "example": "2018-03-14"
+          },
+          "sexAtBirth": {
+            "type": "string",
+            "description": "Sexo asignado al nacer",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "INTERSEX",
+              "UNKNOWN"
+            ]
+          },
+          "nationalId": {
+            "type": "string",
+            "description": "Documento de identidad, si el dependiente ya lo tiene",
+            "maxLength": 40
+          },
+          "issuerAdministrativeAreaConceptId": {
+            "type": "string",
+            "description": "Departamento que expidió el documento (VS_BO_DEPARTMENT)",
+            "format": "uuid"
+          },
+          "relationshipConceptId": {
+            "type": "string",
+            "description": "Qué es el titular para el dependiente (madre, padre, hijo/a, cónyuge o tutor legal)",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "lastName",
+          "birthDate",
+          "relationshipConceptId"
+        ]
+      },
       "CreatePatientDto": {
         "type": "object",
         "properties": {
@@ -87006,6 +87457,29 @@
           "initiatedBy"
         ]
       },
+      "ResourceStatusDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Concepto de estado del recurso"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "createdAt"
+        ]
+      },
       "ClaimPatientDto": {
         "type": "object",
         "properties": {
@@ -89005,6 +89479,37 @@
             ]
           }
         }
+      },
+      "UpdateOwnSiteDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre del consultorio",
+            "maxLength": 200
+          },
+          "timeZone": {
+            "type": "string",
+            "example": "America/La_Paz"
+          },
+          "address": {
+            "$ref": "#/components/schemas/OwnSiteAddressDto"
+          }
+        }
+      },
+      "SetSiteBankQrDto": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Archivo del QR ya subido, o null para quitarlo"
+          }
+        },
+        "required": [
+          "fileId"
+        ]
       },
       "CreateSupportAssignmentDto": {
         "type": "object",

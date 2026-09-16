@@ -26,10 +26,10 @@ Referencia exhaustiva de 19 operación(es) del módulo `common`, derivada del co
 13. [POST /common/identifiers](#13-post-common-identifiers) — Registrar un identificador oficial (UC-02-01)
 14. [POST /internal/files/versions/{vid}/scan-result](#14-post-internal-files-versions-vid-scan-result) — Registrar resultado de escaneo antimalware (UC-02-09)
 15. [GET /internal/files/versions/pending-scan](#15-get-internal-files-versions-pending-scan) — Listar versiones pendientes de escaneo antimalware
-16. [POST /internal/storage-lifecycle/audio/{assetId}/abort](#16-post-internal-storage-lifecycle-audio-assetid-abort) — InternalStorageLifecycleController_abort
-17. [POST /internal/storage-lifecycle/audio/{assetId}/begin](#17-post-internal-storage-lifecycle-audio-assetid-begin) — InternalStorageLifecycleController_begin
-18. [POST /internal/storage-lifecycle/audio/{assetId}/dispatch](#18-post-internal-storage-lifecycle-audio-assetid-dispatch) — InternalStorageLifecycleController_dispatch
-19. [POST /internal/storage-lifecycle/recover](#19-post-internal-storage-lifecycle-recover) — InternalStorageLifecycleController_recover
+16. [POST /internal/storage-lifecycle/audio/{assetId}/abort](#16-post-internal-storage-lifecycle-audio-assetid-abort) — Abortar la publicación reservada de un audio
+17. [POST /internal/storage-lifecycle/audio/{assetId}/begin](#17-post-internal-storage-lifecycle-audio-assetid-begin) — Reservar la publicación de un audio en almacenamiento
+18. [POST /internal/storage-lifecycle/audio/{assetId}/dispatch](#18-post-internal-storage-lifecycle-audio-assetid-dispatch) — Despachar la subida reservada de un audio
+19. [POST /internal/storage-lifecycle/recover](#19-post-internal-storage-lifecycle-recover) — Recuperar publicaciones de almacenamiento pendientes
 
 ---
 
@@ -583,6 +583,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "currentVersionId": "00000000-0000-4000-8000-000000000001",
   "originalName": "Nombre de ejemplo",
+  "mimeType": "valor-ejemplo",
+  "sizeBytes": 1,
   "category": "DOCUMENT",
   "sensitivity": "NORMAL",
   "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -597,6 +599,8 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
 | `originalName` | No | `string` | Sin restricción adicional declarada | Valor de original name mantenido por la instancia. | `Nombre de ejemplo` |
+| `mimeType` | No | `string` | Sin restricción adicional declarada | Tipo MIME de la versión vigente. Ausente si no hay versión vigente. | `valor-ejemplo` |
+| `sizeBytes` | No | `number` | Sin restricción adicional declarada | Tamaño en bytes de la versión vigente. Ausente si no hay versión vigente. | `1` |
 | `category` | Sí | `string` | valores: `DOCUMENT`, `IMAGE` | Valor de category mantenido por la instancia. | `DOCUMENT` |
 | `sensitivity` | Sí | `string` | valores: `NORMAL`, `PHI` | Valor de sensitivity mantenido por la instancia. | `NORMAL` |
 | `lifecycleStatusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del ciclo de vida (concept id). | `00000000-0000-4000-8000-000000000001` |
@@ -1469,6 +1473,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "id": "00000000-0000-4000-8000-000000000001",
         "currentVersionId": "00000000-0000-4000-8000-000000000001",
         "originalName": "Nombre de ejemplo",
+        "mimeType": "valor-ejemplo",
+        "sizeBytes": 1,
         "category": "DOCUMENT",
         "sensitivity": "NORMAL",
         "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1484,15 +1490,17 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<LinkedFileResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"linkId":"00000000-0000-4000-8000-000000000001","ownerId":"00000000-0000-4000-8000-000000000001","ownerType":"USER","linkedAt":"2026-07-31T12:00:00.000Z","file":{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}}]` |
+| `items` | Sí | `array<LinkedFileResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"linkId":"00000000-0000-4000-8000-000000000001","ownerId":"00000000-0000-4000-8000-000000000001","ownerType":"USER","linkedAt":"2026-07-31T12:00:00.000Z","file":{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}}]` |
 | `items[].linkId` | Sí | `string` | formato `uuid` | Id del vínculo, no del archivo. | `00000000-0000-4000-8000-000000000001` |
 | `items[].ownerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Sin descripción específica en el contrato OpenAPI. | `USER` |
 | `items[].linkedAt` | Sí | `string` | formato `date-time` | Cuándo se adjuntó. | `2026-07-31T12:00:00.000Z` |
-| `items[].file` | Sí | `FileResponseDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}` |
+| `items[].file` | Sí | `FileResponseDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}` |
 | `items[].file.id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].file.currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
 | `items[].file.originalName` | No | `string` | Sin restricción adicional declarada | Valor de original name mantenido por la instancia. | `Nombre de ejemplo` |
+| `items[].file.mimeType` | No | `string` | Sin restricción adicional declarada | Tipo MIME de la versión vigente. Ausente si no hay versión vigente. | `valor-ejemplo` |
+| `items[].file.sizeBytes` | No | `number` | Sin restricción adicional declarada | Tamaño en bytes de la versión vigente. Ausente si no hay versión vigente. | `1` |
 | `items[].file.category` | Sí | `string` | valores: `DOCUMENT`, `IMAGE` | Valor de category mantenido por la instancia. | `DOCUMENT` |
 | `items[].file.sensitivity` | Sí | `string` | valores: `NORMAL`, `PHI` | Valor de sensitivity mantenido por la instancia. | `NORMAL` |
 | `items[].file.lifecycleStatusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del ciclo de vida (concept id). | `00000000-0000-4000-8000-000000000001` |
@@ -1616,6 +1624,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "currentVersionId": "00000000-0000-4000-8000-000000000001",
   "originalName": "Nombre de ejemplo",
+  "mimeType": "valor-ejemplo",
+  "sizeBytes": 1,
   "category": "DOCUMENT",
   "sensitivity": "NORMAL",
   "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1630,6 +1640,8 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
 | `originalName` | No | `string` | Sin restricción adicional declarada | Valor de original name mantenido por la instancia. | `Nombre de ejemplo` |
+| `mimeType` | No | `string` | Sin restricción adicional declarada | Tipo MIME de la versión vigente. Ausente si no hay versión vigente. | `valor-ejemplo` |
+| `sizeBytes` | No | `number` | Sin restricción adicional declarada | Tamaño en bytes de la versión vigente. Ausente si no hay versión vigente. | `1` |
 | `category` | Sí | `string` | valores: `DOCUMENT`, `IMAGE` | Valor de category mantenido por la instancia. | `DOCUMENT` |
 | `sensitivity` | Sí | `string` | valores: `NORMAL`, `PHI` | Valor de sensitivity mantenido por la instancia. | `NORMAL` |
 | `lifecycleStatusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del ciclo de vida (concept id). | `00000000-0000-4000-8000-000000000001` |
@@ -2066,14 +2078,14 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `internal/storage-lifecycle`
-- **Nombre:** InternalStorageLifecycleController_abort
+- **Nombre:** Abortar la publicación reservada de un audio
 - **Operation ID:** `InternalStorageLifecycleController_abort`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [InternalStorageLifecycleController.abort](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
 
 ### Descripción de negocio
 
-undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Abortar la publicación reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
 
 ### Descripción del sistema
@@ -2171,14 +2183,14 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `internal/storage-lifecycle`
-- **Nombre:** InternalStorageLifecycleController_begin
+- **Nombre:** Reservar la publicación de un audio en almacenamiento
 - **Operation ID:** `InternalStorageLifecycleController_begin`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [InternalStorageLifecycleController.begin](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
 
 ### Descripción de negocio
 
-undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Reservar la publicación de un audio en almacenamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
 
 ### Descripción del sistema
@@ -2276,14 +2288,14 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `internal/storage-lifecycle`
-- **Nombre:** InternalStorageLifecycleController_dispatch
+- **Nombre:** Despachar la subida reservada de un audio
 - **Operation ID:** `InternalStorageLifecycleController_dispatch`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [InternalStorageLifecycleController.dispatch](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
 
 ### Descripción de negocio
 
-undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Despachar la subida reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
 
 ### Descripción del sistema
@@ -2381,14 +2393,14 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `internal/storage-lifecycle`
-- **Nombre:** InternalStorageLifecycleController_recover
+- **Nombre:** Recuperar publicaciones de almacenamiento pendientes
 - **Operation ID:** `InternalStorageLifecycleController_recover`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [InternalStorageLifecycleController.recover](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
 
 ### Descripción de negocio
 
-undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Recuperar publicaciones de almacenamiento pendientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
 
 ### Descripción del sistema

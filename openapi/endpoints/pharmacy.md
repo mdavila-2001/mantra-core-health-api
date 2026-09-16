@@ -2202,7 +2202,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Vitrina pública de medicamentos con disponibilidad por farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Vitrina pública de medicamentos con disponibilidad por farmacia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: La vitrina: un medicamento por tarjeta.
 
@@ -2253,8 +2253,6 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PublicMedicationPageDto>` | Sí |
 | 400 | Consulta completada correctamente. | `Promise<PublicMedicationPageDto>` | No |
-| 401 | Consulta completada correctamente. | `Promise<PublicMedicationPageDto>` | No |
-| 403 | Consulta completada correctamente. | `Promise<PublicMedicationPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicMedicationPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicMedicationPageDto>` | No |
 
@@ -2346,7 +2344,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Farmacias que publican un medicamento, con precio y distancia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Farmacias que publican un medicamento, con precio y distancia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: Qué farmacias tienen ese medicamento, con precio y distancia.
 
@@ -2396,8 +2394,6 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | Sí |
 | 400 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |
-| 401 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |
-| 403 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |
 | 404 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |

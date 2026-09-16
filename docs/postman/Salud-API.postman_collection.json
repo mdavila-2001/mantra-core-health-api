@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1283 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1283 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1289 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1289 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -18224,7 +18224,7 @@
                 "description": "Unirse a un grupo / comunidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /community/groups/{groupId}/members`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `CommunityGroupsController_joinGroup`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"memberProfileId\": \"{{memberProfileId}}\"\n}",
+                  "raw": "{\n  \"memberProfileId\": \"<memberProfileId: uuid existente>\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -18544,7 +18544,7 @@
               ]
             },
             {
-              "name": "PATCH /community/groups/{groupId}/members/{memberId} · Aprobar/rechazar un alta o cambiar el rol",
+              "name": "PATCH /community/groups/{groupId}/members/{member} · Aprobar/rechazar un alta o cambiar el rol",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -18560,7 +18560,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/community/groups/:groupId/members/:memberId",
+                  "raw": "{{baseUrl}}/community/groups/:groupId/members/:member",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -18569,7 +18569,7 @@
                     "groups",
                     ":groupId",
                     "members",
-                    ":memberId"
+                    ":member"
                   ],
                   "variable": [
                     {
@@ -18578,13 +18578,13 @@
                       "description": "Identificador de ruta · variable `{{groupId}}`"
                     },
                     {
-                      "key": "memberId",
-                      "value": "{{memberId}}",
-                      "description": "Identificador de ruta · variable `{{memberId}}`"
+                      "key": "member",
+                      "value": "{{member}}",
+                      "description": "Identificador de ruta · variable `{{member}}`"
                     }
                   ]
                 },
-                "description": "Aprobar/rechazar un alta o cambiar el rol. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /community/groups/{groupId}/members/{memberId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `CommunityGroupsController_updateMember`",
+                "description": "Aprobar/rechazar un alta o cambiar el rol. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /community/groups/{groupId}/members/{member}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `CommunityGroupsController_updateMember`",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"role\": \"MEMBER\",\n  \"decision\": \"APPROVE\"\n}",
@@ -18611,7 +18611,7 @@
               ]
             },
             {
-              "name": "DELETE /community/groups/{groupId}/members/{memberProfileId} · Salir del grupo o dar de baja a un integrante",
+              "name": "DELETE /community/groups/{groupId}/members/{member} · Salir del grupo o dar de baja a un integrante",
               "request": {
                 "method": "DELETE",
                 "header": [
@@ -18623,7 +18623,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/community/groups/:groupId/members/:memberProfileId",
+                  "raw": "{{baseUrl}}/community/groups/:groupId/members/:member",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -18632,7 +18632,7 @@
                     "groups",
                     ":groupId",
                     "members",
-                    ":memberProfileId"
+                    ":member"
                   ],
                   "variable": [
                     {
@@ -18641,13 +18641,13 @@
                       "description": "Identificador de ruta · variable `{{groupId}}`"
                     },
                     {
-                      "key": "memberProfileId",
-                      "value": "{{memberProfileId}}",
-                      "description": "Identificador de ruta · variable `{{memberProfileId}}`"
+                      "key": "member",
+                      "value": "{{member}}",
+                      "description": "Identificador de ruta · variable `{{member}}`"
                     }
                   ]
                 },
-                "description": "Salir del grupo o dar de baja a un integrante. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /community/groups/{groupId}/members/{memberProfileId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `CommunityGroupsController_leaveGroup`"
+                "description": "Salir del grupo o dar de baja a un integrante. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /community/groups/{groupId}/members/{member}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `CommunityGroupsController_leaveGroup`"
               },
               "response": [],
               "event": [
@@ -36551,12 +36551,6 @@
                   {
                     "key": "Content-Type",
                     "value": "application/json"
-                  },
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
                   }
                 ],
                 "url": {
@@ -36570,7 +36564,7 @@
                     "upload-registration-document"
                   ]
                 },
-                "description": "Pre-cargar un documento legal (PDF) del registro de organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/upload-registration-document`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_uploadRegistrationDocument`",
+                "description": "Pre-cargar un documento legal (PDF) del registro de organización. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/upload-registration-document`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_uploadRegistrationDocument`",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"<binario>\"\n}",
@@ -36579,6 +36573,9 @@
                       "language": "json"
                     }
                   }
+                },
+                "auth": {
+                  "type": "noauth"
                 }
               },
               "response": [],
@@ -39550,14 +39547,7 @@
           "name": "GET /insurance-carrier-catalog · Catálogo público de aseguradoras y sus planes de salud",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/insurance-carrier-catalog",
               "host": [
@@ -39567,7 +39557,10 @@
                 "insurance-carrier-catalog"
               ]
             },
-            "description": "Catálogo público de aseguradoras y sus planes de salud. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance-carrier-catalog`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `InsuranceCatalogController_listCatalog`"
+            "description": "Catálogo público de aseguradoras y sus planes de salud. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance-carrier-catalog`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500\n\noperationId: `InsuranceCatalogController_listCatalog`",
+            "auth": {
+              "type": "noauth"
+            }
           },
           "response": [],
           "event": [
@@ -43745,7 +43738,7 @@
           "name": "internal/storage-lifecycle",
           "item": [
             {
-              "name": "POST /internal/storage-lifecycle/recover",
+              "name": "POST /internal/storage-lifecycle/recover · Recuperar publicaciones de almacenamiento pendientes",
               "request": {
                 "method": "POST",
                 "header": [
@@ -43767,7 +43760,7 @@
                     "recover"
                   ]
                 },
-                "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/recover`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_recover`"
+                "description": "Recuperar publicaciones de almacenamiento pendientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/recover`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_recover`"
               },
               "response": [],
               "event": [
@@ -43792,7 +43785,7 @@
               ]
             },
             {
-              "name": "POST /internal/storage-lifecycle/audio/{assetId}/abort",
+              "name": "POST /internal/storage-lifecycle/audio/{assetId}/abort · Abortar la publicación reservada de un audio",
               "request": {
                 "method": "POST",
                 "header": [
@@ -43827,7 +43820,7 @@
                     }
                   ]
                 },
-                "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/audio/{assetId}/abort`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_abort`"
+                "description": "Abortar la publicación reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/audio/{assetId}/abort`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_abort`"
               },
               "response": [],
               "event": [
@@ -43852,7 +43845,7 @@
               ]
             },
             {
-              "name": "POST /internal/storage-lifecycle/audio/{assetId}/begin",
+              "name": "POST /internal/storage-lifecycle/audio/{assetId}/begin · Reservar la publicación de un audio en almacenamiento",
               "request": {
                 "method": "POST",
                 "header": [
@@ -43887,7 +43880,7 @@
                     }
                   ]
                 },
-                "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/audio/{assetId}/begin`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_begin`"
+                "description": "Reservar la publicación de un audio en almacenamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/audio/{assetId}/begin`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_begin`"
               },
               "response": [],
               "event": [
@@ -43912,7 +43905,7 @@
               ]
             },
             {
-              "name": "POST /internal/storage-lifecycle/audio/{assetId}/dispatch",
+              "name": "POST /internal/storage-lifecycle/audio/{assetId}/dispatch · Despachar la subida reservada de un audio",
               "request": {
                 "method": "POST",
                 "header": [
@@ -43947,7 +43940,7 @@
                     }
                   ]
                 },
-                "description": "undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/audio/{assetId}/dispatch`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_dispatch`"
+                "description": "Despachar la subida reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/storage-lifecycle/audio/{assetId}/dispatch`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InternalStorageLifecycleController_dispatch`"
               },
               "response": [],
               "event": [
@@ -50253,8 +50246,68 @@
       ]
     },
     {
-      "name": "patients (1)",
+      "name": "patients (2)",
       "item": [
+        {
+          "name": "POST /patients/me/reviews · Calificar una atención recibida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patients/me/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patients",
+                "me",
+                "reviews"
+              ]
+            },
+            "description": "El destinatario sale del encuentro declarado: no hace falta conocer el identificador de la vitrina del profesional.\n\n`POST /patients/me/reviews`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `PatientReviewsController_publishOwnReview`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verifiedEncounterId\": \"<verifiedEncounterId: uuid existente>\",\n  \"overallRating\": 1,\n  \"reviewText\": \"reviewText-ejemplo\",\n  \"displayMode\": \"REAL_NAME\",\n  \"dimensions\": [\n    {\n      \"dimension\": \"COMMUNICATION\",\n      \"score\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{reviewId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.reviewId);",
+                  "  if (id) pm.environment.set('reviewId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "POST /patients/{id}/immunization-plan/project · Proyectar el plan de inmunización y abrir brechas",
           "request": {
@@ -58108,7 +58161,7 @@
       ]
     },
     {
-      "name": "practitioners (4)",
+      "name": "practitioners (6)",
       "item": [
         {
           "name": "GET /practitioners/me/role-assignments · Mis vinculaciones con organizaciones",
@@ -58268,6 +58321,129 @@
                   "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                   "  if (first && first.id) pm.environment.set('siteId', first.id);",
                   "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /practitioners/me/sites/{siteId} · Corregir un consultorio propio",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/practitioners/me/sites/:siteId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "practitioners",
+                "me",
+                "sites",
+                ":siteId"
+              ],
+              "variable": [
+                {
+                  "key": "siteId",
+                  "value": "{{siteId}}",
+                  "description": "Identificador de ruta · variable `{{siteId}}`"
+                }
+              ]
+            },
+            "description": "Cambia nombre, huso horario o dirección sin retirar la sede: el id se conserva, y es el que la agenda referencia en cada turno.\n\n`PATCH /practitioners/me/sites/{siteId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `PractitionerSitesController_updateOwnSite`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /practitioners/me/sites/{siteId}/bank-qr · Fijar o quitar el QR bancario de una sede",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/practitioners/me/sites/:siteId/bank-qr",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "practitioners",
+                "me",
+                "sites",
+                ":siteId",
+                "bank-qr"
+              ],
+              "variable": [
+                {
+                  "key": "siteId",
+                  "value": "{{siteId}}",
+                  "description": "Identificador de ruta · variable `{{siteId}}`"
+                }
+              ]
+            },
+            "description": "Asocia un archivo ya subido como QR de cobro de esa sede. `fileId: null` lo quita.\n\n`PUT /practitioners/me/sites/{siteId}/bank-qr`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `PractitionerSitesController_setSiteBankQr`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileId\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }
@@ -60604,7 +60780,7 @@
       ]
     },
     {
-      "name": "profiles (37)",
+      "name": "profiles (39)",
       "item": [
         {
           "name": "profiles-patients",
@@ -60730,6 +60906,55 @@
                       "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/patients/me/dependents · Listar los dependientes a cargo del paciente autenticado",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/dependents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "dependents"
+                  ]
+                },
+                "description": "Listar los dependientes a cargo del paciente autenticado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients/me/dependents`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `ProfilesPatientsController_getOwnDependents`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.dependents || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('dependentId', first.id);",
                       "}"
                     ]
                   }
@@ -60900,6 +61125,67 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.patientId);",
                       "  if (id) pm.environment.set('patientId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /profiles/patients/me/dependents · Registrar un dependiente (menor o adulto mayor tutelado)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/dependents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "dependents"
+                  ]
+                },
+                "description": "Registrar un dependiente (menor o adulto mayor tutelado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients/me/dependents`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPatientsController_registerOwnDependent`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": \"2018-03-14\",\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"relationshipConceptId\": \"<relationshipConceptId: uuid del catálogo, ver GET /terminology/concepts>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{dependentId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.dependentId);",
+                      "  if (id) pm.environment.set('dependentId', id);",
                       "}"
                     ]
                   }
@@ -63058,7 +63344,7 @@
       ]
     },
     {
-      "name": "public (18)",
+      "name": "public (19)",
       "item": [
         {
           "name": "community-public",
@@ -63142,14 +63428,7 @@
               "name": "GET /public/posts · Últimas publicaciones de todos los profesionales",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/posts?cursor=cursor-ejemplo&limit=limit-ejemplo",
                   "host": [
@@ -63174,7 +63453,10 @@
                     }
                   ]
                 },
-                "description": "Últimas publicaciones de todos los profesionales. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/posts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `CommunityPublicController_feedPublico`"
+                "description": "Últimas publicaciones de todos los profesionales. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/posts`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500\n\noperationId: `CommunityPublicController_feedPublico`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -63668,14 +63950,7 @@
               "name": "GET /public/comments/{commentId}/replies · Respuestas de un comentario público",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/comments/:commentId/replies?cursor=cursor-ejemplo&limit=limit-ejemplo",
                   "host": [
@@ -63709,7 +63984,10 @@
                     }
                   ]
                 },
-                "description": "Respuestas de un comentario público. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/comments/{commentId}/replies`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `CommunityPublicController_commentReplies`"
+                "description": "Respuestas de un comentario público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/comments/{commentId}/replies`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `CommunityPublicController_commentReplies`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -63738,14 +64016,7 @@
               "name": "GET /public/media/{id} · Servir una imagen pública (avatar, portada o post)",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/media/:id",
                   "host": [
@@ -63764,7 +64035,10 @@
                     }
                   ]
                 },
-                "description": "Servir una imagen pública (avatar, portada o post). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/media/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `CommunityPublicController_getPublicMedia`"
+                "description": "Servir una imagen pública (avatar, portada o post). Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/media/{id}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `CommunityPublicController_getPublicMedia`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -63793,14 +64067,7 @@
               "name": "GET /public/posts/{postId}/comments · Comentarios raíz de una publicación pública",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/posts/:postId/comments?cursor=cursor-ejemplo&limit=limit-ejemplo",
                   "host": [
@@ -63834,7 +64101,10 @@
                     }
                   ]
                 },
-                "description": "Comentarios raíz de una publicación pública. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/posts/{postId}/comments`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `CommunityPublicController_postComments`"
+                "description": "Comentarios raíz de una publicación pública. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/posts/{postId}/comments`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `CommunityPublicController_postComments`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -63863,14 +64133,7 @@
               "name": "GET /public/posts/{postId}/reactions · Quiénes reaccionaron a una publicación pública",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/posts/:postId/reactions?cursor=cursor-ejemplo&limit=limit-ejemplo",
                   "host": [
@@ -63904,7 +64167,10 @@
                     }
                   ]
                 },
-                "description": "Quiénes reaccionaron a una publicación pública. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/posts/{postId}/reactions`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `CommunityPublicController_postReactions`"
+                "description": "Quiénes reaccionaron a una publicación pública. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/posts/{postId}/reactions`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `CommunityPublicController_postReactions`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -63933,14 +64199,7 @@
               "name": "GET /public/profiles/{prefijo}/{slug} · Ficha pública por prefijo de vertical",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/profiles/:prefijo/:slug",
                   "host": [
@@ -63965,7 +64224,10 @@
                     }
                   ]
                 },
-                "description": "Ficha pública por prefijo de vertical. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/profiles/{prefijo}/{slug}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `CommunityPublicController_getProfileByPrefix`"
+                "description": "Ficha pública por prefijo de vertical. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/profiles/{prefijo}/{slug}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `CommunityPublicController_getProfileByPrefix`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -63989,6 +64251,78 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "GET /public/profiles/{prefijo}/{slug}/reviews · Opiniones publicadas de una ficha pública",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/public/profiles/:prefijo/:slug/reviews?cursor=cursor-ejemplo&limit=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "profiles",
+                    ":prefijo",
+                    ":slug",
+                    "reviews"
+                  ],
+                  "variable": [
+                    {
+                      "key": "prefijo",
+                      "value": "{{prefijo}}",
+                      "description": "Identificador de ruta · variable `{{prefijo}}`"
+                    },
+                    {
+                      "key": "slug",
+                      "value": "{{slug}}",
+                      "description": "Identificador de ruta · variable `{{slug}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Opiniones publicadas de una ficha pública. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/profiles/{prefijo}/{slug}/reviews`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `CommunityPublicController_listPublicProfileReviews`",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.reviews || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('reviewId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
@@ -63999,14 +64333,7 @@
               "name": "GET /public/medications · Vitrina pública de medicamentos con disponibilidad por farmacia",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/medications",
                   "host": [
@@ -64055,7 +64382,10 @@
                     }
                   ]
                 },
-                "description": "Vitrina pública de medicamentos con disponibilidad por farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/medications`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `PharmacyPublicController_listMedications`"
+                "description": "Vitrina pública de medicamentos con disponibilidad por farmacia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/medications`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500\n\noperationId: `PharmacyPublicController_listMedications`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -64084,14 +64414,7 @@
               "name": "GET /public/medications/{conceptId}/availability · Farmacias que publican un medicamento, con precio y distancia",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/medications/:conceptId/availability",
                   "host": [
@@ -64131,7 +64454,10 @@
                     }
                   ]
                 },
-                "description": "Farmacias que publican un medicamento, con precio y distancia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/medications/{conceptId}/availability`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `PharmacyPublicController_getAvailability`"
+                "description": "Farmacias que publican un medicamento, con precio y distancia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/medications/{conceptId}/availability`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `PharmacyPublicController_getAvailability`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
