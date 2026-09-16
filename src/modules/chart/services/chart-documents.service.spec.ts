@@ -28,6 +28,7 @@ function build() {
     findRecordsByPatient: mockFn().mockResolvedValue([]),
     findRecordById: mockFn(),
     findFilesForRecords: mockFn().mockResolvedValue([]),
+    findByEncounter: mockFn().mockResolvedValue([]),
     createFile: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn() };

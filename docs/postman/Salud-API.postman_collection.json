@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1283 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1283 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1286 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1286 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -14004,7 +14004,7 @@
       ]
     },
     {
-      "name": "charts (18)",
+      "name": "charts (19)",
       "item": [
         {
           "name": "chart-care-plans",
@@ -14256,6 +14256,67 @@
                       "  const list = Array.isArray(body) ? body : (body.files || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('fileId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "chart-encounters",
+          "item": [
+            {
+              "name": "GET /charts/encounters/{id}/pdf · Descargar el PDF oficial de un encuentro cerrado",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/charts/encounters/:id/pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "charts",
+                    "encounters",
+                    ":id",
+                    "pdf"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{encounterId}}",
+                      "description": "Identificador de ruta · variable `{{encounterId}}`"
+                    }
+                  ]
+                },
+                "description": "Autoriza a quien puede leer la historia del paciente dueño del encuentro. Requiere que el encuentro esté cerrado (con sello).\n\n`GET /charts/encounters/{id}/pdf`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 422, 429, 500\n\noperationId: `ChartEncountersController_getEncounterPdf`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.encounters || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('encounterId', first.id);",
                       "}"
                     ]
                   }
@@ -60604,7 +60665,7 @@
       ]
     },
     {
-      "name": "profiles (37)",
+      "name": "profiles (39)",
       "item": [
         {
           "name": "profiles-patients",
@@ -60730,6 +60791,55 @@
                       "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/patients/me/dependents · Listar los dependientes a cargo del paciente autenticado",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/dependents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "dependents"
+                  ]
+                },
+                "description": "Listar los dependientes a cargo del paciente autenticado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients/me/dependents`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `ProfilesPatientsController_getOwnDependents`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.dependents || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('dependentId', first.id);",
                       "}"
                     ]
                   }
@@ -60900,6 +61010,67 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.patientId);",
                       "  if (id) pm.environment.set('patientId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /profiles/patients/me/dependents · Registrar un dependiente (menor o adulto mayor tutelado)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/dependents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "dependents"
+                  ]
+                },
+                "description": "Registrar un dependiente (menor o adulto mayor tutelado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients/me/dependents`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPatientsController_registerOwnDependent`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": \"2018-03-14\",\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"relationshipConceptId\": \"<relationshipConceptId: uuid del catálogo, ver GET /terminology/concepts>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{dependentId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.dependentId);",
+                      "  if (id) pm.environment.set('dependentId', id);",
                       "}"
                     ]
                   }

@@ -1,5 +1,6 @@
 export * from './care-episodes.service';
 export * from './encounters.service';
+export * from './encounter-seal.service';
 export * from './observations.service';
 export * from './service-requests.service';
 export * from './diagnostic-reports.service';

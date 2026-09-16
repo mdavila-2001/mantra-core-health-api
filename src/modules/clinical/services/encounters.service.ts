@@ -18,6 +18,7 @@ import {
 import { Encounters } from '../entities';
 import { CLIN } from '../clinical.concepts';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
+import { EncounterSealService } from './encounter-seal.service';
 
 /**
  * Código del estado `ENCOUNTER_FINISHED` (`CLIN.ENCOUNTER_FINISHED` sólo
@@ -47,6 +48,7 @@ export class EncountersService {
     private readonly encountersRepo: EncountersRepository,
     private readonly episodesRepo: CareEpisodesRepository,
     private readonly clinicalNotifications: ClinicalNotificationsService,
+    private readonly seal: EncounterSealService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(EncountersService.name);
@@ -238,6 +240,8 @@ export class EncountersService {
       startAt: encounter.startAt ?? null,
       endAt: encounter.endAt ?? null,
       createdAt: encounter.createdAt,
+      contentHash: encounter.contentHash ?? null,
+      sealedAt: encounter.sealedAt ?? null,
     };
   }
 
@@ -303,6 +307,9 @@ export class EncountersService {
         l.locationStatusConceptId = CLIN.LOCATION_COMPLETED;
         touch(l, actor.id);
       }
+
+      encounter.contentHash = await this.seal.computeHash(tx, encounter);
+      encounter.sealedAt = now;
 
       await tx.flush();
 

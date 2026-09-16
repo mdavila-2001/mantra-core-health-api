@@ -29,6 +29,7 @@ import { ClinicalRecordAccessGuard } from './guards';
 import {
   CareEpisodesService,
   EncountersService,
+  EncounterSealService,
   ObservationsService,
   ServiceRequestsService,
   DiagnosticReportsService,
@@ -85,6 +86,17 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
 // criterio de arriba: repo sin estado por `EntityManager`, sin importar el
 // módulo entero ni cerrar ciclo (`authz` no depende de `clinical`).
 import { CareRelationshipsRepository } from '../authz/repositories';
+// C.4 — el sello del encuentro reusa el hash ya calculado por nota y las
+// actividades/archivos de plan de cuidados y documento. Mismo criterio que
+// los repositorios de arriba: son clases sin estado que reciben el
+// `EntityManager` por parámetro. `clinical` NO puede importar `ChartModule`
+// (cerraría un ciclo: `chart` ya importa `clinical`), así que se proveen
+// sueltos los tres repos de `chart` que `EncounterSealService` necesita.
+import {
+  CarePlansRepository,
+  ClinicalNotesRepository,
+  DocumentsRepository,
+} from '../chart/repositories';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -130,9 +142,13 @@ import { CareRelationshipsRepository } from '../authz/repositories';
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
     ImmunizationsRepository,
+    ClinicalNotesRepository,
+    CarePlansRepository,
+    DocumentsRepository,
     // Servicios
     CareEpisodesService,
     EncountersService,
+    EncounterSealService,
     ObservationsService,
     ServiceRequestsService,
     DiagnosticReportsService,

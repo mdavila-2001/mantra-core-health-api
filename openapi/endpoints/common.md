@@ -583,6 +583,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "currentVersionId": "00000000-0000-4000-8000-000000000001",
   "originalName": "Nombre de ejemplo",
+  "mimeType": "valor-ejemplo",
+  "sizeBytes": 1,
   "category": "DOCUMENT",
   "sensitivity": "NORMAL",
   "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -597,6 +599,8 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
 | `originalName` | No | `string` | Sin restricción adicional declarada | Valor de original name mantenido por la instancia. | `Nombre de ejemplo` |
+| `mimeType` | No | `string` | Sin restricción adicional declarada | Tipo MIME de la versión vigente. Ausente si no hay versión vigente. | `valor-ejemplo` |
+| `sizeBytes` | No | `number` | Sin restricción adicional declarada | Tamaño en bytes de la versión vigente. Ausente si no hay versión vigente. | `1` |
 | `category` | Sí | `string` | valores: `DOCUMENT`, `IMAGE` | Valor de category mantenido por la instancia. | `DOCUMENT` |
 | `sensitivity` | Sí | `string` | valores: `NORMAL`, `PHI` | Valor de sensitivity mantenido por la instancia. | `NORMAL` |
 | `lifecycleStatusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del ciclo de vida (concept id). | `00000000-0000-4000-8000-000000000001` |
@@ -1469,6 +1473,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "id": "00000000-0000-4000-8000-000000000001",
         "currentVersionId": "00000000-0000-4000-8000-000000000001",
         "originalName": "Nombre de ejemplo",
+        "mimeType": "valor-ejemplo",
+        "sizeBytes": 1,
         "category": "DOCUMENT",
         "sensitivity": "NORMAL",
         "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1484,15 +1490,17 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<LinkedFileResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"linkId":"00000000-0000-4000-8000-000000000001","ownerId":"00000000-0000-4000-8000-000000000001","ownerType":"USER","linkedAt":"2026-07-31T12:00:00.000Z","file":{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}}]` |
+| `items` | Sí | `array<LinkedFileResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"linkId":"00000000-0000-4000-8000-000000000001","ownerId":"00000000-0000-4000-8000-000000000001","ownerType":"USER","linkedAt":"2026-07-31T12:00:00.000Z","file":{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}}]` |
 | `items[].linkId` | Sí | `string` | formato `uuid` | Id del vínculo, no del archivo. | `00000000-0000-4000-8000-000000000001` |
 | `items[].ownerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT`, `CONDITION`, `PROCEDURE` | Sin descripción específica en el contrato OpenAPI. | `USER` |
 | `items[].linkedAt` | Sí | `string` | formato `date-time` | Cuándo se adjuntó. | `2026-07-31T12:00:00.000Z` |
-| `items[].file` | Sí | `FileResponseDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}` |
+| `items[].file` | Sí | `FileResponseDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}` |
 | `items[].file.id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].file.currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
 | `items[].file.originalName` | No | `string` | Sin restricción adicional declarada | Valor de original name mantenido por la instancia. | `Nombre de ejemplo` |
+| `items[].file.mimeType` | No | `string` | Sin restricción adicional declarada | Tipo MIME de la versión vigente. Ausente si no hay versión vigente. | `valor-ejemplo` |
+| `items[].file.sizeBytes` | No | `number` | Sin restricción adicional declarada | Tamaño en bytes de la versión vigente. Ausente si no hay versión vigente. | `1` |
 | `items[].file.category` | Sí | `string` | valores: `DOCUMENT`, `IMAGE` | Valor de category mantenido por la instancia. | `DOCUMENT` |
 | `items[].file.sensitivity` | Sí | `string` | valores: `NORMAL`, `PHI` | Valor de sensitivity mantenido por la instancia. | `NORMAL` |
 | `items[].file.lifecycleStatusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del ciclo de vida (concept id). | `00000000-0000-4000-8000-000000000001` |
@@ -1616,6 +1624,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "currentVersionId": "00000000-0000-4000-8000-000000000001",
   "originalName": "Nombre de ejemplo",
+  "mimeType": "valor-ejemplo",
+  "sizeBytes": 1,
   "category": "DOCUMENT",
   "sensitivity": "NORMAL",
   "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1630,6 +1640,8 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
 | `originalName` | No | `string` | Sin restricción adicional declarada | Valor de original name mantenido por la instancia. | `Nombre de ejemplo` |
+| `mimeType` | No | `string` | Sin restricción adicional declarada | Tipo MIME de la versión vigente. Ausente si no hay versión vigente. | `valor-ejemplo` |
+| `sizeBytes` | No | `number` | Sin restricción adicional declarada | Tamaño en bytes de la versión vigente. Ausente si no hay versión vigente. | `1` |
 | `category` | Sí | `string` | valores: `DOCUMENT`, `IMAGE` | Valor de category mantenido por la instancia. | `DOCUMENT` |
 | `sensitivity` | Sí | `string` | valores: `NORMAL`, `PHI` | Valor de sensitivity mantenido por la instancia. | `NORMAL` |
 | `lifecycleStatusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del ciclo de vida (concept id). | `00000000-0000-4000-8000-000000000001` |

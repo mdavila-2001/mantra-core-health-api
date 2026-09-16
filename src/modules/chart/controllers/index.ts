@@ -3,3 +3,4 @@ export * from './chart-documents.controller';
 export * from './chart-care-plans.controller';
 export * from './chart-templates.controller';
 export * from './chart-read.controller';
+export * from './chart-encounters.controller';

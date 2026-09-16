@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1283 de 1283 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1286 de 1286 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -53,7 +53,7 @@ Esta referencia documenta **1283 de 1283 operaciones HTTP** registradas en `open
 | [authz](authz.md) | 24 | `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-pdp`, `authz-policies`, `authz-roles` | 7 |
 | [automation](automation.md) | 17 | `automation` | 2 |
 | [billing](billing.md) | 18 | `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog` | 4 |
-| [chart](chart.md) | 18 | `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates` | 5 |
+| [chart](chart.md) | 19 | `chart-care-plans`, `chart-documents`, `chart-encounters`, `chart-notes`, `chart-read`, `chart-templates` | 6 |
 | [clinical](clinical.md) | 27 | `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records` | 6 |
 | [clinical_ext](clinical-ext.md) | 26 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 8 |
 | [common](common.md) | 19 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files`, `internal/storage-lifecycle` | 6 |
@@ -92,7 +92,7 @@ Esta referencia documenta **1283 de 1283 operaciones HTTP** registradas en `open
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
 | [practice](practice.md) | 26 | `practice` | 6 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
-| [profiles](profiles.md) | 41 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 3 |
+| [profiles](profiles.md) | 43 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 3 |
 | [promotions](promotions.md) | 15 | `loyalty`, `promotions` | 2 |
 | [qa_lab](qa-lab.md) | 13 | `qa`, `qa-internal` | 2 |
 | [quotations](quotations.md) | 4 | `quotations` | 1 |
@@ -117,4 +117,4 @@ Esta referencia documenta **1283 de 1283 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1283 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1286 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

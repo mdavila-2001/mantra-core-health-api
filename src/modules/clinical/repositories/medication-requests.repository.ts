@@ -140,6 +140,25 @@ export class MedicationRequestsRepository {
   }
 
   /**
+   * Prescripciones de un encuentro (para el sello y el PDF oficial del
+   * cierre: el hash tiene que ser determinista).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param encounterId - Encuentro cuyas prescripciones se leen.
+   * @returns Filas ordenadas por `createdAt, id`.
+   */
+  findByEncounter(
+    em: EntityManager,
+    encounterId: string,
+  ): Promise<MedicationRequests[]> {
+    return em.find(
+      MedicationRequests,
+      { encounterId },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Busca una receta por su clave de idempotencia de emisión. `issue_idempotency_key`
    * tiene un índice UNIQUE global (parcial, `WHERE ... IS NOT NULL`); esto permite
    * detectar en el propio servicio la reutilización de una clave sobre una receta
