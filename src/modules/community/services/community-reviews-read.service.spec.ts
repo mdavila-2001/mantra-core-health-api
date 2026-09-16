@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityReviewsReadService } from './community-reviews-read.service';
 import { ResourceNotFoundException } from '../../../common';
+import { COMM } from '../community.concepts';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -22,6 +23,11 @@ function build() {
     listByTargetPage: mockFn().mockResolvedValue([]),
     listDimensionScores: mockFn().mockResolvedValue([]),
     listResponses: mockFn().mockResolvedValue([]),
+    displayNamesByPerson: mockFn().mockResolvedValue(new Map()),
+  };
+  const searchRepo = {
+    findPublicBySlug: mockFn().mockResolvedValue(null),
+    ratingsByProfile: mockFn().mockResolvedValue(new Map()),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
@@ -29,9 +35,10 @@ function build() {
     em as any,
     profilesRepo as any,
     reviewsRepo as any,
+    searchRepo as any,
     logger as any,
   );
-  return { service, profilesRepo, reviewsRepo };
+  return { service, profilesRepo, reviewsRepo, searchRepo };
 }
 
 const review = {
@@ -107,5 +114,177 @@ describe('CommunityReviewsReadService', () => {
 
     expect(res.items).toHaveLength(1);
     expect(res.nextCursor).not.toBeNull();
+  });
+});
+
+describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)', () => {
+  const perfil = {
+    id: 'p-1',
+    targetTypeConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
+  };
+
+  it('404 si el slug no existe', async () => {
+    const d = build();
+    d.searchRepo.findPublicBySlug.mockResolvedValue(null);
+    await expect(
+      d.service.listPublicReviewsBySlug('no-existe', undefined, { limit: 10 }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  it('404 si el slug es del tipo equivocado, sin redirigir', async () => {
+    // `/p/` promete un profesional; servir una farmacia ahí rompería el
+    // JSON-LD de la página, que declara `Physician`.
+    const d = build();
+    d.searchRepo.findPublicBySlug.mockResolvedValue({
+      ...perfil,
+      targetTypeConceptId: 'otro-tipo',
+    });
+    await expect(
+      d.service.listPublicReviewsBySlug(
+        'farmacia-x',
+        COMM.PROFILE_TARGET_PRACTITIONER,
+        {
+          limit: 10,
+        },
+      ),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  it('el promedio es el del perfil, no el de la página', async () => {
+    const d = build();
+    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    // Una sola reseña de 5 en la página; el perfil promedia 4,6 sobre 12.
+    d.reviewsRepo.listByTargetPage.mockResolvedValue([review]);
+    d.searchRepo.ratingsByProfile.mockResolvedValue(
+      new Map([['p-1', { average: 4.6, count: 12 }]]),
+    );
+
+    const res = await d.service.listPublicReviewsBySlug(
+      'dra-perez',
+      undefined,
+      {
+        limit: 10,
+      },
+    );
+
+    expect(res.ratingAverage).toBe(4.6);
+    expect(res.ratingCount).toBe(12);
+    expect(res.items).toHaveLength(1);
+  });
+
+  it('sin reseñas el promedio es null y no cero', async () => {
+    // Cero estrellas es una calificación pésima; «todavía nadie calificó» no
+    // lo es, y decirlo con un 0 sería contar otra cosa.
+    const d = build();
+    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.searchRepo.ratingsByProfile.mockResolvedValue(new Map());
+
+    const res = await d.service.listPublicReviewsBySlug(
+      'dra-perez',
+      undefined,
+      {
+        limit: 10,
+      },
+    );
+
+    expect(res.ratingAverage).toBeNull();
+    expect(res.ratingCount).toBe(0);
+    expect(res.items).toEqual([]);
+  });
+
+  it('descarta las reseñas removidas por moderación, igual que el promedio', async () => {
+    const d = build();
+    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+
+    await d.service.listPublicReviewsBySlug('dra-perez', undefined, {
+      limit: 10,
+    });
+
+    expect(d.reviewsRepo.listByTargetPage).toHaveBeenCalledWith(
+      expect.anything(),
+      'p-1',
+      COMM.PUBLICATION_PUBLISHED,
+      COMM.MODERATION_REMOVED,
+      undefined,
+      11,
+    );
+  });
+
+  it('firma con el nombre sólo si el autor eligió mostrarlo', async () => {
+    const d = build();
+    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.reviewsRepo.listByTargetPage.mockResolvedValue([
+      {
+        ...review,
+        id: 'r-firmada',
+        reviewerPatientProfileId: 'persona-1',
+        reviewerDisplayModeConceptId: COMM.REVIEW_DISPLAY_REAL_NAME,
+      },
+      {
+        ...review,
+        id: 'r-anonima',
+        reviewerPatientProfileId: 'persona-2',
+        reviewerDisplayModeConceptId: COMM.REVIEW_DISPLAY_ANONYMOUS,
+      },
+    ]);
+    d.reviewsRepo.displayNamesByPerson.mockResolvedValue(
+      new Map([
+        ['persona-1', 'Ana Quispe'],
+        ['persona-2', 'Beto Rojas'],
+      ]),
+    );
+
+    const res = await d.service.listPublicReviewsBySlug(
+      'dra-perez',
+      undefined,
+      {
+        limit: 10,
+      },
+    );
+
+    expect(res.items[0].reviewerDisplayName).toBe('Ana Quispe');
+    // Aunque el mapa traiga su nombre, la anónima no lo publica.
+    expect(res.items[1].reviewerDisplayName).toBeNull();
+  });
+
+  it('ni siquiera PIDE el nombre de quien publicó como anónimo', async () => {
+    // Traerlo y descartarlo después dejaría el nombre del autor anónimo en la
+    // memoria del proceso, que es lo que la reseña anónima promete que no pasa.
+    const d = build();
+    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.reviewsRepo.listByTargetPage.mockResolvedValue([
+      {
+        ...review,
+        reviewerPatientProfileId: 'persona-2',
+        reviewerDisplayModeConceptId: COMM.REVIEW_DISPLAY_ANONYMOUS,
+      },
+    ]);
+
+    await d.service.listPublicReviewsBySlug('dra-perez', undefined, {
+      limit: 10,
+    });
+
+    expect(d.reviewsRepo.displayNamesByPerson).toHaveBeenCalledWith(
+      expect.anything(),
+      [],
+    );
+  });
+
+  it('nunca expone el encuentro ni el paciente, tampoco en la superficie pública', async () => {
+    const d = build();
+    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.reviewsRepo.listByTargetPage.mockResolvedValue([review]);
+
+    const res = await d.service.listPublicReviewsBySlug(
+      'dra-perez',
+      undefined,
+      {
+        limit: 10,
+      },
+    );
+
+    const serializado = JSON.stringify(res);
+    expect(serializado).not.toContain('encuentro-secreto');
+    expect(serializado).not.toContain('paciente-secreto');
   });
 });

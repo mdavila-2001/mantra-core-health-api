@@ -63,6 +63,22 @@ export class ServiceReviewDto {
   @ApiPropertyOptional({ format: 'uuid' })
   reviewerDisplayModeConceptId?: string | null;
 
+  /**
+   * Cómo firma quien escribió, o `null` si la publicó como anónima.
+   *
+   * Sale del modo que el propio autor eligió al publicarla
+   * (`reviewer_display_mode_concept_id`): con nombre real viaja su nombre, y
+   * con modo anónimo viaja `null` — nunca el nombre «por si acaso». Es el
+   * único dato del autor que sale de acá, y sale porque él decidió que
+   * saliera; `reviewer_patient_profile_id` sigue sin publicarse, así que una
+   * reseña anónima no se puede reconstruir desde esta respuesta.
+   *
+   * La pantalla que lo reciba en `null` dice «Paciente verificado», no el
+   * nombre vacío.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  reviewerDisplayName?: string | null;
+
   /** Concept id del estado de verificación de la reseña. */
   @ApiProperty({ format: 'uuid' })
   verificationStatusConceptId!: string;
@@ -101,4 +117,32 @@ export class ServiceReviewPageDto {
   /** Cursor de la página siguiente, o `null`. */
   @ApiPropertyOptional({ nullable: true })
   nextCursor!: string | null;
+}
+
+/**
+ * Las reseñas de una ficha pública, con su promedio (P31).
+ *
+ * Es la misma página que `ServiceReviewPageDto` más las dos cifras de la
+ * cabecera. Van juntas y no en dos peticiones porque la cabecera y la lista se
+ * dibujan a la vez: pedirlas por separado deja la pantalla mostrando «4,6 de 5»
+ * arriba y un hueco abajo, o al revés.
+ *
+ * **El promedio no se calcula sobre `items`.** Es el de TODAS las reseñas
+ * publicadas del perfil, no el de la página que se está mirando: promediar la
+ * primera página daría un número que cambia al pasar a la segunda.
+ */
+export class PublicProfileReviewsDto extends ServiceReviewPageDto {
+  /**
+   * Promedio de estrellas del perfil, con una decimal, o `null` si no tiene
+   * ninguna reseña publicada.
+   *
+   * `null` y no `0`: cero estrellas es una calificación pésima y «todavía nadie
+   * calificó» no lo es. Quien lo reciba tiene que decir «sin calificaciones».
+   */
+  @ApiPropertyOptional({ nullable: true, example: 4.6 })
+  ratingAverage!: number | null;
+
+  /** Cuántas reseñas publicadas tiene el perfil en total. */
+  @ApiProperty()
+  ratingCount!: number;
 }

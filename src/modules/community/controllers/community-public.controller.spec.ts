@@ -7,6 +7,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ResourceNotFoundException } from '../../../common';
 import { CommunityPublicController } from './community-public.controller';
 
 /**
@@ -29,9 +30,20 @@ describe('CommunityPublicController', () => {
       postComments: mockFn().mockResolvedValue({ items: [] }),
       commentReplies: mockFn().mockResolvedValue({ items: [] }),
     };
+    const reviews = {
+      listPublicReviewsBySlug: mockFn().mockResolvedValue({
+        items: [],
+        count: 0,
+        limit: 50,
+        nextCursor: null,
+        ratingAverage: null,
+        ratingCount: 0,
+      }),
+    };
     return {
       service,
-      controller: new CommunityPublicController(service as any),
+      reviews,
+      controller: new CommunityPublicController(service as any, reviews as any),
     };
   };
 
@@ -111,6 +123,49 @@ describe('CommunityPublicController', () => {
         cursor: undefined,
         limit: undefined,
       });
+    });
+  });
+  describe('opiniones de la ficha pública (P31)', () => {
+    it('traduce el prefijo de la vertical al concepto de tipo, como la ficha', async () => {
+      const d = build();
+
+      await d.controller.listPublicProfileReviews(
+        'p',
+        'dra-perez',
+        undefined,
+        10,
+      );
+
+      expect(d.reviews.listPublicReviewsBySlug).toHaveBeenCalledWith(
+        'dra-perez',
+        expect.any(String),
+        { cursor: undefined, limit: 10 },
+      );
+    });
+
+    it('un prefijo inventado da 404, el mismo que un slug que no existe', async () => {
+      // Un 400 acá abriría por la puerta de al lado la distinción entre «no
+      // existe» y «no está publicado», que esta superficie no hace.
+      const d = build();
+
+      // Lanza de forma síncrona, igual que `getProfileByPrefix`: el prefijo se
+      // valida antes de tocar nada, así que no hay promesa que rechazar.
+      expect(() =>
+        d.controller.listPublicProfileReviews('zz', 'dra-perez', undefined, 10),
+      ).toThrow(ResourceNotFoundException);
+      expect(d.reviews.listPublicReviewsBySlug).not.toHaveBeenCalled();
+    });
+
+    it('sin limit usa el tope por defecto en vez de pedir todo', async () => {
+      const d = build();
+
+      await d.controller.listPublicProfileReviews('p', 'dra-perez');
+
+      expect(d.reviews.listPublicReviewsBySlug).toHaveBeenCalledWith(
+        'dra-perez',
+        expect.any(String),
+        { cursor: undefined, limit: 50 },
+      );
     });
   });
 });
