@@ -132,6 +132,10 @@ import {
     CommunityMessagingController,
     CommunityModerationController,
     CommunityReviewsController,
+    // Cuelga de `/patients/me` y no de `/community/profiles`: el paciente
+    // identifica lo que califica por su atención, no por el uuid de la
+    // vitrina — que la ficha pública no publica.
+    PatientReviewsController,
     CommunityGroupsController,
     CommunityTopicsController,
     CommunityPollsController,
