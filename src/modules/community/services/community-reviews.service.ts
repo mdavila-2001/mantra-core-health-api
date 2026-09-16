@@ -149,6 +149,71 @@ export class CommunityReviewsService {
     }
   }
 
+  /**
+   * Califico la atención que recibí, nombrándola por el **encuentro** y no por
+   * la vitrina del profesional (C.2).
+   *
+   * ## Por qué hace falta si `publishReview` ya existe
+   *
+   * Porque el paciente no conoce —ni tiene por qué conocer— el uuid de la
+   * vitrina que va a calificar. La ficha pública se abre por slug y **no
+   * publica su id**: un identificador interno regalado a un anónimo no se
+   * vuelve a esconder. Sin esta ruta, la única forma de calificar desde la
+   * ficha era que la lectura pública filtrara ese uuid, que es exactamente lo
+   * que no hace.
+   *
+   * ## No es una segunda implementación de la regla
+   *
+   * Acá sólo se **resuelve el destinatario**: del encuentro sale el
+   * profesional que atendió y de él su vitrina. Todo lo demás —que la atención
+   * sea de quien reseña, que haya terminado, que la haya atendido ese
+   * profesional y que no haya reseñado ya ese encuentro— lo sigue comprobando
+   * `publishReview`, en un solo lugar.
+   *
+   * ## El error no confirma nada
+   *
+   * Un encuentro que no existe, uno sin profesional y uno cuyo profesional no
+   * tiene vitrina dan **el mismo** mensaje que una atención ajena. Distinguirlos
+   * le confirmaría a quien prueba uuids cuáles sí existen, que es justo lo que
+   * `assertAtencionElegible` evita con el mismo texto.
+   *
+   * @param dto - La atención, las estrellas, el texto y cómo quiere firmar.
+   * @param actor - El paciente autenticado.
+   * @returns El id de la reseña y si quedó verificada.
+   * @throws PreconditionFailedException si la atención no habilita una reseña.
+   */
+  async publishOwnReview(
+    dto: CreateReviewDto,
+    actor: AuthenticatedUser,
+  ): Promise<ReviewResponseDto> {
+    const target = await this.resolveTargetOfEncounter(dto.verifiedEncounterId);
+    return this.publishReview(target, dto, actor);
+  }
+
+  /**
+   * La vitrina del profesional que atendió ese encuentro.
+   *
+   * @param encounterId - La atención declarada.
+   * @returns El identificador del perfil público a calificar.
+   * @throws PreconditionFailedException si no se puede resolver, con el mismo
+   *   mensaje que cualquier otro motivo de rechazo.
+   */
+  private async resolveTargetOfEncounter(encounterId: string): Promise<string> {
+    const em = this.em.fork();
+    const encuentro = await this.encountersRepo.findById(em, encounterId);
+    const practitionerId = encuentro?.primaryPractitionerId;
+    const vitrina = practitionerId
+      ? await this.profilesRepo.findByTarget(em, practitionerId)
+      : null;
+    if (!vitrina) {
+      throw new PreconditionFailedException(
+        'La atención declarada no habilita una reseña',
+        { encounterId },
+      );
+    }
+    return vitrina.id;
+  }
+
   /** UC-19-11: publica una review verificada con puntuaciones por dimensión. */
   async publishReview(
     profileId: string,

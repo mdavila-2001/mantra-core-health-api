@@ -32,6 +32,7 @@ import {
   CommunityMessagingController,
   CommunityModerationController,
   CommunityReviewsController,
+  PatientReviewsController,
   CommunityGroupsController,
   CommunityTopicsController,
   CommunityPollsController,
