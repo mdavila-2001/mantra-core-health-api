@@ -27,6 +27,7 @@ import type {
   PublicFeedPageDto,
   PublicNearbyPageDto,
   PublicPostReactionPageDto,
+  PublicResultKind,
   PublicSearchPageDto,
 } from '../dto';
 
@@ -60,6 +61,21 @@ import type {
  * esto lo aprieta donde no hay token que atar a nadie.
  */
 const PUBLIC_RATE_LIMIT = { default: { limit: 60, ttl: 60_000 } };
+
+/**
+ * Los cuatro verticales que `GET /public/nearby` sabe acotar
+ * (`openapi/CONTRATO-PUBLICO.md`, sección 9): no los siete de `PublicResultKind`
+ * — `MEDICATION` no tiene concepto de sujeto geolocalizable y `INSURER` no se
+ * publica por proximidad. Es una lista propia y no `PUBLIC_RESULT_KINDS` (que
+ * no existe en tiempo de ejecución en este paquete) porque un valor fuera de
+ * estos cuatro tiene que descartarse, no colarse al índice.
+ */
+const NEARBY_KINDS: readonly PublicResultKind[] = [
+  'PRACTITIONER',
+  'ORGANIZATION',
+  'PHARMACY',
+  'DIAGNOSTIC_UNIT',
+];
 
 /** Tope por defecto de opiniones por página, igual que el resto de la API. */
 const DEFAULT_REVIEW_PAGE_LIMIT = 50;
@@ -315,7 +331,15 @@ export class CommunityPublicController {
     });
   }
 
-  /** Lo más cercano a un punto. */
+  /**
+   * Lo más cercano a un punto.
+   *
+   * `kind` acotaba en el servicio y en el cliente del front desde el 18/08,
+   * pero el controlador nunca lo declaraba: la frontera se lo comía en
+   * silencio y `/nearby-places` recibía los cuatro verticales mezclados en
+   * vez de sólo imagenología o sólo centros médicos. Mismo defecto que
+   * `specialty` tenía en `searchPractitioners` — ver su spec para el patrón.
+   */
   @Public()
   @Get('public/nearby')
   @ApiOperation({ summary: 'Prestadores cercanos, en línea recta' })
@@ -323,12 +347,14 @@ export class CommunityPublicController {
     @Query('lat') lat?: string,
     @Query('lng') lng?: string,
     @Query('radiusKm') radiusKm?: string,
+    @Query('kind') kind?: string,
     @Query('limit') limit?: string,
   ): Promise<PublicNearbyPageDto> {
     return this.service.nearby({
       lat: this.toFloat(lat),
       lng: this.toFloat(lng),
       radiusKm: this.toFloat(radiusKm),
+      kind: this.toNearbyKind(kind),
       limit: this.toInt(limit),
     });
   }
@@ -521,6 +547,17 @@ export class CommunityPublicController {
     if (valor === undefined) return undefined;
     const n = Number.parseFloat(valor);
     return Number.isFinite(n) ? n : undefined;
+  }
+
+  /**
+   * El vertical de `nearby`, o `undefined` si no es uno de los cuatro que
+   * acepta ese endpoint (ver {@link NEARBY_KINDS}).
+   *
+   * Mismo criterio que `toInt`/`toBool`: un vertical inventado se ignora —el
+   * buscador cae a «todos»— en vez de romper la consulta con 400.
+   */
+  private toNearbyKind(valor?: string): PublicResultKind | undefined {
+    return NEARBY_KINDS.find((kind) => kind === valor);
   }
 
   /** Booleano de un parámetro; sólo `'true'` afirma. */

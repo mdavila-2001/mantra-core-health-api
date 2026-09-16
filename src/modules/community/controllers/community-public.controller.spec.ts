@@ -29,6 +29,7 @@ describe('CommunityPublicController', () => {
       postReactions: mockFn().mockResolvedValue({ items: [] }),
       postComments: mockFn().mockResolvedValue({ items: [] }),
       commentReplies: mockFn().mockResolvedValue({ items: [] }),
+      nearby: mockFn().mockResolvedValue({ items: [] }),
     };
     const reviews = {
       listPublicReviewsBySlug: mockFn().mockResolvedValue({
@@ -76,6 +77,54 @@ describe('CommunityPublicController', () => {
 
       expect(d.service.search).toHaveBeenCalledWith(
         expect.objectContaining({ specialtyConceptId: undefined }),
+      );
+    });
+  });
+
+  /**
+   * Mismo defecto que `specialty` tenía arriba, en `nearby`: `kind` viajaba
+   * desde el cliente y el servicio lo sabía filtrar, pero el método del
+   * controlador no lo declaraba y se perdía en la frontera — `/nearby-places`
+   * recibía los cuatro verticales mezclados sin que nada lo avisara.
+   */
+  describe('nearby — el vertical no se pierde en la frontera', () => {
+    it('el vertical llega al servicio en vez de perderse en la frontera', async () => {
+      const d = build();
+
+      await d.controller.nearby(
+        '-17.78',
+        '-63.18',
+        '5',
+        'DIAGNOSTIC_UNIT',
+        '20',
+      );
+
+      expect(d.service.nearby).toHaveBeenCalledWith({
+        lat: -17.78,
+        lng: -63.18,
+        radiusKm: 5,
+        kind: 'DIAGNOSTIC_UNIT',
+        limit: 20,
+      });
+    });
+
+    it('un vertical fuera del contrato de nearby no se inventa', async () => {
+      const d = build();
+
+      await d.controller.nearby('-17.78', '-63.18', undefined, 'MEDICATION');
+
+      expect(d.service.nearby).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: undefined }),
+      );
+    });
+
+    it('sin vertical el filtro no se inventa', async () => {
+      const d = build();
+
+      await d.controller.nearby('-17.78', '-63.18');
+
+      expect(d.service.nearby).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: undefined }),
       );
     });
   });
