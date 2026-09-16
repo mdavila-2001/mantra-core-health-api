@@ -1133,7 +1133,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   ],
   "startAt": "2026-07-31T12:00:00.000Z",
   "endAt": "2026-07-31T12:00:00.000Z",
-  "createdAt": "2026-07-31T12:00:00.000Z"
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "sealedAt": "2026-07-31T12:00:00.000Z"
 }
 ```
 
@@ -1150,6 +1152,8 @@ Campos de la respuesta:
 | `startAt` | Sí | `string` | formato `date-time`; admite null | Valor de start at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `endAt` | Sí | `string` | formato `date-time`; admite null | Valor de end at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `contentHash` | Sí | `string` | admite null | Sello SHA-256 del contenido del encuentro, calculado al cerrarlo. `null` mientras el encuentro sigue en curso. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `sealedAt` | Sí | `string` | formato `date-time`; admite null | Fecha y hora en que se calculó el sello del encuentro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1315,7 +1319,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   ],
   "startAt": "2026-07-31T12:00:00.000Z",
   "endAt": "2026-07-31T12:00:00.000Z",
-  "createdAt": "2026-07-31T12:00:00.000Z"
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "sealedAt": "2026-07-31T12:00:00.000Z"
 }
 ```
 
@@ -1332,6 +1338,8 @@ Campos de la respuesta:
 | `startAt` | Sí | `string` | formato `date-time`; admite null | Valor de start at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `endAt` | Sí | `string` | formato `date-time`; admite null | Valor de end at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `contentHash` | Sí | `string` | admite null | Sello SHA-256 del contenido del encuentro, calculado al cerrarlo. `null` mientras el encuentro sigue en curso. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `sealedAt` | Sí | `string` | formato `date-time`; admite null | Fecha y hora en que se calculó el sello del encuentro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

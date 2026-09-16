@@ -2248,6 +2248,77 @@ paths:
       description: >-
         Quitar la propia foto de perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /profiles/patients/me/dependents:
+    get:
+      operationId: ProfilesPatientsController_getOwnDependents
+      parameters: []
+      responses:
+        '200':
+          description: Los pacientes que esta cuenta representa con apoderamiento vigente. Sin dependientes, `[]`.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DependentSummaryDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los dependientes a cargo del paciente autenticado
+      tags:
+        - profiles-patients
+      description: >-
+        Listar los dependientes a cargo del paciente autenticado. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: ProfilesPatientsController_registerOwnDependent
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDependentDto'
+      responses:
+        '201':
+          description: El dependiente creado, ya con el apoderamiento que habilita a pedirle turno y a leer su historia.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DependentSummaryDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registrar un dependiente (menor o adulto mayor tutelado)
+      tags:
+        - profiles-patients
+      description: >-
+        Registrar un dependiente (menor o adulto mayor tutelado). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /profiles/patients:
     get:
       operationId: ProfilesPatientsController_searchPatients
@@ -22078,6 +22149,45 @@ paths:
       description: >-
         UC-40-14: expediente del paciente (notas, planes de cuidados y documentos). Requiere JWT y los roles o alcances
         declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /charts/encounters/{id}/pdf:
+    get:
+      description: >-
+        Autoriza a quien puede leer la historia del paciente dueño del encuentro. Requiere que el encuentro esté cerrado
+        (con sello).
+      operationId: ChartEncountersController_getEncounterPdf
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PDF oficial del encuentro
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no puede leer la historia de este paciente
+        '404':
+          description: El encuentro no existe
+        '422':
+          description: El encuentro no está cerrado
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el PDF oficial de un encuentro cerrado
+      tags:
+        - chart-encounters
   /care-teams:
     post:
       operationId: CareTeamsController_create
@@ -50910,6 +51020,10 @@ tags:
     description: >-
       Operaciones del dominio funcional chart documents. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: chart-encounters
+    description: >-
+      Operaciones del dominio funcional chart encounters. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: chart-notes
     description: >-
       Operaciones del dominio funcional chart notes. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -53565,6 +53679,107 @@ components:
           format: uuid
       required:
         - fileId
+    DependentSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        patientProfileId:
+          type: string
+          format: uuid
+        personId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          description: Nombre para mostrar, ya compuesto
+        name:
+          type: string
+        lastName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+          example: '2018-03-14'
+        ageYears:
+          type: number
+          description: Edad cumplida en años
+        nationalId:
+          type: string
+        relationshipCode:
+          type: string
+          description: Parentesco visto desde el dependiente
+          enum:
+            - CHILD
+            - PARENT
+            - SPOUSE
+            - WARD
+            - OTHER
+        relationshipDisplay:
+          type: string
+          description: Rótulo en castellano
+          example: Hijo/a
+        isLegalGuardian:
+          type: boolean
+          description: Si el vínculo afirma la tutela legal
+      required:
+        - id
+        - patientProfileId
+        - personId
+        - fullName
+        - relationshipCode
+        - relationshipDisplay
+        - isLegalGuardian
+    CreateDependentDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de pila
+          maxLength: 100
+        middleName:
+          type: string
+          description: Segundo nombre
+          maxLength: 100
+        lastName:
+          type: string
+          description: Apellido paterno
+          maxLength: 100
+        motherLastName:
+          type: string
+          description: Apellido materno
+          maxLength: 100
+        birthDate:
+          type: string
+          description: Fecha de nacimiento (ISO date, YYYY-MM-DD)
+          format: date
+          example: '2018-03-14'
+        sexAtBirth:
+          type: string
+          description: Sexo asignado al nacer
+          enum:
+            - MALE
+            - FEMALE
+            - INTERSEX
+            - UNKNOWN
+        nationalId:
+          type: string
+          description: Documento de identidad, si el dependiente ya lo tiene
+          maxLength: 40
+        issuerAdministrativeAreaConceptId:
+          type: string
+          description: Departamento que expidió el documento (VS_BO_DEPARTMENT)
+          format: uuid
+        relationshipConceptId:
+          type: string
+          description: Qué es el titular para el dependiente (madre, padre, hijo/a, cónyuge o tutor legal)
+          format: uuid
+      required:
+        - name
+        - lastName
+        - birthDate
+        - relationshipConceptId
     CreatePatientDto:
       type: object
       properties:

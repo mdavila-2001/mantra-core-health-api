@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `chart`
 
-Referencia exhaustiva de 18 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 19 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates`
-- **Controladores:** `ChartCarePlansController`, `ChartDocumentsController`, `ChartNotesController`, `ChartReadController`, `ChartTemplatesController`
+- **Etiquetas OpenAPI:** `chart-care-plans`, `chart-documents`, `chart-encounters`, `chart-notes`, `chart-read`, `chart-templates`
+- **Controladores:** `ChartCarePlansController`, `ChartDocumentsController`, `ChartEncountersController`, `ChartNotesController`, `ChartReadController`, `ChartTemplatesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -15,20 +15,21 @@ Referencia exhaustiva de 18 operación(es) del módulo `chart`, derivada del con
 2. [PATCH /charts/care-plans/{planId}/activities/{activityId}](#2-patch-charts-care-plans-planid-activities-activityid) — Actualizar una actividad del plan de cuidado
 3. [POST /charts/documents](#3-post-charts-documents) — Adjuntar un documento con archivos gobernados
 4. [GET /charts/documents/{documentId}/files/{fileId}/content](#4-get-charts-documents-documentid-files-fileid-content) — Descargar el archivo de un documento del expediente
-5. [GET /charts/notes](#5-get-charts-notes) — Listar las notas de evolución de un profesional por ventana de fechas
-6. [POST /charts/notes](#6-post-charts-notes) — Crear una nota clínica versionada (borrador SOAP)
-7. [POST /charts/notes/{noteId}/amendments](#7-post-charts-notes-noteid-amendments) — Enmendar una nota firmada (addendum versionado)
-8. [PUT /charts/notes/{noteId}/versions](#8-put-charts-notes-noteid-versions) — Editar borrador creando una nueva versión inmutable
-9. [POST /charts/notes/{noteId}/versions/{versionId}/cosign](#9-post-charts-notes-noteid-versions-versionid-cosign) — Cofirmar una versión firmada (cadena de firmas)
-10. [POST /charts/notes/{noteId}/versions/{versionId}/sign](#10-post-charts-notes-noteid-versions-versionid-sign) — Firmar una versión y sellar su contenido
-11. [POST /charts/notes/versions/{versionId}/exam-findings](#11-post-charts-notes-versions-versionid-exam-findings) — Registrar hallazgos de examen físico
-12. [POST /charts/notes/versions/{versionId}/release](#12-post-charts-notes-versions-versionid-release) — Liberar una versión al paciente
-13. [POST /charts/notes/versions/{versionId}/withhold](#13-post-charts-notes-versions-versionid-withhold) — Retener una versión del paciente (motivo legal)
-14. [GET /charts/patients/{patientProfileId}/chart](#14-get-charts-patients-patientprofileid-chart) — UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)
-15. [GET /charts/templates](#15-get-charts-templates) — Listar las plantillas de chart por especialidad
-16. [POST /charts/templates](#16-post-charts-templates) — Crear una plantilla de chart con su esquema de campos, por especialidad
-17. [GET /charts/templates/{id}](#17-get-charts-templates-id) — Leer el esquema de una plantilla de chart
-18. [POST /charts/templates/{templateId}/assignments](#18-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
+5. [GET /charts/encounters/{id}/pdf](#5-get-charts-encounters-id-pdf) — Descargar el PDF oficial de un encuentro cerrado
+6. [GET /charts/notes](#6-get-charts-notes) — Listar las notas de evolución de un profesional por ventana de fechas
+7. [POST /charts/notes](#7-post-charts-notes) — Crear una nota clínica versionada (borrador SOAP)
+8. [POST /charts/notes/{noteId}/amendments](#8-post-charts-notes-noteid-amendments) — Enmendar una nota firmada (addendum versionado)
+9. [PUT /charts/notes/{noteId}/versions](#9-put-charts-notes-noteid-versions) — Editar borrador creando una nueva versión inmutable
+10. [POST /charts/notes/{noteId}/versions/{versionId}/cosign](#10-post-charts-notes-noteid-versions-versionid-cosign) — Cofirmar una versión firmada (cadena de firmas)
+11. [POST /charts/notes/{noteId}/versions/{versionId}/sign](#11-post-charts-notes-noteid-versions-versionid-sign) — Firmar una versión y sellar su contenido
+12. [POST /charts/notes/versions/{versionId}/exam-findings](#12-post-charts-notes-versions-versionid-exam-findings) — Registrar hallazgos de examen físico
+13. [POST /charts/notes/versions/{versionId}/release](#13-post-charts-notes-versions-versionid-release) — Liberar una versión al paciente
+14. [POST /charts/notes/versions/{versionId}/withhold](#14-post-charts-notes-versions-versionid-withhold) — Retener una versión del paciente (motivo legal)
+15. [GET /charts/patients/{patientProfileId}/chart](#15-get-charts-patients-patientprofileid-chart) — UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)
+16. [GET /charts/templates](#16-get-charts-templates) — Listar las plantillas de chart por especialidad
+17. [POST /charts/templates](#17-post-charts-templates) — Crear una plantilla de chart con su esquema de campos, por especialidad
+18. [GET /charts/templates/{id}](#18-get-charts-templates-id) — Leer el esquema de una plantilla de chart
+19. [POST /charts/templates/{templateId}/assignments](#19-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
 
 ---
 
@@ -591,7 +592,106 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /charts/notes
+## 5. GET /charts/encounters/{id}/pdf
+
+- **Módulo:** `chart`
+- **Etiqueta OpenAPI:** `chart-encounters`
+- **Nombre:** Descargar el PDF oficial de un encuentro cerrado
+- **Operation ID:** `ChartEncountersController_getEncounterPdf`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ChartEncountersController.getEncounterPdf](../../src/modules/chart/controllers/chart-encounters.controller.ts)
+
+### Descripción de negocio
+
+Autoriza a quien puede leer la historia del paciente dueño del encuentro. Requiere que el encuentro esté cerrado (con sello).
+
+Contexto declarado en el controlador: 404 si el encuentro no existe, 403 si el actor no puede leer la historia del paciente, 422 si el encuentro todavía no está cerrado (sin sello no hay documento oficial). `no-store`: la caché del navegador no debe conservar un documento clínico después de cerrar sesión.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /charts/encounters/{id}/pdf` en `ChartEncountersController_getEncounterPdf`. El controlador delega en `EncounterPdfService.render`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /charts/encounters/00000000-0000-4000-8000-000000000001/pdf HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /charts/encounters/00000000-0000-4000-8000-000000000001/pdf HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | PDF oficial del encuentro | `Promise<void>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | El actor no puede leer la historia de este paciente | `Promise<void>` | No |
+| 404 | El encuentro no existe | `Promise<void>` | No |
+| 422 | El encuentro no está cerrado | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo podés consultar tu propia historia clínica. | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/chart/services/encounter-pdf.service.ts |
+| 422 | `PRECONDITION_FAILED` | El encuentro no está cerrado | Excepción explícita en src/modules/chart/services/encounter-pdf.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/charts/encounters/{id}/pdf"
+}
+```
+
+---
+
+## 6. GET /charts/notes
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -745,7 +845,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /charts/notes
+## 7. POST /charts/notes
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -891,7 +991,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /charts/notes/{noteId}/amendments
+## 8. POST /charts/notes/{noteId}/amendments
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1037,7 +1137,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. PUT /charts/notes/{noteId}/versions
+## 9. PUT /charts/notes/{noteId}/versions
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1180,7 +1280,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /charts/notes/{noteId}/versions/{versionId}/cosign
+## 10. POST /charts/notes/{noteId}/versions/{versionId}/cosign
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1323,7 +1423,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /charts/notes/{noteId}/versions/{versionId}/sign
+## 11. POST /charts/notes/{noteId}/versions/{versionId}/sign
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1464,7 +1564,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /charts/notes/versions/{versionId}/exam-findings
+## 12. POST /charts/notes/versions/{versionId}/exam-findings
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1606,7 +1706,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /charts/notes/versions/{versionId}/release
+## 13. POST /charts/notes/versions/{versionId}/release
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1735,7 +1835,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /charts/notes/versions/{versionId}/withhold
+## 14. POST /charts/notes/versions/{versionId}/withhold
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1864,7 +1964,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /charts/patients/{patientProfileId}/chart
+## 15. GET /charts/patients/{patientProfileId}/chart
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-read`
@@ -2077,7 +2177,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /charts/templates
+## 16. GET /charts/templates
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`
@@ -2212,7 +2312,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /charts/templates
+## 17. POST /charts/templates
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`
@@ -2420,7 +2520,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /charts/templates/{id}
+## 18. GET /charts/templates/{id}
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`
@@ -2584,7 +2684,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /charts/templates/{templateId}/assignments
+## 19. POST /charts/templates/{templateId}/assignments
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`

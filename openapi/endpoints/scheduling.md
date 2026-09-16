@@ -846,6 +846,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
 | 422 | `PRECONDITION_FAILED` | Indique al menos patientProfileId o resourceId para listar citas | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3890,6 +3891,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
 | 404 | `NOT_FOUND` | Reserva temporal no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 409 | `CONFLICT` | La reserva temporal ya fue consumida o liberada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
@@ -4035,6 +4037,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
 | 404 | `NOT_FOUND` | Reserva temporal no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 409 | `CONFLICT` | La reserva temporal ya fue consumida o liberada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
@@ -6365,6 +6368,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
 | 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 409 | `CONFLICT` | El slot no tiene cupos disponibles | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 409 | `CONFLICT` | El paciente alcanzó el máximo de citas activas | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
@@ -7163,6 +7167,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular y el personal de agenda pueden ver esta lista de espera. | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

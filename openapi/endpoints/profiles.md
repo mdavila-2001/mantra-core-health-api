@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 41 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 43 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`
 - **Controladores:** `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
@@ -20,38 +20,40 @@ Referencia exhaustiva de 41 operación(es) del módulo `profiles`, derivada del 
 7. [POST /profiles/patients/{profileId}/related-persons](#7-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
 8. [GET /profiles/patients/me](#8-get-profiles-patients-me) — Consultar los propios datos de filiación
 9. [PATCH /profiles/patients/me](#9-patch-profiles-patients-me) — Editar los propios datos de filiación
-10. [DELETE /profiles/patients/me/photo](#10-delete-profiles-patients-me-photo) — Quitar la propia foto de perfil
-11. [PUT /profiles/patients/me/photo](#11-put-profiles-patients-me-photo) — Fijar la propia foto de perfil
-12. [GET /profiles/patients/me/summary](#12-get-profiles-patients-me-summary) — Consultar el resumen propio
-13. [POST /profiles/patients/merge](#13-post-profiles-patients-merge) — Fusionar pacientes duplicados
-14. [GET /profiles/patients/merge-events](#14-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
-15. [POST /profiles/patients/merge/{eventId}/reverse](#15-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
-16. [POST /profiles/persons/{personId}/account-links](#16-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
-17. [POST /profiles/persons/{personId}/decease](#17-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
-18. [GET /profiles/practitioners](#18-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
-19. [POST /profiles/practitioners](#19-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
-20. [POST /profiles/practitioners/{profileId}/affiliations](#20-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
-21. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#21-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
-22. [DELETE /profiles/practitioners/{profileId}/photo](#22-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
-23. [PUT /profiles/practitioners/{profileId}/photo](#23-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
-24. [POST /profiles/practitioners/{profileId}/specialties](#24-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
-25. [GET /profiles/practitioners/{profileId}/summary](#25-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
-26. [PATCH /profiles/practitioners/me](#26-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
-27. [GET /profiles/practitioners/me/affiliations](#27-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
-28. [POST /profiles/practitioners/me/affiliations](#28-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
-29. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#29-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
-30. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#30-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
-31. [POST /profiles/practitioners/me/credentials](#31-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
-32. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#32-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
-33. [GET /profiles/practitioners/me/linkable-organizations](#33-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
-34. [GET /profiles/practitioners/me/onboarding](#34-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
-35. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#35-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
-36. [GET /profiles/practitioners/me/summary](#36-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
-37. [GET /profiles/practitioners/specialty-counts](#37-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
-38. [GET /tenants/{tenantId}/practitioner-requests](#38-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
-39. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#39-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
-40. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#40-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
-41. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#41-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
+10. [GET /profiles/patients/me/dependents](#10-get-profiles-patients-me-dependents) — Listar los dependientes a cargo del paciente autenticado
+11. [POST /profiles/patients/me/dependents](#11-post-profiles-patients-me-dependents) — Registrar un dependiente (menor o adulto mayor tutelado)
+12. [DELETE /profiles/patients/me/photo](#12-delete-profiles-patients-me-photo) — Quitar la propia foto de perfil
+13. [PUT /profiles/patients/me/photo](#13-put-profiles-patients-me-photo) — Fijar la propia foto de perfil
+14. [GET /profiles/patients/me/summary](#14-get-profiles-patients-me-summary) — Consultar el resumen propio
+15. [POST /profiles/patients/merge](#15-post-profiles-patients-merge) — Fusionar pacientes duplicados
+16. [GET /profiles/patients/merge-events](#16-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
+17. [POST /profiles/patients/merge/{eventId}/reverse](#17-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
+18. [POST /profiles/persons/{personId}/account-links](#18-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
+19. [POST /profiles/persons/{personId}/decease](#19-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
+20. [GET /profiles/practitioners](#20-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
+21. [POST /profiles/practitioners](#21-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
+22. [POST /profiles/practitioners/{profileId}/affiliations](#22-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
+23. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#23-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
+24. [DELETE /profiles/practitioners/{profileId}/photo](#24-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
+25. [PUT /profiles/practitioners/{profileId}/photo](#25-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
+26. [POST /profiles/practitioners/{profileId}/specialties](#26-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
+27. [GET /profiles/practitioners/{profileId}/summary](#27-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
+28. [PATCH /profiles/practitioners/me](#28-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
+29. [GET /profiles/practitioners/me/affiliations](#29-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
+30. [POST /profiles/practitioners/me/affiliations](#30-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
+31. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#31-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
+32. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#32-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
+33. [POST /profiles/practitioners/me/credentials](#33-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
+34. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#34-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
+35. [GET /profiles/practitioners/me/linkable-organizations](#35-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
+36. [GET /profiles/practitioners/me/onboarding](#36-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
+37. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#37-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
+38. [GET /profiles/practitioners/me/summary](#38-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
+39. [GET /profiles/practitioners/specialty-counts](#39-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
+40. [GET /tenants/{tenantId}/practitioner-requests](#40-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
+41. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#41-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
+42. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#42-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
+43. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#43-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
 
 ---
 
@@ -1638,7 +1640,286 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. DELETE /profiles/patients/me/photo
+## 10. GET /profiles/patients/me/dependents
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Listar los dependientes a cargo del paciente autenticado
+- **Operation ID:** `ProfilesPatientsController_getOwnDependents`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPatientsController.getOwnDependents](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+
+### Descripción de negocio
+
+Listar los dependientes a cargo del paciente autenticado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Los dependientes del titular: a quiénes puede representar en el portal. Sin `@Roles` por lo mismo que el resto de `patients/me/*`: el sujeto lo resuelve el servidor desde la sesión y no hay parámetro que apunte a otro.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients/me/dependents` en `ProfilesPatientsController_getOwnDependents`. El controlador delega en `ProfilesPatientsService.getOwnDependents`. No recibe body. El tipo de retorno estático es `Promise<DependentSummaryDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients/me/dependents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients/me/dependents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Los pacientes que esta cuenta representa con apoderamiento vigente. Sin dependientes, `[]`. | `Promise<DependentSummaryDto[]>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DependentSummaryDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DependentSummaryDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DependentSummaryDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DependentSummaryDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DependentSummaryDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentSummaryDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "personId": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "name": "Nombre de ejemplo",
+    "lastName": "Nombre de ejemplo",
+    "birthDate": "2018-03-14",
+    "ageYears": 1,
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "relationshipCode": "CHILD",
+    "relationshipDisplay": "Hijo/a",
+    "isLegalGuardian": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/dependents"
+}
+```
+
+---
+
+## 11. POST /profiles/patients/me/dependents
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Registrar un dependiente (menor o adulto mayor tutelado)
+- **Operation ID:** `ProfilesPatientsController_registerOwnDependent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPatientsController.registerOwnDependent](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+
+### Descripción de negocio
+
+Registrar un dependiente (menor o adulto mayor tutelado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Registrar a un dependiente: un menor o un adulto mayor a cargo. Crea su persona y su perfil de paciente, y deja al titular como su representante. **No crea una cuenta**: el dependiente no inicia sesión, que es justamente el caso.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/patients/me/dependents` en `ProfilesPatientsController_registerOwnDependent`. El controlador delega en `ProfilesPatientsService.registerOwnDependent`. Valida el body como `CreateDependentDto` y consume `application/json`. El tipo de retorno estático es `Promise<DependentSummaryDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateDependentDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/patients/me/dependents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "birthDate": "2018-03-14",
+  "relationshipConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Nombre de pila | `Nombre de ejemplo` |
+| `middleName` | No | `string` | longitud máxima 100 | Segundo nombre | `Nombre de ejemplo` |
+| `lastName` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Apellido paterno | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Apellido materno | `Nombre de ejemplo` |
+| `birthDate` | Sí | `string` | formato `date` | Fecha de nacimiento (ISO date, YYYY-MM-DD) | `2018-03-14` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
+| `nationalId` | No | `string` | longitud mínima 4; longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad, si el dependiente ya lo tiene | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que expidió el documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `relationshipConceptId` | Sí | `string` | formato `uuid` | Qué es el titular para el dependiente (madre, padre, hijo/a, cónyuge o tutor legal) | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/patients/me/dependents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": "2018-03-14",
+  "sexAtBirth": "MALE",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "relationshipConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | El dependiente creado, ya con el apoderamiento que habilita a pedirle turno y a leer su historia. | `Promise<DependentSummaryDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentSummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "personId": "00000000-0000-4000-8000-000000000001",
+  "fullName": "Nombre de ejemplo",
+  "name": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "birthDate": "2018-03-14",
+  "ageYears": 1,
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "relationshipCode": "CHILD",
+  "relationshipDisplay": "Hijo/a",
+  "isLegalGuardian": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fullName` | Sí | `string` | Sin restricción adicional declarada | Nombre para mostrar, ya compuesto | `Nombre de ejemplo` |
+| `name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2018-03-14` |
+| `ageYears` | No | `number` | Sin restricción adicional declarada | Edad cumplida en años | `1` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `relationshipCode` | Sí | `string` | valores: `CHILD`, `PARENT`, `SPOUSE`, `WARD`, `OTHER` | Parentesco visto desde el dependiente | `CHILD` |
+| `relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Rótulo en castellano | `Hijo/a` |
+| `isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Si el vínculo afirma la tutela legal | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 409 | `CONFLICT` | Ese documento ya está registrado en la plataforma | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La fecha de nacimiento no es una fecha válida | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha de nacimiento no puede ser futura | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/dependents"
+}
+```
+
+---
+
+## 12. DELETE /profiles/patients/me/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1898,7 +2179,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PUT /profiles/patients/me/photo
+## 13. PUT /profiles/patients/me/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2180,7 +2461,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /profiles/patients/me/summary
+## 14. GET /profiles/patients/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2295,7 +2576,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /profiles/patients/merge
+## 15. POST /profiles/patients/merge
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2433,7 +2714,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /profiles/patients/merge-events
+## 16. GET /profiles/patients/merge-events
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2558,7 +2839,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /profiles/patients/merge/{eventId}/reverse
+## 17. POST /profiles/patients/merge/{eventId}/reverse
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2692,7 +2973,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /profiles/persons/{personId}/account-links
+## 18. POST /profiles/persons/{personId}/account-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2827,7 +3108,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /profiles/persons/{personId}/decease
+## 19. POST /profiles/persons/{personId}/decease
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2962,7 +3243,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /profiles/practitioners
+## 20. GET /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -3109,7 +3390,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /profiles/practitioners
+## 21. POST /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -3281,7 +3562,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /profiles/practitioners/{profileId}/affiliations
+## 22. POST /profiles/practitioners/{profileId}/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -3452,7 +3733,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 23. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -3604,7 +3885,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. DELETE /profiles/practitioners/{profileId}/photo
+## 24. DELETE /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -3906,7 +4187,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. PUT /profiles/practitioners/{profileId}/photo
+## 25. PUT /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4229,7 +4510,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /profiles/practitioners/{profileId}/specialties
+## 26. POST /profiles/practitioners/{profileId}/specialties
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4374,7 +4655,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /profiles/practitioners/{profileId}/summary
+## 27. GET /profiles/practitioners/{profileId}/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4672,7 +4953,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. PATCH /profiles/practitioners/me
+## 28. PATCH /profiles/practitioners/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5024,7 +5305,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /profiles/practitioners/me/affiliations
+## 29. GET /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5157,7 +5438,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /profiles/practitioners/me/affiliations
+## 30. POST /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5322,7 +5603,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+## 31. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5420,7 +5701,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+## 32. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5577,7 +5858,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /profiles/practitioners/me/credentials
+## 33. POST /profiles/practitioners/me/credentials
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5727,7 +6008,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. DELETE /profiles/practitioners/me/credentials/{credentialId}
+## 34. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5826,7 +6107,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /profiles/practitioners/me/linkable-organizations
+## 35. GET /profiles/practitioners/me/linkable-organizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5951,7 +6232,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /profiles/practitioners/me/onboarding
+## 36. GET /profiles/practitioners/me/onboarding
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6069,7 +6350,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+## 37. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6188,7 +6469,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /profiles/practitioners/me/summary
+## 38. GET /profiles/practitioners/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6482,7 +6763,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /profiles/practitioners/specialty-counts
+## 39. GET /profiles/practitioners/specialty-counts
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6594,7 +6875,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. GET /tenants/{tenantId}/practitioner-requests
+## 40. GET /tenants/{tenantId}/practitioner-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -6724,7 +7005,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 41. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -6824,7 +7105,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 42. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -6937,7 +7218,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 43. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
