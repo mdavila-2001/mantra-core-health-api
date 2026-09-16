@@ -106,6 +106,9 @@ export class ClaimsController {
   @Roles('BILLING_OPERATOR', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir disputa sobre adjudicación' })
+  // Explícito porque declarar el 403 de abajo apaga el 201 implícito de Swagger
+  // y el contrato quedaba sin ninguna respuesta de éxito.
+  @ApiCreatedResponse({ type: ResourceStatusDto })
   @ApiForbiddenResponse({
     description:
       'La solicitud no existe o la envió otra organización: mismo cuerpo en ' +
