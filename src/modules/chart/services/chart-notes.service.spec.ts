@@ -40,6 +40,7 @@ function build() {
   const notesRepo = {
     findHeaderById: mockFn(),
     findHeadersByPatient: mockFn().mockResolvedValue([]),
+    findHeadersByEncounter: mockFn().mockResolvedValue([]),
     findHeadersPageByAuthor: mockFn().mockResolvedValue([]),
     findVersionsByIds: mockFn().mockResolvedValue(new Map()),
     findVersionById: mockFn(),

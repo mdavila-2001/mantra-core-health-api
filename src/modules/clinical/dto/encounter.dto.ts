@@ -259,4 +259,17 @@ export class EncounterResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+
+  /**
+   * Sello SHA-256 del contenido del encuentro, calculado al cerrarlo.
+   * `null` mientras el encuentro sigue en curso.
+   */
+  @ApiProperty({ type: String, nullable: true })
+  contentHash!: string | null;
+
+  /**
+   * Fecha y hora en que se calculó el sello del encuentro.
+   */
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  sealedAt!: Date | null;
 }
