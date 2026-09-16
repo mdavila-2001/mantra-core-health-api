@@ -55,8 +55,13 @@ function build() {
     // La comprobación de participantes consulta la entidad directamente.
     findOne: mockFn().mockResolvedValue(null),
   };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const profilesRepo = { findById: mockFn() };
+  // `fork()` lo usa la resolución del destinatario (C.2), que lee fuera de
+  // la transacción de escritura.
+  const em = { transactional: mockFn((cb: any) => cb(tx)), fork: mockFn(() => tx) };
+  const profilesRepo = {
+    findById: mockFn(),
+    findByTarget: mockFn().mockResolvedValue(null),
+  };
   const reviewsRepo = {
     findById: mockFn(),
     findByTarget: mockFn(() => Promise.resolve([])),
@@ -363,5 +368,87 @@ describe('CommunityReviewsService (UC-19-11)', () => {
         ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
+  });
+});
+
+describe('CommunityReviewsService — calificar desde el portal del paciente (C.2)', () => {
+  it('resuelve a quién califica desde el encuentro, sin pedir el id de la vitrina', async () => {
+    // Es el motivo entero de la ruta: la ficha pública se abre por slug y no
+    // publica su id, así que el paciente no puede nombrarla.
+    const d = build();
+    d.profilesRepo.findByTarget.mockResolvedValue(vitrina);
+    d.profilesRepo.findById.mockResolvedValue(vitrina);
+    d.reviewsRepo.create.mockReturnValue({ id: 'r1', overallRating: 4 });
+
+    const res = await d.service.publishOwnReview(cuerpo as any, paciente);
+
+    expect(d.profilesRepo.findByTarget).toHaveBeenCalledWith(
+      expect.anything(),
+      'hp-1',
+    );
+    expect(res).toMatchObject({ id: 'r1', verified: true });
+  });
+
+  it('un encuentro que no existe da el MISMO mensaje que una atención ajena', async () => {
+    // Distinguirlos le confirmaría a quien prueba uuids cuáles sí existen.
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue(null);
+
+    await expect(
+      d.service.publishOwnReview(cuerpo as any, paciente),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('un encuentro sin profesional a cargo tampoco habilita una reseña', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      ...atencionValida,
+      primaryPractitionerId: undefined,
+    });
+
+    await expect(
+      d.service.publishOwnReview(cuerpo as any, paciente),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    // Ni siquiera se intenta buscar la vitrina de un profesional que no hay.
+    expect(d.profilesRepo.findByTarget).not.toHaveBeenCalled();
+  });
+
+  it('un profesional sin vitrina no se puede calificar', async () => {
+    const d = build();
+    d.profilesRepo.findByTarget.mockResolvedValue(null);
+
+    await expect(
+      d.service.publishOwnReview(cuerpo as any, paciente),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('sigue exigiendo que la atención haya TERMINADO: no es un atajo a la regla', async () => {
+    // La resolución del destinatario no reemplaza ninguna comprobación:
+    // `publishReview` las hace todas, en un solo lugar.
+    const d = build();
+    d.profilesRepo.findByTarget.mockResolvedValue(vitrina);
+    d.profilesRepo.findById.mockResolvedValue(vitrina);
+    d.encountersRepo.findById.mockResolvedValue({
+      ...atencionValida,
+      statusConceptId: 'en-curso',
+    });
+
+    await expect(
+      d.service.publishOwnReview(cuerpo as any, paciente),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.reviewsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('una cuenta sin perfil de paciente no puede calificar', async () => {
+    const d = build();
+    d.profilesRepo.findByTarget.mockResolvedValue(vitrina);
+    d.profilesRepo.findById.mockResolvedValue(vitrina);
+
+    await expect(
+      d.service.publishOwnReview(cuerpo as any, {
+        id: 'u9',
+        roles: [],
+      } as any),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 });

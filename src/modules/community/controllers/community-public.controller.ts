@@ -10,13 +10,19 @@ import {
 import type { Response } from 'express';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { Public, ResourceNotFoundException } from '../../../common';
+import {
+  ParseOptionalLimitPipe,
+  Public,
+  ResourceNotFoundException,
+} from '../../../common';
 import {
   CommunityPublicService,
+  CommunityReviewsReadService,
   TARGET_CONCEPT_BY_SLUG_PREFIX,
 } from '../services';
 import type {
   PublicCommentPageDto,
+  PublicProfileReviewsDto,
   PublicDirectoryProfileDto,
   PublicFeedPageDto,
   PublicNearbyPageDto,
@@ -55,6 +61,9 @@ import type {
  */
 const PUBLIC_RATE_LIMIT = { default: { limit: 60, ttl: 60_000 } };
 
+/** Tope por defecto de opiniones por página, igual que el resto de la API. */
+const DEFAULT_REVIEW_PAGE_LIMIT = 50;
+
 @ApiTags('community-public')
 @Throttle(PUBLIC_RATE_LIMIT)
 @Controller()
@@ -63,8 +72,12 @@ export class CommunityPublicController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param service - Buscador público.
+   * @param reviews - Lecturas de reseñas, para las opiniones de la ficha (P31).
    */
-  constructor(private readonly service: CommunityPublicService) {}
+  constructor(
+    private readonly service: CommunityPublicService,
+    private readonly reviews: CommunityReviewsReadService,
+  ) {}
 
   /**
    * El feed de la portada: lo último de todas las vitrinas, mezclado.
@@ -361,6 +374,46 @@ export class CommunityPublicController {
       throw new ResourceNotFoundException('No encontrado', { slug });
 
     return this.service.getBySlug(slug, concepto);
+  }
+
+  /**
+   * P31 — las opiniones de una ficha pública, con su promedio.
+   *
+   * Cuelga del mismo `/public/profiles/:prefijo/:slug` que la ficha y no de
+   * `/community/profiles/:profileId/reviews` por lo mismo que aquella ruta
+   * existe: la abre un anónimo y lo único que lleva la URL es el slug. La
+   * lectura con sesión sigue donde estaba y devuelve exactamente las mismas
+   * reseñas — es el mismo servicio, no una segunda implementación.
+   *
+   * El promedio viaja acá y no sólo en la ficha porque la cabecera de las
+   * opiniones y la lista se dibujan juntas: pedirlos por separado deja la
+   * pantalla con «4,6 de 5» arriba y un hueco abajo.
+   *
+   * @param prefijo - `p` · `o` · `f` · `l` · `s`, el mismo que la ficha.
+   * @param slug - Slug estable del perfil.
+   * @param cursor - Cursor opaco de la página anterior.
+   * @param limit - Tope de filas.
+   * @throws ResourceNotFoundException si el prefijo no es uno de los cinco.
+   */
+  @Public()
+  @Get('public/profiles/:prefijo/:slug/reviews')
+  @ApiOperation({ summary: 'Opiniones publicadas de una ficha pública' })
+  listPublicProfileReviews(
+    @Param('prefijo') prefijo: string,
+    @Param('slug') slug: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PublicProfileReviewsDto> {
+    const concepto = TARGET_CONCEPT_BY_SLUG_PREFIX[prefijo];
+    // Mismo 404 que la ficha: un prefijo inventado no se distingue de un slug
+    // que no existe.
+    if (concepto === undefined)
+      throw new ResourceNotFoundException('No encontrado', { slug });
+
+    return this.reviews.listPublicReviewsBySlug(slug, concepto, {
+      cursor,
+      limit: limit ?? DEFAULT_REVIEW_PAGE_LIMIT,
+    });
   }
 
   /**
