@@ -461,7 +461,9 @@ export class ClinicalReadService {
       // la madre que pidió el turno de su hijo tiene que poder leer lo que el
       // pediatra escribió. Se pregunta recién acá —y no antes— para que el caso
       // normal, el titular leyendo lo suyo, no pague una consulta de más.
-      if (await this.representation.representsPatient(patientProfileId, actor)) {
+      if (
+        await this.representation.representsPatient(patientProfileId, actor)
+      ) {
         return;
       }
 

@@ -136,7 +136,10 @@ export const { seeds: CONSENT_CONCEPT_SEEDS, ids: CONS } = defineModuleConcepts(
     // por defecto de `ProcessingLegalBasesService`; la base legal que ampara la
     // representación de un menor por su madre o su padre es boliviana, así que
     // no puede heredar esa.
-    JURISDICTION_BO: { code: 'JURISDICTION_BO', display: 'Bolivia jurisdiction' },
+    JURISDICTION_BO: {
+      code: 'JURISDICTION_BO',
+      display: 'Bolivia jurisdiction',
+    },
     LEGAL_BASIS_CONSENT: {
       code: 'GEN_LEGAL_BASIS_CONSENT',
       display: 'Consent legal basis',

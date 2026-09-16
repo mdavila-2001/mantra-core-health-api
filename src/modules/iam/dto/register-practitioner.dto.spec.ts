@@ -192,7 +192,9 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
     expect(
       await propiedadesConError({
         ...ALTA_MINIMA,
-        credentials: [{ credentialTypeConceptId: TIPO, number: 'A'.repeat(100) }],
+        credentials: [
+          { credentialTypeConceptId: TIPO, number: 'A'.repeat(100) },
+        ],
       }),
     ).toEqual([]);
   });
@@ -201,7 +203,9 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
     expect(
       await propiedadesConError({
         ...ALTA_MINIMA,
-        credentials: [{ credentialTypeConceptId: TIPO, number: 'A'.repeat(101) }],
+        credentials: [
+          { credentialTypeConceptId: TIPO, number: 'A'.repeat(101) },
+        ],
       }),
     ).toEqual(['credentials.0.number']);
   });
@@ -239,7 +243,11 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
       await propiedadesConError({
         ...ALTA_MINIMA,
         credentials: [
-          { credentialTypeConceptId: TIPO, number: 'T-1', issuingCityText: 'La Paz' },
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'T-1',
+            issuingCityText: 'La Paz',
+          },
         ],
       }),
     ).toEqual(['credentials.0.issuingCityText']);

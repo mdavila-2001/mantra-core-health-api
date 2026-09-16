@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ValueSets, ValueSetVersions } from '../../modules/terminology/entities';
+import {
+  ValueSets,
+  ValueSetVersions,
+} from '../../modules/terminology/entities';
 import { ProcessingLegalBases } from '../../modules/consent/entities';
 import { CONS } from '../../modules/consent/consent.concepts';
 import { CONCEPTS, SEED } from '../constants/concepts';

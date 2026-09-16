@@ -525,9 +525,18 @@ describe('IamPractitionerSelfRegistrationService', () => {
         password: dto.password,
         licenseNumber: dto.licenseNumber,
         credentials: [
-          { credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE, number: 'TIT-1' },
-          { credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE, number: 'TIT-2' },
-          { credentialTypeConceptId: PROF.CREDENTIAL_TYPE_MASTER, number: 'MAE-9' },
+          {
+            credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+            number: 'TIT-1',
+          },
+          {
+            credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+            number: 'TIT-2',
+          },
+          {
+            credentialTypeConceptId: PROF.CREDENTIAL_TYPE_MASTER,
+            number: 'MAE-9',
+          },
         ],
       });
 
