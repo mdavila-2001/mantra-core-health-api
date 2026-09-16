@@ -1,7 +1,3 @@
-import {
-  patientCoverageReferenceDate,
-  patientCoverageValidity,
-} from '../patient-coverage-validity';
 import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -79,7 +75,6 @@ import {
   OwnPatientProfileResponseDto,
   OwnAddressDto,
   OwnCoverageDto,
-  CoverageBenefitSummaryDto,
   OwnGuardianDto,
   UpdateOwnPatientProfileDto,
   SetOwnPatientPhotoDto,
@@ -87,21 +82,14 @@ import {
   DependentSummaryDto,
 } from '../dto';
 import { Addresses, Identifiers } from '../../common/entities';
-import { INS } from '../../insurance/insurance.concepts';
-import { resolveInsuranceCurrencyCode } from '../../insurance/insurance-currency';
 import { createDeclaredCoverage } from '../../insurance/services/declared-coverage';
+import { DeclaredCoveragesReader } from '../../insurance/services/declared-coverages-reader';
 import {
   CatalogRepository,
   CoverageRepository,
 } from '../../insurance/repositories';
 import { createGuardianRelatedPerson } from './guardian-related-person';
-// `isPublic` no es columna: el modelo todavía no persiste el tipo de pagador
-// (deuda declarada en el alta, PR #258), así que se deriva del catálogo
-// sembrado — mismo criterio que usa el propio alta al aceptarlos.
-import {
-  isPublicCarrierId,
-  type InsuranceSector,
-} from '../../../common/seed/bolivia-insurance.catalog';
+import type { InsuranceSector } from '../../../common/seed/bolivia-insurance.catalog';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import {
   textoOpcional,
@@ -303,6 +291,7 @@ export class ProfilesPatientsService {
    * @param attachableFiles - La regla compartida de qué archivo se puede referenciar.
    * @param insuranceCatalogRepo - Catálogo de planes de salud (`insurance.insurance_plans`).
    * @param coverageRepo - Coberturas declaradas (`insurance.patient_coverages`).
+   * @param declaredCoverages - Lectura compartida de coberturas declaradas, con aseguradora y plan en palabras.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -331,6 +320,7 @@ export class ProfilesPatientsService {
     // repositorios que ya usa el alta: catálogo de planes y coberturas.
     private readonly insuranceCatalogRepo: CatalogRepository,
     private readonly coverageRepo: CoverageRepository,
+    private readonly declaredCoverages: DeclaredCoveragesReader,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPatientsService.name);
@@ -1186,164 +1176,19 @@ export class ProfilesPatientsService {
    * (PR #258)—, así que una aseguradora cargada por otra vía cae en «privada»
    * hasta que eso exista.
    */
+  /**
+   * Los seguros declarados, con la aseguradora y el plan EN PALABRAS.
+   *
+   * Delegado en `DeclaredCoveragesReader` (`insurance/services/`): es la
+   * misma consulta que necesita el PDF oficial de receta (`clinical`,
+   * subtarea B.3), y duplicarla en dos módulos es la clase de regla que
+   * diverge el día que sólo se corrige en un lado.
+   */
   private async leerCoberturas(
     em: EntityManager,
     patientProfileId: string,
   ): Promise<OwnCoverageDto[]> {
-    const referenceDate = patientCoverageReferenceDate();
-    const filas = await em.getConnection().execute<
-      {
-        coverage_id: string;
-        carrier_id: string;
-        carrier_name: string;
-        plan_name: string | null;
-        member_identifier: string | null;
-        policy_identifier: string | null;
-        verification_status_concept_id: string | null;
-        status_display: string | null;
-        status_code: string | null;
-        status_concept_id: string | null;
-        plan_status_concept_id: string | null;
-        plan_effective_from: string | null;
-        plan_effective_to: string | null;
-        effective_from: string | null;
-        effective_to: string | null;
-        insurance_plan_id: string;
-        currency_code: string | null;
-        currency_concept_id: string | null;
-        whatsapp_number: string | null;
-        call_center_phone: string | null;
-        coverage_order: number | null;
-      }[]
-    >(
-      `select c.id as coverage_id, ca.id as carrier_id, ca.legal_name as carrier_name,
-              pl.name as plan_name, c.member_identifier, c.policy_identifier,
-              c.verification_status_concept_id, coverage_status.display as status_display,
-              coverage_status.code as status_code, c.status_concept_id,
-              pl.status_concept_id as plan_status_concept_id,
-              to_char(c.effective_from, 'YYYY-MM-DD') as effective_from,
-              to_char(c.effective_to, 'YYYY-MM-DD') as effective_to,
-              to_char(pl.effective_from, 'YYYY-MM-DD') as plan_effective_from,
-              to_char(pl.effective_to, 'YYYY-MM-DD') as plan_effective_to,
-              c.insurance_plan_id,
-              currency.code as currency_code, pl.currency_concept_id,
-              ca.whatsapp_number, ca.call_center_phone,
-              c.coverage_order
-         from insurance.patient_coverages c
-         join insurance.insurance_plans pl on pl.id = c.insurance_plan_id
-         join insurance.insurance_products pr on pr.id = pl.insurance_product_id
-         join insurance.insurance_carriers ca on ca.id = pr.insurance_carrier_id
-         left join terminology.catalog_concepts coverage_status on coverage_status.id = c.status_concept_id
-         left join terminology.catalog_concepts currency on currency.id = pl.currency_concept_id
-        where c.patient_profile_id = ?
-        order by c.coverage_order nulls last, c.id`,
-      [patientProfileId],
-    );
-    if (filas.length === 0) return [];
-
-    const planIds = [...new Set(filas.map((fila) => fila.insurance_plan_id))];
-    const beneficios = await em.getConnection().execute<
-      {
-        id: string;
-        insurance_plan_id: string;
-        status_code: string | null;
-        status_concept_id: string | null;
-        category_code: string | null;
-        category_name: string | null;
-        service_concept_id: string | null;
-        service_name: string | null;
-        coverage_percent: string | null;
-        copay_amount: string | null;
-        deductible_amount: string | null;
-        effective_from: string | null;
-        effective_to: string | null;
-      }[]
-    >(
-      `select b.id, b.insurance_plan_id, category.code as category_code,
-              category.display as category_name, b.service_concept_id,
-              service.display as service_name, b.coverage_percent, b.copay_amount,
-              b.deductible_amount, benefit_status.code as status_code, b.status_concept_id,
-              to_char(b.effective_from, 'YYYY-MM-DD') as effective_from,
-              to_char(b.effective_to, 'YYYY-MM-DD') as effective_to
-         from insurance.insurance_plan_benefits b
-         left join terminology.catalog_concepts benefit_status on benefit_status.id = b.status_concept_id
-         left join terminology.catalog_concepts category on category.id = b.benefit_category_concept_id
-         left join terminology.catalog_concepts service on service.id = b.service_concept_id
-        where b.insurance_plan_id in (${planIds.map(() => '?').join(', ')})
-        order by b.insurance_plan_id, b.created_at, b.id`,
-      planIds,
-    );
-    const benefitsByPlan = new Map<string, typeof beneficios>();
-    for (const beneficio of beneficios) {
-      const current = benefitsByPlan.get(beneficio.insurance_plan_id) ?? [];
-      current.push(beneficio);
-      benefitsByPlan.set(beneficio.insurance_plan_id, current);
-    }
-
-    return filas.map((fila) => {
-      const periods = [
-        {
-          statusConceptId: fila.status_concept_id,
-          activeConceptId: INS.COVERAGE_ACTIVE,
-          effectiveFrom: fila.effective_from,
-          effectiveTo: fila.effective_to,
-        },
-        {
-          statusConceptId: fila.plan_status_concept_id,
-          activeConceptId: INS.PLAN_ACTIVE,
-          effectiveFrom: fila.plan_effective_from,
-          effectiveTo: fila.plan_effective_to,
-        },
-      ];
-      return sinCamposAusentes({
-        id: fila.coverage_id,
-        carrierName: fila.carrier_name,
-        planName: fila.plan_name,
-        isPublic: isPublicCarrierId(fila.carrier_id),
-        policyIdentifier: fila.policy_identifier,
-        memberIdentifier: fila.member_identifier,
-        verified: fila.verification_status_concept_id === INS.VERIFY_VERIFIED,
-        status: fila.status_display,
-        statusCode: fila.status_code,
-        validityStatus: patientCoverageValidity(referenceDate, periods),
-        referenceDate,
-        effectiveFrom: fila.effective_from,
-        effectiveTo: fila.effective_to,
-        currencyCode: resolveInsuranceCurrencyCode(
-          fila.currency_concept_id,
-          fila.currency_code,
-        ),
-        carrierWhatsappNumber: fila.whatsapp_number,
-        carrierCallCenterPhone: fila.call_center_phone,
-        benefits: (benefitsByPlan.get(fila.insurance_plan_id) ?? []).map(
-          (benefit) =>
-            sinCamposAusentes({
-              id: benefit.id,
-              statusCode: benefit.status_code,
-              categoryCode: benefit.category_code,
-              categoryName: benefit.category_name,
-              serviceConceptId: benefit.service_concept_id,
-              serviceName: benefit.service_name,
-              coveragePercent: benefit.coverage_percent,
-              copayAmount: benefit.copay_amount,
-              deductibleAmount: benefit.deductible_amount,
-              effectiveFrom: benefit.effective_from,
-              effectiveTo: benefit.effective_to,
-              validityStatus: patientCoverageValidity(referenceDate, [
-                ...periods,
-                {
-                  statusConceptId: benefit.status_concept_id,
-                  activeConceptId: INS.BENEFIT_ACTIVE,
-                  effectiveFrom: benefit.effective_from,
-                  effectiveTo: benefit.effective_to,
-                },
-              ]),
-            }) as CoverageBenefitSummaryDto,
-        ),
-        planId: fila.insurance_plan_id,
-        coverageOrder: fila.coverage_order ?? 0,
-      }) as OwnCoverageDto;
-    });
+    return this.declaredCoverages.read(em, patientProfileId);
   }
   /** Tutores y personas autorizadas, con su nombre y su teléfono. */
   private async leerTutores(

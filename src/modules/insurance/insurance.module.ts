@@ -30,6 +30,7 @@ import {
   InsuranceReadService,
   InsuranceCatalogService,
   InsuranceAnalyticsService,
+  DeclaredCoveragesReader,
 } from './services';
 import {
   CatalogRepository,
@@ -97,6 +98,7 @@ import {
     InsuranceReadService,
     InsuranceCatalogService,
     InsuranceAnalyticsService,
+    DeclaredCoveragesReader,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.
@@ -104,6 +106,14 @@ import {
   // transacción el seguro que la persona declara tener.
   // `ClaimReadRepository` lo lee `scheduling`: la agenda muestra la solicitud
   // de seguro de cada cita, en lote, sin reimplementar la consulta.
-  exports: [CatalogRepository, CoverageRepository, ClaimReadRepository],
+  // `DeclaredCoveragesReader` lo leen `profiles` (GET /profiles/patients/me)
+  // y `clinical` (el PDF oficial de receta, subtarea B.3): es la misma
+  // consulta de coberturas declaradas y no puede tener dos dueños.
+  exports: [
+    CatalogRepository,
+    CoverageRepository,
+    ClaimReadRepository,
+    DeclaredCoveragesReader,
+  ],
 })
 export class InsuranceModule {}

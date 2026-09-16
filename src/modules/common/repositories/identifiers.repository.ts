@@ -105,6 +105,27 @@ export class IdentifiersRepository {
     return new Map(filas.map((fila) => [fila.id, fila]));
   }
 
+  /**
+   * Los identificadores vigentes (`valid_to IS NULL`) de un dueño.
+   *
+   * Mismo `em.find` que ya hacía `ProfilesPatientsService.leerIdentificadores`
+   * inline — se sube al repositorio porque el PDF oficial de receta
+   * (`clinical`, subtarea B.3) también lo necesita, para el documento de
+   * identidad y su departamento emisor. Sin filtrar por tipo: quien llama
+   * ya sabe qué `typeConceptId` busca entre los resultados (documento,
+   * identificador fiscal…), igual que hacía el código original.
+   *
+   * @param em - Contexto de persistencia.
+   * @param ownerId - El dueño de los identificadores (persona o tenant).
+   * @returns Sus identificadores vigentes, sin orden garantizado.
+   */
+  findCurrentByOwner(
+    em: EntityManager,
+    ownerId: string,
+  ): Promise<Identifiers[]> {
+    return em.find(Identifiers, { ownerId, validTo: null });
+  }
+
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateIdentifierData): Identifiers {
     return em.create(
