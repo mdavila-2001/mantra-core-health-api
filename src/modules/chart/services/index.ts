@@ -5,3 +5,4 @@ export * from './chart-templates.service';
 export * from './chart-read.service';
 export * from './chart-note-item.mapper';
 export * from './chart-notes-read.service';
+export * from './encounter-pdf.service';
