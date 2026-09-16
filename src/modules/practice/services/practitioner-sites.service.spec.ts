@@ -30,6 +30,14 @@ function build() {
   };
   const practicesRepo = {
     findById: mockFn().mockResolvedValue({ id: 'pr-1', tenantId: TENANT }),
+    findOwnOffice: mockFn().mockResolvedValue(null),
+  };
+  const addressesRepo = {
+    create: mockFn().mockReturnValue({ id: 'addr-nueva' }),
+    closeVigente: mockFn(),
+  };
+  const accountLinksRepo = {
+    findActiveByPerson: mockFn().mockResolvedValue(null),
   };
   const sitesRepo = {
     findById: mockFn().mockResolvedValue(null),
@@ -69,6 +77,8 @@ function build() {
     sitesRepo as any,
     spacesRepo as any,
     rolesRepo as any,
+    addressesRepo as any,
+    accountLinksRepo as any,
     provisioning as any,
     ownership as any,
     logger as any,
@@ -81,6 +91,8 @@ function build() {
     sitesRepo,
     spacesRepo,
     rolesRepo,
+    addressesRepo,
+    accountLinksRepo,
     provisioning,
     ownership,
     logger,
@@ -315,6 +327,186 @@ describe('PractitionerSitesService', () => {
       const d = build();
       await expect(
         d.service.deleteOwnSite(actor, 'site-ajeno'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('isOwnSite y bankQrFileId en el listado (P32-a / P33)', () => {
+    it('marks the personal practice of that practitioner as their own site', async () => {
+      const d = build();
+      d.rolesRepo.findCurrentWithSite.mockResolvedValue([
+        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+      ]);
+      d.sitesRepo.findById.mockResolvedValue(sede({ bankQrFileId: 'file-qr' }));
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: TENANT,
+        typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+        adminUserId: 'user-1',
+      });
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'user-1',
+      });
+
+      const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
+
+      expect(res[0]).toMatchObject({
+        isOwnSite: true,
+        bankQrFileId: 'file-qr',
+      });
+    });
+
+    it('does not mark a hospital as their own site', async () => {
+      const d = build();
+      d.rolesRepo.findCurrentWithSite.mockResolvedValue([
+        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+      ]);
+      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: TENANT,
+        typeConceptId: PRAC.PRACTICE_TYPE_HOSPITAL,
+        adminUserId: 'otro-usuario',
+      });
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'user-1',
+      });
+
+      const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
+
+      expect(res[0]).toMatchObject({ isOwnSite: false, bankQrFileId: null });
+    });
+
+    it('reads a consulting room of ANOTHER practitioner as not own', async () => {
+      const d = build();
+      d.rolesRepo.findCurrentWithSite.mockResolvedValue([
+        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+      ]);
+      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: TENANT,
+        typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+        adminUserId: 'otro-usuario',
+      });
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'user-1',
+      });
+
+      const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
+
+      expect(res[0].isOwnSite).toBe(false);
+    });
+  });
+
+  describe('updateOwnSite (P32-b)', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    function conConsultorioPropio(d: ReturnType<typeof build>, site: any) {
+      d.sitesRepo.findById.mockResolvedValue(site);
+      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: site.practiceId });
+      d.practicesRepo.findById.mockResolvedValue({
+        id: site.practiceId,
+        tenantId: TENANT,
+        typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+        adminUserId: actor.id,
+      });
+    }
+
+    it('changes only the fields present in the body', async () => {
+      const d = build();
+      const site = sede({ id: 'site-own-1', practiceId: 'pr-own-1' });
+      conConsultorioPropio(d, site);
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.updateOwnSite(actor, 'site-own-1', {
+          name: 'Consultorio Sur',
+        } as any),
+      );
+
+      expect(site.name).toBe('Consultorio Sur');
+      expect(site.timeZone).toBe('America/La_Paz');
+      expect(res).toMatchObject({ name: 'Consultorio Sur', isOwnSite: true });
+    });
+
+    it('fails with not found when the site is not their own office', async () => {
+      const d = build();
+      d.sitesRepo.findById.mockResolvedValue(sede({ practiceId: 'pr-ajena' }));
+      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.updateOwnSite(actor, 'site-ajeno', { name: 'x' } as any),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('ends the previous address instead of overwriting it', async () => {
+      const d = build();
+      const site = sede({
+        id: 'site-own-1',
+        practiceId: 'pr-own-1',
+        addressId: 'addr-vieja',
+      });
+      conConsultorioPropio(d, site);
+      const vigente = { id: 'addr-vieja' };
+      d.fork.findOne.mockResolvedValue(vigente);
+      d.addressesRepo.create.mockReturnValue({ id: 'addr-nueva' });
+
+      await runWithTenant(TENANT, () =>
+        d.service.updateOwnSite(actor, 'site-own-1', {
+          address: { lines: ['Calle Nueva 99'], city: 'La Paz' },
+        } as any),
+      );
+
+      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+        vigente,
+        expect.any(Date),
+        actor.id,
+      );
+      expect(site.addressId).toBe('addr-nueva');
+    });
+  });
+
+  describe('setSiteBankQr (P33)', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    it('authorizes by current assignment, so it works on a site that is not their own', async () => {
+      const d = build();
+      const site = sede({ id: 'site-clinica', practiceId: 'pr-clinica' });
+      d.rolesRepo.findCurrentBySite.mockResolvedValue({ id: 'ra-1' });
+      d.sitesRepo.findById.mockResolvedValue(site);
+      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteBankQr(actor, 'site-clinica', 'file-qr'),
+      );
+
+      expect(site.bankQrFileId).toBe('file-qr');
+      expect(res).toMatchObject({ bankQrFileId: 'file-qr', isOwnSite: false });
+    });
+
+    it('clears the QR when the body carries an explicit null', async () => {
+      const d = build();
+      const site = sede({ bankQrFileId: 'file-viejo' });
+      d.rolesRepo.findCurrentBySite.mockResolvedValue({ id: 'ra-1' });
+      d.sitesRepo.findById.mockResolvedValue(site);
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteBankQr(actor, 'site-1', null),
+      );
+
+      expect(site.bankQrFileId).toBeUndefined();
+      expect(res.bankQrFileId).toBeNull();
+    });
+
+    it('fails with not found without a current assignment for that site', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.setSiteBankQr(actor, 'site-ajeno', 'file-qr'),
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
