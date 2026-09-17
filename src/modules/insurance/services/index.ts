@@ -8,5 +8,6 @@ export * from './broker-commission.service';
 export * from './insurance-read.service';
 export * from './insurance-catalog.service';
 export * from './declared-coverage';
+export * from './declared-coverages-reader';
 export * from './claims-read.service';
 export * from './insurance-analytics.service';

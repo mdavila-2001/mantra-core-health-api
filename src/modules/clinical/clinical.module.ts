@@ -17,6 +17,12 @@ import { CommonModule } from '../common/common.module';
 // clínico contra el PDP de `authz` antes de servir PHI. Import unidireccional
 // (`clinical` → `authz`); `authz` no conoce `clinical`, así que no hay ciclo.
 import { AuthzModule } from '../authz/authz.module';
+// B.3 — el PDF oficial de receta resuelve medicamento, sustancia, vía,
+// unidad, especialidad y departamento emisor por su concepto:
+// `CatalogConceptsRepository.findByIds`, el mismo resolvedor en lote que ya
+// usa `chart` para el PDF del encuentro. Sin ciclo: `terminology` no conoce
+// a `clinical`.
+import { TerminologyModule } from '../terminology/terminology.module';
 import {
   ClinicalEncountersController,
   ClinicalObservationsController,
@@ -24,6 +30,8 @@ import {
   ClinicalPrescriptionPoliciesController,
   ClinicalRecordsController,
   ClinicalReadController,
+  ClinicalPrescriptionsController,
+  ClinicalPrescriptionsPublicController,
 } from './controllers';
 import { ClinicalRecordAccessGuard } from './guards';
 import {
@@ -41,6 +49,7 @@ import {
   ImmunizationsService,
   ClinicalReadService,
   ClinicalNotificationsService,
+  PrescriptionPdfService,
 } from './services';
 import {
   CareEpisodesRepository,
@@ -68,6 +77,14 @@ import {
   PatientPortalProxiesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
+  // B.3 — el PDF oficial de receta necesita el nombre de paciente y
+  // profesional (CTI: `profile_id` es `persons.id`), la especialidad y la
+  // matrícula del prescriptor. Mismo criterio que el resto de este bloque:
+  // clases sin estado por `EntityManager`, sin importar `ProfilesModule`
+  // entero (cerraría el ciclo que el comentario de arriba ya explica).
+  PersonsRepository,
+  PractitionerSpecialtiesRepository,
+  JurisdictionAuthorizationsRepository,
 } from '../profiles/repositories';
 // B.1 — la historia de un menor la lee también quien lo representa, y quién
 // representa a quién lo sabe `profiles`. Mismo criterio que los repositorios de
@@ -97,6 +114,12 @@ import {
   ClinicalNotesRepository,
   DocumentsRepository,
 } from '../chart/repositories';
+// B.3 — el bloque de cobertura declarada del PDF de receta es la misma
+// lectura que usa `GET /profiles/patients/me`. `DeclaredCoveragesReader` no
+// tiene constructor (clase sin estado, `EntityManager` por parámetro), así
+// que se provee directo acá y en `InsuranceModule` sin importar ese módulo
+// entero — mismo criterio que el resto de este archivo.
+import { DeclaredCoveragesReader } from '../insurance/services/declared-coverages-reader';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -111,6 +134,7 @@ import {
     MessagingModule,
     CommonModule,
     AuthzModule,
+    TerminologyModule,
   ],
   controllers: [
     ClinicalEncountersController,
@@ -119,6 +143,8 @@ import {
     ClinicalPrescriptionPoliciesController,
     ClinicalRecordsController,
     ClinicalReadController,
+    ClinicalPrescriptionsController,
+    ClinicalPrescriptionsPublicController,
   ],
   providers: [
     // Repositorios
@@ -145,6 +171,11 @@ import {
     ClinicalNotesRepository,
     CarePlansRepository,
     DocumentsRepository,
+    // B.3 — el PDF oficial de receta.
+    PersonsRepository,
+    PractitionerSpecialtiesRepository,
+    JurisdictionAuthorizationsRepository,
+    DeclaredCoveragesReader,
     // Servicios
     CareEpisodesService,
     EncountersService,
@@ -161,6 +192,7 @@ import {
     ClinicalReadService,
     ClinicalNotificationsService,
     ClinicalRecordAccessGuard,
+    PrescriptionPdfService,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:

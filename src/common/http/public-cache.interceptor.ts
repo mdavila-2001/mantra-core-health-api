@@ -4,11 +4,18 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
+import { HEADERS_METADATA } from '@nestjs/common/constants';
 import { Reflector } from '@nestjs/core';
 import { createHash } from 'node:crypto';
 import type { Request, Response } from 'express';
 import { map, type Observable } from 'rxjs';
 import { IS_PUBLIC_KEY } from '../auth/public.decorator';
+
+/** La forma que deja `@Header(name, value)` en `HEADERS_METADATA`. */
+interface DeclaredHeader {
+  readonly name: string;
+  readonly value: string | (() => string);
+}
 
 /** Cuánto vale una página de búsqueda antes de revalidar, en segundos. */
 const SEARCH_MAX_AGE = 60;
@@ -70,6 +77,15 @@ export class PublicCacheInterceptor implements NestInterceptor {
     // Sólo las lecturas: un POST público —si lo hubiera— no se cachea nunca.
     if (!esPublico || req.method !== 'GET') return next.handle();
 
+    // B.3 — un handler que ya declaró su propio `Cache-Control` (el verify
+    // de receta usa `no-store`: invalidar tiene que verse de inmediato) sabe
+    // más de su propia frescura que esta heurística genérica de "página
+    // pública que cambia poco". Sin este freno, el `public, max-age=60,
+    // stale-while-revalidate=300` de acá pisaría el `no-store` del handler y
+    // una receta invalidada seguiría viéndose "ISSUED" hasta un minuto
+    // después.
+    if (this.declaraSuPropioCacheControl(context)) return next.handle();
+
     const res = http.getResponse<Response>();
 
     return next.handle().pipe(
@@ -97,6 +113,26 @@ export class PublicCacheInterceptor implements NestInterceptor {
         }
         return body;
       }),
+    );
+  }
+
+  /**
+   * ¿El propio handler ya declaró un `Cache-Control` con `@Header(...)`?
+   *
+   * Lee `HEADERS_METADATA` en vez de mirar la respuesta ya armada: en el
+   * momento en que corre este interceptor el método del controlador todavía
+   * no se ejecutó (estamos antes de `next.handle()`), así que un
+   * `res.setHeader` hecho a mano dentro del handler todavía no existe. La
+   * metadata de `@Header()`, en cambio, ya está fija desde que Nest armó las
+   * rutas.
+   */
+  private declaraSuPropioCacheControl(context: ExecutionContext): boolean {
+    const headers = this.reflector.getAllAndOverride<DeclaredHeader[]>(
+      HEADERS_METADATA,
+      [context.getHandler(), context.getClass()],
+    );
+    return (headers ?? []).some(
+      (header) => header.name.toLowerCase() === 'cache-control',
     );
   }
 

@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { firstValueFrom, of } from 'rxjs';
+import { HEADERS_METADATA } from '@nestjs/common/constants';
 import { PublicCacheInterceptor } from './public-cache.interceptor';
 
 /**
@@ -27,6 +28,8 @@ function build(opciones: {
   ifNoneMatch?: string | string[];
   /** Cuerpo que devuelve el manejador. */
   body?: unknown;
+  /** `@Header(...)` que el propio manejador ya declaró (B.3). */
+  headers?: readonly { name: string; value: string }[];
 }) {
   const headers: Record<string, unknown> = {};
   if (opciones.ifNoneMatch !== undefined)
@@ -42,7 +45,9 @@ function build(opciones: {
   });
 
   const reflector = {
-    getAllAndOverride: mockFn(() => opciones.publico),
+    getAllAndOverride: mockFn((clave: unknown) =>
+      clave === HEADERS_METADATA ? (opciones.headers ?? []) : opciones.publico,
+    ),
   };
   const context = {
     getHandler: () => undefined,
@@ -167,6 +172,33 @@ describe('PublicCacheInterceptor', () => {
 
   it('un POST público no se cachea', async () => {
     const d = build({ publico: true, method: 'POST' });
+
+    await d.ejecutar();
+
+    expect(d.res.cabeceras['Cache-Control']).toBeUndefined();
+  });
+
+  // B.3: el verify de receta declara su propio `no-store` porque invalidar
+  // tiene que verse de inmediato. Sin este freno, el `public, max-age=60`
+  // genérico lo pisaría y una receta recién anulada seguiría viéndose
+  // "ISSUED" hasta un minuto después.
+  it('respeta el Cache-Control que el handler ya declaró con @Header', async () => {
+    const d = build({
+      publico: true,
+      headers: [{ name: 'Cache-Control', value: 'no-store' }],
+    });
+
+    await d.ejecutar();
+
+    expect(d.res.cabeceras['Cache-Control']).toBeUndefined();
+    expect(d.res.cabeceras['ETag']).toBeUndefined();
+  });
+
+  it('un Cache-Control declarado con otra capitalización también cuenta', async () => {
+    const d = build({
+      publico: true,
+      headers: [{ name: 'cache-control', value: 'no-store' }],
+    });
 
     await d.ejecutar();
 
