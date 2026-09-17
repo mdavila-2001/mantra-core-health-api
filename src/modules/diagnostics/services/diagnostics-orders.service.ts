@@ -90,6 +90,8 @@ export class DiagnosticsOrdersService {
         priorityConceptId: row.priorityConceptId,
         requesterProfileId: row.requesterProfileId,
         createdAt: row.createdAt,
+        previousDiagnosticReportId: row.previousDiagnosticReportId,
+        duplicateOverrideReason: row.duplicateOverrideReason,
       })),
       reports: this.cut(reports, limit, 'reports', truncated).map((row) => ({
         id: row.id,
