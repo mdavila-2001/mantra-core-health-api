@@ -302,6 +302,10 @@ function diagnosticSnapshot(
   offering: DiagnosticStudyOfferings,
 ): LinkedOrderSnapshot {
   const line = input.lines[0];
+  // Antiduplicación de estudios (subtarea 3.2, T-26): una orden que nació
+  // `SR_SATISFIED_BY_PRIOR` (reutilizó un informe previo, sin justificación
+  // del médico) NO está en esta lista y por lo tanto nunca es `valid` — no
+  // hace falta excluirla a mano, sólo dejar constancia de por qué.
   const valid =
     input.lines.length === 1 &&
     !line.inventoryReservationLineId &&

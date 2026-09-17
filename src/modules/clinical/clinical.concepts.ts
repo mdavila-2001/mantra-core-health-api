@@ -116,6 +116,18 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'SR_REVOKED',
       display: 'Service request revoked',
     },
+    /**
+     * Antiduplicación de estudios (v4.2.17, subtarea 3.2). La orden nace en
+     * este estado cuando el médico eligió reutilizar un informe previo en vez
+     * de repetir el estudio: queda enlazada a él vía
+     * `previous_diagnostic_report_id`, sin `duplicate_override_reason`, y no
+     * es facturable (`LinkedClaimOrderService` la excluye). Value set
+     * dinámico, dueño este archivo: sin nota `vs_*` en la bóveda (v4.1.9).
+     */
+    SERVICE_REQUEST_SATISFIED_BY_PRIOR: {
+      code: 'SR_SATISFIED_BY_PRIOR',
+      display: 'Service request satisfied by prior result',
+    },
     SERVICE_REQUEST_INTENT_PLAN: { code: 'SR_PLAN', display: 'Plan intent' },
     SERVICE_REQUEST_INTENT_PROPOSAL: {
       code: 'SR_PROPOSAL',

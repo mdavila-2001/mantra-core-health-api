@@ -160,6 +160,18 @@ describe('LinkedClaimOrderService', () => {
       }),
     );
   });
+  it('una orden SR_SATISFIED_BY_PRIOR (antiduplicación, subtarea 3.2) no es facturable', async () => {
+    const f = fixture();
+    f.diagnosticOrder.statusConceptId = CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR;
+    const snapshots = await f.service.loadSnapshots(
+      f.em as never,
+      f.claims,
+      f.claimLines,
+    );
+    expect(snapshots.get('dx-claim')).toEqual(
+      expect.objectContaining({ validForSettlement: false }),
+    );
+  });
   it('consulta por lotes con número constante de lecturas incluso con varios reclamos', async () => {
     const f = fixture();
     await f.service.loadSnapshots(

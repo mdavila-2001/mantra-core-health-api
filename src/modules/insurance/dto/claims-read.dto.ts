@@ -218,6 +218,38 @@ export class ClaimListResponseDto {
  * cláusula y la justificación circunstanciada **del ítem**; `denialReason` sigue
  * siendo el motivo TIPIFICADO. Ninguna reemplaza a las otras.
  */
+/**
+ * El estudio duplicado que originó la orden de esta línea, si el médico
+ * enlazó un informe previo (antiduplicación, subtarea 3.2). Nunca incluye la
+ * conclusión clínica: la cara del reclamo ve fecha, prestador, estudio y
+ * justificación, no el informe.
+ */
+export class ClaimLineDuplicateStudyDto {
+  @ApiProperty({ format: 'uuid' })
+  previousDiagnosticReportId!: string;
+
+  @ApiProperty({ example: 'Ecografía abdominal' })
+  studyName!: string;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  performedAt!: Date;
+
+  /** Días entre el estudio previo y ESTA orden (no "hoy"). */
+  @ApiProperty({ example: 14 })
+  daysAgo!: number;
+
+  @ApiProperty({ example: 'Centro de Diagnóstico San Gabriel' })
+  providerName!: string;
+
+  /** `null` cuando la orden reutilizó el informe (sin justificación). */
+  @ApiProperty({ nullable: true, type: String })
+  justification!: string | null;
+
+  /** Si la orden nació satisfecha por el informe previo (no facturable). */
+  @ApiProperty()
+  reused!: boolean;
+}
+
 export class ClaimLineViewDto {
   /** Identificador del ítem. */
   @ApiProperty({ format: 'uuid' })
@@ -284,6 +316,15 @@ export class ClaimLineViewDto {
   /** Identificador del documento clínico de origen, si lo hay. */
   @ApiProperty({ nullable: true, type: String })
   reference!: string | null;
+
+  /**
+   * Antiduplicación de estudios (subtarea 3.2, T-26): presente cuando la orden
+   * de origen está enlazada a un informe previo del mismo estudio. `null` en
+   * cualquier otro caso. La aseguradora no accede al informe: sólo metadatos
+   * y la justificación del médico, si la hay.
+   */
+  @ApiProperty({ nullable: true, type: ClaimLineDuplicateStudyDto })
+  duplicateStudy!: ClaimLineDuplicateStudyDto | null;
 }
 
 /** El dictamen vigente de una solicitud. */

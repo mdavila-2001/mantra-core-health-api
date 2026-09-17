@@ -3,6 +3,7 @@ export * from './encounters.service';
 export * from './encounter-seal.service';
 export * from './observations.service';
 export * from './service-requests.service';
+export * from './duplicate-study-detector';
 export * from './diagnostic-reports.service';
 export * from './conditions.service';
 export * from './allergy-intolerances.service';

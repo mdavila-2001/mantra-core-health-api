@@ -80,25 +80,42 @@ function practiceLookup(practiceIds: string[] = [PRACTICE]) {
   };
 }
 
-/** Doble del `EntityManager`: sólo hace falta `fork` y `find`. */
-function em(porEntidad: (nombre: string) => unknown[] = () => []) {
+/** Doble del `EntityManager`: `fork`, `find` y `findOne`. */
+function em(
+  porEntidad: (nombre: string) => unknown[] = () => [],
+  porEntidadUno: (nombre: string, where: any) => unknown = () => undefined,
+) {
   const fork = {
     find: jest.fn((entidad: { name?: string }) =>
       Promise.resolve(porEntidad(entidad.name ?? '')),
+    ),
+    findOne: jest.fn((entidad: { name?: string }, where: any) =>
+      Promise.resolve(porEntidadUno(entidad.name ?? '', where)),
     ),
   };
   return { fork: () => fork } as never;
 }
 
-/** Arma el servicio con sus tres dependencias dobladas. */
+/** Doble del detector de duplicidad (subtarea 3.2): sin duplicado por defecto. */
+function duplicateStudyDetector(over: Record<string, unknown> = {}) {
+  return {
+    describeByReportId: mockFn().mockResolvedValue(null),
+    ...over,
+  };
+}
+
+/** Arma el servicio con sus cuatro dependencias dobladas. */
 function servicioCon(
   r: Record<string, unknown>,
   practicas: string[] = [PRACTICE],
+  detector: Record<string, unknown> = duplicateStudyDetector(),
+  entidadManager: unknown = em(),
 ) {
   return new ClaimsReadService(
-    em(),
+    entidadManager as never,
     r as never,
     practiceLookup(practicas) as never,
+    detector as never,
   );
 }
 
@@ -145,6 +162,7 @@ describe('ClaimsReadService', () => {
         expect.anything(),
         expect.any(Number),
         null,
+        [],
       );
     });
 
@@ -192,6 +210,7 @@ describe('ClaimsReadService', () => {
         expect.anything(),
         2,
         null,
+        [],
       );
     });
 
@@ -480,6 +499,206 @@ describe('ClaimsReadService', () => {
       expect(detalle.header.carrierWhatsappNumber).toBeNull();
       expect(detalle.header.carrierCallCenterPhone).toBeNull();
       expect(detalle.header.carrierSupportEmail).toBeNull();
+    });
+  });
+
+  describe('antiduplicación de estudios (subtarea 3.2, T-26)', () => {
+    const UNIT = 'unit-1';
+    const ORDER = 'sr-1';
+    const REPORT = 'report-1';
+
+    /** `em()` con una unidad diagnóstica activa del tenant. */
+    function emConUnidad() {
+      return em((nombre) =>
+        nombre === 'DiagnosticUnits' ? [{ id: UNIT }] : [],
+      );
+    }
+
+    it('amplía el alcance a las unidades diagnósticas activas del tenant', async () => {
+      const r = repo();
+
+      await conTenant(() =>
+        servicioCon(r, [], duplicateStudyDetector(), emConUnidad()).listClaims(
+          {},
+        ),
+      );
+
+      expect(r.findClaimsPage).toHaveBeenCalledWith(
+        expect.anything(),
+        [],
+        expect.anything(),
+        expect.any(Number),
+        null,
+        [UNIT],
+      );
+    });
+
+    it('sin prácticas ni unidades diagnósticas activas, responde 403', async () => {
+      const r = repo();
+
+      await expect(
+        conTenant(() => servicioCon(r, []).listClaims({})),
+      ).rejects.toThrow(ForbiddenException);
+      expect(r.findClaimsPage).not.toHaveBeenCalled();
+    });
+
+    it('resuelve duplicateStudy cuando la orden de origen está enlazada a un informe previo', async () => {
+      const orderById = (nombre: string, where: any) =>
+        nombre === 'ServiceRequests' && where.id === ORDER
+          ? {
+              id: ORDER,
+              previousDiagnosticReportId: REPORT,
+              duplicateOverrideReason: 'Control post-quirúrgico inmediato',
+              createdAt: new Date('2026-09-10T09:00:00.000Z'),
+            }
+          : undefined;
+
+      const r = repo({
+        findClaimInScope: mockFn().mockResolvedValue(
+          reclamo({ serviceRequestId: ORDER }),
+        ),
+        findLinesByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'l1',
+            insuranceClaimId: CLAIM,
+            lineSequence: 1,
+            billedAmount: '350.00',
+          },
+        ]),
+      });
+      const detector = duplicateStudyDetector({
+        describeByReportId: mockFn().mockResolvedValue({
+          reportId: REPORT,
+          studyName: 'Ecografía abdominal',
+          providerName: 'Centro San Gabriel',
+          performedAt: new Date('2026-08-27T09:00:00.000Z'),
+          daysAgo: 14,
+          resultsAvailable: true,
+          conclusionText: null,
+          reportDownloadUrl: null,
+          sameOrganization: true,
+          serviceRequestId: null,
+        }),
+      });
+
+      const detalle = await conTenant(() =>
+        servicioCon(
+          r,
+          [PRACTICE],
+          detector,
+          em(() => [], orderById),
+        ).getClaim(CLAIM),
+      );
+
+      expect(detalle.lines[0].duplicateStudy).toEqual({
+        previousDiagnosticReportId: REPORT,
+        studyName: 'Ecografía abdominal',
+        performedAt: new Date('2026-08-27T09:00:00.000Z'),
+        daysAgo: 14,
+        providerName: 'Centro San Gabriel',
+        justification: 'Control post-quirúrgico inmediato',
+        reused: false,
+      });
+    });
+
+    it('duplicateStudy es null cuando la orden no tiene enlace', async () => {
+      const r = repo({
+        findClaimInScope: mockFn().mockResolvedValue(
+          reclamo({ serviceRequestId: ORDER }),
+        ),
+        findLinesByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'l1',
+            insuranceClaimId: CLAIM,
+            lineSequence: 1,
+            billedAmount: '350.00',
+          },
+        ]),
+      });
+      const orderSinEnlace = (nombre: string, where: any) =>
+        nombre === 'ServiceRequests' && where.id === ORDER
+          ? { id: ORDER, previousDiagnosticReportId: undefined }
+          : undefined;
+
+      const detalle = await conTenant(() =>
+        servicioCon(
+          r,
+          [PRACTICE],
+          duplicateStudyDetector(),
+          em(() => [], orderSinEnlace),
+        ).getClaim(CLAIM),
+      );
+
+      expect(detalle.lines[0].duplicateStudy).toBeNull();
+    });
+
+    it('duplicateStudy es null cuando la solicitud no viene de una orden', async () => {
+      const r = repo({
+        findLinesByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'l1',
+            insuranceClaimId: CLAIM,
+            lineSequence: 1,
+            billedAmount: '350.00',
+          },
+        ]),
+      });
+
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+
+      expect(detalle.lines[0].duplicateStudy).toBeNull();
+    });
+
+    it('marca reused=true cuando la orden reutilizó el informe (sin justificación)', async () => {
+      const orderReutilizada = (nombre: string, where: any) =>
+        nombre === 'ServiceRequests' && where.id === ORDER
+          ? {
+              id: ORDER,
+              previousDiagnosticReportId: REPORT,
+              duplicateOverrideReason: undefined,
+              createdAt: new Date('2026-09-10T09:00:00.000Z'),
+            }
+          : undefined;
+
+      const r = repo({
+        findClaimInScope: mockFn().mockResolvedValue(
+          reclamo({ serviceRequestId: ORDER }),
+        ),
+        findLinesByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'l1',
+            insuranceClaimId: CLAIM,
+            lineSequence: 1,
+            billedAmount: '350.00',
+          },
+        ]),
+      });
+      const detector = duplicateStudyDetector({
+        describeByReportId: mockFn().mockResolvedValue({
+          reportId: REPORT,
+          studyName: 'Ecografía abdominal',
+          providerName: 'Centro San Gabriel',
+          performedAt: new Date('2026-08-27T09:00:00.000Z'),
+          daysAgo: 14,
+          resultsAvailable: true,
+          conclusionText: null,
+          reportDownloadUrl: null,
+          sameOrganization: true,
+          serviceRequestId: null,
+        }),
+      });
+
+      const detalle = await conTenant(() =>
+        servicioCon(
+          r,
+          [PRACTICE],
+          detector,
+          em(() => [], orderReutilizada),
+        ).getClaim(CLAIM),
+      );
+
+      expect(detalle.lines[0].duplicateStudy?.reused).toBe(true);
+      expect(detalle.lines[0].duplicateStudy?.justification).toBeNull();
     });
   });
 });
