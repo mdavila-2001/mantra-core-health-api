@@ -109,21 +109,20 @@ export class ClaimReadRepository {
     filters: ClaimListFilters,
     limit: number,
     cursor: ClaimCursor | null,
+    diagnosticUnitIds: readonly string[] = [],
   ): Promise<InsuranceClaims[]> {
-    if (practiceIds.length === 0) return Promise.resolve([]);
+    const providerScope = this.providerScope(practiceIds, diagnosticUnitIds);
+    if (providerScope.length === 0) return Promise.resolve([]);
 
     const range: Record<string, Date> = {};
     if (filters.submittedFrom) range.$gte = filters.submittedFrom;
     if (filters.submittedTo) range.$lte = filters.submittedTo;
 
-    const where: Record<string, unknown> = {
-      billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
-      billingProviderEntityId: { $in: [...practiceIds] },
-    };
+    const where: Record<string, unknown> = { $or: providerScope };
     // La aseguradora es un **filtro** del usuario, no el alcance: acota lo que
-    // ya está acotado por las prácticas propias. Pedir una aseguradora ajena
-    // devuelve vacío porque ninguna solicitud propia la referencia, no porque
-    // se haya intersectado una lista.
+    // ya está acotado por las prácticas y unidades diagnósticas propias.
+    // Pedir una aseguradora ajena devuelve vacío porque ninguna solicitud
+    // propia la referencia, no porque se haya intersectado una lista.
     if (filters.insuranceCarrierId) {
       where.insuranceCarrierId = filters.insuranceCarrierId;
     }
@@ -146,6 +145,37 @@ export class ClaimReadRepository {
       ],
       limit: limit + 1,
     });
+  }
+
+  /**
+   * El alcance del prestador activo: las prácticas propias (reclamos de
+   * atención) y las unidades diagnósticas propias (reclamos vinculados a una
+   * orden de laboratorio/imagen — antiduplicación, subtarea 3.2). Cada tipo
+   * de facturador se persiste con un `billing_provider_type_concept_id`
+   * distinto, así que el alcance es una unión, no un único `$in`.
+   *
+   * @param practiceIds - Prácticas activas de la organización activa.
+   * @param diagnosticUnitIds - Unidades diagnósticas activas de la organización.
+   * @returns Las cláusulas `$or`; vacío si la organización no tiene ninguna.
+   */
+  private providerScope(
+    practiceIds: readonly string[],
+    diagnosticUnitIds: readonly string[],
+  ): Record<string, unknown>[] {
+    const scope: Record<string, unknown>[] = [];
+    if (practiceIds.length > 0) {
+      scope.push({
+        billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
+        billingProviderEntityId: { $in: [...practiceIds] },
+      });
+    }
+    if (diagnosticUnitIds.length > 0) {
+      scope.push({
+        billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_DIAGNOSTIC_UNIT,
+        billingProviderEntityId: { $in: [...diagnosticUnitIds] },
+      });
+    }
+    return scope;
   }
 
   /**
@@ -191,13 +221,11 @@ export class ClaimReadRepository {
     em: EntityManager,
     practiceIds: readonly string[],
     id: string,
+    diagnosticUnitIds: readonly string[] = [],
   ): Promise<InsuranceClaims | null> {
-    if (practiceIds.length === 0) return Promise.resolve(null);
-    return em.findOne(InsuranceClaims, {
-      id,
-      billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
-      billingProviderEntityId: { $in: [...practiceIds] },
-    });
+    const providerScope = this.providerScope(practiceIds, diagnosticUnitIds);
+    if (providerScope.length === 0) return Promise.resolve(null);
+    return em.findOne(InsuranceClaims, { id, $or: providerScope });
   }
 
   /** Aseguradoras por id, para nombrar la columna del listado. */

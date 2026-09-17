@@ -9,6 +9,10 @@ import {
 import { CatalogConcepts } from '../../terminology/entities';
 import { Persons, PatientProfiles } from '../../profiles/entities';
 import { PracticeTenantLookupService } from '../../practice/services';
+import { ServiceRequests } from '../../clinical/entities';
+import { DuplicateStudyDetector } from '../../clinical/services/duplicate-study-detector';
+import { DiagnosticUnits } from '../../diagnostic_units/entities';
+import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import type {
   ClaimAdjudicationVersions,
   ClaimDisputes,
@@ -22,6 +26,7 @@ import type {
   ClaimAdjudicationDto,
   ClaimDetailDto,
   ClaimDisputeSummaryDto,
+  ClaimLineDuplicateStudyDto,
   ClaimLineViewDto,
   ClaimListItemDto,
   ClaimListQueryDto,
@@ -85,11 +90,14 @@ export class ClaimsReadService {
    * @param em - Contexto de persistencia.
    * @param claimRepo - Consultas de lectura del ciclo del reclamo.
    * @param practiceLookup - Puerto de `practice`: las prácticas de la organización.
+   * @param duplicateStudyDetector - Antiduplicación de estudios (subtarea 3.2, T-26);
+   *   provisto directo, sin importar `ClinicalModule` (patrón `DeclaredCoveragesReader`).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly claimRepo: ClaimReadRepository,
     private readonly practiceLookup: PracticeTenantLookupService,
+    private readonly duplicateStudyDetector: DuplicateStudyDetector,
   ) {}
 
   /**
@@ -103,7 +111,8 @@ export class ClaimsReadService {
     const em = this.em.fork();
     const limit = query.limit ?? DEFAULT_PAGE_SIZE;
 
-    const practiceIds = await this.practiceIdsInScope();
+    const { practiceIds, diagnosticUnitIds } =
+      await this.providerScopeInScope();
 
     const filters: ClaimListFilters = {
       statusConceptId: query.statusConceptId,
@@ -121,6 +130,7 @@ export class ClaimsReadService {
       filters,
       limit,
       cursor,
+      diagnosticUnitIds,
     );
     // La fila de sondeo se descarta: existía para saber si hay siguiente, no
     // para mostrarse.
@@ -150,8 +160,14 @@ export class ClaimsReadService {
   async getClaim(id: string): Promise<ClaimDetailDto> {
     const em = this.em.fork();
 
-    const practiceIds = await this.practiceIdsInScope();
-    const claim = await this.claimRepo.findClaimInScope(em, practiceIds, id);
+    const { practiceIds, diagnosticUnitIds } =
+      await this.providerScopeInScope();
+    const claim = await this.claimRepo.findClaimInScope(
+      em,
+      practiceIds,
+      id,
+      diagnosticUnitIds,
+    );
     if (!claim) {
       // Mismo cuerpo que un uuid inexistente, y **sin detalles** (AC-16-14).
       throw this.accessDenied();
@@ -187,8 +203,15 @@ export class ClaimsReadService {
       byLine.map((adj) => [adj.insuranceClaimLineId, adj]),
     );
 
+    const duplicateStudy = await this.resolveDuplicateStudy(em, claim);
     const items = lines.map((line) =>
-      this.buildLine(line, adjByLine.get(line.id), concepts, currency),
+      this.buildLine(
+        line,
+        adjByLine.get(line.id),
+        concepts,
+        currency,
+        duplicateStudy,
+      ),
     );
 
     const billed = sumarDecimales(lines.map((line) => line.billedAmount));
@@ -229,6 +252,36 @@ export class ClaimsReadService {
       await this.practiceLookup.findActivePracticeIdsForTenant(tenantId);
     if (practiceIds.length === 0) throw this.accessDenied();
     return practiceIds;
+  }
+
+  /**
+   * El alcance completo del prestador activo: prácticas (reclamos de
+   * atención) y unidades diagnósticas (reclamos vinculados a una orden de
+   * laboratorio/imagen — antiduplicación, subtarea 3.2). Sin esto, un
+   * reclamo que una unidad diagnóstica presentó nunca era legible: la lectura
+   * sólo miraba `billing_provider_type = PRACTICE`.
+   *
+   * @returns Prácticas y unidades activas de la organización activa.
+   * @throws ForbiddenException si la organización no tiene ninguna de las dos.
+   */
+  private async providerScopeInScope(): Promise<{
+    practiceIds: string[];
+    diagnosticUnitIds: string[];
+  }> {
+    const tenantId = requireTenantId();
+    const em = this.em.fork();
+    const [practiceIds, units] = await Promise.all([
+      this.practiceLookup.findActivePracticeIdsForTenant(tenantId),
+      em.find(DiagnosticUnits, {
+        tenantId,
+        statusConceptId: DUNIT.UNIT_ACTIVE,
+      }),
+    ]);
+    const diagnosticUnitIds = units.map((unit) => unit.id);
+    if (practiceIds.length === 0 && diagnosticUnitIds.length === 0) {
+      throw this.accessDenied();
+    }
+    return { practiceIds, diagnosticUnitIds };
   }
 
   /**
@@ -372,6 +425,7 @@ export class ClaimsReadService {
     adj: ClaimLineAdjudications | undefined,
     concepts: Map<string, InsuranceConceptDto>,
     currency: InsuranceConceptDto | null,
+    duplicateStudy: ClaimLineDuplicateStudyDto | null,
   ): ClaimLineViewDto {
     const { referenceType, reference } = this.clinicalOrigin(line);
     return {
@@ -391,6 +445,51 @@ export class ClaimsReadService {
       denialRationale: adj?.denialRationale ?? null,
       referenceType,
       reference,
+      duplicateStudy,
+    };
+  }
+
+  /**
+   * El estudio duplicado que originó la orden de esta solicitud, si tiene una
+   * y está enlazada a un informe previo (antiduplicación, subtarea 3.2). La
+   * aseguradora/facturación nunca ve la conclusión clínica: `includeConclusion`
+   * va en `false`. `daysAgo` se mide contra la fecha de la ORDEN, no contra
+   * "hoy" — es lo que responde "cuántos días separaron el estudio previo del
+   * pedido nuevo".
+   *
+   * @param em - Contexto de persistencia.
+   * @param claim - La solicitud cuyo origen se resuelve.
+   * @returns La descripción, o `null` si la solicitud no viene de una orden
+   *   enlazada a un informe previo.
+   */
+  private async resolveDuplicateStudy(
+    em: EntityManager,
+    claim: InsuranceClaims,
+  ): Promise<ClaimLineDuplicateStudyDto | null> {
+    if (!claim.serviceRequestId) return null;
+    const order = await em.findOne(ServiceRequests, {
+      id: claim.serviceRequestId,
+    });
+    if (!order?.previousDiagnosticReportId) return null;
+
+    const tenantId = requireTenantId();
+    const description = await this.duplicateStudyDetector.describeByReportId(
+      em,
+      order.previousDiagnosticReportId,
+      tenantId,
+      order.createdAt,
+      false,
+    );
+    if (!description) return null;
+
+    return {
+      previousDiagnosticReportId: description.reportId,
+      studyName: description.studyName,
+      performedAt: description.performedAt,
+      daysAgo: description.daysAgo,
+      providerName: description.providerName,
+      justification: order.duplicateOverrideReason ?? null,
+      reused: order.duplicateOverrideReason === undefined,
     };
   }
 

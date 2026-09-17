@@ -2,9 +2,18 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PracticeModule } from '../practice/practice.module';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
+// Antiduplicación de estudios (subtarea 3.2, T-26): `DuplicateStudyDetector`
+// necesita `ConceptDesignationsRepository` para nombrar el estudio en
+// castellano; se importa el módulo entero en vez de proveer el repo suelto
+// porque ya lo hace `TerminologyModule` y es su dueño.
+import { TerminologyModule } from '../terminology/terminology.module';
 import * as entities from './entities';
 import { LinkedClaimOrderService } from './services/linked-claim-order.service';
 import { LinkedClaimAccessService } from './services/linked-claim-access.service';
+// Mismo criterio que `DeclaredCoveragesReader` (más abajo): clase sin estado
+// por `EntityManager`, provista directo sin importar `ClinicalModule` entero
+// — evita el ciclo de que `ClinicalModule` ya la provee él mismo.
+import { DuplicateStudyDetector } from '../clinical/services/duplicate-study-detector';
 import {
   InsuranceBackboneController,
   CoverageController,
@@ -59,6 +68,7 @@ import {
     // importar la entidad persistente de otro dominio.
     PracticeModule,
     DirectoryAuthorizationModule,
+    TerminologyModule,
   ],
   controllers: [
     InsuranceBackboneController,
@@ -86,6 +96,7 @@ import {
     InsuranceAnalyticsRepository,
     LinkedClaimOrderService,
     LinkedClaimAccessService,
+    DuplicateStudyDetector,
     // Servicios
     InsuranceBackboneService,
     CoverageService,
