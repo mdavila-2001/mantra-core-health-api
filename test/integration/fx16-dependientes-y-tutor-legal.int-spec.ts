@@ -218,24 +218,25 @@ describe('B.1 · dependientes y tutor legal (integración)', () => {
       // La representación de una madre sobre su hijo no vence: se revoca.
       expect(proxy.valid_to).toBeNull();
 
-      const [parentesco] = await em.getConnection().execute<
-        { is_legal_guardian: boolean; relationship_concept_id: string }[]
-      >(
-        `select is_legal_guardian, relationship_concept_id
+      const [parentesco] = await em
+        .getConnection()
+        .execute<
+          { is_legal_guardian: boolean; relationship_concept_id: string }[]
+        >(
+          `select is_legal_guardian, relationship_concept_id
            from profiles.related_persons
           where patient_profile_id = ?`,
-        [perfilHijo],
-      );
+          [perfilHijo],
+        );
       expect(parentesco.is_legal_guardian).toBe(true);
-      expect(parentesco.relationship_concept_id).toBe(
-        PROF.RELATIONSHIP_MOTHER,
-      );
+      expect(parentesco.relationship_concept_id).toBe(PROF.RELATIONSHIP_MOTHER);
 
-      const [paciente] = await em.getConnection().execute<
-        { patient_code: string }[]
-      >(`select patient_code from profiles.patient_profiles where profile_id = ?`, [
-        perfilHijo,
-      ]);
+      const [paciente] = await em
+        .getConnection()
+        .execute<{ patient_code: string }[]>(
+          `select patient_code from profiles.patient_profiles where profile_id = ?`,
+          [perfilHijo],
+        );
       expect(paciente.patient_code).toMatch(/^PAT-/);
     });
 

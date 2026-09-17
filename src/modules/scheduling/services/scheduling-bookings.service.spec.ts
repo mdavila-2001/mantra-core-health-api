@@ -3345,7 +3345,10 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
   } as any;
 
   /** El mostrador, cuyo oficio es repartir turnos de pacientes que no son él. */
-  const mostrador = { id: 'user-mostrador', roles: ['SCHEDULING_AGENT'] } as any;
+  const mostrador = {
+    id: 'user-mostrador',
+    roles: ['SCHEDULING_AGENT'],
+  } as any;
 
   /** Quien atiende: lista las citas de sus pacientes desde su propia agenda. */
   const medico = {

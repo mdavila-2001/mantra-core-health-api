@@ -160,8 +160,7 @@ export class CreateDependentDto {
   })
   @IsUUID()
   @IsIn(DEPENDENT_RELATIONSHIP_CONCEPT_IDS, {
-    message:
-      'El parentesco declarado no habilita a representar a otra persona',
+    message: 'El parentesco declarado no habilita a representar a otra persona',
   })
   relationshipConceptId!: string;
 }

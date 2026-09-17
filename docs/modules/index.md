@@ -1,28 +1,28 @@
 # Catálogo de módulos
 
 > Generado por `yarn docs:modules:sync` desde `src/modules/*/README.md` reales — no editar a
-> mano. 63 módulos, de los cuales 60 tienen entidades propias (ver
+> mano. 66 módulos, de los cuales 61 tienen entidades propias (ver
 > [`docs/reports/system-inventory.md`](../reports/system-inventory.md) §2 para la reconciliación
 > del conteo).
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
-| [`community`](community.md) | 12 | 28 | 18 | 40 | 32 |
+| [`community`](community.md) | 13 | 28 | 18 | 40 | 32 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`insurance`](insurance.md) | 11 | 14 | 10 | 29 | 13 |
 | [`accounting`](accounting.md) | 9 | 10 | 9 | 42 | 12 |
 | [`consent`](consent.md) | 9 | 9 | 9 | 10 | 15 |
+| [`clinical`](clinical.md) | 8 | 15 | 13 | 22 | 13 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 8 | 12 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 11 | 10 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`authz`](authz.md) | 7 | 8 | 14 | 15 | 19 |
 | [`chart`](chart.md) | 6 | 7 | 4 | 11 | 5 |
-| [`clinical`](clinical.md) | 6 | 14 | 13 | 22 | 12 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`diagnostics`](diagnostics.md) | 6 | 7 | 6 | 36 | 8 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 14 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 16 | 21 | 16 |
-| [`practice`](practice.md) | 6 | 10 | 12 | 11 | 16 |
+| [`practice`](practice.md) | 6 | 10 | 12 | 11 | 17 |
 | [`scheduling`](scheduling.md) | 6 | 11 | 6 | 17 | 7 |
 | [`terminology`](terminology.md) | 6 | 8 | 9 | 15 | 16 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
@@ -59,15 +59,18 @@
 | [`vector_rag`](vector_rag.md) | 2 | 4 | 3 | 14 | 1 |
 | [`ads`](ads.md) | 1 | 4 | 5 | 73 | 1 |
 | [`auth_providers`](auth_providers.md) | 1 | 2 | 1 | 9 | 1 |
+| [`content_packs`](content_packs.md) | 1 | 1 | 0 | 0 | 1 |
 | [`crm`](crm.md) | 1 | 2 | 2 | 32 | 1 |
 | [`document_store`](document_store.md) | 1 | 1 | 1 | 0 | 5 |
 | [`education`](education.md) | 1 | 2 | 2 | 15 | 1 |
 | [`erp`](erp.md) | 1 | 2 | 3 | 51 | 1 |
 | [`health_context`](health_context.md) | 1 | 2 | 1 | 10 | 1 |
+| [`medical_groups`](medical_groups.md) | 1 | 1 | 2 | 2 | 1 |
 | [`platform_ops`](platform_ops.md) | 1 | 4 | 5 | 38 | 1 |
+| [`quotations`](quotations.md) | 1 | 1 | 2 | 0 | 3 |
 | [`redis_runtime`](redis_runtime.md) | 1 | 1 | 0 | 0 | 3 |
 | [`reporting`](reporting.md) | 1 | 2 | 2 | 12 | 1 |
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **240** | **369** | **394** | **1244** | **470** |
+| **Total** | **246** | **373** | **398** | **1246** | **477** |

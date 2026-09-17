@@ -72,7 +72,12 @@ describe('PatientRepresentationService', () => {
       ).toBe(true);
       expect(
         portalProxiesRepo.findActiveByProxyUserAndPatient,
-      ).toHaveBeenCalledWith(tx, 'user-tutor', 'person-dependiente', expect.any(Date));
+      ).toHaveBeenCalledWith(
+        tx,
+        'user-tutor',
+        'person-dependiente',
+        expect.any(Date),
+      );
     });
 
     it('sin apoderamiento no pasa, aunque el paciente exista', async () => {
@@ -81,7 +86,9 @@ describe('PatientRepresentationService', () => {
         proxy: null,
       });
 
-      expect(await service.representsPatient('person-ajena', tutor)).toBe(false);
+      expect(await service.representsPatient('person-ajena', tutor)).toBe(
+        false,
+      );
     });
 
     it('una cuenta sin persona vinculada no es titular de nada', async () => {

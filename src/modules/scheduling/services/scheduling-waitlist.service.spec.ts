@@ -599,7 +599,11 @@ describe('SchedulingWaitlistService', () => {
 
       const res = await d.service.enroll(
         { tenantId: 'ten-1', patientProfileId: 'pat-hijo' } as any,
-        { id: 'user-madre', roles: ['PATIENT'], patientProfileId: 'pat-madre' } as any,
+        {
+          id: 'user-madre',
+          roles: ['PATIENT'],
+          patientProfileId: 'pat-madre',
+        } as any,
       );
 
       expect(res.id).toBe('wl-3');
@@ -630,7 +634,11 @@ describe('SchedulingWaitlistService', () => {
       await expect(
         d.service.listForPatient(
           { patientProfileId: 'pat-hijo' } as any,
-          { id: 'user-madre', roles: ['PATIENT'], patientProfileId: 'pat-madre' } as any,
+          {
+            id: 'user-madre',
+            roles: ['PATIENT'],
+            patientProfileId: 'pat-madre',
+          } as any,
         ),
       ).resolves.toEqual({ items: [] });
     });
@@ -639,10 +647,7 @@ describe('SchedulingWaitlistService', () => {
       const d = build();
 
       await expect(
-        d.service.listForPatient(
-          { patientProfileId: 'pat-1' } as any,
-          intruso,
-        ),
+        d.service.listForPatient({ patientProfileId: 'pat-1' } as any, intruso),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });

@@ -1726,10 +1726,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
         '413':
@@ -1743,9 +1739,10 @@ paths:
       summary: Pre-cargar un documento legal (PDF) del registro de organización
       tags:
         - iam-auth
+      security: []
       description: >-
-        Pre-cargar un documento legal (PDF) del registro de organización. Requiere JWT y los roles o alcances declarados
-        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Pre-cargar un documento legal (PDF) del registro de organización. Operación pública; no requiere JWT. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /iam/auth/register-practitioner:
     post:
       operationId: IamAuthController_registerPractitioner
@@ -5728,11 +5725,12 @@ paths:
           $ref: '#/components/responses/InternalError'
       security:
         - bearer: []
+      summary: Reservar la publicación de un audio en almacenamiento
       tags:
         - internal/storage-lifecycle
       description: >-
-        undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan
-        el envelope ErrorResponse.
+        Reservar la publicación de un audio en almacenamiento. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /internal/storage-lifecycle/audio/{assetId}/dispatch:
     post:
       operationId: InternalStorageLifecycleController_dispatch
@@ -5771,11 +5769,12 @@ paths:
           $ref: '#/components/responses/InternalError'
       security:
         - bearer: []
+      summary: Despachar la subida reservada de un audio
       tags:
         - internal/storage-lifecycle
       description: >-
-        undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan
-        el envelope ErrorResponse.
+        Despachar la subida reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /internal/storage-lifecycle/audio/{assetId}/abort:
     post:
       operationId: InternalStorageLifecycleController_abort
@@ -5814,11 +5813,12 @@ paths:
           $ref: '#/components/responses/InternalError'
       security:
         - bearer: []
+      summary: Abortar la publicación reservada de un audio
       tags:
         - internal/storage-lifecycle
       description: >-
-        undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan
-        el envelope ErrorResponse.
+        Abortar la publicación reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /internal/storage-lifecycle/recover:
     post:
       operationId: InternalStorageLifecycleController_recover
@@ -5842,11 +5842,12 @@ paths:
           $ref: '#/components/responses/InternalError'
       security:
         - bearer: []
+      summary: Recuperar publicaciones de almacenamiento pendientes
       tags:
         - internal/storage-lifecycle
       description: >-
-        undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan
-        el envelope ErrorResponse.
+        Recuperar publicaciones de almacenamiento pendientes. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /common/identifiers:
     post:
       operationId: CommonIdentifiersController_create
@@ -9231,6 +9232,43 @@ paths:
       description: >-
         Responder una reseña de la propia vitrina. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /patients/me/reviews:
+    post:
+      description: >-
+        El destinatario sale del encuentro declarado: no hace falta conocer el identificador de la vitrina del
+        profesional.
+      operationId: PatientReviewsController_publishOwnReview
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunityCreateReviewDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Calificar una atención recibida
+      tags:
+        - community-reviews
   /community/groups:
     post:
       operationId: CommunityGroupsController_createGroup
@@ -9412,7 +9450,7 @@ paths:
       description: >-
         Integrantes de un grupo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas
         de error usan el envelope ErrorResponse.
-  /community/groups/{groupId}/members/{memberId}:
+  /community/groups/{groupId}/members/{member}:
     patch:
       operationId: CommunityGroupsController_updateMember
       parameters:
@@ -9421,10 +9459,12 @@ paths:
           in: path
           schema:
             type: string
-        - name: memberId
+        - name: member
           required: true
           in: path
+          description: Id de la membresía (`group_members.id`).
           schema:
+            format: uuid
             type: string
       requestBody:
         required: true
@@ -9461,7 +9501,6 @@ paths:
       description: >-
         Aprobar/rechazar un alta o cambiar el rol. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
-  /community/groups/{groupId}/members/{memberProfileId}:
     delete:
       operationId: CommunityGroupsController_leaveGroup
       parameters:
@@ -9470,10 +9509,12 @@ paths:
           in: path
           schema:
             type: string
-        - name: memberProfileId
+        - name: member
           required: true
           in: path
+          description: Id del perfil del integrante que sale del grupo.
           schema:
+            format: uuid
             type: string
       responses:
         '200':
@@ -9945,10 +9986,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -9956,9 +9993,10 @@ paths:
       summary: Últimas publicaciones de todos los profesionales
       tags:
         - community-public
+      security: []
       description: >-
-        Últimas publicaciones de todos los profesionales. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Últimas publicaciones de todos los profesionales. Operación pública; no requiere JWT. Todas las respuestas de
+        error usan el envelope ErrorResponse.
   /public/posts/{postId}/reactions:
     get:
       operationId: CommunityPublicController_postReactions
@@ -9983,10 +10021,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -9996,9 +10030,10 @@ paths:
       summary: Quiénes reaccionaron a una publicación pública
       tags:
         - community-public
+      security: []
       description: >-
-        Quiénes reaccionaron a una publicación pública. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Quiénes reaccionaron a una publicación pública. Operación pública; no requiere JWT. Todas las respuestas de
+        error usan el envelope ErrorResponse.
   /public/posts/{postId}/comments:
     get:
       operationId: CommunityPublicController_postComments
@@ -10023,10 +10058,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -10036,9 +10067,10 @@ paths:
       summary: Comentarios raíz de una publicación pública
       tags:
         - community-public
+      security: []
       description: >-
-        Comentarios raíz de una publicación pública. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
+        Comentarios raíz de una publicación pública. Operación pública; no requiere JWT. Todas las respuestas de error
+        usan el envelope ErrorResponse.
   /public/comments/{commentId}/replies:
     get:
       operationId: CommunityPublicController_commentReplies
@@ -10063,10 +10095,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -10076,9 +10104,10 @@ paths:
       summary: Respuestas de un comentario público
       tags:
         - community-public
+      security: []
       description: >-
-        Respuestas de un comentario público. Requiere JWT y los roles o alcances declarados por el controlador. Todas
-        las respuestas de error usan el envelope ErrorResponse.
+        Respuestas de un comentario público. Operación pública; no requiere JWT. Todas las respuestas de error usan el
+        envelope ErrorResponse.
   /public/search:
     get:
       operationId: CommunityPublicController_search
@@ -10360,6 +10389,11 @@ paths:
           in: query
           schema:
             type: string
+        - name: kind
+          required: true
+          in: query
+          schema:
+            type: string
         - name: limit
           required: true
           in: query
@@ -10400,10 +10434,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -10413,9 +10443,52 @@ paths:
       summary: Ficha pública por prefijo de vertical
       tags:
         - community-public
+      security: []
       description: >-
-        Ficha pública por prefijo de vertical. Requiere JWT y los roles o alcances declarados por el controlador. Todas
-        las respuestas de error usan el envelope ErrorResponse.
+        Ficha pública por prefijo de vertical. Operación pública; no requiere JWT. Todas las respuestas de error usan el
+        envelope ErrorResponse.
+  /public/profiles/{prefijo}/{slug}/reviews:
+    get:
+      operationId: CommunityPublicController_listPublicProfileReviews
+      parameters:
+        - name: prefijo
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: slug
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: true
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Opiniones publicadas de una ficha pública
+      tags:
+        - community-public
+      security: []
+      description: >-
+        Opiniones publicadas de una ficha pública. Operación pública; no requiere JWT. Todas las respuestas de error
+        usan el envelope ErrorResponse.
   /public/media/{id}:
     get:
       operationId: CommunityPublicController_getPublicMedia
@@ -10430,10 +10503,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -10443,9 +10512,10 @@ paths:
       summary: Servir una imagen pública (avatar, portada o post)
       tags:
         - community-public
+      security: []
       description: >-
-        Servir una imagen pública (avatar, portada o post). Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Servir una imagen pública (avatar, portada o post). Operación pública; no requiere JWT. Todas las respuestas de
+        error usan el envelope ErrorResponse.
   /p/{slug}:
     get:
       operationId: CommunityPublicController_getPractitioner
@@ -13188,6 +13258,12 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateDisputeDto'
       responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceStatusDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -13535,10 +13611,6 @@ paths:
                 $ref: '#/components/schemas/CarrierCatalogResponseDto'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -13546,9 +13618,10 @@ paths:
       summary: Catálogo público de aseguradoras y sus planes de salud
       tags:
         - insurance-catalog
+      security: []
       description: >-
-        Catálogo público de aseguradoras y sus planes de salud. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Catálogo público de aseguradoras y sus planes de salud. Operación pública; no requiere JWT. Todas las respuestas
+        de error usan el envelope ErrorResponse.
   /insurance/analytics/loss-ratio:
     get:
       operationId: InsuranceAnalyticsController_getLossRatioAnalytics
@@ -14338,6 +14411,49 @@ paths:
       tags:
         - practice
   /practitioners/me/sites/{siteId}:
+    patch:
+      description: >-
+        Cambia nombre, huso horario o dirección sin retirar la sede: el id se conserva, y es el que la agenda referencia
+        en cada turno.
+      operationId: PractitionerSitesController_updateOwnSite
+      parameters:
+        - name: siteId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnSiteDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Corregir un consultorio propio
+      tags:
+        - practice
     delete:
       operationId: PractitionerSitesController_deleteOwnSite
       parameters:
@@ -14373,6 +14489,48 @@ paths:
       description: >-
         Retirar un consultorio propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /practitioners/me/sites/{siteId}/bank-qr:
+    put:
+      description: 'Asocia un archivo ya subido como QR de cobro de esa sede. `fileId: null` lo quita.'
+      operationId: PractitionerSitesController_setSiteBankQr
+      parameters:
+        - name: siteId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetSiteBankQrDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Fijar o quitar el QR bancario de una sede
+      tags:
+        - practice
   /role-assignments/{roleId}/support-assignments:
     post:
       operationId: RoleAssignmentsController_attachSupport
@@ -38360,10 +38518,6 @@ paths:
                 $ref: '#/components/schemas/PublicMedicationPageDto'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -38371,9 +38525,10 @@ paths:
       summary: Vitrina pública de medicamentos con disponibilidad por farmacia
       tags:
         - pharmacy-public
+      security: []
       description: >-
-        Vitrina pública de medicamentos con disponibilidad por farmacia. Requiere JWT y los roles o alcances declarados
-        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Vitrina pública de medicamentos con disponibilidad por farmacia. Operación pública; no requiere JWT. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /public/medications/{conceptId}/availability:
     get:
       operationId: PharmacyPublicController_getAvailability
@@ -38410,10 +38565,6 @@ paths:
                 $ref: '#/components/schemas/PublicMedicationAvailabilityDto'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -38423,9 +38574,10 @@ paths:
       summary: Farmacias que publican un medicamento, con precio y distancia
       tags:
         - pharmacy-public
+      security: []
       description: >-
-        Farmacias que publican un medicamento, con precio y distancia. Requiere JWT y los roles o alcances declarados
-        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Farmacias que publican un medicamento, con precio y distancia. Operación pública; no requiere JWT. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /pharmacy/{pharmacyId}/suppliers:
     post:
       operationId: PharmacyProcurementController_createSupplier
@@ -58587,6 +58739,23 @@ components:
           description: Fecha límite de presentación
       required:
         - initiatedBy
+    ResourceStatusDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          format: uuid
+          description: Concepto de estado del recurso
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - status
+        - createdAt
     ClaimPatientDto:
       type: object
       properties:
@@ -60039,6 +60208,28 @@ components:
           enum:
             - VERIFIED
             - EXPIRED
+    UpdateOwnSiteDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del consultorio
+          maxLength: 200
+        timeZone:
+          type: string
+          example: America/La_Paz
+        address:
+          $ref: '#/components/schemas/OwnSiteAddressDto'
+    SetSiteBankQrDto:
+      type: object
+      properties:
+        fileId:
+          type: object
+          format: uuid
+          nullable: true
+          description: Archivo del QR ya subido, o null para quitarlo
+      required:
+        - fileId
     CreateSupportAssignmentDto:
       type: object
       properties:

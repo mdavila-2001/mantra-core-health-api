@@ -57,7 +57,10 @@ function build() {
   };
   // `fork()` lo usa la resolución del destinatario (C.2), que lee fuera de
   // la transacción de escritura.
-  const em = { transactional: mockFn((cb: any) => cb(tx)), fork: mockFn(() => tx) };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => tx),
+  };
   const profilesRepo = {
     findById: mockFn(),
     findByTarget: mockFn().mockResolvedValue(null),
@@ -445,10 +448,13 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
     d.profilesRepo.findById.mockResolvedValue(vitrina);
 
     await expect(
-      d.service.publishOwnReview(cuerpo as any, {
-        id: 'u9',
-        roles: [],
-      } as any),
+      d.service.publishOwnReview(
+        cuerpo as any,
+        {
+          id: 'u9',
+          roles: [],
+        } as any,
+      ),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 });

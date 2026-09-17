@@ -1955,7 +1955,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Pre-cargar un documento legal (PDF) del registro de organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Pre-cargar un documento legal (PDF) del registro de organización. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: Pre-carga pública de un documento legal en PDF para el alta de organización (subtarea 1.2). El archivo nace sin dueño (`common.files.created_by_user_id` NULL) y queda inutilizable hasta que `POST /iam/auth/register-organization` lo reclama por su `fileId` dentro de `organization.legalDocuments`, en la misma transacción que crea el tenant. Límite de 30/min y no el estándar de 10: un alta legítima de aseguradora sube hasta 5 PDF y puede reintentar alguno, y sigue diez veces por debajo del backstop global (300/min, `app.module.ts`). Deuda conocida, declarada y no resuelta acá: nada purga las subidas anónimas que nunca se reclaman (abandono del formulario, rechazo del alta). Quedan en `common.files` con el tenant DEFAULT y sin dueño.
 
@@ -2012,8 +2012,6 @@ Content-Type: multipart/form-data
 |---:|---|---|---|
 | 201 | Recurso creado o acción registrada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 400 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 409 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 413 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 422 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |

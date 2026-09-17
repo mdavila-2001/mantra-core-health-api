@@ -26,10 +26,10 @@ Referencia exhaustiva de 19 operación(es) del módulo `common`, derivada del co
 13. [POST /common/identifiers](#13-post-common-identifiers) — Registrar un identificador oficial (UC-02-01)
 14. [POST /internal/files/versions/{vid}/scan-result](#14-post-internal-files-versions-vid-scan-result) — Registrar resultado de escaneo antimalware (UC-02-09)
 15. [GET /internal/files/versions/pending-scan](#15-get-internal-files-versions-pending-scan) — Listar versiones pendientes de escaneo antimalware
-16. [POST /internal/storage-lifecycle/audio/{assetId}/abort](#16-post-internal-storage-lifecycle-audio-assetid-abort) — InternalStorageLifecycleController_abort
-17. [POST /internal/storage-lifecycle/audio/{assetId}/begin](#17-post-internal-storage-lifecycle-audio-assetid-begin) — InternalStorageLifecycleController_begin
-18. [POST /internal/storage-lifecycle/audio/{assetId}/dispatch](#18-post-internal-storage-lifecycle-audio-assetid-dispatch) — InternalStorageLifecycleController_dispatch
-19. [POST /internal/storage-lifecycle/recover](#19-post-internal-storage-lifecycle-recover) — InternalStorageLifecycleController_recover
+16. [POST /internal/storage-lifecycle/audio/{assetId}/abort](#16-post-internal-storage-lifecycle-audio-assetid-abort) — Abortar la publicación reservada de un audio
+17. [POST /internal/storage-lifecycle/audio/{assetId}/begin](#17-post-internal-storage-lifecycle-audio-assetid-begin) — Reservar la publicación de un audio en almacenamiento
+18. [POST /internal/storage-lifecycle/audio/{assetId}/dispatch](#18-post-internal-storage-lifecycle-audio-assetid-dispatch) — Despachar la subida reservada de un audio
+19. [POST /internal/storage-lifecycle/recover](#19-post-internal-storage-lifecycle-recover) — Recuperar publicaciones de almacenamiento pendientes
 
 ---
 
@@ -2078,14 +2078,14 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `internal/storage-lifecycle`
-- **Nombre:** InternalStorageLifecycleController_abort
+- **Nombre:** Abortar la publicación reservada de un audio
 - **Operation ID:** `InternalStorageLifecycleController_abort`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [InternalStorageLifecycleController.abort](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
 
 ### Descripción de negocio
 
-undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Abortar la publicación reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
 
 ### Descripción del sistema
@@ -2183,14 +2183,14 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `internal/storage-lifecycle`
-- **Nombre:** InternalStorageLifecycleController_begin
+- **Nombre:** Reservar la publicación de un audio en almacenamiento
 - **Operation ID:** `InternalStorageLifecycleController_begin`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [InternalStorageLifecycleController.begin](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
 
 ### Descripción de negocio
 
-undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Reservar la publicación de un audio en almacenamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
 
 ### Descripción del sistema
@@ -2288,14 +2288,14 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `internal/storage-lifecycle`
-- **Nombre:** InternalStorageLifecycleController_dispatch
+- **Nombre:** Despachar la subida reservada de un audio
 - **Operation ID:** `InternalStorageLifecycleController_dispatch`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [InternalStorageLifecycleController.dispatch](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
 
 ### Descripción de negocio
 
-undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Despachar la subida reservada de un audio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
 
 ### Descripción del sistema
@@ -2393,14 +2393,14 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `internal/storage-lifecycle`
-- **Nombre:** InternalStorageLifecycleController_recover
+- **Nombre:** Recuperar publicaciones de almacenamiento pendientes
 - **Operation ID:** `InternalStorageLifecycleController_recover`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [InternalStorageLifecycleController.recover](../../src/modules/common/controllers/internal-storage-lifecycle.controller.ts)
 
 ### Descripción de negocio
 
-undefined. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Recuperar publicaciones de almacenamiento pendientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
 
 ### Descripción del sistema

@@ -11,7 +11,12 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   CurrentUser,
   ParseOptionalLimitPipe,
@@ -92,11 +97,16 @@ export class CommunityGroupsController {
   }
 
   /** P7: resuelve un alta pendiente y/o cambia el rol de un integrante. */
-  @Patch(':groupId/members/:memberId')
+  @Patch(':groupId/members/:member')
   @ApiOperation({ summary: 'Aprobar/rechazar un alta o cambiar el rol' })
+  @ApiParam({
+    name: 'member',
+    format: 'uuid',
+    description: 'Id de la membresía (`group_members.id`).',
+  })
   updateMember(
     @Param('groupId', ParseUUIDPipe) groupId: string,
-    @Param('memberId', ParseUUIDPipe) memberId: string,
+    @Param('member', ParseUUIDPipe) memberId: string,
     @Body() dto: UpdateGroupMemberDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<GroupMemberUpdatedDto> {
@@ -108,12 +118,22 @@ export class CommunityGroupsController {
    *
    * Lleva el **perfil** y no el id de membresía porque quien se da de baja a sí
    * mismo conoce su perfil, no el uuid de su fila en `group_members`.
+   *
+   * El segmento se llama `:member` en las dos rutas —aunque el `PATCH` espera la
+   * membresía y este el perfil— porque el contrato OpenAPI no admite dos rutas
+   * que sólo difieran en el nombre del parámetro (`no-identical-paths`). El
+   * nombre no viaja en la URL: la diferencia queda dicha en `@ApiParam`.
    */
-  @Delete(':groupId/members/:memberProfileId')
+  @Delete(':groupId/members/:member')
   @ApiOperation({ summary: 'Salir del grupo o dar de baja a un integrante' })
+  @ApiParam({
+    name: 'member',
+    format: 'uuid',
+    description: 'Id del perfil del integrante que sale del grupo.',
+  })
   leaveGroup(
     @Param('groupId', ParseUUIDPipe) groupId: string,
-    @Param('memberProfileId', ParseUUIDPipe) memberProfileId: string,
+    @Param('member', ParseUUIDPipe) memberProfileId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<GroupMemberUpdatedDto> {
     return this.service.leaveGroup(groupId, memberProfileId, actor);

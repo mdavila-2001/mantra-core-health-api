@@ -9,11 +9,7 @@ import { PROF } from './profiles.concepts';
  * conocer la tabla.
  */
 export type DependentRelationshipCode =
-  | 'CHILD'
-  | 'PARENT'
-  | 'SPOUSE'
-  | 'WARD'
-  | 'OTHER';
+  'CHILD' | 'PARENT' | 'SPOUSE' | 'WARD' | 'OTHER';
 
 /** El dependiente visto desde quien lo representa: su código y su rótulo. */
 export interface DependentRelationship {

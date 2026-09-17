@@ -104,7 +104,9 @@ describe('PatientPortalProxySeedService', () => {
   });
 
   it('completa sólo lo que falta si una corrida anterior quedó a medias', async () => {
-    const { service, creados } = build([SEED.patientPortalProxyScopeValueSetId]);
+    const { service, creados } = build([
+      SEED.patientPortalProxyScopeValueSetId,
+    ]);
 
     const contadores = await service.run();
 

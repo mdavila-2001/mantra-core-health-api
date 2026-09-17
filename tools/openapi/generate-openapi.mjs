@@ -106,6 +106,23 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['get', '/f/{slug}'],
   ['get', '/l/{slug}'],
   ['get', '/s/{slug}'],
+  // Entraron con `@Public()` y sin sumarse acá: `docs` venía fallando en `dev`
+  // con estos `security-defined` (verificado contra el decorador el 16/09).
+  // Pre-carga del PDF del alta de organización (`iam-auth.controller.ts`).
+  ['post', '/iam/auth/upload-registration-document'],
+  // Lecturas sociales y ficha pública (`community-public.controller.ts`).
+  ['get', '/public/posts'],
+  ['get', '/public/posts/{postId}/reactions'],
+  ['get', '/public/posts/{postId}/comments'],
+  ['get', '/public/comments/{commentId}/replies'],
+  ['get', '/public/profiles/{prefijo}/{slug}'],
+  ['get', '/public/profiles/{prefijo}/{slug}/reviews'],
+  ['get', '/public/media/{id}'],
+  // Catálogo del registro de pacientes (`insurance-catalog.controller.ts`).
+  ['get', '/insurance-carrier-catalog'],
+  // Vitrina pública de medicamentos (`pharmacy-public.controller.ts`).
+  ['get', '/public/medications'],
+  ['get', '/public/medications/{conceptId}/availability'],
 ];
 
 function markPublicOperations(document) {

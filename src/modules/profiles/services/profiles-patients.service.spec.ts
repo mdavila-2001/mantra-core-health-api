@@ -2257,10 +2257,9 @@ describe('ProfilesPatientsService', () => {
         actor,
       );
 
-      expect(b.administrativeAreas.assertIsAdministrativeArea).toHaveBeenCalledWith(
-        b.tx,
-        'dep-scz',
-      );
+      expect(
+        b.administrativeAreas.assertIsAdministrativeArea,
+      ).toHaveBeenCalledWith(b.tx, 'dep-scz');
       expect(b.identifiersRepo.create).toHaveBeenCalledWith(
         b.tx,
         expect.objectContaining({
@@ -2276,7 +2275,9 @@ describe('ProfilesPatientsService', () => {
       // misma persona, que es lo que la fusión existe para deshacer.
       const b = build();
       prepararAlta(b);
-      b.identifiersRepo.findActiveDuplicate.mockResolvedValue({ id: 'ident-1' });
+      b.identifiersRepo.findActiveDuplicate.mockResolvedValue({
+        id: 'ident-1',
+      });
 
       await expect(
         b.service.registerOwnDependent(
@@ -2348,8 +2349,7 @@ describe('ProfilesPatientsService', () => {
       expect(dependiente.ageYears).toBe(
         new Date().getUTCFullYear() -
           2018 -
-          (new Date() <
-          new Date(Date.UTC(new Date().getUTCFullYear(), 2, 14))
+          (new Date() < new Date(Date.UTC(new Date().getUTCFullYear(), 2, 14))
             ? 1
             : 0),
       );

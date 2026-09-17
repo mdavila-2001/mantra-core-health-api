@@ -9,7 +9,7 @@
 # Módulo `clinical`
 
 **Fuente:** [`src/modules/clinical/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/clinical/README.md)
-· 6 controllers · 14 services · 13 repositories · 22 entidades · 12 DTO
+· 8 controllers · 15 services · 13 repositories · 22 entidades · 13 DTO
 
 ---
 
