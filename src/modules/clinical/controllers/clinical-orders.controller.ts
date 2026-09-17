@@ -11,9 +11,11 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { DiagnosticReportsService, ServiceRequestsService } from '../services';
 import {
+  CheckDuplicateStudyDto,
   CreateDiagnosticReportDto,
   CreateServiceRequestDto,
   DiagnosticReportResponseDto,
+  DuplicateStudyCheckResultDto,
   ReleaseDiagnosticReportDto,
   ServiceRequestResponseDto,
 } from '../dto';
@@ -34,6 +36,25 @@ export class ClinicalOrdersController {
     private readonly serviceRequestsService: ServiceRequestsService,
     private readonly diagnosticReportsService: DiagnosticReportsService,
   ) {}
+
+  /**
+   * Antiduplicación de estudios (T-26, subtarea 3.2). Va declarada ANTES de
+   * `service-requests` a propósito: Express no la confundiría con un `:id`
+   * (este controller no tiene ninguno), pero el orden documenta la relación
+   * — es la pre-validación del alta de abajo.
+   */
+  @Post('service-requests/duplicate-check')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)',
+  })
+  checkDuplicateStudy(
+    @Body() dto: CheckDuplicateStudyDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DuplicateStudyCheckResultDto> {
+    return this.serviceRequestsService.checkDuplicate(dto, actor);
+  }
 
   /** UC-08-05. */
   @Post('service-requests')

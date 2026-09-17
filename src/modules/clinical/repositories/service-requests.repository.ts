@@ -48,6 +48,16 @@ export interface CreateServiceRequestData {
    */
   performerTenantId?: string;
   /**
+   * El informe diagnóstico previo que satisface este pedido, si el motor de
+   * duplicidad encontró uno y el médico decidió (antiduplicación, v4.2.17).
+   */
+  previousDiagnosticReportId?: string;
+  /**
+   * Justificación clínica para repetir un estudio duplicado. `undefined`
+   * cuando la orden reutiliza el informe previo o no hubo duplicado.
+   */
+  duplicateOverrideReason?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -88,6 +98,8 @@ export class ServiceRequestsRepository {
         statusConceptId: data.statusConceptId,
         requesterProfileId: data.requesterProfileId,
         performerTenantId: data.performerTenantId,
+        previousDiagnosticReportId: data.previousDiagnosticReportId,
+        duplicateOverrideReason: data.duplicateOverrideReason,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

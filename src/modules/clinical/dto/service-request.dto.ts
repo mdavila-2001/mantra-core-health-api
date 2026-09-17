@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsUUID } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+  ValidateIf,
+} from 'class-validator';
 
 /** Cuerpo de `POST /clinical/service-requests` (UC-08-05). */
 export class CreateServiceRequestDto {
@@ -81,6 +89,57 @@ export class CreateServiceRequestDto {
   @IsOptional()
   @IsUUID()
   performerTenantId?: string;
+
+  /**
+   * El informe diagnóstico previo que satisface este pedido (antiduplicación,
+   * v4.2.17). Obligatorio cuando el chequeo previo (`duplicate-check`) marcó
+   * `isDuplicate: true` y el médico decidió: exactamente el que devolvió el
+   * chequeo, o el alta responde 422. Junto con `reusePreviousReport` o
+   * `duplicateOverrideReason`, nunca los dos a la vez.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason.',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  previousDiagnosticReportId?: string;
+
+  /**
+   * El médico eligió reutilizar el informe previo en vez de repetir el
+   * estudio: la orden nace satisfecha por él y no es facturable. Exige
+   * `previousDiagnosticReportId`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Reutilizar el informe previo detectado en vez de repetir el estudio',
+  })
+  @ValidateIf(
+    (o: CreateServiceRequestDto) => o.reusePreviousReport !== undefined,
+  )
+  @IsBoolean()
+  reusePreviousReport?: boolean;
+
+  /**
+   * Justificación clínica del médico para repetir un estudio duplicado. Exige
+   * `previousDiagnosticReportId` y es incompatible con `reusePreviousReport`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Justificación clínica formal para repetir un estudio duplicado (mínimo 20 caracteres)',
+    minLength: 20,
+    maxLength: 1000,
+  })
+  @ValidateIf(
+    (o: CreateServiceRequestDto) => o.duplicateOverrideReason !== undefined,
+  )
+  @IsString()
+  @MinLength(20, {
+    message: 'La justificación clínica requiere al menos 20 caracteres',
+  })
+  @MaxLength(1000)
+  duplicateOverrideReason?: string;
 }
 
 /** Respuesta tras crear una orden de servicio. */

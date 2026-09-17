@@ -73,6 +73,33 @@ export class ServiceRequests {
   performerTenantId?: string;
 
   /**
+   * El informe diagnóstico previo que satisface este pedido (antiduplicación,
+   * v4.2.17). Presente cuando el motor de duplicidad encontró un informe
+   * liberado o final del mismo estudio dentro de la ventana: `null` significa
+   * que no hubo duplicado, o que la orden es anterior a esta promoción.
+   */
+  @Property({
+    fieldName: 'previous_diagnostic_report_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → clinical.diagnostic_reports
+  previousDiagnosticReportId?: string;
+
+  /**
+   * Justificación clínica del médico para repetir un estudio duplicado
+   * (v4.2.17). `null` cuando la orden reutiliza el informe previo
+   * (`previous_diagnostic_report_id` sin justificación) o cuando no hubo
+   * duplicado. Un CHECK de base impide el estado inverso: justificación sin
+   * informe previo enlazado.
+   */
+  @Property({
+    fieldName: 'duplicate_override_reason',
+    columnType: 'text',
+    nullable: true,
+  })
+  duplicateOverrideReason?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
