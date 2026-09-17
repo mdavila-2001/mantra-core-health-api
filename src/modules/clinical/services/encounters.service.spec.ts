@@ -44,15 +44,28 @@ function build() {
   const clinicalNotifications = {
     encounterClosed: mockFn(() => Promise.resolve({ suppressed: false })),
   };
+  // El sello se cubre por su propio spec (`encounter-seal.service.spec.ts`);
+  // acá se dobla para probar sólo el cableado del cierre.
+  const seal = {
+    computeHash: mockFn().mockResolvedValue('a'.repeat(64)),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new EncountersService(
     em as any,
     encountersRepo,
     episodesRepo as any,
     clinicalNotifications as any,
+    seal as any,
     logger as any,
   );
-  return { service, tx, encountersRepo, episodesRepo, clinicalNotifications };
+  return {
+    service,
+    tx,
+    encountersRepo,
+    episodesRepo,
+    clinicalNotifications,
+    seal,
+  };
 }
 
 /**
@@ -67,6 +80,8 @@ const encounter = () => ({
   startAt: new Date(),
   endAt: undefined,
   createdAt: new Date(),
+  contentHash: undefined,
+  sealedAt: undefined,
   rowVersion: 1,
 });
 
@@ -212,6 +227,11 @@ describe('EncountersService', () => {
         CLIN.LOCATION_COMPLETED,
       );
       expect(res.status).toBe(CLIN.ENCOUNTER_FINISHED);
+      expect(d.seal.computeHash).toHaveBeenCalledWith(d.tx, enc);
+      expect(enc.contentHash).toBe('a'.repeat(64));
+      expect(enc.sealedAt).toBeInstanceOf(Date);
+      expect(res.contentHash).toBe('a'.repeat(64));
+      expect(res.sealedAt).toBeInstanceOf(Date);
     });
 
     it('throws when the encounter does not exist', async () => {
@@ -222,7 +242,7 @@ describe('EncountersService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
-    it('rejects closing an encounter that is not in progress', async () => {
+    it('rejects closing an encounter that is not in progress, and does not seal it', async () => {
       const d = build();
       d.encountersRepo.findById.mockResolvedValue({
         ...encounter(),
@@ -231,6 +251,7 @@ describe('EncountersService', () => {
       await expect(d.service.close('enc1', {}, actor)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
+      expect(d.seal.computeHash).not.toHaveBeenCalled();
     });
 
     it('rejects on optimistic version mismatch', async () => {

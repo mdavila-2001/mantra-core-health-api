@@ -17,6 +17,12 @@ import { CommonModule } from '../common/common.module';
 // clínico contra el PDP de `authz` antes de servir PHI. Import unidireccional
 // (`clinical` → `authz`); `authz` no conoce `clinical`, así que no hay ciclo.
 import { AuthzModule } from '../authz/authz.module';
+// B.3 — el PDF oficial de receta resuelve medicamento, sustancia, vía,
+// unidad, especialidad y departamento emisor por su concepto:
+// `CatalogConceptsRepository.findByIds`, el mismo resolvedor en lote que ya
+// usa `chart` para el PDF del encuentro. Sin ciclo: `terminology` no conoce
+// a `clinical`.
+import { TerminologyModule } from '../terminology/terminology.module';
 import {
   ClinicalEncountersController,
   ClinicalObservationsController,
@@ -24,11 +30,14 @@ import {
   ClinicalPrescriptionPoliciesController,
   ClinicalRecordsController,
   ClinicalReadController,
+  ClinicalPrescriptionsController,
+  ClinicalPrescriptionsPublicController,
 } from './controllers';
 import { ClinicalRecordAccessGuard } from './guards';
 import {
   CareEpisodesService,
   EncountersService,
+  EncounterSealService,
   ObservationsService,
   ServiceRequestsService,
   DiagnosticReportsService,
@@ -40,6 +49,7 @@ import {
   ImmunizationsService,
   ClinicalReadService,
   ClinicalNotificationsService,
+  PrescriptionPdfService,
 } from './services';
 import {
   CareEpisodesRepository,
@@ -67,6 +77,14 @@ import {
   PatientPortalProxiesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
+  // B.3 — el PDF oficial de receta necesita el nombre de paciente y
+  // profesional (CTI: `profile_id` es `persons.id`), la especialidad y la
+  // matrícula del prescriptor. Mismo criterio que el resto de este bloque:
+  // clases sin estado por `EntityManager`, sin importar `ProfilesModule`
+  // entero (cerraría el ciclo que el comentario de arriba ya explica).
+  PersonsRepository,
+  PractitionerSpecialtiesRepository,
+  JurisdictionAuthorizationsRepository,
 } from '../profiles/repositories';
 // B.1 — la historia de un menor la lee también quien lo representa, y quién
 // representa a quién lo sabe `profiles`. Mismo criterio que los repositorios de
@@ -85,6 +103,23 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
 // criterio de arriba: repo sin estado por `EntityManager`, sin importar el
 // módulo entero ni cerrar ciclo (`authz` no depende de `clinical`).
 import { CareRelationshipsRepository } from '../authz/repositories';
+// C.4 — el sello del encuentro reusa el hash ya calculado por nota y las
+// actividades/archivos de plan de cuidados y documento. Mismo criterio que
+// los repositorios de arriba: son clases sin estado que reciben el
+// `EntityManager` por parámetro. `clinical` NO puede importar `ChartModule`
+// (cerraría un ciclo: `chart` ya importa `clinical`), así que se proveen
+// sueltos los tres repos de `chart` que `EncounterSealService` necesita.
+import {
+  CarePlansRepository,
+  ClinicalNotesRepository,
+  DocumentsRepository,
+} from '../chart/repositories';
+// B.3 — el bloque de cobertura declarada del PDF de receta es la misma
+// lectura que usa `GET /profiles/patients/me`. `DeclaredCoveragesReader` no
+// tiene constructor (clase sin estado, `EntityManager` por parámetro), así
+// que se provee directo acá y en `InsuranceModule` sin importar ese módulo
+// entero — mismo criterio que el resto de este archivo.
+import { DeclaredCoveragesReader } from '../insurance/services/declared-coverages-reader';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -99,6 +134,7 @@ import { CareRelationshipsRepository } from '../authz/repositories';
     MessagingModule,
     CommonModule,
     AuthzModule,
+    TerminologyModule,
   ],
   controllers: [
     ClinicalEncountersController,
@@ -107,6 +143,8 @@ import { CareRelationshipsRepository } from '../authz/repositories';
     ClinicalPrescriptionPoliciesController,
     ClinicalRecordsController,
     ClinicalReadController,
+    ClinicalPrescriptionsController,
+    ClinicalPrescriptionsPublicController,
   ],
   providers: [
     // Repositorios
@@ -130,9 +168,18 @@ import { CareRelationshipsRepository } from '../authz/repositories';
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
     ImmunizationsRepository,
+    ClinicalNotesRepository,
+    CarePlansRepository,
+    DocumentsRepository,
+    // B.3 — el PDF oficial de receta.
+    PersonsRepository,
+    PractitionerSpecialtiesRepository,
+    JurisdictionAuthorizationsRepository,
+    DeclaredCoveragesReader,
     // Servicios
     CareEpisodesService,
     EncountersService,
+    EncounterSealService,
     ObservationsService,
     ServiceRequestsService,
     DiagnosticReportsService,
@@ -145,6 +192,7 @@ import { CareRelationshipsRepository } from '../authz/repositories';
     ClinicalReadService,
     ClinicalNotificationsService,
     ClinicalRecordAccessGuard,
+    PrescriptionPdfService,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:

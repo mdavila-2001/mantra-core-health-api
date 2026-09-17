@@ -266,6 +266,25 @@ export class ClinicalNotesRepository {
   }
 
   /**
+   * Cabeceras de nota de un encuentro, en orden de alta (para el sello y el
+   * PDF oficial del cierre: el hash tiene que ser determinista).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param encounterId - Encuentro cuyas notas se leen.
+   * @returns Cabeceras ordenadas por `createdAt, id`.
+   */
+  findHeadersByEncounter(
+    em: EntityManager,
+    encounterId: string,
+  ): Promise<ClinicalNoteHeaders[]> {
+    return em.find(
+      ClinicalNoteHeaders,
+      { encounterId },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Página de cabeceras cuya versión vigente es de un autor dado, por keyset.
    *
    * No hay relación mapeada entre cabecera y versión (nota de la clase): el

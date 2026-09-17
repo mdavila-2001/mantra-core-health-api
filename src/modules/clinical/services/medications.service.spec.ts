@@ -27,6 +27,7 @@ function build() {
   const requestsRepo = {
     findById: mockFn(),
     findByPatient: mockFn().mockResolvedValue([]),
+    findByEncounter: mockFn().mockResolvedValue([]),
     create: mockFn(),
     findByIssueIdempotencyKey: mockFn().mockResolvedValue(null),
   };

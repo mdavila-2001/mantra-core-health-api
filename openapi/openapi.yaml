@@ -22307,6 +22307,45 @@ paths:
       description: >-
         UC-40-14: expediente del paciente (notas, planes de cuidados y documentos). Requiere JWT y los roles o alcances
         declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /charts/encounters/{id}/pdf:
+    get:
+      description: >-
+        Autoriza a quien puede leer la historia del paciente dueño del encuentro. Requiere que el encuentro esté cerrado
+        (con sello).
+      operationId: ChartEncountersController_getEncounterPdf
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PDF oficial del encuentro
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no puede leer la historia de este paciente
+        '404':
+          description: El encuentro no existe
+        '422':
+          description: El encuentro no está cerrado
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el PDF oficial de un encuentro cerrado
+      tags:
+        - chart-encounters
   /care-teams:
     post:
       operationId: CareTeamsController_create
@@ -51132,6 +51171,10 @@ tags:
   - name: chart-documents
     description: >-
       Operaciones del dominio funcional chart documents. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: chart-encounters
+    description: >-
+      Operaciones del dominio funcional chart encounters. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: chart-notes
     description: >-

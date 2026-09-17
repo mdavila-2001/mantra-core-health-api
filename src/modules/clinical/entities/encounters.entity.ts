@@ -93,6 +93,26 @@ export class Encounters {
   appointmentId?: string;
 
   /**
+   * Sello SHA-256 del contenido del encuentro, calculado al cerrarlo.
+   */
+  @Property({
+    fieldName: 'content_hash',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  contentHash?: string;
+
+  /**
+   * Fecha y hora en que se calculó el sello del encuentro.
+   */
+  @Property({
+    fieldName: 'sealed_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  sealedAt?: Date;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
