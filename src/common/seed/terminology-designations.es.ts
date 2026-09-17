@@ -1950,6 +1950,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR,
+    {
+      display: 'Satisfecha por informe previo',
+      definition:
+        'El médico eligió reutilizar un informe reciente del mismo estudio en vez de repetirlo (antiduplicación, v4.2.17). No es facturable.',
+    },
+  ],
+  [
     CLIN.SERVICE_REQUEST_INTENT_PLAN,
     {
       display: 'Intención de plan',

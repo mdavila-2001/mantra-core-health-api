@@ -50,6 +50,11 @@ import {
   ClinicalReadService,
   ClinicalNotificationsService,
   PrescriptionPdfService,
+  // Antiduplicación de estudios (subtarea 3.2, T-26): clase sin estado, mismo
+  // criterio que `DeclaredCoveragesReader` — se provee acá Y directo en
+  // `InsuranceModule` para que el detalle del reclamo la use sin importar
+  // este módulo entero.
+  DuplicateStudyDetector,
 } from './services';
 import {
   CareEpisodesRepository,
@@ -193,6 +198,7 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
     ClinicalNotificationsService,
     ClinicalRecordAccessGuard,
     PrescriptionPdfService,
+    DuplicateStudyDetector,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:
@@ -222,6 +228,7 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
     EncountersRepository,
     ClinicalReadService,
     ClinicalRecordAccessGuard,
+    DuplicateStudyDetector,
   ],
 })
 export class ClinicalModule {}

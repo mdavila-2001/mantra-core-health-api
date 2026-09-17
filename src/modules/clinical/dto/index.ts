@@ -2,6 +2,7 @@ export * from './care-episode.dto';
 export * from './encounter.dto';
 export * from './observation.dto';
 export * from './service-request.dto';
+export * from './duplicate-study.dto';
 export * from './diagnostic-report.dto';
 export * from './condition.dto';
 export * from './allergy.dto';
