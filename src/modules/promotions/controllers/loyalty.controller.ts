@@ -9,7 +9,13 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   CurrentUser,
   getCurrentTenantId,
@@ -26,6 +32,9 @@ import {
   EarnPointsDto,
   RedeemPointsDto,
   PointsLedgerResponseDto,
+  MyLoyaltyResponseDto,
+  MyPointsLedgerQueryDto,
+  MyPointsLedgerPageResponseDto,
   RecomputeBalanceResponseDto,
   ExpirePointsDto,
   ExpirePointsResponseDto,
@@ -77,6 +86,100 @@ export class LoyaltyController {
       );
     }
     return this.loyaltyService.listActivePrograms(query.limit, tenantId);
+  }
+
+  /* ─── Autoservicio del paciente (R-T-E6B1) ─────────────────────────────
+   *
+   * Cuelgan de `me` y no de `memberships/:id` a propósito: si el titular
+   * viajara en la ruta, el endpoint tendría que comparar el de la URL con el de
+   * la sesión, y ésa es exactamente la comparación que un día se olvida. Sin
+   * parámetro no hay nada que comparar — el mismo criterio que
+   * `diagnostic-results/me`. El aislamiento entre personas lo resuelve el
+   * servicio, que deriva el titular del token.
+   *
+   * El rol es `PATIENT`, el rol global real del portal. `MEMBER`, que exigen
+   * las rutas de administración de abajo, **no es un rol global asignable**
+   * (`GlobalRole` no lo incluye), así que ningún paciente podía usarlas.
+   */
+
+  /** R-T-E6B1: mi membresía y mi saldo. */
+  @Get('loyalty/me')
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Mi membresía de lealtad y mi saldo de puntos',
+    description:
+      'El titular sale del token; no se acepta ningún identificador de miembro por la petición. No estar inscrito responde 200 con `enrolled: false`, que es un estado normal del portal y no un error.',
+  })
+  @ApiOkResponse({ type: MyLoyaltyResponseDto })
+  myLoyalty(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyLoyaltyResponseDto> {
+    return this.loyaltyService.myLoyalty(actor, this.requireTenant());
+  }
+
+  /** R-T-E6B1: mis movimientos, paginados por cursor. */
+  @Get('loyalty/me/points')
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Mis movimientos de puntos, más nuevos primero',
+    description:
+      'Paginado por cursor opaco, con orden estable por fecha e id. Sólo movimientos de la membresía del titular.',
+  })
+  @ApiOkResponse({ type: MyPointsLedgerPageResponseDto })
+  myPoints(
+    @Query() query: MyPointsLedgerQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyPointsLedgerPageResponseDto> {
+    return this.loyaltyService.myPointsLedger(
+      actor,
+      this.requireTenant(),
+      query,
+    );
+  }
+
+  /**
+   * R-T-E6B1: canjear mis propios puntos.
+   *
+   * Mismo motor que `loyalty/memberships/:id/points/redeem` —saldo nunca
+   * negativo, idempotencia por clave—, pero la membresía la deriva el servidor
+   * del token en vez de aceptarla en la ruta.
+   */
+  @Post('loyalty/me/points/redeem')
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Canjear puntos de mi propia membresía',
+    description:
+      'El titular sale del token. Idempotente por `idempotencyKey`; una clave que pertenezca a otra membresía se rechaza en vez de devolver datos ajenos.',
+  })
+  @ApiCreatedResponse({ type: PointsLedgerResponseDto })
+  redeemOwnPoints(
+    @Body() dto: RedeemPointsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PointsLedgerResponseDto> {
+    return this.loyaltyService.redeemOwnPoints(
+      actor,
+      this.requireTenant(),
+      dto,
+    );
+  }
+
+  /**
+   * El tenant del contexto, que acota el programa del portal.
+   *
+   * Mismo criterio que el listado de programas: sin `X-Tenant-Id` no se sabe de
+   * qué programa se está hablando, y elegir uno por nosotros sería inventar.
+   */
+  private requireTenant(): string {
+    const tenantId = getCurrentTenantId();
+    if (!tenantId) {
+      throw new PreconditionFailedException(
+        'Se requiere X-Tenant-Id para operar sobre la membresía de lealtad',
+      );
+    }
+    return tenantId;
   }
 
   /** UC-51-01. */
