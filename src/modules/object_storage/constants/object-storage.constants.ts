@@ -126,6 +126,22 @@ export const SIGNED_ACCESS = {
   INSECURE_DEV_SECRET: 'alovida-dev-download-secret',
 } as const;
 
+/**
+ * Finalidades con las que se puede pedir un objeto (MCH-010).
+ *
+ * El DTO acepta cualquier cadena de hasta 100 caracteres, así que sin esta
+ * lista el propósito era texto libre que sólo servía para llenar el registro de
+ * auditoría. Son los mismos cuatro que evalúa el PDP de `authz`
+ * (`CLINICAL_PURPOSE_CONCEPT`): declarar uno que la política no conoce no puede
+ * abrir un acceso que la política nunca autorizó.
+ */
+export const OBJECT_ACCESS_PURPOSES: readonly string[] = [
+  'TREATMENT',
+  'PAYMENT',
+  'OPERATIONS',
+  'EMERGENCY',
+];
+
 /** Comprobación de integridad (`object_integrity_checks`). */
 export const INTEGRITY_CHECK = {
   TYPE_SHA256_SCAN: 'sha256_scan',

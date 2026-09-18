@@ -18,6 +18,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ObjectStorageRepository, DicomRepository } from '../repositories';
+import { ClinicalReadService } from '../../clinical/services';
 import type {
   ObjectLocations,
   ObjectManifests,
@@ -38,6 +39,7 @@ import {
   DICOMWEB_OPERATION,
   DICOMWEB_OUTCOME,
   NAMESPACE_ACTIVE,
+  OBJECT_ACCESS_PURPOSES,
   OBJECT_LIFECYCLE,
   PLACEMENT_ROLE,
   REPLICATION_STATE,
@@ -71,6 +73,8 @@ interface SignedAccessClaims {
   s: string;
   /** Operación habilitada. */
   m: string;
+  /** Finalidad con la que se autorizó, para reevaluarla igual en el canje. */
+  p: string;
   /** Caducidad, en segundos epoch. */
   exp: number;
   /** Identificador de la emisión, para correlacionar con la auditoría. */
@@ -100,6 +104,8 @@ export class ObjectStorageService {
    * @param logger - Valor de logger requerido por la operación.
    * @param publication - Guarda de publicación del almacenamiento, si está cableada.
    * @param contentReader - Lector físico de los objetos (MCH-021).
+   * @param clinicalAccess - Política del expediente, reusada para autorizar el
+   *                         acceso a los objetos de un paciente (MCH-010).
    */
   constructor(
     private readonly em: EntityManager,
@@ -110,6 +116,7 @@ export class ObjectStorageService {
     private readonly publication: StoragePublicationService | undefined,
     @Inject(OBJECT_CONTENT_READER)
     private readonly contentReader: ObjectContentReader,
+    private readonly clinicalAccess: ClinicalReadService,
   ) {
     this.logger.setContext(ObjectStorageService.name);
   }
@@ -517,6 +524,8 @@ export class ObjectStorageService {
       const { version, manifest } = await this.resolveServableVersion(
         tx,
         versionId,
+        actor,
+        dto.purposeOfUseCode,
       );
 
       const envelope = await this.storageRepo.findEncryptionEnvelope(
@@ -532,6 +541,7 @@ export class ObjectStorageService {
         v: version.id,
         s: actor.id,
         m: SIGNED_ACCESS.METHOD,
+        p: dto.purposeOfUseCode,
         exp: Math.floor(expiresAt.getTime() / 1000),
         jti: randomUUID(),
       };
@@ -609,8 +619,11 @@ export class ObjectStorageService {
       });
     }
 
+    // La finalidad sale del token, no de la petición del canje: si viniera de
+    // nuevo del cliente, la comprobación de MCH-010 se haría contra lo que
+    // declare ahora y no contra aquello que se autorizó al emitir.
     const { version, location } = await this.em.transactional((tx) =>
-      this.resolveServableVersion(tx, versionId),
+      this.resolveServableVersion(tx, versionId, actor, claims.p),
     );
     const namespace = await this.storageRepo.findNamespaceById(
       this.em,
@@ -678,6 +691,8 @@ export class ObjectStorageService {
   private async resolveServableVersion(
     tx: EntityManager,
     versionId: string,
+    actor: AuthenticatedUser,
+    purposeOfUseCode: string,
   ): Promise<{
     version: ObjectVersions;
     manifest: ObjectManifests;
@@ -699,6 +714,15 @@ export class ObjectStorageService {
         manifestId: version.objectManifestId,
       });
     }
+
+    // MCH-010: el actor se autoriza contra el recurso completo —tenant, y el
+    // paciente que lo custodia— antes de tocar ubicación, integridad o bytes.
+    // Antes de acá sólo se llegaba por el rol, y el rol no dice de quién es el
+    // objeto.
+    await this.assertActorMayAccess(manifest, actor, purposeOfUseCode, {
+      versionId,
+    });
+
     // Un objeto marcado para borrar o corrupto no se sirve: entregarlo sería
     // dar acceso a algo que el sistema ya declaró que no debe leerse.
     if (
@@ -755,6 +779,82 @@ export class ObjectStorageService {
     }
 
     return { version, manifest, location };
+  }
+
+  /**
+   * ¿Puede este actor llegar a este objeto? (MCH-010)
+   *
+   * Antes la respuesta era «sí, si tiene el rol»: el método buscaba versión,
+   * manifiesto y ubicación por id, y el actor sólo aparecía en el log y como
+   * `principalId` del registro opcional. Con un id de versión y cualquiera de
+   * los cuatro roles del endpoint se alcanzaba el objeto de otro tenant o el
+   * estudio de un paciente ajeno del propio. RLS por tenant no cubre lo
+   * segundo: dentro del mismo tenant conviven todos los pacientes.
+   *
+   * Se responden tres preguntas, todas con datos que resuelve el servidor —el
+   * manifiesto trae el tenant y el paciente; el cliente sólo aportó un id—:
+   *
+   * 1. **Finalidad conocida.** El DTO acepta cualquier cadena; la política sólo
+   *    entiende cuatro. Una finalidad que la política no evalúa no autoriza.
+   * 2. **Custodia.** El actor tiene que ser miembro del tenant dueño del
+   *    objeto. Sin membresía no hay nada más que discutir, tampoco para un rol
+   *    privilegiado: un objeto de otro tenant no es «otro alcance», es de otra
+   *    organización.
+   * 3. **Relación con el paciente.** Si el objeto cuelga de una historia, decide
+   *    {@link ClinicalReadService.assertPuedeLeerHistoria} — la misma política
+   *    que guarda el expediente (turno de hoy, relación asistencial vigente,
+   *    acceso clínico autorizado, titularidad). Se reusa en vez de escribir una
+   *    segunda: dos políticas para la misma pregunta terminan discrepando, y la
+   *    que se olvide de actualizar será la que deje pasar.
+   *
+   * Un objeto sin `patientProfileId` —un backup, un adjunto administrativo— no
+   * tiene historia contra la que preguntar: queda con la custodia del tenant y
+   * el rol del endpoint, y así está dicho en vez de aparentar una comprobación
+   * que no ocurre.
+   *
+   * Todo lo que deniega responde igual que una versión inexistente. Distinguir
+   * «existe pero no es tuyo» de «no existe» le confirma a quien prueba ids
+   * cuáles acertó.
+   */
+  private async assertActorMayAccess(
+    manifest: ObjectManifests,
+    actor: AuthenticatedUser,
+    purposeOfUseCode: string,
+    context: Record<string, unknown>,
+  ): Promise<void> {
+    const denegar = (motivo: string): never => {
+      this.logger.warn(
+        {
+          operation: 'object-storage.access.denied',
+          actorUserId: actor.id,
+          manifestId: manifest.id,
+          reason: motivo,
+          ...context,
+        },
+        'Access to a stored object denied',
+      );
+      throw new ResourceNotFoundException('Versión no encontrada', context);
+    };
+
+    if (!OBJECT_ACCESS_PURPOSES.includes(purposeOfUseCode)) {
+      denegar('PURPOSE_NOT_ALLOWED');
+    }
+    if (!(actor.tenantIds ?? []).includes(manifest.tenantId)) {
+      denegar('TENANT_MISMATCH');
+    }
+    if (!manifest.patientProfileId) return;
+
+    try {
+      await this.clinicalAccess.assertPuedeLeerHistoria(
+        manifest.patientProfileId,
+        actor,
+      );
+    } catch {
+      // La política responde 403 con el detalle del expediente; acá se
+      // uniforma, porque el que pregunta ni siquiera debería saber que el
+      // objeto existe.
+      denegar('PATIENT_ACCESS_DENIED');
+    }
   }
 
   /**
@@ -1034,6 +1134,7 @@ function verifyAccessToken(token: string): SignedAccessClaims | null {
     return typeof claims?.v === 'string' &&
       typeof claims.s === 'string' &&
       typeof claims.m === 'string' &&
+      typeof claims.p === 'string' &&
       typeof claims.exp === 'number'
       ? claims
       : null;

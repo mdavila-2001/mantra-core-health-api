@@ -14,6 +14,11 @@ import {
   DicomRepository,
 } from './repositories';
 import { OBJECT_CONTENT_READER, S3ObjectContentReader } from './ports';
+// MCH-010: la emisión de acceso a un objeto de un paciente se decide con la
+// política del expediente (`ClinicalReadService`), que `ClinicalModule` ya
+// exporta para el guard del expediente. Import unidireccional: `clinical` no
+// conoce `object_storage`, así que no cierra ciclo.
+import { ClinicalModule } from '../clinical/clinical.module';
 
 /**
  * Módulo de almacenamiento de objetos: cargas multiparte, versiones inmutables,
@@ -25,6 +30,7 @@ import { OBJECT_CONTENT_READER, S3ObjectContentReader } from './ports';
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     StorageLifecycleModule,
+    ClinicalModule,
   ],
   controllers: [ObjectStorageController, DicomWebController],
   providers: [

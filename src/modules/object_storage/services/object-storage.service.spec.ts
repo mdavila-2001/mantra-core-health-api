@@ -23,7 +23,12 @@ import {
   UPLOAD_STATUS,
 } from '../constants';
 
-const actor = { id: 'user-1', roles: ['SYSTEM'] };
+const actor = {
+  id: 'user-1',
+  roles: ['SYSTEM'],
+  tenantIds: ['11111111-1111-1111-1111-111111111111'],
+};
+const TENANT = '11111111-1111-1111-1111-111111111111';
 const NAMESPACE = '11111111-1111-1111-1111-111111111111';
 const UPLOAD = '22222222-2222-2222-2222-222222222222';
 const MANIFEST = '33333333-3333-3333-3333-333333333333';
@@ -116,6 +121,11 @@ function build() {
     }),
     open: mockFn(),
   };
+  // MCH-010: la política del expediente. Por defecto autoriza; las pruebas de
+  // acceso la hacen negar para comprobar que el objeto deja de alcanzarse.
+  const clinicalAccess = {
+    assertPuedeLeerHistoria: mockFn(() => Promise.resolve()),
+  };
   const service = new ObjectStorageService(
     em as any,
     storageRepo as any,
@@ -123,8 +133,18 @@ function build() {
     logger as any,
     undefined,
     reader as any,
+    clinicalAccess as any,
   );
-  return { service, tx, storageRepo, dicomRepo, logger, reader, stored };
+  return {
+    service,
+    tx,
+    storageRepo,
+    dicomRepo,
+    logger,
+    reader,
+    stored,
+    clinicalAccess,
+  };
 }
 
 /**
@@ -606,6 +626,8 @@ describe('ObjectStorageService', () => {
       });
       d.storageRepo.findManifestById.mockResolvedValue({
         id: MANIFEST,
+        tenantId: TENANT,
+        patientProfileId: 'pat-1',
         lifecycleState: OBJECT_LIFECYCLE.ACTIVE,
         ...manifestOverrides,
       });
@@ -624,6 +646,116 @@ describe('ObjectStorageService', () => {
       const token = String(res.url).split('/').pop() as string;
       return { res, token };
     }
+
+    // MCH-010: llegar al método con el rol no es ser dueño del objeto. El
+    // actor se ata al tenant y al paciente que lo custodia, y lo que no se
+    // autoriza responde igual que lo que no existe.
+    describe('vínculo del actor con el recurso (MCH-010)', () => {
+      it('does not serve an object of another tenant', async () => {
+        const d = build();
+        wire(d, { tenantId: '99999999-9999-9999-9999-999999999999' });
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        // Ni siquiera se llega a mirar dónde están los bytes.
+        expect(d.storageRepo.findPrimaryLocation).not.toHaveBeenCalled();
+      });
+
+      it('does not serve the object of a patient the actor cannot read', async () => {
+        const d = build();
+        wire(d);
+        d.clinicalAccess.assertPuedeLeerHistoria.mockRejectedValue(
+          new Error('403'),
+        );
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.clinicalAccess.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+          'pat-1',
+          actor,
+        );
+        expect(d.storageRepo.findPrimaryLocation).not.toHaveBeenCalled();
+      });
+
+      it('refuses a purpose the clinical policy does not know', async () => {
+        const d = build();
+        wire(d);
+
+        await expect(
+          d.service.issueSignedUrl(
+            VERSION,
+            { purposeOfUseCode: 'CURIOSITY' } as any,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.clinicalAccess.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+      });
+
+      it('answers a foreign object exactly like a missing one', async () => {
+        const ajeno = build();
+        wire(ajeno, { tenantId: '99999999-9999-9999-9999-999999999999' });
+        const inexistente = build();
+        wire(inexistente);
+        inexistente.storageRepo.findVersionById.mockResolvedValue(null);
+
+        const respuestas = await Promise.all(
+          [ajeno, inexistente].map((d) =>
+            d.service
+              .issueSignedUrl(VERSION, dto, actor)
+              .then(() => null)
+              .catch((e: any) => ({
+                status: e.getStatus?.(),
+                body: e.getResponse?.(),
+              })),
+          ),
+        );
+        expect(respuestas[0]).toEqual(respuestas[1]);
+      });
+
+      it('does not authorise an object without a patient beyond its tenant', async () => {
+        const d = build();
+        wire(d, { patientProfileId: undefined });
+
+        await d.service.issueSignedUrl(VERSION, dto, actor);
+
+        // Sin historia no hay política clínica que preguntar; queda la custodia.
+        expect(d.clinicalAccess.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+      });
+
+      it('re-checks the patient policy when the link is redeemed', async () => {
+        const d = build();
+        wire(d);
+        d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
+        const { token } = await emitir(d);
+        // El permiso se retira entre la emisión y el canje.
+        d.clinicalAccess.assertPuedeLeerHistoria.mockRejectedValue(
+          new Error('403'),
+        );
+
+        await expect(
+          (d.service as any).redeemSignedAccess(VERSION, token, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.reader.open).not.toHaveBeenCalled();
+      });
+
+      it('redeems with the purpose that was authorised, not a new one', async () => {
+        const d = build();
+        wire(d);
+        d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
+        const { token } = await emitir(d, {
+          purposeOfUseCode: 'EMERGENCY',
+        });
+
+        await (d.service as any).redeemSignedAccess(VERSION, token, actor);
+
+        const claims = JSON.parse(
+          Buffer.from(token.split('.')[0], 'base64url').toString('utf8'),
+        );
+        expect(claims.p).toBe('EMERGENCY');
+      });
+    });
 
     // MCH-009: el enlace tiene que ser un acceso temporal de verdad, no la URI
     // interna con una fecha decorativa al lado.
@@ -749,6 +881,8 @@ describe('ObjectStorageService', () => {
         const { token } = await emitir(d);
         d.storageRepo.findManifestById.mockResolvedValue({
           id: MANIFEST,
+          tenantId: TENANT,
+          patientProfileId: 'pat-1',
           lifecycleState: OBJECT_LIFECYCLE.PENDING_DELETION,
         });
 
