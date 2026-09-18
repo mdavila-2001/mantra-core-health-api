@@ -38,6 +38,8 @@ export interface TokenDisplayData {
   name?: string;
   /** Nombre de cada tenant, indexado por su id. */
   tenantNames?: Record<string, string>;
+  /** Roles de negocio con ámbito de tenant; ver `JwtPayload.scopedRoles`. */
+  scopedRoles?: Record<string, string[]>;
   /**
    * Perfil de paciente del titular, si tiene uno. Viaja como claim `pid`; ver
    * `JwtPayload.pid` para por qué no basta con la lectura de `profiles`.
@@ -91,6 +93,9 @@ export class TokenService {
       ...(display.name ? { name: display.name } : {}),
       ...(display.tenantNames && Object.keys(display.tenantNames).length > 0
         ? { tenantNames: display.tenantNames }
+        : {}),
+      ...(display.scopedRoles && Object.keys(display.scopedRoles).length > 0
+        ? { scopedRoles: display.scopedRoles }
         : {}),
       ...(display.patientProfileId ? { pid: display.patientProfileId } : {}),
       ...(display.practitionerProfileId

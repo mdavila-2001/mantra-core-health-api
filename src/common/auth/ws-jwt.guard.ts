@@ -5,6 +5,7 @@ import { JWT_ALGORITHM } from './auth.env';
 import { toAuthenticatedUser } from './jwt.strategy';
 import type { JwtPayload } from './jwt-payload.interface';
 import type { AuthenticatedUser } from './authenticated-user.interface';
+import { SessionValidator } from './session-validator';
 
 /** `client.data` de un socket ya autenticado por `authenticateSocket`. */
 export interface AuthenticatedSocketData {
@@ -34,14 +35,17 @@ export class WsJwtGuard {
    * @param jwt - Firmador/verificador ya configurado con el secreto de la
    *   plataforma (`AuthTokenModule`, global).
    */
-  constructor(private readonly jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    private readonly sessions: SessionValidator,
+  ) {}
 
   /**
    * Verifica el token del handshake y devuelve el sujeto autenticado.
    *
    * @param client - Socket recién conectado.
    */
-  authenticate(client: Socket): AuthenticatedUser {
+  async authenticate(client: Socket): Promise<AuthenticatedUser> {
     const token = this.extractToken(client);
     if (!token) {
       throw new UnauthorizedException('Falta el token de acceso');
@@ -62,6 +66,8 @@ export class WsJwtGuard {
       );
     }
 
+    // Mismo criterio que HTTP: un token de una sesión cerrada no abre un socket.
+    await this.sessions.assertActive(payload);
     return toAuthenticatedUser(payload);
   }
 
