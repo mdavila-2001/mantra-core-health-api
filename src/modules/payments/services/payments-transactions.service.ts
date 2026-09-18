@@ -33,6 +33,7 @@ import {
 import {
   compararImportes,
   esImportePositivo,
+  restarImportes,
   sumarImportes,
 } from './payment-money';
 import { decidirCallback, referenciaEvento } from './payment-callback-machine';
@@ -91,6 +92,10 @@ export class PaymentsTransactionsService {
    * Se exige que el motor de riesgo haya aprobado el intent (UC-42-04 va incluido
    * en este flujo): cobrar sin esa decisión dejaría pasar operaciones que el
    * antifraude rechazó.
+   *
+   * MCH-036: el importe se valida contra el saldo pendiente de la intención
+   * —lo debido menos lo efectivamente capturado— con aritmética exacta, de modo
+   * que un cobro parcial es legítimo pero la suma nunca excede lo debido.
    */
   async processTransaction(
     intentId: string,
@@ -162,12 +167,47 @@ export class PaymentsTransactionsService {
         );
       }
 
+      // MCH-036: el importe de la operación se mide contra lo que todavía se
+      // debe, no contra el de la intención. Antes se admitía cualquier importe y
+      // el saldo nunca se calculaba, así que una captura parcial podía cerrar la
+      // intención completa y una segunda podía cobrar de más.
+      const capturado = await this.capturadoDeIntencion(tx, intentId);
+      const saldo = restarImportes(intent.amount, capturado);
+      // Sin importe explícito se pide el saldo pendiente, que en una intención
+      // intacta es el total.
+      const solicitado = dto.amount ?? saldo;
+      if (!esImportePositivo(solicitado)) {
+        throw new PreconditionFailedException(
+          'El importe a procesar debe ser mayor que cero',
+          { intentId, amount: solicitado },
+        );
+      }
+      if (compararImportes(solicitado, saldo) > 0) {
+        throw new ConflictException(
+          'El importe excede el saldo pendiente de la intención',
+          { intentId, amount: solicitado, captured: capturado, balance: saldo },
+        );
+      }
+      // Capturar más de lo autorizado es un cobro sin autorización del emisor.
+      if (
+        dto.operation === 'CAPTURE' &&
+        open?.statusConceptId === CONCEPTS.TXN_AUTHORIZED &&
+        compararImportes(solicitado, open.amount) > 0
+      ) {
+        throw new ConflictException('La captura excede el importe autorizado', {
+          intentId,
+          transactionId: open.id,
+          amount: solicitado,
+          authorized: open.amount,
+        });
+      }
+
       const transaction = this.transactionsRepo.create(tx, {
         paymentIntentId: intentId,
         gatewayId: intent.gatewayId,
         transactionTypeConceptId: OPERATION_CONCEPT[dto.operation],
         gatewayTransactionRef: dto.gatewayTransactionRef,
-        amount: dto.amount ?? intent.amount,
+        amount: solicitado,
         currencyConceptId: intent.currencyConceptId,
         statusConceptId: CONCEPTS.TXN_PROCESSING,
         authorizationCode: dto.authorizationCode,
@@ -336,12 +376,20 @@ export class PaymentsTransactionsService {
         transaction.paymentIntentId,
       );
       if (intent) {
-        intent.statusConceptId =
-          dto.outcome === 'FAILED'
-            ? CONCEPTS.PI_FAILED
-            : dto.outcome === 'CAPTURED'
-              ? CONCEPTS.PI_SUCCEEDED
-              : CONCEPTS.PI_PROCESSING;
+        // MCH-036: el estado de la intención se deriva de lo efectivamente
+        // capturado y confirmado, no de la operación que informa este callback.
+        // Antes un CAPTURED de 40 sobre una intención de 100 la dejaba
+        // PI_SUCCEEDED, es decir, la obligación aparecía satisfecha por completo.
+        const capturado = await this.capturadoDeIntencion(
+          tx,
+          transaction.paymentIntentId,
+          { id: transaction.id, statusConceptId: targetStatus },
+        );
+        intent.statusConceptId = this.estadoIntencion(
+          dto.outcome,
+          capturado,
+          intent.amount,
+        );
         touch(intent, undefined);
       }
 
@@ -549,6 +597,66 @@ export class PaymentsTransactionsService {
         statusConceptId: CONCEPTS.CANCEL_REQUESTED,
       };
     });
+  }
+
+  /**
+   * Suma exacta de lo efectivamente cobrado por una intención (MCH-036).
+   *
+   * Sólo cuentan las transacciones capturadas o liquidadas: una operación en
+   * PROCESSING no movió dinero y una autorización tampoco. Por eso una
+   * reentrega del mismo callback no incrementa el acumulado: éste se deriva de
+   * las filas, no de los eventos.
+   *
+   * @param tx - Transacción de base de datos activa.
+   * @param intentId - Intención de pago.
+   * @param enCurso - Transacción cuyo estado está cambiando en esta misma unidad;
+   *   se toma su estado nuevo en lugar del persistido.
+   * @returns El importe capturado, como cadena decimal.
+   */
+  private async capturadoDeIntencion(
+    tx: EntityManager,
+    intentId: string,
+    enCurso?: { id: string; statusConceptId: string },
+  ): Promise<string> {
+    const transacciones = await this.transactionsRepo.findByIntent(
+      tx,
+      intentId,
+    );
+    return sumarImportes(
+      transacciones
+        .map((t) => ({
+          amount: t.amount,
+          statusConceptId:
+            t.id === enCurso?.id ? enCurso.statusConceptId : t.statusConceptId,
+        }))
+        .filter((t) => CAPTURED_STATES.includes(t.statusConceptId))
+        .map((t) => t.amount),
+    );
+  }
+
+  /**
+   * Estado de la intención derivado del importe confirmado (MCH-036).
+   *
+   * No hay un concepto PI_PARTIALLY_CAPTURED en el catálogo, así que una
+   * intención cobrada a medias sigue en PI_PROCESSING: es el estado que ya
+   * significa "en curso" y no afirma que la obligación esté satisfecha. Un fallo
+   * posterior a un cobro parcial tampoco la marca fallida: hay dinero cobrado.
+   *
+   * @param outcome - Resultado informado por el proveedor.
+   * @param capturado - Importe efectivamente capturado.
+   * @param debido - Importe de la intención.
+   * @returns El concepto de estado de la intención.
+   */
+  private estadoIntencion(
+    outcome: GatewayCallbackDto['outcome'],
+    capturado: string,
+    debido: string,
+  ): string {
+    if (compararImportes(capturado, debido) >= 0) return CONCEPTS.PI_SUCCEEDED;
+    if (outcome === 'FAILED' && !esImportePositivo(capturado)) {
+      return CONCEPTS.PI_FAILED;
+    }
+    return CONCEPTS.PI_PROCESSING;
   }
 
   /**

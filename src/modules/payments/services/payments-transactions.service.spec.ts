@@ -67,6 +67,7 @@ function build() {
     createRefund: mockFn(),
     findRefundsByTransaction: mockFn(),
     findPendingByIntent: mockFn(),
+    findByIntent: mockFn().mockResolvedValue([]),
     createCancellation: mockFn(),
     findWebhookEventByRef: mockFn().mockResolvedValue(null),
     recordWebhookEvent: mockFn(),
@@ -210,6 +211,7 @@ describe('PaymentsTransactionsService', () => {
       });
       d.transactionsRepo.findPendingByIntent.mockResolvedValue({
         id: 'txn-0',
+        amount: '150.00',
         statusConceptId: CONCEPTS.TXN_AUTHORIZED,
       });
       d.transactionsRepo.create.mockReturnValue({ id: 'txn-1' });
@@ -292,6 +294,219 @@ describe('PaymentsTransactionsService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
+    // MCH-036: `processTransaction` admitía cualquier importe y nunca calculaba
+    // el saldo, así que una captura parcial cerraba la intención completa y una
+    // segunda podía cobrar de más.
+    describe('MCH-036 · saldo acumulado de la intención', () => {
+      function intencion(d: ReturnType<typeof build>, amount: string) {
+        d.intentsRepo.findByIdForUpdate.mockResolvedValue({
+          id: 'intent-1',
+          gatewayId: 'gw-1',
+          amount,
+          currencyConceptId: CONCEPTS.CURRENCY_BOB,
+          statusConceptId: CONCEPTS.PI_PROCESSING,
+        });
+        d.flowRepo.findLatestRiskAssessment.mockResolvedValue({
+          decisionConceptId: CONCEPTS.RISK_APPROVE,
+        });
+        d.transactionsRepo.findPendingByIntent.mockResolvedValue(null);
+        d.transactionsRepo.create.mockImplementation((_tx: any, data: any) => ({
+          id: 'txn-n',
+          ...data,
+        }));
+      }
+      const capturada = (amount: string) => ({
+        id: `txn-${amount}`,
+        amount,
+        statusConceptId: CONCEPTS.TXN_CAPTURED,
+      });
+
+      it('AC01 · una captura de 40 sobre 100 no deja la intención satisfecha', async () => {
+        const d = build();
+        const transaction = {
+          id: 'txn-1',
+          gatewayId: 'gw-1',
+          paymentIntentId: 'intent-1',
+          amount: '40.00',
+          statusConceptId: CONCEPTS.TXN_PROCESSING,
+        };
+        const intent = {
+          id: 'intent-1',
+          amount: '100.00',
+          statusConceptId: CONCEPTS.PI_PROCESSING,
+        };
+        d.transactionsRepo.findByGatewayRef.mockResolvedValue(transaction);
+        d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
+        d.transactionsRepo.findByIntent.mockResolvedValue([transaction]);
+
+        const body = {
+          gatewayTransactionRef: 'ref-1',
+          outcome: 'CAPTURED' as const,
+        };
+        await d.service.applyCallback('libelula', {
+          ...body,
+          signature: signCallback('gw-1', body),
+        });
+
+        expect(transaction.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
+        expect(intent.statusConceptId).toBe(CONCEPTS.PI_PROCESSING);
+      });
+
+      it('AC02 · la segunda captura de 60 completa exactamente los 100', async () => {
+        const d = build();
+        const transaction = {
+          id: 'txn-2',
+          gatewayId: 'gw-1',
+          paymentIntentId: 'intent-1',
+          amount: '60.00',
+          statusConceptId: CONCEPTS.TXN_PROCESSING,
+        };
+        const intent = {
+          id: 'intent-1',
+          amount: '100.00',
+          statusConceptId: CONCEPTS.PI_PROCESSING,
+        };
+        d.transactionsRepo.findByGatewayRef.mockResolvedValue(transaction);
+        d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
+        d.transactionsRepo.findByIntent.mockResolvedValue([
+          capturada('40.00'),
+          transaction,
+        ]);
+
+        const body = {
+          gatewayTransactionRef: 'ref-2',
+          outcome: 'CAPTURED' as const,
+        };
+        await d.service.applyCallback('libelula', {
+          ...body,
+          signature: signCallback('gw-1', body),
+        });
+
+        expect(intent.statusConceptId).toBe(CONCEPTS.PI_SUCCEEDED);
+      });
+
+      it('AC02 · una operación que excede el saldo se rechaza sin crear la fila', async () => {
+        const d = build();
+        intencion(d, '100.00');
+        d.transactionsRepo.findByIntent.mockResolvedValue([capturada('40.00')]);
+
+        await expect(
+          d.service.processTransaction(
+            'intent-1',
+            { operation: 'SALE', amount: '60.01' },
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(ConflictException);
+        expect(d.transactionsRepo.create).not.toHaveBeenCalled();
+
+        // El saldo justo sí pasa.
+        const res = await d.service.processTransaction(
+          'intent-1',
+          { operation: 'SALE', amount: '60.00' },
+          actor,
+        );
+        expect(res.amount).toBe('60.00');
+      });
+
+      it('sin importe explícito se cobra el saldo pendiente, no el total', async () => {
+        const d = build();
+        intencion(d, '100.00');
+        d.transactionsRepo.findByIntent.mockResolvedValue([capturada('40.00')]);
+
+        const res = await d.service.processTransaction(
+          'intent-1',
+          { operation: 'SALE' },
+          actor,
+        );
+
+        expect(res.amount).toBe('60.00');
+      });
+
+      it('una captura no puede exceder el importe autorizado', async () => {
+        const d = build();
+        intencion(d, '100.00');
+        d.transactionsRepo.findPendingByIntent.mockResolvedValue({
+          id: 'txn-0',
+          amount: '40.00',
+          statusConceptId: CONCEPTS.TXN_AUTHORIZED,
+        });
+
+        await expect(
+          d.service.processTransaction(
+            'intent-1',
+            { operation: 'CAPTURE', amount: '40.01' },
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(ConflictException);
+        expect(d.transactionsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('AC03 · la reentrega del callback no acumula el importe dos veces', async () => {
+        const d = build();
+        const transaction = {
+          id: 'txn-1',
+          gatewayId: 'gw-1',
+          paymentIntentId: 'intent-1',
+          amount: '40.00',
+          statusConceptId: CONCEPTS.TXN_CAPTURED,
+        };
+        const intent = {
+          id: 'intent-1',
+          amount: '100.00',
+          statusConceptId: CONCEPTS.PI_PROCESSING,
+        };
+        d.transactionsRepo.findByGatewayRef.mockResolvedValue(transaction);
+        d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
+        d.transactionsRepo.findByIntent.mockResolvedValue([transaction]);
+
+        const body = {
+          gatewayTransactionRef: 'ref-1',
+          outcome: 'CAPTURED' as const,
+        };
+        const res = await d.service.applyCallback('libelula', {
+          ...body,
+          signature: signCallback('gw-1', body),
+        });
+
+        expect(res.duplicate).toBe(true);
+        expect(intent.statusConceptId).toBe(CONCEPTS.PI_PROCESSING);
+      });
+
+      it('un fallo posterior a un cobro parcial no marca fallida la intención', async () => {
+        const d = build();
+        const transaction = {
+          id: 'txn-2',
+          gatewayId: 'gw-1',
+          paymentIntentId: 'intent-1',
+          amount: '60.00',
+          statusConceptId: CONCEPTS.TXN_PROCESSING,
+        };
+        const intent = {
+          id: 'intent-1',
+          amount: '100.00',
+          statusConceptId: CONCEPTS.PI_PROCESSING,
+        };
+        d.transactionsRepo.findByGatewayRef.mockResolvedValue(transaction);
+        d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
+        d.transactionsRepo.findByIntent.mockResolvedValue([
+          capturada('40.00'),
+          transaction,
+        ]);
+
+        const body = {
+          gatewayTransactionRef: 'ref-2',
+          outcome: 'FAILED' as const,
+        };
+        await d.service.applyCallback('libelula', {
+          ...body,
+          signature: signCallback('gw-1', body),
+        });
+
+        expect(transaction.statusConceptId).toBe(CONCEPTS.TXN_FAILED);
+        expect(intent.statusConceptId).toBe(CONCEPTS.PI_PROCESSING);
+      });
+    });
+
     it('rejects charging an intent that already succeeded', async () => {
       const d = build();
       d.intentsRepo.findByIdForUpdate.mockResolvedValue({
@@ -316,14 +531,17 @@ describe('PaymentsTransactionsService', () => {
         id: 'txn-1',
         gatewayId: 'gw-1',
         paymentIntentId: 'intent-1',
+        amount: '150.00',
         statusConceptId: CONCEPTS.TXN_PROCESSING,
       };
       const intent = {
         id: 'intent-1',
+        amount: '150.00',
         statusConceptId: CONCEPTS.PI_PROCESSING,
       };
       d.transactionsRepo.findByGatewayRef.mockResolvedValue(transaction);
       d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
+      d.transactionsRepo.findByIntent.mockResolvedValue([transaction]);
 
       const body = {
         gatewayTransactionRef: 'ref-1',
