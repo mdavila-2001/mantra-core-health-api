@@ -24,8 +24,40 @@ on:
     branches: [master, dev]
   workflow_dispatch:
 
+# Mínimo privilegio para el GITHUB_TOKEN (MCH-031). Ningún paso escribe en el
+# repositorio: sólo lee el código y, en la ejecución manual, sube un artefacto
+# (que no necesita permisos de `contents`).
+permissions:
+  contents: read
+
 jobs:
+  # Frontera de confianza del runner propio (MCH-014). El repositorio es público y
+  # `marcelo-wsl-api` es una máquina del equipo con Docker y el stack de desarrollo
+  # al lado: el código de un PR que viene de un fork no puede ejecutarse ahí. Estos
+  # PRs no se validan en ese runner; el job de abajo falla a propósito —sin hacer
+  # checkout ni ejecutar nada del PR— para que el PR quede bloqueado en rojo en vez
+  # de figurar como `skipped`, que GitHub cuenta como éxito en un check requerido.
+  # Para validarlo, un mantenedor trae la rama al repositorio y abre el PR desde ahí.
+  fork-guard:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name != github.repository
+    # Hospedado y no el propio: si la máquina del equipo está apagada el job
+    # quedaría en cola sin fallar, y un PR de fork no tiene nada que hacer en
+    # ella. Sin minutos de facturación el job muere al arrancar, que también es
+    # rojo: el resultado es el mismo.
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: PR desde fork — no se ejecuta en el runner propio
+        run: |
+          echo "::error::PR desde un fork: su código no se ejecuta en el runner self-hosted. Un mantenedor debe traer la rama al repositorio. Ver docs/operations/ci-runner-self-hosted.md"
+          exit 1
+
   docs:
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     # Runner self-hosted: los minutos de GitHub están agotados por facturación
     # desde el 14/08 y los jobs morían en 2 s sin máquina, así que ~30 PRs
     # entraron sin un solo check. `marcelo-wsl-api` es Linux con Docker, que es
@@ -100,7 +132,15 @@ jobs:
           --health-start-period 120s
 
     steps:
-      - uses: actions/checkout@v4
+      # Acciones fijadas a commit (MCH-031): una etiqueta se puede mover, un SHA no.
+      # Resueltos con `git ls-remote` el 18/09/2026; son el mismo commit al que
+      # apuntaban las etiquetas mayores usadas antes, así que no cambia nada de lo
+      # que se ejecuta. Actualizar = cambiar SHA y comentario en un PR revisable.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # El token no queda guardado en .git/config del workspace, que en un
+          # runner propio persiste entre jobs.
+          persist-credentials: false
 
       # Corepack ANTES de `setup-node`, y no después: `cache: yarn` hace que la
       # acción invoque `yarn cache dir` durante su propio paso, y el yarn global
@@ -127,12 +167,12 @@ jobs:
           corepack enable --install-directory "$RUNNER_TEMP/corepack"
           echo "$RUNNER_TEMP/corepack" >> "$GITHUB_PATH"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "24"
           cache: yarn
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
 
@@ -259,18 +299,12 @@ jobs:
       - name: Lint del contrato OpenAPI (Redocly) — 0 errores obligatorio
         run: yarn docs:openapi:lint
 
-      - name: Detección de breaking changes del contrato
-        # Compara el contrato generado en este PR contra el de la rama base.
-        # No falla el job si no hay contrato base (primera vez) — informa, no bloquea,
-        # hasta que exista un baseline real con el que comparar.
-        run: |
-          git fetch origin ${{ github.base_ref || 'master' }} --depth=1 || true
-          if git show origin/${{ github.base_ref || 'master' }}:openapi/openapi.yaml > /tmp/base-openapi.yaml 2>/dev/null; then
-            npx --yes @redocly/cli diff /tmp/base-openapi.yaml openapi/openapi.yaml || \
-              echo "::warning::El contrato OpenAPI cambió respecto a ${{ github.base_ref || 'master' }} — revisar si es incompatible."
-          else
-            echo "Sin contrato base para comparar (rama nueva o primera generación)."
-          fi
+      # Aquí había un paso de "breaking changes" que corría `npx --yes
+      # @redocly/cli diff`: bajaba de npm la última versión de la CLI —fuera del
+      # lockfile— y la ejecutaba en el runner propio en cada PR (MCH-031), para un
+      # subcomando que Redocly CLI no tiene (la 2.43.2 del lockfile no lo lista), así
+      # que siempre terminaba en warning. No era un control. La detección real de
+      # cambios incompatibles, que sí bloquee, queda en MCH-025 (fase F10).
 
       - name: Validar AsyncAPI — 0 errores obligatorio
         run: yarn docs:asyncapi:validate
@@ -311,11 +345,16 @@ jobs:
       - name: Construir portal MkDocs en modo estricto
         run: yarn docs:build
 
+      # Antes exigía `push`, que no es un trigger de este workflow: el paso no se
+      # ejecutaba nunca (MCH-032). Se publica en la corrida manual, que es la que se
+      # lanza para obtener el portal; en los PRs no, para no subir un artefacto por
+      # cada commit desde el runner propio. El nombre lleva el SHA validado.
       - name: Publicar artefactos de documentación
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
+        if: success() && github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: docs-site
+          name: docs-site-${{ github.sha }}
+          if-no-files-found: error
           path: |
             site/
             openapi/openapi.yaml
