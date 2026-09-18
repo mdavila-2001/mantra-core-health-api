@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { canonicalJson, signPayload } from '../crypto/webhook-signature';
-import { assertOutboundUrlAllowed } from './ssrf-guard';
+import { PreconditionFailedException } from '../errors/domain.exception';
+import {
+  pinnedLookup,
+  resolveOutboundDestination,
+  systemResolver,
+  type OutboundResolver,
+} from './ssrf-guard';
 
 /** Timeout por defecto (ms) para el despacho saliente. */
 export const DEFAULT_DISPATCH_TIMEOUT_MS = 5000;
@@ -47,22 +53,37 @@ export interface OutboundDispatchResult {
 @Injectable()
 export class HttpDispatcherService {
   /**
+   * Resolvedor DNS usado para validar el destino; en pruebas se sustituye por
+   * uno de laboratorio.
+   */
+  protected resolver: OutboundResolver = systemResolver;
+
+  /**
    * Ejecuta la operación post.
    *
    * @param input - Valor de input requerido por la operación.
    * @returns Resultado de post conforme al contrato `Promise<OutboundDispatchResult>`.
    */
   async post(input: OutboundDispatchInput): Promise<OutboundDispatchResult> {
-    assertOutboundUrlAllowed(input.url);
-
     const rawBody = canonicalJson(input.body);
     const signature = signPayload(input.secret, rawBody);
     const startedAt = Date.now();
 
     try {
-      const response = await axios.post(input.url, rawBody, {
+      // MCH-006: la política valida todas las direcciones del destino y la
+      // conexión sólo puede ir a esas (lookup anclado). Un rechazo de la política
+      // es una precondición y se propaga; un fallo de DNS es fallo de entrega.
+      const destination = await resolveOutboundDestination(
+        input.url,
+        this.resolver,
+      );
+      const response = await axios.post(destination.url.href, rawBody, {
         timeout: input.timeoutMs ?? DEFAULT_DISPATCH_TIMEOUT_MS,
+        // Sin redirecciones: un 3xx se devuelve como respuesta, no se sigue.
         maxRedirects: 0,
+        lookup: pinnedLookup(destination),
+        // Un proxy de entorno recibiría la conexión en lugar del destino validado.
+        proxy: false,
         // El cuerpo ya es una cadena firmada: no volver a transformarlo.
         transformRequest: [(data: unknown) => data],
         // Evaluamos nosotros el status; axios no debe lanzar por 4xx/5xx.
@@ -86,6 +107,7 @@ export class HttpDispatcherService {
         errorText: ok ? undefined : `HTTP ${response.status}`,
       };
     } catch (error) {
+      if (error instanceof PreconditionFailedException) throw error;
       const latencyMs = Date.now() - startedAt;
       const err = error as {
         /**
