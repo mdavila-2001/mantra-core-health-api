@@ -6,7 +6,7 @@ import {
   Refunds,
   PaymentCancellationRequests,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
 
 /**
  * Describe el contrato estructural de create transaction data.
@@ -241,6 +241,32 @@ export class PaymentTransactionsRepository {
         ...createdBy(data.actorUserId),
       },
       { partial: true },
+    );
+  }
+
+  /**
+   * Operación abierta de la intención: sin resultado del gateway (PROCESSING) o
+   * autorizada y todavía sin capturar (AUTHORIZED). Si hay de ambas, devuelve
+   * la que está en PROCESSING, que es la más restrictiva.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param paymentIntentId - Intención de pago.
+   * @returns La transacción abierta, o `null`.
+   */
+  async findPendingByIntent(
+    em: EntityManager,
+    paymentIntentId: string,
+  ): Promise<PaymentTransactions | null> {
+    const open = await em.find(PaymentTransactions, {
+      paymentIntentId,
+      statusConceptId: {
+        $in: [CONCEPTS.TXN_PROCESSING, CONCEPTS.TXN_AUTHORIZED],
+      },
+    });
+    return (
+      open.find((t) => t.statusConceptId === CONCEPTS.TXN_PROCESSING) ??
+      open[0] ??
+      null
     );
   }
 
