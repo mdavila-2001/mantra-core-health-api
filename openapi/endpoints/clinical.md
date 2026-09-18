@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `clinical`
 
-Referencia exhaustiva de 27 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 30 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records`
-- **Controladores:** `ClinicalEncountersController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionPoliciesController`, `ClinicalReadController`, `ClinicalRecordsController`
+- **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records`
+- **Controladores:** `ClinicalEncountersController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionPoliciesController`, `ClinicalPrescriptionsController`, `ClinicalPrescriptionsPublicController`, `ClinicalReadController`, `ClinicalRecordsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -35,9 +35,12 @@ Referencia exhaustiva de 27 operación(es) del módulo `clinical`, derivada del 
 22. [GET /clinical/prescription-signature-policies](#22-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
 23. [POST /clinical/prescription-signature-policies](#23-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
 24. [POST /clinical/prescription-signature-policies/{id}/deactivate](#24-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
-25. [POST /clinical/procedures](#25-post-clinical-procedures) — Registrar un procedimiento
-26. [POST /clinical/procedures/{id}/attachments](#26-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
-27. [POST /clinical/service-requests](#27-post-clinical-service-requests) — Crear una orden de servicio
+25. [GET /clinical/prescriptions/{id}/pdf](#25-get-clinical-prescriptions-id-pdf) — Descargar el PDF oficial de una receta
+26. [POST /clinical/procedures](#26-post-clinical-procedures) — Registrar un procedimiento
+27. [POST /clinical/procedures/{id}/attachments](#27-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
+28. [POST /clinical/service-requests](#28-post-clinical-service-requests) — Crear una orden de servicio
+29. [POST /clinical/service-requests/duplicate-check](#29-post-clinical-service-requests-duplicate-check) — Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
+30. [GET /public/prescriptions/{id}/verify](#30-get-public-prescriptions-id-verify) — Verificar la autenticidad de una receta por su sello
 
 ---
 
@@ -3700,7 +3703,104 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /clinical/procedures
+## 25. GET /clinical/prescriptions/{id}/pdf
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-prescriptions`
+- **Nombre:** Descargar el PDF oficial de una receta
+- **Operation ID:** `ClinicalPrescriptionsController_getPrescriptionPdf`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalPrescriptionsController.getPrescriptionPdf](../../src/modules/clinical/controllers/clinical-prescriptions.controller.ts)
+
+### Descripción de negocio
+
+Autoriza al prescriptor y a quien puede leer la historia del paciente dueño de la receta.
+
+Contexto declarado en el controlador: 404 si la receta no existe, 403 si el actor no puede leerla. Nunca 422 por estado: un borrador o una receta invalidada igual se descargan, con marca de agua — es lo que un profesional necesita para revisar lo que escribió, y lo que un paciente necesita para saber qué dejó de valer. `no-store`: la caché del navegador no debe conservar un documento clínico después de cerrar sesión.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/prescriptions/{id}/pdf` en `ClinicalPrescriptionsController_getPrescriptionPdf`. El controlador delega en `PrescriptionPdfService.render`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/prescriptions/00000000-0000-4000-8000-000000000001/pdf HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `PATIENT`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/prescriptions/00000000-0000-4000-8000-000000000001/pdf HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | PDF de la receta (oficial si está emitida; con marca de agua si no) | `Promise<void>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | El actor no puede leer esta receta | `Promise<void>` | No |
+| 404 | La receta no existe | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo podés consultar tu propia historia clínica. | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/clinical/services/prescription-pdf.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/prescriptions/{id}/pdf"
+}
+```
+
+---
+
+## 26. POST /clinical/procedures
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3859,7 +3959,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /clinical/procedures/{id}/attachments
+## 27. POST /clinical/procedures/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3993,7 +4093,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /clinical/service-requests
+## 28. POST /clinical/service-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -4050,6 +4150,9 @@ Content-Type: application/json
 | `priorityConceptId` | No | `string` | formato `uuid` | Prioridad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `requesterProfileId` | No | `string` | formato `uuid` | Profesional solicitante | `00000000-0000-4000-8000-000000000001` |
 | `performerTenantId` | No | `string` | formato `uuid` | Tenant ejecutante | `00000000-0000-4000-8000-000000000001` |
+| `previousDiagnosticReportId` | No | `string` | formato `uuid` | Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason. | `00000000-0000-4000-8000-000000000001` |
+| `reusePreviousReport` | No | `boolean` | Sin restricción adicional declarada | Reutilizar el informe previo detectado en vez de repetir el estudio | `true` |
+| `duplicateOverrideReason` | No | `string` | longitud mínima 20; longitud máxima 1000 | Justificación clínica formal para repetir un estudio duplicado (mínimo 20 caracteres) | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -4069,7 +4172,10 @@ Content-Type: application/json
   "categoryConceptId": "00000000-0000-4000-8000-000000000001",
   "priorityConceptId": "00000000-0000-4000-8000-000000000001",
   "requesterProfileId": "00000000-0000-4000-8000-000000000001",
-  "performerTenantId": "00000000-0000-4000-8000-000000000001"
+  "performerTenantId": "00000000-0000-4000-8000-000000000001",
+  "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
+  "reusePreviousReport": true,
+  "duplicateOverrideReason": "Texto descriptivo de ejemplo"
 }
 ```
 
@@ -4120,6 +4226,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se detectó ningún estudio duplicado para justificar | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4132,6 +4241,286 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/clinical/service-requests"
+}
+```
+
+---
+
+## 29. POST /clinical/service-requests/duplicate-check
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-orders`
+- **Nombre:** Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
+- **Operation ID:** `ClinicalOrdersController_checkDuplicateStudy`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalOrdersController.checkDuplicateStudy](../../src/modules/clinical/controllers/clinical-orders.controller.ts)
+
+### Descripción de negocio
+
+Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Antiduplicación de estudios (T-26, subtarea 3.2). Va declarada ANTES de `service-requests` a propósito: Express no la confundiría con un `:id` (este controller no tiene ninguno), pero el orden documenta la relación — es la pre-validación del alta de abajo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/service-requests/duplicate-check` en `ClinicalOrdersController_checkDuplicateStudy`. El controlador delega en `ServiceRequestsService.checkDuplicate`. Valida el body como `CheckDuplicateStudyDto` y consume `application/json`. El tipo de retorno estático es `Promise<DuplicateStudyCheckResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CheckDuplicateStudyDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/service-requests/duplicate-check HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente cuyo historial se revisa (profiles.patient_profiles) | `00000000-0000-4000-8000-000000000001` |
+| `codeConceptId` | No | `string` | formato `uuid` | Código del estudio (concept id del catálogo clínico) | `00000000-0000-4000-8000-000000000001` |
+| `diagnosticStudyOfferingId` | No | `string` | formato `uuid` | Oferta de estudio del centro; se resuelve a su study_concept_id (diagnostic_units.diagnostic_study_offerings) | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | Sí | `string` | formato `uuid` | Encuentro en curso | `00000000-0000-4000-8000-000000000001` |
+| `windowDays` | No | `number` | mínimo 1; máximo 365 | Ventana de días hacia atrás para buscar duplicados | `30` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/service-requests/duplicate-check HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "codeConceptId": "00000000-0000-4000-8000-000000000001",
+  "diagnosticStudyOfferingId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "windowDays": 30
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DuplicateStudyCheckResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "isDuplicate": true,
+  "previousStudy": {
+    "reportId": "00000000-0000-4000-8000-000000000001",
+    "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+    "studyName": "Hemograma completo",
+    "providerName": "Laboratorio Central AloVida",
+    "performedAt": "2026-07-31T12:00:00.000Z",
+    "daysAgo": 1,
+    "resultsAvailable": true,
+    "conclusionText": "valor-ejemplo",
+    "reportDownloadUrl": "valor-ejemplo",
+    "sameOrganization": true
+  },
+  "warningMessage": "valor-ejemplo",
+  "requiresJustification": true,
+  "pendingReport": true,
+  "windowDays": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `isDuplicate` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `previousStudy` | Sí | `PreviousStudyDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"reportId":"00000000-0000-4000-8000-000000000001","serviceRequestId":"00000000-0000-4000-8000-000000000001","studyName":"Hemograma completo","providerName":"Laboratorio Central AloVida","performedAt":"2026-07-31T12:00:00.000Z","daysAgo":1,"resultsAvailable":true,"conclusionText":"valor-ejemplo","reportDownloadUrl":"valor-ejemplo","sameOrganization":true}` |
+| `previousStudy.reportId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `previousStudy.serviceRequestId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `previousStudy.studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Hemograma completo` |
+| `previousStudy.providerName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Laboratorio Central AloVida` |
+| `previousStudy.performedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `previousStudy.daysAgo` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `previousStudy.resultsAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Si el resultado del estudio ya está liberado, no sólo el informe | `true` |
+| `previousStudy.conclusionText` | Sí | `string` | admite null | Conclusión del informe. null salvo que el informe sea de la misma organización de quien pide. | `valor-ejemplo` |
+| `previousStudy.reportDownloadUrl` | Sí | `string` | admite null | Sin endpoint de descarga para el profesional hoy: siempre null. | `valor-ejemplo` |
+| `previousStudy.sameOrganization` | Sí | `boolean` | Sin restricción adicional declarada | Si el informe pertenece a la organización de quien hace el chequeo | `true` |
+| `warningMessage` | Sí | `string` | admite null | Texto en castellano para mostrar al médico | `valor-ejemplo` |
+| `requiresJustification` | Sí | `boolean` | Sin restricción adicional declarada | Si el alta de la orden va a exigir una decisión (reutilizar o justificar) | `true` |
+| `pendingReport` | Sí | `boolean` | Sin restricción adicional declarada | Si hay un informe del mismo estudio todavía sin liberar dentro de la ventana | `true` |
+| `windowDays` | Sí | `number` | Sin restricción adicional declarada | La ventana efectivamente aplicada, en días | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo podés consultar tu propia historia clínica. | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 404 | `NOT_FOUND` | Oferta de estudio no encontrada | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/service-requests/duplicate-check"
+}
+```
+
+---
+
+## 30. GET /public/prescriptions/{id}/verify
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-prescriptions-public`
+- **Nombre:** Verificar la autenticidad de una receta por su sello
+- **Operation ID:** `ClinicalPrescriptionsPublicController_verify`
+- **Autenticación:** Pública
+- **Implementación:** [ClinicalPrescriptionsPublicController.verify](../../src/modules/clinical/controllers/clinical-prescriptions-public.controller.ts)
+
+### Descripción de negocio
+
+Sin autenticación y sin PHI: recalcula el sello SHA-256 y devuelve el estado y la matrícula del prescriptor.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/prescriptions/{id}/verify` en `ClinicalPrescriptionsPublicController_verify`. El controlador delega en `PrescriptionPdfService.verify`. No recibe body. El tipo de retorno estático es `Promise<PrescriptionVerificationResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/prescriptions/00000000-0000-4000-8000-000000000001/verify HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Deben ser UUID válidos: `id`.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/prescriptions/00000000-0000-4000-8000-000000000001/verify HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
+| 404 | La receta no existe | `Promise<PrescriptionVerificationResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionVerificationResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "DRAFT",
+  "issuedAt": "2026-07-31T12:00:00.000Z",
+  "contentHash": {},
+  "prescriberLicense": {
+    "number": "valor-ejemplo",
+    "authority": {},
+    "state": "ACTIVE"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `DRAFT`, `ISSUED`, `COMPLETED`, `INVALIDATED`, `REPLACED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `issuedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `contentHash` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `prescriberLicense` | No | `PrescriberLicenseDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"number":"valor-ejemplo","authority":{},"state":"ACTIVE"}` |
+| `prescriberLicense.number` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `prescriberLicense.authority` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `prescriberLicense.state` | No | `string` | valores: `ACTIVE`, `PENDING` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/clinical/services/prescription-pdf.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/prescriptions/{id}/verify"
 }
 ```
 

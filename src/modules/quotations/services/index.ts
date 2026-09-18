@@ -1,2 +1,2 @@
-export * from './payment-plan-simulator';
+export * from './payment-plan';
 export * from './quotations.service';

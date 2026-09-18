@@ -12,7 +12,7 @@
 | [`insurance`](insurance.md) | 11 | 14 | 10 | 29 | 13 |
 | [`accounting`](accounting.md) | 9 | 10 | 9 | 42 | 12 |
 | [`consent`](consent.md) | 9 | 9 | 9 | 10 | 15 |
-| [`clinical`](clinical.md) | 8 | 15 | 13 | 22 | 13 |
+| [`clinical`](clinical.md) | 8 | 15 | 13 | 22 | 14 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 8 | 12 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 11 | 10 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
@@ -67,7 +67,7 @@
 | [`health_context`](health_context.md) | 1 | 2 | 1 | 10 | 1 |
 | [`medical_groups`](medical_groups.md) | 1 | 1 | 2 | 2 | 1 |
 | [`platform_ops`](platform_ops.md) | 1 | 4 | 5 | 38 | 1 |
-| [`quotations`](quotations.md) | 1 | 1 | 2 | 0 | 3 |
+| [`quotations`](quotations.md) | 1 | 1 | 2 | 0 | 2 |
 | [`redis_runtime`](redis_runtime.md) | 1 | 1 | 0 | 0 | 3 |
 | [`reporting`](reporting.md) | 1 | 2 | 2 | 12 | 1 |
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |

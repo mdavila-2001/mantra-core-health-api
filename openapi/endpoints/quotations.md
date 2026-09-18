@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `quotations`
 
-Referencia exhaustiva de 4 operación(es) del módulo `quotations`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 3 operación(es) del módulo `quotations`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `quotations`
 - **Controladores:** `QuotationsController`
@@ -14,7 +14,6 @@ Referencia exhaustiva de 4 operación(es) del módulo `quotations`, derivada del
 1. [GET /quotations](#1-get-quotations) — Listar las cotizaciones de un paciente
 2. [POST /quotations](#2-post-quotations) — Crear una cotización
 3. [GET /quotations/{id}](#3-get-quotations-id) — Buscar una cotización por id
-4. [POST /quotations/simulate](#4-post-quotations-simulate) — Simular un plan de pagos (FLAT o FRANCÉS), sin persistir
 
 ---
 
@@ -98,8 +97,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "offeredPrice": "valor-ejemplo",
     "currencyConceptId": "00000000-0000-4000-8000-000000000001",
     "paymentPlanInstallmentCount": 1,
-    "interestRatePercent": "valor-ejemplo",
-    "interestCalculationMethod": "valor-ejemplo",
+    "downPaymentAmount": "valor-ejemplo",
+    "paymentFrequency": "valor-ejemplo",
     "validUntil": "valor-ejemplo",
     "statusConceptId": "00000000-0000-4000-8000-000000000001",
     "createdAt": "2026-07-31T12:00:00.000Z",
@@ -107,9 +106,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       {
         "installmentNumber": 1,
         "dueDate": "valor-ejemplo",
-        "principalAmount": "valor-ejemplo",
-        "interestAmount": "valor-ejemplo",
-        "totalAmount": "valor-ejemplo"
+        "amount": "valor-ejemplo"
       }
     ]
   }
@@ -186,8 +183,15 @@ Content-Type: application/json
   "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
   "offeredPrice": "1500.00",
   "paymentPlanInstallmentCount": 1,
-  "interestRatePercent": "2.5",
-  "interestCalculationMethod": "FLAT",
+  "downPaymentAmount": "190.00",
+  "paymentFrequency": "WEEKLY",
+  "installments": [
+    {
+      "installmentNumber": 1,
+      "dueDate": "2026-10-10",
+      "amount": "233.34"
+    }
+  ],
   "validUntil": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -209,9 +213,13 @@ Content-Type: application/json
 | `serviceCatalogId` | Sí | `string` | formato `uuid` | Servicio del catálogo (billing.service_catalog) | `00000000-0000-4000-8000-000000000001` |
 | `offeredPrice` | Sí | `string` | patrón runtime `PRICE_PATTERN` | Precio ofrecido al paciente (editable respecto del catálogo) | `1500.00` |
 | `currencyConceptId` | No | `string` | formato `uuid` | Moneda (concepto) | `00000000-0000-4000-8000-000000000001` |
-| `paymentPlanInstallmentCount` | Sí | `number` | mínimo 1; máximo 360 | Cantidad de cuotas del plan de pagos | `1` |
-| `interestRatePercent` | Sí | `string` | patrón runtime `RATE_PATTERN` | Tasa de interés mensual, en porcentaje (p. ej. "2.5") | `2.5` |
-| `interestCalculationMethod` | Sí | `string` | valores: `FLAT`, `FRENCH` | Método de cálculo del interés | `FLAT` |
+| `paymentPlanInstallmentCount` | Sí | `number` | mínimo 0; máximo MAX_INSTALLMENTS | Cantidad de cuotas del plan de pagos | `1` |
+| `downPaymentAmount` | Sí | `string` | patrón runtime `PRICE_PATTERN` | Anticipo, entre 0 y el precio ofrecido. Sin interés. | `190.00` |
+| `paymentFrequency` | Sí | `string` | valores: `WEEKLY`, `BIWEEKLY`, `MONTHLY` | Frecuencia de partida del cronograma | `WEEKLY` |
+| `installments` | Sí | `array<QuotationInstallmentInputDto>` | máximo MAX_INSTALLMENTS elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"installmentNumber":1,"dueDate":"2026-10-10","amount":"233.34"}]` |
+| `installments[].installmentNumber` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `installments[].dueDate` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-10-10` |
+| `installments[].amount` | Sí | `string` | patrón runtime `PRICE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `233.34` |
 | `validUntil` | Sí | `string` | formato `date-time` | Fecha de validez de la oferta (ISO) | `2026-07-31T12:00:00.000Z` |
 
 ### Payload completo de ejemplo
@@ -233,8 +241,15 @@ Content-Type: application/json
   "offeredPrice": "1500.00",
   "currencyConceptId": "00000000-0000-4000-8000-000000000001",
   "paymentPlanInstallmentCount": 1,
-  "interestRatePercent": "2.5",
-  "interestCalculationMethod": "FLAT",
+  "downPaymentAmount": "190.00",
+  "paymentFrequency": "WEEKLY",
+  "installments": [
+    {
+      "installmentNumber": 1,
+      "dueDate": "2026-10-10",
+      "amount": "233.34"
+    }
+  ],
   "validUntil": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -268,8 +283,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "offeredPrice": "valor-ejemplo",
   "currencyConceptId": "00000000-0000-4000-8000-000000000001",
   "paymentPlanInstallmentCount": 1,
-  "interestRatePercent": "valor-ejemplo",
-  "interestCalculationMethod": "valor-ejemplo",
+  "downPaymentAmount": "valor-ejemplo",
+  "paymentFrequency": "valor-ejemplo",
   "validUntil": "valor-ejemplo",
   "statusConceptId": "00000000-0000-4000-8000-000000000001",
   "createdAt": "2026-07-31T12:00:00.000Z",
@@ -277,9 +292,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "installmentNumber": 1,
       "dueDate": "valor-ejemplo",
-      "principalAmount": "valor-ejemplo",
-      "interestAmount": "valor-ejemplo",
-      "totalAmount": "valor-ejemplo"
+      "amount": "valor-ejemplo"
     }
   ]
 }
@@ -300,17 +313,15 @@ Campos de la respuesta:
 | `offeredPrice` | Sí | `string` | Sin restricción adicional declarada | Precio ofrecido al paciente. | `valor-ejemplo` |
 | `currencyConceptId` | No | `string` | formato `uuid` | Identificador asociado a currency concept. | `00000000-0000-4000-8000-000000000001` |
 | `paymentPlanInstallmentCount` | Sí | `number` | Sin restricción adicional declarada | Cantidad de cuotas del plan de pagos. | `1` |
-| `interestRatePercent` | Sí | `string` | Sin restricción adicional declarada | Tasa de interés mensual, en porcentaje. | `valor-ejemplo` |
-| `interestCalculationMethod` | Sí | `string` | Sin restricción adicional declarada | Método de cálculo del interés (`FLAT` o `FRENCH`). | `valor-ejemplo` |
+| `downPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Anticipo: lo que se paga el día de la atención. | `valor-ejemplo` |
+| `paymentFrequency` | Sí | `string` | Sin restricción adicional declarada | Frecuencia de partida del cronograma (`WEEKLY`, `BIWEEKLY` o `MONTHLY`). | `valor-ejemplo` |
 | `validUntil` | Sí | `string` | Sin restricción adicional declarada | Fecha hasta la que la oferta es válida (ISO). | `valor-ejemplo` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Estado de la cotización. | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó la cotización. | `2026-07-31T12:00:00.000Z` |
-| `installments` | Sí | `array<InstallmentPreviewDto>` | Sin restricción adicional declarada | Cuotas congeladas del plan de pagos. | `[{"installmentNumber":1,"dueDate":"valor-ejemplo","principalAmount":"valor-ejemplo","interestAmount":"valor-ejemplo","totalAmount":"valor-ejemplo"}]` |
+| `installments` | Sí | `array<QuotationInstallmentDto>` | Sin restricción adicional declarada | Cuotas congeladas del plan de pagos. | `[{"installmentNumber":1,"dueDate":"valor-ejemplo","amount":"valor-ejemplo"}]` |
 | `installments[].installmentNumber` | Sí | `number` | Sin restricción adicional declarada | Número de orden de la cuota dentro del plan (1-based). | `1` |
 | `installments[].dueDate` | Sí | `string` | Sin restricción adicional declarada | Fecha de vencimiento de la cuota (ISO). | `valor-ejemplo` |
-| `installments[].principalAmount` | Sí | `string` | Sin restricción adicional declarada | Porción de capital de la cuota. | `valor-ejemplo` |
-| `installments[].interestAmount` | Sí | `string` | Sin restricción adicional declarada | Porción de interés de la cuota. | `valor-ejemplo` |
-| `installments[].totalAmount` | Sí | `string` | Sin restricción adicional declarada | Importe total de la cuota (capital + interés). | `valor-ejemplo` |
+| `installments[].amount` | Sí | `string` | Sin restricción adicional declarada | Monto de la cuota. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -423,8 +434,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "offeredPrice": "valor-ejemplo",
   "currencyConceptId": "00000000-0000-4000-8000-000000000001",
   "paymentPlanInstallmentCount": 1,
-  "interestRatePercent": "valor-ejemplo",
-  "interestCalculationMethod": "valor-ejemplo",
+  "downPaymentAmount": "valor-ejemplo",
+  "paymentFrequency": "valor-ejemplo",
   "validUntil": "valor-ejemplo",
   "statusConceptId": "00000000-0000-4000-8000-000000000001",
   "createdAt": "2026-07-31T12:00:00.000Z",
@@ -432,9 +443,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "installmentNumber": 1,
       "dueDate": "valor-ejemplo",
-      "principalAmount": "valor-ejemplo",
-      "interestAmount": "valor-ejemplo",
-      "totalAmount": "valor-ejemplo"
+      "amount": "valor-ejemplo"
     }
   ]
 }
@@ -455,17 +464,15 @@ Campos de la respuesta:
 | `offeredPrice` | Sí | `string` | Sin restricción adicional declarada | Precio ofrecido al paciente. | `valor-ejemplo` |
 | `currencyConceptId` | No | `string` | formato `uuid` | Identificador asociado a currency concept. | `00000000-0000-4000-8000-000000000001` |
 | `paymentPlanInstallmentCount` | Sí | `number` | Sin restricción adicional declarada | Cantidad de cuotas del plan de pagos. | `1` |
-| `interestRatePercent` | Sí | `string` | Sin restricción adicional declarada | Tasa de interés mensual, en porcentaje. | `valor-ejemplo` |
-| `interestCalculationMethod` | Sí | `string` | Sin restricción adicional declarada | Método de cálculo del interés (`FLAT` o `FRENCH`). | `valor-ejemplo` |
+| `downPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Anticipo: lo que se paga el día de la atención. | `valor-ejemplo` |
+| `paymentFrequency` | Sí | `string` | Sin restricción adicional declarada | Frecuencia de partida del cronograma (`WEEKLY`, `BIWEEKLY` o `MONTHLY`). | `valor-ejemplo` |
 | `validUntil` | Sí | `string` | Sin restricción adicional declarada | Fecha hasta la que la oferta es válida (ISO). | `valor-ejemplo` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Estado de la cotización. | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó la cotización. | `2026-07-31T12:00:00.000Z` |
-| `installments` | Sí | `array<InstallmentPreviewDto>` | Sin restricción adicional declarada | Cuotas congeladas del plan de pagos. | `[{"installmentNumber":1,"dueDate":"valor-ejemplo","principalAmount":"valor-ejemplo","interestAmount":"valor-ejemplo","totalAmount":"valor-ejemplo"}]` |
+| `installments` | Sí | `array<QuotationInstallmentDto>` | Sin restricción adicional declarada | Cuotas congeladas del plan de pagos. | `[{"installmentNumber":1,"dueDate":"valor-ejemplo","amount":"valor-ejemplo"}]` |
 | `installments[].installmentNumber` | Sí | `number` | Sin restricción adicional declarada | Número de orden de la cuota dentro del plan (1-based). | `1` |
 | `installments[].dueDate` | Sí | `string` | Sin restricción adicional declarada | Fecha de vencimiento de la cuota (ISO). | `valor-ejemplo` |
-| `installments[].principalAmount` | Sí | `string` | Sin restricción adicional declarada | Porción de capital de la cuota. | `valor-ejemplo` |
-| `installments[].interestAmount` | Sí | `string` | Sin restricción adicional declarada | Porción de interés de la cuota. | `valor-ejemplo` |
-| `installments[].totalAmount` | Sí | `string` | Sin restricción adicional declarada | Importe total de la cuota (capital + interés). | `valor-ejemplo` |
+| `installments[].amount` | Sí | `string` | Sin restricción adicional declarada | Monto de la cuota. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -489,151 +496,6 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/quotations/{id}"
-}
-```
-
----
-
-## 4. POST /quotations/simulate
-
-- **Módulo:** `quotations`
-- **Etiqueta OpenAPI:** `quotations`
-- **Nombre:** Simular un plan de pagos (FLAT o FRANCÉS), sin persistir
-- **Operation ID:** `QuotationsController_simulate`
-- **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QuotationsController.simulate](../../src/modules/quotations/controllers/quotations.controller.ts)
-
-### Descripción de negocio
-
-Simular un plan de pagos (FLAT o FRANCÉS), sin persistir. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-
-Contexto declarado en el controlador: Corre el simulador de financiamiento sin persistir nada: devuelve la tabla de cuotas para que la interfaz la muestre antes de confirmar.
-
-### Descripción del sistema
-
-NestJS resuelve `POST /quotations/simulate` en `QuotationsController_simulate`. El controlador delega en `QuotationsService.simulatePaymentPlan`. Valida el body como `SimulatePaymentPlanDto` y consume `application/json`. El tipo de retorno estático es `SimulatePaymentPlanResponseDto`.
-
-### Parámetros
-
-No hay parámetros de ruta, query ni cabeceras específicos de la operación.
-
-### Payload mínimo aceptable
-
-Incluye únicamente los campos obligatorios del DTO `SimulatePaymentPlanDto`; los campos opcionales se omiten.
-
-```http
-POST /quotations/simulate HTTP/1.1
-Host: localhost:3000
-Authorization: Bearer <access_token_jwt>
-Content-Type: application/json
-
-{
-  "offeredPrice": "1500.00",
-  "installmentCount": 1,
-  "interestRatePercent": "2.5",
-  "interestCalculationMethod": "FLAT",
-  "attentionDate": "2026-07-31T12:00:00.000Z"
-}
-```
-
-### Restricciones a considerar
-
-- Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
-- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
-- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
-- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
-
-| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
-|---|:---:|---|---|---|---|
-| `offeredPrice` | Sí | `string` | patrón runtime `PRICE_PATTERN` | Precio ofrecido | `1500.00` |
-| `installmentCount` | Sí | `number` | mínimo 1; máximo 360 | Cantidad de cuotas | `1` |
-| `interestRatePercent` | Sí | `string` | patrón runtime `RATE_PATTERN` | Tasa de interés mensual, en porcentaje (p. ej. "2.5") | `2.5` |
-| `interestCalculationMethod` | Sí | `string` | valores: `FLAT`, `FRENCH` | Método de cálculo del interés | `FLAT` |
-| `attentionDate` | Sí | `string` | formato `date-time` | Fecha de atención (ISO), base de los vencimientos | `2026-07-31T12:00:00.000Z` |
-
-### Payload completo de ejemplo
-
-Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
-
-```http
-POST /quotations/simulate HTTP/1.1
-Host: localhost:3000
-Authorization: Bearer <access_token_jwt>
-Content-Type: application/json
-
-{
-  "offeredPrice": "1500.00",
-  "installmentCount": 1,
-  "interestRatePercent": "2.5",
-  "interestCalculationMethod": "FLAT",
-  "attentionDate": "2026-07-31T12:00:00.000Z"
-}
-```
-
-### Respuestas generales esperadas
-
-| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
-|---:|---|---|---|
-| 200 | Operación completada correctamente. | `SimulatePaymentPlanResponseDto` | No |
-| 400 | Operación completada correctamente. | `SimulatePaymentPlanResponseDto` | No |
-| 401 | Operación completada correctamente. | `SimulatePaymentPlanResponseDto` | No |
-| 403 | Operación completada correctamente. | `SimulatePaymentPlanResponseDto` | No |
-| 409 | Operación completada correctamente. | `SimulatePaymentPlanResponseDto` | No |
-| 413 | Operación completada correctamente. | `SimulatePaymentPlanResponseDto` | No |
-| 422 | Operación completada correctamente. | `SimulatePaymentPlanResponseDto` | No |
-| 429 | Operación completada correctamente. | `SimulatePaymentPlanResponseDto` | No |
-| 500 | Operación completada correctamente. | `SimulatePaymentPlanResponseDto` | No |
-
-Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimulatePaymentPlanResponseDto`. Ejemplo completo derivado de ese DTO:
-
-```json
-{
-  "installments": [
-    {
-      "installmentNumber": 1,
-      "dueDate": "valor-ejemplo",
-      "principalAmount": "valor-ejemplo",
-      "interestAmount": "valor-ejemplo",
-      "totalAmount": "valor-ejemplo"
-    }
-  ]
-}
-```
-
-Campos de la respuesta:
-
-| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
-|---|:---:|---|---|---|---|
-| `installments` | Sí | `array<InstallmentPreviewDto>` | Sin restricción adicional declarada | Cuotas simuladas, en orden. | `[{"installmentNumber":1,"dueDate":"valor-ejemplo","principalAmount":"valor-ejemplo","interestAmount":"valor-ejemplo","totalAmount":"valor-ejemplo"}]` |
-| `installments[].installmentNumber` | Sí | `number` | Sin restricción adicional declarada | Número de orden de la cuota dentro del plan (1-based). | `1` |
-| `installments[].dueDate` | Sí | `string` | Sin restricción adicional declarada | Fecha de vencimiento de la cuota (ISO). | `valor-ejemplo` |
-| `installments[].principalAmount` | Sí | `string` | Sin restricción adicional declarada | Porción de capital de la cuota. | `valor-ejemplo` |
-| `installments[].interestAmount` | Sí | `string` | Sin restricción adicional declarada | Porción de interés de la cuota. | `valor-ejemplo` |
-| `installments[].totalAmount` | Sí | `string` | Sin restricción adicional declarada | Importe total de la cuota (capital + interés). | `valor-ejemplo` |
-
-En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
-
-### Respuestas de error posibles
-
-| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
-|---:|---|---|---|
-| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
-| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
-| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
-
-Ejemplo de error normalizado:
-
-```json
-{
-  "code": "VALIDATION_FAILED",
-  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
-  "correlationId": "req-01J00000000000000000000000",
-  "timestamp": "2026-07-31T12:00:00.000Z",
-  "path": "/quotations/simulate"
 }
 ```
 

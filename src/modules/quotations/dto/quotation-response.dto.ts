@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-/** Una cuota del plan de pagos (simulada o ya congelada en una cotización). */
-export class InstallmentPreviewDto {
+/** Una cuota del plan de pagos, congelada en la cotización. Sin interés. */
+export class QuotationInstallmentDto {
   /**
    * Número de orden de la cuota dentro del plan (1-based).
    */
@@ -15,31 +15,10 @@ export class InstallmentPreviewDto {
   dueDate!: string;
 
   /**
-   * Porción de capital de la cuota.
+   * Monto de la cuota.
    */
   @ApiProperty()
-  principalAmount!: string;
-
-  /**
-   * Porción de interés de la cuota.
-   */
-  @ApiProperty()
-  interestAmount!: string;
-
-  /**
-   * Importe total de la cuota (capital + interés).
-   */
-  @ApiProperty()
-  totalAmount!: string;
-}
-
-/** Respuesta de `POST /quotations/simulate`: sólo la tabla de cuotas, sin persistir. */
-export class SimulatePaymentPlanResponseDto {
-  /**
-   * Cuotas simuladas, en orden.
-   */
-  @ApiProperty({ type: [InstallmentPreviewDto] })
-  installments!: InstallmentPreviewDto[];
+  amount!: string;
 }
 
 /** Una cotización, con su plan de pagos congelado. */
@@ -111,16 +90,16 @@ export class QuotationResponseDto {
   paymentPlanInstallmentCount!: number;
 
   /**
-   * Tasa de interés mensual, en porcentaje.
+   * Anticipo: lo que se paga el día de la atención.
    */
   @ApiProperty()
-  interestRatePercent!: string;
+  downPaymentAmount!: string;
 
   /**
-   * Método de cálculo del interés (`FLAT` o `FRENCH`).
+   * Frecuencia de partida del cronograma (`WEEKLY`, `BIWEEKLY` o `MONTHLY`).
    */
   @ApiProperty()
-  interestCalculationMethod!: string;
+  paymentFrequency!: string;
 
   /**
    * Fecha hasta la que la oferta es válida (ISO).
@@ -143,6 +122,6 @@ export class QuotationResponseDto {
   /**
    * Cuotas congeladas del plan de pagos.
    */
-  @ApiProperty({ type: [InstallmentPreviewDto] })
-  installments!: InstallmentPreviewDto[];
+  @ApiProperty({ type: [QuotationInstallmentDto] })
+  installments!: QuotationInstallmentDto[];
 }

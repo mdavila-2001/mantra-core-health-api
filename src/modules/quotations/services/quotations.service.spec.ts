@@ -4,7 +4,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { QuotationsService } from './quotations.service';
-import { simulatePaymentPlan } from './payment-plan-simulator';
+import { assertPaymentPlanClosesOnPrice, toCents } from './payment-plan';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -34,8 +34,14 @@ const baseDto = {
   serviceCatalogId: 'svc-1',
   offeredPrice: '1000.00',
   paymentPlanInstallmentCount: 3,
-  interestRatePercent: '2',
-  interestCalculationMethod: 'FLAT' as const,
+  downPaymentAmount: '100.00',
+  paymentFrequency: 'MONTHLY' as const,
+  // Flexible: montos distintos y fechas que no siguen la frecuencia.
+  installments: [
+    { installmentNumber: 1, dueDate: '2026-02-01', amount: '300.00' },
+    { installmentNumber: 2, dueDate: '2026-03-15', amount: '300.00' },
+    { installmentNumber: 3, dueDate: '2026-12-20', amount: '300.00' },
+  ],
   validUntil: '2026-02-01',
 };
 
@@ -53,7 +59,8 @@ function build() {
   };
   const installmentsRepo = {
     findByQuotationId: mockFn(),
-    createMany: mockFn(),
+    // Devuelve lo que recibe, como `em.create`: el servicio responde con eso.
+    createMany: mockFn((_em: unknown, rows: unknown) => rows),
   };
   const serviceCatalogRepo = {
     findById: mockFn(),
@@ -90,8 +97,8 @@ function quotationRow(overrides: Record<string, unknown> = {}) {
     offeredPrice: '1000.00',
     currencyConceptId: undefined,
     paymentPlanInstallmentCount: 3,
-    interestRatePercent: '2',
-    interestCalculationMethod: 'FLAT',
+    downPaymentAmount: '100.00',
+    paymentFrequency: 'MONTHLY',
     validUntil: new Date('2026-02-01T00:00:00.000Z'),
     statusConceptId: 'state:active',
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
@@ -99,71 +106,101 @@ function quotationRow(overrides: Record<string, unknown> = {}) {
   };
 }
 
-/** Suma los `principalAmount` de una tabla de cuotas, como número. */
-function sumPrincipal(rows: ReturnType<typeof simulatePaymentPlan>): number {
-  return rows.reduce((acc, r) => acc + Number(r.principalAmount), 0);
-}
+describe('payment-plan (sin interés)', () => {
+  const plan = {
+    offeredPrice: baseDto.offeredPrice,
+    downPaymentAmount: baseDto.downPaymentAmount,
+    paymentPlanInstallmentCount: baseDto.paymentPlanInstallmentCount,
+    installments: baseDto.installments,
+  };
 
-/** Suma capital + interés de toda la tabla, como número. */
-function sumTotal(rows: ReturnType<typeof simulatePaymentPlan>): number {
-  return rows.reduce((acc, r) => acc + Number(r.totalAmount), 0);
-}
-
-describe('payment-plan-simulator', () => {
-  const attentionDate = new Date('2026-01-01T00:00:00.000Z');
-
-  it('FLAT: la suma del capital de las cuotas iguala el precio ofrecido', () => {
-    const rows = simulatePaymentPlan(
-      '1000.00',
-      3,
-      '2.5',
-      'FLAT',
-      attentionDate,
-    );
-    expect(rows).toHaveLength(3);
-    expect(sumPrincipal(rows)).toBeCloseTo(1000, 2);
+  it('cuenta en centavos enteros', () => {
+    expect(toCents('233.34')).toBe(23334);
+    expect(toCents('100')).toBe(10000);
+    expect(toCents('0.5')).toBe(50);
   });
 
-  it('FRENCH: la suma del capital de las cuotas iguala el precio ofrecido', () => {
-    const rows = simulatePaymentPlan(
-      '1000.00',
-      6,
-      '2.5',
-      'FRENCH',
-      attentionDate,
-    );
-    expect(rows).toHaveLength(6);
-    expect(sumPrincipal(rows)).toBeCloseTo(1000, 2);
+  it('acepta un plan cuyo anticipo + cuotas da el precio, aunque las cuotas sean desparejas', () => {
+    expect(() =>
+      assertPaymentPlanClosesOnPrice({
+        ...plan,
+        installments: [
+          { installmentNumber: 1, dueDate: '2026-02-01', amount: '850.00' },
+          { installmentNumber: 2, dueDate: '2026-03-01', amount: '25.33' },
+          { installmentNumber: 3, dueDate: '2026-04-01', amount: '24.67' },
+        ],
+      }),
+    ).not.toThrow();
   });
 
-  it('FRENCH con precios/plazos no exactos igual cierra el capital exacto', () => {
-    const rows = simulatePaymentPlan(
-      '1234.57',
-      11,
-      '1.75',
-      'FRENCH',
-      attentionDate,
-    );
-    expect(sumPrincipal(rows)).toBeCloseTo(1234.57, 2);
+  it('suma exacto donde la coma flotante fallaría (0.1 + 0.2)', () => {
+    expect(() =>
+      assertPaymentPlanClosesOnPrice({
+        offeredPrice: '0.30',
+        downPaymentAmount: '0.10',
+        paymentPlanInstallmentCount: 1,
+        installments: [
+          { installmentNumber: 1, dueDate: '2026-02-01', amount: '0.20' },
+        ],
+      }),
+    ).not.toThrow();
   });
 
-  it('las cuotas vencen una por mes a partir de attentionDate', () => {
-    const rows = simulatePaymentPlan('300.00', 3, '0', 'FLAT', attentionDate);
-    expect(rows[0].dueDate.toISOString().slice(0, 10)).toBe('2026-02-01');
-    expect(rows[1].dueDate.toISOString().slice(0, 10)).toBe('2026-03-01');
-    expect(rows[2].dueDate.toISOString().slice(0, 10)).toBe('2026-04-01');
+  it('pagado todo de anticipo, sin cuotas, es válido', () => {
+    expect(() =>
+      assertPaymentPlanClosesOnPrice({
+        offeredPrice: '1000.00',
+        downPaymentAmount: '1000.00',
+        paymentPlanInstallmentCount: 0,
+        installments: [],
+      }),
+    ).not.toThrow();
   });
 
-  it('el total pagado en FLAT es mayor o igual que en FRENCH, misma tasa/plazo/capital', () => {
-    const flat = simulatePaymentPlan('5000.00', 12, '3', 'FLAT', attentionDate);
-    const french = simulatePaymentPlan(
-      '5000.00',
-      12,
-      '3',
-      'FRENCH',
-      attentionDate,
-    );
-    expect(sumTotal(flat)).toBeGreaterThanOrEqual(sumTotal(french));
+  it.each([
+    [
+      'falta un centavo',
+      {
+        installments: [
+          ...plan.installments.slice(0, 2),
+          { installmentNumber: 3, dueDate: '2026-04-01', amount: '299.99' },
+        ],
+      },
+    ],
+    ['sobra plata', { downPaymentAmount: '100.01' }],
+    [
+      'el anticipo pasa el precio',
+      {
+        downPaymentAmount: '1000.01',
+        installments: [],
+        paymentPlanInstallmentCount: 0,
+      },
+    ],
+    ['la cantidad no coincide', { paymentPlanInstallmentCount: 4 }],
+    [
+      'numeración fuera de orden',
+      {
+        installments: [
+          plan.installments[1]!,
+          plan.installments[0]!,
+          plan.installments[2]!,
+        ],
+      },
+    ],
+    [
+      'una cuota en cero',
+      {
+        downPaymentAmount: '400.00',
+        installments: [
+          ...plan.installments.slice(0, 2),
+          { installmentNumber: 3, dueDate: '2026-04-01', amount: '0.00' },
+        ],
+      },
+    ],
+  ])('rechaza con 422 cuando %s', (_case, change) => {
+    expect(() =>
+      assertPaymentPlanClosesOnPrice({ ...plan, ...change }),
+    ).toThrow(PreconditionFailedException);
   });
 });
 
@@ -235,17 +272,52 @@ describe('QuotationsService.createQuotation', () => {
     expect(d.quotationsRepo.create).not.toHaveBeenCalled();
   });
 
-  it('persiste las cuotas calculadas por el simulador, referenciando la cotización creada', async () => {
+  it('persiste el cronograma tal como llegó —fechas y montos a mano—, sin calcular interés', async () => {
     const d = build();
     d.serviceCatalogRepo.findById.mockResolvedValue(catalogItem);
     d.quotationsRepo.create.mockReturnValue(quotationRow({ id: 'q-42' }));
 
-    await d.service.createQuotation(baseDto, actor);
+    const res = await d.service.createQuotation(baseDto, actor);
 
+    expect(d.quotationsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        downPaymentAmount: '100.00',
+        paymentFrequency: 'MONTHLY',
+      }),
+    );
     expect(d.installmentsRepo.createMany).toHaveBeenCalledTimes(1);
-    const [, installments] = d.installmentsRepo.createMany.mock.calls[0];
-    expect(installments).toHaveLength(baseDto.paymentPlanInstallmentCount);
-    expect(installments.every((i: any) => i.quotationId === 'q-42')).toBe(true);
+    const [, installments] = d.installmentsRepo.createMany.mock.calls[0] as [
+      unknown,
+      any[],
+    ];
+    expect(
+      installments.map((i) => [i.quotationId, i.installmentNumber, i.amount]),
+    ).toEqual([
+      ['q-42', 1, '300.00'],
+      ['q-42', 2, '300.00'],
+      ['q-42', 3, '300.00'],
+    ]);
+    expect(installments[2].dueDate.toISOString().slice(0, 10)).toBe(
+      '2026-12-20',
+    );
+    expect(res.installments[1]).toEqual({
+      installmentNumber: 2,
+      dueDate: '2026-03-15',
+      amount: '300.00',
+    });
+  });
+
+  it('rechaza con 422 un plan que no cierra con el precio, antes de tocar la base', async () => {
+    const d = build();
+
+    await expect(
+      d.service.createQuotation(
+        { ...baseDto, downPaymentAmount: '50.00' },
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.em.transactional).not.toHaveBeenCalled();
   });
 });
 
@@ -266,9 +338,7 @@ describe('QuotationsService.getQuotation', () => {
       {
         installmentNumber: 1,
         dueDate: new Date('2026-02-01T00:00:00.000Z'),
-        principalAmount: '500.00',
-        interestAmount: '10.00',
-        totalAmount: '510.00',
+        amount: '450.00',
       },
     ]);
 
@@ -279,9 +349,7 @@ describe('QuotationsService.getQuotation', () => {
     expect(res.installments[0]).toEqual({
       installmentNumber: 1,
       dueDate: '2026-02-01',
-      principalAmount: '500.00',
-      interestAmount: '10.00',
-      totalAmount: '510.00',
+      amount: '450.00',
     });
   });
 });

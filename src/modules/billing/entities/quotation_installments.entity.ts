@@ -33,22 +33,10 @@ export class QuotationInstallments {
   dueDate!: Date;
 
   /**
-   * Porción de capital de la cuota.
+   * Monto de la cuota, sin interés. Las cuotas no tienen por qué ser iguales (v4.2.18).
    */
-  @Property({ fieldName: 'principal_amount', columnType: 'numeric' })
-  principalAmount!: string;
-
-  /**
-   * Porción de interés de la cuota.
-   */
-  @Property({ fieldName: 'interest_amount', columnType: 'numeric' })
-  interestAmount!: string;
-
-  /**
-   * Importe total de la cuota (capital + interés).
-   */
-  @Property({ fieldName: 'total_amount', columnType: 'numeric' })
-  totalAmount!: string;
+  @Property({ columnType: 'numeric' })
+  amount!: string;
 
   /**
    * Fecha y hora en que se creó el registro.

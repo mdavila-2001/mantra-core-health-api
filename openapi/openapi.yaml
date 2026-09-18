@@ -11020,6 +11020,43 @@ paths:
       description: >-
         Corregir/enmendar una observación (value contract). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /clinical/service-requests/duplicate-check:
+    post:
+      operationId: ClinicalOrdersController_checkDuplicateStudy
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckDuplicateStudyDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
+      tags:
+        - clinical-orders
+      description: >-
+        Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26). Requiere JWT y los
+        roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /clinical/service-requests:
     post:
       operationId: ClinicalOrdersController_createServiceRequest
@@ -11886,6 +11923,73 @@ paths:
         UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros).
         Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el
         envelope ErrorResponse.
+  /clinical/prescriptions/{id}/pdf:
+    get:
+      description: Autoriza al prescriptor y a quien puede leer la historia del paciente dueño de la receta.
+      operationId: ClinicalPrescriptionsController_getPrescriptionPdf
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PDF de la receta (oficial si está emitida; con marca de agua si no)
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no puede leer esta receta
+        '404':
+          description: La receta no existe
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el PDF oficial de una receta
+      tags:
+        - clinical-prescriptions
+  /public/prescriptions/{id}/verify:
+    get:
+      description: 'Sin autenticación y sin PHI: recalcula el sello SHA-256 y devuelve el estado y la matrícula del prescriptor.'
+      operationId: ClinicalPrescriptionsPublicController_verify
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionVerificationResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: La receta no existe
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Verificar la autenticidad de una receta por su sello
+      tags:
+        - clinical-prescriptions-public
   /search/{index}/documents:
     post:
       description: El servidor sella el documento con el `tenantId` del contexto; el del cuerpo se ignora.
@@ -43357,43 +43461,6 @@ paths:
       summary: Evaluar programaciones vencidas y encolar sus corridas
       tags:
         - qa-internal
-  /quotations/simulate:
-    post:
-      operationId: QuotationsController_simulate
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SimulatePaymentPlanDto'
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Simular un plan de pagos (FLAT o FRANCÉS), sin persistir
-      tags:
-        - quotations
-      description: >-
-        Simular un plan de pagos (FLAT o FRANCÉS), sin persistir. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /quotations:
     post:
       operationId: QuotationsController_create
@@ -51236,6 +51303,14 @@ tags:
     description: >-
       Operaciones del dominio funcional clinical prescription policies. Consulte el catálogo Markdown de endpoints para
       payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: clinical-prescriptions
+    description: >-
+      Operaciones del dominio funcional clinical prescriptions. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: clinical-prescriptions-public
+    description: >-
+      Operaciones del dominio funcional clinical prescriptions public. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: clinical-read
     description: >-
       Operaciones del dominio funcional clinical read. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -57409,6 +57484,37 @@ components:
           format: uuid
       required:
         - note
+    CheckDuplicateStudyDto:
+      type: object
+      properties:
+        patientProfileId:
+          type: string
+          description: Paciente cuyo historial se revisa (profiles.patient_profiles)
+          format: uuid
+        codeConceptId:
+          type: string
+          description: Código del estudio (concept id del catálogo clínico)
+          format: uuid
+        diagnosticStudyOfferingId:
+          type: string
+          description: >-
+            Oferta de estudio del centro; se resuelve a su study_concept_id
+            (diagnostic_units.diagnostic_study_offerings)
+          format: uuid
+        encounterId:
+          type: string
+          description: Encuentro en curso
+          format: uuid
+        windowDays:
+          type: number
+          example: 30
+          default: 30
+          minimum: 1
+          maximum: 365
+          description: Ventana de días hacia atrás para buscar duplicados
+      required:
+        - patientProfileId
+        - encounterId
     CreateServiceRequestDto:
       type: object
       properties:
@@ -57444,6 +57550,20 @@ components:
           type: string
           description: Tenant ejecutante
           format: uuid
+        previousDiagnosticReportId:
+          type: string
+          description: >-
+            Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o
+            duplicateOverrideReason.
+          format: uuid
+        reusePreviousReport:
+          type: boolean
+          description: Reutilizar el informe previo detectado en vez de repetir el estudio
+        duplicateOverrideReason:
+          type: string
+          description: Justificación clínica formal para repetir un estudio duplicado (mínimo 20 caracteres)
+          minLength: 20
+          maxLength: 1000
       required:
         - custodianTenantId
         - patientProfileId
@@ -57979,6 +58099,52 @@ components:
         - custodianTenantId
         - patientProfileId
         - vaccineConceptId
+    PrescriberLicenseDto:
+      type: object
+      properties:
+        number:
+          type: string
+        authority:
+          type: object
+          nullable: true
+        state:
+          type: string
+          enum:
+            - ACTIVE
+            - PENDING
+      required:
+        - number
+        - state
+    PrescriptionVerificationResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - ISSUED
+            - COMPLETED
+            - INVALIDATED
+            - REPLACED
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        contentHash:
+          type: object
+          nullable: true
+        prescriberLicense:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PrescriberLicenseDto'
+      required:
+        - id
+        - status
+        - issuedAt
     IndexDocumentDto:
       type: object
       properties:
@@ -58883,6 +59049,37 @@ components:
       required:
         - items
         - nextCursor
+    ClaimLineDuplicateStudyDto:
+      type: object
+      properties:
+        previousDiagnosticReportId:
+          type: string
+          format: uuid
+        studyName:
+          type: string
+          example: Ecografía abdominal
+        performedAt:
+          type: string
+          format: date-time
+        daysAgo:
+          type: number
+          example: 14
+        providerName:
+          type: string
+          example: Centro de Diagnóstico San Gabriel
+        justification:
+          type: string
+          nullable: true
+        reused:
+          type: boolean
+      required:
+        - previousDiagnosticReportId
+        - studyName
+        - performedAt
+        - daysAgo
+        - providerName
+        - justification
+        - reused
     ClaimLineViewDto:
       type: object
       properties:
@@ -58939,6 +59136,11 @@ components:
         reference:
           type: string
           nullable: true
+        duplicateStudy:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/ClaimLineDuplicateStudyDto'
       required:
         - id
         - lineSequence
@@ -58953,6 +59155,7 @@ components:
         - denialRationale
         - referenceType
         - reference
+        - duplicateStudy
     ClaimAdjudicationDto:
       type: object
       properties:
@@ -79525,35 +79728,22 @@ components:
           description: Identificador del release en el módulo de despliegue
       required:
         - gitRef
-    SimulatePaymentPlanDto:
+    QuotationInstallmentInputDto:
       type: object
       properties:
-        offeredPrice:
-          type: string
-          description: Precio ofrecido
-          example: '1500.00'
-        installmentCount:
+        installmentNumber:
           type: number
-          description: Cantidad de cuotas
-        interestRatePercent:
+          minimum: 1
+        dueDate:
           type: string
-          description: Tasa de interés mensual, en porcentaje (p. ej. "2.5")
-          example: '2.5'
-        interestCalculationMethod:
+          example: '2026-10-10'
+        amount:
           type: string
-          description: Método de cálculo del interés
-          enum:
-            - FLAT
-            - FRENCH
-        attentionDate:
-          type: string
-          description: Fecha de atención (ISO), base de los vencimientos
+          example: '233.34'
       required:
-        - offeredPrice
-        - installmentCount
-        - interestRatePercent
-        - interestCalculationMethod
-        - attentionDate
+        - installmentNumber
+        - dueDate
+        - amount
     CreateQuotationDto:
       type: object
       properties:
@@ -79587,16 +79777,21 @@ components:
         paymentPlanInstallmentCount:
           type: number
           description: Cantidad de cuotas del plan de pagos
-        interestRatePercent:
+        downPaymentAmount:
           type: string
-          description: Tasa de interés mensual, en porcentaje (p. ej. "2.5")
-          example: '2.5'
-        interestCalculationMethod:
+          description: Anticipo, entre 0 y el precio ofrecido. Sin interés.
+          example: '190.00'
+        paymentFrequency:
           type: string
-          description: Método de cálculo del interés
+          description: Frecuencia de partida del cronograma
           enum:
-            - FLAT
-            - FRENCH
+            - WEEKLY
+            - BIWEEKLY
+            - MONTHLY
+        installments:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuotationInstallmentInputDto'
         validUntil:
           type: string
           description: Fecha de validez de la oferta (ISO)
@@ -79607,8 +79802,9 @@ components:
         - serviceCatalogId
         - offeredPrice
         - paymentPlanInstallmentCount
-        - interestRatePercent
-        - interestCalculationMethod
+        - downPaymentAmount
+        - paymentFrequency
+        - installments
         - validUntil
     ReadModelDependencyInputDto:
       type: object

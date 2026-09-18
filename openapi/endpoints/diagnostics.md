@@ -2509,7 +2509,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
       "priorityConceptId": "00000000-0000-4000-8000-000000000001",
       "requesterProfileId": "00000000-0000-4000-8000-000000000001",
-      "createdAt": "2026-07-31T12:00:00.000Z"
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
+      "duplicateOverrideReason": "Texto descriptivo de ejemplo"
     }
   ],
   "reports": [
@@ -2539,7 +2541,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente leído. | `00000000-0000-4000-8000-000000000001` |
-| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","duplicateOverrideReason":"Texto descriptivo de ejemplo"}]` |
 | `orders[].id` | Sí | `string` | formato `uuid` | Identificador de la orden. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se pidió, si se pidió durante uno. | `00000000-0000-4000-8000-000000000001` |
@@ -2549,6 +2551,8 @@ Campos de la respuesta:
 | `orders[].priorityConceptId` | No | `string` | formato `uuid` | Prioridad (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `orders[].requesterProfileId` | No | `string` | formato `uuid` | Profesional que la solicitó. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se pidió. | `2026-07-31T12:00:00.000Z` |
+| `orders[].previousDiagnosticReportId` | No | `string` | formato `uuid` | El informe previo que satisface este pedido (antiduplicación, v4.2.17). Presente cuando el médico eligió reutilizar o repetir un estudio duplicado; `undefined` en cualquier otro caso. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].duplicateOverrideReason` | No | `string` | Sin restricción adicional declarada | Justificación del médico si repitió un estudio duplicado (antiduplicación). | `Texto descriptivo de ejemplo` |
 | `reports` | Sí | `array<DiagnosticReportSummaryDto>` | Sin restricción adicional declarada | Informes diagnósticos, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","serviceRequestId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","currentReleasedVersionId":"00000000-0000-4000-8000-000000000001","resultReleaseStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `reports[].id` | Sí | `string` | formato `uuid` | Identificador del informe. | `00000000-0000-4000-8000-000000000001` |
 | `reports[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que pertenece. | `00000000-0000-4000-8000-000000000001` |

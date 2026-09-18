@@ -9,7 +9,7 @@
 # Módulo `quotations`
 
 **Fuente:** [`src/modules/quotations/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/quotations/README.md)
-· 1 controllers · 1 services · 2 repositories · 0 entidades · 3 DTO
+· 1 controllers · 1 services · 2 repositories · 0 entidades · 2 DTO
 
 ---
 

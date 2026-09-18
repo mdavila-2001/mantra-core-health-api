@@ -17,17 +17,9 @@ export interface CreateQuotationInstallmentData {
    */
   dueDate: Date;
   /**
-   * Porción de capital de la cuota.
+   * Monto de la cuota, sin interés.
    */
-  principalAmount: string;
-  /**
-   * Porción de interés de la cuota.
-   */
-  interestAmount: string;
-  /**
-   * Importe total de la cuota (capital + interés).
-   */
-  totalAmount: string;
+  amount: string;
 }
 
 /** Acceso a datos de `billing.quotation_installments`. */
@@ -63,9 +55,7 @@ export class QuotationInstallmentsRepository {
           quotationId: installment.quotationId,
           installmentNumber: installment.installmentNumber,
           dueDate: installment.dueDate,
-          principalAmount: installment.principalAmount,
-          interestAmount: installment.interestAmount,
-          totalAmount: installment.totalAmount,
+          amount: installment.amount,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

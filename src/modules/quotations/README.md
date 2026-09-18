@@ -1,8 +1,9 @@
 # Módulo Quotations — Cotizaciones con plan de pagos (FT-24)
 
 Arma un **presupuesto** sobre un servicio del catálogo (FT-22) con un plan de
-pagos simulado, y **congela** las condiciones ofertadas al momento de crearlo:
-si el precio del servicio cambia después, la cotización conserva el suyo.
+pagos **flexible y sin interés**, y **congela** las condiciones ofertadas al
+momento de crearlo: si el precio del servicio cambia después, la cotización
+conserva el suyo.
 
 No tiene entidades propias: persiste en `billing` (`Quotations` y sus cuotas),
 a través de los repositorios de este módulo.
@@ -11,7 +12,6 @@ a través de los repositorios de este módulo.
 
 | Método | Ruta | Rol | Qué hace |
 |---|---|---|---|
-| `POST` | `/quotations/simulate` | `PRACTITIONER`, `CLINICIAN` | Calcula la tabla de cuotas sin guardar nada. |
 | `POST` | `/quotations` | `PRACTITIONER`, `CLINICIAN` | Crea la cotización con sus cuotas. |
 | `GET` | `/quotations?patientProfileId=` | autenticado | Lista las cotizaciones de un paciente, más recientes primero. |
 | `GET` | `/quotations/:id` | autenticado | Trae una cotización con sus cuotas. |
@@ -19,22 +19,31 @@ a través de los repositorios de este módulo.
 Cotizar exige rol clínico porque quien atiende es quien cotiza. Leer no lo exige,
 igual que el catálogo de servicios del que parte.
 
-## El simulador
+## El plan de pagos (v4.2.18)
 
-`payment-plan-simulator.ts` es una **función pura**: mismos parámetros, mismo
-resultado. La usan tanto `/quotations/simulate` como el alta, así que lo que la
-persona ve antes de confirmar es exactamente lo que se guarda.
+Un consultorio no financia: reparte el precio de un tratamiento en las cuotas
+que le sirvan a la persona. Por eso **no hay tasa ni método de amortización**, y
+el simulador FLAT/FRANCÉS (`POST /quotations/simulate`) se retiró.
 
-- **La tasa es mensual**, en porcentaje: `"2.5"` es 2,5 % por mes.
-- **Las cuotas vencen una por mes** desde la fecha de atención: la primera, un
-  mes después.
-- **`FLAT`**: interés simple sobre el capital total, repartido en partes iguales.
-  El capital también se reparte en partes iguales.
-- **`FRENCH`**: amortización francesa, con cuota fija, capital creciente e
-  interés decreciente.
-- **Los importes se calculan en centavos enteros.** El resto del redondeo se
-  ajusta en la última cuota, para que la suma cierre exacta contra el precio
-  ofrecido.
+El cronograma lo arma quien atiende y viaja entero en el alta:
+
+- **`downPaymentAmount`** — el anticipo, lo que se paga el día de la atención.
+  Entre 0 y el precio.
+- **`paymentFrequency`** — `WEEKLY`, `BIWEEKLY` o `MONTHLY`. Es sólo el punto de
+  partida con que se armó el cronograma.
+- **`installments`** — cada cuota con **su propia fecha y su propio monto**. No
+  tienen por qué ser iguales ni seguir la frecuencia.
+
+`payment-plan.ts` comprueba, en **centavos enteros**, lo que el esquema no puede
+expresar porque cruza filas:
+
+- anticipo + Σ cuotas = precio ofrecido, al centavo;
+- `paymentPlanInstallmentCount` = cantidad de cuotas enviadas (cero si el
+  anticipo cubre todo);
+- las cuotas vienen numeradas 1, 2, 3… en orden, y ninguna es cero.
+
+El resto lo cierran los `CHECK` de la base: frecuencia dentro de las tres,
+anticipo entre 0 y el precio, cuota mayor que cero.
 
 ## Errores
 
@@ -42,3 +51,5 @@ persona ve antes de confirmar es exactamente lo que se guarda.
 - Crear sin perfil profesional en la cuenta responde `422`.
 - Una vigencia (`validUntil`) que no es posterior a la fecha de atención
   responde `422`.
+- Un plan que no cierra con el precio responde `422`, con el total de las
+  cuotas en `details` para que la pantalla diga cuánto falta o sobra.
