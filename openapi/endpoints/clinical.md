@@ -4466,8 +4466,6 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | Sí |
 | 400 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
-| 401 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
-| 403 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
 | 404 | La receta no existe | `Promise<PrescriptionVerificationResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |

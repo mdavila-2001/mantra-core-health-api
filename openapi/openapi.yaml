@@ -11977,10 +11977,6 @@ paths:
                 $ref: '#/components/schemas/PrescriptionVerificationResponseDto'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           description: La receta no existe
         '429':
@@ -11990,6 +11986,7 @@ paths:
       summary: Verificar la autenticidad de una receta por su sello
       tags:
         - clinical-prescriptions-public
+      security: []
   /search/{index}/documents:
     post:
       description: El servidor sella el documento con el `tenantId` del contexto; el del cuerpo se ignora.

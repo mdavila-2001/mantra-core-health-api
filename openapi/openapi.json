@@ -17949,12 +17949,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "description": "La receta no existe"
           },
@@ -17968,7 +17962,8 @@
         "summary": "Verificar la autenticidad de una receta por su sello",
         "tags": [
           "clinical-prescriptions-public"
-        ]
+        ],
+        "security": []
       }
     },
     "/search/{index}/documents": {

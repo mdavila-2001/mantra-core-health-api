@@ -63535,14 +63535,7 @@
               "name": "GET /public/prescriptions/{id}/verify · Verificar la autenticidad de una receta por su sello",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/prescriptions/:id/verify",
                   "host": [
@@ -63562,7 +63555,10 @@
                     }
                   ]
                 },
-                "description": "Sin autenticación y sin PHI: recalcula el sello SHA-256 y devuelve el estado y la matrícula del prescriptor.\n\n`GET /public/prescriptions/{id}/verify`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `ClinicalPrescriptionsPublicController_verify`"
+                "description": "Sin autenticación y sin PHI: recalcula el sello SHA-256 y devuelve el estado y la matrícula del prescriptor.\n\n`GET /public/prescriptions/{id}/verify`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `ClinicalPrescriptionsPublicController_verify`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
