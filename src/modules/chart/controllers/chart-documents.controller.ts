@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import {
@@ -21,10 +22,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartDocumentsService } from '../services';
 import { CreateDocumentDto, DocumentResponseDto } from '../dto';
 
-/** Endpoints de documentos gobernados del chart (`/charts/documents`). */
+/**
+ * Endpoints de documentos gobernados del chart (`/charts/documents`).
+ *
+ * SEC-01: el alta lleva el guard del expediente —`patientProfileId` viaja en el
+ * cuerpo—. La descarga de contenido no lo necesita: `ChartDocumentsService`
+ * resuelve el paciente desde el documento y ya llama a la misma política.
+ */
 @ApiTags('chart-documents')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER')
@@ -39,6 +47,7 @@ export class ChartDocumentsController {
 
   /** UC-15-09. */
   @Post()
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjuntar un documento con archivos gobernados' })
   createDocument(

@@ -6,9 +6,11 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import { ClinicalRecordAccessGuard } from '../guards';
 import { DiagnosticReportsService, ServiceRequestsService } from '../services';
 import {
   CheckDuplicateStudyDto,
@@ -20,7 +22,17 @@ import {
   ServiceRequestResponseDto,
 } from '../dto';
 
-/** Endpoints de órdenes clínicas: peticiones de servicio y reportes diagnósticos. */
+/**
+ * Endpoints de órdenes clínicas: peticiones de servicio y reportes diagnósticos.
+ *
+ * SEC-01: llevan el guard del expediente las dos altas cuyo `patientProfileId`
+ * viaja en el cuerpo. `service-requests/duplicate-check` **no** lo lleva a
+ * propósito: no persiste nada y ya pasa por la misma política dentro de
+ * `ServiceRequestsService.checkDuplicate`, así que montarlo duplicaría la
+ * consulta de autorización sin cambiar ninguna respuesta.
+ * `diagnostic-reports/:id/release` tampoco: su paciente sale del reporte ya
+ * cargado (GAP-3, deuda abierta).
+ */
 @ApiTags('clinical-orders')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER')
@@ -58,6 +70,7 @@ export class ClinicalOrdersController {
 
   /** UC-08-05. */
   @Post('service-requests')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una orden de servicio' })
   createServiceRequest(
@@ -69,6 +82,7 @@ export class ClinicalOrdersController {
 
   /** UC-08-06. */
   @Post('diagnostic-reports')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Emitir un reporte diagnóstico desde la orden' })
   createDiagnosticReport(
