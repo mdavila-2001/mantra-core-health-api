@@ -262,6 +262,9 @@ describe('LedgerService', () => {
         id: 't1',
         transactionNumber: 'JT-1',
         statusConceptId: ACCT.TXN_DRAFT,
+        // MCH-018: la auto-clasificación exige una regla aplicable; el camino
+        // canónico lo es porque el borrador declara su documento origen.
+        sourceDocumentType: 'INVOICE',
       };
       d.journalRepo.findTransactionById.mockResolvedValue(txn);
 
@@ -288,6 +291,88 @@ describe('LedgerService', () => {
       d.journalRepo.ledgerEntriesForTransaction.mockResolvedValue([]);
       await d.service.reverseJournal('t1', {}, actor);
       expect(txn.statusConceptId).toBe(ACCT.TXN_REVERSED);
+    });
+
+    // MCH-018: `classify` sólo cambiaba el estado, así que el asiento quedaba
+    // marcado como auto-clasificado sin que ninguna regla se hubiera evaluado.
+    describe('MCH-018 · la auto-clasificación exige reglas', () => {
+      function borrador(d: ReturnType<typeof build>, origen?: string) {
+        const txn: any = {
+          id: 't1',
+          transactionNumber: 'JT-1',
+          statusConceptId: ACCT.TXN_DRAFT,
+          sourceDocumentType: origen,
+        };
+        d.journalRepo.findTransactionById.mockResolvedValue(txn);
+        return txn;
+      }
+
+      it('AC01 · sin regla aplicable no se marca auto-clasificado', async () => {
+        const d = build();
+        const txn = borrador(d, 'ALGO_QUE_NINGUNA_REGLA_CUBRE');
+
+        const res = await d.service.classify('t1', {}, actor);
+
+        expect(res.status).toBe(ACCT.TXN_PENDING_REVIEW);
+        expect(txn.statusConceptId).toBe(ACCT.TXN_PENDING_REVIEW);
+        expect(res.classification?.decision).toBe('SIN_REGLA');
+        expect(res.classification?.ruleId).toBeUndefined();
+      });
+
+      it('AC02 · un borrador sin documento origen va a revisión sin inventar tipo', async () => {
+        const d = build();
+        const txn = borrador(d);
+
+        const res = await d.service.classify('t1', {}, actor);
+
+        expect(res.status).toBe(ACCT.TXN_PENDING_REVIEW);
+        expect(txn.transactionTypeConceptId).toBeUndefined();
+        expect(res.classification?.transactionTypeConceptId).toBeUndefined();
+      });
+
+      it('con regla aplicable clasifica, imputa el tipo y deja la evidencia', async () => {
+        const d = build();
+        const txn = borrador(d, 'GATEWAY_SETTLEMENT');
+
+        const res = await d.service.classify('t1', {}, actor);
+
+        expect(res.status).toBe(ACCT.TXN_AUTO_CLASSIFIED);
+        expect(txn.transactionTypeConceptId).toBe(ACCT.TXN_TYPE_CLEARING);
+        expect(res.classification).toMatchObject({
+          decision: 'CLASIFICADA',
+          ruleId: 'GATEWAY_SETTLEMENT',
+          rulesetVersion: 'acct-classif-v1',
+        });
+      });
+
+      it('sella en la cadena WORM qué autoridad clasificó', async () => {
+        const clasificado = build();
+        borrador(clasificado, 'INVOICE');
+        await clasificado.service.classify('t1', {}, actor);
+        expect(clasificado.auditTrail.record).toHaveBeenCalledWith(
+          expect.anything(),
+          actor,
+          expect.objectContaining({ action: 'JOURNAL_AUTO_CLASSIFIED' }),
+        );
+
+        const aRevision = build();
+        borrador(aRevision, undefined);
+        await aRevision.service.classify('t1', {}, actor);
+        expect(aRevision.auditTrail.record).toHaveBeenCalledWith(
+          expect.anything(),
+          actor,
+          expect.objectContaining({ action: 'JOURNAL_CLASSIFICATION_REVIEW' }),
+        );
+      });
+
+      it('no se puede saltar la clasificación enviando el borrador a revisión', async () => {
+        const d = build();
+        borrador(d, 'INVOICE');
+
+        await expect(
+          d.service.submitForReview('t1', {}, actor),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
     });
 
     it('assertTransition rechaza saltos inválidos y acepta los válidos', () => {

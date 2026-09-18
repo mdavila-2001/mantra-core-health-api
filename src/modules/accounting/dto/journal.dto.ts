@@ -323,6 +323,41 @@ export class AttachFileDto {
   categoryConceptId?: string;
 }
 
+/**
+ * Evidencia de la clasificación contable (MCH-018). Sin regla aplicable el
+ * asiento no queda auto-clasificado y esto explica por qué fue a revisión.
+ */
+export class JournalClassificationDto {
+  /**
+   * Valor de decision mantenido por la instancia.
+   */
+  @ApiProperty({
+    description: 'Resultado de evaluar el juego de reglas',
+    enum: ['CLASIFICADA', 'SIN_REGLA', 'AMBIGUA'],
+  })
+  decision!: string;
+  /**
+   * Valor de ruleset version mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Versión del juego de reglas evaluado' })
+  rulesetVersion!: string;
+  /**
+   * Identificador asociado a rule.
+   */
+  @ApiPropertyOptional({ description: 'Regla que decidió la imputación' })
+  ruleId?: string;
+  /**
+   * Identificador asociado a transaction type concept.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  transactionTypeConceptId?: string;
+  /**
+   * Valor de reason mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Explicación legible de la decisión' })
+  reason!: string;
+}
+
 /** Respuesta con el asiento posteado. */
 export class JournalTransactionResponseDto {
   /**
@@ -349,6 +384,11 @@ export class JournalTransactionResponseDto {
    * Valor de posted at mantenido por la instancia.
    */
   @ApiProperty() postedAt!: Date | null;
+  /**
+   * Evidencia de la clasificación; sólo la devuelve `classify` (MCH-018).
+   */
+  @ApiPropertyOptional({ type: () => JournalClassificationDto })
+  classification?: JournalClassificationDto;
 }
 
 /** Respuesta de la determinación de cuentas. */
