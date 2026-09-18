@@ -9,7 +9,7 @@
 # Módulo `clinical`
 
 **Fuente:** [`src/modules/clinical/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/clinical/README.md)
-· 8 controllers · 15 services · 13 repositories · 22 entidades · 13 DTO
+· 8 controllers · 15 services · 13 repositories · 22 entidades · 14 DTO
 
 ---
 
@@ -27,6 +27,7 @@ los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`
 | UC-08-03 | `/clinical/observations` | POST | Registrar observación (componentes, rangos, ejecutantes, notas) |
 | UC-08-04 | `/clinical/observations/{id}/amend` | PATCH | Corregir/enmendar observación |
 | UC-08-05 | `/clinical/service-requests` | POST | Crear orden de servicio |
+| 3.2 (T-26) | `/clinical/service-requests/duplicate-check` | POST | Pre-validar duplicidad de estudios (antiduplicación) |
 | UC-08-06 | `/clinical/diagnostic-reports` | POST | Emitir reporte diagnóstico desde la orden |
 | UC-08-07 | `/clinical/diagnostic-reports/{id}/release` | POST | Liberar resultados del reporte |
 | UC-08-08 | `/clinical/conditions` | POST | Registrar condición/diagnóstico |

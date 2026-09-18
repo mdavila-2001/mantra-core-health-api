@@ -46,13 +46,13 @@ export interface CreateQuotationData {
    */
   paymentPlanInstallmentCount: number;
   /**
-   * Tasa de interés mensual, en porcentaje.
+   * Anticipo: lo que se paga el día de la atención.
    */
-  interestRatePercent: string;
+  downPaymentAmount: string;
   /**
-   * Método de cálculo del interés (`FLAT` o `FRENCH`).
+   * Frecuencia de partida del cronograma (`WEEKLY`, `BIWEEKLY` o `MONTHLY`).
    */
-  interestCalculationMethod: string;
+  paymentFrequency: string;
   /**
    * Fecha hasta la que la oferta es válida.
    */
@@ -114,8 +114,8 @@ export class QuotationsRepository {
         offeredPrice: data.offeredPrice,
         currencyConceptId: data.currencyConceptId,
         paymentPlanInstallmentCount: data.paymentPlanInstallmentCount,
-        interestRatePercent: data.interestRatePercent,
-        interestCalculationMethod: data.interestCalculationMethod,
+        downPaymentAmount: data.downPaymentAmount,
+        paymentFrequency: data.paymentFrequency,
         validUntil: data.validUntil,
         statusConceptId: data.statusConceptId,
         ...createdBy(data.actorUserId),

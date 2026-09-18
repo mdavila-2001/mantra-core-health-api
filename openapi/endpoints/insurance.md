@@ -2904,7 +2904,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "policyClauseReference": "valor-ejemplo",
       "denialRationale": "valor-ejemplo",
       "referenceType": "DIAGNOSTIC_STUDY",
-      "reference": "valor-ejemplo"
+      "reference": "valor-ejemplo",
+      "duplicateStudy": {
+        "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
+        "studyName": "Ecografía abdominal",
+        "performedAt": "2026-07-31T12:00:00.000Z",
+        "daysAgo": 14,
+        "providerName": "Centro de Diagnóstico San Gabriel",
+        "justification": "valor-ejemplo",
+        "reused": true
+      }
     }
   ],
   "lineBilledTotal": {
@@ -3041,7 +3050,7 @@ Campos de la respuesta:
 | `header.status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
 | `header.status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
 | `header.hasOpenDispute` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
-| `lines` | Sí | `array<ClaimLineViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","lineSequence":1,"service":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"billedAmount":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"patientResponsibilityAmount":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"approvedAmount":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"deniedAmount":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"decision":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"denialReason":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo","referenceType":"DIAGNOSTIC_STUDY","reference":"valor-ejemplo"}]` |
+| `lines` | Sí | `array<ClaimLineViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","lineSequence":1,"service":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"billedAmount":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"patientResponsibilityAmount":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"approvedAmount":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"deniedAmount":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"decision":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"denialReason":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo","referenceType":"DIAGNOSTIC_STUDY","reference":"valor-ejemplo","duplicateStudy":{"previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","studyName":"Ecografía abdominal","performedAt":"2026-07-31T12:00:00.000Z","daysAgo":14,"providerName":"Centro de Diagnóstico San Gabriel","justification":"valor-ejemplo","reused":true}}]` |
 | `lines[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].lineSequence` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `lines[].service` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
@@ -3077,6 +3086,14 @@ Campos de la respuesta:
 | `lines[].denialRationale` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `lines[].referenceType` | Sí | `string` | valores: `DIAGNOSTIC_STUDY`, `MEDICATION_DISPENSATION`; admite null | Sin descripción específica en el contrato OpenAPI. | `DIAGNOSTIC_STUDY` |
 | `lines[].reference` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `lines[].duplicateStudy` | Sí | `ClaimLineDuplicateStudyDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","studyName":"Ecografía abdominal","performedAt":"2026-07-31T12:00:00.000Z","daysAgo":14,"providerName":"Centro de Diagnóstico San Gabriel","justification":"valor-ejemplo","reused":true}` |
+| `lines[].duplicateStudy.previousDiagnosticReportId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].duplicateStudy.studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ecografía abdominal` |
+| `lines[].duplicateStudy.performedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `lines[].duplicateStudy.daysAgo` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `14` |
+| `lines[].duplicateStudy.providerName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Centro de Diagnóstico San Gabriel` |
+| `lines[].duplicateStudy.justification` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `lines[].duplicateStudy.reused` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `lineBilledTotal` | Sí | `MoneyDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}}` |
 | `lineBilledTotal.amount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1250.00` |
 | `lineBilledTotal.currency` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |

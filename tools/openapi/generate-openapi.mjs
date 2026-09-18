@@ -123,6 +123,10 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // Vitrina pública de medicamentos (`pharmacy-public.controller.ts`).
   ['get', '/public/medications'],
   ['get', '/public/medications/{conceptId}/availability'],
+  // Verificación pública de una receta por su sello
+  // (`clinical-prescriptions-public.controller.ts`, `@Public()`): entró sin
+  // sumarse acá y el lint de Redocly lo daba como `security-defined` (18/09).
+  ['get', '/public/prescriptions/{id}/verify'],
 ];
 
 function markPublicOperations(document) {

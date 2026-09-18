@@ -13,15 +13,12 @@ import {
   QuotationInstallmentsRepository,
   QuotationsRepository,
 } from '../repositories';
-import { CreateQuotationDto, SimulatePaymentPlanDto } from '../dto';
+import { CreateQuotationDto } from '../dto';
 import type {
-  InstallmentPreviewDto,
+  QuotationInstallmentDto,
   QuotationResponseDto,
 } from '../dto/quotation-response.dto';
-import {
-  simulatePaymentPlan as runSimulator,
-  type InstallmentPreview,
-} from './payment-plan-simulator';
+import { assertPaymentPlanClosesOnPrice } from './payment-plan';
 
 /** Fecha (`date`) como `YYYY-MM-DD`, sin desplazamiento por huso horario. */
 function toIsoDate(date: Date): string {
@@ -29,23 +26,10 @@ function toIsoDate(date: Date): string {
 }
 
 /**
- * Convierte la previsualización del simulador (fechas como `Date`, uso
- * interno) a la forma que expone el contrato HTTP (fechas como `string`
- * ISO). Un solo punto de conversión para `/simulate` y `createQuotation`.
- */
-export function toInstallmentPreviewDto(
-  installments: InstallmentPreview[],
-): InstallmentPreviewDto[] {
-  return installments.map((installment) => ({
-    ...installment,
-    dueDate: toIsoDate(installment.dueDate),
-  }));
-}
-
-/**
  * FT-24 — Creación de cotizaciones: presupuesto ofrecido a un paciente sobre
  * un servicio del catálogo (`billing.service_catalog`), con un plan de pagos
- * simulado (FLAT o FRANCÉS) y las condiciones ofertadas congeladas (snapshot)
+ * flexible **sin interés** (v4.2.18: anticipo y cuotas con fecha y monto
+ * propios, que arma quien atiende) y las condiciones ofertadas congeladas (snapshot)
  * para trazabilidad — si el catálogo cambia después, la cotización ya
  * emitida no se ve afectada.
  */
@@ -71,28 +55,13 @@ export class QuotationsService {
   }
 
   /**
-   * Simulador de financiamiento: calcula la tabla de cuotas sin persistir
-   * nada. Función pura por debajo (`payment-plan-simulator.ts`); este método
-   * sólo la expone como parte del servicio para que el controller y
-   * `createQuotation` compartan la misma firma.
-   */
-  simulatePaymentPlan(dto: SimulatePaymentPlanDto): InstallmentPreview[] {
-    return runSimulator(
-      dto.offeredPrice,
-      dto.installmentCount,
-      dto.interestRatePercent,
-      dto.interestCalculationMethod,
-      new Date(dto.attentionDate),
-    );
-  }
-
-  /**
-   * Crea una cotización: valida las precondiciones, congela el nombre del
-   * servicio del catálogo, corre el simulador y persiste cotización + cuotas
-   * en una única transacción.
+   * Crea una cotización: valida las precondiciones —entre ellas, que anticipo
+   * + cuotas cierre con el precio—, congela el nombre del servicio del
+   * catálogo y persiste cotización + cuotas en una única transacción.
    *
    * @throws PreconditionFailedException si el actor no tiene perfil
-   * profesional, o si `validUntil` no es posterior a `attentionDate`.
+   * profesional, si `validUntil` no es posterior a `attentionDate`, o si el
+   * plan de pagos no cierra con el precio (ver `assertPaymentPlanClosesOnPrice`).
    * @throws ResourceNotFoundException si el servicio no existe en el catálogo.
    */
   async createQuotation(
@@ -118,6 +87,8 @@ export class QuotationsService {
       );
     }
 
+    assertPaymentPlanClosesOnPrice(dto);
+
     this.logger.info(
       {
         operation: 'quotations.create',
@@ -141,14 +112,6 @@ export class QuotationsService {
         );
       }
 
-      const installments = runSimulator(
-        dto.offeredPrice,
-        dto.paymentPlanInstallmentCount,
-        dto.interestRatePercent,
-        dto.interestCalculationMethod,
-        attentionDate,
-      );
-
       const quotation = this.quotationsRepo.create(tx, {
         practiceId: dto.practiceId,
         patientProfileId: dto.patientProfileId,
@@ -163,8 +126,8 @@ export class QuotationsService {
         offeredPrice: dto.offeredPrice,
         currencyConceptId: dto.currencyConceptId,
         paymentPlanInstallmentCount: dto.paymentPlanInstallmentCount,
-        interestRatePercent: dto.interestRatePercent,
-        interestCalculationMethod: dto.interestCalculationMethod,
+        downPaymentAmount: dto.downPaymentAmount,
+        paymentFrequency: dto.paymentFrequency,
         validUntil,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         actorUserId: actor.id,
@@ -172,15 +135,13 @@ export class QuotationsService {
       // FK planas: persistir la cotización antes de sus cuotas.
       await tx.flush();
 
-      this.installmentsRepo.createMany(
+      const installments = this.installmentsRepo.createMany(
         tx,
-        installments.map((row) => ({
+        dto.installments.map((row) => ({
           quotationId: quotation.id,
           installmentNumber: row.installmentNumber,
-          dueDate: row.dueDate,
-          principalAmount: row.principalAmount,
-          interestAmount: row.interestAmount,
-          totalAmount: row.totalAmount,
+          dueDate: new Date(row.dueDate),
+          amount: row.amount,
         })),
       );
 
@@ -247,31 +208,21 @@ function toResponseDto(
     | 'offeredPrice'
     | 'currencyConceptId'
     | 'paymentPlanInstallmentCount'
-    | 'interestRatePercent'
-    | 'interestCalculationMethod'
+    | 'downPaymentAmount'
+    | 'paymentFrequency'
     | 'validUntil'
     | 'statusConceptId'
     | 'createdAt'
   >,
   installments: ReadonlyArray<
-    | InstallmentPreview
-    | Pick<
-        QuotationInstallments,
-        | 'installmentNumber'
-        | 'dueDate'
-        | 'principalAmount'
-        | 'interestAmount'
-        | 'totalAmount'
-      >
+    Pick<QuotationInstallments, 'installmentNumber' | 'dueDate' | 'amount'>
   >,
 ): QuotationResponseDto {
-  const installmentDtos: InstallmentPreviewDto[] = installments.map(
+  const installmentDtos: QuotationInstallmentDto[] = installments.map(
     (installment) => ({
       installmentNumber: installment.installmentNumber,
       dueDate: toIsoDate(installment.dueDate),
-      principalAmount: installment.principalAmount,
-      interestAmount: installment.interestAmount,
-      totalAmount: installment.totalAmount,
+      amount: installment.amount,
     }),
   );
 
@@ -287,8 +238,8 @@ function toResponseDto(
     offeredPrice: quotation.offeredPrice,
     currencyConceptId: quotation.currencyConceptId,
     paymentPlanInstallmentCount: quotation.paymentPlanInstallmentCount,
-    interestRatePercent: quotation.interestRatePercent,
-    interestCalculationMethod: quotation.interestCalculationMethod,
+    downPaymentAmount: quotation.downPaymentAmount,
+    paymentFrequency: quotation.paymentFrequency,
     validUntil: toIsoDate(quotation.validUntil),
     statusConceptId: quotation.statusConceptId,
     createdAt: quotation.createdAt,

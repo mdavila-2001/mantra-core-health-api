@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1290 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1290 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1292 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1292 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -15418,7 +15418,7 @@
       ]
     },
     {
-      "name": "clinical (27)",
+      "name": "clinical (29)",
       "item": [
         {
           "name": "clinical-encounters",
@@ -15828,7 +15828,7 @@
                 "description": "Crear una orden de servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /clinical/service-requests`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ClinicalOrdersController_createServiceRequest`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"custodianTenantId\": \"<custodianTenantId: uuid existente>\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"codeConceptId\": \"<codeConceptId: uuid del catálogo, ver GET /terminology/concepts>\"\n}",
+                  "raw": "{\n  \"custodianTenantId\": \"<custodianTenantId: uuid existente>\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"codeConceptId\": \"<codeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"reusePreviousReport\": true,\n  \"duplicateOverrideReason\": \"duplicateOverrideReason-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -15845,6 +15845,66 @@
                     "exec": [
                       "pm.test('status 201', function () {",
                       "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{serviceRequestId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.serviceRequestId);",
+                      "  if (id) pm.environment.set('serviceRequestId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /clinical/service-requests/duplicate-check · Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/clinical/service-requests/duplicate-check",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clinical",
+                    "service-requests",
+                    "duplicate-check"
+                  ]
+                },
+                "description": "Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /clinical/service-requests/duplicate-check`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ClinicalOrdersController_checkDuplicateStudy`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"diagnosticStudyOfferingId\": \"{{diagnosticStudyOfferingId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"windowDays\": 30\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
                       "});",
                       "",
                       "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{serviceRequestId}}.",
@@ -16094,6 +16154,67 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.prescriptionSignaturePolicyId);",
                       "  if (id) pm.environment.set('prescriptionSignaturePolicyId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "clinical-prescriptions",
+          "item": [
+            {
+              "name": "GET /clinical/prescriptions/{id}/pdf · Descargar el PDF oficial de una receta",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/clinical/prescriptions/:id/pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clinical",
+                    "prescriptions",
+                    ":id",
+                    "pdf"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{prescriptionId}}",
+                      "description": "Identificador de ruta · variable `{{prescriptionId}}`"
+                    }
+                  ]
+                },
+                "description": "Autoriza al prescriptor y a quien puede leer la historia del paciente dueño de la receta.\n\n`GET /clinical/prescriptions/{id}/pdf`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `ClinicalPrescriptionsController_getPrescriptionPdf`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.prescriptions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('prescriptionId', first.id);",
                       "}"
                     ]
                   }
@@ -63405,8 +63526,65 @@
       ]
     },
     {
-      "name": "public (19)",
+      "name": "public (20)",
       "item": [
+        {
+          "name": "clinical-prescriptions-public",
+          "item": [
+            {
+              "name": "GET /public/prescriptions/{id}/verify · Verificar la autenticidad de una receta por su sello",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/public/prescriptions/:id/verify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "prescriptions",
+                    ":id",
+                    "verify"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{prescriptionId}}",
+                      "description": "Identificador de ruta · variable `{{prescriptionId}}`"
+                    }
+                  ]
+                },
+                "description": "Sin autenticación y sin PHI: recalcula el sello SHA-256 y devuelve el estado y la matrícula del prescriptor.\n\n`GET /public/prescriptions/{id}/verify`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `ClinicalPrescriptionsPublicController_verify`",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.prescriptions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('prescriptionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
         {
           "name": "community-public",
           "item": [
@@ -65544,7 +65722,7 @@
       ]
     },
     {
-      "name": "quotations (4)",
+      "name": "quotations (3)",
       "item": [
         {
           "name": "GET /quotations · Listar las cotizaciones de un paciente",
@@ -65628,7 +65806,7 @@
             "description": "Crear una cotización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /quotations`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `QuotationsController_create`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"practiceId\": \"{{practiceId}}\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"attentionDate\": \"2026-01-01T00:00:00.000Z\",\n  \"appointmentId\": \"{{appointmentId}}\",\n  \"serviceCatalogId\": \"{{serviceCatalogId}}\",\n  \"offeredPrice\": \"1500.00\",\n  \"paymentPlanInstallmentCount\": 1,\n  \"interestRatePercent\": \"2.5\",\n  \"interestCalculationMethod\": \"FLAT\",\n  \"validUntil\": \"2026-01-01T00:00:00.000Z\"\n}",
+              "raw": "{\n  \"practiceId\": \"{{practiceId}}\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"attentionDate\": \"2026-01-01T00:00:00.000Z\",\n  \"appointmentId\": \"{{appointmentId}}\",\n  \"serviceCatalogId\": \"{{serviceCatalogId}}\",\n  \"offeredPrice\": \"1500.00\",\n  \"paymentPlanInstallmentCount\": 1,\n  \"downPaymentAmount\": \"190.00\",\n  \"paymentFrequency\": \"WEEKLY\",\n  \"installments\": [\n    {\n      \"installmentNumber\": 1,\n      \"dueDate\": \"2026-10-10\",\n      \"amount\": \"233.34\"\n    }\n  ],\n  \"validUntil\": \"2026-01-01T00:00:00.000Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -65645,65 +65823,6 @@
                 "exec": [
                   "pm.test('status 201', function () {",
                   "  pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{quotationId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.quotationId);",
-                  "  if (id) pm.environment.set('quotationId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /quotations/simulate · Simular un plan de pagos (FLAT o FRANCÉS), sin persistir",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/quotations/simulate",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "quotations",
-                "simulate"
-              ]
-            },
-            "description": "Simular un plan de pagos (FLAT o FRANCÉS), sin persistir. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /quotations/simulate`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `QuotationsController_simulate`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"offeredPrice\": \"1500.00\",\n  \"installmentCount\": 1,\n  \"interestRatePercent\": \"2.5\",\n  \"interestCalculationMethod\": \"FLAT\",\n  \"attentionDate\": \"2026-01-01T00:00:00.000Z\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
                   "});",
                   "",
                   "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{quotationId}}.",

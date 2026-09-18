@@ -75,26 +75,20 @@ export class Quotations {
   /**
    * Cantidad de cuotas del plan de pagos ofrecido.
    */
-  @Property({
-    fieldName: 'payment_plan_installment_count',
-    columnType: 'int',
-  })
+  @Property({ fieldName: 'payment_plan_installment_count', columnType: 'int' })
   paymentPlanInstallmentCount!: number;
 
   /**
-   * Tasa de interés mensual (porcentaje) usada por el simulador de financiamiento.
+   * Anticipo: lo que se paga el día de la atención, entre 0 y el precio ofrecido. Sin interés (v4.2.18).
    */
-  @Property({ fieldName: 'interest_rate_percent', columnType: 'numeric' })
-  interestRatePercent!: string;
+  @Property({ fieldName: 'down_payment_amount', columnType: 'numeric' })
+  downPaymentAmount!: string;
 
   /**
-   * Método de cálculo del interés: `FLAT` o `FRENCH`.
+   * Frecuencia con que se armó el cronograma: `WEEKLY`, `BIWEEKLY` o `MONTHLY`. Sólo el punto de partida: cada cuota guarda su propia fecha.
    */
-  @Property({
-    fieldName: 'interest_calculation_method',
-    columnType: 'varchar',
-  })
-  interestCalculationMethod!: string;
+  @Property({ fieldName: 'payment_frequency', columnType: 'varchar' })
+  paymentFrequency!: string;
 
   /**
    * Fecha hasta la que la oferta es válida.

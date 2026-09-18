@@ -1,5 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsDateString,
   IsIn,
   IsInt,
@@ -9,12 +12,18 @@ import {
   Matches,
   Max,
   Min,
+  ValidateNested,
 } from 'class-validator';
 
-/** Métodos de cálculo de interés soportados por el simulador (FT-24). */
-export const INTEREST_CALCULATION_METHODS = ['FLAT', 'FRENCH'] as const;
-export type InterestCalculationMethod =
-  (typeof INTEREST_CALCULATION_METHODS)[number];
+/**
+ * Cada cuánto vence una cuota (FT-24, v4.2.18). Es sólo el punto de partida
+ * del cronograma: cada cuota trae su propia fecha y puede moverse.
+ */
+export const PAYMENT_FREQUENCIES = ['WEEKLY', 'BIWEEKLY', 'MONTHLY'] as const;
+export type PaymentFrequency = (typeof PAYMENT_FREQUENCIES)[number];
+
+/** Tope de cuotas de un plan. El mismo que tenía el simulador retirado. */
+export const MAX_INSTALLMENTS = 360;
 
 /**
  * Importe con hasta dos decimales y sin signo.
@@ -28,11 +37,33 @@ const PRICE_PATTERN_MESSAGE =
   'El precio debe ser un número positivo con hasta dos decimales';
 
 /**
- * Tasa de interés con hasta cuatro decimales y sin signo (p. ej. `2.5`, `1.75`).
+ * Una cuota del plan de pagos tal como la armó quien atiende: fecha y monto,
+ * **sin interés**. Los montos no tienen por qué ser iguales.
  */
-const RATE_PATTERN = /^\d+(\.\d{1,4})?$/;
-const RATE_PATTERN_MESSAGE =
-  'La tasa de interés debe ser un número positivo con hasta cuatro decimales';
+export class QuotationInstallmentInputDto {
+  /**
+   * Número de orden de la cuota dentro del plan (1-based, consecutivo).
+   */
+  @ApiProperty({ minimum: 1 })
+  @IsInt()
+  @Min(1)
+  installmentNumber!: number;
+
+  /**
+   * Fecha de vencimiento de la cuota (ISO `YYYY-MM-DD`).
+   */
+  @ApiProperty({ example: '2026-10-10' })
+  @IsDateString()
+  dueDate!: string;
+
+  /**
+   * Monto de la cuota, con hasta dos decimales.
+   */
+  @ApiProperty({ example: '233.34' })
+  @IsNumberString()
+  @Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })
+  amount!: string;
+}
 
 /** Cuerpo de `POST /quotations` (FT-24 — Creación de cotizaciones). */
 export class CreateQuotationDto {
@@ -101,34 +132,46 @@ export class CreateQuotationDto {
   currencyConceptId?: string;
 
   /**
-   * Cantidad de cuotas del plan de pagos ofrecido.
+   * Cantidad de cuotas del plan de pagos ofrecido. Tiene que coincidir con
+   * `installments.length`; cero si el anticipo cubre el precio entero.
    */
   @ApiProperty({ description: 'Cantidad de cuotas del plan de pagos' })
   @IsInt()
-  @Min(1)
-  @Max(360)
+  @Min(0)
+  @Max(MAX_INSTALLMENTS)
   paymentPlanInstallmentCount!: number;
 
   /**
-   * Tasa de interés mensual, en porcentaje (p. ej. `2.5` = 2.5% mensual).
+   * Anticipo: lo que se paga el día de la atención, antes de la primera cuota.
    */
   @ApiProperty({
-    description: 'Tasa de interés mensual, en porcentaje (p. ej. "2.5")',
-    example: '2.5',
+    description: 'Anticipo, entre 0 y el precio ofrecido. Sin interés.',
+    example: '190.00',
   })
   @IsNumberString()
-  @Matches(RATE_PATTERN, { message: RATE_PATTERN_MESSAGE })
-  interestRatePercent!: string;
+  @Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })
+  downPaymentAmount!: string;
 
   /**
-   * Método de cálculo del interés del plan de pagos.
+   * Frecuencia con que se armó el cronograma.
    */
   @ApiProperty({
-    description: 'Método de cálculo del interés',
-    enum: INTEREST_CALCULATION_METHODS,
+    description: 'Frecuencia de partida del cronograma',
+    enum: PAYMENT_FREQUENCIES,
   })
-  @IsIn(INTEREST_CALCULATION_METHODS)
-  interestCalculationMethod!: InterestCalculationMethod;
+  @IsIn(PAYMENT_FREQUENCIES)
+  paymentFrequency!: PaymentFrequency;
+
+  /**
+   * El cronograma completo, con las fechas y montos que quedaron en pantalla.
+   * Anticipo + Σ `amount` tiene que dar exactamente `offeredPrice`.
+   */
+  @ApiProperty({ type: [QuotationInstallmentInputDto] })
+  @IsArray()
+  @ArrayMaxSize(MAX_INSTALLMENTS)
+  @ValidateNested({ each: true })
+  @Type(() => QuotationInstallmentInputDto)
+  installments!: QuotationInstallmentInputDto[];
 
   /**
    * Fecha hasta la que la oferta es válida.

@@ -16,20 +16,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { QuotationsService, toInstallmentPreviewDto } from '../services';
-import {
-  CreateQuotationDto,
-  QuotationResponseDto,
-  SimulatePaymentPlanDto,
-  SimulatePaymentPlanResponseDto,
-} from '../dto';
+import { QuotationsService } from '../services';
+import { CreateQuotationDto, QuotationResponseDto } from '../dto';
 
 /**
  * FT-24 — Creación de cotizaciones: arma un presupuesto sobre un servicio del
- * catálogo (FT-22) con un plan de pagos simulado (FLAT o FRANCÉS), y congela
- * las condiciones ofertadas al momento de crearla.
+ * catálogo (FT-22) con un plan de pagos flexible **sin interés** —anticipo y
+ * cuotas con fecha y monto propios—, y congela las condiciones ofertadas al
+ * momento de crearla. El simulador de crédito (`POST /quotations/simulate`)
+ * se retiró en v4.2.18.
  *
- * El alta y el simulador exigen rol clínico (quien atiende es quien cotiza);
+ * El alta exige rol clínico (quien atiende es quien cotiza);
  * la lectura no lo exige, igual que el catálogo de servicios del que parte.
  */
 @ApiTags('quotations')
@@ -42,29 +39,6 @@ export class QuotationsController {
    * @param quotationsService - Valor de quotations service requerido por la operación.
    */
   constructor(private readonly quotationsService: QuotationsService) {}
-
-  /**
-   * Corre el simulador de financiamiento sin persistir nada: devuelve la
-   * tabla de cuotas para que la interfaz la muestre antes de confirmar.
-   *
-   * @param dto - Datos validados de la simulación.
-   * @returns La tabla de cuotas simulada.
-   */
-  @Post('simulate')
-  @Roles('PRACTITIONER', 'CLINICIAN')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Simular un plan de pagos (FLAT o FRANCÉS), sin persistir',
-  })
-  simulate(
-    @Body() dto: SimulatePaymentPlanDto,
-  ): SimulatePaymentPlanResponseDto {
-    return {
-      installments: toInstallmentPreviewDto(
-        this.quotationsService.simulatePaymentPlan(dto),
-      ),
-    };
-  }
 
   /**
    * Crea una cotización: congela el servicio cotizado y el plan de pagos.

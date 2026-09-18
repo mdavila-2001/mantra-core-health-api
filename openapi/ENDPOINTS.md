@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1290 de 1290 endpoints** en **66 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1292 de 1292 endpoints** en **66 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -16,7 +16,7 @@ Se documentan **1290 de 1290 endpoints** en **66 módulos**. La referencia compl
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 18 | [Abrir referencia](endpoints/billing.md) |
 | `chart` | 19 | [Abrir referencia](endpoints/chart.md) |
-| `clinical` | 27 | [Abrir referencia](endpoints/clinical.md) |
+| `clinical` | 30 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 26 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 19 | [Abrir referencia](endpoints/common.md) |
 | `community` | 90 | [Abrir referencia](endpoints/community.md) |
@@ -57,7 +57,7 @@ Se documentan **1290 de 1290 endpoints** en **66 módulos**. La referencia compl
 | `profiles` | 43 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 15 | [Abrir referencia](endpoints/promotions.md) |
 | `qa_lab` | 13 | [Abrir referencia](endpoints/qa-lab.md) |
-| `quotations` | 4 | [Abrir referencia](endpoints/quotations.md) |
+| `quotations` | 3 | [Abrir referencia](endpoints/quotations.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |
 | `redis_runtime` | 5 | [Abrir referencia](endpoints/redis-runtime.md) |
 | `reporting` | 12 | [Abrir referencia](endpoints/reporting.md) |
