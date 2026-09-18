@@ -23,7 +23,9 @@ import {
  */
 describe('B.3 · PDF oficial de receta y verificación pública (integración)', () => {
   let ctx: TestContext;
-  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
+  let camposDePaciente: Awaited<
+    ReturnType<typeof camposObligatoriosDePaciente>
+  >;
   const http = () => request(ctx.app.getHttpServer());
 
   const sufijo = randomUUID().slice(0, 8);

@@ -5,7 +5,9 @@ import {
 import type { MedicationRequests } from '../entities';
 
 /** Una receta emitida mínima, lista para sellar. */
-function receta(overrides: Partial<MedicationRequests> = {}): MedicationRequests {
+function receta(
+  overrides: Partial<MedicationRequests> = {},
+): MedicationRequests {
   return {
     id: 'req-1',
     patientProfileId: 'pat-1',
