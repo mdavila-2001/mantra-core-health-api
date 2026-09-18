@@ -21,6 +21,27 @@ import {
 /**
  * Endpoints de logística de encuentros: episodios de cuidado y ciclo de vida del
  * encuentro (check-in y cierre). Capa fina que delega en los servicios de dominio.
+ *
+ * SEC-01 lo dejó **entero fuera** de su alcance, y conviene explicar por qué: no
+ * es que aquí no haya nada que proteger.
+ *
+ * Abrir el episodio y hacer el check-in traen `patientProfileId` en el cuerpo,
+ * así que técnicamente `ClinicalRecordAccessGuard` podría evaluarlos. Pero la
+ * política que ese guard delega —`assertPuedeLeerHistoria`— abre por un turno de
+ * HOY en estado habilitante o por una relación asistencial vigente, y estas dos
+ * operaciones son parte del **inicio** de la atención: exigirles autorización
+ * previa cierra un círculo —«necesito acceso para ejecutar la operación que crea
+ * el acceso»—, y el check-in es justamente la transición hacia el estado
+ * `CHECKED_IN` que la política mira. Reutilizar una política con semántica
+ * equivocada no es «Existing Capability First»: es aplicar la regla de lectura
+ * del expediente a un acto que no es de lectura.
+ *
+ * Queda como residual de seguridad **abierto y propio**
+ * (`BOOTSTRAP_ACCESS_RESIDUAL`), no como parte cerrada de SEC-01: estas rutas
+ * **no están protegidas** por paciente. Resolverlo pide decidir antes qué acto
+ * funda la relación asistencial, y eso no lo define ninguna fuente vigente.
+ * `encounters/:id/close` sigue fuera por el otro motivo de siempre: su paciente
+ * sale del encuentro ya cargado (GAP-3).
  */
 @ApiTags('clinical-encounters')
 @ApiBearerAuth()

@@ -7,9 +7,11 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import { ClinicalRecordAccessGuard } from '../guards';
 import { ObservationsService } from '../services';
 import {
   AmendObservationDto,
@@ -17,7 +19,13 @@ import {
   ObservationResponseDto,
 } from '../dto';
 
-/** Endpoints de observaciones clínicas (registro y enmienda). */
+/**
+ * Endpoints de observaciones clínicas (registro y enmienda).
+ *
+ * SEC-01: el alta lleva el guard del expediente —su `patientProfileId` viaja en
+ * el cuerpo—; la enmienda no, porque su paciente sale de la observación ya
+ * cargada (GAP-3, deuda abierta).
+ */
 @ApiTags('clinical-observations')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER')
@@ -32,6 +40,7 @@ export class ClinicalObservationsController {
 
   /** UC-08-03. */
   @Post()
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar una observación con componentes y ejecutantes',

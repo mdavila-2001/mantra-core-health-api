@@ -7,9 +7,11 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartCarePlansService } from '../services';
 import {
   ActivityResponseDto,
@@ -18,7 +20,13 @@ import {
   UpdateActivityDto,
 } from '../dto';
 
-/** Endpoints de planes de cuidado del chart (`/charts/care-plans`). */
+/**
+ * Endpoints de planes de cuidado del chart (`/charts/care-plans`).
+ *
+ * SEC-01: el alta lleva el guard del expediente —`patientProfileId` viaja en el
+ * cuerpo—; la actualización de una actividad no, porque su paciente sale del
+ * plan ya cargado (GAP-3, deuda abierta).
+ */
 @ApiTags('chart-care-plans')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER')
@@ -33,6 +41,7 @@ export class ChartCarePlansController {
 
   /** UC-15-10. */
   @Post()
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un plan de cuidado con actividades' })
   createCarePlan(

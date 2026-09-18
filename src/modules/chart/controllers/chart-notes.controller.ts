@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -18,6 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartNotesService, ChartNotesReadService } from '../services';
 import {
   AddVersionDto,
@@ -38,7 +40,18 @@ import {
 /**
  * Endpoints de notas clínicas versionadas (`/charts/notes`). Capa fina: valida
  * parámetros y delega en `ChartNotesService`. La autenticación la impone el guard
- * global; el acceso por paciente (grants) se valida aguas arriba.
+ * global.
+ *
+ * SEC-01 (AC-SEC-02): el acceso por paciente **ya no** «se valida aguas arriba»
+ * —no había nada aguas arriba—. La creación de la nota lleva
+ * `ClinicalRecordAccessGuard`, que resuelve su `patientProfileId` del cuerpo
+ * contra la política del expediente. Es la ruta real que la fuente de SEC-01
+ * citaba como `POST /clinical/encounters/:id/notes`, que nunca existió.
+ *
+ * Las otras siete rutas mutantes (versiones, firma, cofirma, enmienda,
+ * liberación, retención, hallazgos) **no** lo llevan: su paciente sólo se
+ * conoce cargando la nota o la versión, y el guard no carga recursos. Es deuda
+ * de seguridad abierta y trazada (GAP-3 de SEC-01), no un olvido.
  */
 @ApiTags('chart-notes')
 @ApiBearerAuth()
@@ -76,6 +89,7 @@ export class ChartNotesController {
 
   /** UC-15-01. */
   @Post()
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear una nota clínica versionada (borrador SOAP)',

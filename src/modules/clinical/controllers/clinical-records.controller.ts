@@ -7,10 +7,12 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import type { FileLinkResponseDto } from '../../common/dto';
+import { ClinicalRecordAccessGuard } from '../guards';
 import {
   AllergyIntolerancesService,
   ConditionsService,
@@ -43,6 +45,14 @@ import {
 /**
  * Endpoints del registro clínico del paciente: condiciones, alergias, medicación
  * (prescripción y administración), procedimientos e inmunizaciones.
+ *
+ * SEC-01: `ClinicalRecordAccessGuard` se monta **handler a handler**, no sobre
+ * la clase. Sólo lo llevan las seis altas cuyo `patientProfileId` viaja en el
+ * cuerpo, que son las que el guard puede evaluar. Las rutas de comando sobre un
+ * recurso ya existente (`:id/sign`, `:id/issue`, `:id/change-status`…) conocen a
+ * su paciente sólo después de cargarlo, y el guard no carga recursos: montarlo
+ * ahí las dejaría con aspecto de protegidas mientras él las deja pasar sin
+ * evaluar nada. Siguen siendo deuda de seguridad abierta (GAP-3 de SEC-01).
  */
 @ApiTags('clinical-records')
 @ApiBearerAuth()
@@ -68,6 +78,7 @@ export class ClinicalRecordsController {
 
   /** UC-08-08. */
   @Post('conditions')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar una condición/diagnóstico' })
   createCondition(
@@ -106,6 +117,7 @@ export class ClinicalRecordsController {
 
   /** UC-08-09. */
   @Post('allergy-intolerances')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar una alergia con reacciones' })
   createAllergy(
@@ -117,6 +129,7 @@ export class ClinicalRecordsController {
 
   /** UC-08-10. */
   @Post('medication-requests')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Prescribir medicación' })
   prescribeMedication(
@@ -128,6 +141,7 @@ export class ClinicalRecordsController {
 
   /** UC-08-11. */
   @Post('medication-records')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Administrar/registrar medicación' })
   administerMedication(
@@ -214,6 +228,7 @@ export class ClinicalRecordsController {
 
   /** UC-08-12. */
   @Post('procedures')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un procedimiento' })
   createProcedure(
@@ -242,6 +257,7 @@ export class ClinicalRecordsController {
 
   /** UC-08-13. */
   @Post('immunizations')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar una inmunización' })
   createImmunization(
