@@ -18,15 +18,29 @@ import type { TestContext } from '../harness';
  * objetos usa su propio lector y el bucket del espacio de nombres.
  */
 export function configureMinioFromEnv(): void {
-  const host = process.env.MINIO_ENDPOINT ?? 'localhost';
-  const port = process.env.MINIO_PORT ?? '9000';
+  const host = limpio(process.env.MINIO_ENDPOINT) || 'localhost';
+  const port = limpio(process.env.MINIO_PORT) || '9000';
   process.env.FILE_STORAGE_S3_ENDPOINT = `http://${host}:${port}`;
   process.env.FILE_STORAGE_S3_FORCE_PATH_STYLE = 'true';
-  process.env.FILE_STORAGE_S3_ACCESS_KEY_ID = process.env.MINIO_ACCESS_KEY;
-  process.env.FILE_STORAGE_S3_SECRET_ACCESS_KEY = process.env.MINIO_SECRET_KEY;
+  process.env.FILE_STORAGE_S3_ACCESS_KEY_ID = limpio(
+    process.env.MINIO_ACCESS_KEY,
+  );
+  process.env.FILE_STORAGE_S3_SECRET_ACCESS_KEY = limpio(
+    process.env.MINIO_SECRET_KEY,
+  );
 }
 
-export const BUCKET = process.env.MINIO_BUCKET ?? 'mantra-redesa-health-files';
+/**
+ * El `.env` del stack lleva comentarios al final de algunas líneas y
+ * `--env-file` de Docker no los corta: el secreto llegaría con la explicación
+ * pegada y MinIO respondería 403 sin decir por qué.
+ */
+function limpio(valor: string | undefined): string {
+  return (valor ?? '').split('#')[0].trim();
+}
+
+export const BUCKET =
+  limpio(process.env.MINIO_BUCKET) || 'mantra-redesa-health-files';
 
 export function s3(): S3Client {
   return new S3Client({
@@ -34,8 +48,8 @@ export function s3(): S3Client {
     endpoint: process.env.FILE_STORAGE_S3_ENDPOINT,
     forcePathStyle: true,
     credentials: {
-      accessKeyId: process.env.MINIO_ACCESS_KEY ?? '',
-      secretAccessKey: process.env.MINIO_SECRET_KEY ?? '',
+      accessKeyId: process.env.FILE_STORAGE_S3_ACCESS_KEY_ID ?? '',
+      secretAccessKey: process.env.FILE_STORAGE_S3_SECRET_ACCESS_KEY ?? '',
     },
   });
 }
@@ -163,4 +177,61 @@ export async function seedObject(
     [randomUUID(), versionId, namespaceId, `s3://${BUCKET}/${key}`],
   );
   return { manifestId, versionId, logicalObjectId, key };
+}
+
+/**
+ * Cuelga el objeto de una jerarquía DICOM estudio → serie → instancia.
+ *
+ * Es lo que el servidor recorre para saber qué estudio auditar (MCH-020). Las
+ * tres tablas no tienen claves foráneas en el esquema vigente, así que el
+ * `imaging_study_id` es un uuid sintético: nada de este camino lo dereferencia.
+ */
+export async function seedDicomChain(
+  ctx: TestContext,
+  objectManifestId: string,
+  opts: { tenantId: string; patientProfileId: string },
+): Promise<{
+  studyInstanceUid: string;
+  seriesInstanceUid: string;
+  sopInstanceUid: string;
+}> {
+  const sql = sqlOf(ctx);
+  const studyId = randomUUID();
+  const seriesId = randomUUID();
+  const raiz = `1.2.840.10008.${Date.now()}.${Math.floor(Math.random() * 10000)}`;
+  const studyInstanceUid = raiz;
+  const seriesInstanceUid = `${raiz}.1`;
+  const sopInstanceUid = `${raiz}.1.1`;
+
+  await sql(
+    `INSERT INTO object_storage.dicom_study_manifests
+       (id, tenant_id, patient_profile_id, imaging_study_id, study_instance_uid,
+        accession_number, study_date, modality_codes, series_count,
+        instance_count, lifecycle_state)
+     VALUES (?, ?, ?, ?, ?, 'ACC-F06', current_date, '{CT}', 1, 1, 'active')`,
+    [
+      studyId,
+      opts.tenantId,
+      opts.patientProfileId,
+      randomUUID(),
+      studyInstanceUid,
+    ],
+  );
+  await sql(
+    `INSERT INTO object_storage.dicom_series_manifests
+       (id, dicom_study_manifest_id, series_instance_uid, modality, series_number,
+        body_part_examined, instance_count, thumbnail_object_manifest_id)
+     VALUES (?, ?, ?, 'CT', 1, 'CHEST', 1, ?)`,
+    [seriesId, studyId, seriesInstanceUid, objectManifestId],
+  );
+  await sql(
+    `INSERT INTO object_storage.dicom_instance_manifests
+       (id, dicom_series_manifest_id, sop_instance_uid, sop_class_uid,
+        instance_number, transfer_syntax_uid, object_manifest_id, frame_count,
+        metadata_json)
+     VALUES (?, ?, ?, '1.2.840.10008.5.1.4.1.1.2', 1,
+             '1.2.840.10008.1.2.1', ?, 1, '{}'::jsonb)`,
+    [randomUUID(), seriesId, sopInstanceUid, objectManifestId],
+  );
+  return { studyInstanceUid, seriesInstanceUid, sopInstanceUid };
 }

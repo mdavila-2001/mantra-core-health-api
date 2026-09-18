@@ -19,6 +19,7 @@ import {
 } from '../../../common';
 import { ObjectStorageRepository, DicomRepository } from '../repositories';
 import { ClinicalReadService } from '../../clinical/services';
+import { AuditTrailService } from '../../audit/services';
 import type {
   ObjectLocations,
   ObjectManifests,
@@ -81,6 +82,25 @@ interface SignedAccessClaims {
   jti: string;
 }
 
+/**
+ * Eventos de acceso a un objeto que quedan sellados en `audit.audit_log`
+ * (MCH-020).
+ *
+ * Están separados porque responden preguntas distintas al reconstruir un
+ * incidente: qué se autorizó, qué se rechazó, y qué llegó a bajar bytes. No hay
+ * un evento «intentado» aparte: cada intento produce exactamente una de estas
+ * cuatro filas, así que una quinta duplicaría la escritura sin agregar un hecho.
+ */
+const OBJECT_ACCESS_EVENT = {
+  ISSUED: 'OBJECT_ACCESS_ISSUED',
+  DENIED: 'OBJECT_ACCESS_DENIED',
+  REDEEMED: 'OBJECT_ACCESS_REDEEMED',
+  REDEEM_DENIED: 'OBJECT_ACCESS_REDEEM_DENIED',
+} as const;
+
+/** Recurso que nombran los eventos de auditoría de este módulo. */
+const OBJECT_ACCESS_ENTITY = 'object_storage.object_version';
+
 /** Contenido de una versión listo para entregar por el proxy de descarga. */
 export interface ObjectContentDelivery {
   /** Bytes del proveedor, sin materializar en memoria. */
@@ -106,6 +126,8 @@ export class ObjectStorageService {
    * @param contentReader - Lector físico de los objetos (MCH-021).
    * @param clinicalAccess - Política del expediente, reusada para autorizar el
    *                         acceso a los objetos de un paciente (MCH-010).
+   * @param auditTrail - Cadena WORM donde queda todo acceso emitido, denegado o
+   *                     canjeado (MCH-020).
    */
   constructor(
     private readonly em: EntityManager,
@@ -117,6 +139,7 @@ export class ObjectStorageService {
     @Inject(OBJECT_CONTENT_READER)
     private readonly contentReader: ObjectContentReader,
     private readonly clinicalAccess: ClinicalReadService,
+    private readonly auditTrail: AuditTrailService,
   ) {
     this.logger.setContext(ObjectStorageService.name);
   }
@@ -520,6 +543,21 @@ export class ObjectStorageService {
     dto: IssueSignedUrlDto,
     actor: AuthenticatedUser,
   ): Promise<SignedUrlResponseDto> {
+    return this.auditedAccess(
+      versionId,
+      actor,
+      dto.purposeOfUseCode,
+      OBJECT_ACCESS_EVENT.DENIED,
+      async () => this.issueSignedUrlAuthorised(versionId, dto, actor),
+    );
+  }
+
+  /** El cuerpo de {@link issueSignedUrl}, ya envuelto por la auditoría. */
+  private async issueSignedUrlAuthorised(
+    versionId: string,
+    dto: IssueSignedUrlDto,
+    actor: AuthenticatedUser,
+  ): Promise<SignedUrlResponseDto> {
     return this.em.transactional(async (tx) => {
       const { version, manifest } = await this.resolveServableVersion(
         tx,
@@ -547,19 +585,27 @@ export class ObjectStorageService {
       };
       const token = signAccessToken(claims);
 
-      // El acceso a imagen clínica se registra aunque sea sólo la emisión del
-      // enlace: es el momento en que el dato sale de nuestro control.
-      let accessLogId: string | undefined;
-      if (dto.studyInstanceUid) {
-        accessLogId = this.dicomRepo.createAccessLog(tx, {
-          tenantId: manifest.tenantId,
-          principalId: actor.id,
-          operation: DICOMWEB_OPERATION.WADO_URI,
-          studyInstanceUid: dto.studyInstanceUid,
-          purposeOfUseCode: dto.purposeOfUseCode,
-          outcome: DICOMWEB_OUTCOME.ALLOWED,
-        }).id;
-      }
+      // MCH-020: el acceso a imagen clínica se registra con el estudio que
+      // resuelve el servidor por la jerarquía del objeto, no con el que venía
+      // en el cuerpo. Omitir el campo ya no borra la evidencia, y mandar un UID
+      // ajeno ya no la desvía a otro estudio.
+      const accessLogId = await this.recordDicomAccess(
+        tx,
+        manifest,
+        actor,
+        dto.purposeOfUseCode,
+        DICOMWEB_OUTCOME.ALLOWED,
+      );
+
+      // El sello va en la misma transacción que la emisión: si la evidencia no
+      // se puede escribir, el acceso no se emite. Es la política explícita ante
+      // un sink de auditoría caído para una acción sensible.
+      await this.auditTrail.record(tx, actor, {
+        action: OBJECT_ACCESS_EVENT.ISSUED,
+        entity: OBJECT_ACCESS_ENTITY,
+        entityId: versionId,
+        tenantId: manifest.tenantId,
+      });
 
       // El aviso va después de las comprobaciones y nombra la emisión, no el
       // token: un enlace reutilizable en los logs es el mismo problema que se
@@ -606,6 +652,21 @@ export class ObjectStorageService {
     token: string,
     actor: AuthenticatedUser,
   ): Promise<ObjectContentDelivery> {
+    return this.auditedAccess(
+      versionId,
+      actor,
+      verifyAccessToken(token)?.p,
+      OBJECT_ACCESS_EVENT.REDEEM_DENIED,
+      async () => this.redeemSignedAccessAudited(versionId, token, actor),
+    );
+  }
+
+  /** El cuerpo de {@link redeemSignedAccess}, ya envuelto por la auditoría. */
+  private async redeemSignedAccessAudited(
+    versionId: string,
+    token: string,
+    actor: AuthenticatedUser,
+  ): Promise<ObjectContentDelivery> {
     const claims = verifyAccessToken(token);
     if (
       !claims ||
@@ -622,9 +683,32 @@ export class ObjectStorageService {
     // La finalidad sale del token, no de la petición del canje: si viniera de
     // nuevo del cliente, la comprobación de MCH-010 se haría contra lo que
     // declare ahora y no contra aquello que se autorizó al emitir.
-    const { version, location } = await this.em.transactional((tx) =>
-      this.resolveServableVersion(tx, versionId, actor, claims.p),
-    );
+    const { version, location } = await this.em.transactional(async (tx) => {
+      const resuelto = await this.resolveServableVersion(
+        tx,
+        versionId,
+        actor,
+        claims.p,
+      );
+      // MCH-020: el canje es el momento en que los bytes salen, y queda
+      // registrado como un evento propio —no alcanza con haber anotado la
+      // emisión, que pudo no usarse nunca—. Va en la misma transacción: sin
+      // evidencia no se abre el objeto.
+      await this.recordDicomAccess(
+        tx,
+        resuelto.manifest,
+        actor,
+        claims.p,
+        DICOMWEB_OUTCOME.ALLOWED,
+      );
+      await this.auditTrail.record(tx, actor, {
+        action: OBJECT_ACCESS_EVENT.REDEEMED,
+        entity: OBJECT_ACCESS_ENTITY,
+        entityId: versionId,
+        tenantId: resuelto.manifest.tenantId,
+      });
+      return resuelto;
+    });
     const namespace = await this.storageRepo.findNamespaceById(
       this.em,
       location.namespaceId,
@@ -680,6 +764,94 @@ export class ObjectStorageService {
   }
 
   // --- Apoyo ---
+
+  /**
+   * Corre una operación de acceso dejando evidencia pase lo que pase (MCH-020).
+   *
+   * El fallo se sella en una transacción **propia**: si se registrara dentro de
+   * la del acceso, el mismo rollback que cancela la emisión borraría la prueba
+   * de que alguien la intentó — que es justamente el intento que hay que poder
+   * reconstruir.
+   *
+   * Un fallo al escribir esa evidencia no convierte un rechazo en un permiso:
+   * el error original se propaga igual, y el problema del sink queda en el log
+   * de errores. Al revés sí importa, y por eso el camino feliz sella dentro de
+   * la transacción del acceso: sin evidencia, no hay acceso.
+   */
+  private async auditedAccess<T>(
+    versionId: string,
+    actor: AuthenticatedUser,
+    purposeOfUseCode: string | undefined,
+    evento: string,
+    operacion: () => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await operacion();
+    } catch (error) {
+      try {
+        await this.em.transactional((tx) =>
+          this.auditTrail.record(tx, actor, {
+            action: evento,
+            entity: OBJECT_ACCESS_ENTITY,
+            entityId: versionId,
+            tenantId: actor.tenantIds?.[0],
+            success: false,
+          }),
+        );
+      } catch (auditError) {
+        this.logger.error(
+          {
+            operation: 'object-storage.access.audit',
+            versionId,
+            actorUserId: actor.id,
+            purposeOfUseCode,
+            event: evento,
+            error: (auditError as Error).message,
+          },
+          'Access audit could not be recorded for a denied object access',
+        );
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Registra el acceso DICOM con las coordenadas que resuelve el servidor
+   * (MCH-020).
+   *
+   * Antes la fila se creaba sólo si el cuerpo traía `studyInstanceUid`, y con
+   * ese valor: el cliente decidía si el acceso quedaba auditado y contra qué
+   * estudio. Acá se sube por la jerarquía instancia → serie → estudio desde el
+   * manifiesto que el servidor ya resolvió. El tenant sale del estudio, no del
+   * actor.
+   *
+   * Un objeto que no es una instancia DICOM catalogada no tiene estudio que
+   * nombrar: ese acceso queda igualmente sellado en `audit.audit_log`, que es
+   * la vía que cubre todo objeto y no sólo la imagen.
+   */
+  private async recordDicomAccess(
+    tx: EntityManager,
+    manifest: ObjectManifests,
+    actor: AuthenticatedUser,
+    purposeOfUseCode: string,
+    outcome: string,
+  ): Promise<string | undefined> {
+    const coordenadas = await this.dicomRepo.findDicomCoordinates(
+      tx,
+      manifest.id,
+    );
+    if (!coordenadas) return undefined;
+    return this.dicomRepo.createAccessLog(tx, {
+      tenantId: coordenadas.tenantId,
+      principalId: actor.id,
+      operation: DICOMWEB_OPERATION.WADO_URI,
+      studyInstanceUid: coordenadas.studyInstanceUid,
+      seriesInstanceUid: coordenadas.seriesInstanceUid,
+      sopInstanceUid: coordenadas.sopInstanceUid,
+      purposeOfUseCode,
+      outcome,
+    }).id;
+  }
 
   /**
    * Las comprobaciones que decidan si una versión se puede servir, en un solo

@@ -94,7 +94,20 @@ function build() {
     createLargePayload: mockFn(() => ({ id: 'payload-1' })),
     findLargePayloadBySource: mockFn(() => Promise.resolve(null)),
   };
-  const dicomRepo = { createAccessLog: mockFn(() => ({ id: 'access-1' })) };
+  const dicomRepo = {
+    createAccessLog: mockFn(() => ({ id: 'access-1' })),
+    // MCH-020: las coordenadas DICOM las resuelve el servidor por la jerarquía
+    // del objeto; el cuerpo de la petición ya no las aporta.
+    findDicomCoordinates: mockFn(() =>
+      Promise.resolve({
+        studyInstanceUid: '1.2.840.10008.REAL',
+        seriesInstanceUid: '1.2.840.10008.REAL.1',
+        sopInstanceUid: '1.2.840.10008.REAL.1.1',
+        tenantId: TENANT,
+        patientProfileId: 'pat-1',
+      }),
+    ),
+  };
   const logger = {
     setContext: mockFn(),
     info: mockFn(),
@@ -126,6 +139,8 @@ function build() {
   const clinicalAccess = {
     assertPuedeLeerHistoria: mockFn(() => Promise.resolve()),
   };
+  // MCH-020: cadena WORM donde queda todo acceso, con el resultado que tuvo.
+  const auditTrail = { record: mockFn(() => Promise.resolve()) };
   const service = new ObjectStorageService(
     em as any,
     storageRepo as any,
@@ -134,6 +149,7 @@ function build() {
     undefined,
     reader as any,
     clinicalAccess as any,
+    auditTrail as any,
   );
   return {
     service,
@@ -144,6 +160,7 @@ function build() {
     reader,
     stored,
     clinicalAccess,
+    auditTrail,
   };
 }
 
@@ -926,18 +943,155 @@ describe('ObjectStorageService', () => {
       expect(d.logger.warn).toHaveBeenCalled();
     });
 
-    it('records the DICOM access when a study is given', async () => {
-      const d = build();
-      wire(d);
+    // MCH-020: la evidencia del acceso la decide y la nombra el servidor.
+    describe('auditoría del acceso (MCH-020)', () => {
+      it('records the DICOM access without any study given by the client', async () => {
+        const d = build();
+        wire(d);
 
-      const res = await d.service.issueSignedUrl(
-        VERSION,
-        { ...dto, studyInstanceUid: '1.2.3' },
-        actor,
-      );
+        const res = await d.service.issueSignedUrl(VERSION, dto, actor);
 
-      expect(res.accessLogId).toBe('access-1');
-      expect(d.dicomRepo.createAccessLog).toHaveBeenCalled();
+        expect(res.accessLogId).toBe('access-1');
+        expect(d.dicomRepo.createAccessLog).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            studyInstanceUid: '1.2.840.10008.REAL',
+            seriesInstanceUid: '1.2.840.10008.REAL.1',
+            sopInstanceUid: '1.2.840.10008.REAL.1.1',
+            tenantId: TENANT,
+            principalId: actor.id,
+            outcome: 'allowed',
+          }),
+        );
+      });
+
+      it('ignores the study the client declares and logs the real one', async () => {
+        const d = build();
+        wire(d);
+
+        await d.service.issueSignedUrl(
+          VERSION,
+          { ...dto, studyInstanceUid: '6.6.6.SUPLANTADO' },
+          actor,
+        );
+
+        expect(d.dicomRepo.createAccessLog).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ studyInstanceUid: '1.2.840.10008.REAL' }),
+        );
+      });
+
+      it('seals the issuance in the audit chain, inside the same transaction', async () => {
+        const d = build();
+        wire(d);
+
+        await d.service.issueSignedUrl(VERSION, dto, actor);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({
+            action: 'OBJECT_ACCESS_ISSUED',
+            entityId: VERSION,
+            tenantId: TENANT,
+          }),
+        );
+      });
+
+      it('does not issue the access when the audit sink fails', async () => {
+        const d = build();
+        wire(d);
+        d.auditTrail.record.mockRejectedValueOnce(new Error('sink caído'));
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toThrow('sink caído');
+      });
+
+      it('audits a denied access even though the operation rolled back', async () => {
+        const d = build();
+        wire(d, { tenantId: '99999999-9999-9999-9999-999999999999' });
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({
+            action: 'OBJECT_ACCESS_DENIED',
+            entityId: VERSION,
+            success: false,
+          }),
+        );
+      });
+
+      it('audits a blocked object instead of reporting a false success', async () => {
+        const d = build();
+        wire(d, { lifecycleState: OBJECT_LIFECYCLE.CORRUPT });
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({ action: 'OBJECT_ACCESS_DENIED' }),
+        );
+        // Y no se anunció una emisión que nunca ocurrió.
+        expect(d.dicomRepo.createAccessLog).not.toHaveBeenCalled();
+      });
+
+      it('audits the redemption as its own event', async () => {
+        const d = build();
+        wire(d);
+        d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
+        const { token } = await emitir(d);
+
+        await (d.service as any).redeemSignedAccess(VERSION, token, actor);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({ action: 'OBJECT_ACCESS_REDEEMED' }),
+        );
+      });
+
+      it('audits a redemption rejected by an invalid link', async () => {
+        const d = build();
+        wire(d);
+
+        await expect(
+          (d.service as any).redeemSignedAccess(VERSION, 'basura', actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({
+            action: 'OBJECT_ACCESS_REDEEM_DENIED',
+            success: false,
+          }),
+        );
+      });
+
+      it('an object outside the DICOM catalogue is still sealed in the chain', async () => {
+        const d = build();
+        wire(d);
+        d.dicomRepo.findDicomCoordinates.mockResolvedValue(null);
+
+        const res = await d.service.issueSignedUrl(VERSION, dto, actor);
+
+        expect(res.accessLogId).toBeUndefined();
+        expect(d.dicomRepo.createAccessLog).not.toHaveBeenCalled();
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({ action: 'OBJECT_ACCESS_ISSUED' }),
+        );
+      });
     });
 
     it('refuses a version whose checksum was only declared by the client (MCH-021)', async () => {

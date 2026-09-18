@@ -955,10 +955,20 @@ export class IssueSignedUrlDto {
   expiresInSeconds?: number;
 
   /**
-   * Valor de study instance uid mantenido por la instancia.
+   * Study UID declarado por el cliente. **Se acepta y se ignora** (MCH-020).
+   *
+   * La auditoría del acceso dependía de este campo: sin él no se creaba
+   * registro alguno, y con él se auditaba el estudio que el cliente nombrara.
+   * El servidor resuelve ahora las coordenadas DICOM por la jerarquía del
+   * objeto. Se mantiene en el contrato para no romper a quien ya lo envía; no
+   * influye en nada y desaparecerá en una versión próxima.
+   *
+   * @deprecated El estudio lo resuelve el servidor desde el objeto.
    */
   @ApiPropertyOptional({
-    description: 'Study UID si el objeto es DICOM',
+    deprecated: true,
+    description:
+      'Ignorado: el estudio se resuelve desde el objeto en el servidor',
     maxLength: 200,
   })
   @IsOptional()

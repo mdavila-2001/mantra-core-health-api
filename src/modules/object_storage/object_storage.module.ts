@@ -19,6 +19,10 @@ import { OBJECT_CONTENT_READER, S3ObjectContentReader } from './ports';
 // exporta para el guard del expediente. Import unidireccional: `clinical` no
 // conoce `object_storage`, así que no cierra ciclo.
 import { ClinicalModule } from '../clinical/clinical.module';
+// MCH-020: todo acceso a un objeto —emitido, denegado o canjeado— se sella en
+// la cadena WORM de `audit`, que ya exporta `AuditTrailService` para que cada
+// dominio selle dentro de su propia transacción.
+import { AuditModule } from '../audit/audit.module';
 
 /**
  * Módulo de almacenamiento de objetos: cargas multiparte, versiones inmutables,
@@ -31,6 +35,7 @@ import { ClinicalModule } from '../clinical/clinical.module';
     MikroOrmModule.forFeature(Object.values(entities)),
     StorageLifecycleModule,
     ClinicalModule,
+    AuditModule,
   ],
   controllers: [ObjectStorageController, DicomWebController],
   providers: [
