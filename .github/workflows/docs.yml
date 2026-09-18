@@ -64,7 +64,13 @@ jobs:
     # lo que exigen los `services:` de acá abajo. Cuando la facturación se
     # reponga, volver a `ubuntu-latest` es cambiar esta línea.
     # Detalles y recuperación: docs/operations/ci-runner-self-hosted.md
-    runs-on: [self-hosted, linux, x64]
+    # Vuelta a runners hospedados (18/09/2026). El runner propio dejó de tomar
+    # trabajos: las corridas de los PR #417 a #421 quedaron en cola sin ejecutar
+    # y el equipo mergeó sin un solo check. Requiere que la facturación de
+    # Actions esté al día; si no lo está, el job muere al arrancar —que también
+    # es rojo, pero honesto— en vez de quedar en cola invisible.
+    # Ver docs/operations/ci-runner-self-hosted.md
+    runs-on: ubuntu-latest
     env:
       # El heap por defecto de Node (~2 GB) no alcanza en este repositorio. El
       # lint type-aware sobre 60 módulos y ~1185 entidades muere con "JavaScript
