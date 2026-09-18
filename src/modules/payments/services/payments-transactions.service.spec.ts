@@ -447,6 +447,98 @@ describe('PaymentsTransactionsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
+    // MCH-017: el tope de reembolsos se compara con aritmética exacta. Con
+    // `Number`, 0.10 + 0.20 da 0.30000000000000004 y rechazaba un reembolso válido.
+    describe('MCH-017 · importes exactos', () => {
+      function capturada(d: ReturnType<typeof build>, amount: string) {
+        d.transactionsRepo.findByIdForUpdate.mockResolvedValue({
+          id: 'txn-1',
+          amount,
+          currencyConceptId: CONCEPTS.CURRENCY_BOB,
+          statusConceptId: CONCEPTS.TXN_CAPTURED,
+        });
+        d.transactionsRepo.createRefund.mockReturnValue({ id: 'refund-n' });
+      }
+      const pendiente = (amount: string) => ({
+        amount,
+        statusConceptId: CONCEPTS.REFUND_PENDING,
+      });
+
+      it('AC01 · capturado 0.30, devuelto 0.10: acepta exactamente 0.20', async () => {
+        const d = build();
+        capturada(d, '0.30');
+        d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
+          pendiente('0.10'),
+        ]);
+
+        const res = await d.service.refund('txn-1', { amount: '0.20' }, actor);
+
+        expect(res.statusConceptId).toBe(CONCEPTS.REFUND_PENDING);
+        expect(d.transactionsRepo.createRefund).toHaveBeenCalledTimes(1);
+      });
+
+      it('AC02 · rechaza un exceso real de una unidad menor, sin crear la fila', async () => {
+        const d = build();
+        capturada(d, '0.30');
+        d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
+          pendiente('0.10'),
+        ]);
+
+        await expect(
+          d.service.refund('txn-1', { amount: '0.21' }, actor),
+        ).rejects.toMatchObject({
+          constructor: ConflictException,
+        });
+        expect(d.transactionsRepo.createRefund).not.toHaveBeenCalled();
+      });
+
+      it('AC03 · la suma de muchas devoluciones cierra justo en el capturado', async () => {
+        const d = build();
+        capturada(d, '2.00');
+        d.transactionsRepo.findRefundsByTransaction.mockResolvedValue(
+          Array.from({ length: 19 }, () => pendiente('0.10')),
+        );
+
+        const res = await d.service.refund('txn-1', { amount: '0.10' }, actor);
+
+        expect(res.statusConceptId).toBe(CONCEPTS.REFUND_PENDING);
+      });
+
+      it('AC03 · compara por valor aunque la base y el pedido usen escalas distintas', async () => {
+        const d = build();
+        // `numeric` sin escala fija puede volver '0.3'; una moneda sin
+        // decimales llega como entero.
+        capturada(d, '0.3');
+        d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
+          pendiente('0.1'),
+        ]);
+        await expect(
+          d.service.refund('txn-1', { amount: '0.20' }, actor),
+        ).resolves.toMatchObject({ statusConceptId: CONCEPTS.REFUND_PENDING });
+
+        const e = build();
+        capturada(e, '300');
+        e.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
+          pendiente('100'),
+        ]);
+        await expect(
+          e.service.refund('txn-1', { amount: '200.01' }, actor),
+        ).rejects.toBeInstanceOf(ConflictException);
+      });
+
+      it('rechaza importes cero o con signo aunque lleguen sin pasar por el DTO', async () => {
+        for (const amount of ['0', '0.00', '-0.10']) {
+          const d = build();
+          capturada(d, '0.30');
+          d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([]);
+          await expect(
+            d.service.refund('txn-1', { amount }, actor),
+          ).rejects.toBeInstanceOf(PreconditionFailedException);
+          expect(d.transactionsRepo.createRefund).not.toHaveBeenCalled();
+        }
+      });
+    });
+
     it('rejects refunding a transaction that was never captured', async () => {
       const d = build();
       d.transactionsRepo.findByIdForUpdate.mockResolvedValue({

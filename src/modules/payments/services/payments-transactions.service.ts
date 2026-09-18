@@ -30,6 +30,11 @@ import {
   CancellationResponseDto,
   type TransactionOperation,
 } from '../dto';
+import {
+  compararImportes,
+  esImportePositivo,
+  sumarImportes,
+} from './payment-money';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   AUTHORIZE: CONCEPTS.TXN_OP_AUTHORIZE,
@@ -366,21 +371,39 @@ export class PaymentsTransactionsService {
         );
       }
 
+      // El DTO ya lo valida; se repite acá porque el tope de abajo supone
+      // importes positivos y el servicio también se llama sin pasar por HTTP.
+      if (!esImportePositivo(dto.amount)) {
+        throw new PreconditionFailedException(
+          'El importe del reembolso debe ser mayor que cero',
+          { transactionId, amount: dto.amount },
+        );
+      }
+
       const previous = await this.transactionsRepo.findRefundsByTransaction(
         tx,
         transactionId,
       );
       // Un reembolso fallido no devolvió dinero; uno pendiente sí lo compromete.
-      const refunded = previous
-        .filter((r) => r.statusConceptId !== CONCEPTS.REFUND_FAILED)
-        .reduce((sum, r) => sum + Number(r.amount), 0);
-      if (refunded + Number(dto.amount) > Number(transaction.amount)) {
+      // Suma y comparación exactas (MCH-017): con `Number`, 0.10 + 0.20 superaba
+      // 0.30 y se rechazaba un reembolso válido.
+      const refunded = sumarImportes(
+        previous
+          .filter((r) => r.statusConceptId !== CONCEPTS.REFUND_FAILED)
+          .map((r) => r.amount),
+      );
+      if (
+        compararImportes(
+          sumarImportes([refunded, dto.amount]),
+          transaction.amount,
+        ) > 0
+      ) {
         throw new ConflictException(
           'El reembolso excede el importe capturado',
           {
             transactionId,
             captured: transaction.amount,
-            alreadyRefunded: refunded.toFixed(2),
+            alreadyRefunded: refunded,
           },
         );
       }
