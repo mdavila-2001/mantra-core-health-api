@@ -37,13 +37,13 @@ const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   SALE: CONCEPTS.TXN_OP_SALE,
 };
 
-/** Estado en que queda la transacción según la operación solicitada. */
-const OPERATION_RESULT_STATUS: Readonly<Record<TransactionOperation, string>> =
-  {
-    AUTHORIZE: CONCEPTS.TXN_AUTHORIZED,
-    CAPTURE: CONCEPTS.TXN_CAPTURED,
-    SALE: CONCEPTS.TXN_CAPTURED,
-  };
+/*
+ * Contención MCH-003 (F01-T01). El módulo no tiene adaptador de gateway: ninguna
+ * de estas rutas llama a un proveedor. Hasta que exista uno (F05), lo único
+ * honesto es registrar la *solicitud* y dejar el resultado pendiente. El único
+ * camino que puede afirmar que el dinero se movió es el callback firmado del
+ * proveedor (`applyCallback`), que verifica el HMAC antes de tocar un estado.
+ */
 
 /** Estados terminales de cobro: habilitan reembolso pero no anulación. */
 const CAPTURED_STATES: readonly string[] = [
@@ -77,7 +77,10 @@ export class PaymentsTransactionsService {
   }
 
   /**
-   * UC-42-05: ejecuta la operación contra el gateway.
+   * UC-42-05: registra la operación solicitada al gateway.
+   *
+   * La transacción nace en PROCESSING sea cual sea la operación: sin adaptador no
+   * hay respuesta del proveedor que permita afirmar autorización ni captura.
    *
    * Se exige que el motor de riesgo haya aprobado el intent (UC-42-04 va incluido
    * en este flujo): cobrar sin esa decisión dejaría pasar operaciones que el
@@ -115,6 +118,28 @@ export class PaymentsTransactionsService {
         });
       }
 
+      // Una operación abierta impide otra que el proveedor pueda confirmar a la
+      // vez: sería un segundo cobro. Sobre una autorización confirmada sólo cabe
+      // capturarla; otra venta o autorización duplicaría el cargo.
+      const open = await this.transactionsRepo.findPendingByIntent(
+        tx,
+        intentId,
+      );
+      if (
+        open &&
+        (open.statusConceptId === CONCEPTS.TXN_PROCESSING ||
+          dto.operation !== 'CAPTURE')
+      ) {
+        throw new ConflictException(
+          'La intención tiene una operación abierta en el gateway',
+          {
+            intentId,
+            transactionId: open.id,
+            statusConceptId: open.statusConceptId,
+          },
+        );
+      }
+
       const risk = await this.flowRepo.findLatestRiskAssessment(tx, intentId);
       if (!risk) {
         throw new PreconditionFailedException(
@@ -138,17 +163,14 @@ export class PaymentsTransactionsService {
         gatewayTransactionRef: dto.gatewayTransactionRef,
         amount: dto.amount ?? intent.amount,
         currencyConceptId: intent.currencyConceptId,
-        statusConceptId: OPERATION_RESULT_STATUS[dto.operation],
+        statusConceptId: CONCEPTS.TXN_PROCESSING,
         authorizationCode: dto.authorizationCode,
         processedAt: new Date(),
         actorUserId: actor.id,
       });
 
-      // Autorizar deja el intent en proceso; capturar o vender lo cierra.
-      intent.statusConceptId =
-        dto.operation === 'AUTHORIZE'
-          ? CONCEPTS.PI_PROCESSING
-          : CONCEPTS.PI_SUCCEEDED;
+      // El intent sólo se cierra cuando el proveedor confirma por callback.
+      intent.statusConceptId = CONCEPTS.PI_PROCESSING;
       touch(intent, actor.id);
 
       return {
@@ -267,7 +289,8 @@ export class PaymentsTransactionsService {
    * UC-42-07: consulta independiente de estado.
    *
    * Sirve como confirmación antes de los efectos contables cuando el callback no
-   * llegó o discrepa. `reconciled` indica si la consulta cambió el estado local.
+   * llegó o discrepa. `reconciled` indica si la consulta cambió el estado local;
+   * mientras no exista adaptador de gateway es siempre `false`.
    */
   async inquireStatus(
     transactionId: string,
@@ -289,25 +312,29 @@ export class PaymentsTransactionsService {
         });
       }
 
-      // Sin conector de gateway implementado, la consulta confirma el estado ya
-      // conocido: no se inventa un resultado que el proveedor no informó.
-      const reconciled =
-        transaction.statusConceptId === CONCEPTS.TXN_PROCESSING;
-      if (reconciled) {
-        transaction.statusConceptId = CONCEPTS.TXN_CAPTURED;
-        touch(transaction, actor.id);
-      }
+      // Sin conector de gateway no hay a quién consultar: se devuelve el estado
+      // conocido tal cual. Antes esto convertía PROCESSING en CAPTURED, es decir,
+      // afirmaba un cobro que el proveedor nunca informó (MCH-003-AC01).
+      this.logger.warn(
+        {
+          operation: 'payments.transaction.inquiry',
+          transactionId,
+          actorUserId: actor.id,
+          reason: 'gateway-adapter-not-configured',
+        },
+        'Status inquiry answered from local state; no gateway adapter',
+      );
 
       return {
         transactionId,
         statusConceptId: transaction.statusConceptId,
-        reconciled,
+        reconciled: false,
       };
     });
   }
 
   /**
-   * UC-42-08: reembolso total o parcial.
+   * UC-42-08: solicita un reembolso total o parcial; queda pendiente del gateway.
    *
    * Solo sobre transacciones capturadas o liquidadas, y la suma de reembolsos no
    * puede superar lo cobrado: devolver más de lo capturado es un descuadre contable.
@@ -343,7 +370,10 @@ export class PaymentsTransactionsService {
         tx,
         transactionId,
       );
-      const refunded = previous.reduce((sum, r) => sum + Number(r.amount), 0);
+      // Un reembolso fallido no devolvió dinero; uno pendiente sí lo compromete.
+      const refunded = previous
+        .filter((r) => r.statusConceptId !== CONCEPTS.REFUND_FAILED)
+        .reduce((sum, r) => sum + Number(r.amount), 0);
       if (refunded + Number(dto.amount) > Number(transaction.amount)) {
         throw new ConflictException(
           'El reembolso excede el importe capturado',
@@ -361,8 +391,8 @@ export class PaymentsTransactionsService {
         currencyConceptId: transaction.currencyConceptId,
         reasonConceptId: CONCEPTS.REFUND_REASON_REQUESTED,
         gatewayRefundRef: dto.gatewayRefundRef,
-        statusConceptId: CONCEPTS.REFUND_COMPLETED,
-        processedAt: new Date(),
+        // Pendiente hasta que el proveedor confirme la devolución (MCH-003-AC03).
+        statusConceptId: CONCEPTS.REFUND_PENDING,
         actorUserId: actor.id,
       });
 
@@ -370,7 +400,7 @@ export class PaymentsTransactionsService {
         id: refund.id,
         paymentTransactionId: transactionId,
         amount: dto.amount,
-        statusConceptId: CONCEPTS.REFUND_COMPLETED,
+        statusConceptId: CONCEPTS.REFUND_PENDING,
       };
     });
   }
@@ -421,8 +451,8 @@ export class PaymentsTransactionsService {
         actorUserId: actor.id,
       });
 
-      transaction.statusConceptId = CONCEPTS.TXN_VOIDED;
-      touch(transaction, actor.id);
+      // La transacción no cambia: anular es una decisión del proveedor, no de
+      // quien la pide. CANCEL_REQUESTED no es VOIDED (MCH-003-AC03).
 
       return {
         id: request.id,

@@ -66,6 +66,7 @@ function build() {
     findByGatewayRef: mockFn(),
     createRefund: mockFn(),
     findRefundsByTransaction: mockFn(),
+    findPendingByIntent: mockFn(),
     createCancellation: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -82,7 +83,10 @@ function build() {
 
 describe('PaymentsTransactionsService', () => {
   describe('processTransaction (UC-42-05)', () => {
-    it('captures the payment and closes the intent as succeeded', async () => {
+    // MCH-003 (contención F01-T01): no hay adaptador de gateway, así que pedir
+    // CAPTURE/SALE no mueve dinero. La transacción queda en proceso hasta que el
+    // proveedor lo confirme con un callback firmado; nunca se fabrica el cobro.
+    it('records the capture as processing and never closes the intent as succeeded', async () => {
       const d = build();
       const intent = {
         id: 'intent-1',
@@ -98,8 +102,9 @@ describe('PaymentsTransactionsService', () => {
       d.transactionsRepo.create.mockReturnValue({
         id: 'txn-1',
         amount: '150.00',
-        statusConceptId: CONCEPTS.TXN_CAPTURED,
+        statusConceptId: CONCEPTS.TXN_PROCESSING,
       });
+      d.transactionsRepo.findPendingByIntent.mockResolvedValue(null);
 
       const res = await d.service.processTransaction(
         'intent-1',
@@ -107,8 +112,117 @@ describe('PaymentsTransactionsService', () => {
         actor,
       );
 
-      expect(res.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
-      expect(intent.statusConceptId).toBe(CONCEPTS.PI_SUCCEEDED);
+      expect(d.transactionsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ statusConceptId: CONCEPTS.TXN_PROCESSING }),
+      );
+      expect(res.statusConceptId).toBe(CONCEPTS.TXN_PROCESSING);
+      expect(intent.statusConceptId).toBe(CONCEPTS.PI_PROCESSING);
+    });
+
+    it('does not record a bare authorization as authorized either', async () => {
+      const d = build();
+      const intent = {
+        id: 'intent-1',
+        gatewayId: 'gw-1',
+        amount: '150.00',
+        currencyConceptId: CONCEPTS.CURRENCY_BOB,
+        statusConceptId: CONCEPTS.PI_PENDING,
+      };
+      d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
+      d.flowRepo.findLatestRiskAssessment.mockResolvedValue({
+        decisionConceptId: CONCEPTS.RISK_APPROVE,
+      });
+      d.transactionsRepo.create.mockReturnValue({ id: 'txn-1' });
+      d.transactionsRepo.findPendingByIntent.mockResolvedValue(null);
+
+      await d.service.processTransaction(
+        'intent-1',
+        { operation: 'AUTHORIZE' },
+        actor,
+      );
+
+      expect(d.transactionsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ statusConceptId: CONCEPTS.TXN_PROCESSING }),
+      );
+    });
+
+    it('rejects a second operation while one is still awaiting the gateway', async () => {
+      const d = build();
+      d.intentsRepo.findByIdForUpdate.mockResolvedValue({
+        id: 'intent-1',
+        gatewayId: 'gw-1',
+        amount: '150.00',
+        statusConceptId: CONCEPTS.PI_PROCESSING,
+      });
+      d.flowRepo.findLatestRiskAssessment.mockResolvedValue({
+        decisionConceptId: CONCEPTS.RISK_APPROVE,
+      });
+      d.transactionsRepo.findPendingByIntent.mockResolvedValue({
+        id: 'txn-0',
+        statusConceptId: CONCEPTS.TXN_PROCESSING,
+      });
+
+      await expect(
+        d.service.processTransaction('intent-1', { operation: 'SALE' }, actor),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.transactionsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it.each(['SALE', 'AUTHORIZE'] as const)(
+      'rejects %s over an authorization the gateway already confirmed',
+      async (operation) => {
+        const d = build();
+        d.intentsRepo.findByIdForUpdate.mockResolvedValue({
+          id: 'intent-1',
+          gatewayId: 'gw-1',
+          amount: '150.00',
+          statusConceptId: CONCEPTS.PI_PROCESSING,
+        });
+        d.flowRepo.findLatestRiskAssessment.mockResolvedValue({
+          decisionConceptId: CONCEPTS.RISK_APPROVE,
+        });
+        d.transactionsRepo.findPendingByIntent.mockResolvedValue({
+          id: 'txn-0',
+          statusConceptId: CONCEPTS.TXN_AUTHORIZED,
+        });
+
+        await expect(
+          d.service.processTransaction('intent-1', { operation }, actor),
+        ).rejects.toBeInstanceOf(ConflictException);
+        expect(d.transactionsRepo.create).not.toHaveBeenCalled();
+      },
+    );
+
+    it('lets CAPTURE proceed over a confirmed authorization', async () => {
+      const d = build();
+      d.intentsRepo.findByIdForUpdate.mockResolvedValue({
+        id: 'intent-1',
+        gatewayId: 'gw-1',
+        amount: '150.00',
+        statusConceptId: CONCEPTS.PI_PROCESSING,
+      });
+      d.flowRepo.findLatestRiskAssessment.mockResolvedValue({
+        decisionConceptId: CONCEPTS.RISK_APPROVE,
+      });
+      d.transactionsRepo.findPendingByIntent.mockResolvedValue({
+        id: 'txn-0',
+        statusConceptId: CONCEPTS.TXN_AUTHORIZED,
+      });
+      d.transactionsRepo.create.mockReturnValue({ id: 'txn-1' });
+
+      const res = await d.service.processTransaction(
+        'intent-1',
+        { operation: 'CAPTURE' },
+        actor,
+      );
+
+      expect(res.id).toBe('txn-1');
+      expect(d.transactionsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ statusConceptId: CONCEPTS.TXN_PROCESSING }),
+      );
     });
 
     it('leaves the intent in processing after a bare authorization', async () => {
@@ -127,8 +241,9 @@ describe('PaymentsTransactionsService', () => {
       d.transactionsRepo.create.mockReturnValue({
         id: 'txn-1',
         amount: '150.00',
-        statusConceptId: CONCEPTS.TXN_AUTHORIZED,
+        statusConceptId: CONCEPTS.TXN_PROCESSING,
       });
+      d.transactionsRepo.findPendingByIntent.mockResolvedValue(null);
 
       await d.service.processTransaction(
         'intent-1',
@@ -276,7 +391,8 @@ describe('PaymentsTransactionsService', () => {
   });
 
   describe('refund (UC-42-08)', () => {
-    it('issues a partial refund within the captured amount', async () => {
+    // MCH-003-AC03: sin confirmación del gateway el reembolso queda pendiente.
+    it('records a partial refund as pending, not completed', async () => {
       const d = build();
       d.transactionsRepo.findByIdForUpdate.mockResolvedValue({
         id: 'txn-1',
@@ -290,7 +406,29 @@ describe('PaymentsTransactionsService', () => {
       const res = await d.service.refund('txn-1', { amount: '50.00' }, actor);
 
       expect(res.amount).toBe('50.00');
-      expect(res.statusConceptId).toBe(CONCEPTS.REFUND_COMPLETED);
+      expect(res.statusConceptId).toBe(CONCEPTS.REFUND_PENDING);
+      expect(d.transactionsRepo.createRefund).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ statusConceptId: CONCEPTS.REFUND_PENDING }),
+      );
+    });
+
+    it('ignores failed refunds when computing what is still refundable', async () => {
+      const d = build();
+      d.transactionsRepo.findByIdForUpdate.mockResolvedValue({
+        id: 'txn-1',
+        amount: '150.00',
+        currencyConceptId: CONCEPTS.CURRENCY_BOB,
+        statusConceptId: CONCEPTS.TXN_CAPTURED,
+      });
+      d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
+        { amount: '150.00', statusConceptId: CONCEPTS.REFUND_FAILED },
+      ]);
+      d.transactionsRepo.createRefund.mockReturnValue({ id: 'refund-2' });
+
+      const res = await d.service.refund('txn-1', { amount: '150.00' }, actor);
+
+      expect(res.statusConceptId).toBe(CONCEPTS.REFUND_PENDING);
     });
 
     it('rejects refunding more than what was captured', async () => {
@@ -301,7 +439,7 @@ describe('PaymentsTransactionsService', () => {
         statusConceptId: CONCEPTS.TXN_CAPTURED,
       });
       d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
-        { amount: '120.00' },
+        { amount: '120.00', statusConceptId: CONCEPTS.REFUND_PENDING },
       ]);
 
       await expect(
@@ -330,7 +468,8 @@ describe('PaymentsTransactionsService', () => {
       requestNumber: 'CAN-001',
     };
 
-    it('voids the transaction and records the request', async () => {
+    // MCH-003-AC03: CANCEL_REQUESTED no significa VOIDED.
+    it('records the request without voiding the transaction', async () => {
       const d = build();
       const transaction = {
         id: 'txn-1',
@@ -346,7 +485,7 @@ describe('PaymentsTransactionsService', () => {
       );
 
       expect(res.statusConceptId).toBe(CONCEPTS.CANCEL_REQUESTED);
-      expect(transaction.statusConceptId).toBe(CONCEPTS.TXN_VOIDED);
+      expect(transaction.statusConceptId).toBe(CONCEPTS.TXN_AUTHORIZED);
     });
 
     it('refuses to void a settled transaction and points to the refund path', async () => {
@@ -363,7 +502,8 @@ describe('PaymentsTransactionsService', () => {
   });
 
   describe('inquireStatus (UC-42-07)', () => {
-    it('confirms a processing transaction as captured', async () => {
+    // MCH-003-AC01: sin adaptador, consultar PROCESSING no lo vuelve CAPTURED.
+    it('does not turn a processing transaction into captured without a gateway', async () => {
       const d = build();
       const transaction = {
         id: 'txn-1',
@@ -373,8 +513,9 @@ describe('PaymentsTransactionsService', () => {
 
       const res = await d.service.inquireStatus('txn-1', actor);
 
-      expect(res.reconciled).toBe(true);
-      expect(res.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
+      expect(res.reconciled).toBe(false);
+      expect(res.statusConceptId).toBe(CONCEPTS.TXN_PROCESSING);
+      expect(transaction.statusConceptId).toBe(CONCEPTS.TXN_PROCESSING);
     });
 
     it('leaves a terminal transaction untouched', async () => {
