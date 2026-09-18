@@ -54,6 +54,13 @@ import {
  * bloqueo) se confirman en su propia transacción ANTES de lanzar el error, para
  * que no se reviertan con el `throw`.
  */
+/** Resultado de la transacción de rotación; las excepciones se lanzan fuera. */
+type RefreshOutcome =
+  | { kind: 'rotated'; tokens: TokenResponseDto }
+  | { kind: 'reuse' }
+  | { kind: 'expired' }
+  | { kind: 'invalid' };
+
 @Injectable()
 export class IamAuthService {
   /**
@@ -419,96 +426,119 @@ export class IamAuthService {
    */
   async refresh(refreshToken: string): Promise<TokenResponseDto> {
     const tokenHash = this.tokenService.hashRefreshToken(refreshToken);
-    const readEm = this.em.fork();
-    const rt = await this.refreshRepo.findByHash(readEm, tokenHash);
-    if (!rt) throw new UnauthorizedException('Refresh token inválido');
 
-    if (rt.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-      // Reuso: un token ya rotado/revocado se presenta de nuevo → revocar sesión.
-      this.logger.warn(
-        {
-          operation: 'iam.auth.refresh',
-          sessionId: rt.sessionId,
-          reason: 'token-reuse',
-        },
-        'Refresh token reuse detected',
-      );
-      await this.em.transactional(async (tx) => {
-        this.eventsRepo.record(tx, {
-          eventTypeConceptId: CONCEPTS.SEC_TOKEN_REUSE,
-          outcomeConceptId: CONCEPTS.OUTCOME_FAILURE,
-          userId: undefined,
-          detailJson: { sessionId: rt.sessionId },
+    // Todo ocurre sobre la fila bloqueada dentro de una sola transacción
+    // (MCH-005). Antes el estado se comprobaba en una lectura previa, fuera de
+    // la transacción: dos peticiones con el mismo token la superaban y cada una
+    // emitía un sucesor. Ahora la segunda espera el bloqueo, ve ROTATED y cae en
+    // la política de reuso, igual que un token repetido más tarde.
+    const outcome = await this.em.transactional(
+      async (tx): Promise<RefreshOutcome> => {
+        const rt = await this.refreshRepo.findByHashForUpdate(tx, tokenHash);
+        if (!rt) return { kind: 'invalid' };
+
+        if (rt.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
+          // Reuso: un token ya rotado/revocado se presenta de nuevo → revocar
+          // la sesión. Se devuelve en vez de lanzar para que la revocación se
+          // confirme: una excepción acá desharía la transacción entera.
+          this.logger.warn(
+            {
+              operation: 'iam.auth.refresh',
+              sessionId: rt.sessionId,
+              reason: 'token-reuse',
+            },
+            'Refresh token reuse detected',
+          );
+          this.eventsRepo.record(tx, {
+            eventTypeConceptId: CONCEPTS.SEC_TOKEN_REUSE,
+            outcomeConceptId: CONCEPTS.OUTCOME_FAILURE,
+            userId: undefined,
+            detailJson: { sessionId: rt.sessionId },
+          });
+          await this.refreshRepo.revokeBySessionId(tx, rt.sessionId);
+          await this.sessionsRepo.revokeById(tx, rt.sessionId);
+          return { kind: 'reuse' };
+        }
+
+        if (rt.expiresAt.getTime() < Date.now()) return { kind: 'expired' };
+
+        const session = await this.sessionsRepo.findById(tx, rt.sessionId);
+        if (!session || session.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
+          throw new UnauthorizedException('Sesión no activa');
+        }
+
+        const activeRoles = await this.rolesRepo.findActiveForUser(
+          tx,
+          session.userId,
+        );
+        const roles = await this.mergeRoleCodes(
+          tx,
+          session.userId,
+          activeRoles,
+        );
+        const tenants = await this.loadActiveTenantIds(tx, session.userId);
+        // El refresco tiene que repoblar lo mismo que el login: si no, al rotar el
+        // token la interfaz perdería el nombre y volvería a mostrar el uuid.
+        const holder = await this.usersRepo.findById(tx, session.userId);
+        const accessToken = this.tokenService.signAccessToken(
+          session.userId,
+          session.tokenId,
+          roles,
+          tenants,
+          {
+            name: holder?.displayName,
+            tenantNames: await this.loadTenantNames(tx, tenants),
+            patientProfileId: await this.loadPatientProfileId(
+              tx,
+              session.userId,
+            ),
+            // También en el refresco: un claim que no sobrevive a la renovación
+            // del token desaparece a los quince minutos, y la agenda del médico
+            // se volvería la de otro sin que nadie tocara nada.
+            practitionerProfileId: await this.loadPractitionerProfileId(
+              tx,
+              session.userId,
+            ),
+          },
+        );
+        const { raw, hash } = this.tokenService.issueRefreshToken();
+        const expiresAt = new Date(
+          Date.now() + this.authEnv.refreshTtlDays * 24 * 60 * 60 * 1000,
+        );
+
+        rt.stateConceptId = CONCEPTS.STATE_ROTATED;
+        touch(rt, session.userId);
+
+        this.refreshRepo.create(tx, {
+          sessionId: session.id,
+          tokenHash: hash,
+          expiresAt,
+          replacedById: rt.id,
         });
-        await this.refreshRepo.revokeBySessionId(tx, rt.sessionId);
-        await this.sessionsRepo.revokeById(tx, rt.sessionId);
-      });
-      throw new UnauthorizedException('Reuso de refresh token detectado');
+
+        this.eventsRepo.record(tx, {
+          eventTypeConceptId: CONCEPTS.SEC_TOKEN_REFRESH,
+          outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+          userId: session.userId,
+        });
+
+        return {
+          kind: 'rotated',
+          tokens: { accessToken, refreshToken: raw, expiresAt },
+        };
+      },
+    );
+
+    switch (outcome.kind) {
+      case 'rotated':
+        return outcome.tokens;
+      case 'reuse':
+        throw new UnauthorizedException('Reuso de refresh token detectado');
+      case 'expired':
+        throw new UnauthorizedException('Refresh token expirado');
+      default:
+        throw new UnauthorizedException('Refresh token inválido');
     }
-
-    if (rt.expiresAt.getTime() < Date.now()) {
-      throw new UnauthorizedException('Refresh token expirado');
-    }
-
-    return this.em.transactional(async (tx) => {
-      const session = await this.sessionsRepo.findById(tx, rt.sessionId);
-      if (!session || session.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new UnauthorizedException('Sesión no activa');
-      }
-
-      const activeRoles = await this.rolesRepo.findActiveForUser(
-        tx,
-        session.userId,
-      );
-      const roles = await this.mergeRoleCodes(tx, session.userId, activeRoles);
-      const tenants = await this.loadActiveTenantIds(tx, session.userId);
-      // El refresco tiene que repoblar lo mismo que el login: si no, al rotar el
-      // token la interfaz perdería el nombre y volvería a mostrar el uuid.
-      const holder = await this.usersRepo.findById(tx, session.userId);
-      const accessToken = this.tokenService.signAccessToken(
-        session.userId,
-        session.tokenId,
-        roles,
-        tenants,
-        {
-          name: holder?.displayName,
-          tenantNames: await this.loadTenantNames(tx, tenants),
-          patientProfileId: await this.loadPatientProfileId(tx, session.userId),
-          // También en el refresco: un claim que no sobrevive a la renovación
-          // del token desaparece a los quince minutos, y la agenda del médico
-          // se volvería la de otro sin que nadie tocara nada.
-          practitionerProfileId: await this.loadPractitionerProfileId(
-            tx,
-            session.userId,
-          ),
-        },
-      );
-      const { raw, hash } = this.tokenService.issueRefreshToken();
-      const expiresAt = new Date(
-        Date.now() + this.authEnv.refreshTtlDays * 24 * 60 * 60 * 1000,
-      );
-
-      const oldRt = await this.refreshRepo.findByHash(tx, tokenHash);
-      if (oldRt) {
-        oldRt.stateConceptId = CONCEPTS.STATE_ROTATED;
-        touch(oldRt, session.userId);
-      }
-
-      this.refreshRepo.create(tx, {
-        sessionId: session.id,
-        tokenHash: hash,
-        expiresAt,
-        replacedById: oldRt?.id,
-      });
-
-      this.eventsRepo.record(tx, {
-        eventTypeConceptId: CONCEPTS.SEC_TOKEN_REFRESH,
-        outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
-        userId: session.userId,
-      });
-
-      return { accessToken, refreshToken: raw, expiresAt };
-    });
   }
 
   /** UC-01-08: revoca todas las sesiones activas del usuario actual. */
