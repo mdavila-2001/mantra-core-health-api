@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
+import axios, { type AxiosRequestConfig } from 'axios';
 import { canonicalJson, signPayload } from '../crypto/webhook-signature';
 import { PreconditionFailedException } from '../errors/domain.exception';
 import {
@@ -106,10 +106,12 @@ export interface OutboundDispatchResult {
 @Injectable()
 export class HttpDispatcherService {
   /**
-   * Resolvedor DNS usado para validar el destino; en pruebas se sustituye por
-   * uno de laboratorio.
+   * Resolvedor DNS usado para validar el destino; ausente significa el del
+   * sistema. Es opcional y público a propósito: como propiedad obligatoria (o
+   * protegida) la clase deja de ser estructuralmente compatible con los dobles
+   * `{ post }` que usan las pruebas de los módulos que la consumen.
    */
-  protected resolver: OutboundResolver = systemResolver;
+  resolver?: OutboundResolver;
 
   /**
    * Ejecuta la operación post.
@@ -141,7 +143,7 @@ export class HttpDispatcherService {
       // conexión sólo puede ir a esas (lookup anclado). Un rechazo de la política
       // es una precondición y se propaga; un fallo de DNS es fallo de entrega.
       const destination = await Promise.race([
-        resolveOutboundDestination(input.url, this.resolver),
+        resolveOutboundDestination(input.url, this.resolver ?? systemResolver),
         new Promise<never>((_, reject) =>
           deadline.signal.addEventListener('abort', () =>
             reject(
@@ -157,7 +159,13 @@ export class HttpDispatcherService {
         maxContentLength: MAX_DISPATCH_RESPONSE_BYTES,
         // Sin redirecciones: un 3xx se devuelve como respuesta, no se sigue.
         maxRedirects: 0,
-        lookup: pinnedLookup(destination),
+        // Axios tipa `lookup` más estrecho que Node: no admite la forma de una
+        // sola dirección en texto, que sí es parte del contrato de
+        // `net.connect` y la que usa el agente cuando no pide `all`. El
+        // comportamiento es el de Node; la aserción sólo salva esa diferencia.
+        lookup: pinnedLookup(
+          destination,
+        ) as unknown as AxiosRequestConfig['lookup'],
         // Un proxy de entorno recibiría la conexión en lugar del destino validado.
         proxy: false,
         // El cuerpo ya es una cadena firmada: no volver a transformarlo.

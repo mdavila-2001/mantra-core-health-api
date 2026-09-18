@@ -8,7 +8,6 @@ import {
   ResourceNotFoundException,
   UnauthorizedException,
   canonicalJson,
-  deriveWebhookSecret,
   touch,
   verifySignature,
   type AuthenticatedUser,
@@ -30,6 +29,7 @@ import {
   CancellationResponseDto,
   type TransactionOperation,
 } from '../dto';
+import { resolveGatewayWebhookSecrets } from './webhook-secret.resolver';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   AUTHORIZE: CONCEPTS.TXN_OP_AUTHORIZE,
@@ -219,27 +219,28 @@ export class PaymentsTransactionsService {
 
       // Verificación de origen del webhook (fail-closed). Sin esto, cualquiera que
       // conozca una `gatewayTransactionRef` podía forzar `PI_SUCCEEDED` (pago
-      // fraudulento). Se valida el HMAC de la firma contra el secreto del gateway.
-      // TODO: resolver el secreto real desde `gateway_connections.webhook_secret_ref`
-      // (bóveda de credenciales) en lugar del secreto derivado por gateway.
-      const webhookSecret = deriveWebhookSecret(
-        'payments-gateway',
-        transaction.gatewayId,
-      );
+      // fraudulento). MCH-019: el HMAC se valida con el secreto de la conexión
+      // configurada (`gateway_connections.webhook_secret_ref`); sin él, se rechaza.
+      const { secrets, connectionId, reason } =
+        await resolveGatewayWebhookSecrets(tx, transaction);
       const signedBody = canonicalJson({
         gatewayTransactionRef: dto.gatewayTransactionRef,
         outcome: dto.outcome,
         authorizationCode: dto.authorizationCode,
       });
+      const signature = dto.signature;
       if (
-        !dto.signature ||
-        !verifySignature(webhookSecret, signedBody, dto.signature)
+        !signature ||
+        !secrets.some((secret) =>
+          verifySignature(secret, signedBody, signature),
+        )
       ) {
         this.logger.warn(
           {
             operation: 'payments.callback.apply',
             gatewayTransactionRef: dto.gatewayTransactionRef,
-            reason: 'invalid-signature',
+            gatewayConnectionId: connectionId,
+            reason: reason ?? 'invalid-signature',
           },
           'Rejected gateway callback with invalid signature',
         );

@@ -1,4 +1,5 @@
 import dns from 'node:dns';
+import type { LookupAddress } from 'node:dns';
 import { isIP } from 'node:net';
 import { PreconditionFailedException } from '../errors/domain.exception';
 
@@ -261,11 +262,21 @@ export async function resolveOutboundDestination(
   return { url, hostname, addresses };
 }
 
-/** Firma de `lookup` que aceptan `http.request`/`net.connect`. */
+/**
+ * Firma de `lookup` que aceptan `http.request`/`net.connect`: sin `all` se
+ * responde una dirección en texto más su familia; con `all`, la lista completa.
+ */
 type LookupCallback = (
   err: NodeJS.ErrnoException | null,
-  address: string | ResolvedAddress[],
-  family?: number,
+  address: string | LookupAddress[],
+  family?: 4 | 6,
+) => void;
+
+/** Tipo del `lookup` anclado, tal como lo consume el agente HTTP. */
+export type PinnedLookup = (
+  hostname: string,
+  options: { all?: boolean } | number | undefined,
+  callback: LookupCallback,
 ) => void;
 
 /**
@@ -273,12 +284,8 @@ type LookupCallback = (
  * transporte pidiera otro host (p. ej. tras una redirección) falla en lugar de
  * resolverlo sin validar.
  */
-export function pinnedLookup(destination: OutboundDestination) {
-  return (
-    hostname: string,
-    options: { all?: boolean } | number | undefined,
-    callback: LookupCallback,
-  ): void => {
+export function pinnedLookup(destination: OutboundDestination): PinnedLookup {
+  return (hostname, options, callback): void => {
     if (hostname.replace(/^\[|\]$/g, '') !== destination.hostname) {
       const err: NodeJS.ErrnoException = new Error(
         `Host no validado por la política de egreso: ${hostname}`,

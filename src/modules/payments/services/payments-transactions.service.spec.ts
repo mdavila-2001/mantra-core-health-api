@@ -16,13 +16,20 @@ import {
   ResourceNotFoundException,
   UnauthorizedException,
   canonicalJson,
-  deriveWebhookSecret,
   signPayload,
 } from '../../../common';
+import { GatewayConnections } from '../entities';
 
-/** Firma un callback de gateway como lo haría el proveedor (mismo secreto derivado). */
+/**
+ * MCH-019: el callback se firma con el secreto de la conexión del gateway. En
+ * estas pruebas la intención apunta a `conn-1`, cuya referencia es esta variable.
+ */
+const CONNECTION_SECRET = 'secreto-de-prueba-de-la-conexion-conn-1';
+process.env.WEBHOOK_SECRET_UNIT_CONN_1 = CONNECTION_SECRET;
+
+/** Firma un callback de gateway como lo haría el proveedor (secreto de la conexión). */
 function signCallback(
-  gatewayId: string,
+  _gatewayId: string,
   body: {
     /**
      * Valor de gateway transaction ref mantenido por la instancia.
@@ -38,9 +45,8 @@ function signCallback(
     authorizationCode?: string;
   },
 ): string {
-  const secret = deriveWebhookSecret('payments-gateway', gatewayId);
   return signPayload(
-    secret,
+    CONNECTION_SECRET,
     canonicalJson({
       gatewayTransactionRef: body.gatewayTransactionRef,
       outcome: body.outcome,
@@ -56,7 +62,21 @@ const actor = { id: 'user-1', roles: ['PAYMENTS_ADMIN'] };
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
+  // Lecturas del resolvedor de secreto (MCH-019): la intención apunta a conn-1.
+  const tx = {
+    flush: mockFn(),
+    findOne: mockFn((entity: unknown) =>
+      Promise.resolve(
+        entity === GatewayConnections
+          ? {
+              id: 'conn-1',
+              gatewayId: 'gw-1',
+              webhookSecretRef: 'env:WEBHOOK_SECRET_UNIT_CONN_1',
+            }
+          : { id: 'intent-1', gatewayConnectionId: 'conn-1' },
+      ),
+    ),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const intentsRepo = { findByIdForUpdate: mockFn() };
   const flowRepo = { findLatestRiskAssessment: mockFn() };
