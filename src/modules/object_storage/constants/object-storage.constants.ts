@@ -105,6 +105,27 @@ export const CHECKSUM_SOURCES_TRUSTED: readonly string[] = [
   CHECKSUM_SOURCE_SCAN,
 ];
 
+/**
+ * Acceso temporal a una versión (MCH-009).
+ *
+ * El enlace que se emite es un canje contra este servicio, no la URI del
+ * proveedor: así el acceso se revoca cerrando el objeto y no hay que esperar a
+ * que caduque una firma emitida por S3. El tope de vida es corto a propósito —
+ * es PHI saliendo de nuestro control— y el mínimo lo impone el DTO.
+ */
+export const SIGNED_ACCESS = {
+  /** Vida por defecto cuando el cliente no pide ninguna. */
+  DEFAULT_SECONDS: 300,
+  /** Tope duro: lo que el cliente pida por encima se recorta a esto. */
+  MAX_SECONDS: 900,
+  /** Única operación que el enlace habilita. */
+  METHOD: 'GET',
+  /** Variable con el secreto de firma; comparte el de las URL de descarga. */
+  SECRET_ENV: 'DOWNLOAD_URL_SECRET',
+  /** Valor público de desarrollo, igual que en el servicio de archivos. */
+  INSECURE_DEV_SECRET: 'alovida-dev-download-secret',
+} as const;
+
 /** Comprobación de integridad (`object_integrity_checks`). */
 export const INTEGRITY_CHECK = {
   TYPE_SHA256_SCAN: 'sha256_scan',
