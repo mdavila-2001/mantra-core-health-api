@@ -31,7 +31,9 @@ import { PrescriptionPdfService } from '../services';
 @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
 @Controller('clinical/prescriptions')
 export class ClinicalPrescriptionsController {
-  constructor(private readonly prescriptionPdfService: PrescriptionPdfService) {}
+  constructor(
+    private readonly prescriptionPdfService: PrescriptionPdfService,
+  ) {}
 
   /**
    * 404 si la receta no existe, 403 si el actor no puede leerla. Nunca 422
@@ -50,7 +52,8 @@ export class ClinicalPrescriptionsController {
       'Autoriza al prescriptor y a quien puede leer la historia del paciente dueño de la receta.',
   })
   @ApiOkResponse({
-    description: 'PDF de la receta (oficial si está emitida; con marca de agua si no)',
+    description:
+      'PDF de la receta (oficial si está emitida; con marca de agua si no)',
     content: {
       'application/pdf': { schema: { type: 'string', format: 'binary' } },
     },

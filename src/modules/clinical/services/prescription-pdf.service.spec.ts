@@ -46,7 +46,9 @@ function build() {
   const requestsRepo = { findById: mockFn() };
   const clinicalRead = { assertPuedeLeerHistoria: mockFn() };
   const conditionsRepo = { findById: mockFn() };
-  const catalogConceptsRepo = { findByIds: mockFn().mockResolvedValue(new Map()) };
+  const catalogConceptsRepo = {
+    findByIds: mockFn().mockResolvedValue(new Map()),
+  };
   const patientProfilesRepo = {
     findById: mockFn().mockResolvedValue({ profileId: 'person-pat' }),
   };
@@ -60,16 +62,23 @@ function build() {
     findById: mockFn((_em: unknown, id: string) =>
       Promise.resolve(
         id === 'person-pat'
-          ? { displayName: 'Paciente de Prueba', birthDate: new Date('1990-01-01') }
+          ? {
+              displayName: 'Paciente de Prueba',
+              birthDate: new Date('1990-01-01'),
+            }
           : { displayName: 'Profesional de Prueba' },
       ),
     ),
   };
-  const specialtiesRepo = { findAllByPractitioner: mockFn().mockResolvedValue([]) };
+  const specialtiesRepo = {
+    findAllByPractitioner: mockFn().mockResolvedValue([]),
+  };
   const jurisdictionAuthorizationsRepo = {
     findByPractitioner: mockFn().mockResolvedValue([]),
   };
-  const identifiersRepo = { findCurrentByOwner: mockFn().mockResolvedValue([]) };
+  const identifiersRepo = {
+    findCurrentByOwner: mockFn().mockResolvedValue([]),
+  };
   const declaredCoverages = { read: mockFn().mockResolvedValue([]) };
 
   const service = new PrescriptionPdfService(
@@ -248,7 +257,9 @@ describe('armarReceta', () => {
     ['unit-1', { code: 'UNIT_{tablet}', display: 'Tablet' }],
   ]) as any;
 
-  function datosBase(overrides: Partial<DatosDeLaReceta> = {}): DatosDeLaReceta {
+  function datosBase(
+    overrides: Partial<DatosDeLaReceta> = {},
+  ): DatosDeLaReceta {
     return {
       requestId: 'req-1',
       status: CLIN.MEDICATION_REQUEST_ISSUED,
@@ -273,7 +284,9 @@ describe('armarReceta', () => {
 
   it('sin cobertura declarada, la sección lo dice explícito', () => {
     const papel = armarReceta(datosBase());
-    const seccion = papel.secciones.find((s) => s.titulo === 'Cobertura de seguro');
+    const seccion = papel.secciones.find(
+      (s) => s.titulo === 'Cobertura de seguro',
+    );
 
     expect(seccion?.lineas).toEqual(['Sin seguro vinculado en AloVida']);
   });
@@ -305,7 +318,9 @@ describe('armarReceta', () => {
         ],
       }),
     );
-    const seccion = papel.secciones.find((s) => s.titulo === 'Cobertura de seguro');
+    const seccion = papel.secciones.find(
+      (s) => s.titulo === 'Cobertura de seguro',
+    );
     const texto = seccion?.lineas.join(' ') ?? '';
 
     expect(texto).toContain('Alianza Vida');

@@ -155,23 +155,21 @@ describe('DeclaredCoveragesReader', () => {
       const { reader, em } = build();
       const platform = new PostgreSqlPlatform();
       const benefitQueries: string[] = [];
-      const execute = mockFn(
-        async (sql: string, bindings: unknown[] = []) => {
-          if (sql.includes('from insurance.patient_coverages')) {
-            return planIds.map((planId, index) => ({
-              coverage_id: `coverage-${index}`,
-              insurance_plan_id: planId,
-              carrier_id: 'carrier',
-              carrier_name: 'Andina',
-              plan_name: 'Integral',
-            }));
-          }
-          if (sql.includes('from insurance.insurance_plan_benefits')) {
-            benefitQueries.push(platform.formatQuery(sql, bindings));
-          }
-          return [];
-        },
-      );
+      const execute = mockFn(async (sql: string, bindings: unknown[] = []) => {
+        if (sql.includes('from insurance.patient_coverages')) {
+          return planIds.map((planId, index) => ({
+            coverage_id: `coverage-${index}`,
+            insurance_plan_id: planId,
+            carrier_id: 'carrier',
+            carrier_name: 'Andina',
+            plan_name: 'Integral',
+          }));
+        }
+        if (sql.includes('from insurance.insurance_plan_benefits')) {
+          benefitQueries.push(platform.formatQuery(sql, bindings));
+        }
+        return [];
+      });
       em.getConnection.mockReturnValue({ execute });
 
       const coverages = await reader.read(em as any, 'pat-1');
