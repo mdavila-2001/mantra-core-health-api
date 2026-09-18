@@ -1,4 +1,9 @@
-import { Injectable, Optional } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Optional,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import {
   StoragePublicationService,
   guardStorageMutation,
@@ -11,9 +16,16 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ObjectStorageRepository, DicomRepository } from '../repositories';
+import type { ObjectNamespaces } from '../entities';
+import {
+  OBJECT_CONTENT_READER,
+  ObjectContentUnavailableError,
+  type ObjectContentReader,
+} from '../ports';
 import {
   CHECKSUM_ALGORITHM_SHA256,
-  CHECKSUM_SOURCE_CLIENT,
+  CHECKSUM_SOURCE_SERVER,
+  CHECKSUM_SOURCES_TRUSTED,
   CHECKSUM_VERIFICATION,
   COLD_STORAGE_CLASSES,
   DICOMWEB_OPERATION,
@@ -52,13 +64,18 @@ export class ObjectStorageService {
    * @param storageRepo - Valor de storage repo requerido por la operación.
    * @param dicomRepo - Valor de dicom repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param publication - Guarda de publicación del almacenamiento, si está cableada.
+   * @param contentReader - Lector físico de los objetos (MCH-021).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly storageRepo: ObjectStorageRepository,
     private readonly dicomRepo: DicomRepository,
     private readonly logger: PinoLogger,
-    @Optional() private readonly publication?: StoragePublicationService,
+    @Optional()
+    private readonly publication: StoragePublicationService | undefined,
+    @Inject(OBJECT_CONTENT_READER)
+    private readonly contentReader: ObjectContentReader,
   ) {
     this.logger.setContext(ObjectStorageService.name);
   }
@@ -133,6 +150,12 @@ export class ObjectStorageService {
    * El tamaño recibido tiene que cuadrar con el declarado: aceptar una carga
    * incompleta dejaría un objeto que parece bueno y no lo es, y el problema se
    * descubriría meses después al intentar leerlo.
+   *
+   * MCH-021: ese cuadre era entre dos números que mandaba el cliente. Ahora el
+   * servidor mira el objeto en el proveedor —existe, pesa lo esperado, es la
+   * versión declarada y sus bytes dan el SHA-256 declarado— antes de dar la
+   * carga por cerrada. Si algo no cuadra la carga sigue `initiated`: se puede
+   * reintentar con el objeto correcto, y no queda una versión publicable.
    */
   async completeUpload(
     uploadId: string,
@@ -183,6 +206,18 @@ export class ObjectStorageService {
         );
       }
 
+      const stored = await this.verifyStoredContent(
+        namespace,
+        upload.targetObjectKey,
+        {
+          sha256: dto.sha256,
+          sizeBytes: upload.expectedSizeBytes,
+          providerVersionId: dto.providerVersionId,
+          providerUri: dto.providerUri,
+        },
+        { uploadId },
+      );
+
       let manifest = await this.storageRepo.findManifestByLogicalIdForUpdate(
         tx,
         upload.namespaceId,
@@ -227,15 +262,15 @@ export class ObjectStorageService {
         manifestId: manifest.id,
         namespaceId: upload.namespaceId,
         versionNumber: (previous?.versionNumber ?? 0) + 1,
-        providerVersionId: dto.providerVersionId,
+        providerVersionId: stored.providerVersionId,
         objectKey: upload.targetObjectKey,
         mimeType: dto.mimeType,
         sizeBytes: dto.receivedSizeBytes,
-        sha256: dto.sha256,
-        etag: dto.etag,
+        sha256: stored.sha256,
+        etag: stored.etag ?? dto.etag,
         compression: dto.compression,
         supersedesVersionId: previous?.id,
-        providerUri: dto.providerUri,
+        providerUri: stored.providerUri,
         storageClass: dto.storageClass ?? namespace.defaultStorageClass,
         encryption: dto.encryption,
       });
@@ -299,6 +334,20 @@ export class ObjectStorageService {
         );
       }
 
+      // MCH-021: igual que al cerrar una carga, la versión nueva nace de los
+      // bytes que hay en el proveedor, no de lo que se declara de ellos.
+      const stored = await this.verifyStoredContent(
+        namespace,
+        dto.objectKey,
+        {
+          sha256: dto.sha256,
+          sizeBytes: dto.sizeBytes,
+          providerVersionId: dto.providerVersionId,
+          providerUri: dto.providerUri,
+        },
+        { manifestId },
+      );
+
       const duplicate = await this.storageRepo.findVersionBySha(
         tx,
         manifestId,
@@ -320,15 +369,15 @@ export class ObjectStorageService {
         manifestId,
         namespaceId: manifest.namespaceId,
         versionNumber: (previous?.versionNumber ?? 0) + 1,
-        providerVersionId: dto.providerVersionId,
+        providerVersionId: stored.providerVersionId,
         objectKey: dto.objectKey,
         mimeType: dto.mimeType,
         sizeBytes: dto.sizeBytes,
-        sha256: dto.sha256,
-        etag: dto.etag,
+        sha256: stored.sha256,
+        etag: stored.etag ?? dto.etag,
         compression: dto.compression,
         supersedesVersionId: previous?.id,
-        providerUri: dto.providerUri,
+        providerUri: stored.providerUri,
         storageClass: dto.storageClass ?? namespace.defaultStorageClass,
         encryption: dto.encryption,
       });
@@ -466,6 +515,27 @@ export class ObjectStorageService {
           },
         );
       }
+      // MCH-021: sólo se sirve una versión cuyos bytes alguien de confianza
+      // leyó —el servidor al cerrarla o el verificador de integridad—. Un
+      // checksum `client` es lo que se declaró, no lo que hay; y el de otra
+      // versión no cuenta, porque se busca por esta versión y su SHA.
+      const checksum = await this.storageRepo.findChecksum(
+        tx,
+        versionId,
+        CHECKSUM_ALGORITHM_SHA256,
+      );
+      if (
+        !checksum ||
+        checksum.verificationStatus !== CHECKSUM_VERIFICATION.VERIFIED ||
+        !CHECKSUM_SOURCES_TRUSTED.includes(checksum.source) ||
+        checksum.checksum.toLowerCase() !== version.sha256.toLowerCase()
+      ) {
+        throw new PreconditionFailedException(
+          'La versión no tiene la integridad verificada',
+          { versionId },
+        );
+      }
+
       // Lo frío no se sirve directo: hay que rehidratarlo antes, y firmarlo
       // ahora daría una URL que devuelve error al abrirla.
       if (COLD_STORAGE_CLASSES.includes(location.storageClass)) {
@@ -509,6 +579,106 @@ export class ObjectStorageService {
   }
 
   // --- Apoyo ---
+
+  /**
+   * MCH-021: comprueba contra el proveedor que el objeto existe y es lo que se
+   * declaró. La ubicación sale del espacio de nombres y de la clave que el
+   * servidor ya tiene; la URI del cliente sólo se acepta si es esa misma.
+   *
+   * La lectura del hash queda atada al ETag que devolvió la inspección: si el
+   * objeto cambia entre las dos llamadas, la lectura falla en vez de mezclar
+   * el tamaño de uno con el hash de otro. El ETag multiparte no se usa como
+   * hash: el SHA-256 se calcula siempre sobre los bytes.
+   */
+  private async verifyStoredContent(
+    namespace: ObjectNamespaces,
+    objectKey: string,
+    declared: {
+      sha256: string;
+      sizeBytes: string;
+      providerVersionId: string;
+      providerUri: string;
+    },
+    context: Record<string, unknown>,
+  ): Promise<{
+    sha256: string;
+    providerVersionId: string;
+    etag?: string;
+    providerUri: string;
+  }> {
+    const providerUri = canonicalProviderUri(namespace, objectKey);
+    if (declared.providerUri !== providerUri) {
+      throw new PreconditionFailedException(
+        'La URI declarada no es la ubicación del objeto',
+        context,
+      );
+    }
+    const locator = {
+      backendCode: namespace.backendCode,
+      bucket: namespace.bucketOrContainer,
+      key: objectKey,
+      providerVersionId: namespace.versioningEnabled
+        ? declared.providerVersionId
+        : undefined,
+    };
+    const expectedSize = BigInt(declared.sizeBytes);
+    const expectedSha = declared.sha256.toLowerCase();
+
+    try {
+      const stat = await this.contentReader.stat(locator);
+      if (!stat) {
+        throw new PreconditionFailedException(
+          'El objeto no está en el almacenamiento',
+          context,
+        );
+      }
+      if (
+        namespace.versioningEnabled &&
+        stat.providerVersionId !== declared.providerVersionId
+      ) {
+        throw new PreconditionFailedException(
+          'La versión del proveedor no coincide con la declarada',
+          context,
+        );
+      }
+      if (stat.sizeBytes !== expectedSize) {
+        throw new PreconditionFailedException(
+          'El tamaño almacenado no coincide con el declarado',
+          context,
+        );
+      }
+      const digest = await this.contentReader.digest(locator, stat.etag);
+      if (digest.sizeBytes !== expectedSize || digest.sha256 !== expectedSha) {
+        throw new PreconditionFailedException(
+          'El contenido almacenado no coincide con el SHA-256 declarado',
+          context,
+        );
+      }
+      return {
+        sha256: expectedSha,
+        // Sin versionado el proveedor no da versión: queda la etiqueta
+        // declarada, que no autoriza nada por sí sola (el hash sí se verificó).
+        providerVersionId: stat.providerVersionId ?? declared.providerVersionId,
+        etag: stat.etag,
+        providerUri,
+      };
+    } catch (error) {
+      if (error instanceof ObjectContentUnavailableError) {
+        this.logger.error(
+          {
+            operation: 'object-storage.content.verify',
+            reasonCode: error.reasonCode,
+            ...context,
+          },
+          'Stored object could not be verified against the provider',
+        );
+        throw new ServiceUnavailableException(
+          'No se pudo verificar el objeto en el almacenamiento',
+        );
+      }
+      throw error;
+    }
+  }
 
   /**
    * Escribe la versión con todo lo que la acompaña: checksum, sobre de cifrado y
@@ -594,7 +764,9 @@ export class ObjectStorageService {
       objectVersionId: version.id,
       algorithm: CHECKSUM_ALGORITHM_SHA256,
       checksum: data.sha256,
-      source: CHECKSUM_SOURCE_CLIENT,
+      // Llega acá sólo después de `verifyStoredContent`: el hash lo calculó
+      // el servidor sobre los bytes del proveedor.
+      source: CHECKSUM_SOURCE_SERVER,
       verificationStatus: CHECKSUM_VERIFICATION.VERIFIED,
       verifiedAt: new Date(),
     });
@@ -621,4 +793,18 @@ export class ObjectStorageService {
 
     return version;
   }
+}
+
+/**
+ * URI con la que el catálogo nombra el objeto. Se deriva del espacio de nombres
+ * y de la clave: es lo que el servidor sabe, no lo que alguien le contó.
+ */
+function canonicalProviderUri(
+  namespace: ObjectNamespaces,
+  objectKey: string,
+): string {
+  const scheme = ['s3', 'minio'].includes(namespace.backendCode)
+    ? 's3'
+    : namespace.backendCode;
+  return `${scheme}://${namespace.bucketOrContainer}/${objectKey}`;
 }

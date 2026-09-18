@@ -13,6 +13,7 @@ import {
   ObjectGovernanceRepository,
   DicomRepository,
 } from './repositories';
+import { OBJECT_CONTENT_READER, S3ObjectContentReader } from './ports';
 
 /**
  * Módulo de almacenamiento de objetos: cargas multiparte, versiones inmutables,
@@ -33,6 +34,9 @@ import {
     ObjectStorageService,
     DicomCatalogService,
     ObjectGovernanceService,
+    // MCH-021/MCH-009: lectura física de los objetos para verificarlos al
+    // cerrarlos y para entregarlos detrás de un acceso firmado.
+    { provide: OBJECT_CONTENT_READER, useClass: S3ObjectContentReader },
   ],
 })
 export class ObjectStorageModule {}

@@ -94,6 +94,16 @@ export const CHECKSUM_VERIFICATION = {
 export const CHECKSUM_ALGORITHM_SHA256 = 'SHA256';
 export const CHECKSUM_SOURCE_CLIENT = 'client';
 export const CHECKSUM_SOURCE_SCAN = 'scan';
+/**
+ * El servidor leyó los bytes del proveedor y calculó el hash (MCH-021). Junto
+ * con `scan` —el verificador de integridad— son los únicos orígenes que
+ * habilitan servir una versión: `client` es sólo lo que alguien declaró.
+ */
+export const CHECKSUM_SOURCE_SERVER = 'server';
+export const CHECKSUM_SOURCES_TRUSTED: readonly string[] = [
+  CHECKSUM_SOURCE_SERVER,
+  CHECKSUM_SOURCE_SCAN,
+];
 
 /** Comprobación de integridad (`object_integrity_checks`). */
 export const INTEGRITY_CHECK = {
