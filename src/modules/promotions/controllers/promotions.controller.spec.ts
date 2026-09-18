@@ -10,7 +10,8 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { LoyaltyController } from './loyalty.controller';
 import { PromotionsController } from './promotions.controller';
-import { runWithTenant } from '../../../common';
+import { PreconditionFailedException, runWithTenant } from '../../../common';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 
 const actor = { id: 'user-1', roles: ['PROMOTIONS_ADMIN'] };
 const ID = '11111111-1111-1111-1111-111111111111';
@@ -28,6 +29,9 @@ function build() {
     recomputeBalance: mockFn(),
     expirePoints: mockFn(),
     listActivePrograms: mockFn(),
+    myLoyalty: mockFn(),
+    myPointsLedger: mockFn(),
+    redeemOwnPoints: mockFn(),
     createReferral: mockFn(),
     qualifyReferral: mockFn(),
   };
@@ -165,6 +169,85 @@ describe('LoyaltyController', () => {
       qualifyDto,
       actor,
     );
+  });
+
+  /* ─── Autoservicio del paciente (R-T-E6B1) ───────────────────────────── */
+
+  const patient = {
+    id: 'user-9',
+    roles: ['PATIENT'],
+    patientProfileId: '88888888-8888-8888-8888-888888888888',
+  } as any;
+
+  it('mi membresía: delega con el actor y el tenant del contexto', async () => {
+    const d = build();
+    d.loyaltyService.myLoyalty.mockResolvedValue({ enrolled: false });
+
+    const res = await runWithTenant('tenant-1', () =>
+      d.loyalty.myLoyalty(patient),
+    );
+
+    expect(res).toEqual({ enrolled: false });
+    expect(d.loyaltyService.myLoyalty).toHaveBeenCalledWith(
+      patient,
+      'tenant-1',
+    );
+  });
+
+  it('mi membresía: sin X-Tenant-Id no se adivina el programa', () => {
+    const d = build();
+
+    expect(() => d.loyalty.myLoyalty(patient)).toThrow(
+      PreconditionFailedException,
+    );
+    expect(d.loyaltyService.myLoyalty).not.toHaveBeenCalled();
+  });
+
+  it('mis movimientos: pasa la query de paginación tal cual', async () => {
+    const d = build();
+    d.loyaltyService.myPointsLedger.mockResolvedValue({ entries: [] });
+    const query = { limit: 20, cursor: 'c-1' } as any;
+
+    await runWithTenant('tenant-1', () => d.loyalty.myPoints(query, patient));
+
+    expect(d.loyaltyService.myPointsLedger).toHaveBeenCalledWith(
+      patient,
+      'tenant-1',
+      query,
+    );
+  });
+
+  it('canje propio: el cuerpo no lleva membresía; la deriva el servicio', async () => {
+    const d = build();
+    d.loyaltyService.redeemOwnPoints.mockResolvedValue({
+      ledgerEntryId: 'e-1',
+    });
+    const dto = { points: '100', idempotencyKey: 'k-1' } as any;
+
+    await runWithTenant('tenant-1', () =>
+      d.loyalty.redeemOwnPoints(dto, patient),
+    );
+
+    expect(d.loyaltyService.redeemOwnPoints).toHaveBeenCalledWith(
+      patient,
+      'tenant-1',
+      dto,
+    );
+    expect(Object.keys(dto)).not.toContain('memberRefId');
+  });
+
+  it('las rutas del portal exigen PATIENT, y no un MEMBER inexistente', () => {
+    const prototipo = LoyaltyController.prototype as unknown as Record<
+      string,
+      unknown
+    >;
+    const roles = (metodo: string): string[] =>
+      Reflect.getMetadata(ROLES_KEY, prototipo[metodo] as object) ?? [];
+
+    for (const metodo of ['myLoyalty', 'myPoints', 'redeemOwnPoints']) {
+      expect(roles(metodo)).toEqual(['PATIENT']);
+      expect(roles(metodo)).not.toContain('MEMBER');
+    }
   });
 });
 
