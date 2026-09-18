@@ -28,6 +28,7 @@ tests fail-closed disponen además de un token intencionalmente sin membresías.
 | `terminology.int-spec.ts`                  | API y persistencia de Terminology          |
 | `vademecum.int-spec.ts`                    | Seed SQL versionado de vademécum           |
 | `worker-provider-adapter-swap.int-spec.ts` | Adapter fallback sin proveedor configurado |
+| `hardening/mch-003.int-spec.ts`            | Pagos sin gateway: estados y doble cargo   |
 
 ## Suites opt-in
 
