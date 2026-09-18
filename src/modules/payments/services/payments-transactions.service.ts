@@ -35,6 +35,7 @@ import {
   esImportePositivo,
   sumarImportes,
 } from './payment-money';
+import { decidirCallback, referenciaEvento } from './payment-callback-machine';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   AUTHORIZE: CONCEPTS.TXN_OP_AUTHORIZE,
@@ -194,6 +195,12 @@ export class PaymentsTransactionsService {
    * Los proveedores reintentan los webhooks, así que la operación debe ser
    * idempotente: si la transacción ya está en el estado que informa el callback se
    * responde `duplicate=true` sin volver a mutar nada ni duplicar efectos contables.
+   *
+   * MCH-011: también reordenan. El evento verificado se archiva en
+   * `payment_webhook_events` y se interpreta con la máquina de estados
+   * (`decidirCallback`): sólo un avance legítimo escribe. Una entrega atrasada se
+   * ignora sin retroceder y una contradicción con un estado terminal queda sin
+   * procesar para conciliación, en vez de sobreescribir un cobro confirmado.
    */
   async applyCallback(
     callbackPath: string,
@@ -252,11 +259,67 @@ export class PaymentsTransactionsService {
       }
 
       const targetStatus = this.callbackStatus(dto.outcome);
-      if (transaction.statusConceptId === targetStatus) {
+      // MCH-011: el evento se interpreta contra el estado ya conocido. Antes
+      // sólo coincidencia exacta contaba como duplicado y cualquier otro caso
+      // sobreescribía, así que un AUTHORIZED atrasado hacía retroceder un cobro
+      // ya confirmado.
+      const decision = decidirCallback(
+        transaction.statusConceptId,
+        targetStatus,
+      );
+
+      // Bandeja de entrada: el hecho verificado se archiva con su firma antes de
+      // decidir nada. La referencia es determinista, así que su índice único
+      // reconoce la reentrega aunque el estado local ya haya avanzado.
+      const eventRef = referenciaEvento(dto);
+      const archivado = await this.transactionsRepo.findWebhookEventByRef(
+        tx,
+        eventRef,
+      );
+      if (!archivado) {
+        this.transactionsRepo.recordWebhookEvent(tx, {
+          gatewayId: transaction.gatewayId,
+          eventType: `payments.callback.${dto.outcome}`,
+          gatewayEventRef: eventRef,
+          payloadJson: {
+            callbackPath,
+            gatewayTransactionRef: dto.gatewayTransactionRef,
+            outcome: dto.outcome,
+            authorizationCode: dto.authorizationCode,
+          },
+          signature: dto.signature,
+          isVerified: true,
+          processed: decision === 'aplicar',
+          relatedIntentId: transaction.paymentIntentId,
+        });
+      }
+
+      if (decision !== 'aplicar') {
+        if (decision !== 'duplicado') {
+          this.logger.warn(
+            {
+              operation: 'payments.callback.apply',
+              transactionId: transaction.id,
+              gatewayTransactionRef: dto.gatewayTransactionRef,
+              currentStatusConceptId: transaction.statusConceptId,
+              reportedStatusConceptId: targetStatus,
+              decision,
+            },
+            decision === 'obsoleto'
+              ? 'Ignored out-of-order gateway callback'
+              : 'Gateway callback contradicts a terminal state; needs reconciliation',
+          );
+        }
+        // No se toca ni la transacción ni la intención: retroceder un estado
+        // confirmado es peor que perder el evento, y la contradicción queda
+        // archivada sin procesar para que alguien la concilie.
         return {
           transactionId: transaction.id,
-          duplicate: true,
-          statusConceptId: targetStatus,
+          duplicate: decision === 'duplicado',
+          applied: false,
+          decision,
+          reconciliationRequired: decision === 'contradiccion',
+          statusConceptId: transaction.statusConceptId,
         };
       }
 
@@ -285,6 +348,9 @@ export class PaymentsTransactionsService {
       return {
         transactionId: transaction.id,
         duplicate: false,
+        applied: true,
+        decision,
+        reconciliationRequired: false,
         statusConceptId: targetStatus,
       };
     });

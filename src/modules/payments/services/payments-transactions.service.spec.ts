@@ -68,6 +68,8 @@ function build() {
     findRefundsByTransaction: mockFn(),
     findPendingByIntent: mockFn(),
     createCancellation: mockFn(),
+    findWebhookEventByRef: mockFn().mockResolvedValue(null),
+    recordWebhookEvent: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
@@ -78,7 +80,7 @@ function build() {
     transactionsRepo as any,
     logger as any,
   );
-  return { service, tx, intentsRepo, flowRepo, transactionsRepo };
+  return { service, tx, intentsRepo, flowRepo, transactionsRepo, logger };
 }
 
 describe('PaymentsTransactionsService', () => {
@@ -375,6 +377,139 @@ describe('PaymentsTransactionsService', () => {
 
       expect(res.duplicate).toBe(true);
       expect(d.intentsRepo.findByIdForUpdate).not.toHaveBeenCalled();
+    });
+
+    // MCH-011: un proveedor reintenta y reordena entregas legítimas. Antes sólo
+    // la coincidencia exacta contaba como duplicado y cualquier otro evento
+    // sobreescribía el estado, así que una entrega atrasada revertía un cobro.
+    describe('MCH-011 · orden de los eventos', () => {
+      function llegada(
+        d: ReturnType<typeof build>,
+        ref: string,
+        outcome: 'AUTHORIZED' | 'CAPTURED' | 'FAILED',
+      ) {
+        const body = { gatewayTransactionRef: ref, outcome };
+        return d.service.applyCallback('libelula', {
+          ...body,
+          signature: signCallback('gw-1', body),
+        });
+      }
+      function transaccion(statusConceptId: string) {
+        return {
+          id: 'txn-1',
+          gatewayId: 'gw-1',
+          paymentIntentId: 'intent-1',
+          amount: '150.00',
+          statusConceptId,
+        };
+      }
+
+      it('AC01 · un AUTHORIZED atrasado no hace retroceder un cobro capturado', async () => {
+        const d = build();
+        const txn = transaccion(CONCEPTS.TXN_CAPTURED);
+        d.transactionsRepo.findByGatewayRef.mockResolvedValue(txn);
+
+        const res = await llegada(d, 'ref-1', 'AUTHORIZED');
+
+        expect(res.applied).toBe(false);
+        expect(res.decision).toBe('obsoleto');
+        expect(res.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
+        expect(txn.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
+        // Ni siquiera se bloquea la intención: no hay nada que escribir.
+        expect(d.intentsRepo.findByIdForUpdate).not.toHaveBeenCalled();
+      });
+
+      it('AC01 · un FAILED tardío sobre un cobro capturado no lo marca fallido', async () => {
+        const d = build();
+        const txn = transaccion(CONCEPTS.TXN_CAPTURED);
+        d.transactionsRepo.findByGatewayRef.mockResolvedValue(txn);
+
+        const res = await llegada(d, 'ref-1', 'FAILED');
+
+        expect(res.applied).toBe(false);
+        expect(res.decision).toBe('contradiccion');
+        expect(res.reconciliationRequired).toBe(true);
+        expect(txn.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
+        expect(d.intentsRepo.findByIdForUpdate).not.toHaveBeenCalled();
+      });
+
+      it('AC02 · las dos permutaciones de AUTHORIZED y CAPTURED terminan igual', async () => {
+        const enOrden = build();
+        const a = transaccion(CONCEPTS.TXN_PROCESSING);
+        enOrden.transactionsRepo.findByGatewayRef.mockResolvedValue(a);
+        enOrden.intentsRepo.findByIdForUpdate.mockResolvedValue({
+          id: 'intent-1',
+          amount: '150.00',
+          statusConceptId: CONCEPTS.PI_PROCESSING,
+        });
+        await llegada(enOrden, 'ref-1', 'AUTHORIZED');
+        await llegada(enOrden, 'ref-1', 'CAPTURED');
+
+        const permutado = build();
+        const b = transaccion(CONCEPTS.TXN_PROCESSING);
+        permutado.transactionsRepo.findByGatewayRef.mockResolvedValue(b);
+        permutado.intentsRepo.findByIdForUpdate.mockResolvedValue({
+          id: 'intent-1',
+          amount: '150.00',
+          statusConceptId: CONCEPTS.PI_PROCESSING,
+        });
+        await llegada(permutado, 'ref-1', 'CAPTURED');
+        await llegada(permutado, 'ref-1', 'AUTHORIZED');
+
+        expect(a.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
+        expect(b.statusConceptId).toBe(a.statusConceptId);
+      });
+
+      it('AC03 · la contradicción se archiva sin procesar, no se oculta', async () => {
+        const d = build();
+        d.transactionsRepo.findByGatewayRef.mockResolvedValue(
+          transaccion(CONCEPTS.TXN_CAPTURED),
+        );
+
+        await llegada(d, 'ref-1', 'FAILED');
+
+        expect(d.transactionsRepo.recordWebhookEvent).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            gatewayId: 'gw-1',
+            isVerified: true,
+            processed: false,
+            relatedIntentId: 'intent-1',
+          }),
+        );
+      });
+
+      it('no archiva dos veces la reentrega del mismo hecho', async () => {
+        const d = build();
+        d.transactionsRepo.findByGatewayRef.mockResolvedValue(
+          transaccion(CONCEPTS.TXN_CAPTURED),
+        );
+        d.transactionsRepo.findWebhookEventByRef.mockResolvedValue({
+          id: 'evt-1',
+        });
+
+        const res = await llegada(d, 'ref-1', 'CAPTURED');
+
+        expect(res.duplicate).toBe(true);
+        expect(d.transactionsRepo.recordWebhookEvent).not.toHaveBeenCalled();
+      });
+
+      it('sí aplica el avance legítimo PROCESSING → AUTHORIZED → CAPTURED', async () => {
+        const d = build();
+        const txn = transaccion(CONCEPTS.TXN_PROCESSING);
+        d.transactionsRepo.findByGatewayRef.mockResolvedValue(txn);
+        const intent = {
+          id: 'intent-1',
+          amount: '150.00',
+          statusConceptId: CONCEPTS.PI_PROCESSING,
+        };
+        d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
+
+        expect((await llegada(d, 'ref-1', 'AUTHORIZED')).applied).toBe(true);
+        expect(txn.statusConceptId).toBe(CONCEPTS.TXN_AUTHORIZED);
+        expect((await llegada(d, 'ref-1', 'CAPTURED')).applied).toBe(true);
+        expect(txn.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
+      });
     });
 
     it('throws when the reference does not correlate to a local transaction', async () => {
