@@ -281,7 +281,7 @@ p(
   `| Endpoints **declarados** | ${endpointCount} | Decoradores \`@Get/@Post/@Put/@Patch/@Delete\` en ${controllers.length} controllers de \`src/modules\`. |`,
 );
 p(
-  `| Operaciones **registradas** | ${registeredOperations ?? 'sin contrato'} | Operaciones de \`openapi/openapi.json\`, que se genera arrancando la app (\`generate-openapi.mjs\`). Vale para el commit en que se regeneró ese archivo. |`,
+  `| Operaciones **registradas** | ${registeredOperations ?? 'sin contrato'} | Operaciones de \`openapi/openapi.json\`, que se genera arrancando la app (\`generate-openapi.mjs\`). Incluye rutas de fuera de \`src/modules\` (\`/health\`, \`/readiness\`…), así que no se compara 1:1 con las declaradas. Vale para el commit en que se regeneró ese archivo. |`,
 );
 p(
   '| Rutas **verificadas en runtime** | no medido | Este script no ejecuta rutas. Ninguna cifra de esta tabla es evidencia de que un endpoint funcione. |',
