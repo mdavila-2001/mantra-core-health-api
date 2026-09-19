@@ -343,10 +343,14 @@ jobs:
       #
       # `--ci` evita que Jest intente escribir snapshots nuevos en un runner
       # efímero (fallaría igual, pero con un mensaje que no dice por qué).
-      # `--runInBand` porque `test/jest-integration.json` ya fija
-      # `maxWorkers: 1`: las suites comparten la misma base y no se truncan
-      # entre corridas (cada una sufija sus propios datos), así que correrlas
-      # en paralelo arriesgaría que una lea filas a medio escribir de otra.
+      # En serie por `maxWorkers: 1` de `test/jest-integration.json`: las
+      # suites comparten la misma base y no se truncan entre corridas (cada una
+      # sufija sus propios datos), así que correrlas en paralelo arriesgaría
+      # que una lea filas a medio escribir de otra. Pero SIN `--runInBand`:
+      # cada suite arranca AppModule entero y, en el proceso principal, la
+      # memoria se acumula hasta pasar los 6 GB (run 35452830577 murió así a
+      # mitad de camino). Con `workerIdleMemoryLimit` Jest corre ese único
+      # worker aparte y lo recicla entre suites.
       #
       # Corre COMPLETA en cada PR, no un subconjunto: es el único gate de
       # integración que existe hoy — `dev`/`master` no exigen ningún check
@@ -382,7 +386,7 @@ jobs:
           MINIO_BUCKET: mantra-redesa-health-files-ci
           JWT_SECRET: ci-only-secret-not-a-real-credential
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
-        run: yarn test:integration --ci --runInBand
+        run: yarn test:integration --ci
 
       - name: Generar documentación detallada de endpoints
         run: yarn docs:endpoints:generate

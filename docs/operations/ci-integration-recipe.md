@@ -19,7 +19,7 @@ marcara, porque las unitarias corren contra repositorios simulados y no lo detec
 El paso nuevo agrega:
 
 ```bash
-yarn test:integration --ci --runInBand
+yarn test:integration --ci
 ```
 
 **Va después de "Materializar el esquema — DDL versionado de `database/`"**: ese paso aplica, con
@@ -64,7 +64,7 @@ recorte de arriba queda listo para aplicar en un PR aparte.
 En el host, si `argon2` carga bien:
 
 ```bash
-corepack yarn test:integration --ci --runInBand
+corepack yarn test:integration --ci
 ```
 
 Si no (bloqueo del binario nativo en Windows — ver `LEEME-PRIMERO.md`), dentro de un contenedor
@@ -80,7 +80,7 @@ docker run --rm --network mantra-redesa-network \
   -e MINIO_ENDPOINT=mantra-redesa-minio-1 \
   -e MIKRO_ORM_CLI_ALWAYS_ALLOW_TS=true \
   -v "$PWD:/app" -v mch-int-node-modules:/app/node_modules -w /app node:24 \
-  bash -c "corepack enable && yarn install --immutable && yarn test:integration --ci --runInBand"
+  bash -c "corepack enable && yarn install --immutable && yarn test:integration --ci"
 ```
 
 Ver `.env.example` para el resto de las variables (contraseñas, buckets) que el paso de CI fija
