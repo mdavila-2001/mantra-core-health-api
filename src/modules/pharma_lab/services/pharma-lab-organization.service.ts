@@ -35,6 +35,9 @@ import type {
  * `accounting` y `community`, y este servicio se limita a lo que la spec pide
  * *además* de eso para el giro farmacéutico.
  */
+
+/** Roles que, con alcance global, ven todos los laboratorios de la red. */
+const CROSS_LAB_ROLES: readonly string[] = ['PLATFORM_ADMIN', 'BUSINESS_ADMIN'];
 @Injectable()
 export class PharmaLabOrganizationService {
   /**
@@ -164,12 +167,32 @@ export class PharmaLabOrganizationService {
   }
 
   /**
-   * Lista los laboratorios registrados.
+   * Lista los laboratorios registrados que el actor puede ver.
    *
+   * El administrador de un laboratorio ve sólo los de sus organizaciones: el
+   * listado abierto le mostraba la razón social, el identificador fiscal y el estado de todos
+   * los laboratorios de la red, competidores incluidos. Ver todos queda para
+   * quien administra la plataforma con alcance global — un `BUSINESS_ADMIN`
+   * concedido dentro de un tenant (MCH-001) no cuenta, igual que en
+   * `RolesGuard`.
+   *
+   * @param actor - Usuario autenticado que consulta.
    * @returns Laboratorios ordenados por razón social.
    */
-  listLabs(): Promise<PharmaLabs[]> {
-    return this.repo.listLabs(this.em);
+  listLabs(actor: AuthenticatedUser): Promise<PharmaLabs[]> {
+    const seesAll =
+      actor.roles.includes('SUPERADMIN') ||
+      CROSS_LAB_ROLES.some(
+        (role) =>
+          actor.roles.includes(role) &&
+          !Object.values(actor.scopedRoles ?? {}).some((codes) =>
+            codes.includes(role),
+          ),
+      );
+    return this.repo.listLabs(
+      this.em,
+      seesAll ? null : (actor.tenantIds ?? []),
+    );
   }
 
   /**

@@ -59,8 +59,8 @@ export class PharmaLabsController {
   /** Listado de laboratorios registrados. */
   @Get()
   @ApiOperation({ summary: 'Listar laboratorios farmacéuticos' })
-  list(): Promise<PharmaLabs[]> {
-    return this.service.listLabs();
+  list(@CurrentUser() actor: AuthenticatedUser): Promise<PharmaLabs[]> {
+    return this.service.listLabs(actor);
   }
 
   /** Perfil institucional. */

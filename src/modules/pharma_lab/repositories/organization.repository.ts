@@ -39,10 +39,17 @@ export class OrganizationRepository {
    * Lista los laboratorios registrados.
    *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantIds - Organizaciones a las que se acota el listado; `null`
+   *   sólo para quien administra la plataforma entera y ve todas.
    * @returns Laboratorios ordenados por razón social.
    */
-  listLabs(em: EntityManager): Promise<PharmaLabs[]> {
-    return em.find(PharmaLabs, {}, { orderBy: { legalName: 'asc' } });
+  listLabs(
+    em: EntityManager,
+    tenantIds: readonly string[] | null,
+  ): Promise<PharmaLabs[]> {
+    const where =
+      tenantIds === null ? {} : { tenantId: { $in: [...tenantIds] } };
+    return em.find(PharmaLabs, where, { orderBy: { legalName: 'asc' } });
   }
 
   /**
