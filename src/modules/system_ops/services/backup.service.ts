@@ -15,6 +15,7 @@ import {
   RestoreTestRunResponseDto,
   type RestoreObjectiveStatus,
 } from '../dto';
+import { validarObjetivosDeContinuidad } from '../policies';
 
 /**
  * UC-11-09 (política de backup con RPO/RTO/inmutabilidad) y UC-11-10 (prueba de
@@ -41,18 +42,23 @@ export class BackupService {
   /**
    * UC-11-09: define una política de backup.
    *
-   * RPO (pérdida de datos tolerada) y RTO (tiempo de indisponibilidad
-   * tolerado) son objetivos de negocio independientes: una organización puede
-   * aceptar perder una hora de datos y a la vez exigir volver a estar arriba
-   * en quince minutos. Antes se rechazaba `rpoSeconds > rtoSeconds` como si
-   * fuera un error — no lo es, era una comparación conceptualmente errónea
-   * (MCH-022). Cada valor se valida por su propio rango en el DTO
-   * (`@IsInt() @Min(0)`); acá no hay ninguna regla cruzada.
+   * MCH-022: cada objetivo se valida contra **su propio** rango. RPO y RTO
+   * miden dimensiones distintas y no se comparan entre sí: `RPO=3600` con
+   * `RTO=900` es una política legítima («tolero perder una hora de datos, pero
+   * exijo estar arriba en quince minutos»). Los rangos y sus motivos viven en
+   * `policies/continuity-objectives.policy.ts`.
    */
   async createPolicy(
     dto: CreateBackupPolicyDto,
     actor: AuthenticatedUser,
   ): Promise<IdResultDto> {
+    const fueraDeRango = validarObjetivosDeContinuidad(dto);
+    if (fueraDeRango.length > 0) {
+      throw new PreconditionFailedException(
+        fueraDeRango.map((v) => v.mensaje).join('; '),
+        Object.fromEntries(fueraDeRango.map((v) => [v.campo, v.valor])),
+      );
+    }
     return this.em.transactional(async (tx) => {
       const policy = this.repo.createPolicy(tx, {
         tenantId: dto.tenantId,
