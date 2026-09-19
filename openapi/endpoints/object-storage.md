@@ -1335,7 +1335,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo podés consultar tu propia historia clínica. | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Enlace de acceso no válido | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | El espacio de nombres de la versión no existe | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | Versión no encontrada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
@@ -2011,7 +2011,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo podés consultar tu propia historia clínica. | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Versión no encontrada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | Objeto no encontrado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | La versión no tiene ubicación primaria | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
