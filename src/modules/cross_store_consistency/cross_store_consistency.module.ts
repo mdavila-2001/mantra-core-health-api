@@ -11,7 +11,13 @@ import {
   ReconciliationService,
   DeletionService,
   StorageMaintenanceService,
+  ObjectStoreReconciliationService,
 } from './services';
+import {
+  OBJECT_CONTENT_READER,
+  S3ObjectContentReader,
+} from '../object_storage/ports';
+import { OBJECT_STORE_INVENTORY, S3ObjectStoreInventory } from './ports';
 import {
   ProjectionRepository,
   ReconciliationRepository,
@@ -42,6 +48,13 @@ import {
     ReconciliationService,
     DeletionService,
     StorageMaintenanceService,
+    // F09: el escaneo de objetos huérfanos necesita mirar el almacén, no sólo
+    // registrar lo que alguien diga de él. El lector es el mismo del módulo 60
+    // —no se duplica—; el inventario es propio porque el 60 no expone recorrido
+    // de bucket y este módulo no lo toca.
+    { provide: OBJECT_CONTENT_READER, useClass: S3ObjectContentReader },
+    { provide: OBJECT_STORE_INVENTORY, useClass: S3ObjectStoreInventory },
+    ObjectStoreReconciliationService,
   ],
 })
 export class CrossStoreConsistencyModule {}

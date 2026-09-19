@@ -5,6 +5,11 @@
 > ni ejercicio de restauración probado en este sistema al momento de esta auditoría. Este runbook
 > documenta el procedimiento genérico esperado; **no se ha ejecutado ni verificado contra este
 > sistema real**.
+>
+> **Actualización MCH-016 (2026-09-19):** lo único que sí se ejecutó es un **ensayo local** de
+> `pg_dump`/`pg_restore` en la máquina de desarrollo. Está medido y documentado más abajo, en
+> [Ensayo local](#ensayo-local-lo-único-que-sí-se-ejecutó). No cambia la advertencia de arriba:
+> un ensayo local **no es** recuperación ante desastre probada.
 
 ## Cuándo se activa
 
@@ -27,31 +32,70 @@ por otros medios.
    a las partes afectadas — obligatorio si involucra PHI (ver
    [modelo de amenazas](../../security/threat-model.md) §"Notificación de brecha").
 
-## Ensayo local (MCH-016) — qué prueba y qué no
+## Ensayo local: lo único que sí se ejecutó
 
-`scripts/recovery/drill-postgres.sh` demuestra el mecanismo de `pg_dump`/`pg_restore` contra el
-propio motor local: mide un `pg_dump` y un `pg_restore` reales sobre una base de trabajo aparte
-(`mantra_restore_drill`, dentro del mismo contenedor, borrada al terminar) y compara conteos de
-filas de un puñado de tablas contra el origen. Nunca escribe en la base de origen.
+`scripts/recovery/drill-postgres.sh` vuelca la base local con `pg_dump`, la restaura en una base
+de trabajo aparte del mismo contenedor (`mantra_restore_drill`), compara los conteos de diez tablas
+centinela, contrasta las referencias de adjuntos contra los objetos de MinIO y mide el tiempo. La
+base principal **sólo se lee**; la de trabajo se borra al terminar.
 
-**Esto NO es la prueba que pide el hallazgo completo.** Sigue sin demostrarse:
+```bash
+bash scripts/recovery/drill-postgres.sh
+DRILL_KEEP=1 bash scripts/recovery/drill-postgres.sh   # conserva la copia para inspeccionarla
+```
 
-- restauración en infraestructura **nueva** (este ensayo restaura en el mismo motor y el mismo
-  volumen que ya tiene los datos — no prueba recuperación ante la pérdida real de ese volumen);
-- MongoDB y los objetos de MinIO (sólo PostgreSQL);
-- una muestra clínica completa con adjuntos y trazabilidad consistente entre almacenes;
-- RPO (el ensayo no simula una ventana de pérdida entre un respaldo y un incidente — con el
-  contrato de MCH-023, el resultado de esa dimensión es `NOT_MEASURED`, no aprobado por omisión);
-- backup real de producción (corre contra el volumen de desarrollo de quien lo ejecuta).
+Deja un informe con fecha en `.drill/` (ignorado por git: es evidencia de esa máquina y ese
+momento).
 
-Uso: `scripts/recovery/drill-postgres.sh` (variables de entorno documentadas en el propio script).
-Al terminar, escribe una evidencia JSON con fecha, tiempos medidos y qué quedó sin medir — nunca
-"recuperación probada" por haberlo corrido en la máquina de desarrollo.
+### Lo que se midió el 2026-09-19
+
+Entorno: Docker Desktop en Windows, `mantra-redesa-postgres-1` (timescaledb-ha:pg18), base
+`mantra_redesa_health` de desarrollo.
+
+| Medición | Valor |
+|---|---|
+| `pg_dump` | 3 s · 10 079 357 bytes |
+| `pg_restore` | 69 s, sin errores |
+| **RTO local** (volcado + restauración) | **72 s** |
+| RPO | **no medido** |
+| Conteos de las 10 tablas centinela | coinciden origen/restaurada |
+| Adjuntos | **nada que ensayar**: 0 referencias y 0 objetos |
+
+**Este número de RTO no es el RTO del sistema.** Es el de una base de desarrollo casi vacía
+(3 usuarios, 26 tenants, 0 encuentros clínicos, 0 archivos) en la misma máquina y el mismo motor.
+Con volumen real y con el traslado de la copia a otro host, será mayor — cuánto, no se sabe.
+
+### Lo que sigue sin demostrarse
+
+Esto es lo que la ficha MCH-016 pide y el ensayo local **no** cubre. Son bloqueos concretos, no
+pendientes genéricos:
+
+1. **Restauración en infraestructura nueva.** El ensayo restaura en el mismo motor y la misma
+   máquina, así que no prueba que un host vacío pueda reconstruirse.
+   *Qué falta:* un entorno de laboratorio efímero (una VM o un proyecto cloud descartable) donde
+   restaurar desde cero. *Quién lo puede dar:* quien administre la infraestructura de despliegue.
+2. **Una muestra clínica completa con adjuntos.** No hay con qué: `clinical.encounters`,
+   `common.files` y el bucket de MinIO están vacíos en desarrollo, y el volcado de Postgres no
+   incluye los bytes de los objetos. El script ya compara referencias contra objetos y **falla**
+   (código 1) mientras no pueda demostrar nada sobre adjuntos — a propósito, para que la ausencia
+   no se lea como éxito.
+   *Qué falta:* un juego de datos sintéticos con adjuntos reales cargados, y el volcado de MinIO
+   junto al de Postgres. *Quién lo puede dar:* el equipo que mantiene los seeds de desarrollo.
+3. **RPO.** Un `pg_dump` a demanda tiene pérdida cero por construcción, no por una capacidad
+   demostrada; informar `RPO=0` desde ahí sería inventar evidencia.
+   *Qué falta:* un backup programado real y su periodicidad. *Quién lo puede dar:* quien defina
+   el mecanismo de backup de producción, que hoy no está en este repositorio.
+4. **Consistencia entre almacenes.** Mongo, OpenSearch, Redis y MinIO no entran en el volcado.
+   Una restauración sólo de Postgres deja el sistema coherente consigo mismo y no con el resto.
+
+### Cómo se registra el resultado
+
+`POST /internal/ops/restore-test-runs` con `measuredRtoSeconds` y **sin** `measuredRpoSeconds`.
+El servicio devuelve `objectiveStatus: NOT_MEASURED` (MCH-023), que es lo correcto: falta evidencia
+para declarar el objetivo cumplido. No registrar un `outcome` de éxito por haber corrido el script.
 
 ## Declaración de esta auditoría
 
-Este runbook sigue siendo, en lo esencial, un procedimiento **esperado**, no uno **probado**: el
-ensayo de arriba cubre el mecanismo de PostgreSQL, no el runbook completo (Mongo, objetos, RPO,
-infraestructura nueva). No ejecutar el procedimiento completo en un incidente real sin antes
-confirmar que el mecanismo de backup subyacente existe y es restaurable — ver `OPS-004` en
-[matriz de trazabilidad](../../governance/traceability-matrix.md).
+Este runbook es un procedimiento **esperado**, no uno **probado**. No ejecutar en un incidente
+real sin antes confirmar que el mecanismo de backup subyacente existe y es restaurable — ver
+`OPS-004` en [matriz de trazabilidad](../../governance/traceability-matrix.md).
