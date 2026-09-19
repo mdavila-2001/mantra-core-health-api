@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `insurance`
 
-Referencia exhaustiva de 36 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 40 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`
-- **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceAnalyticsController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsuranceReadController`, `PriorAuthController`, `ReconciliationController`
+- **Etiquetas OpenAPI:** `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`
+- **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceAnalyticsController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsurancePortabilityController`, `InsurancePortabilityPublicController`, `InsuranceReadController`, `PriorAuthController`, `ReconciliationController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -40,13 +40,17 @@ Referencia exhaustiva de 36 operación(es) del módulo `insurance`, derivada del
 27. [PUT /insurance-plans/{planId}/premium](#27-put-insurance-plans-planid-premium) — Declarar la prima de lista mensual de un plan administrable
 28. [POST /insurance-products/{productId}/plans](#28-post-insurance-products-productid-plans) — Crear un plan del carrier del tenant activo
 29. [GET /insurance/analytics/loss-ratio](#29-get-insurance-analytics-loss-ratio) — Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo
-30. [POST /patient-coverages](#30-post-patient-coverages) — Registrar cobertura de paciente y dependientes
-31. [POST /prior-authorization-requests](#31-post-prior-authorization-requests) — Solicitar autorización previa con items
-32. [POST /prior-authorization-requests/{id}/determinations](#32-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
-33. [POST /provider-networks](#33-post-provider-networks) — Alta de red de prestadores (soporte)
-34. [POST /provider-networks/{id}/memberships](#34-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
-35. [POST /reconciliation-batches](#35-post-reconciliation-batches) — Abrir lote de conciliación
-36. [POST /reconciliation-batches/{id}/items](#36-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
+30. [GET /insurance/portability/certificates/{certificateId}/json](#30-get-insurance-portability-certificates-certificateid-json) — Descargar el certificado de portabilidad en JSON interoperable
+31. [GET /insurance/portability/certificates/{certificateId}/pdf](#31-get-insurance-portability-certificates-certificateid-pdf) — Descargar el certificado de portabilidad en PDF
+32. [POST /insurance/portability/export](#32-post-insurance-portability-export) — Exportar el historial de póliza y siniestralidad del titular a 1 clic
+33. [POST /patient-coverages](#33-post-patient-coverages) — Registrar cobertura de paciente y dependientes
+34. [POST /prior-authorization-requests](#34-post-prior-authorization-requests) — Solicitar autorización previa con items
+35. [POST /prior-authorization-requests/{id}/determinations](#35-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
+36. [POST /provider-networks](#36-post-provider-networks) — Alta de red de prestadores (soporte)
+37. [POST /provider-networks/{id}/memberships](#37-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
+38. [GET /public/portability/verify/{manifestHash}](#38-get-public-portability-verify-manifesthash) — Verificar la autenticidad de un certificado de portabilidad por su sello
+39. [POST /reconciliation-batches](#39-post-reconciliation-batches) — Abrir lote de conciliación
+40. [POST /reconciliation-batches/{id}/items](#40-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
 
 ---
 
@@ -4655,7 +4659,428 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /patient-coverages
+## 30. GET /insurance/portability/certificates/{certificateId}/json
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-portability`
+- **Nombre:** Descargar el certificado de portabilidad en JSON interoperable
+- **Operation ID:** `InsurancePortabilityController_downloadJson`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InsurancePortabilityController.downloadJson](../../src/modules/insurance/controllers/insurance-portability.controller.ts)
+
+### Descripción de negocio
+
+Descargar el certificado de portabilidad en JSON interoperable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El certificado en JSON interoperable, tal como se selló.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /insurance/portability/certificates/{certificateId}/json` en `InsurancePortabilityController_downloadJson`. El controlador delega en `InsurancePortabilityService.downloadJson`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `certificateId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /insurance/portability/certificates/00000000-0000-4000-8000-000000000001/json HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `certificateId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /insurance/portability/certificates/00000000-0000-4000-8000-000000000001/json HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | JSON del certificado, exactamente como se selló | `Promise<void>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | El actor no es el titular del certificado | `Promise<void>` | No |
+| 404 | El certificado no existe | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/insurance/portability/certificates/{certificateId}/json"
+}
+```
+
+---
+
+## 31. GET /insurance/portability/certificates/{certificateId}/pdf
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-portability`
+- **Nombre:** Descargar el certificado de portabilidad en PDF
+- **Operation ID:** `InsurancePortabilityController_downloadPdf`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InsurancePortabilityController.downloadPdf](../../src/modules/insurance/controllers/insurance-portability.controller.ts)
+
+### Descripción de negocio
+
+Descargar el certificado de portabilidad en PDF. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El certificado oficial en PDF, con su código QR de verificación.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /insurance/portability/certificates/{certificateId}/pdf` en `InsurancePortabilityController_downloadPdf`. El controlador delega en `InsurancePortabilityService.renderPdf`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `certificateId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /insurance/portability/certificates/00000000-0000-4000-8000-000000000001/pdf HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `certificateId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /insurance/portability/certificates/00000000-0000-4000-8000-000000000001/pdf HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | PDF del certificado, con QR de verificación y sello SHA-256 | `Promise<void>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | El actor no es el titular del certificado | `Promise<void>` | No |
+| 404 | El certificado no existe | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/insurance/portability/certificates/{certificateId}/pdf"
+}
+```
+
+---
+
+## 32. POST /insurance/portability/export
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-portability`
+- **Nombre:** Exportar el historial de póliza y siniestralidad del titular a 1 clic
+- **Operation ID:** `InsurancePortabilityController_export`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InsurancePortabilityController.export](../../src/modules/insurance/controllers/insurance-portability.controller.ts)
+
+### Descripción de negocio
+
+Exportar el historial de póliza y siniestralidad del titular a 1 clic. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Arma, sella y persiste el certificado del titular.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /insurance/portability/export` en `InsurancePortabilityController_export`. El controlador delega en `InsurancePortabilityService.export`. Valida el body como `RequestPortabilityExportDto` y consume `application/json`. El tipo de retorno estático es `Promise<PortabilityExportResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RequestPortabilityExportDto`; los campos opcionales se omiten.
+
+```http
+POST /insurance/portability/export HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle(EXPORT_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `format` | No | `string` | valores: `PDF`, `JSON`, `BUNDLE` | Sin descripción específica en el contrato OpenAPI. | `BUNDLE` |
+| `targetInsurerTenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /insurance/portability/export HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "format": "BUNDLE",
+  "targetInsurerTenantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PortabilityExportResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PortabilityExportResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PortabilityExportResultDto>` | No |
+| 403 | El actor no es el titular del perfil ni plataforma. | `Promise<PortabilityExportResultDto>` | No |
+| 404 | El paciente o la aseguradora declarada no existen. | `Promise<PortabilityExportResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PortabilityExportResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PortabilityExportResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PortabilityExportResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PortabilityExportResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PortabilityExportResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PortabilityExportResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "certificateId": "00000000-0000-4000-8000-000000000001",
+  "manifestHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "generatedAt": "2026-09-18T18:00:00.000Z",
+  "format": "PDF",
+  "recordCount": 14,
+  "policiesCount": 3,
+  "pdfDownloadUrl": "/insurance/portability/certificates/a1b2c3d4/pdf",
+  "jsonDownloadUrl": "/insurance/portability/certificates/a1b2c3d4/json",
+  "verificationUrl": "https://app.alovida.com/verify/portability/e3b0c442...",
+  "summary": {
+    "currencyCode": "BOB",
+    "allTime": {
+      "claimsCount": 1,
+      "approvedCount": 1,
+      "deniedCount": 1,
+      "pendingCount": 1,
+      "billedAmount": "12450.00",
+      "coveredAmount": "10230.00",
+      "patientCopayAmount": "1200.00",
+      "deniedAmount": "0.00",
+      "firstClaimAt": "valor-ejemplo",
+      "lastClaimAt": "valor-ejemplo",
+      "coveredMonths": "11.87"
+    },
+    "last36Months": {
+      "claimsCount": 1,
+      "approvedCount": 1,
+      "deniedCount": 1,
+      "pendingCount": 1,
+      "billedAmount": "12450.00",
+      "coveredAmount": "10230.00",
+      "patientCopayAmount": "1200.00",
+      "deniedAmount": "0.00",
+      "firstClaimAt": "valor-ejemplo",
+      "lastClaimAt": "valor-ejemplo",
+      "coveredMonths": "11.87"
+    },
+    "byYear": [
+      {
+        "year": 2026,
+        "claimsCount": 1,
+        "billedAmount": "4500.00",
+        "coveredAmount": "3600.00"
+      }
+    ],
+    "claimsOver2000Count": 1,
+    "estimatedLossRatioPercent": "86.14"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `certificateId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `manifestHash` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `generatedAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026-09-18T18:00:00.000Z` |
+| `format` | Sí | `string` | valores: `PDF`, `JSON`, `BUNDLE` | Sin descripción específica en el contrato OpenAPI. | `PDF` |
+| `recordCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `14` |
+| `policiesCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `3` |
+| `pdfDownloadUrl` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `/insurance/portability/certificates/a1b2c3d4/pdf` |
+| `jsonDownloadUrl` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `/insurance/portability/certificates/a1b2c3d4/json` |
+| `verificationUrl` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `https://app.alovida.com/verify/portability/e3b0c442...` |
+| `summary` | Sí | `PortabilitySummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"currencyCode":"BOB","allTime":{"claimsCount":1,"approvedCount":1,"deniedCount":1,"pendingCount":1,"billedAmount":"12450.00","coveredAmount":"10230.00","patientCopayAmount":"1200.00","deniedAmount":"0.00","firstClaimAt":"valor-ejemplo","lastClaimAt":"valor-ejemplo","coveredMonths":"11.87"},"last36Months":{"claimsCount":1,"approvedCount":1,"deniedCount":1,"pendingCount":1,"billedAmount":"12450.00","coveredAmount":"10230.00","patientCopayAmount":"1200.00","deniedAmount":"0.00","firstClaimAt":"valor-ejemplo","lastClaimAt":"valor-ejemplo","coveredMonths":"11.87"},"byYear":[{"year":2026,"claimsCount":1,"billedAmount":"4500.00","coveredAmount":"3600.00"}],"claimsOver2000Count":1,"estimatedLossRatioPercent":"86.14"}` |
+| `summary.currencyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `summary.allTime` | Sí | `PortabilityPeriodStatsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"claimsCount":1,"approvedCount":1,"deniedCount":1,"pendingCount":1,"billedAmount":"12450.00","coveredAmount":"10230.00","patientCopayAmount":"1200.00","deniedAmount":"0.00","firstClaimAt":"valor-ejemplo","lastClaimAt":"valor-ejemplo","coveredMonths":"11.87"}` |
+| `summary.allTime.claimsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.allTime.approvedCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.allTime.deniedCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.allTime.pendingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.allTime.billedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `12450.00` |
+| `summary.allTime.coveredAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `10230.00` |
+| `summary.allTime.patientCopayAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1200.00` |
+| `summary.allTime.deniedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `0.00` |
+| `summary.allTime.firstClaimAt` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `summary.allTime.lastClaimAt` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `summary.allTime.coveredMonths` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `11.87` |
+| `summary.last36Months` | Sí | `PortabilityPeriodStatsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"claimsCount":1,"approvedCount":1,"deniedCount":1,"pendingCount":1,"billedAmount":"12450.00","coveredAmount":"10230.00","patientCopayAmount":"1200.00","deniedAmount":"0.00","firstClaimAt":"valor-ejemplo","lastClaimAt":"valor-ejemplo","coveredMonths":"11.87"}` |
+| `summary.last36Months.claimsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.last36Months.approvedCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.last36Months.deniedCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.last36Months.pendingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.last36Months.billedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `12450.00` |
+| `summary.last36Months.coveredAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `10230.00` |
+| `summary.last36Months.patientCopayAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1200.00` |
+| `summary.last36Months.deniedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `0.00` |
+| `summary.last36Months.firstClaimAt` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `summary.last36Months.lastClaimAt` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `summary.last36Months.coveredMonths` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `11.87` |
+| `summary.byYear` | Sí | `array<PortabilityYearStatsDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"year":2026,"claimsCount":1,"billedAmount":"4500.00","coveredAmount":"3600.00"}]` |
+| `summary.byYear[].year` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026` |
+| `summary.byYear[].claimsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.byYear[].billedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `4500.00` |
+| `summary.byYear[].coveredAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `3600.00` |
+| `summary.claimsOver2000Count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `summary.estimatedLossRatioPercent` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `86.14` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | La aseguradora declarada no existe | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El artefacto generado no tiene contenido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El artefacto generado excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(EXPORT_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/insurance/portability/export"
+}
+```
+
+---
+
+## 33. POST /patient-coverages
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-coverage`
@@ -4802,7 +5227,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /prior-authorization-requests
+## 34. POST /prior-authorization-requests
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -4970,7 +5395,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /prior-authorization-requests/{id}/determinations
+## 35. POST /prior-authorization-requests/{id}/determinations
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -5104,7 +5529,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /provider-networks
+## 36. POST /provider-networks
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -5235,7 +5660,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /provider-networks/{id}/memberships
+## 37. POST /provider-networks/{id}/memberships
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -5369,7 +5794,118 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /reconciliation-batches
+## 38. GET /public/portability/verify/{manifestHash}
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-portability-public`
+- **Nombre:** Verificar la autenticidad de un certificado de portabilidad por su sello
+- **Operation ID:** `InsurancePortabilityPublicController_verify`
+- **Autenticación:** Pública
+- **Implementación:** [InsurancePortabilityPublicController.verify](../../src/modules/insurance/controllers/insurance-portability-public.controller.ts)
+
+### Descripción de negocio
+
+Sin autenticación y sin PHI: confirma que el certificado existe y con qué se emitió.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/portability/verify/{manifestHash}` en `InsurancePortabilityPublicController_verify`. El controlador delega en `InsurancePortabilityService.verify`. No recibe body. El tipo de retorno estático es `Promise<PortabilityVerificationResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `manifestHash` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/portability/verify/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/portability/verify/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PortabilityVerificationResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PortabilityVerificationResponseDto>` | No |
+| 404 | No existe un certificado con ese sello | `Promise<PortabilityVerificationResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PortabilityVerificationResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PortabilityVerificationResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PortabilityVerificationResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "status": "VALID",
+  "certificateId": "00000000-0000-4000-8000-000000000001",
+  "manifestHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "generatedAt": "2026-09-18T18:00:00.000Z",
+  "recordCount": 14,
+  "algorithm": "SHA-256",
+  "issuer": "AloVida"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `VALID` |
+| `certificateId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `manifestHash` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `generatedAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026-09-18T18:00:00.000Z` |
+| `recordCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `14` |
+| `algorithm` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `SHA-256` |
+| `issuer` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `AloVida` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/portability/verify/{manifestHash}"
+}
+```
+
+---
+
+## 39. POST /reconciliation-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
@@ -5502,7 +6038,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /reconciliation-batches/{id}/items
+## 40. POST /reconciliation-batches/{id}/items
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`

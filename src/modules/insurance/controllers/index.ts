@@ -9,3 +9,5 @@ export * from './insurance-read.controller';
 export * from './insurance-catalog.controller';
 export * from './claims-read.controller';
 export * from './insurance-analytics.controller';
+export * from './insurance-portability.controller';
+export * from './insurance-portability-public.controller';

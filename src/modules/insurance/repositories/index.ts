@@ -7,3 +7,4 @@ export * from './settlement.repository';
 export * from './read.repository';
 export * from './claim-read.repository';
 export * from './insurance-analytics.repository';
+export * from './insurance-portability.repository';

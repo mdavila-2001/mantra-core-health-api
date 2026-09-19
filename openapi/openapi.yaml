@@ -13778,6 +13778,152 @@ paths:
         Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo. Requiere JWT y
         los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope
         ErrorResponse.
+  /insurance/portability/export:
+    post:
+      operationId: InsurancePortabilityController_export
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestPortabilityExportDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortabilityExportResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no es el titular del perfil ni plataforma.
+        '404':
+          description: El paciente o la aseguradora declarada no existen.
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Exportar el historial de póliza y siniestralidad del titular a 1 clic
+      tags:
+        - insurance-portability
+      description: >-
+        Exportar el historial de póliza y siniestralidad del titular a 1 clic. Requiere JWT y los roles o alcances
+        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /insurance/portability/certificates/{certificateId}/pdf:
+    get:
+      operationId: InsurancePortabilityController_downloadPdf
+      parameters:
+        - name: certificateId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PDF del certificado, con QR de verificación y sello SHA-256
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no es el titular del certificado
+        '404':
+          description: El certificado no existe
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el certificado de portabilidad en PDF
+      tags:
+        - insurance-portability
+      description: >-
+        Descargar el certificado de portabilidad en PDF. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /insurance/portability/certificates/{certificateId}/json:
+    get:
+      operationId: InsurancePortabilityController_downloadJson
+      parameters:
+        - name: certificateId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: JSON del certificado, exactamente como se selló
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no es el titular del certificado
+        '404':
+          description: El certificado no existe
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el certificado de portabilidad en JSON interoperable
+      tags:
+        - insurance-portability
+      description: >-
+        Descargar el certificado de portabilidad en JSON interoperable. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /public/portability/verify/{manifestHash}:
+    get:
+      description: 'Sin autenticación y sin PHI: confirma que el certificado existe y con qué se emitió.'
+      operationId: InsurancePortabilityPublicController_verify
+      parameters:
+        - name: manifestHash
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortabilityVerificationResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: No existe un certificado con ese sello
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Verificar la autenticidad de un certificado de portabilidad por su sello
+      tags:
+        - insurance-portability-public
+      security: []
   /practices:
     get:
       operationId: PracticesController_listPractices
@@ -52112,6 +52258,14 @@ tags:
     description: >-
       Operaciones del dominio funcional insurance coverage. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: insurance-portability
+    description: >-
+      Operaciones del dominio funcional insurance portability. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: insurance-portability-public
+    description: >-
+      Operaciones del dominio funcional insurance portability public. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: insurance-prior-auth
     description: >-
       Operaciones del dominio funcional insurance prior auth. Consulte el catálogo Markdown de endpoints para payloads
@@ -60579,6 +60733,193 @@ components:
         - specialties
         - prevalentPathologies
         - immunization
+    RequestPortabilityExportDto:
+      type: object
+      properties:
+        patientProfileId:
+          type: string
+          format: uuid
+        format:
+          type: string
+          enum:
+            - PDF
+            - JSON
+            - BUNDLE
+          default: BUNDLE
+        targetInsurerTenantId:
+          type: string
+          format: uuid
+      required:
+        - patientProfileId
+    PortabilityPeriodStatsDto:
+      type: object
+      properties:
+        claimsCount:
+          type: number
+        approvedCount:
+          type: number
+        deniedCount:
+          type: number
+        pendingCount:
+          type: number
+        billedAmount:
+          type: string
+          example: '12450.00'
+        coveredAmount:
+          type: string
+          example: '10230.00'
+        patientCopayAmount:
+          type: string
+          example: '1200.00'
+        deniedAmount:
+          type: string
+          example: '0.00'
+        firstClaimAt:
+          type: string
+          nullable: true
+        lastClaimAt:
+          type: string
+          nullable: true
+        coveredMonths:
+          type: string
+          example: '11.87'
+      required:
+        - claimsCount
+        - approvedCount
+        - deniedCount
+        - pendingCount
+        - billedAmount
+        - coveredAmount
+        - patientCopayAmount
+        - deniedAmount
+        - firstClaimAt
+        - lastClaimAt
+        - coveredMonths
+    PortabilityYearStatsDto:
+      type: object
+      properties:
+        year:
+          type: number
+          example: 2026
+        claimsCount:
+          type: number
+        billedAmount:
+          type: string
+          example: '4500.00'
+        coveredAmount:
+          type: string
+          example: '3600.00'
+      required:
+        - year
+        - claimsCount
+        - billedAmount
+        - coveredAmount
+    PortabilitySummaryDto:
+      type: object
+      properties:
+        currencyCode:
+          type: string
+          nullable: true
+          example: BOB
+        allTime:
+          $ref: '#/components/schemas/PortabilityPeriodStatsDto'
+        last36Months:
+          $ref: '#/components/schemas/PortabilityPeriodStatsDto'
+        byYear:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortabilityYearStatsDto'
+        claimsOver2000Count:
+          type: number
+        estimatedLossRatioPercent:
+          type: string
+          nullable: true
+          example: '86.14'
+      required:
+        - currencyCode
+        - allTime
+        - last36Months
+        - byYear
+        - claimsOver2000Count
+        - estimatedLossRatioPercent
+    PortabilityExportResultDto:
+      type: object
+      properties:
+        certificateId:
+          type: string
+          format: uuid
+        manifestHash:
+          type: string
+          example: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        generatedAt:
+          type: string
+          example: '2026-09-18T18:00:00.000Z'
+        format:
+          type: string
+          enum:
+            - PDF
+            - JSON
+            - BUNDLE
+        recordCount:
+          type: number
+          example: 14
+        policiesCount:
+          type: number
+          example: 3
+        pdfDownloadUrl:
+          type: string
+          example: /insurance/portability/certificates/a1b2c3d4/pdf
+        jsonDownloadUrl:
+          type: string
+          example: /insurance/portability/certificates/a1b2c3d4/json
+        verificationUrl:
+          type: string
+          example: https://app.alovida.com/verify/portability/e3b0c442...
+        summary:
+          $ref: '#/components/schemas/PortabilitySummaryDto'
+      required:
+        - certificateId
+        - manifestHash
+        - generatedAt
+        - format
+        - recordCount
+        - policiesCount
+        - pdfDownloadUrl
+        - jsonDownloadUrl
+        - verificationUrl
+        - summary
+    PortabilityVerificationResponseDto:
+      type: object
+      properties:
+        status:
+          type: string
+          example: VALID
+        certificateId:
+          type: string
+          format: uuid
+        manifestHash:
+          type: string
+          example: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        generatedAt:
+          type: string
+          example: '2026-09-18T18:00:00.000Z'
+        recordCount:
+          type: number
+          example: 14
+        algorithm:
+          type: string
+          example: SHA-256
+        issuer:
+          type: string
+          example: AloVida
+      required:
+        - status
+        - certificateId
+        - manifestHash
+        - generatedAt
+        - recordCount
+        - algorithm
+        - issuer
     CreatePracticeDto:
       type: object
       properties:

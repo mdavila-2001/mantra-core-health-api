@@ -127,6 +127,10 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // (`clinical-prescriptions-public.controller.ts`, `@Public()`): entró sin
   // sumarse acá y el lint de Redocly lo daba como `security-defined` (18/09).
   ['get', '/public/prescriptions/{id}/verify'],
+  // Verificación pública de un certificado de portabilidad de seguros por su
+  // sello SHA-256 (`insurance-portability-public.controller.ts`, `@Public()`
+  // — subtarea 3.3, 2026-09-18).
+  ['get', '/public/portability/verify/{manifestHash}'],
 ];
 
 function markPublicOperations(document) {

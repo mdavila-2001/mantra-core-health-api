@@ -126,6 +126,7 @@ export const healthDataIndexes1: readonly IndexTuple[] = [
   ['health_export_manifests', 'ix_health_export_manifests_file_id', ['file_id'], false, 'btree'],
   ['health_export_manifests', 'ix_health_export_manifests_encryption_profile_id', ['encryption_profile_id'], false, 'btree'],
   ['health_export_manifests', 'ix_health_export_manifests_retention_policy_id', ['retention_policy_id'], false, 'btree'],
+  ['health_export_manifests', 'ix_health_export_manifests_content_hash', ['content_hash'], false, 'btree'],
   ['health_export_manifests', 'brin_health_export_manifests_created_at', ['created_at'], false, 'brin'],
   ['health_export_manifests', 'uk_health_export_manifests_job_version', ['health_export_job_id', 'manifest_version'], true, 'btree'],
   ['health_ingestion_batches', 'ix_health_ingestion_batches_tenant_id', ['tenant_id'], false, 'btree'],
