@@ -183,12 +183,12 @@ Cancelar el pedido, cambiar cantidades/importes/moneda, cambiar la orden/oferta 
 
 ## Fuentes y despliegue
 
-- [DTO de reclamos, adjudicación, publicación y reversión](../../src/modules/insurance/dto/claims.dto.ts).
-- [DTO de autorización previa](../../src/modules/insurance/dto/prior-auth.dto.ts).
-- [Proyección de liquidación](../../src/modules/insurance/dto/patient-settlement.dto.ts).
-- [Lectura del perfil y beneficios](../../src/modules/profiles/dto/read-patients.dto.ts).
-- [Pedido de farmacia y porciones congeladas](../../src/modules/pharmacy_inventory/dto/pharmacy-orders.dto.ts).
-- [Selección de EOB vigente](../../src/modules/insurance/services/patient-settlement-projection.ts).
+- DTO de reclamos, adjudicación, publicación y reversión: `src/modules/insurance/dto/claims.dto.ts`.
+- DTO de autorización previa: `src/modules/insurance/dto/prior-auth.dto.ts`.
+- Proyección de liquidación: `src/modules/insurance/dto/patient-settlement.dto.ts`.
+- Lectura del perfil y beneficios: `src/modules/profiles/dto/read-patients.dto.ts`.
+- Pedido de farmacia y porciones congeladas: `src/modules/pharmacy_inventory/dto/pharmacy-orders.dto.ts`.
+- Selección de EOB vigente: `src/modules/insurance/services/patient-settlement-projection.ts`.
 
 La regeneración conserva las 72 definiciones de índices de `diagnostic_units`. El diff de ese archivo retira nueve líneas de comentario sobre la antigua excepción B-10; no elimina índices. Las notas canónicas de encuestas incorporadas en la bóveda permiten conservar su módulo 65 e índices al regenerar el catálogo.
 

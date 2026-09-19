@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
@@ -21,6 +22,7 @@ import type {
   PharmacovigilanceReports,
 } from '../entities';
 import { PharmacovigilanceService } from '../services';
+import { PharmaLabScopeGuard, PharmaLabOpenTo } from '../guards';
 
 /**
  * Farmacovigilancia (UC-17-29, UC-17-30).
@@ -32,6 +34,7 @@ import { PharmacovigilanceService } from '../services';
  */
 @ApiTags('pharma-lab-pharmacovigilance')
 @ApiBearerAuth()
+@UseGuards(PharmaLabScopeGuard)
 @Controller('pharma-labs/:pharmaLabId/pharmacovigilance')
 export class PharmacovigilanceController {
   /**
@@ -44,6 +47,9 @@ export class PharmacovigilanceController {
   /** UC-17-29. */
   @Post('reports')
   @HttpCode(HttpStatus.CREATED)
+  // Cualquier médico reporta al laboratorio del medicamento que sospecha,
+  // sea o no de su red: el reporte no se puede acotar a los propios.
+  @PharmaLabOpenTo('PRACTITIONER', 'CLINICIAN')
   @Roles(
     'PRACTITIONER',
     'CLINICIAN',

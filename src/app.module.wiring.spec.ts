@@ -2,7 +2,6 @@ import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { MODULE_METADATA } from '@nestjs/common/constants';
 import type { DynamicModule, ForwardReference, Type } from '@nestjs/common';
-import { AppModule } from './app.module';
 
 /**
  * MCH-012 · un módulo funcional que nadie importa no publica sus rutas.
@@ -19,6 +18,20 @@ import { AppModule } from './app.module';
  * olvido antes de que llegue a integración.
  */
 type Importable = Type | DynamicModule | ForwardReference | Promise<unknown>;
+
+/**
+ * Importar `AppModule` evalúa `MikroOrmModule.forRoot(buildOrmConfig())`, que
+ * valida las variables de la base al cargar el módulo aunque nadie se conecte.
+ * En local las pone el `.env`; en CI no hay `.env` y la suite ni arrancaba.
+ * Sólo se completan las que falten: este spec lee metadata, no abre conexiones.
+ */
+const PLACEHOLDER_DB_ENV: Record<string, string> = {
+  DB_HOST: '127.0.0.1',
+  DB_PORT: '5432',
+  DB_USER: 'wiring_spec',
+  DB_PASSWORD: 'wiring_spec',
+  DB_NAME: 'wiring_spec',
+};
 
 // Ruta desde la raíz del repo: jest corre desde ahí y el runner es ESM (sin
 // `__dirname`).
@@ -85,8 +98,16 @@ async function declaredDomainModules(): Promise<Array<[string, Type]>> {
 
 describe('MCH-012 · todo módulo de dominio está conectado al arranque', () => {
   let declared: Array<[string, Type]>;
+  let AppModule: Type;
 
   beforeAll(async () => {
+    for (const [key, value] of Object.entries(PLACEHOLDER_DB_ENV))
+      process.env[key] ??= value;
+    // Por ruta absoluta, como los módulos de dominio más abajo: un `import()`
+    // relativo sin extensión no resuelve con `moduleResolution: nodenext`.
+    ({ AppModule } = (await import(
+      join(process.cwd(), 'src', 'app.module.ts')
+    )) as { AppModule: Type });
     declared = await declaredDomainModules();
   });
 

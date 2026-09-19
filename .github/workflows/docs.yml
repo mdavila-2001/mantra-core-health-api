@@ -242,11 +242,15 @@ jobs:
       # el candidato real de un PR. `test:cov` corre exactamente las mismas
       # pruebas (mismo comando base, `--coverage` de más) y hace fallar el job
       # si el candidato queda por debajo de `coverageThreshold` — el trinquete
-      # que MCH-024 fija sobre el valor medido. Reusa el mismo
-      # NODE_OPTIONS=--max-old-space-size=6144 del job: ya está validado para
-      # el paso más pesado (generar el contrato con AppModule completo).
+      # que MCH-024 fija sobre el valor medido.
+      #
+      # Sin `--runInBand`: en un solo proceso, las ~680 suites con cobertura
+      # acumulan módulos VM de ESM hasta pasar los 6 GB de NODE_OPTIONS y el
+      # job muere por falta de heap (run 35449865820). Con los workers de la
+      # config de jest (`maxWorkers: 4`, `workerIdleMemoryLimit: 768MB`) cada
+      # worker se recicla antes de crecer, y la cobertura se fusiona igual.
       - name: Pruebas unitarias con cobertura — no puede bajar del umbral fijado
-        run: yarn test:cov --runInBand
+        run: yarn test:cov
 
       - name: Generar contrato OpenAPI real desde el código
         env:
@@ -274,11 +278,30 @@ jobs:
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
         run: node tools/openapi/generate-openapi.mjs
 
-      # Va DESPUÉS de generar el contrato, y el orden no es estético: ese paso
-      # arranca AppModule completo, que es lo que materializa los 58 esquemas y
-      # las 1212 tablas en la base efímera. Ejecutado antes, el aprovisionamiento
-      # no encontraría ningún esquema de negocio sobre el que otorgar nada y
-      # abortaría.
+      # El Postgres de `services:` arranca vacío, y nada lo llenaba: "Generar
+      # contrato" corre con ORM_SCHEMA_SYNC=off (tools/openapi/generate-openapi.mjs
+      # lo fuerza), así que no crea una sola tabla. Por eso la suite de
+      # integración moría en la primera siembra con `relation
+      # "terminology.terminology_sources" does not exist` (run 35450632863).
+      #
+      # Se aplica el mismo DDL que el stack local, con el mismo script y la
+      # misma imagen que `postgres-init` de docker-compose: `database/SQL`
+      # (apply_all + FK diferidas + patches) y las extensiones de `database/NoSQL`.
+      # `db:vendor:check` ya garantizó más arriba que esa copia existe.
+      # `--add-host postgres:127.0.0.1` porque el script apunta al host
+      # `postgres` de la red de compose; acá el servicio escucha en localhost.
+      - name: Materializar el esquema — DDL versionado de database/
+        run: |
+          docker run --rm --network host --add-host postgres:127.0.0.1 \
+            -e POSTGRES_DB=mantra_redesa_health \
+            -e POSTGRES_USER=mantra -e POSTGRES_PASSWORD=mantra \
+            -v "$PWD/database/SQL:/init/SQL:ro" \
+            -v "$PWD/database/NoSQL:/init/NoSQL:ro" \
+            -v "$PWD/docker/db-init:/init/bin:ro" \
+            --entrypoint bash timescale/timescaledb-ha:pg18 /init/bin/init-postgres.sh
+
+      # Va DESPUÉS de materializar el esquema: sin los 58 esquemas de negocio no
+      # hay nada sobre lo que otorgar privilegios.
       #
       # Las contraseñas son literales contra una base efímera que muere con el
       # runner. No son secretos, y guardarlas como tales daría a entender que
@@ -315,18 +338,19 @@ jobs:
       # entre los 60 módulos, contratos HTTP, jobs, FKs) no se ejecutaban en
       # ningún merge — sólo en la máquina de quien se acordara de correrlas.
       #
-      # Va DESPUÉS de "Generar contrato OpenAPI real desde el código" y no
-      # antes, por el mismo motivo que "Aprovisionar roles de aplicación": ese
-      # paso es el que arranca AppModule completo y materializa los 58
-      # esquemas / 1212 tablas. Antes de eso no hay nada sobre lo que una
-      # migración o una consulta puedan operar.
+      # Va DESPUÉS de "Materializar el esquema": sin el DDL aplicado no hay
+      # nada sobre lo que una migración o una consulta puedan operar.
       #
       # `--ci` evita que Jest intente escribir snapshots nuevos en un runner
       # efímero (fallaría igual, pero con un mensaje que no dice por qué).
-      # `--runInBand` porque `test/jest-integration.json` ya fija
-      # `maxWorkers: 1`: las suites comparten la misma base y no se truncan
-      # entre corridas (cada una sufija sus propios datos), así que correrlas
-      # en paralelo arriesgaría que una lea filas a medio escribir de otra.
+      # En serie por `maxWorkers: 1` de `test/jest-integration.json`: las
+      # suites comparten la misma base y no se truncan entre corridas (cada una
+      # sufija sus propios datos), así que correrlas en paralelo arriesgaría
+      # que una lea filas a medio escribir de otra. Pero SIN `--runInBand`:
+      # cada suite arranca AppModule entero y, en el proceso principal, la
+      # memoria se acumula hasta pasar los 6 GB (run 35452830577 murió así a
+      # mitad de camino). Con `workerIdleMemoryLimit` Jest corre ese único
+      # worker aparte y lo recicla entre suites.
       #
       # Corre COMPLETA en cada PR, no un subconjunto: es el único gate de
       # integración que existe hoy — `dev`/`master` no exigen ningún check
@@ -362,7 +386,7 @@ jobs:
           MINIO_BUCKET: mantra-redesa-health-files-ci
           JWT_SECRET: ci-only-secret-not-a-real-credential
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
-        run: yarn test:integration --ci --runInBand
+        run: yarn test:integration --ci
 
       - name: Generar documentación detallada de endpoints
         run: yarn docs:endpoints:generate
