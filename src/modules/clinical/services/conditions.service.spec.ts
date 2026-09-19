@@ -13,6 +13,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -33,6 +34,9 @@ function build() {
   const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const filesService = { createLink: mockFn() };
+  const clinicalRead = {
+    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ConditionsService(
     em as any,
     conditionsRepo as any,
@@ -40,8 +44,17 @@ function build() {
     historyRepo as any,
     logger as any,
     filesService as any,
+    clinicalRead as any,
   );
-  return { service, conditionsRepo, auditTrail, historyRepo, filesService };
+  return {
+    service,
+    tx,
+    conditionsRepo,
+    auditTrail,
+    historyRepo,
+    filesService,
+    clinicalRead,
+  };
 }
 
 describe('ConditionsService (UC-08-08)', () => {
@@ -262,6 +275,53 @@ describe('ConditionsService · attachFile (ALV-033)', () => {
     await expect(
       d.service.attachFile('missing', { fileId: 'file1' }, actor),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.filesService.createLink).not.toHaveBeenCalled();
+  });
+});
+
+describe('ConditionsService · MCH-007, mutaciones por id', () => {
+  const ajena = {
+    id: 'cond-ajena',
+    patientProfileId: 'paciente-ajeno',
+    custodianTenantId: 't1',
+    clinicalStatusConceptId: CLIN.CONDITION_ACTIVE,
+  };
+
+  function sinPermiso() {
+    const d = build();
+    d.conditionsRepo.findById.mockResolvedValue({ ...ajena });
+    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      new ForbiddenException('sin permiso'),
+    );
+    return d;
+  }
+
+  it('cambiar el estado pregunta por el paciente de la condición y, sin permiso, no escribe', async () => {
+    const d = sinPermiso();
+    await expect(
+      d.service.changeClinicalStatus(
+        ajena.id,
+        {
+          newClinicalStatusConceptId: CLIN.CONDITION_INACTIVE,
+          reasonText: 'x',
+        } as any,
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      'paciente-ajeno',
+      actor,
+    );
+    expect(d.tx.flush).not.toHaveBeenCalled();
+    expect(d.auditTrail.record).not.toHaveBeenCalled();
+    expect(d.historyRepo.append).not.toHaveBeenCalled();
+  });
+
+  it('adjuntar un archivo sin permiso no crea el vínculo', async () => {
+    const d = sinPermiso();
+    await expect(
+      d.service.attachFile(ajena.id, { fileId: 'f1' } as any, actor),
+    ).rejects.toBeInstanceOf(ForbiddenException);
     expect(d.filesService.createLink).not.toHaveBeenCalled();
   });
 });

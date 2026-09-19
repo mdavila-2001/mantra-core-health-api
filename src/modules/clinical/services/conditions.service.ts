@@ -16,6 +16,7 @@ import {
   ConditionResponseDto,
 } from '../dto';
 import { Conditions } from '../entities';
+import { ClinicalReadService } from './clinical-read.service';
 import { CLIN } from '../clinical.concepts';
 import { AuditTrailService } from '../../audit/services';
 import { HistoryRepository } from '../../audit/repositories';
@@ -88,6 +89,7 @@ export class ConditionsService {
    * @param historyRepo - Versionado append-only (`audit.conditions_history`).
    * @param logger - Valor de logger requerido por la operación.
    * @param filesService - Liga un archivo ya subido a esta condición (ALV-033).
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
@@ -96,6 +98,7 @@ export class ConditionsService {
     private readonly historyRepo: HistoryRepository,
     private readonly logger: PinoLogger,
     private readonly filesService: FilesService,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(ConditionsService.name);
   }
@@ -230,7 +233,11 @@ export class ConditionsService {
       'Changing condition clinical status',
     );
     return this.em.transactional(async (tx) => {
-      const condition = await this.loadConditionOrThrow(tx, conditionId);
+      const condition = await this.loadConditionForWrite(
+        tx,
+        conditionId,
+        actor,
+      );
       const fromStatus = condition.clinicalStatusConceptId;
       const allowed = fromStatus
         ? CLINICAL_STATUS_TRANSITIONS[fromStatus]
@@ -304,12 +311,10 @@ export class ConditionsService {
    * (`POST /common/files` → `POST /common/files/:id/versions`); esto sólo
    * registra a qué condición corresponde, no mueve bytes.
    *
-   * Mismo umbral de autorización que registrar la condición: el guard de
-   * clase (`@Roles('CLINICIAN', 'PRACTITIONER')`) del controlador, sin exigir
-   * además una relación asistencial con el paciente — igual que `create()` y
-   * `changeClinicalStatus()`, que tampoco la piden. Pedirle más a adjuntar un
-   * archivo que a crear el diagnóstico en sí sería una regla nueva e
-   * inconsistente, no una corrección.
+   * Mismo umbral de autorización que registrar la condición (MCH-007): poder
+   * escribir en la historia de su paciente. `create()` lo resuelve el guard,
+   * que ve al paciente en el cuerpo; acá el paciente sólo se conoce cargando
+   * la condición, así que lo resuelve el servicio.
    *
    * @param conditionId - La condición a la que se liga el archivo.
    * @param dto - El archivo ya subido.
@@ -321,7 +326,11 @@ export class ConditionsService {
     dto: AttachFileToConditionDto,
     actor: AuthenticatedUser,
   ): Promise<FileLinkResponseDto> {
-    const condition = await this.loadConditionOrThrow(this.em, conditionId);
+    const condition = await this.loadConditionForWrite(
+      this.em,
+      conditionId,
+      actor,
+    );
     this.logger.info(
       {
         operation: 'clinical.condition.attach_file',
@@ -335,6 +344,24 @@ export class ConditionsService {
       { ownerType: OwnerType.CONDITION, ownerId: condition.id },
       actor,
     );
+  }
+
+  /**
+   * Condición por id, sólo si el actor puede escribir en la historia de su
+   * paciente (MCH-007). El paciente sale de la fila, nunca de la petición: las
+   * mutaciones por id no traen paciente que el guard pueda evaluar.
+   */
+  private async loadConditionForWrite(
+    tx: EntityManager,
+    conditionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<Conditions> {
+    const condition = await this.loadConditionOrThrow(tx, conditionId);
+    await this.clinicalRead.assertPuedeEscribirHistoria(
+      condition.patientProfileId,
+      actor,
+    );
+    return condition;
   }
 
   /** Condición por id, o `ResourceNotFoundException`. */

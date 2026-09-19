@@ -1,27 +1,50 @@
-import { Injectable, Optional } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Optional,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import {
   StoragePublicationService,
   guardStorageMutation,
 } from '../../../common/storage/storage-publication.service';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+import { resolveSecret } from '../../../common/crypto/dev-secret';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
 import { ObjectStorageRepository, DicomRepository } from '../repositories';
+import { ClinicalReadService } from '../../clinical/services';
+import { AuditTrailService } from '../../audit/services';
+import type {
+  ObjectLocations,
+  ObjectManifests,
+  ObjectNamespaces,
+  ObjectVersions,
+} from '../entities';
+import {
+  OBJECT_CONTENT_READER,
+  ObjectContentUnavailableError,
+  type ObjectContentReader,
+} from '../ports';
 import {
   CHECKSUM_ALGORITHM_SHA256,
-  CHECKSUM_SOURCE_CLIENT,
+  CHECKSUM_SOURCE_SERVER,
+  CHECKSUM_SOURCES_TRUSTED,
   CHECKSUM_VERIFICATION,
   COLD_STORAGE_CLASSES,
   DICOMWEB_OPERATION,
   DICOMWEB_OUTCOME,
   NAMESPACE_ACTIVE,
+  OBJECT_ACCESS_PURPOSES,
   OBJECT_LIFECYCLE,
   PLACEMENT_ROLE,
   REPLICATION_STATE,
+  SIGNED_ACCESS,
   UPLOAD_STATUS,
 } from '../constants';
 import {
@@ -37,7 +60,54 @@ import {
   EncryptionEnvelopeDto,
 } from '../dto';
 
-const DEFAULT_SIGNED_URL_SECONDS = 300;
+/**
+ * Lo que viaja firmado dentro del enlace temporal (MCH-009).
+ *
+ * Son los cinco datos que atan el enlace a una sola cosa: qué versión, quién,
+ * qué operación, hasta cuándo y qué emisión concreta. Cambiar cualquiera de
+ * ellos invalida la firma, porque la firma cubre el JSON entero.
+ */
+interface SignedAccessClaims {
+  /** Versión del objeto. */
+  v: string;
+  /** Sujeto: el actor al que se le emitió. */
+  s: string;
+  /** Operación habilitada. */
+  m: string;
+  /** Finalidad con la que se autorizó, para reevaluarla igual en el canje. */
+  p: string;
+  /** Caducidad, en segundos epoch. */
+  exp: number;
+  /** Identificador de la emisión, para correlacionar con la auditoría. */
+  jti: string;
+}
+
+/**
+ * Eventos de acceso a un objeto que quedan sellados en `audit.audit_log`
+ * (MCH-020).
+ *
+ * Están separados porque responden preguntas distintas al reconstruir un
+ * incidente: qué se autorizó, qué se rechazó, y qué llegó a bajar bytes. No hay
+ * un evento «intentado» aparte: cada intento produce exactamente una de estas
+ * cuatro filas, así que una quinta duplicaría la escritura sin agregar un hecho.
+ */
+const OBJECT_ACCESS_EVENT = {
+  ISSUED: 'OBJECT_ACCESS_ISSUED',
+  DENIED: 'OBJECT_ACCESS_DENIED',
+  REDEEMED: 'OBJECT_ACCESS_REDEEMED',
+  REDEEM_DENIED: 'OBJECT_ACCESS_REDEEM_DENIED',
+} as const;
+
+/** Recurso que nombran los eventos de auditoría de este módulo. */
+const OBJECT_ACCESS_ENTITY = 'object_storage.object_version';
+
+/** Contenido de una versión listo para entregar por el proxy de descarga. */
+export interface ObjectContentDelivery {
+  /** Bytes del proveedor, sin materializar en memoria. */
+  body: NodeJS.ReadableStream;
+  mimeType: string;
+  contentLength?: number;
+}
 
 /**
  * Objetos: cargas multiparte, versiones inmutables, payloads grandes y emisión
@@ -52,13 +122,24 @@ export class ObjectStorageService {
    * @param storageRepo - Valor de storage repo requerido por la operación.
    * @param dicomRepo - Valor de dicom repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param publication - Guarda de publicación del almacenamiento, si está cableada.
+   * @param contentReader - Lector físico de los objetos (MCH-021).
+   * @param clinicalAccess - Política del expediente, reusada para autorizar el
+   *                         acceso a los objetos de un paciente (MCH-010).
+   * @param auditTrail - Cadena WORM donde queda todo acceso emitido, denegado o
+   *                     canjeado (MCH-020).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly storageRepo: ObjectStorageRepository,
     private readonly dicomRepo: DicomRepository,
     private readonly logger: PinoLogger,
-    @Optional() private readonly publication?: StoragePublicationService,
+    @Optional()
+    private readonly publication: StoragePublicationService | undefined,
+    @Inject(OBJECT_CONTENT_READER)
+    private readonly contentReader: ObjectContentReader,
+    private readonly clinicalAccess: ClinicalReadService,
+    private readonly auditTrail: AuditTrailService,
   ) {
     this.logger.setContext(ObjectStorageService.name);
   }
@@ -133,6 +214,12 @@ export class ObjectStorageService {
    * El tamaño recibido tiene que cuadrar con el declarado: aceptar una carga
    * incompleta dejaría un objeto que parece bueno y no lo es, y el problema se
    * descubriría meses después al intentar leerlo.
+   *
+   * MCH-021: ese cuadre era entre dos números que mandaba el cliente. Ahora el
+   * servidor mira el objeto en el proveedor —existe, pesa lo esperado, es la
+   * versión declarada y sus bytes dan el SHA-256 declarado— antes de dar la
+   * carga por cerrada. Si algo no cuadra la carga sigue `initiated`: se puede
+   * reintentar con el objeto correcto, y no queda una versión publicable.
    */
   async completeUpload(
     uploadId: string,
@@ -183,6 +270,18 @@ export class ObjectStorageService {
         );
       }
 
+      const stored = await this.verifyStoredContent(
+        namespace,
+        upload.targetObjectKey,
+        {
+          sha256: dto.sha256,
+          sizeBytes: upload.expectedSizeBytes,
+          providerVersionId: dto.providerVersionId,
+          providerUri: dto.providerUri,
+        },
+        { uploadId },
+      );
+
       let manifest = await this.storageRepo.findManifestByLogicalIdForUpdate(
         tx,
         upload.namespaceId,
@@ -227,15 +326,15 @@ export class ObjectStorageService {
         manifestId: manifest.id,
         namespaceId: upload.namespaceId,
         versionNumber: (previous?.versionNumber ?? 0) + 1,
-        providerVersionId: dto.providerVersionId,
+        providerVersionId: stored.providerVersionId,
         objectKey: upload.targetObjectKey,
         mimeType: dto.mimeType,
         sizeBytes: dto.receivedSizeBytes,
-        sha256: dto.sha256,
-        etag: dto.etag,
+        sha256: stored.sha256,
+        etag: stored.etag ?? dto.etag,
         compression: dto.compression,
         supersedesVersionId: previous?.id,
-        providerUri: dto.providerUri,
+        providerUri: stored.providerUri,
         storageClass: dto.storageClass ?? namespace.defaultStorageClass,
         encryption: dto.encryption,
       });
@@ -299,6 +398,20 @@ export class ObjectStorageService {
         );
       }
 
+      // MCH-021: igual que al cerrar una carga, la versión nueva nace de los
+      // bytes que hay en el proveedor, no de lo que se declara de ellos.
+      const stored = await this.verifyStoredContent(
+        namespace,
+        dto.objectKey,
+        {
+          sha256: dto.sha256,
+          sizeBytes: dto.sizeBytes,
+          providerVersionId: dto.providerVersionId,
+          providerUri: dto.providerUri,
+        },
+        { manifestId },
+      );
+
       const duplicate = await this.storageRepo.findVersionBySha(
         tx,
         manifestId,
@@ -320,15 +433,15 @@ export class ObjectStorageService {
         manifestId,
         namespaceId: manifest.namespaceId,
         versionNumber: (previous?.versionNumber ?? 0) + 1,
-        providerVersionId: dto.providerVersionId,
+        providerVersionId: stored.providerVersionId,
         objectKey: dto.objectKey,
         mimeType: dto.mimeType,
         sizeBytes: dto.sizeBytes,
-        sha256: dto.sha256,
-        etag: dto.etag,
+        sha256: stored.sha256,
+        etag: stored.etag ?? dto.etag,
         compression: dto.compression,
         supersedesVersionId: previous?.id,
-        providerUri: dto.providerUri,
+        providerUri: stored.providerUri,
         storageClass: dto.storageClass ?? namespace.defaultStorageClass,
         encryption: dto.encryption,
       });
@@ -403,104 +516,116 @@ export class ObjectStorageService {
   }
 
   /**
-   * UC-60-09: emitir el acceso firmado a una versión.
+   * UC-60-09: emitir el acceso temporal a una versión.
    *
-   * No devuelve la URL ya firmada: devuelve la URI del proveedor, la versión de
-   * la clave y la caducidad. **Firmar es del adaptador de almacenamiento**, que
-   * es quien tiene la credencial; este módulo autoriza y deja el rastro.
+   * ## Por qué ya no se devuelve `providerUri` (MCH-009)
+   *
+   * Antes esto devolvía la URI interna del proveedor y una `expiresAt`
+   * calculada al lado. Ninguna de las dos cosas era un acceso temporal: la URI
+   * no se abre desde un navegador si el bucket es privado, y si el bucket
+   * fuera público la fecha no caduca nada —el enlace seguiría vivo para
+   * siempre—. El contrato prometía un acceso con vencimiento y entregaba una
+   * ruta permanente con una etiqueta decorativa.
+   *
+   * Ahora se emite un canje: una URL de este mismo servicio con un token
+   * firmado con HMAC-SHA256 que ata la versión, el actor, la operación y la
+   * caducidad. Se eligió el canje y no un presignado del proveedor porque esto
+   * es PHI: cerrar el objeto o marcarlo para borrado revoca el acceso en el
+   * acto, mientras que una firma de S3 sigue sirviendo bytes hasta que expira,
+   * sin que nosotros podamos intervenir. El precio es que los bytes pasan por
+   * la API; a cambio cada descarga vuelve a pasar por las comprobaciones.
+   *
+   * El TTL que pida el cliente se recorta al tope del módulo: anunciar una
+   * caducidad es inútil si el que pide elige cuánto dura.
    */
   async issueSignedUrl(
     versionId: string,
     dto: IssueSignedUrlDto,
     actor: AuthenticatedUser,
   ): Promise<SignedUrlResponseDto> {
-    this.logger.warn(
-      {
-        operation: 'object-storage.signed-url.issue',
-        versionId,
-        actorUserId: actor.id,
-        purposeOfUseCode: dto.purposeOfUseCode,
-      },
-      'Signed access to a stored object issued',
+    return this.auditedAccess(
+      versionId,
+      actor,
+      dto.purposeOfUseCode,
+      OBJECT_ACCESS_EVENT.DENIED,
+      async () => this.issueSignedUrlAuthorised(versionId, dto, actor),
     );
+  }
 
+  /** El cuerpo de {@link issueSignedUrl}, ya envuelto por la auditoría. */
+  private async issueSignedUrlAuthorised(
+    versionId: string,
+    dto: IssueSignedUrlDto,
+    actor: AuthenticatedUser,
+  ): Promise<SignedUrlResponseDto> {
     return this.em.transactional(async (tx) => {
-      const version = await this.storageRepo.findVersionById(tx, versionId);
-      if (!version) {
-        throw new ResourceNotFoundException('Versión no encontrada', {
-          versionId,
-        });
-      }
-
-      const manifest = await this.storageRepo.findManifestById(
-        tx,
-        version.objectManifestId,
-      );
-      if (!manifest) {
-        throw new ResourceNotFoundException('Objeto no encontrado', {
-          manifestId: version.objectManifestId,
-        });
-      }
-      // Un objeto marcado para borrar o corrupto no se sirve: entregarlo sería
-      // dar acceso a algo que el sistema ya declaró que no debe leerse.
-      if (
-        manifest.lifecycleState === OBJECT_LIFECYCLE.PENDING_DELETION ||
-        manifest.lifecycleState === OBJECT_LIFECYCLE.CORRUPT
-      ) {
-        throw new PreconditionFailedException('El objeto no está disponible', {
-          versionId,
-          lifecycleState: manifest.lifecycleState,
-        });
-      }
-
-      const location = await this.storageRepo.findPrimaryLocation(
+      const { version, manifest } = await this.resolveServableVersion(
         tx,
         versionId,
-        PLACEMENT_ROLE.PRIMARY,
+        actor,
+        dto.purposeOfUseCode,
       );
-      if (!location) {
-        throw new ResourceNotFoundException(
-          'La versión no tiene ubicación primaria',
-          {
-            versionId,
-          },
-        );
-      }
-      // Lo frío no se sirve directo: hay que rehidratarlo antes, y firmarlo
-      // ahora daría una URL que devuelve error al abrirla.
-      if (COLD_STORAGE_CLASSES.includes(location.storageClass)) {
-        throw new PreconditionFailedException(
-          'La versión está en almacenamiento frío: requiere rehidratación previa',
-          { versionId, storageClass: location.storageClass },
-        );
-      }
 
       const envelope = await this.storageRepo.findEncryptionEnvelope(
         tx,
         versionId,
       );
-      const expiresAt = new Date(
-        Date.now() +
-          (dto.expiresInSeconds ?? DEFAULT_SIGNED_URL_SECONDS) * 1000,
+      const seconds = Math.min(
+        dto.expiresInSeconds ?? SIGNED_ACCESS.DEFAULT_SECONDS,
+        SIGNED_ACCESS.MAX_SECONDS,
+      );
+      const expiresAt = new Date(Date.now() + seconds * 1000);
+      const claims: SignedAccessClaims = {
+        v: version.id,
+        s: actor.id,
+        m: SIGNED_ACCESS.METHOD,
+        p: dto.purposeOfUseCode,
+        exp: Math.floor(expiresAt.getTime() / 1000),
+        jti: randomUUID(),
+      };
+      const token = signAccessToken(claims);
+
+      // MCH-020: el acceso a imagen clínica se registra con el estudio que
+      // resuelve el servidor por la jerarquía del objeto, no con el que venía
+      // en el cuerpo. Omitir el campo ya no borra la evidencia, y mandar un UID
+      // ajeno ya no la desvía a otro estudio.
+      const accessLogId = await this.recordDicomAccess(
+        tx,
+        manifest,
+        actor,
+        dto.purposeOfUseCode,
+        DICOMWEB_OUTCOME.ALLOWED,
       );
 
-      // El acceso a imagen clínica se registra aunque sea sólo la emisión del
-      // enlace: es el momento en que el dato sale de nuestro control.
-      let accessLogId: string | undefined;
-      if (dto.studyInstanceUid) {
-        accessLogId = this.dicomRepo.createAccessLog(tx, {
-          tenantId: manifest.tenantId,
-          principalId: actor.id,
-          operation: DICOMWEB_OPERATION.WADO_URI,
-          studyInstanceUid: dto.studyInstanceUid,
+      // El sello va en la misma transacción que la emisión: si la evidencia no
+      // se puede escribir, el acceso no se emite. Es la política explícita ante
+      // un sink de auditoría caído para una acción sensible.
+      await this.auditTrail.record(tx, actor, {
+        action: OBJECT_ACCESS_EVENT.ISSUED,
+        entity: OBJECT_ACCESS_ENTITY,
+        entityId: versionId,
+        tenantId: manifest.tenantId,
+      });
+
+      // El aviso va después de las comprobaciones y nombra la emisión, no el
+      // token: un enlace reutilizable en los logs es el mismo problema que se
+      // está cerrando.
+      this.logger.warn(
+        {
+          operation: 'object-storage.signed-url.issue',
+          versionId,
+          actorUserId: actor.id,
           purposeOfUseCode: dto.purposeOfUseCode,
-          outcome: DICOMWEB_OUTCOME.ALLOWED,
-        }).id;
-      }
+          accessId: claims.jti,
+          expiresAt: expiresAt.toISOString(),
+        },
+        'Signed access to a stored object issued',
+      );
 
       return {
         objectVersionId: versionId,
-        providerUri: location.providerUri,
+        url: `/object-storage/versions/${versionId}/content/${token}`,
+        method: SIGNED_ACCESS.METHOD,
         expiresAt: expiresAt.toISOString(),
         keyVersion: envelope?.keyVersion,
         accessLogId,
@@ -508,7 +633,501 @@ export class ObjectStorageService {
     });
   }
 
+  /**
+   * Canjea el enlace temporal por los bytes de la versión (MCH-009).
+   *
+   * El token no es una credencial por sí solo: dice a qué versión y a quién se
+   * emitió, y la firma garantiza que nadie lo cambió. Todo lo demás se vuelve a
+   * comprobar contra la base en este momento —estado del objeto, integridad,
+   * clase de almacenamiento—, porque entre la emisión y el canje el objeto pudo
+   * marcarse para borrado o declararse corrupto y un enlace vivo no puede
+   * sobrevivir a eso.
+   *
+   * Cualquier problema con el token —firma, caducidad, versión ajena, otro
+   * actor— responde lo mismo que un enlace inexistente: distinguirlos le diría
+   * a quien prueba tokens cuál de sus intentos se acercó.
+   */
+  async redeemSignedAccess(
+    versionId: string,
+    token: string,
+    actor: AuthenticatedUser,
+  ): Promise<ObjectContentDelivery> {
+    return this.auditedAccess(
+      versionId,
+      actor,
+      verifyAccessToken(token)?.p,
+      OBJECT_ACCESS_EVENT.REDEEM_DENIED,
+      async () => this.redeemSignedAccessAudited(versionId, token, actor),
+    );
+  }
+
+  /** El cuerpo de {@link redeemSignedAccess}, ya envuelto por la auditoría. */
+  private async redeemSignedAccessAudited(
+    versionId: string,
+    token: string,
+    actor: AuthenticatedUser,
+  ): Promise<ObjectContentDelivery> {
+    const claims = verifyAccessToken(token);
+    if (
+      !claims ||
+      claims.v !== versionId ||
+      claims.s !== actor.id ||
+      claims.m !== SIGNED_ACCESS.METHOD ||
+      claims.exp * 1000 <= Date.now()
+    ) {
+      throw new ResourceNotFoundException('Enlace de acceso no válido', {
+        versionId,
+      });
+    }
+
+    // La finalidad sale del token, no de la petición del canje: si viniera de
+    // nuevo del cliente, la comprobación de MCH-010 se haría contra lo que
+    // declare ahora y no contra aquello que se autorizó al emitir.
+    const { version, location } = await this.em.transactional(async (tx) => {
+      const resuelto = await this.resolveServableVersion(
+        tx,
+        versionId,
+        actor,
+        claims.p,
+      );
+      // MCH-020: el canje es el momento en que los bytes salen, y queda
+      // registrado como un evento propio —no alcanza con haber anotado la
+      // emisión, que pudo no usarse nunca—. Va en la misma transacción: sin
+      // evidencia no se abre el objeto.
+      await this.recordDicomAccess(
+        tx,
+        resuelto.manifest,
+        actor,
+        claims.p,
+        DICOMWEB_OUTCOME.ALLOWED,
+      );
+      await this.auditTrail.record(tx, actor, {
+        action: OBJECT_ACCESS_EVENT.REDEEMED,
+        entity: OBJECT_ACCESS_ENTITY,
+        entityId: versionId,
+        tenantId: resuelto.manifest.tenantId,
+      });
+      return resuelto;
+    });
+    const namespace = await this.storageRepo.findNamespaceById(
+      this.em,
+      location.namespaceId,
+    );
+    if (!namespace) {
+      throw new ResourceNotFoundException(
+        'El espacio de nombres de la versión no existe',
+        { versionId },
+      );
+    }
+
+    try {
+      const content = await this.contentReader.open({
+        backendCode: namespace.backendCode,
+        bucket: namespace.bucketOrContainer,
+        key: version.objectKey,
+        providerVersionId: namespace.versioningEnabled
+          ? version.providerVersionId
+          : undefined,
+      });
+      this.logger.warn(
+        {
+          operation: 'object-storage.signed-url.redeem',
+          versionId,
+          actorUserId: actor.id,
+          accessId: claims.jti,
+        },
+        'Signed access to a stored object redeemed',
+      );
+      return {
+        body: content.body,
+        mimeType: version.mimeType,
+        contentLength: content.contentLength,
+      };
+    } catch (error) {
+      if (error instanceof ObjectContentUnavailableError) {
+        // Sin bytes no hay descarga, y no se degrada a devolver la URI interna:
+        // eso reintroduciría exactamente lo que MCH-009 cierra.
+        this.logger.error(
+          {
+            operation: 'object-storage.signed-url.redeem',
+            versionId,
+            reasonCode: error.reasonCode,
+          },
+          'Stored object could not be read for a signed access',
+        );
+        throw new ServiceUnavailableException(
+          'No se pudo leer el objeto en el almacenamiento',
+        );
+      }
+      throw error;
+    }
+  }
+
   // --- Apoyo ---
+
+  /**
+   * Corre una operación de acceso dejando evidencia pase lo que pase (MCH-020).
+   *
+   * El fallo se sella en una transacción **propia**: si se registrara dentro de
+   * la del acceso, el mismo rollback que cancela la emisión borraría la prueba
+   * de que alguien la intentó — que es justamente el intento que hay que poder
+   * reconstruir.
+   *
+   * Un fallo al escribir esa evidencia no convierte un rechazo en un permiso:
+   * el error original se propaga igual, y el problema del sink queda en el log
+   * de errores. Al revés sí importa, y por eso el camino feliz sella dentro de
+   * la transacción del acceso: sin evidencia, no hay acceso.
+   */
+  private async auditedAccess<T>(
+    versionId: string,
+    actor: AuthenticatedUser,
+    purposeOfUseCode: string | undefined,
+    evento: string,
+    operacion: () => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await operacion();
+    } catch (error) {
+      try {
+        await this.em.transactional((tx) =>
+          this.auditTrail.record(tx, actor, {
+            action: evento,
+            entity: OBJECT_ACCESS_ENTITY,
+            entityId: versionId,
+            tenantId: actor.tenantIds?.[0],
+            success: false,
+          }),
+        );
+      } catch (auditError) {
+        this.logger.error(
+          {
+            operation: 'object-storage.access.audit',
+            versionId,
+            actorUserId: actor.id,
+            purposeOfUseCode,
+            event: evento,
+            error: (auditError as Error).message,
+          },
+          'Access audit could not be recorded for a denied object access',
+        );
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Registra el acceso DICOM con las coordenadas que resuelve el servidor
+   * (MCH-020).
+   *
+   * Antes la fila se creaba sólo si el cuerpo traía `studyInstanceUid`, y con
+   * ese valor: el cliente decidía si el acceso quedaba auditado y contra qué
+   * estudio. Acá se sube por la jerarquía instancia → serie → estudio desde el
+   * manifiesto que el servidor ya resolvió. El tenant sale del estudio, no del
+   * actor.
+   *
+   * Un objeto que no es una instancia DICOM catalogada no tiene estudio que
+   * nombrar: ese acceso queda igualmente sellado en `audit.audit_log`, que es
+   * la vía que cubre todo objeto y no sólo la imagen.
+   */
+  private async recordDicomAccess(
+    tx: EntityManager,
+    manifest: ObjectManifests,
+    actor: AuthenticatedUser,
+    purposeOfUseCode: string,
+    outcome: string,
+  ): Promise<string | undefined> {
+    const coordenadas = await this.dicomRepo.findDicomCoordinates(
+      tx,
+      manifest.id,
+    );
+    if (!coordenadas) return undefined;
+    return this.dicomRepo.createAccessLog(tx, {
+      tenantId: coordenadas.tenantId,
+      principalId: actor.id,
+      operation: DICOMWEB_OPERATION.WADO_URI,
+      studyInstanceUid: coordenadas.studyInstanceUid,
+      seriesInstanceUid: coordenadas.seriesInstanceUid,
+      sopInstanceUid: coordenadas.sopInstanceUid,
+      purposeOfUseCode,
+      outcome,
+    }).id;
+  }
+
+  /**
+   * Las comprobaciones que decidan si una versión se puede servir, en un solo
+   * lugar: las corre la emisión del enlace y las vuelve a correr el canje.
+   *
+   * Repetirlas en el canje no es redundante — es la razón por la que un enlace
+   * emitido no es una autorización perpetua.
+   */
+  private async resolveServableVersion(
+    tx: EntityManager,
+    versionId: string,
+    actor: AuthenticatedUser,
+    purposeOfUseCode: string,
+  ): Promise<{
+    version: ObjectVersions;
+    manifest: ObjectManifests;
+    location: ObjectLocations;
+  }> {
+    const version = await this.storageRepo.findVersionById(tx, versionId);
+    if (!version) {
+      throw new ResourceNotFoundException('Versión no encontrada', {
+        versionId,
+      });
+    }
+
+    const manifest = await this.storageRepo.findManifestById(
+      tx,
+      version.objectManifestId,
+    );
+    if (!manifest) {
+      throw new ResourceNotFoundException('Objeto no encontrado', {
+        manifestId: version.objectManifestId,
+      });
+    }
+
+    // MCH-010: el actor se autoriza contra el recurso completo —tenant, y el
+    // paciente que lo custodia— antes de tocar ubicación, integridad o bytes.
+    // Antes de acá sólo se llegaba por el rol, y el rol no dice de quién es el
+    // objeto.
+    await this.assertActorMayAccess(manifest, actor, purposeOfUseCode, {
+      versionId,
+    });
+
+    // Un objeto marcado para borrar o corrupto no se sirve: entregarlo sería
+    // dar acceso a algo que el sistema ya declaró que no debe leerse.
+    if (
+      manifest.lifecycleState === OBJECT_LIFECYCLE.PENDING_DELETION ||
+      manifest.lifecycleState === OBJECT_LIFECYCLE.CORRUPT
+    ) {
+      throw new PreconditionFailedException('El objeto no está disponible', {
+        versionId,
+        lifecycleState: manifest.lifecycleState,
+      });
+    }
+
+    const location = await this.storageRepo.findPrimaryLocation(
+      tx,
+      versionId,
+      PLACEMENT_ROLE.PRIMARY,
+    );
+    if (!location) {
+      throw new ResourceNotFoundException(
+        'La versión no tiene ubicación primaria',
+        {
+          versionId,
+        },
+      );
+    }
+    // MCH-021: sólo se sirve una versión cuyos bytes alguien de confianza
+    // leyó —el servidor al cerrarla o el verificador de integridad—. Un
+    // checksum `client` es lo que se declaró, no lo que hay; y el de otra
+    // versión no cuenta, porque se busca por esta versión y su SHA.
+    const checksum = await this.storageRepo.findChecksum(
+      tx,
+      versionId,
+      CHECKSUM_ALGORITHM_SHA256,
+    );
+    if (
+      !checksum ||
+      checksum.verificationStatus !== CHECKSUM_VERIFICATION.VERIFIED ||
+      !CHECKSUM_SOURCES_TRUSTED.includes(checksum.source) ||
+      checksum.checksum.toLowerCase() !== version.sha256.toLowerCase()
+    ) {
+      throw new PreconditionFailedException(
+        'La versión no tiene la integridad verificada',
+        { versionId },
+      );
+    }
+
+    // Lo frío no se sirve directo: hay que rehidratarlo antes, y emitir el
+    // enlace ahora daría un acceso que falla al abrirlo.
+    if (COLD_STORAGE_CLASSES.includes(location.storageClass)) {
+      throw new PreconditionFailedException(
+        'La versión está en almacenamiento frío: requiere rehidratación previa',
+        { versionId, storageClass: location.storageClass },
+      );
+    }
+
+    return { version, manifest, location };
+  }
+
+  /**
+   * ¿Puede este actor llegar a este objeto? (MCH-010)
+   *
+   * Antes la respuesta era «sí, si tiene el rol»: el método buscaba versión,
+   * manifiesto y ubicación por id, y el actor sólo aparecía en el log y como
+   * `principalId` del registro opcional. Con un id de versión y cualquiera de
+   * los cuatro roles del endpoint se alcanzaba el objeto de otro tenant o el
+   * estudio de un paciente ajeno del propio. RLS por tenant no cubre lo
+   * segundo: dentro del mismo tenant conviven todos los pacientes.
+   *
+   * Se responden tres preguntas, todas con datos que resuelve el servidor —el
+   * manifiesto trae el tenant y el paciente; el cliente sólo aportó un id—:
+   *
+   * 1. **Finalidad conocida.** El DTO acepta cualquier cadena; la política sólo
+   *    entiende cuatro. Una finalidad que la política no evalúa no autoriza.
+   * 2. **Custodia.** El actor tiene que ser miembro del tenant dueño del
+   *    objeto. Sin membresía no hay nada más que discutir, tampoco para un rol
+   *    privilegiado: un objeto de otro tenant no es «otro alcance», es de otra
+   *    organización.
+   * 3. **Relación con el paciente.** Si el objeto cuelga de una historia, decide
+   *    {@link ClinicalReadService.assertPuedeLeerHistoria} — la misma política
+   *    que guarda el expediente (turno de hoy, relación asistencial vigente,
+   *    acceso clínico autorizado, titularidad). Se reusa en vez de escribir una
+   *    segunda: dos políticas para la misma pregunta terminan discrepando, y la
+   *    que se olvide de actualizar será la que deje pasar.
+   *
+   * Un objeto sin `patientProfileId` —un backup, un adjunto administrativo— no
+   * tiene historia contra la que preguntar: queda con la custodia del tenant y
+   * el rol del endpoint, y así está dicho en vez de aparentar una comprobación
+   * que no ocurre.
+   *
+   * Todo lo que deniega responde igual que una versión inexistente. Distinguir
+   * «existe pero no es tuyo» de «no existe» le confirma a quien prueba ids
+   * cuáles acertó.
+   */
+  private async assertActorMayAccess(
+    manifest: ObjectManifests,
+    actor: AuthenticatedUser,
+    purposeOfUseCode: string,
+    context: Record<string, unknown>,
+  ): Promise<void> {
+    const denegar = (motivo: string): never => {
+      this.logger.warn(
+        {
+          operation: 'object-storage.access.denied',
+          actorUserId: actor.id,
+          manifestId: manifest.id,
+          reason: motivo,
+          ...context,
+        },
+        'Access to a stored object denied',
+      );
+      throw new ResourceNotFoundException('Versión no encontrada', context);
+    };
+
+    if (!OBJECT_ACCESS_PURPOSES.includes(purposeOfUseCode)) {
+      denegar('PURPOSE_NOT_ALLOWED');
+    }
+    if (!(actor.tenantIds ?? []).includes(manifest.tenantId)) {
+      denegar('TENANT_MISMATCH');
+    }
+    if (!manifest.patientProfileId) return;
+
+    try {
+      await this.clinicalAccess.assertPuedeLeerHistoria(
+        manifest.patientProfileId,
+        actor,
+      );
+    } catch {
+      // La política responde 403 con el detalle del expediente; acá se
+      // uniforma, porque el que pregunta ni siquiera debería saber que el
+      // objeto existe.
+      denegar('PATIENT_ACCESS_DENIED');
+    }
+  }
+
+  /**
+   * MCH-021: comprueba contra el proveedor que el objeto existe y es lo que se
+   * declaró. La ubicación sale del espacio de nombres y de la clave que el
+   * servidor ya tiene; la URI del cliente sólo se acepta si es esa misma.
+   *
+   * La lectura del hash queda atada al ETag que devolvió la inspección: si el
+   * objeto cambia entre las dos llamadas, la lectura falla en vez de mezclar
+   * el tamaño de uno con el hash de otro. El ETag multiparte no se usa como
+   * hash: el SHA-256 se calcula siempre sobre los bytes.
+   */
+  private async verifyStoredContent(
+    namespace: ObjectNamespaces,
+    objectKey: string,
+    declared: {
+      sha256: string;
+      sizeBytes: string;
+      providerVersionId: string;
+      providerUri: string;
+    },
+    context: Record<string, unknown>,
+  ): Promise<{
+    sha256: string;
+    providerVersionId: string;
+    etag?: string;
+    providerUri: string;
+  }> {
+    const providerUri = canonicalProviderUri(namespace, objectKey);
+    if (declared.providerUri !== providerUri) {
+      throw new PreconditionFailedException(
+        'La URI declarada no es la ubicación del objeto',
+        context,
+      );
+    }
+    const locator = {
+      backendCode: namespace.backendCode,
+      bucket: namespace.bucketOrContainer,
+      key: objectKey,
+      providerVersionId: namespace.versioningEnabled
+        ? declared.providerVersionId
+        : undefined,
+    };
+    const expectedSize = BigInt(declared.sizeBytes);
+    const expectedSha = declared.sha256.toLowerCase();
+
+    try {
+      const stat = await this.contentReader.stat(locator);
+      if (!stat) {
+        throw new PreconditionFailedException(
+          'El objeto no está en el almacenamiento',
+          context,
+        );
+      }
+      if (
+        namespace.versioningEnabled &&
+        stat.providerVersionId !== declared.providerVersionId
+      ) {
+        throw new PreconditionFailedException(
+          'La versión del proveedor no coincide con la declarada',
+          context,
+        );
+      }
+      if (stat.sizeBytes !== expectedSize) {
+        throw new PreconditionFailedException(
+          'El tamaño almacenado no coincide con el declarado',
+          context,
+        );
+      }
+      const digest = await this.contentReader.digest(locator, stat.etag);
+      if (digest.sizeBytes !== expectedSize || digest.sha256 !== expectedSha) {
+        throw new PreconditionFailedException(
+          'El contenido almacenado no coincide con el SHA-256 declarado',
+          context,
+        );
+      }
+      return {
+        sha256: expectedSha,
+        // Sin versionado el proveedor no da versión: queda la etiqueta
+        // declarada, que no autoriza nada por sí sola (el hash sí se verificó).
+        providerVersionId: stat.providerVersionId ?? declared.providerVersionId,
+        etag: stat.etag,
+        providerUri,
+      };
+    } catch (error) {
+      if (error instanceof ObjectContentUnavailableError) {
+        this.logger.error(
+          {
+            operation: 'object-storage.content.verify',
+            reasonCode: error.reasonCode,
+            ...context,
+          },
+          'Stored object could not be verified against the provider',
+        );
+        throw new ServiceUnavailableException(
+          'No se pudo verificar el objeto en el almacenamiento',
+        );
+      }
+      throw error;
+    }
+  }
 
   /**
    * Escribe la versión con todo lo que la acompaña: checksum, sobre de cifrado y
@@ -594,7 +1213,9 @@ export class ObjectStorageService {
       objectVersionId: version.id,
       algorithm: CHECKSUM_ALGORITHM_SHA256,
       checksum: data.sha256,
-      source: CHECKSUM_SOURCE_CLIENT,
+      // Llega acá sólo después de `verifyStoredContent`: el hash lo calculó
+      // el servidor sobre los bytes del proveedor.
+      source: CHECKSUM_SOURCE_SERVER,
       verificationStatus: CHECKSUM_VERIFICATION.VERIFIED,
       verifiedAt: new Date(),
     });
@@ -621,4 +1242,89 @@ export class ObjectStorageService {
 
     return version;
   }
+}
+
+/**
+ * Secreto de firma del acceso temporal (MCH-009).
+ *
+ * Se resuelve en cada firma y no al importar el módulo, para que el corte por
+ * producción ocurra en la operación que lo necesita y sea diagnosticable. Es el
+ * mismo secreto que firma las URL de descarga de archivos clínicos: los dos
+ * enlaces tienen la misma naturaleza y rotarlos por separado sólo agregaría una
+ * variable más que olvidar.
+ */
+function signedAccessSecret(): string {
+  return resolveSecret(
+    SIGNED_ACCESS.SECRET_ENV,
+    SIGNED_ACCESS.INSECURE_DEV_SECRET,
+    'firma del acceso temporal a objetos almacenados',
+  );
+}
+
+/** HMAC del payload, en base64url. */
+function accessSignature(payload: string): string {
+  return createHmac('sha256', signedAccessSecret())
+    .update(payload)
+    .digest('base64url');
+}
+
+/**
+ * `<claims en base64url>.<firma en base64url>`.
+ *
+ * El payload va legible a propósito: no guarda ningún secreto —sólo ids, la
+ * operación y la caducidad— y quien lo canjea ya conoce esos datos. Lo que
+ * impide forjarlo es la firma, no la ofuscación.
+ */
+function signAccessToken(claims: SignedAccessClaims): string {
+  const payload = Buffer.from(JSON.stringify(claims)).toString('base64url');
+  return `${payload}.${accessSignature(payload)}`;
+}
+
+/**
+ * Devuelve las afirmaciones del token sólo si la firma las cubre; `null` en
+ * cualquier otro caso.
+ *
+ * La comparación es en tiempo constante: comparar firmas con `===` filtra por
+ * el tiempo de respuesta cuántos bytes acertó quien está probando.
+ */
+function verifyAccessToken(token: string): SignedAccessClaims | null {
+  const partes = token.split('.');
+  if (partes.length !== 2 || !partes[0] || !partes[1]) return null;
+  const [payload, firma] = partes;
+  const esperada = Buffer.from(accessSignature(payload));
+  const recibida = Buffer.from(firma);
+  if (
+    esperada.byteLength !== recibida.byteLength ||
+    !timingSafeEqual(esperada, recibida)
+  ) {
+    return null;
+  }
+  try {
+    const claims = JSON.parse(
+      Buffer.from(payload, 'base64url').toString('utf8'),
+    ) as SignedAccessClaims;
+    return typeof claims?.v === 'string' &&
+      typeof claims.s === 'string' &&
+      typeof claims.m === 'string' &&
+      typeof claims.p === 'string' &&
+      typeof claims.exp === 'number'
+      ? claims
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * URI con la que el catálogo nombra el objeto. Se deriva del espacio de nombres
+ * y de la clave: es lo que el servidor sabe, no lo que alguien le contó.
+ */
+function canonicalProviderUri(
+  namespace: ObjectNamespaces,
+  objectKey: string,
+): string {
+  const scheme = ['s3', 'minio'].includes(namespace.backendCode)
+    ? 's3'
+    : namespace.backendCode;
+  return `${scheme}://${namespace.bucketOrContainer}/${objectKey}`;
 }

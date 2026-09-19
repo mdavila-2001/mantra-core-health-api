@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
@@ -26,6 +26,7 @@ import {
 } from '../dto';
 import { MedicationRequests } from '../entities';
 import { CLIN } from '../clinical.concepts';
+import { ClinicalReadService } from './clinical-read.service';
 import { PrescriptionSignaturePoliciesService } from './prescription-signature-policies.service';
 import { AuditTrailService } from '../../audit/services';
 import { HistoryRepository } from '../../audit/repositories';
@@ -64,6 +65,7 @@ export class MedicationsService {
    * @param signaturePolicies - Valor de signature policies requerido por la operación.
    * @param clinicalNotifications - Emisión in-app del carril P1.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
@@ -75,6 +77,7 @@ export class MedicationsService {
     private readonly historyRepo: HistoryRepository,
     private readonly clinicalNotifications: ClinicalNotificationsService,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(MedicationsService.name);
   }
@@ -135,6 +138,49 @@ export class MedicationsService {
       signedAt: request.signedAt ?? null,
       createdAt: request.createdAt,
     };
+  }
+
+  /**
+   * MCH-007: carga la receta y exige poder escribir en la historia de su
+   * paciente. Todas las mutaciones de receta llegan con el id en la ruta y sin
+   * paciente, así que el guard no las puede evaluar: el paciente sale de la
+   * fila, nunca de la petición.
+   */
+  private async loadRequestForWrite(
+    tx: EntityManager,
+    requestId: string,
+    actor: AuthenticatedUser,
+  ): Promise<MedicationRequests> {
+    const request = await this.loadRequestOrThrow(tx, requestId);
+    await this.clinicalRead.assertPuedeEscribirHistoria(
+      request.patientProfileId,
+      actor,
+    );
+    return request;
+  }
+
+  /**
+   * MCH-007: una receta la firma su prescriptor. Poder escribir en la historia
+   * no es poder firmar por otro profesional — la misma regla que
+   * `ChartNotesService.assertFirmaConPerfilPropio` aplica a las notas.
+   *
+   * Si la receta declara prescriptor, firma ese perfil. Si no lo declara (el
+   * campo es opcional al prescribir), firma quien redactó el borrador.
+   * `SUPERADMIN` pasa, igual que en el resto del sistema de roles.
+   */
+  private assertFirmaElPrescriptor(
+    request: MedicationRequests,
+    actor: AuthenticatedUser,
+  ): void {
+    if (actor.roles.includes('SUPERADMIN')) return;
+    const esSuya = request.prescriberProfileId
+      ? request.prescriberProfileId === actor.practitionerProfileId
+      : request.createdByUserId === actor.id;
+    if (!esSuya) {
+      throw new ForbiddenException(
+        'Una receta la firma su prescriptor: no se puede firmar en nombre de otro profesional.',
+      );
+    }
   }
 
   /**
@@ -223,7 +269,7 @@ export class MedicationsService {
       'Editing medication request draft',
     );
     return this.em.transactional(async (tx) => {
-      const request = await this.loadRequestOrThrow(tx, requestId);
+      const request = await this.loadRequestForWrite(tx, requestId, actor);
       if (request.statusConceptId !== CLIN.MEDICATION_REQUEST_DRAFT) {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) admite edición; una receta emitida es inmutable',
@@ -285,13 +331,16 @@ export class MedicationsService {
       'Signing medication request',
     );
     return this.em.transactional(async (tx) => {
-      const request = await this.loadRequestOrThrow(tx, requestId);
+      const request = await this.loadRequestForWrite(tx, requestId, actor);
       if (request.statusConceptId !== CLIN.MEDICATION_REQUEST_DRAFT) {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) puede firmarse antes de emitirse',
           { requestId, status: request.statusConceptId },
         );
       }
+      // Antes del atajo idempotente: quien no es el prescriptor recibe 403
+      // aunque la receta ya esté firmada, no un 200 que parezca éxito.
+      this.assertFirmaElPrescriptor(request, actor);
       if (!request.signedAt) {
         request.signedAt = new Date();
         request.signedByUserId = actor.id;
@@ -326,7 +375,7 @@ export class MedicationsService {
       'Issuing medication request',
     );
     const emitida = await this.em.transactional(async (tx) => {
-      const request = await this.loadRequestOrThrow(tx, requestId);
+      const request = await this.loadRequestForWrite(tx, requestId, actor);
       // CAN §6 (idempotencia): un reintento de la emisión con la MISMA clave sobre
       // una receta ya emitida devuelve el resultado sellado (replay), sin volver a
       // emitir ni fallar. Sin clave o clave distinta, el guard de estado se mantiene.
@@ -433,7 +482,7 @@ export class MedicationsService {
       'Invalidating medication request',
     );
     return this.em.transactional(async (tx) => {
-      const request = await this.loadRequestOrThrow(tx, requestId);
+      const request = await this.loadRequestForWrite(tx, requestId, actor);
       if (request.statusConceptId !== CLIN.MEDICATION_REQUEST_ISSUED) {
         throw new PreconditionFailedException(
           'Solo una receta emitida (ISSUED) puede invalidarse',
@@ -484,7 +533,7 @@ export class MedicationsService {
       'Replacing medication request',
     );
     return this.em.transactional(async (tx) => {
-      const original = await this.loadRequestOrThrow(tx, requestId);
+      const original = await this.loadRequestForWrite(tx, requestId, actor);
       if (original.statusConceptId !== CLIN.MEDICATION_REQUEST_ISSUED) {
         throw new PreconditionFailedException(
           'Solo una receta emitida (ISSUED) puede reemplazarse',
@@ -568,7 +617,7 @@ export class MedicationsService {
       'Renewing medication request',
     );
     return this.em.transactional(async (tx) => {
-      const source = await this.loadRequestOrThrow(tx, requestId);
+      const source = await this.loadRequestForWrite(tx, requestId, actor);
       const renewable = [
         CLIN.MEDICATION_REQUEST_ISSUED,
         CLIN.MEDICATION_REQUEST_COMPLETED,

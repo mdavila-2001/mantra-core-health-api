@@ -70,6 +70,7 @@ import { IntegrationContractsModule } from './modules/integration_contracts/inte
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { LakehouseModule } from './modules/lakehouse/lakehouse.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
+import { MedicalGroupsModule } from './modules/medical_groups/medical_groups.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
 import { ObjectStorageModule } from './modules/object_storage/object_storage.module';
 import { OrganizationExtensionsModule } from './modules/organization_extensions/organization_extensions.module';
@@ -206,6 +207,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     IntegrationsModule,
     LakehouseModule,
     MarketingModule,
+    // MCH-012: existía entero y sin importar, así que sus rutas daban 404.
+    // `app.module.wiring.spec.ts` impide que otro módulo quede así.
+    MedicalGroupsModule,
     MessagingModule,
     ObjectStorageModule,
     OrganizationExtensionsModule,

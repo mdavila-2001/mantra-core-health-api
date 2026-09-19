@@ -25,7 +25,7 @@ import {
  *
  * SEC-01: el alta lleva el guard del expediente —`patientProfileId` viaja en el
  * cuerpo—; la actualización de una actividad no, porque su paciente sale del
- * plan ya cargado (GAP-3, deuda abierta).
+ * plan ya cargado: esa la autoriza el servicio (MCH-007).
  */
 @ApiTags('chart-care-plans')
 @ApiBearerAuth()

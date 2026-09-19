@@ -33702,6 +33702,331 @@ paths:
       tags:
         - marketing
       security: []
+  /medical-groups:
+    get:
+      operationId: MedicalGroupsController_list
+      parameters:
+        - name: tab
+          required: false
+          in: query
+          schema:
+            enum:
+              - historico
+              - enviadas
+              - recibidas
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar grupos médicos (histórico/enviadas/recibidas)
+      tags:
+        - medical-groups
+      description: >-
+        Listar grupos médicos (histórico/enviadas/recibidas). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: MedicalGroupsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMedicalGroupDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Crear grupo médico
+      tags:
+        - medical-groups
+      description: >-
+        Crear grupo médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
+  /medical-groups/patients/{patientProfileId}/conditions:
+    get:
+      operationId: MedicalGroupsController_listPatientConditions
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Diagnósticos del paciente para el selector del formulario
+      tags:
+        - medical-groups
+      description: >-
+        Diagnósticos del paciente para el selector del formulario. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}:
+    get:
+      operationId: MedicalGroupsController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Consultar un grupo médico (formulario de sólo lectura)
+      tags:
+        - medical-groups
+      description: >-
+        Consultar un grupo médico (formulario de sólo lectura). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}/members/{memberId}/respond:
+    post:
+      operationId: MedicalGroupsController_respondToInvitation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: memberId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondMedicalGroupInvitationDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Aceptar o rechazar la invitación a un cargo del grupo
+      tags:
+        - medical-groups
+      description: >-
+        Aceptar o rechazar la invitación a un cargo del grupo. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}/reschedule-requests:
+    post:
+      operationId: MedicalGroupsController_requestReschedule
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestMedicalGroupRescheduleDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Solicitar cambio de horario
+      tags:
+        - medical-groups
+      description: >-
+        Solicitar cambio de horario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}/reschedule-requests/respond:
+    post:
+      operationId: MedicalGroupsController_respondToReschedule
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondMedicalGroupRescheduleDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Resolver la solicitud de cambio de horario
+      tags:
+        - medical-groups
+      description: >-
+        Resolver la solicitud de cambio de horario. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}/exercise-notes:
+    patch:
+      operationId: MedicalGroupsController_updateExerciseNotes
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMedicalGroupExerciseNotesDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO)
+      tags:
+        - medical-groups
+      description: >-
+        Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO). Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /object-storage/namespaces/{code}/uploads/initiate:
     post:
       description: 'La clave de destino es opaca: no debe llevar datos del paciente.'
@@ -34061,6 +34386,41 @@ paths:
       security:
         - bearer: []
       summary: Emitir acceso firmado a una versión
+      tags:
+        - object-storage
+  /object-storage/versions/{versionId}/content/{token}:
+    get:
+      description: El token ata versión, actor, operación y caducidad.
+      operationId: ObjectStorageController_downloadSignedContent
+      parameters:
+        - name: versionId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: token
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el contenido de una versión con el enlace emitido
       tags:
         - object-storage
   /object-storage/versions/{versionId}/integrity-checks:
@@ -51962,6 +52322,10 @@ tags:
     description: >-
       Operaciones del dominio funcional marketing. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: medical-groups
+    description: >-
+      Operaciones del dominio funcional medical groups. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: messaging
     description: >-
       Operaciones del dominio funcional messaging. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -73660,6 +74024,101 @@ components:
         - model
         - windowFrom
         - windowTo
+    MedicalGroupMemberInputDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          description: Profesional invitado a este cargo
+          format: uuid
+        roleTitle:
+          type: string
+          description: Cargo/función dentro del grupo (p. ej. "Anestesiólogo")
+        agreedPaymentAmount:
+          type: string
+          example: '500.00'
+        agreedPaymentCurrencyConceptId:
+          type: string
+          format: uuid
+        additionalTermsText:
+          type: string
+          description: Adicionales de términos y condiciones opcionales para este cargo
+      required:
+        - practitionerProfileId
+        - roleTitle
+        - agreedPaymentAmount
+    CreateMedicalGroupDto:
+      type: object
+      properties:
+        serviceCatalogId:
+          type: string
+          format: uuid
+          description: billing.service_catalog
+        patientProfileId:
+          type: string
+          format: uuid
+          description: profiles.patient_profiles
+        conditionId:
+          type: string
+          format: uuid
+          description: clinical.conditions
+        scheduledAt:
+          type: string
+          description: Fecha y hora de realización, ISO 8601
+        locationText:
+          type: string
+          description: Lugar de realización
+        notesText:
+          type: string
+        additionalTermsText:
+          type: string
+          description: Adicionales de términos y condiciones del solicitante, sobre el default del servicio
+        members:
+          description: El resto del equipo (cargo/función + pago). El creador se agrega solo como miembro aceptado.
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalGroupMemberInputDto'
+      required:
+        - serviceCatalogId
+        - scheduledAt
+        - locationText
+        - members
+    RespondMedicalGroupInvitationDto:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum:
+            - ACCEPTED
+            - REJECTED
+      required:
+        - decision
+    RequestMedicalGroupRescheduleDto:
+      type: object
+      properties:
+        proposedAt:
+          type: string
+          description: Nueva fecha propuesta, ISO 8601
+      required:
+        - proposedAt
+    RespondMedicalGroupRescheduleDto:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum:
+            - ACCEPTED
+            - REJECTED
+      required:
+        - decision
+    UpdateMedicalGroupExerciseNotesDto:
+      type: object
+      properties:
+        notesText:
+          type: string
+          description: Notas del procedimiento ya realizado
+      required:
+        - notesText
     InitiateUploadDto:
       type: object
       properties:
@@ -73965,7 +74424,8 @@ components:
           minimum: 30
         studyInstanceUid:
           type: string
-          description: Study UID si el objeto es DICOM
+          deprecated: true
+          description: 'Ignorado: el estudio se resuelve desde el objeto en el servidor'
           maxLength: 200
       required:
         - purposeOfUseCode

@@ -50,6 +50,43 @@ describe('AuthzEffectiveRolesService', () => {
       ).resolves.toEqual([]);
       expect(d.em.find).not.toHaveBeenCalled();
     });
+  });
+
+  // MCH-001: el ámbito (tenantId) de cada asignación tiene que sobrevivir a la
+  // resolución de roles. `codesForUser` lo descarta a propósito (compatibilidad);
+  // `scopedAssignmentsForUser` es quien lo conserva para que el guard de
+  // autorización pueda exigirlo.
+  describe('scopedAssignmentsForUser', () => {
+    it('conserva el tenant de cada asignación de rol de negocio', async () => {
+      const d = build();
+      d.assignmentsRepo.findActiveForUser.mockResolvedValue([
+        { roleId: 'r1', tenantId: 'tenant-A' },
+        { roleId: 'r2', tenantId: 'tenant-B' },
+      ]);
+      d.em.find.mockResolvedValue([
+        { id: 'r1', code: 'STORAGE_ADMIN' },
+        { id: 'r2', code: 'STORAGE_ADMIN' },
+      ]);
+
+      await expect(
+        d.service.scopedAssignmentsForUser(d.em as never, 'u1'),
+      ).resolves.toEqual([
+        { code: 'STORAGE_ADMIN', tenantId: 'tenant-A' },
+        { code: 'STORAGE_ADMIN', tenantId: 'tenant-B' },
+      ]);
+    });
+
+    it('una asignación sin tenant declarado queda sin ámbito (excepción documentada)', async () => {
+      const d = build();
+      d.assignmentsRepo.findActiveForUser.mockResolvedValue([
+        { roleId: 'r1', tenantId: undefined },
+      ]);
+      d.em.find.mockResolvedValue([{ id: 'r1', code: 'PLATFORM_AUDITOR' }]);
+
+      await expect(
+        d.service.scopedAssignmentsForUser(d.em as never, 'u1'),
+      ).resolves.toEqual([{ code: 'PLATFORM_AUDITOR', tenantId: undefined }]);
+    });
 
     it('descarta el rol que ya no está activo', async () => {
       const d = build();
@@ -97,6 +134,29 @@ describe('AuthzEffectiveRolesService', () => {
         d.service.ensureRoleByCode(d.em as never, 'u1', 'PRACTITIONER'),
       ).resolves.toBe(true);
       expect(d.assignmentsRepo.create).not.toHaveBeenCalled();
+    });
+
+    // MCH-034: el lookup tiene que preguntar por el mismo ámbito que se va a
+    // conceder, no sólo por (usuario, rol).
+    it('pasa el tenant al lookup: no confunde una asignación de otro tenant con esta', async () => {
+      const d = build();
+      d.em.findOne.mockResolvedValue({ id: 'r1', isAssignable: true });
+      d.assignmentsRepo.findActive.mockResolvedValue(null);
+
+      await d.service.ensureRoleByCode(d.em as never, 'u1', 'PRACTITIONER', {
+        tenantId: 'tenant-B',
+      });
+
+      expect(d.assignmentsRepo.findActive).toHaveBeenCalledWith(
+        d.em,
+        'u1',
+        'r1',
+        { tenantId: 'tenant-B' },
+      );
+      expect(d.assignmentsRepo.create).toHaveBeenCalledWith(
+        d.em,
+        expect.objectContaining({ tenantId: 'tenant-B' }),
+      );
     });
 
     it('responde false sin lanzar cuando el rol no existe', async () => {

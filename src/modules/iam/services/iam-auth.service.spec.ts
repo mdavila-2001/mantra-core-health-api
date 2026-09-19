@@ -58,6 +58,7 @@ function build() {
   const refreshRepo = {
     create: mockFn(),
     findByHash: mockFn(),
+    findByHashForUpdate: mockFn(),
     revokeBySessionId: mockFn().mockResolvedValue(1),
     revokeActiveBySessionIds: mockFn().mockResolvedValue(0),
     purgeExpired: mockFn().mockResolvedValue(0),
@@ -80,7 +81,9 @@ function build() {
   };
   // Sin asignaciones en `authz`: el token queda con los roles de plataforma, que
   // es el caso por defecto de una cuenta que no ejerce ningún rol asistencial.
-  const effectiveRoles = { codesForUser: mockFn().mockResolvedValue([]) };
+  const effectiveRoles = {
+    scopedAssignmentsForUser: mockFn().mockResolvedValue([]),
+  };
   const logger = {
     setContext: mockFn(),
     info: mockFn(),
@@ -172,7 +175,9 @@ describe('IamAuthService', () => {
       d.rolesRepo.findActiveForUser.mockResolvedValue([
         { roleConceptId: CONCEPTS.ROLE_USER },
       ]);
-      d.effectiveRoles.codesForUser.mockResolvedValue(['SURGEON']);
+      d.effectiveRoles.scopedAssignmentsForUser.mockResolvedValue([
+        { code: 'SURGEON', tenantId: undefined },
+      ]);
 
       await d.service.login({ email: 'a@x.io', password: PASSWORD }, '1.2.3.4');
 
@@ -183,6 +188,37 @@ describe('IamAuthService', () => {
         ['USER', 'SURGEON'],
         expect.anything(),
         expect.anything(),
+      );
+    });
+
+    // MCH-001: un rol de negocio concedido en un tenant concreto viaja con su
+    // ámbito, sin desdibujarse en `roles`.
+    it('scopes a business role granted in a specific tenant, in the token claims', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      d.rolesRepo.findActiveForUser.mockResolvedValue([]);
+      d.effectiveRoles.scopedAssignmentsForUser.mockResolvedValue([
+        { code: 'STORAGE_ADMIN', tenantId: 'tenant-A' },
+      ]);
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD }, '1.2.3.4');
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        ['STORAGE_ADMIN'],
+        expect.anything(),
+        expect.objectContaining({
+          scopedRoles: { 'tenant-A': ['STORAGE_ADMIN'] },
+        }),
       );
     });
 
@@ -201,7 +237,9 @@ describe('IamAuthService', () => {
       d.rolesRepo.findActiveForUser.mockResolvedValue([
         { roleConceptId: CONCEPTS.ROLE_USER },
       ]);
-      d.effectiveRoles.codesForUser.mockRejectedValue(new Error('authz down'));
+      d.effectiveRoles.scopedAssignmentsForUser.mockRejectedValue(
+        new Error('authz down'),
+      );
 
       // Un problema de autorización no debe convertirse en una caída de la
       // autenticación: entra con sus roles de plataforma y recibirá un 403
@@ -427,7 +465,7 @@ describe('IamAuthService', () => {
         expiresAt: new Date('2030-01-01'),
         updatedAt: new Date(),
       };
-      d.refreshRepo.findByHash.mockResolvedValue(active);
+      d.refreshRepo.findByHashForUpdate.mockResolvedValue(active);
       d.sessionsRepo.findById.mockResolvedValue({
         id: 's1',
         userId: 'u1',
@@ -445,9 +483,80 @@ describe('IamAuthService', () => {
       expect(d.refreshRepo.create).toHaveBeenCalled();
     });
 
+    // MCH-005: la comprobación de estado tiene que hacerse sobre la fila
+    // bloqueada dentro de la transacción. Una lectura previa fuera de ella deja
+    // que dos peticiones con el mismo token la superen y emitan dos sucesores.
+    it('reads the token under a row lock inside the transaction, never before it', async () => {
+      const d = build();
+      d.refreshRepo.findByHashForUpdate.mockResolvedValue({
+        id: 'rt1',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        sessionId: 's1',
+        expiresAt: new Date('2030-01-01'),
+      });
+      d.sessionsRepo.findById.mockResolvedValue({
+        id: 's1',
+        userId: 'u1',
+        tokenId: 'tid',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+
+      await d.service.refresh('raw');
+
+      expect(d.refreshRepo.findByHashForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        expect.any(String),
+      );
+      expect(d.refreshRepo.findByHash).not.toHaveBeenCalled();
+    });
+
+    it('issues no successor when the locked row is no longer active (lost race)', async () => {
+      const d = build();
+      // Primera lectura (si la hubiera) ve ACTIVE; la fila bloqueada ya fue rotada.
+      d.refreshRepo.findByHash.mockResolvedValue({
+        id: 'rt1',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        sessionId: 's1',
+        expiresAt: new Date('2030-01-01'),
+      });
+      d.refreshRepo.findByHashForUpdate.mockResolvedValue({
+        id: 'rt1',
+        stateConceptId: CONCEPTS.STATE_ROTATED,
+        sessionId: 's1',
+        expiresAt: new Date('2030-01-01'),
+      });
+      d.sessionsRepo.findById.mockResolvedValue({
+        id: 's1',
+        userId: 'u1',
+        tokenId: 'tid',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+
+      await expect(d.service.refresh('raw')).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+      expect(d.refreshRepo.create).not.toHaveBeenCalled();
+      expect(d.refreshRepo.revokeBySessionId).toHaveBeenCalledWith(d.tx, 's1');
+    });
+
+    it('rejects an expired token read under the lock without issuing a successor', async () => {
+      const d = build();
+      d.refreshRepo.findByHashForUpdate.mockResolvedValue({
+        id: 'rt1',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        sessionId: 's1',
+        expiresAt: new Date('2000-01-01'),
+      });
+
+      await expect(d.service.refresh('raw')).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+      expect(d.refreshRepo.create).not.toHaveBeenCalled();
+    });
+
     it('detects reuse of a non-active token and revokes the session', async () => {
       const d = build();
-      d.refreshRepo.findByHash.mockResolvedValue({
+      d.refreshRepo.findByHashForUpdate.mockResolvedValue({
         id: 'rt1',
         stateConceptId: CONCEPTS.STATE_ROTATED,
         sessionId: 's1',
@@ -469,7 +578,7 @@ describe('IamAuthService', () => {
 
     it('rejects an unknown refresh token', async () => {
       const d = build();
-      d.refreshRepo.findByHash.mockResolvedValue(null);
+      d.refreshRepo.findByHashForUpdate.mockResolvedValue(null);
       await expect(d.service.refresh('raw')).rejects.toBeInstanceOf(
         UnauthorizedException,
       );

@@ -88,6 +88,9 @@ suite('7.2 explicit local synthetic real-stack journey', () => {
     const { TokenService } = await load<
       typeof import('../../src/common/auth/token.service')
     >('../../src/common/auth/token.service');
+    const { CONCEPTS } = await load<
+      typeof import('../../src/common/constants/concepts')
+    >('../../src/common/constants/concepts');
     let app: INestApplication | undefined;
     const boot = async () => {
       const instance = await NestFactory.create(AppModule, {
@@ -326,6 +329,18 @@ suite('7.2 explicit local synthetic real-stack journey', () => {
         expect(refs.incomingReferences).toBeGreaterThan(0);
       });
       expect(hash(await snapshot(em))).toBe(hash(state.baseline));
+      // MCH-004: el token sólo autentica si su `sid` tiene sesión activa.
+      await current
+        .get(MikroORM)
+        .em.fork()
+        .getConnection()
+        .execute(
+          `insert into iam.sessions
+             (id, user_id, token_id, state_concept_id, expires_at, created_at, updated_at)
+           values (gen_random_uuid(), ?, ?, ?, now() + interval '1 day', now(), now())
+           on conflict (token_id) do nothing`,
+          [spec.ownerUserIds[0], spec.runId, CONCEPTS.STATE_ACTIVE],
+        );
       const token = current
         .get(TokenService)
         .signAccessToken(

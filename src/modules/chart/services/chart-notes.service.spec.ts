@@ -53,8 +53,16 @@ function build() {
     createExamFinding: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new ChartNotesService(em as any, notesRepo, logger as any);
-  return { service, tx, em, notesRepo };
+  const clinicalRead = {
+    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+  };
+  const service = new ChartNotesService(
+    em as any,
+    notesRepo,
+    logger as any,
+    clinicalRead as any,
+  );
+  return { service, tx, em, notesRepo, clinicalRead };
 }
 
 describe('ChartNotesService', () => {
@@ -364,6 +372,11 @@ describe('ChartNotesService', () => {
   describe('releaseVersion (UC-15-06)', () => {
     it('rejects when the version is not eligible', async () => {
       const d = build();
+      // MCH-007: toda mutación por id resuelve el paciente en la cabecera.
+      d.notesRepo.findHeaderById.mockResolvedValue({
+        id: 'h1',
+        patientProfileId: 'p1',
+      });
       d.notesRepo.findVersionById.mockResolvedValue({
         id: 'v1',
         clinicalNoteId: 'h1',
@@ -440,8 +453,14 @@ describe('ChartNotesService', () => {
   describe('recordExamFindings (UC-15-08)', () => {
     it('rejects recording on a signed version', async () => {
       const d = build();
+      // MCH-007: toda mutación por id resuelve el paciente en la cabecera.
+      d.notesRepo.findHeaderById.mockResolvedValue({
+        id: 'h1',
+        patientProfileId: 'p1',
+      });
       d.notesRepo.findVersionById.mockResolvedValue({
         id: 'v1',
+        clinicalNoteId: 'h1',
         statusConceptId: CHART.VERSION_SIGNED,
       });
       await expect(
@@ -451,7 +470,16 @@ describe('ChartNotesService', () => {
 
     it('inserts one finding per entry with a default body system', async () => {
       const d = build();
-      const version: any = { id: 'v1', statusConceptId: CHART.VERSION_DRAFT };
+      // MCH-007: toda mutación por id resuelve el paciente en la cabecera.
+      d.notesRepo.findHeaderById.mockResolvedValue({
+        id: 'h1',
+        patientProfileId: 'p1',
+      });
+      const version: any = {
+        id: 'v1',
+        clinicalNoteId: 'h1',
+        statusConceptId: CHART.VERSION_DRAFT,
+      };
       d.notesRepo.findVersionById.mockResolvedValue(version);
 
       const res = await d.service.recordExamFindings(
@@ -473,4 +501,71 @@ describe('ChartNotesService', () => {
       expect(version.objectiveText).toBe('synth');
     });
   });
+});
+
+describe('ChartNotesService · MCH-007, mutaciones por id', () => {
+  const cabecera = () => ({
+    id: 'n1',
+    patientProfileId: 'paciente-ajeno',
+    lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+    currentVersionId: 'v1',
+  });
+  const version = () => ({
+    id: 'v1',
+    clinicalNoteId: 'n1',
+    statusConceptId: CHART.VERSION_DRAFT,
+    releaseEligibilityConceptId: CHART.ELIGIBILITY_ELIGIBLE,
+  });
+
+  function sinPermiso() {
+    const d = build();
+    d.notesRepo.findHeaderById.mockResolvedValue(cabecera());
+    d.notesRepo.findVersionById.mockResolvedValue(version());
+    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      new ForbiddenException('sin permiso'),
+    );
+    return d;
+  }
+
+  it.each([
+    [
+      'addVersion',
+      (d: any) => d.service.addVersion('n1', { authorProfileId: 's1' }, actor),
+    ],
+    [
+      'signVersion',
+      (d: any) =>
+        d.service.signVersion('n1', 'v1', { signerProfileId: 's1' }, actor),
+    ],
+    [
+      'cosignVersion',
+      (d: any) =>
+        d.service.cosignVersion('n1', 'v1', { signerProfileId: 's1' }, actor),
+    ],
+    [
+      'amendNote',
+      (d: any) => d.service.amendNote('n1', { authorProfileId: 's1' }, actor),
+    ],
+    ['releaseVersion', (d: any) => d.service.releaseVersion('v1', {}, actor)],
+    ['withholdVersion', (d: any) => d.service.withholdVersion('v1', {}, actor)],
+    [
+      'recordExamFindings',
+      (d: any) => d.service.recordExamFindings('v1', { findings: [] }, actor),
+    ],
+  ])(
+    '%s pregunta por el paciente de la nota y, sin permiso, no escribe',
+    async (_nombre, operar) => {
+      const d = sinPermiso();
+      await expect(operar(d)).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+        'paciente-ajeno',
+        actor,
+      );
+      expect(d.notesRepo.createVersion).not.toHaveBeenCalled();
+      expect(d.notesRepo.createSignature).not.toHaveBeenCalled();
+      expect(d.notesRepo.createReleaseEvent).not.toHaveBeenCalled();
+      expect(d.notesRepo.createExamFinding).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    },
+  );
 });

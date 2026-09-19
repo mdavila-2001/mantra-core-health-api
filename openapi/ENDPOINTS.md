@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1299 de 1299 endpoints** en **66 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1304 de 1304 endpoints** en **67 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -38,13 +38,14 @@ Se documentan **1299 de 1299 endpoints** en **66 módulos**. La referencia compl
 | `health_data` | 16 | [Abrir referencia](endpoints/health-data.md) |
 | `iam` | 31 | [Abrir referencia](endpoints/iam.md) |
 | `identity_assurance` | 27 | [Abrir referencia](endpoints/identity-assurance.md) |
-| `insurance` | 40 | [Abrir referencia](endpoints/insurance.md) |
+| `insurance` | 36 | [Abrir referencia](endpoints/insurance.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
 | `marketing` | 14 | [Abrir referencia](endpoints/marketing.md) |
+| `medical_groups` | 8 | [Abrir referencia](endpoints/medical-groups.md) |
 | `messaging` | 17 | [Abrir referencia](endpoints/messaging.md) |
-| `object_storage` | 13 | [Abrir referencia](endpoints/object-storage.md) |
+| `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
 | `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |

@@ -13,6 +13,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -27,13 +28,17 @@ function build() {
   const reportsRepo = { findById: mockFn(), create: mockFn() };
   const serviceRequestsRepo = { findById: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const clinicalRead = {
+    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+  };
   const service = new DiagnosticReportsService(
     em as any,
     reportsRepo,
     serviceRequestsRepo as any,
     logger as any,
+    clinicalRead as any,
   );
-  return { service, reportsRepo, serviceRequestsRepo };
+  return { service, tx, reportsRepo, serviceRequestsRepo, clinicalRead };
 }
 
 /**
@@ -134,5 +139,27 @@ describe('DiagnosticReportsService', () => {
         d.service.release('dr1', { expectedRowVersion: 1 }, actor),
       ).rejects.toBeInstanceOf(ConcurrencyConflictException);
     });
+  });
+});
+
+describe('DiagnosticReportsService · MCH-007, liberación por id', () => {
+  it('pregunta por el paciente del informe y, sin permiso, no lo libera', async () => {
+    const d = build();
+    const dr = { ...report(), patientProfileId: 'paciente-ajeno' };
+    const estadoAntes = dr.lifecycleStatusConceptId;
+    d.reportsRepo.findById.mockResolvedValue(dr);
+    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      new ForbiddenException('sin permiso'),
+    );
+
+    await expect(
+      d.service.release('dr1', {} as any, actor),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      'paciente-ajeno',
+      actor,
+    );
+    expect(dr.lifecycleStatusConceptId).toBe(estadoAntes);
+    expect(d.tx.flush).not.toHaveBeenCalled();
   });
 });

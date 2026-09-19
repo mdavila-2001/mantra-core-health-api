@@ -24,7 +24,7 @@ import {
  *
  * SEC-01: el alta lleva el guard del expediente —su `patientProfileId` viaja en
  * el cuerpo—; la enmienda no, porque su paciente sale de la observación ya
- * cargada (GAP-3, deuda abierta).
+ * cargada: la autoriza el servicio (MCH-007).
  */
 @ApiTags('clinical-observations')
 @ApiBearerAuth()

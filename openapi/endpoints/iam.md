@@ -1922,10 +1922,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 401 | `UNAUTHENTICATED` | Refresh token inválido | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | Sesión no activa | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
 | 401 | `UNAUTHENTICATED` | Reuso de refresh token detectado | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
 | 401 | `UNAUTHENTICATED` | Refresh token expirado | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
-| 401 | `UNAUTHENTICATED` | Sesión no activa | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | Refresh token inválido | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 20, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

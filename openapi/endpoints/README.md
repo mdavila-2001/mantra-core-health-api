@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1299 de 1299 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **66 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1304 de 1304 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **67 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -76,13 +76,14 @@ Esta referencia documenta **1299 de 1299 operaciones HTTP** registradas en `open
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 31 | `iam-auth`, `iam-users` | 2 |
 | [identity_assurance](identity-assurance.md) | 27 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
-| [insurance](insurance.md) | 40 | `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 13 |
+| [insurance](insurance.md) | 36 | `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 11 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
 | [lakehouse](lakehouse.md) | 13 | `lakehouse` | 2 |
 | [marketing](marketing.md) | 14 | `marketing` | 2 |
+| [medical_groups](medical-groups.md) | 8 | `medical-groups` | 1 |
 | [messaging](messaging.md) | 17 | `messaging`, `messaging-internal`, `messaging-webhooks` | 3 |
-| [object_storage](object-storage.md) | 13 | `dicomweb`, `object-storage` | 2 |
+| [object_storage](object-storage.md) | 14 | `dicomweb`, `object-storage` | 2 |
 | [organization_extensions](organization-extensions.md) | 9 | `orgext-affiliations`, `orgext-data-boundaries`, `orgext-facility-licenses`, `orgext-hospitals` | 4 |
 | [payments](payments.md) | 14 | `payments`, `payments-intents`, `payments-transactions` | 3 |
 | [pharma_lab](pharma-lab.md) | 76 | `pharma-lab-catalog`, `pharma-lab-notices`, `pharma-lab-pharmacovigilance`, `pharma-lab-reference`, `pharma-lab-regulatory`, `pharma-lab-social-accounting`, `pharma-lab-visit-agenda`, `pharma-lab-visit-records`, `pharma-lab-visit-requests`, `pharma-lab-visit-surveys`, `pharma-lab-visitors`, `pharma-labs` | 12 |
@@ -117,4 +118,4 @@ Esta referencia documenta **1299 de 1299 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1299 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1304 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

@@ -3,6 +3,7 @@ import { defineConfig } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { loadOrmEnv, type OrmEnv } from './orm.env';
 import { createOrmLoggerFactory } from '../observability/orm.logger';
+import { warnIfRlsRoleFallbackIsUnsafe } from './rls-role-resolution';
 import { HistoryMirrorSubscriber } from '../subscribers/history-mirror.subscriber';
 
 /**
@@ -34,6 +35,10 @@ const APPLICATION_NAME = 'mantra-redesa-health-api';
  *            en tests sin tocar `process.env`.
  */
 export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
+  warnIfRlsRoleFallbackIsUnsafe({
+    DB_APP_USER: process.env.DB_APP_USER,
+    RLS_ENFORCE: process.env.RLS_ENFORCE,
+  });
   return defineConfig({
     host: env.connection.host,
     port: env.connection.port,

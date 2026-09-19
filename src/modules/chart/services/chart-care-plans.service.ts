@@ -16,6 +16,7 @@ import {
   UpdateActivityDto,
   type ActivityStatus,
 } from '../dto';
+import { ClinicalReadService } from '../../clinical/services';
 
 /** Mapa estado (DTO) → concepto de estado de actividad. */
 const ACTIVITY_STATUS_CONCEPT: Record<ActivityStatus, string> = {
@@ -39,11 +40,13 @@ export class ChartCarePlansService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param carePlansRepo - Valor de care plans repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly carePlansRepo: CarePlansRepository,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(ChartCarePlansService.name);
   }
@@ -119,6 +122,11 @@ export class ChartCarePlansService {
         throw new ResourceNotFoundException('Plan de cuidado no encontrado', {
           planId,
         });
+      // MCH-007: la ruta sólo trae ids; el paciente sale del plan.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        plan.patientProfileId,
+        actor,
+      );
       if (plan.statusConceptId !== CHART.CAREPLAN_ACTIVE) {
         throw new PreconditionFailedException(
           'El plan de cuidado no está activo',

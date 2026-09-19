@@ -1659,6 +1659,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | La suscripción ya expiró | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay versión ACTIVE del contrato para entregar | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
 | 422 | `PRECONDITION_FAILED` | La suscripción no tiene callbackUri para entregar | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
+| 422 | `PRECONDITION_FAILED` | El cuerpo del despacho excede el tamaño permitido | Excepción explícita en src/common/http/http-dispatcher.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

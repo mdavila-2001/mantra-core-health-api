@@ -253,6 +253,16 @@ export class IamUsersService {
         }
         active.stateConceptId = CONCEPTS.STATE_REVOKED;
         touch(active, actor.id);
+        // El rol viaja firmado en el access token: retirarlo en la base no
+        // alcanza. Se cierran las sesiones para que el token deje de servir en
+        // la petición siguiente (MCH-004) y el próximo login emita los roles
+        // vigentes.
+        const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(
+          tx,
+          userId,
+        );
+        await this.sessionsRepo.revokeAllActiveForUser(tx, userId);
+        await this.refreshRepo.revokeActiveBySessionIds(tx, sessionIds);
         this.eventsRepo.record(tx, {
           eventTypeConceptId: CONCEPTS.SEC_ROLE_REVOKE,
           outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,

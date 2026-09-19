@@ -7,6 +7,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
 import { ChartCarePlansService } from './chart-care-plans.service';
 import { CHART } from '../chart.concepts';
 import {
@@ -34,12 +35,16 @@ function build() {
     createActivity: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const clinicalRead = {
+    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ChartCarePlansService(
     em as any,
     carePlansRepo,
     logger as any,
+    clinicalRead as any,
   );
-  return { service, tx, carePlansRepo };
+  return { service, tx, carePlansRepo, clinicalRead };
 }
 
 describe('ChartCarePlansService', () => {
@@ -164,5 +169,31 @@ describe('ChartCarePlansService', () => {
       expect(plan.statusConceptId).toBe(CHART.CAREPLAN_ACTIVE);
       expect(res.statusConceptId).toBe(CHART.ACTIVITY_IN_PROGRESS);
     });
+  });
+});
+
+describe('ChartCarePlansService · MCH-007, actividad por id', () => {
+  it('pregunta por el paciente del plan y, sin permiso, no toca la actividad', async () => {
+    const d = build();
+    d.carePlansRepo.findPlanById.mockResolvedValue({
+      id: 'cp1',
+      patientProfileId: 'paciente-ajeno',
+      statusConceptId: CHART.CAREPLAN_ACTIVE,
+    });
+    const activity = { id: 'a1', carePlanId: 'cp1', detailText: 'antes' };
+    d.carePlansRepo.findActivityById.mockResolvedValue(activity);
+    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      new ForbiddenException('sin permiso'),
+    );
+
+    await expect(
+      d.service.updateActivity('cp1', 'a1', { detailText: 'después' }, actor),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      'paciente-ajeno',
+      actor,
+    );
+    expect(activity.detailText).toBe('antes');
+    expect(d.tx.flush).not.toHaveBeenCalled();
   });
 });
