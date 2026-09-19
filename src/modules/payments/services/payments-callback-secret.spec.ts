@@ -40,12 +40,14 @@ function build(esc: Escenario) {
     id: 'txn-1',
     gatewayId: 'gw-1',
     paymentIntentId: 'intent-1',
+    amount: '100.00',
     statusConceptId: CONCEPTS.TXN_PROCESSING,
   };
   const intent = {
     id: 'intent-1',
     gatewayId: 'gw-1',
     gatewayConnectionId: esc.gatewayConnectionId,
+    amount: '100.00',
     statusConceptId: CONCEPTS.PI_PROCESSING,
   };
   const tx = {
@@ -64,6 +66,11 @@ function build(esc: Escenario) {
   const intentsRepo = { findByIdForUpdate: mockFn(() => intent) };
   const transactionsRepo = {
     findByGatewayRef: mockFn(() => Promise.resolve(transaction)),
+    // MCH-011: el callback verificado se archiva en la bandeja de webhooks.
+    findWebhookEventByRef: mockFn(() => Promise.resolve(null)),
+    recordWebhookEvent: mockFn(),
+    // MCH-036: el estado de la intención se deriva de lo capturado.
+    findByIntent: mockFn(() => Promise.resolve([transaction])),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PaymentsTransactionsService(

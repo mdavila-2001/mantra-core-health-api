@@ -31,6 +31,7 @@ import {
   NormalBalance,
 } from '../dto';
 import { sumCents, fromCents } from './money';
+import { clasificar } from './journal-classification';
 import { AuditTrailService } from '../../audit/services';
 import { PracticeTenantLookupService } from '../../practice/services';
 
@@ -57,7 +58,11 @@ const NORMAL_BALANCE_CONCEPT: Record<NormalBalance, string> = {
  * ocurre en la transición APPROVED → POSTED.
  */
 const ALLOWED_TRANSITIONS: Record<string, readonly string[]> = {
-  [ACCT.TXN_DRAFT]: [ACCT.TXN_AUTO_CLASSIFIED],
+  // MCH-018: un borrador que el motor de reglas no puede clasificar va a
+  // revisión humana en vez de marcarse auto-clasificado. Ese camino lo abre
+  // únicamente `classify`: `submitForReview` sigue exigiendo pasar por la
+  // clasificación (ver su guardia explícita).
+  [ACCT.TXN_DRAFT]: [ACCT.TXN_AUTO_CLASSIFIED, ACCT.TXN_PENDING_REVIEW],
   [ACCT.TXN_AUTO_CLASSIFIED]: [ACCT.TXN_PENDING_REVIEW],
   [ACCT.TXN_PENDING_REVIEW]: [ACCT.TXN_APPROVED],
   [ACCT.TXN_APPROVED]: [ACCT.TXN_POSTED],
@@ -343,26 +348,106 @@ export class LedgerService {
 
   /**
    * ALOVIDA C-17 — DRAFT → AUTO_CLASSIFIED. Clasificación automática por reglas.
-   * PLACEHOLDER determinista y documentado: en ausencia de un motor de reglas de
-   * clasificación, se marca el asiento como auto-clasificado conservando su tipo
-   * STANDARD. Punto de extensión: aquí se resolvería `transactionTypeConceptId`
-   * (y/o cuentas por defecto) a partir de reglas de determinación por escenario.
+   *
+   * MCH-018: antes esto era un PLACEHOLDER que sólo cambiaba el estado, así que
+   * el asiento quedaba "auto-clasificado" sin que ninguna regla se hubiera
+   * evaluado. Ahora decide el motor versionado (`journal-classification.ts`):
+   * sólo con una regla aplicable el asiento llega a AUTO_CLASSIFIED y se le
+   * imputa el tipo que la regla determina. Sin regla, o con reglas en conflicto,
+   * va a PENDING_REVIEW sin inventar tipo ni cuenta, y la respuesta dice por qué.
+   *
+   * @param id - Asiento a clasificar.
+   * @param _dto - Cuerpo de la transición; no aporta datos a la decisión.
+   * @param actor - Usuario autenticado que la solicita.
+   * @returns El asiento con la evidencia de la clasificación.
    */
-  classify(
+  async classify(
     id: string,
     _dto: JournalTransitionDto,
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
-    return this.transition(id, ACCT.TXN_AUTO_CLASSIFIED, actor, 'classify');
+    const owner = await this.journalRepo.findTransactionById(this.em, id);
+    if (owner) {
+      await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
+    }
+
+    return this.em.transactional(async (tx) => {
+      const txn = await this.journalRepo.findTransactionById(tx, id);
+      if (!txn) {
+        throw new ResourceNotFoundException('Asiento no encontrado', {
+          transactionId: id,
+        });
+      }
+
+      const resultado = clasificar({
+        sourceDocumentType: txn.sourceDocumentType,
+      });
+      const destino =
+        resultado.decision === 'CLASIFICADA'
+          ? ACCT.TXN_AUTO_CLASSIFIED
+          : ACCT.TXN_PENDING_REVIEW;
+      this.assertTransition(txn.statusConceptId, destino);
+
+      if (resultado.transactionTypeConceptId) {
+        txn.transactionTypeConceptId = resultado.transactionTypeConceptId;
+      }
+      txn.statusConceptId = destino;
+      touch(txn, actor.id);
+
+      // La cadena WORM distingue las dos autoridades: una clasificación por
+      // reglas no queda sellada igual que un envío a revisión humana.
+      await this.auditTrail.record(tx, actor, {
+        action:
+          resultado.decision === 'CLASIFICADA'
+            ? 'JOURNAL_AUTO_CLASSIFIED'
+            : 'JOURNAL_CLASSIFICATION_REVIEW',
+        entity: JOURNAL_AUDIT_ENTITY,
+        entityId: id,
+      });
+
+      this.logger.info(
+        {
+          operation: 'accounting.journal.classify',
+          transactionId: id,
+          decision: resultado.decision,
+          rulesetVersion: resultado.rulesetVersion,
+          ruleId: resultado.ruleId,
+          to: destino,
+        },
+        'Journal transaction classified',
+      );
+
+      return { ...this.toResponse(txn), classification: resultado };
+    });
   }
 
-  /** ALOVIDA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
+  /**
+   * ALOVIDA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW.
+   *
+   * MCH-018: desde DRAFT la máquina admite ahora PENDING_REVIEW, pero ese camino
+   * es sólo el de `classify` cuando ninguna regla aplica. Enviar a revisión un
+   * borrador sin pasar por la clasificación se rechaza acá explícitamente.
+   */
   submitForReview(
     id: string,
     _dto: JournalTransitionDto,
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
-    return this.transition(id, ACCT.TXN_PENDING_REVIEW, actor, 'submit-review');
+    return this.transition(
+      id,
+      ACCT.TXN_PENDING_REVIEW,
+      actor,
+      'submit-review',
+      undefined,
+      (txn) => {
+        if (txn.statusConceptId === ACCT.TXN_DRAFT) {
+          throw new PreconditionFailedException(
+            'El asiento debe clasificarse antes de enviarse a revisión',
+            { transactionId: id },
+          );
+        }
+      },
+    );
   }
 
   /**
@@ -757,6 +842,14 @@ export class LedgerService {
   /**
    * Transición genérica de estado: carga el asiento, valida la transición y aplica
    * el nuevo estado (más una mutación opcional específica del comando).
+   *
+   * @param id - Asiento a transitar.
+   * @param to - Estado destino.
+   * @param actor - Usuario autenticado que la solicita.
+   * @param operation - Nombre del comando, para la traza.
+   * @param mutate - Mutación específica del comando, tras cambiar el estado.
+   * @param guard - Comprobación previa a la transición sobre el estado actual.
+   * @returns El asiento ya transitado.
    */
   private async transition(
     id: string,
@@ -777,6 +870,12 @@ export class LedgerService {
        */
       approvedByUserId?: string;
     }) => void,
+    guard?: (txn: {
+      /**
+       * Identificador asociado a status concept.
+       */
+      statusConceptId: string;
+    }) => void,
   ): Promise<JournalTransactionResponseDto> {
     // Fuera de la transacción: es una lectura contra `practice`, no contra
     // `accounting`, y no necesita compartir el lock de la fila del asiento.
@@ -792,6 +891,7 @@ export class LedgerService {
           transactionId: id,
         });
       }
+      guard?.(txn);
       this.assertTransition(txn.statusConceptId, to);
       txn.statusConceptId = to;
       mutate?.(txn);

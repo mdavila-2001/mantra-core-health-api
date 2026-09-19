@@ -3,6 +3,7 @@ import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   PaymentTransactions,
+  PaymentWebhookEvents,
   Refunds,
   PaymentCancellationRequests,
 } from '../entities';
@@ -142,6 +143,45 @@ export interface CreateCancellationData {
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural del evento de webhook que se archiva
+ * (bandeja de entrada de callbacks, MCH-011).
+ */
+export interface RecordWebhookEventData {
+  /**
+   * Identificador asociado a gateway.
+   */
+  gatewayId: string;
+  /**
+   * Tipo de evento informado por el proveedor.
+   */
+  eventType: string;
+  /**
+   * Referencia determinista del hecho; su índice único reconoce la reentrega.
+   */
+  gatewayEventRef: string;
+  /**
+   * Cuerpo verificable tal como llegó.
+   */
+  payloadJson: unknown;
+  /**
+   * Firma presentada por el proveedor.
+   */
+  signature?: string;
+  /**
+   * Si la firma se verificó antes de archivar el evento.
+   */
+  isVerified: boolean;
+  /**
+   * Si el evento se aplicó al estado local o quedó para conciliación.
+   */
+  processed: boolean;
+  /**
+   * Identificador asociado a related intent.
+   */
+  relatedIntentId?: string;
+}
+
 /** Acceso a datos de transacciones de gateway, reembolsos y cancelaciones. */
 @Injectable()
 export class PaymentTransactionsRepository {
@@ -267,6 +307,55 @@ export class PaymentTransactionsRepository {
       open.find((t) => t.statusConceptId === CONCEPTS.TXN_PROCESSING) ??
       open[0] ??
       null
+    );
+  }
+
+  /**
+   * Evento ya archivado con esa referencia, si lo hay. Es la deduplicación
+   * persistente de la bandeja de callbacks (MCH-011): permite distinguir una
+   * reentrega del proveedor de un hecho nuevo aunque el estado local ya haya
+   * avanzado por otra vía.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param gatewayEventRef - Referencia determinista del evento.
+   * @returns El evento archivado, o `null`.
+   */
+  findWebhookEventByRef(
+    em: EntityManager,
+    gatewayEventRef: string,
+  ): Promise<PaymentWebhookEvents | null> {
+    return em.findOne(PaymentWebhookEvents, { gatewayEventRef });
+  }
+
+  /**
+   * Archiva el callback verificado con su firma, su cuerpo y si se aplicó.
+   * Un evento con `processed = false` es exactamente la cola de conciliación:
+   * la contradicción queda visible en vez de taparse con un overwrite.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns El evento archivado.
+   */
+  recordWebhookEvent(
+    em: EntityManager,
+    data: RecordWebhookEventData,
+  ): PaymentWebhookEvents {
+    const now = new Date();
+    return em.create(
+      PaymentWebhookEvents,
+      {
+        gatewayId: data.gatewayId,
+        eventType: data.eventType,
+        gatewayEventRef: data.gatewayEventRef,
+        payloadJson: data.payloadJson,
+        signature: data.signature,
+        isVerified: data.isVerified,
+        processed: data.processed,
+        relatedIntentId: data.relatedIntentId,
+        receivedAt: now,
+        recordedAt: now,
+      },
+      { partial: true },
     );
   }
 
