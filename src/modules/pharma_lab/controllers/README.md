@@ -6,19 +6,19 @@ Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la ló
 
 ### Archivos
 
-| Archivo | Responsabilidad |
-| --- | --- |
-| `index.ts` | Punto de exportación pública de la carpeta. |
-| `medical-visitors.controller.ts` | Adaptador HTTP del dominio. |
-| `pharma-catalog.controller.ts` | Adaptador HTTP del dominio. |
-| `pharma-lab-social.controller.ts` | Adaptador HTTP del dominio. |
-| `pharma-labs.controller.ts` | Adaptador HTTP del dominio. |
-| `pharmacovigilance.controller.ts` | Adaptador HTTP del dominio. |
-| `regulatory-documents.controller.ts` | Adaptador HTTP del dominio. |
-| `visit-agenda.controller.ts` | Adaptador HTTP del dominio. |
-| `visit-records.controller.ts` | Adaptador HTTP del dominio. |
-| `visit-requests.controller.ts` | Adaptador HTTP del dominio. |
-| `visit-surveys.controller.ts` | Adaptador HTTP del dominio. |
+| Archivo                              | Responsabilidad                             |
+| ------------------------------------ | ------------------------------------------- |
+| `index.ts`                           | Punto de exportación pública de la carpeta. |
+| `medical-visitors.controller.ts`     | Adaptador HTTP del dominio.                 |
+| `pharma-catalog.controller.ts`       | Adaptador HTTP del dominio.                 |
+| `pharma-lab-social.controller.ts`    | Adaptador HTTP del dominio.                 |
+| `pharma-labs.controller.ts`          | Adaptador HTTP del dominio.                 |
+| `pharmacovigilance.controller.ts`    | Adaptador HTTP del dominio.                 |
+| `regulatory-documents.controller.ts` | Adaptador HTTP del dominio.                 |
+| `visit-agenda.controller.ts`         | Adaptador HTTP del dominio.                 |
+| `visit-records.controller.ts`        | Adaptador HTTP del dominio.                 |
+| `visit-requests.controller.ts`       | Adaptador HTTP del dominio.                 |
+| `visit-surveys.controller.ts`        | Adaptador HTTP del dominio.                 |
 
 ## Criterios de mantenimiento
 

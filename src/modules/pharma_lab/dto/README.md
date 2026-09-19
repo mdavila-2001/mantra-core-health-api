@@ -6,20 +6,20 @@ Contratos de entrada y salida, validación y documentación de la API.
 
 ### Archivos
 
-| Archivo | Responsabilidad |
-| --- | --- |
-| `accounting.dto.ts` | Contrato de entrada o salida de la API. |
-| `agenda.dto.ts` | Contrato de entrada o salida de la API. |
-| `catalog.dto.ts` | Contrato de entrada o salida de la API. |
-| `common.dto.ts` | Contrato de entrada o salida de la API. |
-| `index.ts` | Punto de exportación pública de la carpeta. |
-| `organization.dto.ts` | Contrato de entrada o salida de la API. |
-| `pharmacovigilance.dto.ts` | Contrato de entrada o salida de la API. |
-| `regulatory.dto.ts` | Contrato de entrada o salida de la API. |
-| `social.dto.ts` | Contrato de entrada o salida de la API. |
-| `surveys.dto.ts` | Contrato de entrada o salida de la API. |
-| `visitors.dto.ts` | Contrato de entrada o salida de la API. |
-| `visits.dto.ts` | Contrato de entrada o salida de la API. |
+| Archivo                    | Responsabilidad                             |
+| -------------------------- | ------------------------------------------- |
+| `accounting.dto.ts`        | Contrato de entrada o salida de la API.     |
+| `agenda.dto.ts`            | Contrato de entrada o salida de la API.     |
+| `catalog.dto.ts`           | Contrato de entrada o salida de la API.     |
+| `common.dto.ts`            | Contrato de entrada o salida de la API.     |
+| `index.ts`                 | Punto de exportación pública de la carpeta. |
+| `organization.dto.ts`      | Contrato de entrada o salida de la API.     |
+| `pharmacovigilance.dto.ts` | Contrato de entrada o salida de la API.     |
+| `regulatory.dto.ts`        | Contrato de entrada o salida de la API.     |
+| `social.dto.ts`            | Contrato de entrada o salida de la API.     |
+| `surveys.dto.ts`           | Contrato de entrada o salida de la API.     |
+| `visitors.dto.ts`          | Contrato de entrada o salida de la API.     |
+| `visits.dto.ts`            | Contrato de entrada o salida de la API.     |
 
 ## Criterios de mantenimiento
 

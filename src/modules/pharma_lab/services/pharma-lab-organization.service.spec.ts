@@ -37,6 +37,18 @@ function build() {
     findLab: mockFn((_em: unknown, id: string) =>
       Promise.resolve(id === LAB_B ? labB : null),
     ),
+    // El usuario `staff-b` es personal activo de LAB_B sin ser miembro de su
+    // organización: vincular personal no crea membresía de tenant.
+    findStaffByUser: mockFn((_em: unknown, labId: string, userId: string) =>
+      Promise.resolve(
+        labId === LAB_B && userId === 'staff-b'
+          ? { statusConceptId: PHL.LINK_ACTIVE }
+          : null,
+      ),
+    ),
+    findLabIdsWhereStaff: mockFn((_em: unknown, userId: string) =>
+      Promise.resolve(userId === 'staff-b' ? [LAB_B] : []),
+    ),
   };
   const tx = { flush: mockFn(), findOne: mockFn(() => Promise.resolve({})) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -61,13 +73,19 @@ describe('PharmaLabOrganizationService.listLabs · alcance', () => {
       roles: ['PHARMA_LAB_ADMIN'],
       tenantIds: [TENANT_A],
     });
-    expect(repo.listLabs).toHaveBeenCalledWith(expect.anything(), [TENANT_A]);
+    expect(repo.listLabs).toHaveBeenCalledWith(expect.anything(), {
+      tenantIds: [TENANT_A],
+      labIds: [],
+    });
   });
 
   it('sin organizaciones, el listado queda vacío en vez de abierto', async () => {
     const { service, repo } = build();
     await service.listLabs({ id: 'u1', roles: ['PHARMA_LAB_ADMIN'] });
-    expect(repo.listLabs).toHaveBeenCalledWith(expect.anything(), []);
+    expect(repo.listLabs).toHaveBeenCalledWith(expect.anything(), {
+      tenantIds: [],
+      labIds: [],
+    });
   });
 
   it('PLATFORM_ADMIN con alcance global ve todos', async () => {
@@ -94,7 +112,10 @@ describe('PharmaLabOrganizationService.listLabs · alcance', () => {
       scopedRoles: { [TENANT_B]: ['BUSINESS_ADMIN'] },
       tenantIds: [TENANT_B],
     });
-    expect(repo.listLabs).toHaveBeenCalledWith(expect.anything(), [TENANT_B]);
+    expect(repo.listLabs).toHaveBeenCalledWith(expect.anything(), {
+      tenantIds: [TENANT_B],
+      labIds: [],
+    });
   });
 });
 
@@ -130,6 +151,29 @@ describe('PharmaLabOrganizationService · administrar un laboratorio ajeno', () 
         tenantIds: [TENANT_B],
       } as any),
     ).resolves.toBe(labB);
+  });
+
+  it('el personal activo del laboratorio lo ve aunque no sea miembro de la organización', async () => {
+    const { service, labB } = build();
+    await expect(
+      service.getLab(LAB_B, {
+        id: 'staff-b',
+        roles: ['PHARMA_LAB_ADMIN'],
+        tenantIds: [],
+      } as any),
+    ).resolves.toBe(labB);
+  });
+
+  it('y lo encuentra en el listado', async () => {
+    const { service, repo } = build();
+    await service.listLabs({
+      id: 'staff-b',
+      roles: ['PHARMA_LAB_ADMIN'],
+    } as any);
+    expect(repo.listLabs).toHaveBeenCalledWith(expect.anything(), {
+      tenantIds: [],
+      labIds: [LAB_B],
+    });
   });
 
   it('PLATFORM_ADMIN con alcance global ve cualquiera', async () => {

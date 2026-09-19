@@ -14,11 +14,11 @@ Agrupa los componentes relacionados con **pharma_lab** y mantiene cohesionada es
 
 ### Archivos
 
-| Archivo | Responsabilidad |
-| --- | --- |
+| Archivo                  | Responsabilidad                                      |
+| ------------------------ | ---------------------------------------------------- |
 | `pharma_lab.concepts.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `pharma_lab.module.ts` | Composición de dependencias del módulo NestJS. |
-| `pharma_lab.roles.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `pharma_lab.module.ts`   | Composición de dependencias del módulo NestJS.       |
+| `pharma_lab.roles.ts`    | Implementación o recurso de soporte de esta carpeta. |
 
 ## Criterios de mantenimiento
 

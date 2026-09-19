@@ -175,22 +175,28 @@ export class PharmaLabOrganizationService {
   /**
    * Lista los laboratorios registrados que el actor puede ver.
    *
-   * El administrador de un laboratorio ve sólo los de sus organizaciones: el
-   * listado abierto le mostraba la razón social, el identificador fiscal y el estado de todos
-   * los laboratorios de la red, competidores incluidos. Ver todos queda para
-   * quien administra la plataforma con alcance global — un `BUSINESS_ADMIN`
-   * concedido dentro de un tenant (MCH-001) no cuenta, igual que en
-   * `RolesGuard`.
+   * Fuera de quien administra la red con alcance global (`SUPERADMIN`, y
+   * `PLATFORM_ADMIN`/`BUSINESS_ADMIN` sin ámbito de tenant, igual que en
+   * `RolesGuard`), cada uno ve sólo los laboratorios de sus organizaciones y
+   * aquellos donde es personal activo. El listado abierto mostraba la razón
+   * social, el identificador fiscal y el estado de todos los de la red.
    *
    * @param actor - Usuario autenticado que consulta.
    * @returns Laboratorios ordenados por razón social.
    */
-  listLabs(actor: AuthenticatedUser): Promise<PharmaLabs[]> {
-    const seesAll = this.access.administersAllLabs(actor);
-    return this.repo.listLabs(
+  async listLabs(actor: AuthenticatedUser): Promise<PharmaLabs[]> {
+    if (this.access.administersAllLabs(actor)) {
+      return this.repo.listLabs(this.em, null);
+    }
+    const labIds = await this.repo.findLabIdsWhereStaff(
       this.em,
-      seesAll ? null : (actor.tenantIds ?? []),
+      actor.id,
+      PHL.LINK_ACTIVE,
     );
+    return this.repo.listLabs(this.em, {
+      tenantIds: actor.tenantIds ?? [],
+      labIds,
+    });
   }
 
   /**
