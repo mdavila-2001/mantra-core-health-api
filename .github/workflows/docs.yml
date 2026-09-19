@@ -203,7 +203,7 @@ jobs:
           docker rm -f minio 2>/dev/null || true
           docker run -d --name minio -p 9000:9000 \
             -e MINIO_ROOT_USER=mantra -e MINIO_ROOT_PASSWORD=mantra12345678 \
-            minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
+            quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
           for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && break; sleep 2; done
 
       - name: Instalar dependencias Node
