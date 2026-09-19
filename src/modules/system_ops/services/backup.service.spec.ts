@@ -14,7 +14,18 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 
+import { SYSOPS } from '../system_ops.concepts';
+import { RestoreObjectiveStatus } from '../policies';
+
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+
+/** Política ACTIVE con ambos objetivos fijados, base de los casos de MCH-023. */
+const politicaActiva = () => ({
+  id: 'bp1',
+  statusConceptId: CONCEPTS.STATE_ACTIVE,
+  rpoSeconds: 60,
+  rtoSeconds: 600,
+});
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -101,25 +112,144 @@ describe('BackupService', () => {
 
     it('flags an objective breach when measured RPO exceeds target', async () => {
       const d = build();
-      d.repo.findPolicyById.mockResolvedValue({
-        id: 'bp1',
-        statusConceptId: CONCEPTS.STATE_ACTIVE,
-        rpoSeconds: 60,
-        rtoSeconds: 600,
-      });
+      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
       d.repo.createTestRun.mockReturnValue({
         id: 'rt1',
+        outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
+      });
+      const res = await d.service.recordRestoreTest(
+        {
+          backupPolicyId: 'bp1',
+          outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
+          measuredRpoSeconds: 120,
+          measuredRtoSeconds: 300,
+          integrityCheckPassed: true,
+        } as any,
+        actor,
+      );
+      expect(res.objectiveBreached).toBe(true);
+      expect(res.objectiveStatus).toBe(RestoreObjectiveStatus.FAILED);
+    });
+
+    // MCH-023-AC01: sin medición el resultado es desconocido, nunca aprobado.
+    it('sin mediciones el estado es NOT_MEASURED, no "no incumple"', async () => {
+      const d = build();
+      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.createTestRun.mockReturnValue({
+        id: 'rt2',
+        outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
+      });
+      const res = await d.service.recordRestoreTest(
+        {
+          backupPolicyId: 'bp1',
+          outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
+        } as any,
+        actor,
+      );
+      expect(res.objectiveStatus).toBe(RestoreObjectiveStatus.NOT_MEASURED);
+      expect(res.objectiveBreached).toBe(false);
+      // …y lo no medido se persiste como no medido.
+      expect(d.repo.createTestRun.mock.calls[0][1]).toMatchObject({
+        objectiveStatus: RestoreObjectiveStatus.NOT_MEASURED,
+      });
+    });
+
+    it('una medición a medias tampoco alcanza para aprobar', async () => {
+      const d = build();
+      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.createTestRun.mockReturnValue({
+        id: 'rt3',
         outcomeConceptId: 'o',
       });
       const res = await d.service.recordRestoreTest(
         {
           backupPolicyId: 'bp1',
-          outcomeConceptId: 'o',
-          measuredRpoSeconds: 120,
-        },
+          outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
+          measuredRpoSeconds: 30, // falta el RTO, que la política sí fija
+          integrityCheckPassed: true,
+        } as any,
         actor,
       );
-      expect(res.objectiveBreached).toBe(true);
+      expect(res.objectiveStatus).toBe(RestoreObjectiveStatus.NOT_MEASURED);
+    });
+
+    it('sin verificación de integridad no se aprueba', async () => {
+      const d = build();
+      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.createTestRun.mockReturnValue({
+        id: 'rt4',
+        outcomeConceptId: 'o',
+      });
+      const res = await d.service.recordRestoreTest(
+        {
+          backupPolicyId: 'bp1',
+          outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
+          measuredRpoSeconds: 30,
+          measuredRtoSeconds: 300,
+        } as any,
+        actor,
+      );
+      expect(res.objectiveStatus).toBe(RestoreObjectiveStatus.NOT_MEASURED);
+    });
+
+    // MCH-023-AC02: una restauración fallida no se vuelve exitosa por omitir
+    // métricas ni por fallar la integridad.
+    it.each([
+      [
+        'la restauración se informó fallida',
+        {
+          outcomeConceptId: SYSOPS.RESTORE_OUTCOME_FAIL,
+          measuredRpoSeconds: 30,
+          measuredRtoSeconds: 300,
+          integrityCheckPassed: true,
+        },
+      ],
+      [
+        'la integridad no pasó',
+        {
+          outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
+          measuredRpoSeconds: 30,
+          measuredRtoSeconds: 300,
+          integrityCheckPassed: false,
+        },
+      ],
+      [
+        'se informó fallida y además se omitieron las métricas',
+        { outcomeConceptId: SYSOPS.RESTORE_OUTCOME_FAIL },
+      ],
+    ])('queda FAILED cuando %s', async (_caso, dto) => {
+      const d = build();
+      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.createTestRun.mockReturnValue({
+        id: 'rt5',
+        outcomeConceptId: 'o',
+      });
+      const res = await d.service.recordRestoreTest(
+        { backupPolicyId: 'bp1', ...dto } as any,
+        actor,
+      );
+      expect(res.objectiveStatus).toBe(RestoreObjectiveStatus.FAILED);
+    });
+
+    it('aprueba sólo con las dos mediciones dentro del objetivo e integridad verificada', async () => {
+      const d = build();
+      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.createTestRun.mockReturnValue({
+        id: 'rt6',
+        outcomeConceptId: 'o',
+      });
+      const res = await d.service.recordRestoreTest(
+        {
+          backupPolicyId: 'bp1',
+          outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
+          measuredRpoSeconds: 30,
+          measuredRtoSeconds: 300,
+          integrityCheckPassed: true,
+        } as any,
+        actor,
+      );
+      expect(res.objectiveStatus).toBe(RestoreObjectiveStatus.PASSED);
+      expect(res.objectiveBreached).toBe(false);
     });
   });
 });
