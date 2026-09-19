@@ -71,6 +71,7 @@
     "seed:vitrina": "node tools/alovida/seed-vitrina-publica.mjs",
     "seed:diagnostic-units": "node tools/alovida/seed-diagnostic-units.mjs",
     "faker": "node tools/alovida/faker-worker.mjs",
+    "faker:carriers": "node tools/alovida/register-insurance-carriers.mjs",
     "search:reindex": "node tools/search/reindex.mjs",
     "seed:e2e:reset": "node tools/e2e/reset-e2e.mjs",
     "seed:e2e": "node tools/e2e/seed-e2e.mjs",
