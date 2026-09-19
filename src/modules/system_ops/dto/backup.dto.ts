@@ -10,6 +10,9 @@ import {
   Min,
 } from 'class-validator';
 
+/** Resultado de comparar una restauración contra los objetivos de RPO/RTO. */
+export type RestoreObjectiveStatus = 'MET' | 'BREACHED' | 'NOT_MEASURED';
+
 /** Cuerpo de `POST /admin/ops/backup-policies` (UC-11-09). */
 export class CreateBackupPolicyDto {
   /**
@@ -178,8 +181,13 @@ export class RestoreTestRunResponseDto {
   outcomeConceptId!: string;
 
   /**
-   * Valor de objective breached mantenido por la instancia.
+   * Resultado contra los objetivos de la política (MCH-023).
+   *
+   * `NOT_MEASURED` no es un incumplimiento: es la falta de evidencia para
+   * afirmar cumplimiento. Un consumidor no puede leerlo como «aprobado» — el
+   * propio nombre lo obliga a distinguirlo.
    */
+  @ApiProperty({ enum: ['MET', 'BREACHED', 'NOT_MEASURED'] })
   @ApiProperty({ description: 'true si el RPO/RTO medido supera el objetivo' })
-  objectiveBreached!: boolean;
+  objectiveStatus!: RestoreObjectiveStatus;
 }

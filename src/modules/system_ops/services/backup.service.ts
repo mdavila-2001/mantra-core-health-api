@@ -13,6 +13,7 @@ import {
   CreateRestoreTestRunDto,
   IdResultDto,
   RestoreTestRunResponseDto,
+  type RestoreObjectiveStatus,
 } from '../dto';
 
 /**
@@ -37,17 +38,21 @@ export class BackupService {
     this.logger.setContext(BackupService.name);
   }
 
-  /** UC-11-09: define una política de backup (RPO <= RTO, valores positivos). */
+  /**
+   * UC-11-09: define una política de backup.
+   *
+   * RPO (pérdida de datos tolerada) y RTO (tiempo de indisponibilidad
+   * tolerado) son objetivos de negocio independientes: una organización puede
+   * aceptar perder una hora de datos y a la vez exigir volver a estar arriba
+   * en quince minutos. Antes se rechazaba `rpoSeconds > rtoSeconds` como si
+   * fuera un error — no lo es, era una comparación conceptualmente errónea
+   * (MCH-022). Cada valor se valida por su propio rango en el DTO
+   * (`@IsInt() @Min(0)`); acá no hay ninguna regla cruzada.
+   */
   async createPolicy(
     dto: CreateBackupPolicyDto,
     actor: AuthenticatedUser,
   ): Promise<IdResultDto> {
-    if (dto.rpoSeconds > dto.rtoSeconds) {
-      throw new PreconditionFailedException('El RPO no puede superar al RTO', {
-        rpoSeconds: dto.rpoSeconds,
-        rtoSeconds: dto.rtoSeconds,
-      });
-    }
     return this.em.transactional(async (tx) => {
       const policy = this.repo.createPolicy(tx, {
         tenantId: dto.tenantId,
@@ -95,13 +100,31 @@ export class BackupService {
         );
       }
 
-      const objectiveBreached =
-        (dto.measuredRpoSeconds !== undefined &&
-          policy.rpoSeconds !== undefined &&
-          dto.measuredRpoSeconds > policy.rpoSeconds) ||
-        (dto.measuredRtoSeconds !== undefined &&
-          policy.rtoSeconds !== undefined &&
-          dto.measuredRtoSeconds > policy.rtoSeconds);
+      // MCH-023: cada dimensión medida se compara contra su objetivo; la que
+      // falta queda NOT_MEASURED, no "dentro de objetivo". Antes el `&&` de la
+      // comparación hacía que faltar una métrica se leyera exactamente igual
+      // que cumplirla — «no incumple» se malinterpretaba como «cumple».
+      const rpoStatus =
+        dto.measuredRpoSeconds === undefined || policy.rpoSeconds === undefined
+          ? 'NOT_MEASURED'
+          : dto.measuredRpoSeconds > policy.rpoSeconds
+            ? 'BREACHED'
+            : 'MET';
+      const rtoStatus =
+        dto.measuredRtoSeconds === undefined || policy.rtoSeconds === undefined
+          ? 'NOT_MEASURED'
+          : dto.measuredRtoSeconds > policy.rtoSeconds
+            ? 'BREACHED'
+            : 'MET';
+      // Un incumplimiento confirmado en una dimensión es un resultado
+      // definitivo aunque la otra no se haya medido: una restauración fallida
+      // no se vuelve exitosa (ni "desconocida") por omitir la otra métrica.
+      const objectiveStatus: RestoreObjectiveStatus =
+        rpoStatus === 'BREACHED' || rtoStatus === 'BREACHED'
+          ? 'BREACHED'
+          : rpoStatus === 'NOT_MEASURED' || rtoStatus === 'NOT_MEASURED'
+            ? 'NOT_MEASURED'
+            : 'MET';
 
       const run = this.repo.createTestRun(tx, {
         backupPolicyId: policy.id,
@@ -116,7 +139,7 @@ export class BackupService {
         recordedByUserId: actor.id,
       });
       await tx.flush();
-      if (objectiveBreached) {
+      if (objectiveStatus === 'BREACHED') {
         this.logger.warn(
           { operation: 'sysops.backup.restore-test', runId: run.id },
           'Restore objective breached',
@@ -125,7 +148,7 @@ export class BackupService {
       return {
         id: run.id,
         outcomeConceptId: run.outcomeConceptId,
-        objectiveBreached,
+        objectiveStatus,
       };
     });
   }
