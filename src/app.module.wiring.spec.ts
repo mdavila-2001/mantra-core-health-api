@@ -103,7 +103,11 @@ describe('MCH-012 · todo módulo de dominio está conectado al arranque', () =>
   beforeAll(async () => {
     for (const [key, value] of Object.entries(PLACEHOLDER_DB_ENV))
       process.env[key] ??= value;
-    ({ AppModule } = (await import('./app.module')) as { AppModule: Type });
+    // Por ruta absoluta, como los módulos de dominio más abajo: un `import()`
+    // relativo sin extensión no resuelve con `moduleResolution: nodenext`.
+    ({ AppModule } = (await import(
+      join(process.cwd(), 'src', 'app.module.ts')
+    )) as { AppModule: Type });
     declared = await declaredDomainModules();
   });
 
