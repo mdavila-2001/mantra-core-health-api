@@ -1170,6 +1170,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN, CASHIER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Intención de pago no encontrada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 409 | `CONFLICT` | La intención ya fue cobrada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La intención tiene una operación abierta en el gateway | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La intención está cancelada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 422 | `PRECONDITION_FAILED` | La intención requiere evaluación de riesgo antes de cobrar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |

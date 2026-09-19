@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1292 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1292 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1299 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1299 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -39365,7 +39365,7 @@
       ]
     },
     {
-      "name": "insurance (1)",
+      "name": "insurance (4)",
       "item": [
         {
           "name": "GET /insurance/analytics/loss-ratio · Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo",
@@ -39429,6 +39429,180 @@
                   "  const list = Array.isArray(body) ? body : (body.analytics || body.items || body.data || body.results);",
                   "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                   "  if (first && first.id) pm.environment.set('analyticId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /insurance/portability/export · Exportar el historial de póliza y siniestralidad del titular a 1 clic",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance/portability/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance",
+                "portability",
+                "export"
+              ]
+            },
+            "description": "Exportar el historial de póliza y siniestralidad del titular a 1 clic. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance/portability/export`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsurancePortabilityController_export`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"format\": \"BUNDLE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{exportId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.exportId);",
+                  "  if (id) pm.environment.set('exportId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /insurance/portability/certificates/{certificateId}/json · Descargar el certificado de portabilidad en JSON interoperable",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance/portability/certificates/:certificateId/json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance",
+                "portability",
+                "certificates",
+                ":certificateId",
+                "json"
+              ],
+              "variable": [
+                {
+                  "key": "certificateId",
+                  "value": "{{certificateId}}",
+                  "description": "Identificador de ruta · variable `{{certificateId}}`"
+                }
+              ]
+            },
+            "description": "Descargar el certificado de portabilidad en JSON interoperable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance/portability/certificates/{certificateId}/json`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `InsurancePortabilityController_downloadJson`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.certificates || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('certificateId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /insurance/portability/certificates/{certificateId}/pdf · Descargar el certificado de portabilidad en PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance/portability/certificates/:certificateId/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance",
+                "portability",
+                "certificates",
+                ":certificateId",
+                "pdf"
+              ],
+              "variable": [
+                {
+                  "key": "certificateId",
+                  "value": "{{certificateId}}",
+                  "description": "Identificador de ruta · variable `{{certificateId}}`"
+                }
+              ]
+            },
+            "description": "Descargar el certificado de portabilidad en PDF. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance/portability/certificates/{certificateId}/pdf`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `InsurancePortabilityController_downloadPdf`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.certificates || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('certificateId', first.id);",
                   "}"
                 ]
               }
@@ -45664,8 +45838,117 @@
       ]
     },
     {
-      "name": "loyalty (7)",
+      "name": "loyalty (10)",
       "item": [
+        {
+          "name": "GET /loyalty/me · Mi membresía de lealtad y mi saldo de puntos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "loyalty",
+                "me"
+              ]
+            },
+            "description": "El titular sale del token; no se acepta ningún identificador de miembro por la petición. No estar inscrito responde 200 con `enrolled: false`, que es un estado normal del portal y no un error.\n\n`GET /loyalty/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `LoyaltyController_myLoyalty`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('meId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /loyalty/me/points · Mis movimientos de puntos, más nuevos primero",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/me/points",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "loyalty",
+                "me",
+                "points"
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "Cursor opaco devuelto por la página anterior",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Movimientos por página (1..100, por defecto 20)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Paginado por cursor opaco, con orden estable por fecha e id. Sólo movimientos de la membresía del titular.\n\n`GET /loyalty/me/points`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `LoyaltyController_myPoints`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.points || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('pointId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "GET /loyalty/programs · Listar programas de lealtad activos",
           "request": {
@@ -45775,6 +46058,67 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.expirePointId);",
                   "  if (id) pm.environment.set('expirePointId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /loyalty/me/points/redeem · Canjear puntos de mi propia membresía",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/me/points/redeem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "loyalty",
+                "me",
+                "points",
+                "redeem"
+              ]
+            },
+            "description": "El titular sale del token. Idempotente por `idempotencyKey`; una clave que pertenezca a otra membresía se rechaza en vez de devolver datos ajenos.\n\n`POST /loyalty/me/points/redeem`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `LoyaltyController_redeemOwnPoints`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"points\": \"points-ejemplo\",\n  \"idempotencyKey\": \"idempotencyKey-ejemplo\",\n  \"awardType\": \"POINTS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{pointId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.pointId);",
+                  "  if (id) pm.environment.set('pointId', id);",
                   "}"
                 ]
               }
@@ -63526,7 +63870,7 @@
       ]
     },
     {
-      "name": "public (20)",
+      "name": "public (21)",
       "item": [
         {
           "name": "clinical-prescriptions-public",
@@ -64557,6 +64901,63 @@
                       "  const list = Array.isArray(body) ? body : (body.reviews || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('reviewId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "insurance-portability-public",
+          "item": [
+            {
+              "name": "GET /public/portability/verify/{manifestHash} · Verificar la autenticidad de un certificado de portabilidad por su sello",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/public/portability/verify/:manifestHash",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "portability",
+                    "verify",
+                    ":manifestHash"
+                  ],
+                  "variable": [
+                    {
+                      "key": "manifestHash",
+                      "value": "{{manifestHash}}",
+                      "description": "Identificador de ruta · variable `{{manifestHash}}`"
+                    }
+                  ]
+                },
+                "description": "Sin autenticación y sin PHI: confirma que el certificado existe y con qué se emitió.\n\n`GET /public/portability/verify/{manifestHash}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `InsurancePortabilityPublicController_verify`",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('verifyId', first.id);",
                       "}"
                     ]
                   }
