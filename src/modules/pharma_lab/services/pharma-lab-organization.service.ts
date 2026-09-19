@@ -36,8 +36,6 @@ import type {
  * *además* de eso para el giro farmacéutico.
  */
 
-/** Roles que, con alcance global, ven todos los laboratorios de la red. */
-const CROSS_LAB_ROLES: readonly string[] = ['PLATFORM_ADMIN', 'BUSINESS_ADMIN'];
 @Injectable()
 export class PharmaLabOrganizationService {
   /**
@@ -75,6 +73,7 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
+      this.access.assertAdministers(actor, dto.tenantId);
       const tenant = await tx.findOne(Tenants, { id: dto.tenantId });
       if (!tenant) {
         throw new ResourceNotFoundException('Organización no encontrada', {
@@ -132,7 +131,11 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<TransitionResultDto> {
     return this.em.transactional(async (tx) => {
-      const lab = await this.access.requireLab(tx, pharmaLabId);
+      const lab = await this.access.requireAdministeredLab(
+        tx,
+        pharmaLabId,
+        actor,
+      );
       if (dto.tradeName !== undefined) lab.tradeName = dto.tradeName;
       if (dto.taxId !== undefined) lab.taxId = dto.taxId;
       if (dto.description !== undefined) lab.description = dto.description;
@@ -162,8 +165,11 @@ export class PharmaLabOrganizationService {
    * @returns El laboratorio.
    * @throws ResourceNotFoundException si no existe.
    */
-  async getLab(pharmaLabId: string): Promise<PharmaLabs> {
-    return this.access.requireLab(this.em, pharmaLabId);
+  async getLab(
+    pharmaLabId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmaLabs> {
+    return this.access.requireAdministeredLab(this.em, pharmaLabId, actor);
   }
 
   /**
@@ -180,15 +186,7 @@ export class PharmaLabOrganizationService {
    * @returns Laboratorios ordenados por razón social.
    */
   listLabs(actor: AuthenticatedUser): Promise<PharmaLabs[]> {
-    const seesAll =
-      actor.roles.includes('SUPERADMIN') ||
-      CROSS_LAB_ROLES.some(
-        (role) =>
-          actor.roles.includes(role) &&
-          !Object.values(actor.scopedRoles ?? {}).some((codes) =>
-            codes.includes(role),
-          ),
-      );
+    const seesAll = this.access.administersAllLabs(actor);
     return this.repo.listLabs(
       this.em,
       seesAll ? null : (actor.tenantIds ?? []),
@@ -210,7 +208,12 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
-      const lab = await this.access.requireActiveLab(tx, pharmaLabId);
+      const lab = await this.access.requireAdministeredLab(
+        tx,
+        pharmaLabId,
+        actor,
+        { active: true },
+      );
       const existing = await this.repo.findStaffByUser(
         tx,
         pharmaLabId,
@@ -277,7 +280,11 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<TransitionResultDto> {
     return this.em.transactional(async (tx) => {
-      const lab = await this.access.requireLab(tx, pharmaLabId);
+      const lab = await this.access.requireAdministeredLab(
+        tx,
+        pharmaLabId,
+        actor,
+      );
       const staff = await this.requireStaff(tx, pharmaLabId, staffId);
       const previous = staff.permissions ?? [];
 
@@ -327,7 +334,11 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<TransitionResultDto> {
     return this.em.transactional(async (tx) => {
-      const lab = await this.access.requireLab(tx, pharmaLabId);
+      const lab = await this.access.requireAdministeredLab(
+        tx,
+        pharmaLabId,
+        actor,
+      );
       const staff = await this.requireStaff(tx, pharmaLabId, staffId);
 
       staff.statusConceptId = PHL.LINK_TERMINATED;
@@ -363,8 +374,11 @@ export class PharmaLabOrganizationService {
    * @param pharmaLabId - Laboratorio.
    * @returns Personal ordenado por fecha de ingreso descendente.
    */
-  async listStaff(pharmaLabId: string): Promise<PharmaLabStaff[]> {
-    await this.access.requireLab(this.em, pharmaLabId);
+  async listStaff(
+    pharmaLabId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmaLabStaff[]> {
+    await this.access.requireAdministeredLab(this.em, pharmaLabId, actor);
     return this.repo.listStaff(this.em, pharmaLabId);
   }
 
@@ -374,8 +388,11 @@ export class PharmaLabOrganizationService {
    * @param pharmaLabId - Laboratorio.
    * @returns Eventos del más reciente al más antiguo.
    */
-  async listLinkEvents(pharmaLabId: string): Promise<PharmaLabLinkEvents[]> {
-    await this.access.requireLab(this.em, pharmaLabId);
+  async listLinkEvents(
+    pharmaLabId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmaLabLinkEvents[]> {
+    await this.access.requireAdministeredLab(this.em, pharmaLabId, actor);
     return this.repo.listLinkEvents(this.em, pharmaLabId);
   }
 

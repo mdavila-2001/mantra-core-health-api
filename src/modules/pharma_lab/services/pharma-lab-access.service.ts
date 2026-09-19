@@ -20,6 +20,9 @@ import { PHL } from '../pharma_lab.concepts';
  * escribir en once servicios distintos es una regla que en algún momento no se
  * escribe.
  */
+
+/** Roles que, con alcance global, administran todos los laboratorios. */
+const CROSS_LAB_ROLES: readonly string[] = ['PLATFORM_ADMIN', 'BUSINESS_ADMIN'];
 @Injectable()
 export class PharmaLabAccessService {
   /**
@@ -28,6 +31,73 @@ export class PharmaLabAccessService {
    * @param orgRepo - Repositorio del laboratorio y su personal.
    * @param visitorsRepo - Repositorio de visitadores.
    */
+  /**
+   * ¿Administra el actor todos los laboratorios de la red?
+   *
+   * Sólo `SUPERADMIN` y `PLATFORM_ADMIN`/`BUSINESS_ADMIN` con alcance global.
+   * Un código concedido dentro de un tenant (MCH-001, `scopedRoles`) no cuenta,
+   * igual que en `RolesGuard`.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns `true` si puede operar sobre cualquier laboratorio.
+   */
+  administersAllLabs(actor: AuthenticatedUser): boolean {
+    if (actor.roles.includes('SUPERADMIN')) return true;
+    return CROSS_LAB_ROLES.some(
+      (role) =>
+        actor.roles.includes(role) &&
+        !Object.values(actor.scopedRoles ?? {}).some((codes) =>
+          codes.includes(role),
+        ),
+    );
+  }
+
+  /**
+   * Exige que el actor administre la organización dada.
+   *
+   * @param actor - Usuario autenticado.
+   * @param tenantId - Organización del laboratorio.
+   * @param pharmaLabId - Laboratorio, para el detalle del error.
+   * @throws ResourceNotFoundException si no la administra: responder 404 y no
+   *   403 evita confirmar que el laboratorio existe.
+   */
+  assertAdministers(
+    actor: AuthenticatedUser,
+    tenantId: string,
+    pharmaLabId?: string,
+  ): void {
+    if (this.administersAllLabs(actor)) return;
+    if ((actor.tenantIds ?? []).includes(tenantId)) return;
+    throw new ResourceNotFoundException('Laboratorio no encontrado', {
+      pharmaLabId,
+    });
+  }
+
+  /**
+   * Resuelve un laboratorio que el actor administra.
+   *
+   * Antes las rutas de `/pharma-labs/:pharmaLabId` sólo buscaban el
+   * laboratorio: el administrador de uno podía editar el perfil, el personal y
+   * los permisos de cualquier otro con sólo conocer su id.
+   *
+   * @param tx - Transacción activa.
+   * @param pharmaLabId - Laboratorio.
+   * @param actor - Usuario autenticado.
+   * @param options - `active: true` exige además que esté activo.
+   * @returns El laboratorio.
+   */
+  async requireAdministeredLab(
+    tx: EntityManager,
+    pharmaLabId: string,
+    actor: AuthenticatedUser,
+    options: { active?: boolean } = {},
+  ): Promise<PharmaLabs> {
+    const lab = await this.requireLab(tx, pharmaLabId);
+    this.assertAdministers(actor, lab.tenantId, pharmaLabId);
+    if (options.active) return this.requireActiveLab(tx, pharmaLabId);
+    return lab;
+  }
+
   constructor(
     private readonly orgRepo: OrganizationRepository,
     private readonly visitorsRepo: VisitorsRepository,

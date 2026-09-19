@@ -68,8 +68,9 @@ export class PharmaLabsController {
   @ApiOperation({ summary: 'Consultar el perfil de un laboratorio' })
   getOne(
     @Param('pharmaLabId', ParseUUIDPipe) pharmaLabId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmaLabs> {
-    return this.service.getLab(pharmaLabId);
+    return this.service.getLab(pharmaLabId, actor);
   }
 
   /** UC-17-02. */
@@ -100,8 +101,9 @@ export class PharmaLabsController {
   @ApiOperation({ summary: 'Listar el personal del laboratorio' })
   listStaff(
     @Param('pharmaLabId', ParseUUIDPipe) pharmaLabId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmaLabStaff[]> {
-    return this.service.listStaff(pharmaLabId);
+    return this.service.listStaff(pharmaLabId, actor);
   }
 
   /** UC-17-04. */
@@ -138,7 +140,8 @@ export class PharmaLabsController {
   @ApiOperation({ summary: 'Historial de vinculaciones y permisos' })
   listLinkEvents(
     @Param('pharmaLabId', ParseUUIDPipe) pharmaLabId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmaLabLinkEvents[]> {
-    return this.service.listLinkEvents(pharmaLabId);
+    return this.service.listLinkEvents(pharmaLabId, actor);
   }
 }
