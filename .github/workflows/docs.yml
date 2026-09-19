@@ -237,8 +237,16 @@ jobs:
       - name: DDL versionado — la copia de database/ está y no está vacía
         run: yarn db:vendor:check
 
-      - name: Pruebas unitarias
-        run: yarn test
+      # MCH-024 — antes corría `yarn test` a secas: la cobertura sólo se medía
+      # cuando alguien se acordaba de correr `test:cov` a mano, y nunca contra
+      # el candidato real de un PR. `test:cov` corre exactamente las mismas
+      # pruebas (mismo comando base, `--coverage` de más) y hace fallar el job
+      # si el candidato queda por debajo de `coverageThreshold` — el trinquete
+      # que MCH-024 fija sobre el valor medido. Reusa el mismo
+      # NODE_OPTIONS=--max-old-space-size=6144 del job: ya está validado para
+      # el paso más pesado (generar el contrato con AppModule completo).
+      - name: Pruebas unitarias con cobertura — no puede bajar del umbral fijado
+        run: yarn test:cov --runInBand
 
       - name: Generar contrato OpenAPI real desde el código
         env:
@@ -456,6 +464,8 @@ jobs:
             openapi/openapi.yaml
             openapi/openapi.json
             asyncapi/asyncapi.yaml
+            coverage/coverage-summary.json
+            coverage/lcov-report/
           retention-days: 30
 
       # `always()` para que corra también cuando el job falló o lo cancelaron:
