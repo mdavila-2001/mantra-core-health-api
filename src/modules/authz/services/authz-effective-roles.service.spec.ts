@@ -136,6 +136,29 @@ describe('AuthzEffectiveRolesService', () => {
       expect(d.assignmentsRepo.create).not.toHaveBeenCalled();
     });
 
+    // MCH-034: el lookup tiene que preguntar por el mismo ámbito que se va a
+    // conceder, no sólo por (usuario, rol).
+    it('pasa el tenant al lookup: no confunde una asignación de otro tenant con esta', async () => {
+      const d = build();
+      d.em.findOne.mockResolvedValue({ id: 'r1', isAssignable: true });
+      d.assignmentsRepo.findActive.mockResolvedValue(null);
+
+      await d.service.ensureRoleByCode(d.em as never, 'u1', 'PRACTITIONER', {
+        tenantId: 'tenant-B',
+      });
+
+      expect(d.assignmentsRepo.findActive).toHaveBeenCalledWith(
+        d.em,
+        'u1',
+        'r1',
+        { tenantId: 'tenant-B' },
+      );
+      expect(d.assignmentsRepo.create).toHaveBeenCalledWith(
+        d.em,
+        expect.objectContaining({ tenantId: 'tenant-B' }),
+      );
+    });
+
     it('responde false sin lanzar cuando el rol no existe', async () => {
       // Quien lo llama está completando un flujo mayor —un alta, la
       // verificación de una matrícula— y decide si eso es un fallo.

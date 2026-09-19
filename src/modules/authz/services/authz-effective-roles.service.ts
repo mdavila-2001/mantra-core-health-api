@@ -142,7 +142,17 @@ export class AuthzEffectiveRolesService {
     });
     if (!role || !role.isAssignable) return false;
 
-    const existing = await this.assignmentsRepo.findActive(em, userId, role.id);
+    // MCH-034: el ámbito es parte de la identidad de la asignación. Sin esto,
+    // conceder el mismo rol en un segundo tenant encontraba la fila del primero
+    // y la daba por buena: el alta pedida quedaba sin hacerse, en silencio.
+    const existing = await this.assignmentsRepo.findActive(
+      em,
+      userId,
+      role.id,
+      {
+        tenantId: options.tenantId,
+      },
+    );
     if (existing) return true;
 
     this.assignmentsRepo.create(em, {
