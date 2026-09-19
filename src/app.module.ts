@@ -101,6 +101,7 @@ import { DocumentStoreModule } from './modules/document_store/document_store.mod
 import { RedisRuntimeModule } from './modules/redis_runtime/redis_runtime.module';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 import { PublicCacheInterceptor } from './common/http/public-cache.interceptor';
+import { PublicCacheStore } from './common/http/public-cache.store';
 import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
 
 /**
@@ -250,7 +251,10 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: ThrottlerStorage, useClass: RedisThrottlerStorage },
     // Sólo actúa sobre manejadores `@Public()`: una respuesta con sesión no
-    // puede llevar `Cache-Control: public` ni de casualidad.
+    // puede llevar `Cache-Control: public` ni de casualidad. `PublicCacheStore`
+    // es su caché de representaciones (MCH-028): se declara acá porque nada
+    // más en la app la necesita.
+    PublicCacheStore,
     { provide: APP_INTERCEPTOR, useClass: PublicCacheInterceptor },
     // Contexto de tenant por request: valida X-Tenant-Id contra la membresía del
     // actor y, con RLS_ENFORCE=true, fija app.current_tenant_id para las políticas.
