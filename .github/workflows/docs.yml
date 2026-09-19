@@ -309,8 +309,41 @@ jobs:
       # @redocly/cli diff`: bajaba de npm la última versión de la CLI —fuera del
       # lockfile— y la ejecutaba en el runner propio en cada PR (MCH-031), para un
       # subcomando que Redocly CLI no tiene (la 2.43.2 del lockfile no lo lista), así
-      # que siempre terminaba en warning. No era un control. La detección real de
-      # cambios incompatibles, que sí bloquee, queda en MCH-025 (fase F10).
+      # que siempre terminaba en warning. No era un control.
+      #
+      # MCH-025 — reemplazo real y bloqueante, resuelto por el lockfile (nada
+      # nuevo: sólo node:fs/node:assert). `tools/openapi/check-breaking.mjs`
+      # compara el `openapi.json` de esta rama contra el de la rama destino y
+      # falla si hay ruta/operación/código de respuesta eliminado, campo nuevo
+      # obligatorio en un request, propiedad eliminada de una response o un
+      # cambio de tipo. Sus propias pruebas van primero: si el detector está
+      # roto, el job tiene que fallar ahí y no fingir un "sin cambios" corriente
+      # abajo.
+      - name: Pruebas del detector de cambios incompatibles de OpenAPI (MCH-025)
+        run: yarn docs:openapi:check-breaking:test
+
+      # `github.base_ref` sólo existe en un `pull_request`; en `workflow_dispatch`
+      # no hay rama destino contra la cual comparar y el paso no aplica.
+      #
+      # `git show origin/<base>:openapi/openapi.json` puede fallar por un motivo
+      # legítimo (la rama base todavía no tiene contrato generado, p. ej. en el
+      # primer PR que lo introduce) — eso es "no hay línea base", no "hay una
+      # ruptura", así que se avisa con `::warning::` y se sigue, en vez de
+      # bloquear un PR que no tiene con qué compararse ni de fingir que pasó
+      # limpio un chequeo que nunca corrió.
+      - name: Cambios incompatibles del contrato OpenAPI — bloqueante (MCH-025)
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          if git show "origin/${{ github.base_ref }}:openapi/openapi.json" > /tmp/openapi-base.json 2>/tmp/openapi-base.err; then
+            node tools/openapi/check-breaking.mjs \
+              --base /tmp/openapi-base.json \
+              --head openapi/openapi.json \
+              --exceptions tools/openapi/breaking-changes-exceptions.json
+          else
+            echo "::warning::No hay openapi.json en origin/${{ github.base_ref }} para comparar; se omite el chequeo de cambios incompatibles. Detalle:"
+            cat /tmp/openapi-base.err
+          fi
 
       - name: Validar AsyncAPI — 0 errores obligatorio
         run: yarn docs:asyncapi:validate
