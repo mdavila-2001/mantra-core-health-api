@@ -159,3 +159,8 @@ salud-db/
 /SQL/
 /NoSQL/
 Mantra Core Health Context/
+
+# Salida del ensayo local de restauración (scripts/recovery/drill-postgres.sh).
+# Cada corrida genera su volcado e informe con fecha: son evidencia de esa
+# máquina y ese momento, no fuente. Lo que se conserva del ensayo va al runbook.
+.drill/
