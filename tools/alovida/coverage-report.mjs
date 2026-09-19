@@ -9,6 +9,13 @@
 //     ni @Public → sin actor/autorización declarada).
 //   - `DIRECT_CROSS_DOMAIN_ACCESS`: repositorio que importa entidades de OTRO módulo.
 // No arranca la app ni toca la BD. Uso: `node tools/alovida/coverage-report.mjs`.
+//
+// MCH-033: el informe dice de qué commit sale y qué mide cada cifra. Las tres
+// capas no se mezclan: «declarado» son decoradores en el código; «registrado»
+// son las operaciones del contrato OpenAPI que genera la app arrancada
+// (`openapi/openapi.json`, versionado); «verificado en runtime» no lo mide este
+// script y se dice así. La fecha es la del commit, no la de la corrida, para
+// que regenerar desde un clon del mismo SHA dé el mismo archivo byte a byte.
 // =============================================================================
 import {
   readFileSync,
@@ -18,6 +25,7 @@ import {
   existsSync,
 } from 'node:fs';
 import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const ROOT = process.cwd();
 const MODULES = join(ROOT, 'src', 'modules');
@@ -212,16 +220,72 @@ for (const f of allFiles.filter((f) => /\/repositories\//.test(f))) {
   }
 }
 
+// --- Procedencia y denominadores (MCH-033) -----------------------------------
+const git = (...args) =>
+  execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
+const sha = git('rev-parse', 'HEAD');
+const commitDate = git('log', '-1', '--format=%cI', 'HEAD');
+// Sólo lo que este inventario lee: si `src/` u `openapi/` tienen cambios sin
+// commitear, las cifras no corresponden al SHA y el informe lo dice.
+const dirty = git('status', '--porcelain', '--', 'src', 'openapi') !== '';
+
+const moduleDirs = readdirSync(MODULES).filter((name) =>
+  statSync(join(MODULES, name)).isDirectory(),
+);
+const modulesWithEntities = new Set(entities.map((e) => e.module)).size;
+
+/** Operaciones del contrato generado desde la app arrancada, si existe. */
+const registeredOperations = (() => {
+  const file = join(ROOT, 'openapi', 'openapi.json');
+  if (!existsSync(file)) return null;
+  const HTTP = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'];
+  const { paths } = JSON.parse(readFileSync(file, 'utf8'));
+  return Object.values(paths).reduce(
+    (total, methods) =>
+      total + Object.keys(methods).filter((m) => HTTP.includes(m)).length,
+    0,
+  );
+})();
+
 // --- Reporte -----------------------------------------------------------------
 const lines = [];
 const p = (s = '') => lines.push(s);
 p('# Informe de cobertura ALOVIDA (estático)');
 p('');
-p(`- Entidades (tablas mapeadas): **${entities.length}**`);
+p(`- Commit: \`${sha}\` (${commitDate})`);
+if (dirty)
+  p(
+    '- ⚠️ Generado con cambios sin commitear en `src/` u `openapi/`: las cifras no corresponden a ese commit.',
+  );
 p(
-  `- Endpoints declarados: **${endpointCount}** en ${controllers.length} controllers`,
+  '- Regenerar: `node tools/alovida/coverage-report.mjs` (o `yarn alovida:coverage`)',
 );
-p(`- Módulos: **${new Set(entities.map((e) => e.module)).size}**`);
+p(
+  '- Método: lectura estática del código. No arranca la app, no toca la base y **no ejecuta ninguna ruta**.',
+);
+p('');
+p('## Inventario');
+p('');
+p('| Qué | Cuánto | Qué significa |');
+p('|---|---:|---|');
+p(
+  `| Directorios de módulo en \`src/modules\` | ${moduleDirs.length} | Todos, tengan o no entidades. |`,
+);
+p(
+  `| Módulos con entidades | ${modulesWithEntities} | Directorios con al menos una clase en \`entities/\`. |`,
+);
+p(
+  `| Clases de entidad | ${entities.length} | Clases exportadas en \`entities/\` de \`src/modules\`. No es un conteo de tablas de la base. |`,
+);
+p(
+  `| Endpoints **declarados** | ${endpointCount} | Decoradores \`@Get/@Post/@Put/@Patch/@Delete\` en ${controllers.length} controllers de \`src/modules\`. |`,
+);
+p(
+  `| Operaciones **registradas** | ${registeredOperations ?? 'sin contrato'} | Operaciones de \`openapi/openapi.json\`, que se genera arrancando la app (\`generate-openapi.mjs\`). Vale para el commit en que se regeneró ese archivo. |`,
+);
+p(
+  '| Rutas **verificadas en runtime** | no medido | Este script no ejecuta rutas. Ninguna cifra de esta tabla es evidencia de que un endpoint funcione. |',
+);
 p('');
 p(
   `## ORPHAN_TABLE — entidades sin consumidor fuera de \`entities/\` (${orphanTables.length})`,
