@@ -6,19 +6,19 @@ Consultas y operaciones de persistencia aisladas de la lógica de negocio.
 
 ### Archivos
 
-| Archivo                           | Responsabilidad                                 |
-| --------------------------------- | ----------------------------------------------- |
-| `agenda.repository.ts`            | Acceso a datos aislado de la lógica de negocio. |
-| `analytics.repository.ts`         | Acceso a datos aislado de la lógica de negocio. |
-| `catalog.repository.ts`           | Acceso a datos aislado de la lógica de negocio. |
-| `doctor-calendar.repository.ts`   | Acceso a datos aislado de la lógica de negocio. |
-| `index.ts`                        | Punto de exportación pública de la carpeta.     |
-| `organization.repository.ts`      | Acceso a datos aislado de la lógica de negocio. |
+| Archivo | Responsabilidad |
+| --- | --- |
+| `agenda.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
+| `analytics.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
+| `catalog.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
+| `doctor-calendar.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
+| `index.ts` | Punto de exportación pública de la carpeta. |
+| `organization.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
 | `pharmacovigilance.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
-| `regulatory.repository.ts`        | Acceso a datos aislado de la lógica de negocio. |
-| `surveys.repository.ts`           | Acceso a datos aislado de la lógica de negocio. |
-| `visitors.repository.ts`          | Acceso a datos aislado de la lógica de negocio. |
-| `visits.repository.ts`            | Acceso a datos aislado de la lógica de negocio. |
+| `regulatory.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
+| `surveys.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
+| `visitors.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
+| `visits.repository.ts` | Acceso a datos aislado de la lógica de negocio. |
 
 ## Criterios de mantenimiento
 
