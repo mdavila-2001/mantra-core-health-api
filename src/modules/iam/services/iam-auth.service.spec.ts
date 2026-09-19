@@ -81,7 +81,9 @@ function build() {
   };
   // Sin asignaciones en `authz`: el token queda con los roles de plataforma, que
   // es el caso por defecto de una cuenta que no ejerce ningún rol asistencial.
-  const effectiveRoles = { codesForUser: mockFn().mockResolvedValue([]) };
+  const effectiveRoles = {
+    scopedAssignmentsForUser: mockFn().mockResolvedValue([]),
+  };
   const logger = {
     setContext: mockFn(),
     info: mockFn(),
@@ -173,7 +175,9 @@ describe('IamAuthService', () => {
       d.rolesRepo.findActiveForUser.mockResolvedValue([
         { roleConceptId: CONCEPTS.ROLE_USER },
       ]);
-      d.effectiveRoles.codesForUser.mockResolvedValue(['SURGEON']);
+      d.effectiveRoles.scopedAssignmentsForUser.mockResolvedValue([
+        { code: 'SURGEON', tenantId: undefined },
+      ]);
 
       await d.service.login({ email: 'a@x.io', password: PASSWORD }, '1.2.3.4');
 
@@ -184,6 +188,37 @@ describe('IamAuthService', () => {
         ['USER', 'SURGEON'],
         expect.anything(),
         expect.anything(),
+      );
+    });
+
+    // MCH-001: un rol de negocio concedido en un tenant concreto viaja con su
+    // ámbito, sin desdibujarse en `roles`.
+    it('scopes a business role granted in a specific tenant, in the token claims', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      d.rolesRepo.findActiveForUser.mockResolvedValue([]);
+      d.effectiveRoles.scopedAssignmentsForUser.mockResolvedValue([
+        { code: 'STORAGE_ADMIN', tenantId: 'tenant-A' },
+      ]);
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD }, '1.2.3.4');
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        ['STORAGE_ADMIN'],
+        expect.anything(),
+        expect.objectContaining({
+          scopedRoles: { 'tenant-A': ['STORAGE_ADMIN'] },
+        }),
       );
     });
 
@@ -202,7 +237,9 @@ describe('IamAuthService', () => {
       d.rolesRepo.findActiveForUser.mockResolvedValue([
         { roleConceptId: CONCEPTS.ROLE_USER },
       ]);
-      d.effectiveRoles.codesForUser.mockRejectedValue(new Error('authz down'));
+      d.effectiveRoles.scopedAssignmentsForUser.mockRejectedValue(
+        new Error('authz down'),
+      );
 
       // Un problema de autorización no debe convertirse en una caída de la
       // autenticación: entra con sus roles de plataforma y recibirá un 403

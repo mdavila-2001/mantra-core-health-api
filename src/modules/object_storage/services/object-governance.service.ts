@@ -17,6 +17,7 @@ import {
 } from '../repositories';
 import {
   CHECKSUM_ALGORITHM_SHA256,
+  CHECKSUM_SOURCE_SCAN,
   CHECKSUM_VERIFICATION,
   DELETION_VERIFICATION,
   INTEGRITY_CHECK,
@@ -379,6 +380,10 @@ export class ObjectGovernanceService {
         checksum.verificationStatus = passed
           ? CHECKSUM_VERIFICATION.VERIFIED
           : CHECKSUM_VERIFICATION.MISMATCH;
+        // MCH-021: la emisión de acceso sólo sirve versiones con un checksum
+        // de origen confiable. El verificador lo es; al pasar, el checksum
+        // queda firmado por él y no por el cliente que lo declaró al subir.
+        if (passed) checksum.source = CHECKSUM_SOURCE_SCAN;
       }
 
       const location = await this.storageRepo.findPrimaryLocationForUpdate(

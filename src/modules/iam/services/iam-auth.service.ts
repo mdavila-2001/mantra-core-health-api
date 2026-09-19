@@ -146,7 +146,7 @@ export class IamAuthService {
     em: EntityManager,
     userId: string,
     globalRoles: { roleConceptId: string }[],
-  ): Promise<string[]> {
+  ): Promise<{ roles: string[]; scopedRoles: Record<string, string[]> }> {
     const global = conceptIdsToRoleCodes(
       globalRoles.map((r) => r.roleConceptId),
     );
@@ -154,16 +154,30 @@ export class IamAuthService {
     // sujeto entra con sus roles de plataforma y recibe un 403 explícito al
     // tocar lo clínico, que es un fallo legible. Fallar el login entero
     // convertiría un problema de autorización en una caída de autenticación.
-    const business = await this.effectiveRoles
-      .codesForUser(em, userId)
+    const assignments = await this.effectiveRoles
+      .scopedAssignmentsForUser(em, userId)
       .catch((error: unknown) => {
         this.logger.error(
           { err: error, userId, operation: 'iam.auth.effective-roles' },
           'No se pudieron resolver los roles de negocio del sujeto',
         );
-        return [] as string[];
+        return [] as { code: string; tenantId?: string }[];
       });
-    return [...new Set([...global, ...business])];
+
+    const business = assignments.map((a) => a.code);
+    // MCH-001: sólo entra a `scopedRoles` la asignación que SÍ declara tenant.
+    // Sin `tenantId` es una excepción global deliberada del propio modelo de
+    // datos: queda en `roles` como siempre, sin ámbito que la restrinja.
+    const scopedRoles: Record<string, string[]> = {};
+    for (const a of assignments) {
+      if (!a.tenantId) continue;
+      (scopedRoles[a.tenantId] ??= []).push(a.code);
+    }
+
+    return {
+      roles: [...new Set([...global, ...business])],
+      scopedRoles,
+    };
   }
 
   private async loadActiveTenantIds(
@@ -353,7 +367,11 @@ export class IamAuthService {
 
     return this.em.transactional(async (tx) => {
       const activeRoles = await this.rolesRepo.findActiveForUser(tx, user.id);
-      const roles = await this.mergeRoleCodes(tx, user.id, activeRoles);
+      const { roles, scopedRoles } = await this.mergeRoleCodes(
+        tx,
+        user.id,
+        activeRoles,
+      );
       const tenants = await this.loadActiveTenantIds(tx, user.id);
       const issued = this.tokenService.issueSessionTokens(
         user.id,
@@ -362,6 +380,7 @@ export class IamAuthService {
         {
           name: user.displayName,
           tenantNames: await this.loadTenantNames(tx, tenants),
+          scopedRoles,
           patientProfileId: await this.loadPatientProfileId(tx, user.id),
           practitionerProfileId: await this.loadPractitionerProfileId(
             tx,
@@ -471,7 +490,7 @@ export class IamAuthService {
           tx,
           session.userId,
         );
-        const roles = await this.mergeRoleCodes(
+        const { roles, scopedRoles } = await this.mergeRoleCodes(
           tx,
           session.userId,
           activeRoles,
@@ -488,6 +507,7 @@ export class IamAuthService {
           {
             name: holder?.displayName,
             tenantNames: await this.loadTenantNames(tx, tenants),
+            scopedRoles,
             patientProfileId: await this.loadPatientProfileId(
               tx,
               session.userId,

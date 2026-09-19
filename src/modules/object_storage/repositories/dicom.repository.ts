@@ -302,6 +302,49 @@ export class DicomRepository {
     return em.count(DicomInstanceManifests, { dicomSeriesManifestId });
   }
 
+  /**
+   * Las coordenadas DICOM de un objeto, resueltas desde el servidor (MCH-020).
+   *
+   * El registro de acceso tomaba el `studyInstanceUid` del cuerpo de la
+   * petición: el cliente elegía qué recurso quedaba auditado y, omitiéndolo,
+   * que no quedara ninguno. Acá se sube por la jerarquía real —instancia →
+   * serie → estudio— desde el manifiesto del objeto que el servidor ya
+   * resolvió.
+   *
+   * `null` cuando el objeto no es una instancia DICOM catalogada: entonces no
+   * hay estudio que nombrar, y quien llama registra el acceso por la otra vía.
+   */
+  async findDicomCoordinates(
+    em: EntityManager,
+    objectManifestId: string,
+  ): Promise<{
+    studyInstanceUid: string;
+    seriesInstanceUid: string;
+    sopInstanceUid: string;
+    tenantId: string;
+    patientProfileId: string;
+  } | null> {
+    const instance = await em.findOne(DicomInstanceManifests, {
+      objectManifestId,
+    });
+    if (!instance) return null;
+    const series = await em.findOne(DicomSeriesManifests, {
+      id: instance.dicomSeriesManifestId,
+    });
+    if (!series) return null;
+    const study = await em.findOne(DicomStudyManifests, {
+      id: series.dicomStudyManifestId,
+    });
+    if (!study) return null;
+    return {
+      studyInstanceUid: study.studyInstanceUid,
+      seriesInstanceUid: series.seriesInstanceUid,
+      sopInstanceUid: instance.sopInstanceUid,
+      tenantId: study.tenantId,
+      patientProfileId: study.patientProfileId,
+    };
+  }
+
   // --- Registro de accesos (UC-60-05, 09) ---
 
   /**

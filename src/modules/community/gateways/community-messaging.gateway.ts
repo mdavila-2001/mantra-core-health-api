@@ -137,9 +137,9 @@ export class CommunityMessagingGateway
    * Autentica al conectar. Un socket sin token válido nunca llega a poder
    * unirse a nada — se corta acá, no en cada mensaje.
    */
-  handleConnection(client: Socket): void {
+  async handleConnection(client: Socket): Promise<void> {
     try {
-      const user = this.wsAuth.authenticate(client);
+      const user = await this.wsAuth.authenticate(client);
       (client.data as GatewaySocketData).user = user;
     } catch {
       client.disconnect(true);
