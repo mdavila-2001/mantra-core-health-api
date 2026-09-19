@@ -119,6 +119,7 @@
     "db:provision:dev": "node scripts/postgres/provision-development-roles.mjs",
     "db:vendor": "bash scripts/db/vendor-ddl.sh",
     "db:vendor:check": "bash scripts/db/vendor-ddl.sh --check",
+    "db:verify-clean-init": "bash scripts/db/verify-clean-init.sh",
     "start:worker:audio-assets": "node dist/src/worker-audio-assets",
     "start:worker:audio-assets:dev": "nest start --watch --entryFile worker-audio-assets",
     "infra:up": "docker compose up -d redis opensearch opensearch-init minio mock-provider-server",
