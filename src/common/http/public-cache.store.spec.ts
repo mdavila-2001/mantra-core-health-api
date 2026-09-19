@@ -9,7 +9,11 @@ describe('PublicCacheStore', () => {
 
   it('devuelve lo guardado mientras no venza', () => {
     const store = new PublicCacheStore();
-    const valor = { etag: 'W/"a"', body: { x: 1 }, cacheControl: 'public, max-age=60' };
+    const valor = {
+      etag: 'W/"a"',
+      body: { x: 1 },
+      cacheControl: 'public, max-age=60',
+    };
 
     store.set('clave', valor, 60_000);
 
@@ -21,7 +25,11 @@ describe('PublicCacheStore', () => {
     const store = new PublicCacheStore();
     const ahora = jest.spyOn(Date, 'now');
     ahora.mockReturnValue(1_000);
-    store.set('clave', { etag: 'W/"a"', body: {}, cacheControl: 'public' }, 1_000);
+    store.set(
+      'clave',
+      { etag: 'W/"a"', body: {}, cacheControl: 'public' },
+      1_000,
+    );
 
     ahora.mockReturnValue(1_000 + 1_000 + 1); // un milisegundo después del vencimiento
     expect(store.get('clave')).toBeUndefined();
@@ -46,11 +54,19 @@ describe('PublicCacheStore', () => {
     const store = new PublicCacheStore();
     const TOPE = 500;
     for (let i = 0; i < TOPE; i += 1) {
-      store.set(`clave-${i}`, { etag: `W/"${i}"`, body: {}, cacheControl: 'public' }, 60_000);
+      store.set(
+        `clave-${i}`,
+        { etag: `W/"${i}"`, body: {}, cacheControl: 'public' },
+        60_000,
+      );
     }
     expect(store.size).toBe(TOPE);
 
-    store.set('clave-nueva', { etag: 'W/"nueva"', body: {}, cacheControl: 'public' }, 60_000);
+    store.set(
+      'clave-nueva',
+      { etag: 'W/"nueva"', body: {}, cacheControl: 'public' },
+      60_000,
+    );
 
     expect(store.size).toBe(TOPE); // no creció
     expect(store.get('clave-0')).toBeUndefined(); // la más vieja se fue

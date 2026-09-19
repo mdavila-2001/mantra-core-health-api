@@ -68,7 +68,9 @@ function build(opciones: {
       getResponse: () => res,
     }),
   };
-  const handleFn = mockFn(() => of(opciones.body ?? { items: [], nextCursor: null }));
+  const handleFn = mockFn(() =>
+    of(opciones.body ?? { items: [], nextCursor: null }),
+  );
   const next = { handle: handleFn };
 
   const store = opciones.store ?? new PublicCacheStore();
