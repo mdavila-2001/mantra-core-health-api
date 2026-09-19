@@ -31,7 +31,7 @@ import {
  * `ServiceRequestsService.checkDuplicate`, así que montarlo duplicaría la
  * consulta de autorización sin cambiar ninguna respuesta.
  * `diagnostic-reports/:id/release` tampoco: su paciente sale del reporte ya
- * cargado (GAP-3, deuda abierta).
+ * cargado, y lo autoriza el servicio (MCH-007).
  */
 @ApiTags('clinical-orders')
 @ApiBearerAuth()

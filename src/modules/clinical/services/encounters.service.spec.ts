@@ -14,6 +14,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -50,6 +51,9 @@ function build() {
     computeHash: mockFn().mockResolvedValue('a'.repeat(64)),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const clinicalRead = {
+    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+  };
   const service = new EncountersService(
     em as any,
     encountersRepo,
@@ -57,6 +61,7 @@ function build() {
     clinicalNotifications as any,
     seal as any,
     logger as any,
+    clinicalRead as any,
   );
   return {
     service,
@@ -65,6 +70,7 @@ function build() {
     episodesRepo,
     clinicalNotifications,
     seal,
+    clinicalRead,
   };
 }
 
@@ -264,5 +270,27 @@ describe('EncountersService', () => {
         d.service.close('enc1', { expectedRowVersion: 1 }, actor),
       ).rejects.toBeInstanceOf(ConcurrencyConflictException);
     });
+  });
+});
+
+describe('EncountersService · MCH-007, cierre por id', () => {
+  it('pregunta por el paciente del encuentro y, sin permiso, no lo cierra ni lo sella', async () => {
+    const d = build();
+    const enc = { ...encounter(), patientProfileId: 'paciente-ajeno' };
+    d.encountersRepo.findById.mockResolvedValue(enc);
+    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      new ForbiddenException('sin permiso'),
+    );
+
+    await expect(d.service.close('enc1', {}, actor)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      'paciente-ajeno',
+      actor,
+    );
+    expect(enc.statusConceptId).toBe(CLIN.ENCOUNTER_IN_PROGRESS);
+    expect(d.seal.computeHash).not.toHaveBeenCalled();
+    expect(d.tx.flush).not.toHaveBeenCalled();
   });
 });

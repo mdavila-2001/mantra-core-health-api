@@ -66,14 +66,23 @@ function pacienteDelCuerpo(body: unknown): string | undefined {
  * ruta— y no se interpreta cuerpo alguno. Los dos controladores de lectura que
  * cuelgan de este guard se comportan igual que ayer.
  *
+ * ## MCH-007: escribir no es leer
+ *
+ * En `POST`/`PUT`/`PATCH` la pregunta es
+ * {@link ClinicalReadService.assertPuedeEscribirHistoria}: la misma base
+ * asistencial que la lectura, pero el PDP se consulta con `WRITE` y no hay red
+ * de titularidad. Antes una escritura se autorizaba con la política de
+ * lectura, y un grant `READ` —el que crea el paciente al aprobar una solicitud
+ * de acceso— bastaba para escribir en su historia.
+ *
  * ## Qué NO hace, y por qué
  *
  * No carga recursos. Las rutas de comando cuyo paciente sólo se conoce cargando
  * la receta, la nota o la observación (`medication-requests/:id/sign`,
- * `notes/:noteId/versions`…) **no** quedan cubiertas: resolverlas exigiría
- * meter repositorios de dos módulos dentro de un guard y una consulta extra por
- * petición. Es deuda de seguridad abierta y trazada (GAP-3 del discovery de
- * SEC-01), no un caso olvidado. Por eso el guard se monta **handler a handler**
+ * `notes/:noteId/versions`…) no se resuelven acá: exigiría meter repositorios
+ * de dos módulos dentro de un guard y una consulta extra por petición. Las
+ * autoriza cada servicio después de cargar el recurso, con
+ * `assertPuedeEscribirHistoria` (MCH-007, cierre del GAP-3 de SEC-01). Por eso el guard se monta **handler a handler**
  * sobre las rutas cuyo paciente ya viaja en la petición, y no a nivel de clase:
  * una ruta no debe parecer protegida cuando el guard va a terminar dejándola
  * pasar sin evaluar nada.
@@ -96,9 +105,8 @@ export class ClinicalRecordAccessGuard implements CanActivate {
 
     // El cuerpo sólo se mira en los métodos que escriben. Un `GET` se sigue
     // decidiendo con la ruta y nada más.
-    const delCuerpo = METODOS_MUTANTES.has(request.method)
-      ? pacienteDelCuerpo(request.body)
-      : undefined;
+    const escribe = METODOS_MUTANTES.has(request.method);
+    const delCuerpo = escribe ? pacienteDelCuerpo(request.body) : undefined;
 
     // Ruta primero, cuerpo después, y sin repetir: cuando los dos traen el
     // mismo paciente se pregunta una sola vez —preguntar dos veces por la misma
@@ -123,7 +131,16 @@ export class ClinicalRecordAccessGuard implements CanActivate {
       // Lanza `ForbiddenException` si no corresponde; NestJS la propaga tal
       // cual. Secuencial y no en paralelo: el primer paciente que el actor no
       // puede tocar corta la petición sin lanzar la consulta del segundo.
-      await this.readService.assertPuedeLeerHistoria(patientProfileId, actor);
+      // MCH-007: una escritura se decide con la política de escritura —un
+      // grant de sólo lectura no alcanza—, también para el paciente de la ruta.
+      if (escribe) {
+        await this.readService.assertPuedeEscribirHistoria(
+          patientProfileId,
+          actor,
+        );
+      } else {
+        await this.readService.assertPuedeLeerHistoria(patientProfileId, actor);
+      }
     }
     return true;
   }

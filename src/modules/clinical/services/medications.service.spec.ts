@@ -13,6 +13,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -52,6 +53,9 @@ function build() {
   const clinicalNotifications = {
     prescriptionIssued: mockFn().mockResolvedValue({ suppressed: false }),
   };
+  const clinicalRead = {
+    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+  };
   const service = new MedicationsService(
     em as any,
     requestsRepo,
@@ -62,8 +66,10 @@ function build() {
     historyRepo as any,
     clinicalNotifications as any,
     logger as any,
+    clinicalRead as any,
   );
   return {
+    clinicalRead,
     clinicalNotifications,
     service,
     requestsRepo,
@@ -345,6 +351,8 @@ describe('MedicationsService', () => {
       const request = {
         id: 'mr1',
         patientProfileId: 'p1',
+        // Sin prescriptor declarado firma quien redactó el borrador (MCH-007).
+        createdByUserId: 'user-1',
         statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
         updatedAt: new Date(),
         createdAt: new Date(),
@@ -563,5 +571,111 @@ describe('MedicationsService', () => {
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
+  });
+});
+
+describe('MedicationsService · MCH-007', () => {
+  // Fija: el fixture se compara consigo mismo para probar que no se tocó.
+  const CREADA = new Date('2026-09-01T12:00:00Z');
+  const borrador = () => ({
+    id: 'mr1',
+    patientProfileId: 'paciente-ajeno',
+    prescriberProfileId: 'hp-autor',
+    createdByUserId: 'user-autor',
+    statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+    updatedAt: CREADA,
+    createdAt: CREADA,
+  });
+  const otroMedico = {
+    id: 'user-otro',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'hp-otro',
+  } as any;
+  const autor = {
+    id: 'user-autor',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'hp-autor',
+  } as any;
+
+  it.each([
+    [
+      'editDraft',
+      (d: any) => d.service.editDraft('mr1', { doseText: 'x' }, otroMedico),
+    ],
+    ['sign', (d: any) => d.service.sign('mr1', otroMedico)],
+    ['issue', (d: any) => d.service.issue('mr1', otroMedico)],
+    [
+      'invalidate',
+      (d: any) => d.service.invalidate('mr1', { reasonText: 'x' }, otroMedico),
+    ],
+    [
+      'replace',
+      (d: any) => d.service.replace('mr1', { reasonText: 'x' }, otroMedico),
+    ],
+    ['renew', (d: any) => d.service.renew('mr1', {}, otroMedico)],
+  ])(
+    '%s pregunta por el paciente de la receta y, sin permiso, no escribe',
+    async (_nombre, operar) => {
+      const d = build();
+      const request = borrador();
+      d.requestsRepo.findById.mockResolvedValue(request);
+      d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+        new ForbiddenException('sin permiso'),
+      );
+
+      await expect(operar(d)).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+        'paciente-ajeno',
+        otroMedico,
+      );
+      expect(request).toEqual(borrador());
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
+    },
+  );
+
+  it('poder escribir no es poder firmar por otro profesional', async () => {
+    const d = build();
+    const request = borrador();
+    d.requestsRepo.findById.mockResolvedValue(request);
+
+    await expect(d.service.sign('mr1', otroMedico)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect((request as any).signedAt).toBeUndefined();
+    expect(d.auditTrail.record).not.toHaveBeenCalled();
+  });
+
+  it('el prescriptor firma su receta', async () => {
+    const d = build();
+    const request = borrador();
+    d.requestsRepo.findById.mockResolvedValue(request);
+
+    await d.service.sign('mr1', autor);
+    expect((request as any).signedByUserId).toBe('user-autor');
+  });
+
+  it('sin prescriptor declarado, sólo firma quien redactó el borrador', async () => {
+    const d = build();
+    const request = { ...borrador(), prescriberProfileId: undefined };
+    d.requestsRepo.findById.mockResolvedValue(request);
+
+    await expect(d.service.sign('mr1', otroMedico)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    await d.service.sign('mr1', autor);
+    expect((request as any).signedByUserId).toBe('user-autor');
+  });
+
+  it('una receta ya firmada no devuelve 200 a quien no es su prescriptor', async () => {
+    const d = build();
+    d.requestsRepo.findById.mockResolvedValue({
+      ...borrador(),
+      signedAt: new Date(),
+      signedByUserId: 'user-autor',
+    });
+
+    await expect(d.service.sign('mr1', otroMedico)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
   });
 });

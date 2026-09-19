@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ProceduresService } from './procedures.service';
 import { ResourceNotFoundException } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -24,14 +25,24 @@ function build() {
   const serviceRequestsRepo = { findById: mockFn() };
   const filesService = { createLink: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const clinicalRead = {
+    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ProceduresService(
     em as any,
     proceduresRepo,
     serviceRequestsRepo as any,
     filesService as any,
     logger as any,
+    clinicalRead as any,
   );
-  return { service, proceduresRepo, serviceRequestsRepo, filesService };
+  return {
+    service,
+    proceduresRepo,
+    serviceRequestsRepo,
+    filesService,
+    clinicalRead,
+  };
 }
 
 describe('ProceduresService (UC-08-12)', () => {
@@ -129,6 +140,28 @@ describe('ProceduresService · attachFile (ALV-033, odontología)', () => {
     await expect(
       d.service.attachFile('missing', { fileId: 'file1' }, actor),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.filesService.createLink).not.toHaveBeenCalled();
+  });
+});
+
+describe('ProceduresService · MCH-007, adjuntar por id', () => {
+  it('pregunta por el paciente del procedimiento y, sin permiso, no crea el vínculo', async () => {
+    const d = build();
+    d.proceduresRepo.findById.mockResolvedValue({
+      id: 'proc1',
+      patientProfileId: 'paciente-ajeno',
+    });
+    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      new ForbiddenException('sin permiso'),
+    );
+
+    await expect(
+      d.service.attachFile('proc1', { fileId: 'f1' } as any, actor),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      'paciente-ajeno',
+      actor,
+    );
     expect(d.filesService.createLink).not.toHaveBeenCalled();
   });
 });

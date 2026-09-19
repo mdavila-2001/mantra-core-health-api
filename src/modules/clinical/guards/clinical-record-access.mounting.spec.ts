@@ -120,32 +120,82 @@ const HANDLERS_BOOTSTRAP_SIN_GUARD: ReadonlyArray<
 /**
  * Rutas mutantes que NO deben llevar el guard, con el motivo por el que no.
  *
- * Las de `GAP-3` conocen a su paciente sólo después de cargar el recurso, y el
+ * Estas rutas conocen a su paciente sólo después de cargar el recurso, y el
  * guard no carga recursos: montarlo ahí lo haría devolver `true` sin evaluar
- * nada. `checkDuplicateStudy` es otro motivo distinto — no persiste y ya pasa
+ * nada. Eran el GAP-3 de SEC-01; desde MCH-007 las autoriza cada servicio con
+ * `ClinicalReadService.assertPuedeEscribirHistoria`, y cada spec de servicio
+ * prueba que sin permiso no escriben. `checkDuplicateStudy` es otro motivo distinto — no persiste y ya pasa
  * por la misma política dentro de su servicio.
  */
 const HANDLERS_SIN_GUARD: ReadonlyArray<readonly [unknown, string, string]> = [
-  [ClinicalRecordsController, 'changeConditionStatus', 'GAP-3'],
-  [ClinicalRecordsController, 'attachFileToCondition', 'GAP-3'],
-  [ClinicalRecordsController, 'editMedicationDraft', 'GAP-3'],
-  [ClinicalRecordsController, 'signMedicationRequest', 'GAP-3'],
-  [ClinicalRecordsController, 'issueMedicationRequest', 'GAP-3'],
-  [ClinicalRecordsController, 'invalidateMedicationRequest', 'GAP-3'],
-  [ClinicalRecordsController, 'replaceMedicationRequest', 'GAP-3'],
-  [ClinicalRecordsController, 'renewMedicationRequest', 'GAP-3'],
-  [ClinicalRecordsController, 'attachFileToProcedure', 'GAP-3'],
-  [ClinicalEncountersController, 'close', 'GAP-3'],
-  [ClinicalObservationsController, 'amend', 'GAP-3'],
-  [ClinicalOrdersController, 'releaseDiagnosticReport', 'GAP-3'],
-  [ChartNotesController, 'addVersion', 'GAP-3'],
-  [ChartNotesController, 'signVersion', 'GAP-3'],
-  [ChartNotesController, 'cosignVersion', 'GAP-3'],
-  [ChartNotesController, 'amendNote', 'GAP-3'],
-  [ChartNotesController, 'releaseVersion', 'GAP-3'],
-  [ChartNotesController, 'withholdVersion', 'GAP-3'],
-  [ChartNotesController, 'recordExamFindings', 'GAP-3'],
-  [ChartCarePlansController, 'updateActivity', 'GAP-3'],
+  [
+    ClinicalRecordsController,
+    'changeConditionStatus',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [
+    ClinicalRecordsController,
+    'attachFileToCondition',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [
+    ClinicalRecordsController,
+    'editMedicationDraft',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [
+    ClinicalRecordsController,
+    'signMedicationRequest',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [
+    ClinicalRecordsController,
+    'issueMedicationRequest',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [
+    ClinicalRecordsController,
+    'invalidateMedicationRequest',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [
+    ClinicalRecordsController,
+    'replaceMedicationRequest',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [
+    ClinicalRecordsController,
+    'renewMedicationRequest',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [
+    ClinicalRecordsController,
+    'attachFileToProcedure',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [ClinicalEncountersController, 'close', 'MCH-007: lo autoriza el servicio'],
+  [ClinicalObservationsController, 'amend', 'MCH-007: lo autoriza el servicio'],
+  [
+    ClinicalOrdersController,
+    'releaseDiagnosticReport',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [ChartNotesController, 'addVersion', 'MCH-007: lo autoriza el servicio'],
+  [ChartNotesController, 'signVersion', 'MCH-007: lo autoriza el servicio'],
+  [ChartNotesController, 'cosignVersion', 'MCH-007: lo autoriza el servicio'],
+  [ChartNotesController, 'amendNote', 'MCH-007: lo autoriza el servicio'],
+  [ChartNotesController, 'releaseVersion', 'MCH-007: lo autoriza el servicio'],
+  [ChartNotesController, 'withholdVersion', 'MCH-007: lo autoriza el servicio'],
+  [
+    ChartNotesController,
+    'recordExamFindings',
+    'MCH-007: lo autoriza el servicio',
+  ],
+  [
+    ChartCarePlansController,
+    'updateActivity',
+    'MCH-007: lo autoriza el servicio',
+  ],
   [
     ClinicalOrdersController,
     'checkDuplicateStudy',
@@ -186,8 +236,8 @@ describe('SEC-01 · montaje de ClinicalRecordAccessGuard', () => {
   );
 
   it('monta handler a handler, nunca sobre la clase, en los controladores de escritura', () => {
-    // A nivel de clase el guard alcanzaría también a las rutas de GAP-3 y las
-    // dejaría con aspecto de protegidas.
+    // A nivel de clase el guard alcanzaría también a las rutas por id y las
+    // dejaría con aspecto de protegidas por él.
     for (const controller of [
       ClinicalRecordsController,
       ClinicalEncountersController,

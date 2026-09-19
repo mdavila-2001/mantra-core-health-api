@@ -20,6 +20,7 @@ import {
   ObservationResponseDto,
 } from '../dto';
 import { CLIN } from '../clinical.concepts';
+import { ClinicalReadService } from './clinical-read.service';
 
 /** Campos de valor recibidos por DTO (números; el modelo persiste string). */
 interface ValueLike {
@@ -68,6 +69,7 @@ export class ObservationsService {
    * @param encountersRepo - Valor de encounters repo requerido por la operación.
    * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
@@ -75,6 +77,7 @@ export class ObservationsService {
     private readonly encountersRepo: EncountersRepository,
     private readonly serviceRequestsRepo: ServiceRequestsRepository,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(ObservationsService.name);
   }
@@ -298,6 +301,11 @@ export class ObservationsService {
           observationId,
         });
       }
+      // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        observation.patientProfileId,
+        actor,
+      );
       const amendable = [CLIN.OBSERVATION_FINAL, CLIN.OBSERVATION_PRELIMINARY];
       if (!amendable.includes(observation.statusConceptId)) {
         throw new PreconditionFailedException(
