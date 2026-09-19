@@ -2779,6 +2779,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "legalRepresentative": {
         "role": "MARKETING_MANAGER",
         "fullName": "Nombre de ejemplo",
+        "name": "Nombre de ejemplo",
+        "middleName": "Nombre de ejemplo",
+        "lastName": "Nombre de ejemplo",
+        "motherLastName": "Nombre de ejemplo",
         "email": "usuario@example.com",
         "phone": "+59170000000",
         "idNumber": "valor-ejemplo"
@@ -2787,6 +2791,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "role": "MARKETING_MANAGER",
           "fullName": "Nombre de ejemplo",
+          "name": "Nombre de ejemplo",
+          "middleName": "Nombre de ejemplo",
+          "lastName": "Nombre de ejemplo",
+          "motherLastName": "Nombre de ejemplo",
           "email": "usuario@example.com",
           "phone": "+59170000000",
           "idNumber": "valor-ejemplo"
@@ -2801,7 +2809,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<MyOrganizationDto>` | Sin restricción adicional declarada | Sus organizaciones, de la más recientemente creada a la más antigua. | `[{"myRoleConceptId":"00000000-0000-4000-8000-000000000001","canAdminister":true,"isVerified":true,"payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","sigla":"valor-ejemplo","address":"valor-ejemplo","latitude":1,"longitude":1},"legalRepresentative":{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"},"executives":[{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}]}]` |
+| `items` | Sí | `array<MyOrganizationDto>` | Sin restricción adicional declarada | Sus organizaciones, de la más recientemente creada a la más antigua. | `[{"myRoleConceptId":"00000000-0000-4000-8000-000000000001","canAdminister":true,"isVerified":true,"payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","sigla":"valor-ejemplo","address":"valor-ejemplo","latitude":1,"longitude":1},"legalRepresentative":{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","name":"Nombre de ejemplo","middleName":"Nombre de ejemplo","lastName":"Nombre de ejemplo","motherLastName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"},"executives":[{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","name":"Nombre de ejemplo","middleName":"Nombre de ejemplo","lastName":"Nombre de ejemplo","motherLastName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}]}]` |
 | `items[].myRoleConceptId` | Sí | `string` | formato `uuid` | Concepto del rol de la membresía activa (owner/admin/staff) | `00000000-0000-4000-8000-000000000001` |
 | `items[].canAdminister` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero para owner y admin de la organización | `true` |
 | `items[].isVerified` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero cuando la plataforma verificó la organización | `true` |
@@ -2812,15 +2820,23 @@ Campos de la respuesta:
 | `items[].payer.address` | No | `string` | Sin restricción adicional declarada | Dirección de la aseguradora | `valor-ejemplo` |
 | `items[].payer.latitude` | No | `number` | Sin restricción adicional declarada | Latitud de la casa matriz (-90 a 90) | `1` |
 | `items[].payer.longitude` | No | `number` | Sin restricción adicional declarada | Longitud de la casa matriz (-180 a 180) | `1` |
-| `items[].legalRepresentative` | No | `OrganizationContactPersonDto` | Sin restricción adicional declarada | Quién representa legalmente a la organización (subtarea 1.4). Va al nivel de la organización y no dentro de `payer` porque no es un dato de aseguradora: el registro de procesos pide el mismo bloque para farmacia, laboratorio e imagenología. | `{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}` |
+| `items[].legalRepresentative` | No | `OrganizationContactPersonDto` | Sin restricción adicional declarada | Quién representa legalmente a la organización (subtarea 1.4). Va al nivel de la organización y no dentro de `payer` porque no es un dato de aseguradora: el registro de procesos pide el mismo bloque para farmacia, laboratorio e imagenología. | `{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","name":"Nombre de ejemplo","middleName":"Nombre de ejemplo","lastName":"Nombre de ejemplo","motherLastName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}` |
 | `items[].legalRepresentative.role` | No | `string` | Sin restricción adicional declarada | Rol canónico del contacto dentro de la organización | `MARKETING_MANAGER` |
 | `items[].legalRepresentative.fullName` | No | `string` | Sin restricción adicional declarada | Nombre completo del contacto | `Nombre de ejemplo` |
+| `items[].legalRepresentative.name` | No | `string` | Sin restricción adicional declarada | Nombre de pila, si se declaró en partes | `Nombre de ejemplo` |
+| `items[].legalRepresentative.middleName` | No | `string` | Sin restricción adicional declarada | Segundo nombre, si se declaró | `Nombre de ejemplo` |
+| `items[].legalRepresentative.lastName` | No | `string` | Sin restricción adicional declarada | Apellido paterno, si se declaró en partes | `Nombre de ejemplo` |
+| `items[].legalRepresentative.motherLastName` | No | `string` | Sin restricción adicional declarada | Apellido materno, si se declaró | `Nombre de ejemplo` |
 | `items[].legalRepresentative.email` | No | `string` | formato `email` | Correo de contacto | `usuario@example.com` |
 | `items[].legalRepresentative.phone` | No | `string` | Sin restricción adicional declarada | Celular o teléfono de contacto | `+59170000000` |
 | `items[].legalRepresentative.idNumber` | No | `string` | Sin restricción adicional declarada | Documento de identidad declarado | `valor-ejemplo` |
-| `items[].executives` | No | `array<OrganizationContactPersonDto>` | Sin restricción adicional declarada | Las gerencias de contacto declaradas, en orden canónico (general, comercial, marketing). | `[{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}]` |
+| `items[].executives` | No | `array<OrganizationContactPersonDto>` | Sin restricción adicional declarada | Las gerencias de contacto declaradas, en orden canónico (general, comercial, marketing). | `[{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","name":"Nombre de ejemplo","middleName":"Nombre de ejemplo","lastName":"Nombre de ejemplo","motherLastName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}]` |
 | `items[].executives[].role` | No | `string` | Sin restricción adicional declarada | Rol canónico del contacto dentro de la organización | `MARKETING_MANAGER` |
 | `items[].executives[].fullName` | No | `string` | Sin restricción adicional declarada | Nombre completo del contacto | `Nombre de ejemplo` |
+| `items[].executives[].name` | No | `string` | Sin restricción adicional declarada | Nombre de pila, si se declaró en partes | `Nombre de ejemplo` |
+| `items[].executives[].middleName` | No | `string` | Sin restricción adicional declarada | Segundo nombre, si se declaró | `Nombre de ejemplo` |
+| `items[].executives[].lastName` | No | `string` | Sin restricción adicional declarada | Apellido paterno, si se declaró en partes | `Nombre de ejemplo` |
+| `items[].executives[].motherLastName` | No | `string` | Sin restricción adicional declarada | Apellido materno, si se declaró | `Nombre de ejemplo` |
 | `items[].executives[].email` | No | `string` | formato `email` | Correo de contacto | `usuario@example.com` |
 | `items[].executives[].phone` | No | `string` | Sin restricción adicional declarada | Celular o teléfono de contacto | `+59170000000` |
 | `items[].executives[].idNumber` | No | `string` | Sin restricción adicional declarada | Documento de identidad declarado | `valor-ejemplo` |

@@ -80846,11 +80846,32 @@
       "RegisterOrganizationLegalRepresentativeDto": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Mariana"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Elena"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Siles"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Justiniano"
+          },
           "fullName": {
             "type": "string",
-            "description": "Nombre completo del representante legal",
+            "description": "Nombre completo del representante legal (forma anterior; preferí name/lastName)",
             "maxLength": 200,
-            "example": "Mariana Siles Justiniano"
+            "example": "Mariana Siles Justiniano",
+            "deprecated": true
           },
           "idNumber": {
             "type": "string",
@@ -80878,7 +80899,6 @@
           }
         },
         "required": [
-          "fullName",
           "idNumber",
           "email",
           "powerOfAttorneyFileId"
@@ -80887,11 +80907,32 @@
       "RegisterOrganizationExecutiveContactDto": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Carlos"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Eduardo"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Mendoza"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Rivero"
+          },
           "fullName": {
             "type": "string",
-            "description": "Nombre completo del ejecutivo",
+            "description": "Nombre completo del ejecutivo (forma anterior; preferí name/lastName)",
             "maxLength": 200,
-            "example": "Carlos Mendoza Rivero"
+            "example": "Carlos Mendoza Rivero",
+            "deprecated": true
           },
           "phone": {
             "type": "string",
@@ -80908,7 +80949,6 @@
           }
         },
         "required": [
-          "fullName",
           "phone",
           "email"
         ]
