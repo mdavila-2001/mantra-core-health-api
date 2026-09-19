@@ -754,23 +754,26 @@ export class SchedulingCatalogRepository {
     );
     if (slots.length === 0) return { total: 0, live: 0, sample: [] };
 
-    const enSusCupos = { bookableSlotId: { $in: slots.map((s) => s.id) } };
+    // Los criterios repiten `bookableSlotId` en vez de componerse con spread:
+    // es lo que acota la consulta a los cupos de esta plantilla, y el guardrail
+    // de tenant sólo lo reconoce escrito en el literal.
+    const slotIds = slots.map((s) => s.id);
+    const enSusCupos = { bookableSlotId: { $in: slotIds } };
     const total = await em.count(AppointmentBookings, enSusCupos);
     if (total === 0) return { total: 0, live: 0, sample: [] };
 
     const conEstadoVivo = {
-      ...enSusCupos,
+      bookableSlotId: { $in: slotIds },
       statusConceptId: { $in: [...activeStates] },
     };
     const live = await em.count(AppointmentBookings, conEstadoVivo);
 
     // La muestra prioriza las vivas: son las accionables, y son las que el
     // médico necesita ver nombradas para ir a resolverlas.
-    const sample = await em.find(
-      AppointmentBookings,
-      live > 0 ? conEstadoVivo : enSusCupos,
-      { limit },
-    );
+    const sample =
+      live > 0
+        ? await em.find(AppointmentBookings, conEstadoVivo, { limit })
+        : await em.find(AppointmentBookings, enSusCupos, { limit });
     return { total, live, sample };
   }
 

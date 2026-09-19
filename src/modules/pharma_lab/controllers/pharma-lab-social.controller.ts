@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -29,6 +30,7 @@ import {
   PharmaSocialService,
   type AllocationReport,
 } from '../services';
+import { PharmaLabScopeGuard } from '../guards';
 
 /**
  * Publicaciones de visitador sujetas a aprobación (UC-17-35, UC-17-36) y
@@ -40,6 +42,7 @@ import {
  */
 @ApiTags('pharma-lab-social-accounting')
 @ApiBearerAuth()
+@UseGuards(PharmaLabScopeGuard)
 @Controller('pharma-labs')
 export class PharmaLabSocialController {
   /**

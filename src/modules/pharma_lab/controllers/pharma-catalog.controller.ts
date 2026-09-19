@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
@@ -28,6 +29,7 @@ import type {
   PharmaProducts,
 } from '../entities';
 import { PharmaCatalogService } from '../services';
+import { PharmaLabScopeGuard } from '../guards';
 
 /**
  * Catálogo de medicamentos y material informativo (UC-17-21 a UC-17-26).
@@ -35,6 +37,7 @@ import { PharmaCatalogService } from '../services';
  */
 @ApiTags('pharma-lab-catalog')
 @ApiBearerAuth()
+@UseGuards(PharmaLabScopeGuard)
 @Controller('pharma-labs/:pharmaLabId')
 export class PharmaCatalogController {
   /**

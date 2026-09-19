@@ -15,10 +15,15 @@
 //                                      sin ningún rastro de `tenantId` cerca
 // =============================================================================
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 
-const ROOT = process.cwd();
-const SRC = join(ROOT, 'src');
+// Rutas siempre con `/`: todas las reglas y allowlists las comparan con
+// patrones como `modules/x/` o `src/...#metodo`. Con los separadores de
+// Windows ninguna coincidía y el chequeo local no se parecía al de CI (la regla
+// de tenant ni siquiera corría).
+const posix = (p) => p.split(sep).join('/');
+const ROOT = posix(process.cwd());
+const SRC = `${ROOT}/src`;
 
 /** Dominios cuyos datos son inmutables/protegidos (clínico, legal, financiero, auditoría). */
 const RESTRICTED_DOMAINS = [
@@ -59,6 +64,18 @@ const ALLOWED_COMMANDS =
  *     `@Roles('SYSTEM')`.
  * NO exime del requisito de autenticación (el guard global lo garantiza).
  */
+/**
+ * Borrados en dominio protegido que NO tocan un registro clínico, legal ni
+ * financiero, aunque vivan en su módulo o su ruta nombre un recurso inmutable.
+ * Clave `ruta-relativa#path-del-@Delete`. Cada entrada, con su porqué:
+ *   - prescription-favorites: plantillas personales del profesional para
+ *     repetir una indicación. No es una receta emitida ni entra en la historia
+ *     clínica; el servicio sólo borra favoritos del perfil de quien pide.
+ */
+const RESTRICTED_DELETE_ALLOWLIST = new Set([
+  "src/modules/clinical_ext/controllers/prescription-favorites.controller.ts#':id'",
+]);
+
 const AUTHN_NON_ROLE_ALLOWLIST =
   /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/controllers\/audio-assets\.controller\.ts/;
 
@@ -76,10 +93,11 @@ function hasGlobalJwtGuard() {
 }
 const GLOBAL_JWT_GUARD = hasGlobalJwtGuard();
 
-function walk(dir) {
+function walk(from) {
+  const dir = posix(from);
   const out = [];
   for (const name of readdirSync(dir)) {
-    const p = join(dir, name);
+    const p = `${dir}/${name}`;
     const s = statSync(p);
     if (s.isDirectory()) out.push(...walk(p));
     else if (name.endsWith('.ts') && !name.endsWith('.spec.ts')) out.push(p);
@@ -123,8 +141,16 @@ for (const file of controllers) {
       pendingDecorators.some((d) => /@Roles\(/.test(d.text)) ||
       /@Roles\(/.test(near);
 
+    const deleteAllowed =
+      verb === 'Delete' &&
+      RESTRICTED_DELETE_ALLOWLIST.has(`${rel(file)}#${path}`);
+
     // HARD_DELETE sobre dominio protegido.
-    if (verb === 'Delete' && RESTRICTED_DOMAINS.includes(domain)) {
+    if (
+      verb === 'Delete' &&
+      RESTRICTED_DOMAINS.includes(domain) &&
+      !deleteAllowed
+    ) {
       add(
         'HARD_DELETE_RESTRICTED_DATA',
         file,
@@ -136,6 +162,7 @@ for (const file of controllers) {
     if (
       isImmutableCtrl &&
       ['Put', 'Patch', 'Delete'].includes(verb) &&
+      !deleteAllowed &&
       !ALLOWED_COMMANDS.test(path)
     ) {
       add(
@@ -356,6 +383,12 @@ const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
   'src/modules/consent/repositories/privacy-restrictions.repository.ts#findExpirable',
   'src/modules/messaging/repositories/notifications.repository.ts#findClaimableRequests',
   'src/modules/messaging/repositories/outbox.repository.ts#claimPendingOutbox',
+  // Coordinador de ciclo de vida de almacenamiento (common/storage): recupera y
+  // arbitra intenciones de escritura/borrado de objetos. Un objeto físico puede
+  // estar disputado por intenciones de distintos tenants, así que el chequeo de
+  // pares tiene que ver todas; filtrar por tenant dejaría pasar un borrado que
+  // pisa una publicación ajena en curso. No lo alcanza ningún controlador.
+  'src/modules/messaging/repositories/queues.repository.ts#findStorageIntents',
   'src/modules/qa_lab/repositories/qa-catalog.repository.ts#claimDueSchedules',
   'src/modules/reporting/repositories/reporting-runs.repository.ts#findDueSchedules',
   'src/modules/tracking/repositories/tracking.repository.ts#findOpenSubjectsForScan',

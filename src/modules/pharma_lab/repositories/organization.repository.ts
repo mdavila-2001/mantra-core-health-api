@@ -39,10 +39,24 @@ export class OrganizationRepository {
    * Lista los laboratorios registrados.
    *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param scope - Organizaciones y laboratorios a los que se acota el
+   *   listado; `null` sólo para quien administra la plataforma entera.
    * @returns Laboratorios ordenados por razón social.
    */
-  listLabs(em: EntityManager): Promise<PharmaLabs[]> {
-    return em.find(PharmaLabs, {}, { orderBy: { legalName: 'asc' } });
+  listLabs(
+    em: EntityManager,
+    scope: { tenantIds: readonly string[]; labIds: readonly string[] } | null,
+  ): Promise<PharmaLabs[]> {
+    const where =
+      scope === null
+        ? {}
+        : {
+            $or: [
+              { tenantId: { $in: [...scope.tenantIds] } },
+              { id: { $in: [...scope.labIds] } },
+            ],
+          };
+    return em.find(PharmaLabs, where, { orderBy: { legalName: 'asc' } });
   }
 
   /**
@@ -85,6 +99,27 @@ export class OrganizationRepository {
     userId: string,
   ): Promise<PharmaLabStaff | null> {
     return em.findOne(PharmaLabStaff, { pharmaLabId, userId });
+  }
+
+  /**
+   * Laboratorios en los que la cuenta es personal con vínculo activo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - Cuenta.
+   * @param activeStatus - Concepto del vínculo activo.
+   * @returns Identificadores de laboratorio.
+   */
+  async findLabIdsWhereStaff(
+    em: EntityManager,
+    userId: string,
+    activeStatus: string,
+  ): Promise<string[]> {
+    const rows = await em.find(
+      PharmaLabStaff,
+      { userId, statusConceptId: activeStatus },
+      { fields: ['pharmaLabId'] },
+    );
+    return rows.map((r) => r.pharmaLabId);
   }
 
   /**
