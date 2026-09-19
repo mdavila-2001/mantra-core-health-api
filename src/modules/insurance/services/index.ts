@@ -11,3 +11,5 @@ export * from './declared-coverage';
 export * from './declared-coverages-reader';
 export * from './claims-read.service';
 export * from './insurance-analytics.service';
+export * from './insurance-portability.service';
+export * from './insurance-portability-pdf.service';

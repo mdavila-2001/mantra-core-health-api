@@ -8,8 +8,9 @@ import { HEADERS_METADATA } from '@nestjs/common/constants';
 import { Reflector } from '@nestjs/core';
 import { createHash } from 'node:crypto';
 import type { Request, Response } from 'express';
-import { map, type Observable } from 'rxjs';
+import { map, of, tap, type Observable } from 'rxjs';
 import { IS_PUBLIC_KEY } from '../auth/public.decorator';
+import { PublicCacheStore } from './public-cache.store';
 
 /** La forma que deja `@Header(name, value)` en `HEADERS_METADATA`. */
 interface DeclaredHeader {
@@ -49,6 +50,19 @@ const STALE_WHILE_REVALIDATE = 300;
  *
  * Una respuesta con sesión nunca lleva `Cache-Control: public`: bastaría un
  * proxy intermedio para servirle a alguien la página de otro.
+ *
+ * ## MCH-028 — la revalidación ya no ejecuta el handler
+ *
+ * Hasta acá el `ETag` se calculaba **después** de `next.handle()`: un 304
+ * ahorraba los bytes de la respuesta, pero la consulta cara —la que arma la
+ * página— ya había corrido igual, que es justo lo que el párrafo anterior
+ * promete evitar. Ahora `PublicCacheStore` guarda la representación (`ETag` +
+ * cuerpo + `Cache-Control`) la primera vez que se calcula, con la misma
+ * vigencia que el `max-age` ya anunciado. Mientras esa entrada siga vigente,
+ * ni una relectura con `If-None-Match` que coincide ni una sin cabecera
+ * llegan a `next.handle()`: la primera contesta 304, la segunda sirve el
+ * cuerpo cacheado. Ninguna de las dos es más vieja que lo que el propio
+ * `Cache-Control` ya le prometió al cliente.
  */
 @Injectable()
 export class PublicCacheInterceptor implements NestInterceptor {
@@ -56,8 +70,12 @@ export class PublicCacheInterceptor implements NestInterceptor {
    * Inicializa la instancia y sus dependencias.
    *
    * @param reflector - Lee la marca `@Public()` del manejador.
+   * @param store - Caché de representaciones ya calculadas (MCH-028).
    */
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly store: PublicCacheStore,
+  ) {}
 
   /**
    * Envuelve la respuesta para agregarle validación y caché.
@@ -67,15 +85,23 @@ export class PublicCacheInterceptor implements NestInterceptor {
    * @returns El cuerpo, o vacío si el cliente ya lo tenía.
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const http = context.switchToHttp();
+    const req = http.getRequest<Request>();
+
+    // Cualquier escritura puede volver obsoleta una representación pública ya
+    // cacheada (ver la nota de `PublicCacheStore.clear` sobre por qué es todo
+    // o nada). No se filtra por `@Public()` acá: una escritura autenticada
+    // —publicar un post, por ejemplo— es exactamente la que tiene que tirar
+    // abajo el feed público que la muestra.
+    if (req.method !== 'GET') {
+      return next.handle().pipe(tap(() => this.store.clear()));
+    }
+
     const esPublico = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
-    const http = context.switchToHttp();
-    const req = http.getRequest<Request>();
-
-    // Sólo las lecturas: un POST público —si lo hubiera— no se cachea nunca.
-    if (!esPublico || req.method !== 'GET') return next.handle();
+    if (!esPublico) return next.handle();
 
     // B.3 — un handler que ya declaró su propio `Cache-Control` (el verify
     // de receta usa `no-store`: invalidar tiene que verse de inmediato) sabe
@@ -83,10 +109,30 @@ export class PublicCacheInterceptor implements NestInterceptor {
     // pública que cambia poco". Sin este freno, el `public, max-age=60,
     // stale-while-revalidate=300` de acá pisaría el `no-store` del handler y
     // una receta invalidada seguiría viéndose "ISSUED" hasta un minuto
-    // después.
+    // después. Estas respuestas tampoco se cachean en `PublicCacheStore`.
     if (this.declaraSuPropioCacheControl(context)) return next.handle();
 
     const res = http.getResponse<Response>();
+    const clave = req.originalUrl ?? req.url;
+
+    // MCH-028 — si ya hay una representación vigente, ni siquiera se llama a
+    // `next.handle()`: eso es todo el controlador, el servicio y la consulta
+    // que arma el cuerpo. Una relectura con el `ETag` correcto contesta 304 y
+    // una sin cabecera (o con una vieja) recibe el mismo cuerpo que ya se le
+    // sirvió al primer cliente, dentro de la misma ventana que el propio
+    // `Cache-Control` ya prometía.
+    const cacheado = this.store.get(clave);
+    if (cacheado) {
+      res.setHeader('ETag', cacheado.etag);
+      res.setHeader('Cache-Control', cacheado.cacheControl);
+
+      const pedido = req.headers['if-none-match'];
+      if (pedido && this.coincide(pedido, cacheado.etag)) {
+        res.status(304);
+        return of(undefined);
+      }
+      return of(cacheado.body);
+    }
 
     return next.handle().pipe(
       map((body: unknown) => {
@@ -95,12 +141,12 @@ export class PublicCacheInterceptor implements NestInterceptor {
         const etag = `W/"${createHash('sha1')
           .update(JSON.stringify(body))
           .digest('base64url')}"`;
+        const maxAge = this.maxAgeFor(req.path);
+        const cacheControl = `public, max-age=${maxAge}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`;
 
         res.setHeader('ETag', etag);
-        res.setHeader(
-          'Cache-Control',
-          `public, max-age=${this.maxAgeFor(req.path)}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`,
-        );
+        res.setHeader('Cache-Control', cacheControl);
+        this.store.set(clave, { etag, body, cacheControl }, maxAge * 1000);
 
         // `If-None-Match` puede traer varios ETags separados por coma, y `*`.
         // Compararlo con `===` contra el encabezado entero fallaría en cuanto

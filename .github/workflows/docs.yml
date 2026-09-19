@@ -237,8 +237,16 @@ jobs:
       - name: DDL versionado — la copia de database/ está y no está vacía
         run: yarn db:vendor:check
 
-      - name: Pruebas unitarias
-        run: yarn test
+      # MCH-024 — antes corría `yarn test` a secas: la cobertura sólo se medía
+      # cuando alguien se acordaba de correr `test:cov` a mano, y nunca contra
+      # el candidato real de un PR. `test:cov` corre exactamente las mismas
+      # pruebas (mismo comando base, `--coverage` de más) y hace fallar el job
+      # si el candidato queda por debajo de `coverageThreshold` — el trinquete
+      # que MCH-024 fija sobre el valor medido. Reusa el mismo
+      # NODE_OPTIONS=--max-old-space-size=6144 del job: ya está validado para
+      # el paso más pesado (generar el contrato con AppModule completo).
+      - name: Pruebas unitarias con cobertura — no puede bajar del umbral fijado
+        run: yarn test:cov --runInBand
 
       - name: Generar contrato OpenAPI real desde el código
         env:
@@ -287,7 +295,10 @@ jobs:
         run: yarn db:provision:dev
 
       # Verificación real del mínimo privilegio (§54): no inspecciona los GRANT
-      # del catálogo, ejecuta las operaciones y exige 42501.
+      # del catálogo, ejecuta las operaciones y exige 42501. Corre primero y
+      # sola porque es la más barata y la más específica: si el rol de
+      # aplicación quedó mal aprovisionado, mejor enterarse acá que a mitad de
+      # la suite completa de abajo.
       - name: Pruebas de privilegios — el lector no puede escribir
         env:
           DB_HOST: localhost
@@ -299,6 +310,60 @@ jobs:
           POSTGRES_READER_PASSWORD: ci-reader-ephemeral
         run: yarn test:integration --testPathPatterns=postgres-privileges
 
+      # MCH-026 — hasta acá esto era lo único que corría de integración: un
+      # filtro de un solo archivo. Las otras 93 suites (RLS por tenant, DI
+      # entre los 60 módulos, contratos HTTP, jobs, FKs) no se ejecutaban en
+      # ningún merge — sólo en la máquina de quien se acordara de correrlas.
+      #
+      # Va DESPUÉS de "Generar contrato OpenAPI real desde el código" y no
+      # antes, por el mismo motivo que "Aprovisionar roles de aplicación": ese
+      # paso es el que arranca AppModule completo y materializa los 58
+      # esquemas / 1212 tablas. Antes de eso no hay nada sobre lo que una
+      # migración o una consulta puedan operar.
+      #
+      # `--ci` evita que Jest intente escribir snapshots nuevos en un runner
+      # efímero (fallaría igual, pero con un mensaje que no dice por qué).
+      # `--runInBand` porque `test/jest-integration.json` ya fija
+      # `maxWorkers: 1`: las suites comparten la misma base y no se truncan
+      # entre corridas (cada una sufija sus propios datos), así que correrlas
+      # en paralelo arriesgaría que una lea filas a medio escribir de otra.
+      #
+      # Corre COMPLETA en cada PR, no un subconjunto: es el único gate de
+      # integración que existe hoy — `dev`/`master` no exigen ningún check
+      # (ver LEEME-PRIMERO) — y recortarla dejaría exactamente el hueco que
+      # esta ficha vino a cerrar. Si en un runner hospedado real el tiempo o
+      # el costo de Actions la vuelve impracticable por PR, la salida
+      # documentada (no aplicada acá) es partirla en un subconjunto rápido por
+      # PR y la completa contra `dev`; no se tocan los triggers de este
+      # workflow en esta ficha porque es justo lo que el PR #424 tiene en
+      # danza. Detalle y comandos equivalentes para correrla fuera de CI en
+      # docs/operations/ci-integration-recipe.md.
+      - name: Suite de integración completa (MCH-026)
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: mantra
+          DB_PASSWORD: mantra
+          DB_NAME: mantra_redesa_health
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          POSTGRES_USER: mantra
+          POSTGRES_PASSWORD: mantra
+          POSTGRES_DB: mantra_redesa_health
+          MONGODB_URI: mongodb://localhost:27017/mantra_redesa_health_document_store
+          MONGO_DB: mantra_redesa_health_document_store
+          REDIS_HOST: localhost
+          REDIS_PORT: "6379"
+          OPENSEARCH_NODE: http://localhost:9200
+          MINIO_ENDPOINT: localhost
+          MINIO_PORT: "9000"
+          MINIO_ACCESS_KEY: mantra
+          MINIO_SECRET_KEY: mantra12345678
+          MINIO_BUCKET: mantra-redesa-health-files-ci
+          JWT_SECRET: ci-only-secret-not-a-real-credential
+          MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
+        run: yarn test:integration --ci --runInBand
+
       - name: Generar documentación detallada de endpoints
         run: yarn docs:endpoints:generate
 
@@ -309,8 +374,41 @@ jobs:
       # @redocly/cli diff`: bajaba de npm la última versión de la CLI —fuera del
       # lockfile— y la ejecutaba en el runner propio en cada PR (MCH-031), para un
       # subcomando que Redocly CLI no tiene (la 2.43.2 del lockfile no lo lista), así
-      # que siempre terminaba en warning. No era un control. La detección real de
-      # cambios incompatibles, que sí bloquee, queda en MCH-025 (fase F10).
+      # que siempre terminaba en warning. No era un control.
+      #
+      # MCH-025 — reemplazo real y bloqueante, resuelto por el lockfile (nada
+      # nuevo: sólo node:fs/node:assert). `tools/openapi/check-breaking.mjs`
+      # compara el `openapi.json` de esta rama contra el de la rama destino y
+      # falla si hay ruta/operación/código de respuesta eliminado, campo nuevo
+      # obligatorio en un request, propiedad eliminada de una response o un
+      # cambio de tipo. Sus propias pruebas van primero: si el detector está
+      # roto, el job tiene que fallar ahí y no fingir un "sin cambios" corriente
+      # abajo.
+      - name: Pruebas del detector de cambios incompatibles de OpenAPI (MCH-025)
+        run: yarn docs:openapi:check-breaking:test
+
+      # `github.base_ref` sólo existe en un `pull_request`; en `workflow_dispatch`
+      # no hay rama destino contra la cual comparar y el paso no aplica.
+      #
+      # `git show origin/<base>:openapi/openapi.json` puede fallar por un motivo
+      # legítimo (la rama base todavía no tiene contrato generado, p. ej. en el
+      # primer PR que lo introduce) — eso es "no hay línea base", no "hay una
+      # ruptura", así que se avisa con `::warning::` y se sigue, en vez de
+      # bloquear un PR que no tiene con qué compararse ni de fingir que pasó
+      # limpio un chequeo que nunca corrió.
+      - name: Cambios incompatibles del contrato OpenAPI — bloqueante (MCH-025)
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          if git show "origin/${{ github.base_ref }}:openapi/openapi.json" > /tmp/openapi-base.json 2>/tmp/openapi-base.err; then
+            node tools/openapi/check-breaking.mjs \
+              --base /tmp/openapi-base.json \
+              --head openapi/openapi.json \
+              --exceptions tools/openapi/breaking-changes-exceptions.json
+          else
+            echo "::warning::No hay openapi.json en origin/${{ github.base_ref }} para comparar; se omite el chequeo de cambios incompatibles. Detalle:"
+            cat /tmp/openapi-base.err
+          fi
 
       - name: Validar AsyncAPI — 0 errores obligatorio
         run: yarn docs:asyncapi:validate
@@ -366,6 +464,8 @@ jobs:
             openapi/openapi.yaml
             openapi/openapi.json
             asyncapi/asyncapi.yaml
+            coverage/coverage-summary.json
+            coverage/lcov-report/
           retention-days: 30
 
       # `always()` para que corra también cuando el job falló o lo cancelaron:

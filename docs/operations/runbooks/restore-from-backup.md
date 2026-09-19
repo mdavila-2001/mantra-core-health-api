@@ -27,8 +27,31 @@ por otros medios.
    a las partes afectadas — obligatorio si involucra PHI (ver
    [modelo de amenazas](../../security/threat-model.md) §"Notificación de brecha").
 
+## Ensayo local (MCH-016) — qué prueba y qué no
+
+`scripts/recovery/drill-postgres.sh` demuestra el mecanismo de `pg_dump`/`pg_restore` contra el
+propio motor local: mide un `pg_dump` y un `pg_restore` reales sobre una base de trabajo aparte
+(`mantra_restore_drill`, dentro del mismo contenedor, borrada al terminar) y compara conteos de
+filas de un puñado de tablas contra el origen. Nunca escribe en la base de origen.
+
+**Esto NO es la prueba que pide el hallazgo completo.** Sigue sin demostrarse:
+
+- restauración en infraestructura **nueva** (este ensayo restaura en el mismo motor y el mismo
+  volumen que ya tiene los datos — no prueba recuperación ante la pérdida real de ese volumen);
+- MongoDB y los objetos de MinIO (sólo PostgreSQL);
+- una muestra clínica completa con adjuntos y trazabilidad consistente entre almacenes;
+- RPO (el ensayo no simula una ventana de pérdida entre un respaldo y un incidente — con el
+  contrato de MCH-023, el resultado de esa dimensión es `NOT_MEASURED`, no aprobado por omisión);
+- backup real de producción (corre contra el volumen de desarrollo de quien lo ejecuta).
+
+Uso: `scripts/recovery/drill-postgres.sh` (variables de entorno documentadas en el propio script).
+Al terminar, escribe una evidencia JSON con fecha, tiempos medidos y qué quedó sin medir — nunca
+"recuperación probada" por haberlo corrido en la máquina de desarrollo.
+
 ## Declaración de esta auditoría
 
-Este runbook es un procedimiento **esperado**, no uno **probado**. No ejecutar en un incidente
-real sin antes confirmar que el mecanismo de backup subyacente existe y es restaurable — ver
-`OPS-004` en [matriz de trazabilidad](../../governance/traceability-matrix.md).
+Este runbook sigue siendo, en lo esencial, un procedimiento **esperado**, no uno **probado**: el
+ensayo de arriba cubre el mecanismo de PostgreSQL, no el runbook completo (Mongo, objetos, RPO,
+infraestructura nueva). No ejecutar el procedimiento completo en un incidente real sin antes
+confirmar que el mecanismo de backup subyacente existe y es restaurable — ver `OPS-004` en
+[matriz de trazabilidad](../../governance/traceability-matrix.md).
