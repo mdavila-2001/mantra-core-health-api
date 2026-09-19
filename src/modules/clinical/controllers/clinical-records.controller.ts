@@ -52,7 +52,8 @@ import {
  * recurso ya existente (`:id/sign`, `:id/issue`, `:id/change-status`…) conocen a
  * su paciente sólo después de cargarlo, y el guard no carga recursos: montarlo
  * ahí las dejaría con aspecto de protegidas mientras él las deja pasar sin
- * evaluar nada. Siguen siendo deuda de seguridad abierta (GAP-3 de SEC-01).
+ * evaluar nada. Las autoriza cada servicio tras cargar el recurso, con la
+ * política de escritura (MCH-007, cierre del GAP-3 de SEC-01).
  */
 @ApiTags('clinical-records')
 @ApiBearerAuth()

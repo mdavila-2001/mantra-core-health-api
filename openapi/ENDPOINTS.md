@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1292 de 1292 endpoints** en **66 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1304 de 1304 endpoints** en **67 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -43,8 +43,9 @@ Se documentan **1292 de 1292 endpoints** en **66 módulos**. La referencia compl
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
 | `marketing` | 14 | [Abrir referencia](endpoints/marketing.md) |
+| `medical_groups` | 8 | [Abrir referencia](endpoints/medical-groups.md) |
 | `messaging` | 17 | [Abrir referencia](endpoints/messaging.md) |
-| `object_storage` | 13 | [Abrir referencia](endpoints/object-storage.md) |
+| `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
 | `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |
@@ -55,7 +56,7 @@ Se documentan **1292 de 1292 endpoints** en **66 módulos**. La referencia compl
 | `practice` | 28 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 32 | [Abrir referencia](endpoints/procedures-perioperative.md) |
 | `profiles` | 43 | [Abrir referencia](endpoints/profiles.md) |
-| `promotions` | 15 | [Abrir referencia](endpoints/promotions.md) |
+| `promotions` | 18 | [Abrir referencia](endpoints/promotions.md) |
 | `qa_lab` | 13 | [Abrir referencia](endpoints/qa-lab.md) |
 | `quotations` | 3 | [Abrir referencia](endpoints/quotations.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |

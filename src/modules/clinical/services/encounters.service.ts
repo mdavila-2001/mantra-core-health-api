@@ -19,6 +19,7 @@ import { Encounters } from '../entities';
 import { CLIN } from '../clinical.concepts';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
 import { EncounterSealService } from './encounter-seal.service';
+import { ClinicalReadService } from './clinical-read.service';
 
 /**
  * Código del estado `ENCOUNTER_FINISHED` (`CLIN.ENCOUNTER_FINISHED` sólo
@@ -42,6 +43,7 @@ export class EncountersService {
    * @param episodesRepo - Valor de episodes repo requerido por la operación.
    * @param clinicalNotifications - Emisión in-app del carril P1.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
@@ -50,6 +52,7 @@ export class EncountersService {
     private readonly clinicalNotifications: ClinicalNotificationsService,
     private readonly seal: EncounterSealService,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(EncountersService.name);
   }
@@ -262,6 +265,11 @@ export class EncountersService {
           encounterId,
         });
       }
+      // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        encounter.patientProfileId,
+        actor,
+      );
       if (encounter.statusConceptId !== CLIN.ENCOUNTER_IN_PROGRESS) {
         throw new PreconditionFailedException('El encuentro no está en curso', {
           encounterId,

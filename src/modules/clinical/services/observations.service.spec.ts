@@ -13,6 +13,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -37,14 +38,25 @@ function build() {
   const encountersRepo = { findById: mockFn() };
   const serviceRequestsRepo = { findById: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const clinicalRead = {
+    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ObservationsService(
     em as any,
     observationsRepo,
     encountersRepo as any,
     serviceRequestsRepo as any,
     logger as any,
+    clinicalRead as any,
   );
-  return { service, tx, observationsRepo, encountersRepo, serviceRequestsRepo };
+  return {
+    service,
+    tx,
+    observationsRepo,
+    encountersRepo,
+    serviceRequestsRepo,
+    clinicalRead,
+  };
 }
 
 describe('ObservationsService', () => {
@@ -97,6 +109,131 @@ describe('ObservationsService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    describe('MCH-008 · coherencia de paciente, encuentro y orden', () => {
+      const base = {
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        codeConceptId: 'code1',
+        quantityValue: 1,
+      };
+
+      function withCreatedObservation(d: ReturnType<typeof build>) {
+        d.observationsRepo.create.mockReturnValue({
+          id: 'obs1',
+          patientProfileId: 'p1',
+          statusConceptId: CLIN.OBSERVATION_FINAL,
+          rowVersion: 1,
+          createdAt: new Date(),
+        });
+      }
+
+      it('rechaza el encuentro de otro paciente y no escribe', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue({
+          id: 'enc-b',
+          patientProfileId: 'p2',
+          tenantId: 't1',
+        });
+        await expect(
+          d.service.record({ ...base, encounterId: 'enc-b' } as any, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.observationsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('rechaza el encuentro de otro tenant aunque sea del paciente', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue({
+          id: 'enc-x',
+          patientProfileId: 'p1',
+          tenantId: 't2',
+        });
+        await expect(
+          d.service.record({ ...base, encounterId: 'enc-x' } as any, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.observationsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('rechaza la orden de otro paciente y no escribe', async () => {
+        const d = build();
+        d.serviceRequestsRepo.findById.mockResolvedValue({
+          id: 'sr-b',
+          patientProfileId: 'p2',
+          custodianTenantId: 't1',
+        });
+        await expect(
+          d.service.record(
+            { ...base, basedOnServiceRequestId: 'sr-b' } as any,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.observationsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('rechaza la orden de otro tenant que no la deriva a este', async () => {
+        const d = build();
+        d.serviceRequestsRepo.findById.mockResolvedValue({
+          id: 'sr-x',
+          patientProfileId: 'p1',
+          custodianTenantId: 't2',
+          performerTenantId: 't3',
+        });
+        await expect(
+          d.service.record(
+            { ...base, basedOnServiceRequestId: 'sr-x' } as any,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.observationsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('acepta una orden derivada a este tenant y conserva origen, custodio y paciente', async () => {
+        const d = build();
+        withCreatedObservation(d);
+        d.serviceRequestsRepo.findById.mockResolvedValue({
+          id: 'sr-ref',
+          patientProfileId: 'p1',
+          custodianTenantId: 't-origen',
+          performerTenantId: 't1',
+        });
+        await d.service.record(
+          { ...base, basedOnServiceRequestId: 'sr-ref' } as any,
+          actor,
+        );
+        expect(d.observationsRepo.create).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            basedOnServiceRequestId: 'sr-ref',
+          }),
+        );
+      });
+
+      it('acepta encuentro y orden coherentes del mismo tenant', async () => {
+        const d = build();
+        withCreatedObservation(d);
+        d.encountersRepo.findById.mockResolvedValue({
+          id: 'enc-a',
+          patientProfileId: 'p1',
+          tenantId: 't1',
+        });
+        d.serviceRequestsRepo.findById.mockResolvedValue({
+          id: 'sr-a',
+          patientProfileId: 'p1',
+          custodianTenantId: 't1',
+        });
+        await d.service.record(
+          {
+            ...base,
+            encounterId: 'enc-a',
+            basedOnServiceRequestId: 'sr-a',
+          } as any,
+          actor,
+        );
+        expect(d.observationsRepo.create).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('rejects when no value family is provided', async () => {
@@ -175,5 +312,36 @@ describe('ObservationsService', () => {
         ),
       ).rejects.toBeInstanceOf(ConcurrencyConflictException);
     });
+  });
+});
+
+describe('ObservationsService · MCH-007, enmienda por id', () => {
+  it('pregunta por el paciente de la observación y, sin permiso, no la toca', async () => {
+    const d = build();
+    const observation = {
+      id: 'obs-ajena',
+      patientProfileId: 'paciente-ajeno',
+      statusConceptId: CLIN.OBSERVATION_FINAL,
+      rowVersion: 1,
+    };
+    d.observationsRepo.findById.mockResolvedValue(observation);
+    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      new ForbiddenException('sin permiso'),
+    );
+
+    await expect(
+      d.service.amend(
+        'obs-ajena',
+        { valueText: 'otro', note: 'corrección' } as any,
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      'paciente-ajeno',
+      actor,
+    );
+    expect(observation.statusConceptId).toBe(CLIN.OBSERVATION_FINAL);
+    expect(d.observationsRepo.createNote).not.toHaveBeenCalled();
+    expect(d.tx.flush).not.toHaveBeenCalled();
   });
 });

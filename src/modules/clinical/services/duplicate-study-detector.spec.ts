@@ -35,6 +35,8 @@ function build(data: {
   designations?: Map<string, any>;
   concepts?: any[];
   tenants?: any[];
+  /** Filas que devuelve la consulta acotada de `findDuplicate`. */
+  duplicateRows?: Array<{ id: string }>;
 }) {
   const find = mockFn((Entity: unknown, _where: unknown) => {
     if (Entity === DiagnosticReports)
@@ -68,14 +70,15 @@ function build(data: {
     }
     return Promise.resolve(null);
   });
-  const em = { find, findOne } as any;
+  const execute = mockFn(() => Promise.resolve(data.duplicateRows ?? []));
+  const em = { find, findOne, getConnection: () => ({ execute }) } as any;
   const conceptDesignations = {
     findPreferredByLanguageForConcepts: mockFn().mockResolvedValue(
       data.designations ?? new Map(),
     ),
   };
   const detector = new DuplicateStudyDetector(conceptDesignations as any);
-  return { detector, em, conceptDesignations };
+  return { detector, em, execute, find, findOne, conceptDesignations };
 }
 
 /** Un informe con los campos que el detector proyecta. */
@@ -89,6 +92,7 @@ function informe(over: Partial<any> = {}) {
     lifecycleStatusConceptId: CLIN.REPORT_PARTIAL,
     resultReleaseStatusConceptId: undefined,
     currentReleasedVersionId: undefined,
+    createdAt: daysAgo(14),
     updatedAt: daysAgo(14),
     ...over,
   };
@@ -109,84 +113,90 @@ function version(over: Partial<any> = {}) {
 
 describe('DuplicateStudyDetector', () => {
   describe('findDuplicate', () => {
+    // Qué informe cuenta (ventana, liberado/final, orden revocada) lo decide
+    // la consulta en la base; eso lo prueba
+    // `test/integration/hardening/mch-029.int-spec.ts` contra PostgreSQL. Acá
+    // se fija lo que el detector hace con lo que la consulta devuelve.
+
+    it('MCH-029 · acota la consulta: paciente, estudio, inicio de ventana, criterios y LIMIT 1', async () => {
+      const { detector, em, execute } = build({});
+      await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
+
+      const [consulta, parametros] = execute.mock.calls[0];
+      expect(consulta).toMatch(/LIMIT 1/);
+      expect(consulta).toMatch(/created_at/);
+      expect(consulta).not.toMatch(/updated_at/);
+      expect(parametros).toEqual([
+        PATIENT,
+        CODE,
+        CLIN.RELEASE_RELEASED,
+        CLIN.REPORT_FINAL,
+        CLIN.SERVICE_REQUEST_REVOKED,
+        daysAgo(30),
+      ]);
+    });
+
+    it('MCH-029 · sin fila en la ventana no hidrata ningún informe', async () => {
+      const { detector, em, find, findOne } = build({
+        reports: [informe({ lifecycleStatusConceptId: CLIN.REPORT_FINAL })],
+      });
+      const match = await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
+      expect(match).toBeNull();
+      expect(find).not.toHaveBeenCalled();
+      expect(findOne).not.toHaveBeenCalled();
+    });
+
     it('finds a report released via diagnostics (current_released_version_id present)', async () => {
       const { detector, em } = build({
         reports: [informe({ currentReleasedVersionId: 'version-1' })],
-        versions: [version()],
+        versions: [version({ issuedAt: daysAgo(3) })],
+        duplicateRows: [{ id: 'report-1' }],
       });
       const match = await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
-      expect(match).not.toBeNull();
       expect(match?.resultsAvailable).toBe(true);
+      expect(match?.performedAt).toEqual(daysAgo(3));
     });
 
     it('finds a report released via clinical (lifecycle FINAL, no version)', async () => {
       const { detector, em } = build({
         reports: [informe({ lifecycleStatusConceptId: CLIN.REPORT_FINAL })],
+        duplicateRows: [{ id: 'report-1' }],
       });
       const match = await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
       expect(match).not.toBeNull();
       expect(match?.version).toBeNull();
     });
 
-    it('returns null when the report is outside the window', async () => {
+    it('MCH-029 · sin versión, performedAt es la creación del informe, nunca su última corrección', async () => {
+      const createdAt = daysAgo(5);
       const { detector, em } = build({
         reports: [
           informe({
             lifecycleStatusConceptId: CLIN.REPORT_FINAL,
-            updatedAt: daysAgo(45),
+            createdAt,
+            updatedAt: NOW,
           }),
         ],
+        duplicateRows: [{ id: 'report-1' }],
       });
       const match = await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
-      expect(match).toBeNull();
+      expect(match?.performedAt).toEqual(createdAt);
     });
 
-    it('finds the same 45-day-old report with a 60-day window', async () => {
+    it('MCH-029 · un informe leído de la base con la versión liberada en null no cuenta como liberado', async () => {
       const { detector, em } = build({
         reports: [
           informe({
             lifecycleStatusConceptId: CLIN.REPORT_FINAL,
-            updatedAt: daysAgo(45),
+            currentReleasedVersionId: null,
+            resultReleaseStatusConceptId: null,
           }),
         ],
-      });
-      const match = await detector.findDuplicate(em, PATIENT, CODE, 60, NOW);
-      expect(match).not.toBeNull();
-    });
-
-    it('does not count a PARTIAL report without a released version as a duplicate', async () => {
-      const { detector, em } = build({
-        reports: [informe({ lifecycleStatusConceptId: CLIN.REPORT_PARTIAL })],
+        duplicateRows: [{ id: 'report-1' }],
       });
       const match = await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
-      expect(match).toBeNull();
-    });
-
-    it('excludes reports whose originating order was revoked', async () => {
-      const { detector, em } = build({
-        reports: [
-          informe({
-            lifecycleStatusConceptId: CLIN.REPORT_FINAL,
-            serviceRequestId: 'sr-1',
-          }),
-        ],
-        revokedOrders: [
-          { id: 'sr-1', statusConceptId: CLIN.SERVICE_REQUEST_REVOKED },
-        ],
-      });
-      const match = await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
-      expect(match).toBeNull();
-    });
-
-    it('falls back to report.updatedAt as performedAt when there is no version', async () => {
-      const updatedAt = daysAgo(5);
-      const { detector, em } = build({
-        reports: [
-          informe({ lifecycleStatusConceptId: CLIN.REPORT_FINAL, updatedAt }),
-        ],
-      });
-      const match = await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
-      expect(match?.performedAt).toEqual(updatedAt);
+      expect(match?.resultsAvailable).toBe(false);
+      expect(match?.version).toBeNull();
     });
   });
 
@@ -369,6 +379,31 @@ describe('DuplicateStudyDetector', () => {
         NOW,
       );
       expect(pending).toBe(true);
+    });
+
+    it('MCH-029 · cuenta como pendiente un parcial leído de la base (versión liberada en null)', async () => {
+      const { detector, em } = build({
+        reports: [
+          informe({
+            lifecycleStatusConceptId: CLIN.REPORT_PARTIAL,
+            currentReleasedVersionId: null,
+            resultReleaseStatusConceptId: null,
+          }),
+        ],
+      });
+      await expect(
+        detector.findPendingReport(em, PATIENT, CODE, 30, NOW),
+      ).resolves.toBe(true);
+    });
+
+    it('MCH-029 · filtra la ventana por creación, no por última corrección', async () => {
+      const { detector, em, find } = build({});
+      await detector.findPendingReport(em, PATIENT, CODE, 30, NOW);
+      expect(find.mock.calls[0][1]).toEqual({
+        patientProfileId: PATIENT,
+        codeConceptId: CODE,
+        createdAt: { $gte: daysAgo(30) },
+      });
     });
 
     it('returns false when the report is already final', async () => {

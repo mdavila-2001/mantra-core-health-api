@@ -43,6 +43,12 @@ function build() {
     warningMessageFor: mockFn().mockReturnValue('warning'),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const outbox = {
+    publishDomainEvent: mockFn().mockResolvedValue({ duplicate: false }),
+  };
+  const clinicalNotifications = {
+    serviceRequestPlaced: mockFn().mockResolvedValue({ suppressed: false }),
+  };
   const service = new ServiceRequestsService(
     em as any,
     serviceRequestsRepo as any,
@@ -50,9 +56,13 @@ function build() {
     clinicalRead as any,
     duplicateStudyDetector as any,
     logger as any,
+    outbox as any,
+    clinicalNotifications as any,
   );
   return {
     service,
+    outbox,
+    clinicalNotifications,
     serviceRequestsRepo,
     encountersRepo,
     clinicalRead,
@@ -381,5 +391,107 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         ),
       ).rejects.toThrow('forbidden');
     });
+  });
+});
+
+describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
+  const dto = {
+    custodianTenantId: 't1',
+    patientProfileId: 'p1',
+    codeConceptId: 'code1',
+  };
+  const orden = (statusConceptId: string) => ({
+    id: 'sr1',
+    custodianTenantId: 't1',
+    patientProfileId: 'p1',
+    statusConceptId,
+    intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+    createdAt: new Date(),
+  });
+
+  it('publica exactamente un hecho al outbox, dentro de la transacción y sólo con ids', async () => {
+    const d = build();
+    d.serviceRequestsRepo.create.mockReturnValue(
+      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+    );
+
+    await d.service.create(dto, actor);
+
+    expect(d.outbox.publishDomainEvent).toHaveBeenCalledTimes(1);
+    expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(d.tx, {
+      tenantId: 't1',
+      eventType: 'ServiceRequestPlaced',
+      aggregateType: 'clinical.service_requests',
+      aggregateId: 'sr1',
+      payloadJson: {
+        serviceRequestId: 'sr1',
+        statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+      },
+      actorUserId: actor.id,
+    });
+  });
+
+  it('le avisa al paciente de una orden activa', async () => {
+    const d = build();
+    d.serviceRequestsRepo.create.mockReturnValue(
+      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+    );
+
+    await d.service.create(dto, actor);
+
+    expect(d.clinicalNotifications.serviceRequestPlaced).toHaveBeenCalledWith(
+      'sr1',
+      'p1',
+      actor.id,
+    );
+  });
+
+  it('no avisa de una orden resuelta con un informe previo: no le pide nada al paciente', async () => {
+    const d = build();
+    d.duplicateStudyDetector.findDuplicate.mockResolvedValue(MATCH);
+    d.serviceRequestsRepo.create.mockReturnValue(
+      orden(CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR),
+    );
+
+    await d.service.create(
+      {
+        ...dto,
+        previousDiagnosticReportId: 'report-1',
+        reusePreviousReport: true,
+      } as any,
+      actor,
+    );
+
+    expect(d.outbox.publishDomainEvent).toHaveBeenCalledTimes(1);
+    expect(d.clinicalNotifications.serviceRequestPlaced).not.toHaveBeenCalled();
+  });
+
+  it('una emisión fallida no tumba la orden', async () => {
+    const d = build();
+    d.serviceRequestsRepo.create.mockReturnValue(
+      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+    );
+    d.clinicalNotifications.serviceRequestPlaced.mockResolvedValue({
+      suppressed: false,
+      failed: true,
+    });
+
+    await expect(d.service.create(dto, actor)).resolves.toMatchObject({
+      id: 'sr1',
+    });
+  });
+
+  it('si la orden no llega a persistirse no hay hecho ni aviso', async () => {
+    const d = build();
+    d.serviceRequestsRepo.create.mockReturnValue(
+      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+    );
+    d.tx.flush.mockRejectedValueOnce(new Error('violación de FK'));
+
+    await expect(d.service.create(dto, actor)).rejects.toThrow(
+      'violación de FK',
+    );
+    expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    expect(d.clinicalNotifications.serviceRequestPlaced).not.toHaveBeenCalled();
   });
 });

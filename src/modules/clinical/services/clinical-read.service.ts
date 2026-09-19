@@ -87,6 +87,13 @@ const ESTADOS_QUE_HABILITAN: readonly string[] = [
   SCHED.BOOKING_COMPLETED,
 ];
 
+/**
+ * El 403 de la historia clínica, idéntico para lectura y escritura: no debe
+ * distinguir un paciente ajeno de un uuid inventado.
+ */
+const SIN_ACCESO_A_LA_HISTORIA =
+  'Sólo podés consultar tu propia historia clínica.';
+
 /** Ventana que se mira alrededor de ahora; el día exacto lo decide la zona de la sede. */
 const VENTANA_MS = 48 * 60 * 60 * 1000;
 
@@ -223,6 +230,69 @@ export class ClinicalReadService {
   }
 
   /**
+   * MCH-007: ¿puede este actor **escribir** en la historia de este paciente?
+   *
+   * Hasta ahora las escrituras del expediente pasaban por
+   * {@link assertPuedeLeerHistoria}, que le pregunta al PDP por `READ`: un
+   * grant de sólo lectura —el que crea el paciente al aprobar una solicitud de
+   * acceso (`practitioner-access-requests`)— alcanzaba para escribir. Y su
+   * último recurso, la titularidad, dejaba al profesional escribir en su propia
+   * historia.
+   *
+   * La escritura pide lo mismo que la lectura salvo en esas dos cosas:
+   *
+   * 1. `SUPERADMIN` pasa, igual que en el resto del sistema de roles.
+   * 2. Sólo un rol que atiende escribe. Un paciente no escribe su expediente.
+   * 3. Estar atendiendo —consulta en curso, turno vivo de hoy o relación
+   *    asistencial vigente— habilita, con el mismo criterio que la lectura.
+   * 4. Sin eso, el PDP con la acción **`WRITE`**: un grant `READ` no alcanza el
+   *    rango (`CLINICAL_ACTION_RANK`), uno `WRITE`/`FULL` sí.
+   * 5. No hay red de titularidad: nadie escribe su propia historia por serlo.
+   *
+   * El 403 lleva el mismo texto que el de la lectura para que no distinga
+   * «no es tuya» de «no existe».
+   *
+   * Firmar es otra pregunta —quién firma—, y cada servicio la resuelve contra
+   * su propio recurso: poder escribir no es poder firmar por otro profesional.
+   *
+   * @param patientProfileId - La historia en la que se quiere escribir.
+   * @param actor - Quién escribe.
+   * @throws ForbiddenException si no hay base de escritura sobre ese paciente.
+   */
+  async assertPuedeEscribirHistoria(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (actor.roles.includes('SUPERADMIN')) return;
+
+    if (actor.roles.some((rol) => ROLES_QUE_ATIENDEN.includes(rol))) {
+      const em = this.em.fork();
+      const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+      const perfilProfesional = link
+        ? await this.practitionerProfilesRepo.findById(em, link.personId)
+        : null;
+      if (
+        perfilProfesional &&
+        (await this.estaAtendiendo(
+          em,
+          perfilProfesional.profileId,
+          patientProfileId,
+        ))
+      ) {
+        return;
+      }
+      if (
+        actor.practitionerProfileId &&
+        (await this.tieneAccesoAutorizado(patientProfileId, actor, 'WRITE'))
+      ) {
+        return;
+      }
+    }
+
+    throw new ForbiddenException(SIN_ACCESO_A_LA_HISTORIA);
+  }
+
+  /**
    * ¿Hay una base legítima de acceso más allá del turno de hoy?
    *
    * Consulta el PDP de `authz` (`clinical_access_grants` / `care_relationships`
@@ -233,6 +303,7 @@ export class ClinicalReadService {
   private async tieneAccesoAutorizado(
     patientProfileId: string,
     actor: AuthenticatedUser,
+    action: 'READ' | 'WRITE' = 'READ',
   ): Promise<boolean> {
     const tenantId = actor.tenantIds?.[0];
     if (!tenantId) return false;
@@ -241,7 +312,7 @@ export class ClinicalReadService {
         userId: actor.id,
         tenantId,
         resource: 'clinical.patient_record',
-        action: 'READ',
+        action,
         patientProfileId,
         practitionerProfileId: actor.practitionerProfileId,
         purposeOfUse: 'TREATMENT',
@@ -478,9 +549,7 @@ export class ClinicalReadService {
       // El mensaje no cambia: quien no puede leerla no tiene por qué distinguir
       // «no sos el titular» de «no lo representás» ni de «ese paciente no
       // existe». Las tres cosas se dicen igual.
-      throw new ForbiddenException(
-        'Sólo podés consultar tu propia historia clínica.',
-      );
+      throw new ForbiddenException(SIN_ACCESO_A_LA_HISTORIA);
     }
   }
 

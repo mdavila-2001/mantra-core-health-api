@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { DiagnosticReports, ServiceRequests } from '../entities';
+import { DiagnosticReports } from '../entities';
 import { DiagnosticReportVersions } from '../../diagnostics/entities';
 import { Tenants } from '../../directory/entities';
 import { CatalogConcepts } from '../../terminology/entities';
 import { ConceptDesignationsRepository } from '../../terminology/repositories';
 import { CLIN } from '../clinical.concepts';
 import { CONCEPTS } from '../../../common';
+
+/** Presente de verdad: ni `undefined` (entidad nueva) ni `null` (fila leída). */
+function hasValue<T>(value: T | null | undefined): value is T {
+  return value !== undefined && value !== null;
+}
 
 /** Ventana por defecto de la regla de antiduplicación (T-26), en días. */
 export const DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS = 30;
@@ -83,38 +88,54 @@ export class DuplicateStudyDetector {
     windowDays: number,
     now: Date,
   ): Promise<DuplicateStudyMatch | null> {
-    const candidates = await em.find(
-      DiagnosticReports,
-      { patientProfileId, codeConceptId },
-      { orderBy: { updatedAt: 'DESC' } },
+    const windowStart = this.windowStartOf(windowDays, now);
+
+    // MCH-029: la ventana, el estado y la orden revocada se resuelven en la
+    // base, y vuelve UNA fila. Antes se traían todos los informes del paciente
+    // con ese estudio y se filtraba en memoria: el costo crecía con el
+    // historial, no con la ventana pedida.
+    //
+    // «Liberado o final» son los dos caminos de liberación (ver la clase) más
+    // `RELEASE_RELEASED`, el mismo criterio que `isReleased`. La fecha es la
+    // de `performedAtOf`, escrita en SQL: emisión de la versión liberada, su
+    // registro, o la creación del informe.
+    const filas = await em.getConnection().execute<{ id: string }[]>(
+      `SELECT r.id
+         FROM clinical.diagnostic_reports r
+         LEFT JOIN diagnostics.diagnostic_report_versions v
+                ON v.id = r.current_released_version_id
+         LEFT JOIN clinical.service_requests sr
+                ON sr.id = r.service_request_id
+        WHERE r.patient_profile_id = ?
+          AND r.code_concept_id = ?
+          AND (r.current_released_version_id IS NOT NULL
+               OR r.result_release_status_concept_id = ?
+               OR r.lifecycle_status_concept_id = ?)
+          AND (sr.id IS NULL OR sr.status_concept_id <> ?)
+          AND COALESCE(v.issued_at, v.recorded_at, r.created_at) >= ?
+        ORDER BY COALESCE(v.issued_at, v.recorded_at, r.created_at) DESC, r.id DESC
+        LIMIT 1`,
+      [
+        patientProfileId,
+        codeConceptId,
+        CLIN.RELEASE_RELEASED,
+        CLIN.REPORT_FINAL,
+        CLIN.SERVICE_REQUEST_REVOKED,
+        windowStart,
+      ],
+      'all',
     );
-    if (candidates.length === 0) return null;
+    if (filas.length === 0) return null;
 
-    const revoked = await this.revokedServiceRequestIds(em, candidates);
-    const versionByReport = await this.releasedVersionsByReport(em, candidates);
-
-    const windowStart = new Date(
-      now.getTime() - windowDays * 24 * 60 * 60 * 1000,
-    );
-
-    for (const report of candidates) {
-      if (report.serviceRequestId && revoked.has(report.serviceRequestId)) {
-        continue;
-      }
-      const version = versionByReport.get(report.id) ?? null;
-      const resultsAvailable = this.isReleased(report, version);
-      const isFinalOrReleased =
-        resultsAvailable ||
-        report.lifecycleStatusConceptId === CLIN.REPORT_FINAL;
-      if (!isFinalOrReleased) continue;
-
-      const performedAt =
-        version?.issuedAt ?? version?.recordedAt ?? report.updatedAt;
-      if (performedAt < windowStart) continue;
-
-      return { report, version, performedAt, resultsAvailable };
-    }
-    return null;
+    const report = await em.findOne(DiagnosticReports, { id: filas[0].id });
+    if (!report) return null;
+    const version = await this.releasedVersionOf(em, report);
+    return {
+      report,
+      version,
+      performedAt: this.performedAtOf(report, version),
+      resultsAvailable: this.isReleased(report, version),
+    };
   }
 
   /**
@@ -129,18 +150,17 @@ export class DuplicateStudyDetector {
     windowDays: number,
     now: Date,
   ): Promise<boolean> {
-    const windowStart = new Date(
-      now.getTime() - windowDays * 24 * 60 * 60 * 1000,
-    );
+    // MCH-029: `created_at`, no `updated_at`: corregir un informe viejo no lo
+    // vuelve un resultado «en camino».
     const reports = await em.find(DiagnosticReports, {
       patientProfileId,
       codeConceptId,
-      updatedAt: { $gte: windowStart },
+      createdAt: { $gte: this.windowStartOf(windowDays, now) },
     });
     return reports.some(
       (report) =>
         report.lifecycleStatusConceptId !== CLIN.REPORT_FINAL &&
-        report.currentReleasedVersionId === undefined,
+        !this.isReleased(report, null),
     );
   }
 
@@ -220,14 +240,9 @@ export class DuplicateStudyDetector {
     const report = await em.findOne(DiagnosticReports, { id: reportId });
     if (!report) return null;
 
-    const version = report.currentReleasedVersionId
-      ? await em.findOne(DiagnosticReportVersions, {
-          id: report.currentReleasedVersionId,
-        })
-      : null;
+    const version = await this.releasedVersionOf(em, report);
     const resultsAvailable = this.isReleased(report, version);
-    const performedAt =
-      version?.issuedAt ?? version?.recordedAt ?? report.updatedAt;
+    const performedAt = this.performedAtOf(report, version);
 
     return this.describe(
       em,
@@ -261,61 +276,46 @@ export class DuplicateStudyDetector {
     report: DiagnosticReports,
     version: DiagnosticReportVersions | null,
   ): boolean {
-    if (report.currentReleasedVersionId !== undefined) return true;
+    // MikroORM hidrata la columna vacía como `null`, no `undefined`: comparar
+    // sólo con `undefined` daba por liberado cualquier informe leído de la
+    // base (MCH-029).
+    if (hasValue(report.currentReleasedVersionId)) return true;
     if (report.resultReleaseStatusConceptId === CLIN.RELEASE_RELEASED)
       return true;
     return version !== null;
   }
 
-  /** Las órdenes revocadas de un lote de informes, en una sola consulta. */
-  private async revokedServiceRequestIds(
+  /** La versión liberada del informe, si la tiene. */
+  private async releasedVersionOf(
     em: EntityManager,
-    reports: readonly DiagnosticReports[],
-  ): Promise<ReadonlySet<string>> {
-    const serviceRequestIds = [
-      ...new Set(
-        reports
-          .map((report) => report.serviceRequestId)
-          .filter((id): id is string => id !== undefined),
-      ),
-    ];
-    if (serviceRequestIds.length === 0) return new Set();
-    const orders = await em.find(ServiceRequests, {
-      id: { $in: serviceRequestIds },
-      statusConceptId: CLIN.SERVICE_REQUEST_REVOKED,
+    report: DiagnosticReports,
+  ): Promise<DiagnosticReportVersions | null> {
+    if (!hasValue(report.currentReleasedVersionId)) return null;
+    return em.findOne(DiagnosticReportVersions, {
+      id: report.currentReleasedVersionId,
     });
-    return new Set(orders.map((order) => order.id));
   }
 
   /**
-   * La versión liberada de cada informe (por `current_released_version_id`),
-   * en una sola consulta por lote.
+   * Cuándo se hizo el estudio: la emisión de la versión liberada, su registro
+   * o, sin versión, la **creación** del informe.
+   *
+   * MCH-029: antes el último recurso era `updated_at`, y corregir los
+   * metadatos de un estudio viejo lo volvía reciente. El modelo no tiene
+   * fecha de realización en `diagnostic_reports`; `created_at` no se mueve
+   * con una corrección y, en el camino sin versión (liberación por
+   * `clinical`), es lo más cercano a la realización que el informe guarda.
+   * La consulta de {@link findDuplicate} repite esta misma expresión en SQL.
    */
-  private async releasedVersionsByReport(
-    em: EntityManager,
-    reports: readonly DiagnosticReports[],
-  ): Promise<Map<string, DiagnosticReportVersions>> {
-    const versionIds = [
-      ...new Set(
-        reports
-          .map((report) => report.currentReleasedVersionId)
-          .filter((id): id is string => id !== undefined),
-      ),
-    ];
-    if (versionIds.length === 0) return new Map();
-    const versions = await em.find(DiagnosticReportVersions, {
-      id: { $in: versionIds },
-    });
-    const versionById = new Map(
-      versions.map((version) => [version.id, version]),
-    );
-    const byReport = new Map<string, DiagnosticReportVersions>();
-    for (const report of reports) {
-      if (report.currentReleasedVersionId === undefined) continue;
-      const version = versionById.get(report.currentReleasedVersionId);
-      if (version) byReport.set(report.id, version);
-    }
-    return byReport;
+  private performedAtOf(
+    report: DiagnosticReports,
+    version: DiagnosticReportVersions | null,
+  ): Date {
+    return version?.issuedAt ?? version?.recordedAt ?? report.createdAt;
+  }
+
+  private windowStartOf(windowDays: number, now: Date): Date {
+    return new Date(now.getTime() - windowDays * 24 * 60 * 60 * 1000);
   }
 
   /** El nombre del estudio en castellano, con reserva al `display` del catálogo. */

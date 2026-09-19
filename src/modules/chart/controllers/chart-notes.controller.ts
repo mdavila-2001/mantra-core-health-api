@@ -50,8 +50,9 @@ import {
  *
  * Las otras siete rutas mutantes (versiones, firma, cofirma, enmienda,
  * liberación, retención, hallazgos) **no** lo llevan: su paciente sólo se
- * conoce cargando la nota o la versión, y el guard no carga recursos. Es deuda
- * de seguridad abierta y trazada (GAP-3 de SEC-01), no un olvido.
+ * conoce cargando la nota o la versión, y el guard no carga recursos. Las
+ * autoriza `ChartNotesService` con la política de escritura (MCH-007, cierre
+ * del GAP-3 de SEC-01).
  */
 @ApiTags('chart-notes')
 @ApiBearerAuth()

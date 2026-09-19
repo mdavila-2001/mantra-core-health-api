@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1292 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1292 requests en 141 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1304 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1304 requests en 142 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -45664,8 +45664,117 @@
       ]
     },
     {
-      "name": "loyalty (7)",
+      "name": "loyalty (10)",
       "item": [
+        {
+          "name": "GET /loyalty/me · Mi membresía de lealtad y mi saldo de puntos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "loyalty",
+                "me"
+              ]
+            },
+            "description": "El titular sale del token; no se acepta ningún identificador de miembro por la petición. No estar inscrito responde 200 con `enrolled: false`, que es un estado normal del portal y no un error.\n\n`GET /loyalty/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `LoyaltyController_myLoyalty`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('meId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /loyalty/me/points · Mis movimientos de puntos, más nuevos primero",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/me/points",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "loyalty",
+                "me",
+                "points"
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "Cursor opaco devuelto por la página anterior",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Movimientos por página (1..100, por defecto 20)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Paginado por cursor opaco, con orden estable por fecha e id. Sólo movimientos de la membresía del titular.\n\n`GET /loyalty/me/points`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `LoyaltyController_myPoints`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.points || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('pointId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "GET /loyalty/programs · Listar programas de lealtad activos",
           "request": {
@@ -45775,6 +45884,67 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.expirePointId);",
                   "  if (id) pm.environment.set('expirePointId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /loyalty/me/points/redeem · Canjear puntos de mi propia membresía",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/me/points/redeem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "loyalty",
+                "me",
+                "points",
+                "redeem"
+              ]
+            },
+            "description": "El titular sale del token. Idempotente por `idempotencyKey`; una clave que pertenezca a otra membresía se rechaza en vez de devolver datos ajenos.\n\n`POST /loyalty/me/points/redeem`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `LoyaltyController_redeemOwnPoints`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"points\": \"points-ejemplo\",\n  \"idempotencyKey\": \"idempotencyKey-ejemplo\",\n  \"awardType\": \"POINTS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{pointId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.pointId);",
+                  "  if (id) pm.environment.set('pointId', id);",
                   "}"
                 ]
               }
@@ -46941,6 +47111,514 @@
       ]
     },
     {
+      "name": "medical-groups (8)",
+      "item": [
+        {
+          "name": "GET /medical-groups · Listar grupos médicos (histórico/enviadas/recibidas)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-groups"
+              ],
+              "query": [
+                {
+                  "key": "tab",
+                  "value": "historico",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "limit-ejemplo",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Listar grupos médicos (histórico/enviadas/recibidas). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /medical-groups`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `MedicalGroupsController_list`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.medicalGroups || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('medicalGroupId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /medical-groups · Crear grupo médico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-groups"
+              ]
+            },
+            "description": "Crear grupo médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /medical-groups`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `MedicalGroupsController_create`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceCatalogId\": \"{{serviceCatalogId}}\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"conditionId\": \"{{conditionId}}\",\n  \"scheduledAt\": \"2026-01-01T00:00:00.000Z\",\n  \"locationText\": \"locationText-ejemplo\",\n  \"notesText\": \"notesText-ejemplo\",\n  \"additionalTermsText\": \"additionalTermsText-ejemplo\",\n  \"members\": [\n    {\n      \"practitionerProfileId\": \"{{practitionerProfileId}}\",\n      \"roleTitle\": \"roleTitle-ejemplo\",\n      \"agreedPaymentAmount\": \"500.00\",\n      \"agreedPaymentCurrencyConceptId\": \"<agreedPaymentCurrencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"additionalTermsText\": \"additionalTermsText-ejemplo\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{medicalGroupId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.medicalGroupId);",
+                  "  if (id) pm.environment.set('medicalGroupId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /medical-groups/{id}/members/{memberId}/respond · Aceptar o rechazar la invitación a un cargo del grupo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-groups/:id/members/:memberId/respond",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-groups",
+                ":id",
+                "members",
+                ":memberId",
+                "respond"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{medicalGroupId}}",
+                  "description": "Identificador de ruta · variable `{{medicalGroupId}}`"
+                },
+                {
+                  "key": "memberId",
+                  "value": "{{memberId}}",
+                  "description": "Identificador de ruta · variable `{{memberId}}`"
+                }
+              ]
+            },
+            "description": "Aceptar o rechazar la invitación a un cargo del grupo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /medical-groups/{id}/members/{memberId}/respond`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `MedicalGroupsController_respondToInvitation`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"ACCEPTED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{memberId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.memberId);",
+                  "  if (id) pm.environment.set('memberId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /medical-groups/{id}/reschedule-requests · Solicitar cambio de horario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-groups/:id/reschedule-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-groups",
+                ":id",
+                "reschedule-requests"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{medicalGroupId}}",
+                  "description": "Identificador de ruta · variable `{{medicalGroupId}}`"
+                }
+              ]
+            },
+            "description": "Solicitar cambio de horario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /medical-groups/{id}/reschedule-requests`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `MedicalGroupsController_requestReschedule`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proposedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{rescheduleRequestId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.rescheduleRequestId);",
+                  "  if (id) pm.environment.set('rescheduleRequestId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /medical-groups/{id}/reschedule-requests/respond · Resolver la solicitud de cambio de horario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-groups/:id/reschedule-requests/respond",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-groups",
+                ":id",
+                "reschedule-requests",
+                "respond"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{medicalGroupId}}",
+                  "description": "Identificador de ruta · variable `{{medicalGroupId}}`"
+                }
+              ]
+            },
+            "description": "Resolver la solicitud de cambio de horario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /medical-groups/{id}/reschedule-requests/respond`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `MedicalGroupsController_respondToReschedule`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"ACCEPTED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{rescheduleRequestId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.rescheduleRequestId);",
+                  "  if (id) pm.environment.set('rescheduleRequestId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /medical-groups/patients/{patientProfileId}/conditions · Diagnósticos del paciente para el selector del formulario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-groups/patients/:patientProfileId/conditions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-groups",
+                "patients",
+                ":patientProfileId",
+                "conditions"
+              ],
+              "variable": [
+                {
+                  "key": "patientProfileId",
+                  "value": "{{patientProfileId}}",
+                  "description": "Identificador de ruta · variable `{{patientProfileId}}`"
+                }
+              ]
+            },
+            "description": "Diagnósticos del paciente para el selector del formulario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /medical-groups/patients/{patientProfileId}/conditions`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `MedicalGroupsController_listPatientConditions`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.conditions || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('conditionId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /medical-groups/{id} · Consultar un grupo médico (formulario de sólo lectura)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-groups/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-groups",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{medicalGroupId}}",
+                  "description": "Identificador de ruta · variable `{{medicalGroupId}}`"
+                }
+              ]
+            },
+            "description": "Consultar un grupo médico (formulario de sólo lectura). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /medical-groups/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `MedicalGroupsController_findOne`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.medicalGroups || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('medicalGroupId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /medical-groups/{id}/exercise-notes · Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-groups/:id/exercise-notes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-groups",
+                ":id",
+                "exercise-notes"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{medicalGroupId}}",
+                  "description": "Identificador de ruta · variable `{{medicalGroupId}}`"
+                }
+              ]
+            },
+            "description": "Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /medical-groups/{id}/exercise-notes`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `MedicalGroupsController_updateExerciseNotes`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notesText\": \"notesText-ejemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "moderation (1)",
       "item": [
         {
@@ -47394,7 +48072,7 @@
       ]
     },
     {
-      "name": "object-storage (12)",
+      "name": "object-storage (13)",
       "item": [
         {
           "name": "POST /object-storage/archive-jobs/build · Archivar el objeto a almacenamiento frío",
@@ -48115,6 +48793,68 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.versionId);",
                   "  if (id) pm.environment.set('versionId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /object-storage/versions/{versionId}/content/{token} · Descargar el contenido de una versión con el enlace emitido",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/object-storage/versions/:versionId/content/:token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "object-storage",
+                "versions",
+                ":versionId",
+                "content",
+                ":token"
+              ],
+              "variable": [
+                {
+                  "key": "versionId",
+                  "value": "{{versionId}}",
+                  "description": "Identificador de ruta · variable `{{versionId}}`"
+                },
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "description": "Identificador de ruta · variable `{{token}}`"
+                }
+              ]
+            },
+            "description": "El token ata versión, actor, operación y caducidad.\n\n`GET /object-storage/versions/{versionId}/content/{token}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `ObjectStorageController_downloadSignedContent`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.versions || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('versionId', first.id);",
                   "}"
                 ]
               }

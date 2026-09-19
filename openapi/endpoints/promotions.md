@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `promotions`
 
-Referencia exhaustiva de 15 operación(es) del módulo `promotions`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `promotions`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `loyalty`, `promotions`
 - **Controladores:** `LoyaltyController`, `PromotionsController`
@@ -14,18 +14,21 @@ Referencia exhaustiva de 15 operación(es) del módulo `promotions`, derivada de
 1. [POST /checkout/{orderId}/apply-discount](#1-post-checkout-orderid-apply-discount) — Aplicar un descuento al intento de pago del checkout
 2. [POST /coupons/validate](#2-post-coupons-validate) — Validar un cupón contra una orden
 3. [POST /loyalty/jobs/expire-points](#3-post-loyalty-jobs-expire-points) — Barrer los puntos vencidos de un programa
-4. [POST /loyalty/memberships/{id}/points/earn](#4-post-loyalty-memberships-id-points-earn) — Acumular puntos por un evento de la aplicación
-5. [POST /loyalty/memberships/{id}/points/redeem](#5-post-loyalty-memberships-id-points-redeem) — Canjear puntos
-6. [POST /loyalty/memberships/{id}/recompute](#6-post-loyalty-memberships-id-recompute) — Reproyectar saldo y nivel desde el ledger
-7. [GET /loyalty/programs](#7-get-loyalty-programs) — Listar programas de lealtad activos
-8. [POST /loyalty/programs](#8-post-loyalty-programs) — Crear un programa de lealtad con niveles y reglas
-9. [POST /loyalty/programs/{id}/memberships](#9-post-loyalty-programs-id-memberships) — Inscribir a un miembro en el programa
-10. [POST /promotions](#10-post-promotions) — Crear una promoción con sus reglas de descuento
-11. [POST /promotions/{id}/coupons/batch](#11-post-promotions-id-coupons-batch) — Emitir un lote de cupones
-12. [POST /redemptions](#12-post-redemptions) — Redimir un cupón y registrar la redención
-13. [POST /redemptions/{id}/reverse](#13-post-redemptions-id-reverse) — Revertir una redención por devolución o cancelación
-14. [POST /referral-programs/{id}/referrals](#14-post-referral-programs-id-referrals) — Generar el código de referido del miembro
-15. [POST /referrals/{id}/qualify](#15-post-referrals-id-qualify) — Calificar el referido y premiar a ambas partes
+4. [GET /loyalty/me](#4-get-loyalty-me) — Mi membresía de lealtad y mi saldo de puntos
+5. [GET /loyalty/me/points](#5-get-loyalty-me-points) — Mis movimientos de puntos, más nuevos primero
+6. [POST /loyalty/me/points/redeem](#6-post-loyalty-me-points-redeem) — Canjear puntos de mi propia membresía
+7. [POST /loyalty/memberships/{id}/points/earn](#7-post-loyalty-memberships-id-points-earn) — Acumular puntos por un evento de la aplicación
+8. [POST /loyalty/memberships/{id}/points/redeem](#8-post-loyalty-memberships-id-points-redeem) — Canjear puntos
+9. [POST /loyalty/memberships/{id}/recompute](#9-post-loyalty-memberships-id-recompute) — Reproyectar saldo y nivel desde el ledger
+10. [GET /loyalty/programs](#10-get-loyalty-programs) — Listar programas de lealtad activos
+11. [POST /loyalty/programs](#11-post-loyalty-programs) — Crear un programa de lealtad con niveles y reglas
+12. [POST /loyalty/programs/{id}/memberships](#12-post-loyalty-programs-id-memberships) — Inscribir a un miembro en el programa
+13. [POST /promotions](#13-post-promotions) — Crear una promoción con sus reglas de descuento
+14. [POST /promotions/{id}/coupons/batch](#14-post-promotions-id-coupons-batch) — Emitir un lote de cupones
+15. [POST /redemptions](#15-post-redemptions) — Redimir un cupón y registrar la redención
+16. [POST /redemptions/{id}/reverse](#16-post-redemptions-id-reverse) — Revertir una redención por devolución o cancelación
+17. [POST /referral-programs/{id}/referrals](#17-post-referral-programs-id-referrals) — Generar el código de referido del miembro
+18. [POST /referrals/{id}/qualify](#18-post-referrals-id-qualify) — Calificar el referido y premiar a ambas partes
 
 ---
 
@@ -448,7 +451,409 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /loyalty/memberships/{id}/points/earn
+## 4. GET /loyalty/me
+
+- **Módulo:** `promotions`
+- **Etiqueta OpenAPI:** `loyalty`
+- **Nombre:** Mi membresía de lealtad y mi saldo de puntos
+- **Operation ID:** `LoyaltyController_myLoyalty`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LoyaltyController.myLoyalty](../../src/modules/promotions/controllers/loyalty.controller.ts)
+
+### Descripción de negocio
+
+El titular sale del token; no se acepta ningún identificador de miembro por la petición. No estar inscrito responde 200 con `enrolled: false`, que es un estado normal del portal y no un error.
+
+Contexto declarado en el controlador: R-T-E6B1: mi membresía y mi saldo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /loyalty/me` en `LoyaltyController_myLoyalty`. El controlador delega en `PromotionsLoyaltyService.myLoyalty`. No recibe body. El tipo de retorno estático es `Promise<MyLoyaltyResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /loyalty/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /loyalty/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyLoyaltyResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MyLoyaltyResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyLoyaltyResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyLoyaltyResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyLoyaltyResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyLoyaltyResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyLoyaltyResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "enrolled": true,
+  "membership": {
+    "membershipId": "00000000-0000-4000-8000-000000000001",
+    "programName": "Nombre de ejemplo",
+    "pointsCurrencyName": "BOB",
+    "pointsBalance": "valor-ejemplo",
+    "lifetimePoints": "valor-ejemplo",
+    "tier": {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "multiplier": "valor-ejemplo",
+      "minPoints": "valor-ejemplo"
+    },
+    "enrolledAt": "2026-07-31T12:00:00.000Z",
+    "active": true
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `enrolled` | Sí | `boolean` | Sin restricción adicional declarada | Si el titular tiene membresía en el programa | `true` |
+| `membership` | No | `MyLoyaltyMembershipDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"membershipId":"00000000-0000-4000-8000-000000000001","programName":"Nombre de ejemplo","pointsCurrencyName":"BOB","pointsBalance":"valor-ejemplo","lifetimePoints":"valor-ejemplo","tier":{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","multiplier":"valor-ejemplo","minPoints":"valor-ejemplo"},"enrolledAt":"2026-07-31T12:00:00.000Z","active":true}` |
+| `membership.membershipId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `membership.programName` | No | `string` | Sin restricción adicional declarada | Nombre del programa | `Nombre de ejemplo` |
+| `membership.pointsCurrencyName` | No | `string` | Sin restricción adicional declarada | Cómo se llaman las unidades del programa («puntos») | `BOB` |
+| `membership.pointsBalance` | No | `string` | Sin restricción adicional declarada | Saldo disponible, como texto exacto | `valor-ejemplo` |
+| `membership.lifetimePoints` | No | `string` | Sin restricción adicional declarada | Acumulado de por vida, como texto exacto | `valor-ejemplo` |
+| `membership.tier` | No | `MyLoyaltyTierDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","multiplier":"valor-ejemplo","minPoints":"valor-ejemplo"}` |
+| `membership.tier.code` | No | `string` | Sin restricción adicional declarada | Código del nivel | `CODIGO_EJEMPLO` |
+| `membership.tier.name` | No | `string` | Sin restricción adicional declarada | Nombre del nivel | `Nombre de ejemplo` |
+| `membership.tier.multiplier` | No | `string` | Sin restricción adicional declarada | Cuánto multiplica la acumulación | `valor-ejemplo` |
+| `membership.tier.minPoints` | No | `string` | Sin restricción adicional declarada | Puntos de por vida desde los que se alcanza | `valor-ejemplo` |
+| `membership.enrolledAt` | No | `string` | formato `date-time` | Cuándo se inscribió | `2026-07-31T12:00:00.000Z` |
+| `membership.active` | No | `boolean` | Sin restricción adicional declarada | Si la membresía está activa. Se publica el hecho y no el concepto: el uuid de terminología es interno. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/loyalty/me"
+}
+```
+
+---
+
+## 5. GET /loyalty/me/points
+
+- **Módulo:** `promotions`
+- **Etiqueta OpenAPI:** `loyalty`
+- **Nombre:** Mis movimientos de puntos, más nuevos primero
+- **Operation ID:** `LoyaltyController_myPoints`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LoyaltyController.myPoints](../../src/modules/promotions/controllers/loyalty.controller.ts)
+
+### Descripción de negocio
+
+Paginado por cursor opaco, con orden estable por fecha e id. Sólo movimientos de la membresía del titular.
+
+Contexto declarado en el controlador: R-T-E6B1: mis movimientos, paginados por cursor.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /loyalty/me/points` en `LoyaltyController_myPoints`. El controlador delega en `PromotionsLoyaltyService.myPointsLedger`. No recibe body. El tipo de retorno estático es `Promise<MyPointsLedgerPageResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Movimientos por página (1..100, por defecto 20) | `20` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /loyalty/me/points HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /loyalty/me/points?cursor=valor-ejemplo&limit=20 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyPointsLedgerPageResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPointsLedgerPageResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "entries": [
+    {
+      "entryId": "00000000-0000-4000-8000-000000000001",
+      "direction": "valor-ejemplo",
+      "points": "valor-ejemplo",
+      "reason": "Texto descriptivo de ejemplo",
+      "balanceAfter": "valor-ejemplo",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `entries` | Sí | `array<MyPointsLedgerEntryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"entryId":"00000000-0000-4000-8000-000000000001","direction":"valor-ejemplo","points":"valor-ejemplo","reason":"Texto descriptivo de ejemplo","balanceAfter":"valor-ejemplo","expiresAt":"2026-07-31T12:00:00.000Z","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `entries[].entryId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `entries[].direction` | No | `string` | Sin restricción adicional declarada | Hacia dónde mueve los puntos, como código del catálogo (POINTS_EARN, POINTS_REDEEM, POINTS_EXPIRE, POINTS_ADJUST). Se omite si el concepto no pertenece a ese catálogo: antes que publicar un uuid interno, no se dice. | `valor-ejemplo` |
+| `entries[].points` | Sí | `string` | Sin restricción adicional declarada | Siempre positivo; el signo lo dice la dirección | `valor-ejemplo` |
+| `entries[].reason` | No | `string` | Sin restricción adicional declarada | Por qué se movieron, como código del catálogo (REASON_*). Se omite con el mismo criterio que `direction`. | `Texto descriptivo de ejemplo` |
+| `entries[].balanceAfter` | No | `string` | Sin restricción adicional declarada | Saldo que quedó después | `valor-ejemplo` |
+| `entries[].expiresAt` | No | `string` | formato `date-time` | Cuándo vencen estos puntos | `2026-07-31T12:00:00.000Z` |
+| `entries[].occurredAt` | Sí | `string` | formato `date-time` | Cuándo ocurrió el movimiento | `2026-07-31T12:00:00.000Z` |
+| `nextCursor` | No | `string` | Sin restricción adicional declarada | Cursor de la página siguiente; ausente si no hay más | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 422 | `PRECONDITION_FAILED` | Cursor de movimientos inválido | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/loyalty/me/points"
+}
+```
+
+---
+
+## 6. POST /loyalty/me/points/redeem
+
+- **Módulo:** `promotions`
+- **Etiqueta OpenAPI:** `loyalty`
+- **Nombre:** Canjear puntos de mi propia membresía
+- **Operation ID:** `LoyaltyController_redeemOwnPoints`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LoyaltyController.redeemOwnPoints](../../src/modules/promotions/controllers/loyalty.controller.ts)
+
+### Descripción de negocio
+
+El titular sale del token. Idempotente por `idempotencyKey`; una clave que pertenezca a otra membresía se rechaza en vez de devolver datos ajenos.
+
+Contexto declarado en el controlador: R-T-E6B1: canjear mis propios puntos. Mismo motor que `loyalty/memberships/:id/points/redeem` —saldo nunca negativo, idempotencia por clave—, pero la membresía la deriva el servidor del token en vez de aceptarla en la ruta.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /loyalty/me/points/redeem` en `LoyaltyController_redeemOwnPoints`. El controlador delega en `PromotionsLoyaltyService.redeemOwnPoints`. Valida el body como `RedeemPointsDto` y consume `application/json`. El tipo de retorno estático es `Promise<PointsLedgerResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RedeemPointsDto`; los campos opcionales se omiten.
+
+```http
+POST /loyalty/me/points/redeem HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "points": "valor-ejemplo",
+  "idempotencyKey": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `points` | Sí | `string` | Sin restricción adicional declarada | Puntos a canjear | `valor-ejemplo` |
+| `idempotencyKey` | Sí | `string` | longitud máxima 200 | Clave de idempotencia del canje | `valor-ejemplo` |
+| `awardType` | No | `string` | valores: `POINTS`, `WALLET_CREDIT` | Sin descripción específica en el contrato OpenAPI. | `POINTS` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /loyalty/me/points/redeem HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "points": "valor-ejemplo",
+  "idempotencyKey": "valor-ejemplo",
+  "awardType": "POINTS"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PointsLedgerResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PointsLedgerResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PointsLedgerResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ledgerEntryId": "00000000-0000-4000-8000-000000000001",
+  "membershipId": "00000000-0000-4000-8000-000000000001",
+  "points": "valor-ejemplo",
+  "balanceAfter": "valor-ejemplo",
+  "lifetimePoints": "valor-ejemplo",
+  "currentTierId": "00000000-0000-4000-8000-000000000001",
+  "duplicate": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ledgerEntryId` | Sí | `string` | formato `uuid` | Entrada del ledger | `00000000-0000-4000-8000-000000000001` |
+| `membershipId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `points` | Sí | `string` | Sin restricción adicional declarada | Puntos del movimiento | `valor-ejemplo` |
+| `balanceAfter` | Sí | `string` | Sin restricción adicional declarada | Saldo tras el movimiento | `valor-ejemplo` |
+| `lifetimePoints` | Sí | `string` | Sin restricción adicional declarada | Puntos de por vida tras el movimiento | `valor-ejemplo` |
+| `currentTierId` | No | `string` | formato `uuid` | Nivel actual tras recalcular | `00000000-0000-4000-8000-000000000001` |
+| `duplicate` | Sí | `boolean` | Sin restricción adicional declarada | true si la clave de idempotencia ya se había usado | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Membresía no encontrada | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia pertenece a otro canje | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No tenés una membresía de lealtad en este programa | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canje debe ser de puntos positivos | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 422 | `PRECONDITION_FAILED` | La membresía no está activa | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 422 | `PRECONDITION_FAILED` | Saldo de puntos insuficiente | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/loyalty/me/points/redeem"
+}
+```
+
+---
+
+## 7. POST /loyalty/memberships/{id}/points/earn
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`
@@ -558,7 +963,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `ledgerEntryId` | Sí | `string` | formato `uuid` | Entrada del ledger | `00000000-0000-4000-8000-000000000001` |
-| `membershipId` | Sí | `string` | formato `uuid` | Identificador asociado a membership. | `00000000-0000-4000-8000-000000000001` |
+| `membershipId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `points` | Sí | `string` | Sin restricción adicional declarada | Puntos del movimiento | `valor-ejemplo` |
 | `balanceAfter` | Sí | `string` | Sin restricción adicional declarada | Saldo tras el movimiento | `valor-ejemplo` |
 | `lifetimePoints` | Sí | `string` | Sin restricción adicional declarada | Puntos de por vida tras el movimiento | `valor-ejemplo` |
@@ -600,7 +1005,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /loyalty/memberships/{id}/points/redeem
+## 8. POST /loyalty/memberships/{id}/points/redeem
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`
@@ -706,7 +1111,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `ledgerEntryId` | Sí | `string` | formato `uuid` | Entrada del ledger | `00000000-0000-4000-8000-000000000001` |
-| `membershipId` | Sí | `string` | formato `uuid` | Identificador asociado a membership. | `00000000-0000-4000-8000-000000000001` |
+| `membershipId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `points` | Sí | `string` | Sin restricción adicional declarada | Puntos del movimiento | `valor-ejemplo` |
 | `balanceAfter` | Sí | `string` | Sin restricción adicional declarada | Saldo tras el movimiento | `valor-ejemplo` |
 | `lifetimePoints` | Sí | `string` | Sin restricción adicional declarada | Puntos de por vida tras el movimiento | `valor-ejemplo` |
@@ -744,7 +1149,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /loyalty/memberships/{id}/recompute
+## 9. POST /loyalty/memberships/{id}/recompute
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`
@@ -861,7 +1266,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. GET /loyalty/programs
+## 10. GET /loyalty/programs
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`
@@ -975,7 +1380,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /loyalty/programs
+## 11. POST /loyalty/programs
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`
@@ -1180,7 +1585,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /loyalty/programs/{id}/memberships
+## 12. POST /loyalty/programs/{id}/memberships
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`
@@ -1319,7 +1724,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /promotions
+## 13. POST /promotions
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -1513,7 +1918,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /promotions/{id}/coupons/batch
+## 14. POST /promotions/{id}/coupons/batch
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -1662,7 +2067,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /redemptions
+## 15. POST /redemptions
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -1811,7 +2216,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /redemptions/{id}/reverse
+## 16. POST /redemptions/{id}/reverse
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -1945,7 +2350,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /referral-programs/{id}/referrals
+## 17. POST /referral-programs/{id}/referrals
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`
@@ -2075,7 +2480,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /referrals/{id}/qualify
+## 18. POST /referrals/{id}/qualify
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`

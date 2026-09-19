@@ -100,6 +100,42 @@ export class ClinicalNotificationsService {
   }
 
   /**
+   * MCH-027 · «Tu médico te dejó una orden».
+   *
+   * A diferencia de la receta y del encuentro, este aviso se llama **dentro**
+   * de la transacción que crea la orden, y es a propósito: `create` también
+   * corre anidado en la transacción de otro caso de uso
+   * (`PeriopPreopService`), y ahí «después de mi commit» todavía no es el
+   * commit real — un aviso emitido en ese punto podría quedar apuntando a una
+   * orden que la transacción de afuera deshizo.
+   *
+   * Dentro, `NotificationsService.emitInApp` abre su propia transacción, que
+   * MikroORM anida como un savepoint de la vigente: el aviso se confirma sólo
+   * si la orden se confirma, y si la emisión falla se deshace nada más su
+   * savepoint — `emitInApp` no lanza y la orden sigue. El `debounceKey` por
+   * orden impide un segundo aviso del mismo hecho.
+   *
+   * @param serviceRequestId - La orden creada.
+   * @param patientProfileId - Paciente al que se le dejó.
+   * @param actorUserId - Profesional que la creó.
+   * @returns Qué pasó con la emisión; nunca lanza.
+   */
+  async serviceRequestPlaced(
+    serviceRequestId: string,
+    patientProfileId: string,
+    actorUserId: string,
+  ): Promise<EmitInAppResult> {
+    return this.emitToPatient(patientProfileId, {
+      subject: 'Tu médico te dejó una orden',
+      bodyText:
+        'Tenés una orden de estudios nueva. Podés verla en tus órdenes médicas.',
+      destinationType: 'SERVICE_REQUEST',
+      destinationId: serviceRequestId,
+      actorUserId,
+    });
+  }
+
+  /**
    * Resuelve la cuenta del paciente y emite.
    *
    * Un perfil de paciente sin cuenta activa —los hay: el alta asistida crea el
@@ -115,7 +151,7 @@ export class ClinicalNotificationsService {
       /** Cuerpo de una línea. */
       bodyText: string;
       /** Clase de objeto que abre. */
-      destinationType: 'PRESCRIPTION' | 'ENCOUNTER';
+      destinationType: 'PRESCRIPTION' | 'ENCOUNTER' | 'SERVICE_REQUEST';
       /** Identificador de ese objeto. */
       destinationId: string;
       /** Profesional que provocó el hecho. */

@@ -18,6 +18,7 @@ import {
   ReleaseDiagnosticReportDto,
 } from '../dto';
 import { CLIN } from '../clinical.concepts';
+import { ClinicalReadService } from './clinical-read.service';
 
 /**
  * UC-08-06 (crear) y UC-08-07 (liberar) de reportes diagnósticos. Al crear desde
@@ -33,12 +34,14 @@ export class DiagnosticReportsService {
    * @param reportsRepo - Valor de reports repo requerido por la operación.
    * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly reportsRepo: DiagnosticReportsRepository,
     private readonly serviceRequestsRepo: ServiceRequestsRepository,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(DiagnosticReportsService.name);
   }
@@ -113,6 +116,11 @@ export class DiagnosticReportsService {
           { reportId },
         );
       }
+      // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        report.patientProfileId,
+        actor,
+      );
       const releasable = [CLIN.REPORT_PARTIAL, CLIN.REPORT_PRELIMINARY];
       if (!releasable.includes(report.lifecycleStatusConceptId)) {
         throw new PreconditionFailedException(
