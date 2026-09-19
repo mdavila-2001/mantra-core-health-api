@@ -8,11 +8,26 @@ function build() {
   const orden: string[] = [];
   let contadorPersona = 0;
   const personsRepo = {
-    create: fn((_tx: unknown, data: { displayName: string }) => {
-      orden.push(`persons.create:${data.displayName}`);
-      contadorPersona += 1;
-      return { id: `person-${contadorPersona}`, ...data };
-    }),
+    create: fn(
+      (
+        _tx: unknown,
+        data: {
+          name?: string;
+          middleName?: string;
+          lastName?: string;
+          motherLastName?: string;
+          displayName?: string;
+        },
+      ) => {
+        // Registra lo que de verdad importa comprobar: si vino `displayName`
+        // (la forma legada, `fullName` del DTO) o las partes sueltas.
+        orden.push(
+          `persons.create:${data.displayName ?? `${data.name} ${data.lastName}`}`,
+        );
+        contadorPersona += 1;
+        return { id: `person-${contadorPersona}`, ...data };
+      },
+    ),
   };
   const identifiersRepo = {
     create: fn((_tx: unknown, data: unknown) => ({
@@ -238,5 +253,62 @@ describe('IamOrganizationRepresentativesService', () => {
       'flush',
       'attachRegistrationRepresentatives',
     ]);
+  });
+
+  it('con el nombre en partes, persons.create recibe name/middleName/lastName/motherLastName y NO displayName', async () => {
+    const d = build();
+
+    await d.service.register(d.tx, {
+      tenantId: 'tenant-1',
+      ownerUserId: 'user-1',
+      legalDocumentFileIds: [],
+      legalRepresentative: {
+        name: 'Mariana',
+        middleName: 'Elena Sofía',
+        lastName: 'Siles',
+        motherLastName: 'Justiniano',
+        idNumber: '4872190 SC',
+        email: 'legal@aseguradora.com',
+        powerOfAttorneyFileId: 'file-poder',
+      } as never,
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        name: 'Mariana',
+        middleName: 'Elena Sofía',
+        lastName: 'Siles',
+        motherLastName: 'Justiniano',
+        displayName: undefined,
+      }),
+    );
+  });
+
+  it('con `fullName` (forma legada), persons.create recibe SOLO displayName, sin partes', async () => {
+    const d = build();
+
+    await d.service.register(d.tx, {
+      tenantId: 'tenant-1',
+      ownerUserId: 'user-1',
+      legalDocumentFileIds: [],
+      legalRepresentative: {
+        fullName: 'Mariana Siles Justiniano',
+        idNumber: '4872190 SC',
+        email: 'legal@aseguradora.com',
+        powerOfAttorneyFileId: 'file-poder',
+      },
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        name: undefined,
+        middleName: undefined,
+        lastName: undefined,
+        motherLastName: undefined,
+        displayName: 'Mariana Siles Justiniano',
+      }),
+    );
   });
 });

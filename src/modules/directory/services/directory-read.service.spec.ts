@@ -560,8 +560,33 @@ describe('DirectoryReadService.listMemberships', () => {
       ]);
       d.legalRepo.findPersonsByIds.mockResolvedValue(
         new Map([
-          ['person-rep', { id: 'person-rep', displayName: 'Mariana Siles' }],
-          ['person-gm', { id: 'person-gm', displayName: 'Carlos Mendoza' }],
+          // `name`/`middleName`/`lastName`/`motherLastName` explícitos en
+          // `null`, no omitidos: así hidrata MikroORM una columna nullable
+          // sin valor (memoria del proyecto), y es lo que reprodujo el bug
+          // real —`fichaDe` comparaba contra `undefined` y dejaba pasar un
+          // `name: null` al JSON de respuesta.
+          [
+            'person-rep',
+            {
+              id: 'person-rep',
+              displayName: 'Mariana Siles',
+              name: null,
+              middleName: null,
+              lastName: null,
+              motherLastName: null,
+            },
+          ],
+          [
+            'person-gm',
+            {
+              id: 'person-gm',
+              displayName: 'Carlos Mendoza',
+              name: null,
+              middleName: null,
+              lastName: null,
+              motherLastName: null,
+            },
+          ],
           ['person-cm', { id: 'person-cm', displayName: 'Ana Paz' }],
           ['person-mm', { id: 'person-mm', displayName: 'Luis Rojas' }],
         ]),
@@ -644,6 +669,69 @@ describe('DirectoryReadService.listMemberships', () => {
           idNumber: undefined,
         },
       ]);
+    });
+
+    it('cuando la persona tiene las partes del nombre, la ficha las lleva junto a fullName', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-1', tenantRoleConceptId: DIR.ROLE_OWNER },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-1',
+        code: 'ASE-2',
+        legalName: 'Aseguradora Y',
+        tenantTypeConceptId: TENANT_TYPE_CONCEPT_BY_CODE.PAYER,
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      d.legalRepo.listLegalRepsByTenant.mockResolvedValue([
+        {
+          personId: 'person-rep2',
+          representativeRoleConceptId: 'ct-representante',
+          ciIdentifierId: undefined,
+          isPrimary: true,
+        },
+      ]);
+      d.legalRepo.findPersonsByIds.mockResolvedValue(
+        new Map([
+          [
+            'person-rep2',
+            {
+              id: 'person-rep2',
+              displayName: 'Mariana Elena Sofía Siles Justiniano',
+              name: 'Mariana',
+              middleName: 'Elena Sofía',
+              lastName: 'Siles',
+              motherLastName: 'Justiniano',
+            },
+          ],
+        ]),
+      );
+      d.identifiersRepo.findByIds.mockResolvedValue(new Map());
+      d.contactPointsRepo.findVigentesByOwners.mockResolvedValue([
+        {
+          ownerId: 'person-rep2',
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          value: 'legal@aseguradora.com',
+        },
+      ]);
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items[0].legalRepresentative).toEqual({
+        role: 'LEGAL_REPRESENTATIVE',
+        fullName: 'Mariana Elena Sofía Siles Justiniano',
+        name: 'Mariana',
+        middleName: 'Elena Sofía',
+        lastName: 'Siles',
+        motherLastName: 'Justiniano',
+        email: 'legal@aseguradora.com',
+        phone: undefined,
+        idNumber: undefined,
+      });
     });
 
     it('sin representante legal ni gerencias, la ficha no lleva esas claves', async () => {

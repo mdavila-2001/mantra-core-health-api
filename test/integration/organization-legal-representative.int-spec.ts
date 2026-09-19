@@ -222,10 +222,14 @@ describe('1.4 · representante legal y gerencias del alta de organización (inte
     }
   });
 
-  it('escenario 2 · las cuatro personas, su CI y sus contactos vigentes', async () => {
+  it('escenario 2 · las cuatro personas, en partes, su CI y sus contactos vigentes', async () => {
     const codigo = `REP2_${marca}`;
     const powerOfAttorneyFileId = await subirPdf('poder.pdf');
 
+    // Este es el escenario que manda el nombre EN PARTES (no `fullName`): el
+    // representante lleva `middleName` para fijar que el plegado de un
+    // tercer nombre en `middleName` —ya resuelto del lado del cliente— llega
+    // intacto a `profiles.persons.middle_name`.
     const res = await http()
       .post('/iam/auth/register-organization')
       .send(
@@ -233,27 +237,33 @@ describe('1.4 · representante legal y gerencias del alta de organización (inte
           code: codigo,
           email: `rep2-${marca}@example.test`,
           legalRepresentative: {
-            fullName: 'Mariana Siles Justiniano',
+            name: 'Mariana',
+            middleName: 'Elena Sofía',
+            lastName: 'Siles',
+            motherLastName: 'Justiniano',
             idNumber: '4872190 SC',
             email: 'legal@aseguradora.com',
             powerOfAttorneyFileId,
           },
           executives: {
-            generalManager: gerencia(
-              'Carlos Mendoza',
-              '+591 70000001',
-              'gm@aseguradora.com',
-            ),
-            commercialManager: gerencia(
-              'Ana Paz',
-              '+591 70000002',
-              'cm@aseguradora.com',
-            ),
-            marketingManager: gerencia(
-              'Luis Rojas',
-              '+591 70000003',
-              'mm@aseguradora.com',
-            ),
+            generalManager: {
+              name: 'Carlos',
+              lastName: 'Mendoza',
+              phone: '+591 70000001',
+              email: 'gm@aseguradora.com',
+            },
+            commercialManager: {
+              name: 'Ana',
+              lastName: 'Paz',
+              phone: '+591 70000002',
+              email: 'cm@aseguradora.com',
+            },
+            marketingManager: {
+              name: 'Luis',
+              lastName: 'Rojas',
+              phone: '+591 70000003',
+              email: 'mm@aseguradora.com',
+            },
           },
         }),
       )
@@ -270,15 +280,36 @@ describe('1.4 · representante legal y gerencias del alta de organización (inte
     const personas = await em.find(Persons, {
       id: { $in: vinculos.map((v) => v.personId) },
     });
+    // `display_name` lo compone la API a partir de las partes —el cliente ya
+    // no manda un nombre completo—, así que sigue siendo el mismo valor que
+    // antes de esta subtarea.
     const nombres = new Set(personas.map((p) => p.displayName));
     expect(nombres).toEqual(
       new Set([
-        'Mariana Siles Justiniano',
+        'Mariana Elena Sofía Siles Justiniano',
         'Carlos Mendoza',
         'Ana Paz',
         'Luis Rojas',
       ]),
     );
+
+    const representantePersona = personas.find(
+      (p) => p.displayName === 'Mariana Elena Sofía Siles Justiniano',
+    );
+    expect(representantePersona).toMatchObject({
+      name: 'Mariana',
+      middleName: 'Elena Sofía',
+      lastName: 'Siles',
+      motherLastName: 'Justiniano',
+    });
+    const gerenteGeneral = personas.find(
+      (p) => p.displayName === 'Carlos Mendoza',
+    );
+    expect(gerenteGeneral).toMatchObject({
+      name: 'Carlos',
+      lastName: 'Mendoza',
+      motherLastName: null,
+    });
 
     const representante = vinculos.find(
       (v) => v.ciIdentifierId !== undefined && v.ciIdentifierId !== null,
@@ -318,6 +349,46 @@ describe('1.4 · representante legal y gerencias del alta de organización (inte
       expect(contacto.ownerTypeConceptId).toBe(CONCEPTS.OWNER_PERSON);
       expect(contacto.useConceptId).toBe(CONCEPTS.CONTACT_USE_WORK);
     }
+  });
+
+  it('escenario 2b · con fullName (forma legada), las partes quedan NULL y display_name es el compuesto tal cual', async () => {
+    const codigo = `REP2B_${marca}`;
+    const powerOfAttorneyFileId = await subirPdf('poder.pdf');
+
+    const res = await http()
+      .post('/iam/auth/register-organization')
+      .send(
+        altaDto({
+          code: codigo,
+          email: `rep2b-${marca}@example.test`,
+          legalRepresentative: {
+            fullName: 'Lic. Mariana Siles Justiniano',
+            idNumber: '4872190 SC',
+            email: 'legal@aseguradora.com',
+            powerOfAttorneyFileId,
+          },
+        }),
+      )
+      .expect(201);
+
+    creados.push({ userId: res.body.ownerUserId, tenantId: res.body.tenantId });
+
+    const em = ctx.orm.em.fork();
+    const vinculos = await em.find(TenantLegalRepresentatives, {
+      tenantId: res.body.tenantId,
+    });
+    personIdsCreados.push(...vinculos.map((v) => v.personId));
+
+    const persona = await em.findOneOrFail(Persons, {
+      id: vinculos[0]!.personId,
+    });
+    // Sin partes que adivinar: `fullName` manda tal cual, exactamente como
+    // antes de esta subtarea.
+    expect(persona.displayName).toBe('Lic. Mariana Siles Justiniano');
+    expect(persona.name).toBeNull();
+    expect(persona.middleName).toBeNull();
+    expect(persona.lastName).toBeNull();
+    expect(persona.motherLastName).toBeNull();
   });
 
   it('escenario 3 · el documento del poder: PODER_REPRESENTANTE_LEGAL, NOTARIA, PENDIENTE y de quién es', async () => {
@@ -534,8 +605,14 @@ describe('1.4 · representante legal y gerencias del alta de organización (inte
         altaDto({
           code: codigo,
           email,
+          // El representante manda las partes (verifica que GET /tenants/me
+          // también las lea de vuelta); las gerencias siguen con `fullName`
+          // (forma legada), a propósito: la lectura convive con las dos.
           legalRepresentative: {
-            fullName: 'Mariana Siles Justiniano',
+            name: 'Mariana',
+            middleName: 'Elena Sofía',
+            lastName: 'Siles',
+            motherLastName: 'Justiniano',
             idNumber: '4872190 SC',
             email: 'legal@aseguradora.com',
             powerOfAttorneyFileId,
@@ -579,10 +656,16 @@ describe('1.4 · representante legal y gerencias del alta de organización (inte
     );
     expect(organizacion?.legalRepresentative).toMatchObject({
       role: 'LEGAL_REPRESENTATIVE',
-      fullName: 'Mariana Siles Justiniano',
+      fullName: 'Mariana Elena Sofía Siles Justiniano',
+      name: 'Mariana',
+      middleName: 'Elena Sofía',
+      lastName: 'Siles',
+      motherLastName: 'Justiniano',
       email: 'legal@aseguradora.com',
       idNumber: '4872190 SC',
     });
+    // Las gerencias mandaron `fullName` (forma legada): sin partes que leer.
+    expect(organizacion?.executives[0].name).toBeUndefined();
     expect(organizacion?.executives).toHaveLength(3);
     expect(organizacion?.executives[2]).toMatchObject({
       role: 'MARKETING_MANAGER',
