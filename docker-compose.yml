@@ -364,9 +364,19 @@ services:
     volumes:
       # DDL canónico del repositorio del modelo, que se clona como hermano de
       # este (SQL/ y NoSQL/ generados desde los .puml). El database/ interno del
-      # repo NO es fuente de esquema.
-      - ../mantra-core-health-model/SQL:/init/SQL:ro
-      - ../mantra-core-health-model/NoSQL:/init/NoSQL:ro
+      # repo NO es fuente de esquema: es una copia vendorizada de ese mismo DDL
+      # (`scripts/db/vendor-ddl.sh`), que puede ir una versión atrás.
+      #
+      # F09: el valor por omisión es el de siempre, así que nada cambia para
+      # quien tenga el repo hermano al lado. Quien NO lo tenga apunta estas dos
+      # variables al `database/` vendorizado y el init deja de abortar en
+      # silencio (síntoma: seeds que fallan por columnas inexistentes, como pasó
+      # con `insurance_carriers.sigla`):
+      #   MCH_DDL_SQL_DIR=./database/SQL
+      #   MCH_DDL_NOSQL_DIR=./database/NoSQL
+      # Ojo: eso levanta el esquema de la copia vendorizada, no el del modelo.
+      - ${MCH_DDL_SQL_DIR:-../mantra-core-health-model/SQL}:/init/SQL:ro
+      - ${MCH_DDL_NOSQL_DIR:-../mantra-core-health-model/NoSQL}:/init/NoSQL:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
