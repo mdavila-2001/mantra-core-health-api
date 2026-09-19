@@ -63,8 +63,16 @@ No se regeneró OpenAPI: no cambió ningún decorador.
 TDD: 7 regresiones en RED por conducta (aserciones de estado, no imports) → GREEN. La revisión
 técnica encontró el doble cargo AUTHORIZED→SALE: se agregaron 3 casos (el de CAPTURE en RED) y se
 corrigió la consulta del repositorio. Los casos SALE/AUTHORIZE pasaban con el mock antes del
-arreglo, porque el filtro defectuoso vivía en el repositorio: **la prueba real de ese filtro
-requiere PostgreSQL** (`test/integration/hardening/mch-003.int-spec.ts`, no creado).
+arreglo, porque el filtro defectuoso vivía en el repositorio. Por eso se agregó
+`test/integration/hardening/mch-003.int-spec.ts`, que prueba por HTTP y lee PostgreSQL:
+
+| Corrida | Resultado |
+|---|---|
+| Código anterior (`98e7fb5a`) | 3 de 4 en rojo. SALE sobre una autorización confirmada devolvió **201 y creó un segundo cargo** |
+| Código corregido | 4/4 en verde |
+
+Entorno: `node:24` en Docker (argon2 no carga en el host), infraestructura de `docker-compose.yml`
+y DDL de `database/` aplicado con `docker/db-init/init-postgres.sh`.
 
 ## Comandos ejecutados
 
@@ -111,6 +119,4 @@ que pide el plan.
 
 1. Correr el workflow en un PR de esta rama: confirmar que `docs` corre y `fork-guard` se omite
    (MCH-032-AC01 con `workflow_dispatch`).
-2. Crear `test/integration/hardening/mch-003.int-spec.ts` contra PostgreSQL: AUTHORIZED + SALE → 409
-   sin filas nuevas.
-3. F02 (MCH-004/005: sesiones y refresh atómico), con preflight previo si dev avanzó.
+2. F02 (MCH-004/005: sesiones y refresh atómico), con preflight previo si dev avanzó.
