@@ -22,11 +22,13 @@ El paso nuevo agrega:
 yarn test:integration --ci --runInBand
 ```
 
-**Va después de "Generar contrato OpenAPI real desde el código"**, no antes: ese paso arranca
-`AppModule` completo por primera vez en el job, y es lo que materializa los 58 esquemas / ~1212
-tablas contra el Postgres efímero de `services:`. Antes de eso no hay nada sobre lo que una consulta
-o una migración de prueba puedan operar — moverlo antes rompería el job con "relation does not
-exist" en la primera suite, no con un fallo de negocio.
+**Va después de "Materializar el esquema — DDL versionado de `database/`"**: ese paso aplica, con
+el mismo `docker/db-init/init-postgres.sh` y la misma imagen que `postgres-init` de docker-compose,
+el DDL de `database/SQL` (y las extensiones de `database/NoSQL`) sobre el Postgres efímero de
+`services:`. Hasta 2026-09-19 esta página decía que lo materializaba "Generar contrato", pero ese
+paso corre con `ORM_SCHEMA_SYNC=off` y no crea ninguna tabla: la primera corrida real de la suite
+(run 35450632863) murió en la siembra con `relation "terminology.terminology_sources" does not
+exist`.
 
 También va después de "Aprovisionar roles de aplicación PostgreSQL" y de "Pruebas de privilegios",
 que se dejan intactos: son la verificación específica de que el rol de aplicación (no el

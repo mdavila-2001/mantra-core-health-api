@@ -278,11 +278,30 @@ jobs:
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
         run: node tools/openapi/generate-openapi.mjs
 
-      # Va DESPUÉS de generar el contrato, y el orden no es estético: ese paso
-      # arranca AppModule completo, que es lo que materializa los 58 esquemas y
-      # las 1212 tablas en la base efímera. Ejecutado antes, el aprovisionamiento
-      # no encontraría ningún esquema de negocio sobre el que otorgar nada y
-      # abortaría.
+      # El Postgres de `services:` arranca vacío, y nada lo llenaba: "Generar
+      # contrato" corre con ORM_SCHEMA_SYNC=off (tools/openapi/generate-openapi.mjs
+      # lo fuerza), así que no crea una sola tabla. Por eso la suite de
+      # integración moría en la primera siembra con `relation
+      # "terminology.terminology_sources" does not exist` (run 35450632863).
+      #
+      # Se aplica el mismo DDL que el stack local, con el mismo script y la
+      # misma imagen que `postgres-init` de docker-compose: `database/SQL`
+      # (apply_all + FK diferidas + patches) y las extensiones de `database/NoSQL`.
+      # `db:vendor:check` ya garantizó más arriba que esa copia existe.
+      # `--add-host postgres:127.0.0.1` porque el script apunta al host
+      # `postgres` de la red de compose; acá el servicio escucha en localhost.
+      - name: Materializar el esquema — DDL versionado de database/
+        run: |
+          docker run --rm --network host --add-host postgres:127.0.0.1 \
+            -e POSTGRES_DB=mantra_redesa_health \
+            -e POSTGRES_USER=mantra -e POSTGRES_PASSWORD=mantra \
+            -v "$PWD/database/SQL:/init/SQL:ro" \
+            -v "$PWD/database/NoSQL:/init/NoSQL:ro" \
+            -v "$PWD/docker/db-init:/init/bin:ro" \
+            --entrypoint bash timescale/timescaledb-ha:pg18 /init/bin/init-postgres.sh
+
+      # Va DESPUÉS de materializar el esquema: sin los 58 esquemas de negocio no
+      # hay nada sobre lo que otorgar privilegios.
       #
       # Las contraseñas son literales contra una base efímera que muere con el
       # runner. No son secretos, y guardarlas como tales daría a entender que
@@ -319,11 +338,8 @@ jobs:
       # entre los 60 módulos, contratos HTTP, jobs, FKs) no se ejecutaban en
       # ningún merge — sólo en la máquina de quien se acordara de correrlas.
       #
-      # Va DESPUÉS de "Generar contrato OpenAPI real desde el código" y no
-      # antes, por el mismo motivo que "Aprovisionar roles de aplicación": ese
-      # paso es el que arranca AppModule completo y materializa los 58
-      # esquemas / 1212 tablas. Antes de eso no hay nada sobre lo que una
-      # migración o una consulta puedan operar.
+      # Va DESPUÉS de "Materializar el esquema": sin el DDL aplicado no hay
+      # nada sobre lo que una migración o una consulta puedan operar.
       #
       # `--ci` evita que Jest intente escribir snapshots nuevos en un runner
       # efímero (fallaría igual, pero con un mensaje que no dice por qué).
