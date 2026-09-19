@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
+  Max,
   IsDateString,
   IsInt,
   IsOptional,
@@ -9,6 +10,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { MAX_OBJETIVO_SEGUNDOS, RANGO_OBJETIVOS } from '../policies';
 
 /** Cuerpo de `POST /admin/ops/backup-policies` (UC-11-09). */
 export class CreateBackupPolicyDto {
@@ -39,17 +41,29 @@ export class CreateBackupPolicyDto {
   /**
    * Valor de rpo seconds mantenido por la instancia.
    */
-  @ApiProperty({ description: 'RPO objetivo en segundos' })
+  @ApiProperty({
+    description:
+      'RPO objetivo en segundos: cuántos datos se tolera perder. Independiente del RTO (MCH-022); 0 es válido y significa no perder ningún dato',
+    minimum: RANGO_OBJETIVOS.rpoSeconds.min,
+    maximum: MAX_OBJETIVO_SEGUNDOS,
+  })
   @IsInt()
-  @Min(0)
+  @Min(RANGO_OBJETIVOS.rpoSeconds.min)
+  @Max(RANGO_OBJETIVOS.rpoSeconds.max)
   rpoSeconds!: number;
 
   /**
    * Valor de rto seconds mantenido por la instancia.
    */
-  @ApiProperty({ description: 'RTO objetivo en segundos' })
+  @ApiProperty({
+    description:
+      'RTO objetivo en segundos: cuánto tiempo se tolera estar fuera de servicio. Independiente del RPO (MCH-022); al menos 1 segundo',
+    minimum: RANGO_OBJETIVOS.rtoSeconds.min,
+    maximum: MAX_OBJETIVO_SEGUNDOS,
+  })
   @IsInt()
-  @Min(0)
+  @Min(RANGO_OBJETIVOS.rtoSeconds.min)
+  @Max(RANGO_OBJETIVOS.rtoSeconds.max)
   rtoSeconds!: number;
 
   /**

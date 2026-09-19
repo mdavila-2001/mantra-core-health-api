@@ -14,6 +14,7 @@ import {
   IdResultDto,
   RestoreTestRunResponseDto,
 } from '../dto';
+import { validarObjetivosDeContinuidad } from '../policies';
 
 /**
  * UC-11-09 (política de backup con RPO/RTO/inmutabilidad) y UC-11-10 (prueba de
@@ -37,16 +38,25 @@ export class BackupService {
     this.logger.setContext(BackupService.name);
   }
 
-  /** UC-11-09: define una política de backup (RPO <= RTO, valores positivos). */
+  /**
+   * UC-11-09: define una política de backup.
+   *
+   * MCH-022: cada objetivo se valida contra **su propio** rango. RPO y RTO
+   * miden dimensiones distintas y no se comparan entre sí: `RPO=3600` con
+   * `RTO=900` es una política legítima («tolero perder una hora de datos, pero
+   * exijo estar arriba en quince minutos»). Los rangos y sus motivos viven en
+   * `policies/continuity-objectives.policy.ts`.
+   */
   async createPolicy(
     dto: CreateBackupPolicyDto,
     actor: AuthenticatedUser,
   ): Promise<IdResultDto> {
-    if (dto.rpoSeconds > dto.rtoSeconds) {
-      throw new PreconditionFailedException('El RPO no puede superar al RTO', {
-        rpoSeconds: dto.rpoSeconds,
-        rtoSeconds: dto.rtoSeconds,
-      });
+    const fueraDeRango = validarObjetivosDeContinuidad(dto);
+    if (fueraDeRango.length > 0) {
+      throw new PreconditionFailedException(
+        fueraDeRango.map((v) => v.mensaje).join('; '),
+        Object.fromEntries(fueraDeRango.map((v) => [v.campo, v.valor])),
+      );
     }
     return this.em.transactional(async (tx) => {
       const policy = this.repo.createPolicy(tx, {

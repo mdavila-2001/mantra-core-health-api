@@ -35,14 +35,45 @@ function build() {
 
 describe('BackupService', () => {
   describe('createPolicy (UC-11-09)', () => {
-    it('rejects when rpo > rto', async () => {
+    // MCH-022-AC01: RPO y RTO miden dimensiones distintas (pérdida de datos
+    // tolerada vs. tiempo fuera de servicio tolerado). Una organización puede
+    // aceptar perder una hora de datos y a la vez exigir estar arriba en quince
+    // minutos: eso es una política legítima, no un error de carga.
+    it('acepta RPO=3600 con RTO=900: son objetivos independientes', async () => {
+      const d = build();
+      d.repo.createPolicy.mockReturnValue({ id: 'bp1' });
+      const res = await d.service.createPolicy(
+        { rpoSeconds: 3600, rtoSeconds: 900 } as any,
+        actor,
+      );
+      expect(res).toEqual({ id: 'bp1' });
+    });
+
+    // MCH-022-AC02: lo inválido se rechaza por su propio rango.
+    it.each([
+      ['RPO negativo', { rpoSeconds: -1, rtoSeconds: 900 }],
+      ['RTO negativo', { rpoSeconds: 3600, rtoSeconds: -1 }],
+      ['RTO en cero', { rpoSeconds: 3600, rtoSeconds: 0 }],
+      ['RPO absurdo', { rpoSeconds: 31_536_001, rtoSeconds: 900 }],
+      ['RTO absurdo', { rpoSeconds: 3600, rtoSeconds: 31_536_001 }],
+      ['RPO no entero', { rpoSeconds: 1.5, rtoSeconds: 900 }],
+    ])('rechaza %s por su propio rango', async (_caso, objetivos) => {
       const d = build();
       await expect(
+        d.service.createPolicy(objetivos as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.repo.createPolicy).not.toHaveBeenCalled();
+    });
+
+    it('RPO=0 es válido: exige no perder ningún dato', async () => {
+      const d = build();
+      d.repo.createPolicy.mockReturnValue({ id: 'bp0' });
+      await expect(
         d.service.createPolicy(
-          { rpoSeconds: 100, rtoSeconds: 10 } as any,
+          { rpoSeconds: 0, rtoSeconds: 900 } as any,
           actor,
         ),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      ).resolves.toEqual({ id: 'bp0' });
     });
 
     it('creates the policy', async () => {
