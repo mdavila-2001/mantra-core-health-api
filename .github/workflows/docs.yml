@@ -242,11 +242,15 @@ jobs:
       # el candidato real de un PR. `test:cov` corre exactamente las mismas
       # pruebas (mismo comando base, `--coverage` de más) y hace fallar el job
       # si el candidato queda por debajo de `coverageThreshold` — el trinquete
-      # que MCH-024 fija sobre el valor medido. Reusa el mismo
-      # NODE_OPTIONS=--max-old-space-size=6144 del job: ya está validado para
-      # el paso más pesado (generar el contrato con AppModule completo).
+      # que MCH-024 fija sobre el valor medido.
+      #
+      # Sin `--runInBand`: en un solo proceso, las ~680 suites con cobertura
+      # acumulan módulos VM de ESM hasta pasar los 6 GB de NODE_OPTIONS y el
+      # job muere por falta de heap (run 35449865820). Con los workers de la
+      # config de jest (`maxWorkers: 4`, `workerIdleMemoryLimit: 768MB`) cada
+      # worker se recicla antes de crecer, y la cobertura se fusiona igual.
       - name: Pruebas unitarias con cobertura — no puede bajar del umbral fijado
-        run: yarn test:cov --runInBand
+        run: yarn test:cov
 
       - name: Generar contrato OpenAPI real desde el código
         env:
