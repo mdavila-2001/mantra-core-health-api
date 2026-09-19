@@ -9,10 +9,12 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ObjectStorageService } from './object-storage.service';
+import { ServiceUnavailableException } from '@nestjs/common';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { ObjectContentUnavailableError } from '../ports';
 import {
   NAMESPACE_ACTIVE,
   OBJECT_LIFECYCLE,
@@ -21,12 +23,40 @@ import {
   UPLOAD_STATUS,
 } from '../constants';
 
-const actor = { id: 'user-1', roles: ['SYSTEM'] };
+const actor = {
+  id: 'user-1',
+  roles: ['SYSTEM'],
+  tenantIds: ['11111111-1111-1111-1111-111111111111'],
+};
+const TENANT = '11111111-1111-1111-1111-111111111111';
 const NAMESPACE = '11111111-1111-1111-1111-111111111111';
 const UPLOAD = '22222222-2222-2222-2222-222222222222';
 const MANIFEST = '33333333-3333-3333-3333-333333333333';
 const VERSION = '44444444-4444-4444-4444-444444444444';
 const SHA = 'a'.repeat(64);
+const SHA_V2 = 'b'.repeat(64);
+
+/**
+ * Lo que el proveedor tiene guardado de verdad, por clave. Las pruebas de
+ * integridad (MCH-021) lo alteran para que los bytes contradigan al cliente.
+ */
+function storedContents(): Record<
+  string,
+  { sha256: string; sizeBytes: bigint; providerVersionId?: string }
+> {
+  return {
+    'obj/opaque-key': {
+      sha256: SHA,
+      sizeBytes: 1024n,
+      providerVersionId: 'pv-1',
+    },
+    'obj/key-2': {
+      sha256: SHA_V2,
+      sizeBytes: 2048n,
+      providerVersionId: 'pv-2',
+    },
+  };
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -54,18 +84,84 @@ function build() {
     findEncryptionEnvelope: mockFn(),
     createLocation: mockFn(() => ({ id: 'location-1' })),
     findPrimaryLocation: mockFn(),
+    findChecksum: mockFn(() =>
+      Promise.resolve({
+        checksum: SHA,
+        source: 'server',
+        verificationStatus: 'verified',
+      }),
+    ),
     createLargePayload: mockFn(() => ({ id: 'payload-1' })),
     findLargePayloadBySource: mockFn(() => Promise.resolve(null)),
   };
-  const dicomRepo = { createAccessLog: mockFn(() => ({ id: 'access-1' })) };
-  const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const dicomRepo = {
+    createAccessLog: mockFn(() => ({ id: 'access-1' })),
+    // MCH-020: las coordenadas DICOM las resuelve el servidor por la jerarquía
+    // del objeto; el cuerpo de la petición ya no las aporta.
+    findDicomCoordinates: mockFn(() =>
+      Promise.resolve({
+        studyInstanceUid: '1.2.840.10008.REAL',
+        seriesInstanceUid: '1.2.840.10008.REAL.1',
+        sopInstanceUid: '1.2.840.10008.REAL.1.1',
+        tenantId: TENANT,
+        patientProfileId: 'pat-1',
+      }),
+    ),
+  };
+  const logger = {
+    setContext: mockFn(),
+    info: mockFn(),
+    warn: mockFn(),
+    error: mockFn(),
+  };
+  const stored = storedContents();
+  const reader = {
+    stat: mockFn((loc: any) => {
+      const obj = stored[loc.key];
+      return Promise.resolve(
+        obj
+          ? {
+              sizeBytes: obj.sizeBytes,
+              providerVersionId: obj.providerVersionId,
+              etag: '"etag-provider"',
+            }
+          : null,
+      );
+    }),
+    digest: mockFn((loc: any) => {
+      const obj = stored[loc.key];
+      return Promise.resolve({ sha256: obj.sha256, sizeBytes: obj.sizeBytes });
+    }),
+    open: mockFn(),
+  };
+  // MCH-010: la política del expediente. Por defecto autoriza; las pruebas de
+  // acceso la hacen negar para comprobar que el objeto deja de alcanzarse.
+  const clinicalAccess = {
+    assertPuedeLeerHistoria: mockFn(() => Promise.resolve()),
+  };
+  // MCH-020: cadena WORM donde queda todo acceso, con el resultado que tuvo.
+  const auditTrail = { record: mockFn(() => Promise.resolve()) };
   const service = new ObjectStorageService(
     em as any,
     storageRepo as any,
     dicomRepo as any,
     logger as any,
+    undefined,
+    reader as any,
+    clinicalAccess as any,
+    auditTrail as any,
   );
-  return { service, tx, storageRepo, dicomRepo, logger };
+  return {
+    service,
+    tx,
+    storageRepo,
+    dicomRepo,
+    logger,
+    reader,
+    stored,
+    clinicalAccess,
+    auditTrail,
+  };
 }
 
 /**
@@ -82,6 +178,8 @@ function activeNamespace(overrides: Record<string, unknown> = {}): any {
     versioningEnabled: true,
     objectLockEnabled: true,
     defaultStorageClass: 'standard',
+    backendCode: 's3',
+    bucketOrContainer: 'bucket',
     ...overrides,
   };
 }
@@ -111,7 +209,7 @@ const COMPLETE: any = {
   providerVersionId: 'pv-1',
   etag: 'etag-1',
   mimeType: 'application/dicom',
-  providerUri: 's3://bucket/obj',
+  providerUri: 's3://bucket/obj/opaque-key',
 };
 
 describe('ObjectStorageService', () => {
@@ -266,6 +364,110 @@ describe('ObjectStorageService', () => {
       expect(d.storageRepo.createVersion).not.toHaveBeenCalled();
     });
 
+    // MCH-021: el catálogo no puede publicar lo que el cliente dice de los
+    // bytes; tiene que mirarlos.
+    describe('integridad física (MCH-021)', () => {
+      it('refuses when the stored bytes do not hash to the declared sha', async () => {
+        const d = build();
+        wire(d);
+        d.stored['obj/opaque-key'].sha256 = 'c'.repeat(64);
+
+        await expect(
+          d.service.completeUpload(UPLOAD, COMPLETE),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.storageRepo.createVersion).not.toHaveBeenCalled();
+        expect(d.storageRepo.createChecksum).not.toHaveBeenCalled();
+      });
+
+      it('refuses when the object is not in the provider', async () => {
+        const d = build();
+        wire(d);
+        delete d.stored['obj/opaque-key'];
+
+        await expect(
+          d.service.completeUpload(UPLOAD, COMPLETE),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.storageRepo.createVersion).not.toHaveBeenCalled();
+      });
+
+      it('refuses when the stored size is smaller than declared', async () => {
+        const d = build();
+        wire(d);
+        d.stored['obj/opaque-key'].sizeBytes = 1000n;
+
+        await expect(
+          d.service.completeUpload(UPLOAD, COMPLETE),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.storageRepo.createVersion).not.toHaveBeenCalled();
+      });
+
+      it('refuses a provider version other than the declared one', async () => {
+        const d = build();
+        wire(d);
+        d.stored['obj/opaque-key'].providerVersionId = 'pv-otra';
+
+        await expect(
+          d.service.completeUpload(UPLOAD, COMPLETE),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.storageRepo.createVersion).not.toHaveBeenCalled();
+      });
+
+      it('refuses a provider URI that is not where the upload landed', async () => {
+        const d = build();
+        wire(d);
+
+        await expect(
+          d.service.completeUpload(UPLOAD, {
+            ...COMPLETE,
+            providerUri: 's3://otro-bucket/otra-clave',
+          }),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.storageRepo.createVersion).not.toHaveBeenCalled();
+      });
+
+      it('records the checksum as verified by the server, with provider data', async () => {
+        const d = build();
+        wire(d);
+
+        await d.service.completeUpload(UPLOAD, COMPLETE);
+
+        expect(d.reader.digest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            backendCode: 's3',
+            bucket: 'bucket',
+            key: 'obj/opaque-key',
+            providerVersionId: 'pv-1',
+          }),
+          '"etag-provider"',
+        );
+        expect(d.storageRepo.createChecksum).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            checksum: SHA,
+            source: 'server',
+            verificationStatus: 'verified',
+          }),
+        );
+        expect(d.storageRepo.createVersion).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ etag: '"etag-provider"' }),
+        );
+      });
+
+      it('does not complete when the provider cannot be read', async () => {
+        const d = build();
+        wire(d);
+        d.reader.stat.mockRejectedValue(
+          new ObjectContentUnavailableError('PROVIDER_ERROR'),
+        );
+
+        await expect(
+          d.service.completeUpload(UPLOAD, COMPLETE),
+        ).rejects.toBeInstanceOf(ServiceUnavailableException);
+        expect(d.storageRepo.createVersion).not.toHaveBeenCalled();
+      });
+    });
+
     it('fails when the upload does not exist', async () => {
       const d = build();
       d.storageRepo.findUploadForUpdate.mockResolvedValue(null);
@@ -278,13 +480,13 @@ describe('ObjectStorageService', () => {
 
   describe('createVersion (UC-60-03)', () => {
     const dto: any = {
-      sha256: 'b'.repeat(64),
+      sha256: SHA_V2,
       providerVersionId: 'pv-2',
       objectKey: 'obj/key-2',
       sizeBytes: '2048',
       etag: 'etag-2',
       mimeType: 'application/pdf',
-      providerUri: 's3://bucket/obj2',
+      providerUri: 's3://bucket/obj/key-2',
     };
 
     /**
@@ -322,6 +524,17 @@ describe('ObjectStorageService', () => {
         d.tx,
         expect.objectContaining({ supersedesVersionId: 'version-prev' }),
       );
+    });
+
+    it('refuses a version whose bytes do not match the declared sha (MCH-021)', async () => {
+      const d = build();
+      wire(d);
+      d.stored['obj/key-2'].sha256 = 'c'.repeat(64);
+
+      await expect(
+        d.service.createVersion(MANIFEST, dto),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.storageRepo.createVersion).not.toHaveBeenCalled();
     });
 
     it('refuses a namespace without versioning', async () => {
@@ -422,18 +635,293 @@ describe('ObjectStorageService', () => {
       d.storageRepo.findVersionById.mockResolvedValue({
         id: VERSION,
         objectManifestId: MANIFEST,
+        sha256: SHA,
+        objectKey: 'obj/opaque-key',
+        providerVersionId: 'pv-1',
+        mimeType: 'application/dicom',
+        sizeBytes: '1024',
       });
       d.storageRepo.findManifestById.mockResolvedValue({
         id: MANIFEST,
+        tenantId: TENANT,
+        patientProfileId: 'pat-1',
         lifecycleState: OBJECT_LIFECYCLE.ACTIVE,
         ...manifestOverrides,
       });
       d.storageRepo.findPrimaryLocation.mockResolvedValue({
         providerUri: 's3://bucket/obj',
         storageClass: 'standard',
+        namespaceId: NAMESPACE,
         ...locationOverrides,
       });
+      d.storageRepo.findNamespaceById.mockResolvedValue(activeNamespace());
     }
+
+    /** Emite y devuelve el token que viaja en la URL. */
+    async function emitir(d: ReturnType<typeof build>, body: any = dto) {
+      const res: any = await d.service.issueSignedUrl(VERSION, body, actor);
+      const token = String(res.url).split('/').pop() as string;
+      return { res, token };
+    }
+
+    // MCH-010: llegar al método con el rol no es ser dueño del objeto. El
+    // actor se ata al tenant y al paciente que lo custodia, y lo que no se
+    // autoriza responde igual que lo que no existe.
+    describe('vínculo del actor con el recurso (MCH-010)', () => {
+      it('does not serve an object of another tenant', async () => {
+        const d = build();
+        wire(d, { tenantId: '99999999-9999-9999-9999-999999999999' });
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        // Ni siquiera se llega a mirar dónde están los bytes.
+        expect(d.storageRepo.findPrimaryLocation).not.toHaveBeenCalled();
+      });
+
+      it('does not serve the object of a patient the actor cannot read', async () => {
+        const d = build();
+        wire(d);
+        d.clinicalAccess.assertPuedeLeerHistoria.mockRejectedValue(
+          new Error('403'),
+        );
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.clinicalAccess.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+          'pat-1',
+          actor,
+        );
+        expect(d.storageRepo.findPrimaryLocation).not.toHaveBeenCalled();
+      });
+
+      it('refuses a purpose the clinical policy does not know', async () => {
+        const d = build();
+        wire(d);
+
+        await expect(
+          d.service.issueSignedUrl(
+            VERSION,
+            { purposeOfUseCode: 'CURIOSITY' } as any,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.clinicalAccess.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+      });
+
+      it('answers a foreign object exactly like a missing one', async () => {
+        const ajeno = build();
+        wire(ajeno, { tenantId: '99999999-9999-9999-9999-999999999999' });
+        const inexistente = build();
+        wire(inexistente);
+        inexistente.storageRepo.findVersionById.mockResolvedValue(null);
+
+        const respuestas = await Promise.all(
+          [ajeno, inexistente].map((d) =>
+            d.service
+              .issueSignedUrl(VERSION, dto, actor)
+              .then(() => null)
+              .catch((e: any) => ({
+                status: e.getStatus?.(),
+                body: e.getResponse?.(),
+              })),
+          ),
+        );
+        expect(respuestas[0]).toEqual(respuestas[1]);
+      });
+
+      it('does not authorise an object without a patient beyond its tenant', async () => {
+        const d = build();
+        wire(d, { patientProfileId: undefined });
+
+        await d.service.issueSignedUrl(VERSION, dto, actor);
+
+        // Sin historia no hay política clínica que preguntar; queda la custodia.
+        expect(d.clinicalAccess.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+      });
+
+      it('re-checks the patient policy when the link is redeemed', async () => {
+        const d = build();
+        wire(d);
+        d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
+        const { token } = await emitir(d);
+        // El permiso se retira entre la emisión y el canje.
+        d.clinicalAccess.assertPuedeLeerHistoria.mockRejectedValue(
+          new Error('403'),
+        );
+
+        await expect(
+          (d.service as any).redeemSignedAccess(VERSION, token, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.reader.open).not.toHaveBeenCalled();
+      });
+
+      it('redeems with the purpose that was authorised, not a new one', async () => {
+        const d = build();
+        wire(d);
+        d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
+        const { token } = await emitir(d, {
+          purposeOfUseCode: 'EMERGENCY',
+        });
+
+        await (d.service as any).redeemSignedAccess(VERSION, token, actor);
+
+        const claims = JSON.parse(
+          Buffer.from(token.split('.')[0], 'base64url').toString('utf8'),
+        );
+        expect(claims.p).toBe('EMERGENCY');
+      });
+    });
+
+    // MCH-009: el enlace tiene que ser un acceso temporal de verdad, no la URI
+    // interna con una fecha decorativa al lado.
+    describe('acceso temporal real (MCH-009)', () => {
+      afterEach(() => jest.restoreAllMocks());
+
+      it('returns a signed link to the proxy and never the provider URI', async () => {
+        const d = build();
+        wire(d);
+
+        const { res, token } = await emitir(d);
+
+        expect(res.providerUri).toBeUndefined();
+        expect(JSON.stringify(res)).not.toContain('s3://');
+        expect(res.method).toBe('GET');
+        expect(res.url).toBe(
+          `/object-storage/versions/${VERSION}/content/${token}`,
+        );
+        expect(token.split('.')).toHaveLength(2);
+      });
+
+      it('caps the lifetime the client asks for', async () => {
+        const d = build();
+        wire(d);
+        const antes = Date.now();
+
+        const { res } = await emitir(d, { ...dto, expiresInSeconds: 86400 });
+
+        expect(new Date(res.expiresAt).getTime()).toBeLessThanOrEqual(
+          antes + 900 * 1000 + 1000,
+        );
+      });
+
+      it('serves the bytes of the signed version through the proxy', async () => {
+        const d = build();
+        wire(d);
+        const body = { pipe: mockFn() };
+        d.reader.open.mockResolvedValue({ body, contentLength: 1024 });
+        const { token } = await emitir(d);
+
+        const content: any = await (d.service as any).redeemSignedAccess(
+          VERSION,
+          token,
+          actor,
+        );
+
+        expect(content.body).toBe(body);
+        expect(content.mimeType).toBe('application/dicom');
+        expect(d.reader.open).toHaveBeenCalledWith(
+          expect.objectContaining({
+            bucket: 'bucket',
+            key: 'obj/opaque-key',
+            providerVersionId: 'pv-1',
+          }),
+        );
+      });
+
+      it('rejects the link once it expired', async () => {
+        const d = build();
+        wire(d);
+        const { res, token } = await emitir(d);
+        const vence = new Date(res.expiresAt).getTime();
+        jest.spyOn(Date, 'now').mockReturnValue(vence + 1000);
+
+        await expect(
+          (d.service as any).redeemSignedAccess(VERSION, token, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.reader.open).not.toHaveBeenCalled();
+      });
+
+      it('rejects the link for another version', async () => {
+        const d = build();
+        wire(d);
+        const { token } = await emitir(d);
+
+        await expect(
+          (d.service as any).redeemSignedAccess(
+            '55555555-5555-5555-5555-555555555555',
+            token,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.reader.open).not.toHaveBeenCalled();
+      });
+
+      it('rejects a tampered signature or payload', async () => {
+        const d = build();
+        wire(d);
+        const { token } = await emitir(d);
+        const [payload, firma] = token.split('.');
+        const otraFirma = `${payload}.${firma.slice(0, -2)}${firma.endsWith('AA') ? 'BB' : 'AA'}`;
+        const claims = JSON.parse(
+          Buffer.from(payload, 'base64url').toString('utf8'),
+        );
+        const otroPayload = `${Buffer.from(
+          JSON.stringify({ ...claims, exp: claims.exp + 3600 }),
+        ).toString('base64url')}.${firma}`;
+
+        for (const falso of [otraFirma, otroPayload, 'basura', '']) {
+          await expect(
+            (d.service as any).redeemSignedAccess(VERSION, falso, actor),
+          ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        }
+        expect(d.reader.open).not.toHaveBeenCalled();
+      });
+
+      it('rejects the link when redeemed by someone else', async () => {
+        const d = build();
+        wire(d);
+        const { token } = await emitir(d);
+
+        await expect(
+          (d.service as any).redeemSignedAccess(VERSION, token, {
+            id: 'user-2',
+            roles: ['SYSTEM'],
+          }),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      });
+
+      it('re-checks the object on redemption: pending deletion is not served', async () => {
+        const d = build();
+        wire(d);
+        const { token } = await emitir(d);
+        d.storageRepo.findManifestById.mockResolvedValue({
+          id: MANIFEST,
+          tenantId: TENANT,
+          patientProfileId: 'pat-1',
+          lifecycleState: OBJECT_LIFECYCLE.PENDING_DELETION,
+        });
+
+        await expect(
+          (d.service as any).redeemSignedAccess(VERSION, token, actor),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.reader.open).not.toHaveBeenCalled();
+      });
+
+      it('fails closed when the provider is down, without falling back to the URI', async () => {
+        const d = build();
+        wire(d);
+        d.reader.open.mockRejectedValue(
+          new ObjectContentUnavailableError('PROVIDER_ERROR'),
+        );
+        const { token } = await emitir(d);
+
+        await expect(
+          (d.service as any).redeemSignedAccess(VERSION, token, actor),
+        ).rejects.toBeInstanceOf(ServiceUnavailableException);
+      });
+    });
 
     it('issues the access and logs the emission', async () => {
       const d = build();
@@ -444,9 +932,10 @@ describe('ObjectStorageService', () => {
 
       const res = await d.service.issueSignedUrl(VERSION, dto, actor);
 
+      // MCH-009: ya no devuelve la URI del proveedor sino el enlace firmado.
       expect(res).toMatchObject({
         objectVersionId: VERSION,
-        providerUri: 's3://bucket/obj',
+        method: 'GET',
         keyVersion: 'v1',
       });
       expect(new Date(res.expiresAt).getTime()).toBeGreaterThan(Date.now());
@@ -454,18 +943,179 @@ describe('ObjectStorageService', () => {
       expect(d.logger.warn).toHaveBeenCalled();
     });
 
-    it('records the DICOM access when a study is given', async () => {
+    // MCH-020: la evidencia del acceso la decide y la nombra el servidor.
+    describe('auditoría del acceso (MCH-020)', () => {
+      it('records the DICOM access without any study given by the client', async () => {
+        const d = build();
+        wire(d);
+
+        const res = await d.service.issueSignedUrl(VERSION, dto, actor);
+
+        expect(res.accessLogId).toBe('access-1');
+        expect(d.dicomRepo.createAccessLog).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            studyInstanceUid: '1.2.840.10008.REAL',
+            seriesInstanceUid: '1.2.840.10008.REAL.1',
+            sopInstanceUid: '1.2.840.10008.REAL.1.1',
+            tenantId: TENANT,
+            principalId: actor.id,
+            outcome: 'allowed',
+          }),
+        );
+      });
+
+      it('ignores the study the client declares and logs the real one', async () => {
+        const d = build();
+        wire(d);
+
+        await d.service.issueSignedUrl(
+          VERSION,
+          { ...dto, studyInstanceUid: '6.6.6.SUPLANTADO' },
+          actor,
+        );
+
+        expect(d.dicomRepo.createAccessLog).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ studyInstanceUid: '1.2.840.10008.REAL' }),
+        );
+      });
+
+      it('seals the issuance in the audit chain, inside the same transaction', async () => {
+        const d = build();
+        wire(d);
+
+        await d.service.issueSignedUrl(VERSION, dto, actor);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({
+            action: 'OBJECT_ACCESS_ISSUED',
+            entityId: VERSION,
+            tenantId: TENANT,
+          }),
+        );
+      });
+
+      it('does not issue the access when the audit sink fails', async () => {
+        const d = build();
+        wire(d);
+        d.auditTrail.record.mockRejectedValueOnce(new Error('sink caído'));
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toThrow('sink caído');
+      });
+
+      it('audits a denied access even though the operation rolled back', async () => {
+        const d = build();
+        wire(d, { tenantId: '99999999-9999-9999-9999-999999999999' });
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({
+            action: 'OBJECT_ACCESS_DENIED',
+            entityId: VERSION,
+            success: false,
+          }),
+        );
+      });
+
+      it('audits a blocked object instead of reporting a false success', async () => {
+        const d = build();
+        wire(d, { lifecycleState: OBJECT_LIFECYCLE.CORRUPT });
+
+        await expect(
+          d.service.issueSignedUrl(VERSION, dto, actor),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({ action: 'OBJECT_ACCESS_DENIED' }),
+        );
+        // Y no se anunció una emisión que nunca ocurrió.
+        expect(d.dicomRepo.createAccessLog).not.toHaveBeenCalled();
+      });
+
+      it('audits the redemption as its own event', async () => {
+        const d = build();
+        wire(d);
+        d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
+        const { token } = await emitir(d);
+
+        await (d.service as any).redeemSignedAccess(VERSION, token, actor);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({ action: 'OBJECT_ACCESS_REDEEMED' }),
+        );
+      });
+
+      it('audits a redemption rejected by an invalid link', async () => {
+        const d = build();
+        wire(d);
+
+        await expect(
+          (d.service as any).redeemSignedAccess(VERSION, 'basura', actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({
+            action: 'OBJECT_ACCESS_REDEEM_DENIED',
+            success: false,
+          }),
+        );
+      });
+
+      it('an object outside the DICOM catalogue is still sealed in the chain', async () => {
+        const d = build();
+        wire(d);
+        d.dicomRepo.findDicomCoordinates.mockResolvedValue(null);
+
+        const res = await d.service.issueSignedUrl(VERSION, dto, actor);
+
+        expect(res.accessLogId).toBeUndefined();
+        expect(d.dicomRepo.createAccessLog).not.toHaveBeenCalled();
+        expect(d.auditTrail.record).toHaveBeenCalledWith(
+          d.tx,
+          actor,
+          expect.objectContaining({ action: 'OBJECT_ACCESS_ISSUED' }),
+        );
+      });
+    });
+
+    it('refuses a version whose checksum was only declared by the client (MCH-021)', async () => {
       const d = build();
       wire(d);
+      d.storageRepo.findChecksum.mockResolvedValue({
+        checksum: SHA,
+        source: 'client',
+        verificationStatus: 'verified',
+      });
 
-      const res = await d.service.issueSignedUrl(
-        VERSION,
-        { ...dto, studyInstanceUid: '1.2.3' },
-        actor,
-      );
+      await expect(
+        d.service.issueSignedUrl(VERSION, dto, actor as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
 
-      expect(res.accessLogId).toBe('access-1');
-      expect(d.dicomRepo.createAccessLog).toHaveBeenCalled();
+    it('refuses a version without any checksum (MCH-021)', async () => {
+      const d = build();
+      wire(d);
+      d.storageRepo.findChecksum.mockResolvedValue(null);
+
+      await expect(
+        d.service.issueSignedUrl(VERSION, dto, actor as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('refuses serving cold storage without rehydration', async () => {
