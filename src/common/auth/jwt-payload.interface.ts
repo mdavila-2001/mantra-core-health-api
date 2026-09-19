@@ -17,6 +17,13 @@ export interface JwtPayload {
    */
   roles: string[];
   /**
+   * Códigos de rol de negocio con ámbito de tenant, indexados por el tenant en
+   * el que fueron concedidos (MCH-001). Ver `AuthenticatedUser.scopedRoles`
+   * para la semántica completa: un código ausente de este mapa es una
+   * excepción global.
+   */
+  scopedRoles?: Record<string, string[]>;
+  /**
    * Tenants (organizaciones) de los que el usuario es miembro activo. El request
    * elige uno vía cabecera `X-Tenant-Id`, que debe pertenecer a esta lista; así
    * el scoping por tenant (RLS) no requiere un lookup por request.
