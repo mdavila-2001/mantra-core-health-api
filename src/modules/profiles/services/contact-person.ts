@@ -1,6 +1,7 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { CONCEPTS } from '../../../common';
+import type { DeclaredPersonName } from '../person-name';
 import type {
   ContactPointsRepository,
   IdentifiersRepository,
@@ -15,10 +16,16 @@ export interface ContactPersonRepos {
   readonly contactPoints: ContactPointsRepository;
 }
 
-/** Lo que el formulario declara de una persona de contacto. */
-export interface ContactPersonData {
-  /** Nombre completo, tal como lo escribieron. */
-  readonly displayName: string;
+/**
+ * Lo que el formulario declara de una persona de contacto.
+ *
+ * El nombre se declara en partes (`DeclaredPersonName`), igual que el resto
+ * de las altas: `PersonsRepository.create` las guarda tal cual en sus
+ * columnas y compone `display_name` sola cuando no viene explícito. Un
+ * llamador que todavía sólo tiene un nombre completo pasa `displayName` —
+ * queda como la forma anterior, no como la única.
+ */
+export interface ContactPersonData extends DeclaredPersonName {
   /** Correo de contacto; siempre se pide. */
   readonly email: string;
   /** Celular, para las gerencias. */
@@ -59,13 +66,15 @@ export interface CreatedContactPerson {
  * paciente», que es exactamente lo que el JSDoc de `guardian-related-person`
  * explica para el tutor.
  *
- * ## Por qué `display_name` y no las cuatro partes del nombre
+ * ## Por qué las cuatro partes del nombre y no sólo `display_name`
  *
- * El formulario pide «nombre completo» en un solo campo. Partirlo en nombre,
- * segundo nombre, apellido y apellido materno sería adivinar dónde corta —y
- * «Lic. Mariana Siles Justiniano» no se parte igual que «María de los
- * Ángeles»—. `PersonsRepository.create` ya compone el display a partir de las
- * partes cuando existen; acá se le da directo el único dato real.
+ * El formulario pregunta cada parte por separado — nombre, segundo nombre,
+ * apellido paterno, apellido materno — y las manda así; partir un «nombre
+ * completo» a ciegas ya no hace falta acá. `PersonsRepository.create` guarda
+ * las partes en sus columnas y compone `display_name` sola cuando no viene
+ * explícito. `displayName` sigue siendo un dato aceptado en esta interfaz
+ * —la forma anterior, que el DTO del alta todavía admite por compatibilidad—
+ * y, si viene, manda tal cual.
  *
  * ## Por qué no se busca un duplicado del documento
  *
@@ -93,6 +102,10 @@ export function createContactPerson(
   data: ContactPersonData,
 ): CreatedContactPerson {
   const persona = repos.persons.create(tx, {
+    name: data.name,
+    middleName: data.middleName,
+    lastName: data.lastName,
+    motherLastName: data.motherLastName,
     displayName: data.displayName,
     personStatusConceptId: PROF.PERSON_ACTIVE,
     vitalStatusConceptId: PROF.VITAL_ALIVE,

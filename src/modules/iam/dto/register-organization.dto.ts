@@ -100,20 +100,81 @@ export class RegisterOrganizationLegalDocumentsDto {
  * el correo de tres cargos — general, comercial y marketing (ASEGURADORA
  * 1.9-1.17) —. No son cuentas de la plataforma: son a quién llamar para un
  * convenio, una conciliación o un siniestro.
+ *
+ * ## El nombre se declara en partes
+ *
+ * Mismo criterio que `RegisterOrganizationOwnerDto`: `name`/`lastName` son
+ * obligatorios salvo que venga `fullName`, que es la forma anterior y sigue
+ * aceptada para no romper a quien ya integró contra este endpoint. No hay
+ * `thirdName` — ninguna persona de este alta lo tiene en el contrato — así
+ * que un tercer nombre u otros se pliega en `middleName` antes de enviarlo,
+ * como ya hace el cliente con el owner.
  */
 export class RegisterOrganizationExecutiveContactDto {
   /**
-   * Nombre completo del ejecutivo, tal como lo escriban.
+   * Nombre de pila del ejecutivo.
+   *
+   * Obligatorio salvo que se envíe `fullName`, la forma anterior de declarar
+   * el nombre.
    */
-  @ApiProperty({
-    description: 'Nombre completo del ejecutivo',
+  @ApiPropertyOptional({ maxLength: 100, example: 'Carlos' })
+  @ValidateIf(
+    (dto: RegisterOrganizationExecutiveContactDto) =>
+      dto.fullName === undefined,
+  )
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  name?: string;
+
+  /**
+   * Segundo nombre. Opcional: mucha gente no tiene.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Eduardo' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  middleName?: string;
+
+  /**
+   * Apellido paterno. Mismo criterio que `name`.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Mendoza' })
+  @ValidateIf(
+    (dto: RegisterOrganizationExecutiveContactDto) =>
+      dto.fullName === undefined,
+  )
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  lastName?: string;
+
+  /**
+   * Apellido materno. Opcional: no todas las jurisdicciones lo emiten.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Rivero' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  motherLastName?: string;
+
+  /**
+   * Nombre completo del ejecutivo, tal como lo escriban.
+   *
+   * Forma anterior de declarar el nombre. Preferí `name`/`lastName`: si viene,
+   * manda tal cual; si no, se compone con las partes.
+   */
+  @ApiPropertyOptional({
+    description: 'Nombre completo del ejecutivo (forma anterior; preferí name/lastName)',
     maxLength: 200,
     example: 'Carlos Mendoza Rivero',
+    deprecated: true,
   })
+  @IsOptional()
   @IsString()
   @MinLength(3)
   @MaxLength(200)
-  fullName!: string;
+  fullName?: string;
 
   /**
    * Celular de contacto, con su prefijo internacional.
@@ -158,17 +219,69 @@ export class RegisterOrganizationExecutiveContactDto {
  */
 export class RegisterOrganizationLegalRepresentativeDto {
   /**
-   * Nombre completo del representante legal.
+   * Nombre de pila del representante legal.
+   *
+   * Obligatorio salvo que se envíe `fullName`, la forma anterior de declarar
+   * el nombre. Sin `thirdName` en el contrato: se pliega en `middleName`.
    */
-  @ApiProperty({
-    description: 'Nombre completo del representante legal',
+  @ApiPropertyOptional({ maxLength: 100, example: 'Mariana' })
+  @ValidateIf(
+    (dto: RegisterOrganizationLegalRepresentativeDto) =>
+      dto.fullName === undefined,
+  )
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  name?: string;
+
+  /**
+   * Segundo nombre. Opcional: mucha gente no tiene.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Elena' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  middleName?: string;
+
+  /**
+   * Apellido paterno. Mismo criterio que `name`.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Siles' })
+  @ValidateIf(
+    (dto: RegisterOrganizationLegalRepresentativeDto) =>
+      dto.fullName === undefined,
+  )
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  lastName?: string;
+
+  /**
+   * Apellido materno. Opcional: no todas las jurisdicciones lo emiten.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Justiniano' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  motherLastName?: string;
+
+  /**
+   * Nombre completo del representante legal.
+   *
+   * Forma anterior de declarar el nombre. Preferí `name`/`lastName`: si viene,
+   * manda tal cual; si no, se compone con las partes.
+   */
+  @ApiPropertyOptional({
+    description: 'Nombre completo del representante legal (forma anterior; preferí name/lastName)',
     maxLength: 200,
     example: 'Mariana Siles Justiniano',
+    deprecated: true,
   })
+  @IsOptional()
   @IsString()
   @MinLength(3)
   @MaxLength(200)
-  fullName!: string;
+  fullName?: string;
 
   /**
    * Documento de identidad, tal como figura en el carnet.
