@@ -10,9 +10,18 @@ import {
   CONCEPTS,
   SEED,
   canonicalJson,
-  deriveWebhookSecret,
   signPayload,
 } from '../../../src/common';
+
+/**
+ * MCH-019 · el callback ya no se firma con el secreto derivado por gateway: el
+ * servicio resuelve `gateway_connections.webhook_secret_ref`. La variable se
+ * define antes de arrancar la app porque la referencia se lee del entorno del
+ * proceso (en despliegue, del gestor de secretos que lo alimenta).
+ */
+const CONNECTION_SECRET_ENV = 'WEBHOOK_SECRET_MCH003';
+const CONNECTION_SECRET = 'secreto-de-conexion-mch003-para-integracion';
+process.env[CONNECTION_SECRET_ENV] = CONNECTION_SECRET;
 
 /**
  * MCH-003 · contención de pagos sin gateway, contra PostgreSQL.
@@ -31,6 +40,7 @@ describe('MCH-003 · pagos sin gateway no fabrican estados (integración)', () =
   const http = () => request(ctx.app.getHttpServer());
   const sufijo = randomUUID().slice(0, 8);
   const gatewayId = randomUUID();
+  const connectionId = randomUUID();
   let intentes = 0;
 
   const sql = <T = Record<string, unknown>>(
@@ -46,6 +56,7 @@ describe('MCH-003 · pagos sin gateway no fabrican estados (integración)', () =
       .send({
         tenantId: SEED.tenantId,
         gatewayId,
+        gatewayConnectionId: connectionId,
         amount: '150.00',
         currency: 'BOB',
         purpose: 'OTHER',
@@ -75,7 +86,7 @@ describe('MCH-003 · pagos sin gateway no fabrican estados (integración)', () =
   ) {
     const body = { gatewayTransactionRef: ref, outcome };
     const signature = signPayload(
-      deriveWebhookSecret('payments-gateway', gatewayId),
+      CONNECTION_SECRET,
       canonicalJson({ ...body, authorizationCode: undefined }),
     );
     return http()
@@ -113,6 +124,25 @@ describe('MCH-003 · pagos sin gateway no fabrican estados (integración)', () =
         `MCH003-${sufijo}`,
         `Gateway de prueba MCH-003 ${sufijo}`,
         CONCEPTS.FEE_TYPE_GATEWAY,
+        CONCEPTS.STATE_ACTIVE,
+        TEST_ADMIN_ID,
+      ],
+    );
+    // MCH-019: la conexión aporta el secreto con que el proveedor firma sus
+    // callbacks. Se guarda la *referencia*, nunca la clave literal.
+    await sql(
+      `insert into payments.gateway_connections
+         (id, gateway_id, tenant_id, environment_concept_id, merchant_ref,
+          webhook_secret_ref, state_concept_id, created_at, updated_at,
+          created_by_user_id, row_version)
+       values (?, ?, ?, ?, ?, ?, ?, now(), now(), ?, 1)`,
+      [
+        connectionId,
+        gatewayId,
+        SEED.tenantId,
+        CONCEPTS.QA_ENV_DEV,
+        `MCH003-${sufijo}`,
+        `env:${CONNECTION_SECRET_ENV}`,
         CONCEPTS.STATE_ACTIVE,
         TEST_ADMIN_ID,
       ],
