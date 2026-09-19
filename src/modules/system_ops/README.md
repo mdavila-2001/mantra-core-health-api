@@ -56,8 +56,10 @@ remediación y publicación de drafts genéricos.
 - **Segregación de funciones**: el verificador de una acción no puede ser el asignado.
 - **Cierre condicional**: un hallazgo se cierra y un plan se completa solo cuando
   todas las acciones asociadas están VERIFIED.
-- **Backup**: `rpo_seconds <= rto_seconds`; la prueba de restauración compara
-  medidos vs objetivo y señala `objectiveBreached`.
+- **Backup**: RPO y RTO son objetivos de negocio independientes, sin regla
+  cruzada entre ellos (RPO puede superar a RTO legítimamente); la prueba de
+  restauración compara medidos vs objetivo y devuelve `objectiveStatus`
+  (`MET`/`BREACHED`/`NOT_MEASURED` — sin medición no se afirma cumplimiento).
 - Cada cambio de gobierno deja rastro en `governance_change_log`; los barridos y
   publicaciones dejan `record_revisions` (append-only).
 

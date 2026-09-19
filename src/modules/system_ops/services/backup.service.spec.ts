@@ -35,14 +35,19 @@ function build() {
 
 describe('BackupService', () => {
   describe('createPolicy (UC-11-09)', () => {
-    it('rejects when rpo > rto', async () => {
+    // MCH-022: RPO (pérdida de datos tolerada) y RTO (tiempo de
+    // indisponibilidad tolerado) son dimensiones distintas del negocio. Una
+    // organización puede aceptar perder una hora de datos y a la vez exigir
+    // recuperación en quince minutos — RPO > RTO ahí es una política válida,
+    // no un error.
+    it('accepts RPO=3600 con RTO=900: no hay regla de negocio que lo prohíba', async () => {
       const d = build();
-      await expect(
-        d.service.createPolicy(
-          { rpoSeconds: 100, rtoSeconds: 10 } as any,
-          actor,
-        ),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      d.repo.createPolicy.mockReturnValue({ id: 'bp1' });
+      const res = await d.service.createPolicy(
+        { rpoSeconds: 3600, rtoSeconds: 900 } as any,
+        actor,
+      );
+      expect(res).toEqual({ id: 'bp1' });
     });
 
     it('creates the policy', async () => {
@@ -85,10 +90,111 @@ describe('BackupService', () => {
           backupPolicyId: 'bp1',
           outcomeConceptId: 'o',
           measuredRpoSeconds: 120,
+          measuredRtoSeconds: 100,
         },
         actor,
       );
-      expect(res.objectiveBreached).toBe(true);
+      expect(res.objectiveStatus).toBe('BREACHED');
+    });
+
+    // MCH-023: sin medición, el resultado tiene que ser desconocido, nunca
+    // «cumple». Antes el `&&` de la comparación hacía que faltar una métrica
+    // se leyera exactamente igual que cumplirla.
+    it('sin ninguna métrica medida, el resultado es NOT_MEASURED, no MET', async () => {
+      const d = build();
+      d.repo.findPolicyById.mockResolvedValue({
+        id: 'bp1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        rpoSeconds: 60,
+        rtoSeconds: 600,
+      });
+      d.repo.createTestRun.mockReturnValue({
+        id: 'rt1',
+        outcomeConceptId: 'o',
+      });
+
+      const res = await d.service.recordRestoreTest(
+        { backupPolicyId: 'bp1', outcomeConceptId: 'o' },
+        actor,
+      );
+
+      expect(res.objectiveStatus).toBe('NOT_MEASURED');
+    });
+
+    it('con RPO medido y conforme pero RTO sin medir: NOT_MEASURED, no MET', async () => {
+      const d = build();
+      d.repo.findPolicyById.mockResolvedValue({
+        id: 'bp1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        rpoSeconds: 60,
+        rtoSeconds: 600,
+      });
+      d.repo.createTestRun.mockReturnValue({
+        id: 'rt1',
+        outcomeConceptId: 'o',
+      });
+
+      const res = await d.service.recordRestoreTest(
+        {
+          backupPolicyId: 'bp1',
+          outcomeConceptId: 'o',
+          measuredRpoSeconds: 30,
+        },
+        actor,
+      );
+
+      expect(res.objectiveStatus).toBe('NOT_MEASURED');
+    });
+
+    it('con RTO sin medir pero RPO medido y ya incumplido: BREACHED gana, no se disuelve en NOT_MEASURED', async () => {
+      const d = build();
+      d.repo.findPolicyById.mockResolvedValue({
+        id: 'bp1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        rpoSeconds: 60,
+        rtoSeconds: 600,
+      });
+      d.repo.createTestRun.mockReturnValue({
+        id: 'rt1',
+        outcomeConceptId: 'o',
+      });
+
+      const res = await d.service.recordRestoreTest(
+        {
+          backupPolicyId: 'bp1',
+          outcomeConceptId: 'o',
+          measuredRpoSeconds: 90,
+        },
+        actor,
+      );
+
+      expect(res.objectiveStatus).toBe('BREACHED');
+    });
+
+    it('con las dos métricas medidas y dentro de objetivo: MET', async () => {
+      const d = build();
+      d.repo.findPolicyById.mockResolvedValue({
+        id: 'bp1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        rpoSeconds: 60,
+        rtoSeconds: 600,
+      });
+      d.repo.createTestRun.mockReturnValue({
+        id: 'rt1',
+        outcomeConceptId: 'o',
+      });
+
+      const res = await d.service.recordRestoreTest(
+        {
+          backupPolicyId: 'bp1',
+          outcomeConceptId: 'o',
+          measuredRpoSeconds: 30,
+          measuredRtoSeconds: 300,
+        },
+        actor,
+      );
+
+      expect(res.objectiveStatus).toBe('MET');
     });
   });
 });
