@@ -7,8 +7,7 @@
 # POR QUÉ EXISTE
 # --------------
 # El esquema relacional vive en OTRO repositorio —`mantra-core-health-model`,
-# que se clona como HERMANO de éste (ver el commit 19ef5a17, que cerró B-2)— y
-# `docker-compose.yml` lo monta desde `../mantra-core-health-model/SQL`.
+# que se clona como HERMANO de éste (ver el commit 19ef5a17, que cerró B-2).
 #
 # Que el modelo tenga repositorio propio arregla el versionado, pero NO arregla
 # el despliegue: una plataforma como Coolify clona ESTE repositorio y nada más.
@@ -16,11 +15,12 @@
 # `/init/SQL` vacío, la base queda sin tablas y la aplicación responde 500 en la
 # primera escritura.
 #
-# `docker-compose.yml` (desarrollo local) sigue montando el repositorio del
-# modelo, para que quien edita el DDL vea el efecto sin copiar nada.
-# `docker-compose.coolify.yml` (despliegue) monta `./database/SQL`. Este script
-# es el puente entre los dos, y `--check` es la comprobación que impide
-# desplegar una copia atrasada.
+# `docker-compose.yml` (desarrollo local) monta por defecto la copia versionada
+# (`./database/SQL`, `./database/NoSQL`); quien edita el DDL en caliente exporta
+# `SQL_MODEL_DIR`/`NOSQL_MODEL_DIR` apuntando al repositorio del modelo para
+# verlo sin copiar nada. `docker-compose.coolify.yml` (despliegue) monta
+# `./database/SQL`. Este script es el puente entre las dos copias, y `--check`
+# es la comprobación que impide desplegar una copia atrasada.
 #
 #   bash scripts/db/vendor-ddl.sh            # copia el modelo a database/
 #   bash scripts/db/vendor-ddl.sh --check    # falla si difieren

@@ -91,10 +91,11 @@ CLAUDE.md
 
 # database/ de la RAÍZ — modelo canónico (.puml), DDL y mappings NoSQL. SÍ se
 # versiona: `docker-compose.yml` monta `./database/SQL` en `postgres-init` y
-# `./database/NoSQL` en `mongo-init`, así que un clon sin esta carpeta levanta
-# los contenedores de inicialización sin nada que aplicar. Mientras vivió solo
-# en local, cualquiera que clonara el repo se quedaba sin el esquema y sin los
-# índices de búsqueda, que es exactamente el bloqueo que reportó el equipo.
+# `./database/NoSQL` en `postgres-init`, `mongo-init` y `opensearch-init`, así
+# que un clon sin esta carpeta levanta los contenedores de inicialización sin
+# nada que aplicar. Mientras vivió solo en local, cualquiera que clonara el
+# repo se quedaba sin el esquema y sin los índices de búsqueda, que es
+# exactamente el bloqueo que reportó el equipo.
 # (Son 6,6 MB de texto: DDL, mappings y modelo. Sin dumps ni datos de paciente.)
 
 # docs/ SÍ se versiona: es el portal de documentación técnica que construye

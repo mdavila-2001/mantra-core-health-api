@@ -19,8 +19,30 @@ versiona»); lo que faltaba era la carpeta.
 
 | Compose | Monta | Para qué |
 |---|---|---|
-| `docker-compose.yml` (desarrollo) | `../mantra-core-health-model/{SQL,NoSQL}` | Que quien edita el DDL vea el efecto sin copiar nada |
+| `docker-compose.yml` (desarrollo) | `./database/{SQL,NoSQL}` por defecto | Que levantar el perfil `local-db` funcione con solo clonar este repo |
 | `docker-compose.coolify.yml` (despliegue) | `./database/SQL`, `./database/NoSQL` | Que el servidor tenga el esquema con solo clonar el repo |
+
+### Editar el modelo y verlo en el contenedor
+
+Para que `docker-compose.yml` aplique el modelo en caliente (sin pasar por
+`yarn db:vendor` en cada cambio), exportar `SQL_MODEL_DIR`/`NOSQL_MODEL_DIR`
+apuntando al repositorio hermano antes de levantar el perfil `local-db`:
+
+```bash
+export SQL_MODEL_DIR=../mantra-core-health-model/SQL
+export NOSQL_MODEL_DIR=../mantra-core-health-model/NoSQL
+docker compose --profile local-db up -d postgres postgres-init mongodb mongo-init opensearch opensearch-init
+```
+
+En Windows, la alternativa (`yarn db:vendor`) necesita `rsync` en WSL — no
+corre en PowerShell ni en Git Bash a secas.
+
+## Verificar una base limpia
+
+`yarn db:verify-clean-init` levanta un proyecto compose efímero, aplica el DDL
+por defecto, corre los seeds y revisa la fidelidad del ORM contra el esquema
+resultante. Declara como heredadas las diferencias de `pharma_lab` y
+`polyglot_storage` (ver más abajo) y falla ante cualquier otra.
 
 ## Cómo se mantiene al día
 
