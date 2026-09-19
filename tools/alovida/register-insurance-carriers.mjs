@@ -76,6 +76,18 @@ const MAIL_DOMAIN = 'ejemplo-alovida.test';
 /** Sufijo del código: hace obvio, al leer la tabla, cuál nació de un alta y cuál del padrón. */
 const SIGNUP_SUFFIX = '_SIGNUP';
 
+/**
+ * Pausa entre altas, en milisegundos.
+ *
+ * `POST /iam/auth/register-organization` está limitado a **10 por minuto**
+ * (`@Throttle` del controlador): las diecisiete seguidas se caen con 429 a la
+ * mitad. Una cada 7 s entra cómoda por debajo del límite y la tanda completa
+ * tarda unos dos minutos.
+ */
+const PAUSA_MS = Number(process.env.CARRIER_DELAY_MS ?? 7000);
+
+const esperar = (ms) => new Promise((listo) => setTimeout(listo, ms));
+
 function parseArgs(argv) {
   const args = { limit: 1, all: false, only: null };
   for (let i = 0; i < argv.length; i += 1) {
@@ -314,14 +326,39 @@ async function main() {
 
   const cuentas = [];
   const fallos = [];
+  const yaExistian = [];
+  let primera = true;
   for (const carrier of elegidas) {
+    if (!primera) await esperar(PAUSA_MS);
+    primera = false;
     const subida = await uploadPowerOfAttorney(carrier.razonSocial, carrier.code);
     if (!subida.fileId) {
       console.log(`  aviso: ${carrier.sigla} — el poder no se pudo subir (${subida.status}); `
         + 'se registra sin representante legal');
     }
     const payload = payloadDe(carrier, subida.fileId);
-    const alta = await api('/iam/auth/register-organization', { body: payload });
+    let alta = await api('/iam/auth/register-organization', { body: payload });
+    // 429: se pasó el límite igual (otra cosa golpeando la API). Se espera el
+    // resto del minuto y se reintenta UNA vez; si vuelve a fallar, se informa.
+    if (alta.status === 429) {
+      console.log(`  429      ${payload.organization.code} — esperando 60 s y reintentando`);
+      await esperar(60_000);
+      alta = await api('/iam/auth/register-organization', { body: payload });
+    }
+    // 409: ya estaba dada de alta por una corrida anterior. No es un fallo: la
+    // credencial sirve igual, así que entra en la tabla como las demás.
+    if (alta.status === 409) {
+      yaExistian.push(payload.organization.code);
+      console.log(`  ya está  ${payload.organization.code.padEnd(58)} ${payload.owner.email}`);
+      cuentas.push({
+        code: payload.organization.code,
+        nit: carrier.nit,
+        email: payload.owner.email,
+        legalName: carrier.razonSocial,
+        conRepresentante: Boolean(subida.fileId),
+      });
+      continue;
+    }
     if (alta.status === 201 || alta.status === 200) {
       cuentas.push({
         code: payload.organization.code,
@@ -339,7 +376,7 @@ async function main() {
 
   if (cuentas.length) writeCache(target, { target, generado: new Date().toISOString(), cuentas });
 
-  console.log(`\nAltas: ${cuentas.length} · fallos: ${fallos.length}`);
+  console.log(`\nAltas: ${cuentas.length - yaExistian.length} nuevas · ${yaExistian.length} ya existían · fallos: ${fallos.length}`);
   if (cuentas.length) {
     console.log(`Contraseña de todas: ${PASSWORD}`);
     console.log('Entrar con el CORREO del owner en el login de la app.');
