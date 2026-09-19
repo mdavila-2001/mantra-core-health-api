@@ -71,7 +71,7 @@ antes de pedir el merge.
 - **Integración** (`test/integration/hardening/mch-001.int-spec.ts`, escrito y commiteado, **no
   ejecutado con éxito por el bloqueo de arriba**): dos organizaciones reales, un profesional con
   `CLINICIAN` asignado por `authz` sólo en el tenant A y membresía ordinaria en B, contra
-  `GET /chart/templates` (gateada por `@Roles('CLINICIAN', ...)`). Falta correrla.
+  `GET /charts/templates` (gateada por `@Roles('CLINICIAN', ...)`). Falta correrla.
 
 ## Próximo paso exacto
 

@@ -2,7 +2,13 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { CONCEPTS } from '../../../src/common';
 import { DIR } from '../../../src/modules/directory/directory.concepts';
-import { bootstrapTestApp, bearer, type TestContext } from '../harness';
+import { PROF } from '../../../src/modules/profiles/profiles.concepts';
+import {
+  bootstrapTestApp,
+  bearer,
+  camposObligatoriosDePaciente,
+  type TestContext,
+} from '../harness';
 
 /**
  * MCH-001 · un rol con ámbito de tenant no autoriza fuera de ese tenant.
@@ -10,19 +16,23 @@ import { bootstrapTestApp, bearer, type TestContext } from '../harness';
  * Un profesional recibe `CLINICIAN` sólo en el tenant A (asignación de
  * `authz`, con `tenantId`). Además tiene membresía ordinaria en B — la
  * pertenencia a una organización, por sí sola, no concede el rol. La misma
- * ruta (`GET /chart/templates`, gateada por `@Roles('CLINICIAN', ...)`) tiene
+ * ruta (`GET /charts/templates`, gateada por `@Roles('CLINICIAN', ...)`) tiene
  * que permitirlo en A y denegarlo en B.
  *
  * No trunca ni borra: cada organización y usuario lleva un sufijo propio.
  */
 describe('MCH-001 · roles con ámbito de tenant (integración)', () => {
   let ctx: TestContext;
+  let camposDePaciente: Awaited<
+    ReturnType<typeof camposObligatoriosDePaciente>
+  >;
   const http = () => request(ctx.app.getHttpServer());
   const sufijo = randomUUID().slice(0, 8);
   const PASSWORD = 'S3cret-passw0rd';
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
   });
 
   afterAll(async () => {
@@ -46,7 +56,9 @@ describe('MCH-001 · roles con ámbito de tenant (integración)', () => {
         organization: {
           code: `MCH001_${codigo}_${sufijo}`,
           legalName: `Clínica ${codigo} ${sufijo} S.R.L.`,
-          tenantType: 'PROVIDER',
+          tenantType: 'HOSPITAL',
+          countryConceptId: CONCEPTS.COUNTRY_BO,
+          jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
         },
         owner: { email, password: PASSWORD, name: 'Owner', lastName: codigo },
       })
@@ -54,10 +66,10 @@ describe('MCH-001 · roles con ámbito de tenant (integración)', () => {
     return { tenantId: res.body.tenantId, ownerUserId: res.body.ownerUserId };
   }
 
-  async function login(email: string): Promise<string> {
+  async function login(nationalId: string): Promise<string> {
     const res = await http()
       .post('/iam/auth/login')
-      .send({ email, password: PASSWORD })
+      .send({ nationalId, password: PASSWORD })
       .expect(200);
     return res.body.accessToken as string;
   }
@@ -66,20 +78,24 @@ describe('MCH-001 · roles con ámbito de tenant (integración)', () => {
     const a = await registrarOrganizacion(`A${sufijo.slice(0, 3)}`);
     const b = await registrarOrganizacion(`B${sufijo.slice(0, 3)}`);
 
-    // Profesional nuevo: se registra sin organización propia, sólo la cuenta.
+    // Cuenta nueva sin ningún rol clínico global: si se usara un profesional
+    // registrado, el rol global PRACTITIONER ya autorizaría en cualquier
+    // tenant y el caso no probaría nada (charts/templates también lo acepta).
+    // Una paciente sin ningún grant de authz es el sujeto correcto: la única
+    // vía de autorización posible es la asignación con ámbito que se prueba.
+    const nationalId = `MCH001-${sufijo}`;
     const email = `mch001-medico-${sufijo}@example.test`;
     await http()
-      .post('/iam/auth/register-practitioner')
+      .post('/iam/auth/register-patient')
       .send({
-        email,
+        ...camposDePaciente,
+        nationalId,
         password: PASSWORD,
-        name: 'Medico',
-        lastName: 'MCH001',
-        licenseNumber: `LIC-MCH001-${sufijo}`,
-        credentialNumber: `CRED-MCH001-${sufijo}`,
+        displayName: 'Paciente MCH-001',
+        email,
       })
       .expect(201);
-    const preToken = await login(email);
+    const preToken = await login(nationalId);
     const claims = JSON.parse(
       Buffer.from(preToken.split('.')[1], 'base64url').toString('utf8'),
     );
@@ -87,7 +103,7 @@ describe('MCH-001 · roles con ámbito de tenant (integración)', () => {
 
     // Antes de tocar authz: sin rol clínico en ningún tenant, la ruta rechaza.
     await http()
-      .get('/chart/templates')
+      .get('/charts/templates')
       .set(bearer(preToken))
       .set('X-Tenant-Id', a.tenantId)
       .expect(403);
@@ -120,7 +136,7 @@ describe('MCH-001 · roles con ámbito de tenant (integración)', () => {
       [medicoId, role.id, a.tenantId, CONCEPTS.STATE_ACTIVE],
     );
 
-    const token = await login(email);
+    const token = await login(nationalId);
     const tokenClaims = JSON.parse(
       Buffer.from(token.split('.')[1], 'base64url').toString('utf8'),
     );
@@ -131,7 +147,7 @@ describe('MCH-001 · roles con ámbito de tenant (integración)', () => {
 
     // Permitido en el tenant donde se concedió.
     await http()
-      .get('/chart/templates')
+      .get('/charts/templates')
       .set(bearer(token))
       .set('X-Tenant-Id', a.tenantId)
       .expect(200);
@@ -139,7 +155,7 @@ describe('MCH-001 · roles con ámbito de tenant (integración)', () => {
     // Denegado en el tenant donde sólo hay membresía ordinaria — el defecto
     // que describe MCH-001 era exactamente que esto pasara con 200.
     await http()
-      .get('/chart/templates')
+      .get('/charts/templates')
       .set(bearer(token))
       .set('X-Tenant-Id', b.tenantId)
       .expect(403);
