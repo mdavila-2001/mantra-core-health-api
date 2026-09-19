@@ -287,7 +287,10 @@ jobs:
         run: yarn db:provision:dev
 
       # Verificación real del mínimo privilegio (§54): no inspecciona los GRANT
-      # del catálogo, ejecuta las operaciones y exige 42501.
+      # del catálogo, ejecuta las operaciones y exige 42501. Corre primero y
+      # sola porque es la más barata y la más específica: si el rol de
+      # aplicación quedó mal aprovisionado, mejor enterarse acá que a mitad de
+      # la suite completa de abajo.
       - name: Pruebas de privilegios — el lector no puede escribir
         env:
           DB_HOST: localhost
@@ -298,6 +301,60 @@ jobs:
           POSTGRES_WRITER_PASSWORD: ci-writer-ephemeral
           POSTGRES_READER_PASSWORD: ci-reader-ephemeral
         run: yarn test:integration --testPathPatterns=postgres-privileges
+
+      # MCH-026 — hasta acá esto era lo único que corría de integración: un
+      # filtro de un solo archivo. Las otras 93 suites (RLS por tenant, DI
+      # entre los 60 módulos, contratos HTTP, jobs, FKs) no se ejecutaban en
+      # ningún merge — sólo en la máquina de quien se acordara de correrlas.
+      #
+      # Va DESPUÉS de "Generar contrato OpenAPI real desde el código" y no
+      # antes, por el mismo motivo que "Aprovisionar roles de aplicación": ese
+      # paso es el que arranca AppModule completo y materializa los 58
+      # esquemas / 1212 tablas. Antes de eso no hay nada sobre lo que una
+      # migración o una consulta puedan operar.
+      #
+      # `--ci` evita que Jest intente escribir snapshots nuevos en un runner
+      # efímero (fallaría igual, pero con un mensaje que no dice por qué).
+      # `--runInBand` porque `test/jest-integration.json` ya fija
+      # `maxWorkers: 1`: las suites comparten la misma base y no se truncan
+      # entre corridas (cada una sufija sus propios datos), así que correrlas
+      # en paralelo arriesgaría que una lea filas a medio escribir de otra.
+      #
+      # Corre COMPLETA en cada PR, no un subconjunto: es el único gate de
+      # integración que existe hoy — `dev`/`master` no exigen ningún check
+      # (ver LEEME-PRIMERO) — y recortarla dejaría exactamente el hueco que
+      # esta ficha vino a cerrar. Si en un runner hospedado real el tiempo o
+      # el costo de Actions la vuelve impracticable por PR, la salida
+      # documentada (no aplicada acá) es partirla en un subconjunto rápido por
+      # PR y la completa contra `dev`; no se tocan los triggers de este
+      # workflow en esta ficha porque es justo lo que el PR #424 tiene en
+      # danza. Detalle y comandos equivalentes para correrla fuera de CI en
+      # docs/operations/ci-integration-recipe.md.
+      - name: Suite de integración completa (MCH-026)
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: mantra
+          DB_PASSWORD: mantra
+          DB_NAME: mantra_redesa_health
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          POSTGRES_USER: mantra
+          POSTGRES_PASSWORD: mantra
+          POSTGRES_DB: mantra_redesa_health
+          MONGODB_URI: mongodb://localhost:27017/mantra_redesa_health_document_store
+          MONGO_DB: mantra_redesa_health_document_store
+          REDIS_HOST: localhost
+          REDIS_PORT: "6379"
+          OPENSEARCH_NODE: http://localhost:9200
+          MINIO_ENDPOINT: localhost
+          MINIO_PORT: "9000"
+          MINIO_ACCESS_KEY: mantra
+          MINIO_SECRET_KEY: mantra12345678
+          MINIO_BUCKET: mantra-redesa-health-files-ci
+          JWT_SECRET: ci-only-secret-not-a-real-credential
+          MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
+        run: yarn test:integration --ci --runInBand
 
       - name: Generar documentación detallada de endpoints
         run: yarn docs:endpoints:generate
