@@ -10,10 +10,11 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { MAX_OBJETIVO_SEGUNDOS, RANGO_OBJETIVOS } from '../policies';
-
-/** Resultado de comparar una restauración contra los objetivos de RPO/RTO. */
-export type RestoreObjectiveStatus = 'MET' | 'BREACHED' | 'NOT_MEASURED';
+import {
+  MAX_OBJETIVO_SEGUNDOS,
+  RANGO_OBJETIVOS,
+  RestoreObjectiveStatus,
+} from '../policies';
 
 /** Cuerpo de `POST /admin/ops/backup-policies` (UC-11-09). */
 export class CreateBackupPolicyDto {
@@ -195,13 +196,36 @@ export class RestoreTestRunResponseDto {
   outcomeConceptId!: string;
 
   /**
-   * Resultado contra los objetivos de la política (MCH-023).
+   * Estado trivalente de la evaluación (MCH-023).
    *
-   * `NOT_MEASURED` no es un incumplimiento: es la falta de evidencia para
-   * afirmar cumplimiento. Un consumidor no puede leerlo como «aprobado» — el
-   * propio nombre lo obliga a distinguirlo.
+   * `NOT_MEASURED` **no** es «cumple»: significa que falta evidencia para
+   * afirmar nada. Es el campo que hay que leer; `objectiveBreached` se conserva
+   * sólo por compatibilidad del contrato.
    */
-  @ApiProperty({ enum: ['MET', 'BREACHED', 'NOT_MEASURED'] })
-  @ApiProperty({ description: 'true si el RPO/RTO medido supera el objetivo' })
+  @ApiProperty({
+    enum: RestoreObjectiveStatus,
+    enumName: 'RestoreObjectiveStatus',
+    description:
+      'PASSED sólo con mediciones e integridad suficientes; FAILED si se incumplió; NOT_MEASURED si falta evidencia',
+  })
   objectiveStatus!: RestoreObjectiveStatus;
+
+  /**
+   * Motivo del estado, en castellano, para el operador.
+   */
+  @ApiProperty({ description: 'Por qué la corrida quedó en ese estado' })
+  objectiveStatusReason!: string;
+
+  /**
+   * Valor de objective breached mantenido por la instancia.
+   *
+   * @deprecated Es `true` sólo cuando `objectiveStatus` es `FAILED`. Un `false`
+   * aquí incluye el caso «no se midió»: leer `objectiveStatus`.
+   */
+  @ApiProperty({
+    description:
+      'true si el RPO/RTO medido supera el objetivo. Obsoleto: un false también cubre NOT_MEASURED',
+    deprecated: true,
+  })
+  objectiveBreached!: boolean;
 }

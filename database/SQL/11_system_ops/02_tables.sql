@@ -278,11 +278,15 @@ CREATE TABLE IF NOT EXISTS "system_ops"."restore_test_runs" (
     "measured_rpo_seconds" integer,
     "measured_rto_seconds" integer,
     "integrity_check_passed" boolean,
+    "objective_status" varchar NOT NULL DEFAULT 'NOT_MEASURED',
     "evidence_file_id" uuid,
     "started_at" timestamptz NOT NULL,
     "finished_at" timestamptz,
     "recorded_by_user_id" uuid,
-    CONSTRAINT "pk_restore_test_runs" PRIMARY KEY ("id")
+    CONSTRAINT "pk_restore_test_runs" PRIMARY KEY ("id"),
+    -- MCH-023: la evaluacion es trivalente. NOT_MEASURED no es "cumple".
+    CONSTRAINT "ck_restore_test_runs_objective_status"
+        CHECK ("objective_status" IN ('PASSED', 'FAILED', 'NOT_MEASURED'))
 );
 
 CREATE TABLE IF NOT EXISTS "system_ops"."cross_border_transfer_events" (
