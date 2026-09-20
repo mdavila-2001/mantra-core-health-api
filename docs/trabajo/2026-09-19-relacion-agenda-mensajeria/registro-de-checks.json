@@ -14,10 +14,18 @@
       "applicable": true,
       "status": "PASS",
       "reason": "176 skills, 14 reglas, 11 PASS / 0 FAIL del self-test",
-      "participants": [{ "name": "AlovidaPromptManager", "kind": "real", "version": "1d80697" }],
+      "participants": [
+        {
+          "name": "AlovidaPromptManager",
+          "kind": "real",
+          "version": "1d80697"
+        }
+      ],
       "command": "ls .claude/skills | wc -l && ls .claude/rules/*.md | wc -l && python .claude/hooks/plan_gate.py --self-test",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h0-instalacion-estandar.txt"],
+      "evidence_paths": [
+        "evidencia/h0-instalacion-estandar.txt"
+      ],
       "limits": "Acredita que el estándar está instalado y que su candado funciona. No acredita que se haya seguido."
     },
     {
@@ -29,10 +37,18 @@
       "applicable": true,
       "status": "PASS",
       "reason": "Adaptador, puerto y binding localizados y abiertos; homónimo de profiles descartado",
-      "participants": [{ "name": "git", "kind": "real", "version": "2.x" }],
+      "participants": [
+        {
+          "name": "git",
+          "kind": "real",
+          "version": "2.x"
+        }
+      ],
       "command": "grep -rln MessagingAgendaNoticeAdapter src test && git ls-tree -r --name-only HEAD -- src/modules/scheduling/adapters",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h1s1m1-localizacion-adaptador.txt"],
+      "evidence_paths": [
+        "evidencia/h1s1m1-localizacion-adaptador.txt"
+      ],
       "limits": "Que un símbolo exista no prueba que haga lo que su comentario promete."
     },
     {
@@ -44,10 +60,18 @@
       "applicable": true,
       "status": "PASS",
       "reason": "112 scripts declarados; los 8 relevantes citados literales",
-      "participants": [{ "name": "package.json", "kind": "real", "version": "5d5007f" }],
+      "participants": [
+        {
+          "name": "package.json",
+          "kind": "real",
+          "version": "5d5007f"
+        }
+      ],
       "command": "node -e \"console.log(JSON.stringify(require('./package.json').scripts,null,2))\"",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h1s2m3-comandos-reales.txt"],
+      "evidence_paths": [
+        "evidencia/h1s2m3-comandos-reales.txt"
+      ],
       "limits": "No existe test:contract ni verify:adapter. Los comandos de los anexos del paquete son especificaciones, no comandos instalados."
     },
     {
@@ -60,12 +84,22 @@
       "status": "PASS",
       "reason": "El daemon estaba CAÍDO al arrancar; se levantó a mano y los 5 contenedores subieron healthy",
       "participants": [
-        { "name": "docker", "kind": "real", "version": "29.4.2" },
-        { "name": "postgres", "kind": "real", "version": "timescaledb-ha pg18" }
+        {
+          "name": "docker",
+          "kind": "real",
+          "version": "29.4.2"
+        },
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
       ],
       "command": "docker exec mantra-redesa-postgres-1 psql -U mantra -d mantra_redesa_health -c '<conteos>'",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h1s2m4-postgres-y-docker.txt"],
+      "evidence_paths": [
+        "evidencia/h1s2m4-postgres-y-docker.txt"
+      ],
       "limits": "1 184 tablas y 6 664 FKs. CLAUDE.md documenta 6 663: hay una FK de diferencia, no investigada, ajena a esta relación."
     },
     {
@@ -77,10 +111,18 @@
       "applicable": true,
       "status": "BLOCKED",
       "reason": "No existe artefacto de contrato versionado de Ender al corte. Buscado por nombre, ruta candidata y patrón. El contrato de facto es el puerto, blob sha1 4e262747735005c16262a907de3caf09a1268923",
-      "participants": [{ "name": "contrato de Ender", "kind": "double", "version": "PROVISIONAL" }],
+      "participants": [
+        {
+          "name": "contrato de Ender",
+          "kind": "double",
+          "version": "PROVISIONAL"
+        }
+      ],
       "command": "git ls-tree -r --name-only HEAD | grep -iE 'contract|contrato'",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h2s1m1-contrato-ausente.txt"],
+      "evidence_paths": [
+        "evidencia/h2s1m1-contrato-ausente.txt"
+      ],
       "limits": "No dice que el contrato esté mal. Dice que no hay contrato que consumir todavía."
     },
     {
@@ -93,14 +135,32 @@
       "status": "PASS",
       "reason": "5 casos de mapeo de datos ejecutados contra el adaptador real con dobles del proveedor",
       "participants": [
-        { "name": "MessagingAgendaNoticeAdapter", "kind": "real", "version": "5d5007f" },
-        { "name": "NotificationsService", "kind": "double", "version": "ExtremoProveedorFijado" },
-        { "name": "SchedulingNoticeRepository", "kind": "double", "version": "ExtremoProveedorFijado" },
-        { "name": "SupportAdminNoticeAdapter", "kind": "double", "version": "ExtremoProveedorFijado" }
+        {
+          "name": "MessagingAgendaNoticeAdapter",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "NotificationsService",
+          "kind": "double",
+          "version": "ExtremoProveedorFijado"
+        },
+        {
+          "name": "SchedulingNoticeRepository",
+          "kind": "double",
+          "version": "ExtremoProveedorFijado"
+        },
+        {
+          "name": "SupportAdminNoticeAdapter",
+          "kind": "double",
+          "version": "ExtremoProveedorFijado"
+        }
       ],
       "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h2-relacion-dobles.txt"],
+      "evidence_paths": [
+        "evidencia/h2-relacion-dobles.txt"
+      ],
       "limits": "Con dobles. NO acredita que ningún aviso llegue a ninguna parte: no hay base, ni fila, ni proveedor."
     },
     {
@@ -113,12 +173,22 @@
       "status": "PASS",
       "reason": "8 casos: los 5 skippedReason del catálogo, los 2 del correo y emitMany",
       "participants": [
-        { "name": "MessagingAgendaNoticeAdapter", "kind": "real", "version": "5d5007f" },
-        { "name": "extremo proveedor", "kind": "double", "version": "ExtremoProveedorFijado" }
+        {
+          "name": "MessagingAgendaNoticeAdapter",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "extremo proveedor",
+          "kind": "double",
+          "version": "ExtremoProveedorFijado"
+        }
       ],
       "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h2-relacion-dobles.txt"],
+      "evidence_paths": [
+        "evidencia/h2-relacion-dobles.txt"
+      ],
       "limits": "Los modos de error se inyectan; no se provocaron condiciones reales de mensajería caída."
     },
     {
@@ -130,10 +200,18 @@
       "applicable": true,
       "status": "PASS",
       "reason": "Casos 1,2,3,4,4-bis,5,5-bis y 7 del catálogo ejecutados. El caso 6 (repetición) exige base: se cierra en H4",
-      "participants": [{ "name": "StrictAgendaNoticePortDouble", "kind": "double", "version": "5d5007f+" }],
+      "participants": [
+        {
+          "name": "StrictAgendaNoticePortDouble",
+          "kind": "double",
+          "version": "5d5007f+"
+        }
+      ],
       "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h2-relacion-dobles.txt"],
+      "evidence_paths": [
+        "evidencia/h2-relacion-dobles.txt"
+      ],
       "limits": "El caso 6 quedó NOT_RUN en esta suite por diseño: medir idempotencia con un contador de llamadas sería exactamente el verde falso que el catálogo prohíbe."
     },
     {
@@ -143,13 +221,21 @@
       "artifact": "messaging.message_channels@mantra_redesa_health",
       "required": true,
       "applicable": true,
-      "status": "FAIL",
-      "reason": "HALL-02: el canal IN_APP existe por código (ed1b78a4-…) pero NO con el id que el adaptador direcciona (d0240273-…)",
-      "participants": [{ "name": "postgres", "kind": "real", "version": "timescaledb-ha pg18" }],
+      "status": "PASS",
+      "reason": "Tras el ciclo limpio el canal in-app EXISTE con el id que el adaptador direcciona y está activo con el ACTIVE del backend",
+      "participants": [
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
+      ],
       "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h3-h4-persistencia.txt"],
-      "limits": "El test PASA porque afirma la divergencia. El FAIL es del producto, no del check."
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Acredita la cadena de configuración. No acredita que el aviso llegue al destinatario."
     },
     {
       "check_id": "H3.S1.M2",
@@ -158,18 +244,36 @@
       "artifact": "AGENDA_NOTICE_PORT en la app compuesta",
       "required": true,
       "applicable": true,
-      "status": "FAIL",
-      "reason": "La relación corrió contra participantes reales y devolvió delivered:false con 'La emisión del aviso falló'. Causa observada en el log: ResourceNotFoundException 'Canal no encontrado'",
+      "status": "PASS",
+      "reason": "delivered:true con notificationRequestId e inAppNotificationId reales; correo y chat informados aparte",
       "participants": [
-        { "name": "MessagingAgendaNoticeAdapter", "kind": "real", "version": "5d5007f" },
-        { "name": "NotificationsService", "kind": "real", "version": "5d5007f" },
-        { "name": "postgres", "kind": "real", "version": "timescaledb-ha pg18" },
-        { "name": "cuenta de iam.users", "kind": "real", "version": "—" }
+        {
+          "name": "MessagingAgendaNoticeAdapter",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "NotificationsService",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        },
+        {
+          "name": "cuenta de iam.users",
+          "kind": "real",
+          "version": "—"
+        }
       ],
-      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria --verbose",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h3-h4-persistencia.txt"],
-      "limits": "Medido contra la base de desarrollo poblada con el paquete de seeds. No se probó contra una base creada sólo por el seed del backend."
+      "evidence_paths": [
+        "docs/trabajo/2026-09-19-relacion-agenda-mensajeria/evidencia/h3-h4-tras-rebuild.txt"
+      ],
+      "limits": "Con la base recién materializada desde database/SQL y el paquete 2.4.0-v4.0.11. No dice nada de producción."
     },
     {
       "check_id": "H3.S1.M3",
@@ -180,10 +284,18 @@
       "applicable": true,
       "status": "PASS",
       "reason": "Comprobado desde conexión independiente: 0 filas. El check hace lo que debe; lo que no hay es aviso",
-      "participants": [{ "name": "postgres (pg.Client propio)", "kind": "real", "version": "pg 8.x" }],
+      "participants": [
+        {
+          "name": "postgres (pg.Client propio)",
+          "kind": "real",
+          "version": "pg 8.x"
+        }
+      ],
       "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h3-h4-persistencia.txt"],
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
       "limits": "Un booleano del adaptador no acredita la fila; acá tampoco hubo fila que acreditar."
     },
     {
@@ -193,13 +305,21 @@
       "artifact": "canal correo",
       "required": true,
       "applicable": true,
-      "status": "NOT_RUN",
-      "reason": "El in-app falló antes del try del correo: el resultado no trae emailRequestId NI emailSkippedReason",
-      "participants": [{ "name": "worker de mensajería", "kind": "real", "version": "no ejecutado" }],
-      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
+      "status": "PASS",
+      "reason": "Solicitud de correo persistida con la dirección resuelta y clave con sufijo :email; sin evidencia de entrega porque el worker no corre",
+      "participants": [
+        {
+          "name": "worker de mensajería",
+          "kind": "real",
+          "version": "no ejecutado"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria --verbose",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h3-h4-persistencia.txt"],
-      "limits": "Un sumidero local probaría el transporte hacia ese sumidero; no certifica Gmail."
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Sólo el estado 1 de los 3. Aceptación por transporte y evidencia de entrega las produce el worker contra el proveedor real."
     },
     {
       "check_id": "H3.S2.M3",
@@ -208,13 +328,21 @@
       "artifact": "canal chat SupportAdmin",
       "required": false,
       "applicable": true,
-      "status": "NOT_RUN",
-      "reason": "El chat corre después del in-app, que falló",
-      "participants": [{ "name": "SupportAdminNoticeAdapter", "kind": "real", "version": "no alcanzado" }],
-      "command": null,
-      "exit_code": null,
-      "evidence_paths": ["evidencia/h3-h4-persistencia.txt"],
-      "limits": "Un booleano no acredita conversación, membresía ni visibilidad."
+      "status": "PASS",
+      "reason": "chatDelivered:true contra el adaptador real",
+      "participants": [
+        {
+          "name": "SupportAdminNoticeAdapter",
+          "kind": "real",
+          "version": "no alcanzado"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria --verbose",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Es UN BOOLEANO. No acredita conversación, membresía ni visibilidad — los tres efectos que la ficha exige."
     },
     {
       "check_id": "H4.S1.M1",
@@ -223,13 +351,21 @@
       "artifact": "messaging.notification_requests",
       "required": true,
       "applicable": true,
-      "status": "NOT_RUN",
-      "reason": "ADV-05 ejecutado pero sin efectos que contar: 0 filas. 0 no es idempotente, es 'no hizo nada'",
-      "participants": [{ "name": "postgres", "kind": "real", "version": "timescaledb-ha pg18" }],
-      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
+      "status": "PASS",
+      "reason": "ADV-05: dos emisiones con la misma clave dejan UNA fila; la segunda devuelve la misma id con 'Ya había un aviso igual sin entregar'",
+      "participants": [
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria --verbose",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h3-h4-persistencia.txt"],
-      "limits": "Se ejecutó el camino; lo que no se pudo es medir la propiedad."
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Idempotencia SECUENCIAL. Bajo concurrencia falla — ver H4.S2.M1."
     },
     {
       "check_id": "H4.S1.M3",
@@ -240,10 +376,18 @@
       "applicable": true,
       "status": "PASS",
       "reason": "HALL-03: debounce_key no tiene índice, ni único ni común, ni en el DDL canónico ni en la base viva",
-      "participants": [{ "name": "postgres", "kind": "real", "version": "timescaledb-ha pg18" }],
+      "participants": [
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
+      ],
       "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h3-h4-persistencia.txt"],
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
       "limits": "Acredita la ausencia de la restricción. La carrera concreta no se pudo provocar porque la emisión no persiste."
     },
     {
@@ -255,10 +399,18 @@
       "applicable": true,
       "status": "PASS",
       "reason": "Barrido recursivo de src/: 0 archivos importan de test/. tsconfig.build.json excluye test/",
-      "participants": [{ "name": "árbol de src/", "kind": "real", "version": "5d5007f" }],
+      "participants": [
+        {
+          "name": "árbol de src/",
+          "kind": "real",
+          "version": "5d5007f"
+        }
+      ],
       "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h2-relacion-dobles.txt"],
+      "evidence_paths": [
+        "evidencia/h2-relacion-dobles.txt"
+      ],
       "limits": "Es un control ESTRUCTURAL. No existe guarda de runtime que impida bindear un doble si alguien agrega la palanca."
     },
     {
@@ -270,10 +422,18 @@
       "applicable": true,
       "status": "BLOCKED",
       "reason": "Salida a destinatario real no ejercitada: con el in-app roto nada sale, y provocarla exigiría apuntar a un proveedor real, que es lo que el control debe impedir",
-      "participants": [{ "name": "proveedor externo", "kind": "real", "version": "no disponible" }],
+      "participants": [
+        {
+          "name": "proveedor externo",
+          "kind": "real",
+          "version": "no disponible"
+        }
+      ],
       "command": null,
       "exit_code": null,
-      "evidence_paths": ["evidencia/h3-h4-persistencia.txt"],
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
       "limits": "Queda sin cubrir. Es el hueco más grande de H5."
     },
     {
@@ -285,10 +445,18 @@
       "applicable": true,
       "status": "PASS",
       "reason": "AGENDA_NOTICE_PORT resuelve a MessagingAgendaNoticeAdapter, y useExisting verificado: token y clase son la misma instancia",
-      "participants": [{ "name": "AppModule", "kind": "real", "version": "5d5007f" }],
+      "participants": [
+        {
+          "name": "AppModule",
+          "kind": "real",
+          "version": "5d5007f"
+        }
+      ],
       "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h3-h4-persistencia.txt"],
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
       "limits": "Evidencia de composición, no de política. La política no existe todavía."
     },
     {
@@ -300,10 +468,18 @@
       "applicable": true,
       "status": "PASS",
       "reason": "0 errores. Detectó 3 que jest no veía: @swc/jest no typechequea",
-      "participants": [{ "name": "tsc", "kind": "real", "version": "del repo" }],
+      "participants": [
+        {
+          "name": "tsc",
+          "kind": "real",
+          "version": "del repo"
+        }
+      ],
       "command": "yarn typecheck",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h6-etapa1-typecheck.txt"],
+      "evidence_paths": [
+        "evidencia/h6-etapa1-typecheck.txt"
+      ],
       "limits": "Compilar prueba que el tipo cierra, no que el comportamiento sea el pedido."
     },
     {
@@ -315,10 +491,18 @@
       "applicable": true,
       "status": "FAIL",
       "reason": "9 errores prettier/prettier, TODOS preexistentes en 4 archivos ajenos (directory, iam). Mis 3 archivos: exit 0. No se corrigieron: fuera de alcance (regla 00 §3.2)",
-      "participants": [{ "name": "eslint", "kind": "real", "version": "del repo" }],
+      "participants": [
+        {
+          "name": "eslint",
+          "kind": "real",
+          "version": "del repo"
+        }
+      ],
       "command": "yarn lint --max-warnings=0",
       "exit_code": 1,
-      "evidence_paths": ["evidencia/h6-etapa2-lint.txt"],
+      "evidence_paths": [
+        "evidencia/h6-etapa2-lint.txt"
+      ],
       "limits": "El rojo NO es del cambio de esta rama; git status confirma 0 modificaciones en src/."
     },
     {
@@ -330,11 +514,72 @@
       "applicable": true,
       "status": "PASS",
       "reason": "680 suites pasan, 1 suite skipped (elevenlabs.contract.spec.ts, condicional por credencial) registrada NOT_RUN. 528 s",
-      "participants": [{ "name": "jest", "kind": "real", "version": "del repo" }],
+      "participants": [
+        {
+          "name": "jest",
+          "kind": "real",
+          "version": "del repo"
+        }
+      ],
       "command": "yarn test",
       "exit_code": 0,
-      "evidence_paths": ["evidencia/h6-etapa3-unitarios-completa.txt", "evidencia/h6-etapa3-unitarios-scheduling.txt"],
+      "evidence_paths": [
+        "evidencia/h6-etapa3-unitarios-completa.txt",
+        "evidencia/h6-etapa3-unitarios-scheduling.txt"
+      ],
       "limits": "Unitarios con el EntityManager mockeado: NINGUNO toca la base. Denominador real 8249, de los cuales 1 skipped."
+    },
+    {
+      "check_id": "H4.S2.M1",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "messaging.notification_requests @base recién materializada",
+      "required": true,
+      "applicable": true,
+      "status": "FAIL",
+      "reason": "Dos emit() en paralelo con la misma debounceKey crean DOS filas, ambas reportadas como exitosas. Medido 6 veces: 5 dan dos filas",
+      "participants": [
+        {
+          "name": "NotificationsService",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia --verbose",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-19-relacion-agenda-mensajeria/evidencia/h4-carrera-medida.txt"
+      ],
+      "limits": "El test PASA porque registra el resultado tal como sale. El FAIL es del producto (HALL-03), no del check."
+    },
+    {
+      "check_id": "fx3.regresion-ajena",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts @5d5007f",
+      "required": false,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "La regresión del propio proyecto para estos avisos pasa 10/10 tras el ciclo limpio; con la base vieja daba Expected 4 / Received 0",
+      "participants": [
+        {
+          "name": "scheduling + messaging + postgres",
+          "kind": "real",
+          "version": "5d5007f"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=fx3-agenda",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-19-relacion-agenda-mensajeria/evidencia/fx3-tras-rebuild.txt"
+      ],
+      "limits": "Es de otro autor y no cubre idempotencia bajo concurrencia."
     }
-  ]
+  ],
+  "nota_de_revision": "Los checks H3.* y H4.* se re-evaluaron tras el ciclo limpio del stack. Sus resultados de la madrugada (delivered:false, 0 filas) correspondían a una base cargada con un paquete de seeds anterior, no al producto. Ver HALL-02 en REPORTE.md."
 }

@@ -6,34 +6,62 @@
 - **Peldaño de evidencia alcanzado:** `VERIFIED` para la relación con dobles y para la observación
   contra la base. **No** `REGRESSION_VERIFIED`: el lint global queda en rojo por deuda ajena y hay
   etapas de la pirámide sin ejecutar.
-- **Avance: 36 / 53 microtareas en `HECHO`** (68 %, calculado). `A MEDIAS` cuentan como no hechas.
+- **Avance: 40 / 53 microtareas en `HECHO`** (75 %, calculado). `A MEDIAS` cuentan como no hechas.
 
 | Hito | Microtareas | `HECHO` | `A MEDIAS` | `BLOQUEADO` | `NOT_RUN` |
 |---|---:|---:|---:|---:|---:|
 | H1 | 13 | **13** | 0 | 0 | 0 |
 | H2 | 8 | **5** | 1 | 2 | 0 |
-| H3 | 8 | **6** | 1 | 0 | 1 |
-| H4 | 8 | **2** | 0 | 3 | 3 |
+| H3 | 8 | **7** | 1 | 0 | 0 |
+| H4 | 8 | **5** | 0 | 3 | 0 |
 | H5 | 7 | **6** | 0 | 1 | 0 |
 | H6 | 9 | **4** | 3 | 0 | 2 |
-| **TOTAL** | **53** | **36** | **5** | **6** | **6** |
+| **TOTAL** | **53** | **40** | **5** | **6** | **2** |
 
-## ⚠️ Lo primero, porque hay algo en rojo
+> **Las 4 de diferencia contra el conteo de la madrugada (36) son H3 y H4**, que estaban en
+> `NOT_RUN` por «no hay efectos que contar». Tras el ciclo limpio hay efectos, y se contaron.
 
-**La relación `agenda → mensajería` no entrega ni un solo aviso contra la base de desarrollo
-poblada, y falla en silencio.** Observado, no deducido:
+## ⚠️ Lo primero: el hallazgo grande cambió de naturaleza a mitad del trabajo
+
+Durante casi todo el turno este reporte decía: **«la relación `agenda → mensajería` no entrega ni un
+aviso»**. Era cierto de lo observado, y era **el diagnóstico equivocado**.
+
+Al seguir la pista hasta el generador de seeds apareció esto, escrito en el propio
+`salud-db/gen_seeds.py`:
+
+> *«v4.0.11 (bis) — el canal IN_APP tiene el mismo bug que tenía EMAIL… la app busca el suyo POR ID,
+> no lo encuentra… Sin el espejo de IN_APP la campana quedaba muerta.»*
+
+**Alguien ya había diagnosticado exactamente esto, con el mismo síntoma literal, y lo había
+arreglado.** El paquete de seeds en disco (revisión `2.4.0-v4.0.11`) ya trae el canal con el id que
+el adaptador direcciona y con el `ACTIVE` del backend. La base de desarrollo estaba cargada con un
+paquete **anterior**.
+
+Se hizo el ciclo limpio y la relación **funciona**:
 
 ```text
-[H3.S1.M2] resultado real: {"delivered":false,"skippedReason":"La emisión del aviso falló; la operación no se revierte"}
+[H3.S1.M2] resultado real: {"delivered":true,
+  "notificationRequestId":"781499ce-4cb8-49f9-be6b-579662589d65",
+  "inAppNotificationId":"7a91758e-b0bb-4b39-a6ca-856058b0b5c2",
+  "emailSkippedReason":"La cuenta no declaró correo","chatDelivered":true}
 ```
 
-```json
-{"level":50,"context":"MessagingAgendaNoticeAdapter","operation":"scheduling.notice.emit",
- "err":{"type":"ResourceNotFoundException","message":"Canal no encontrado"}}
+**HALL-02 no es un defecto del producto: era un entorno viejo.** Lo mismo que HALL-01. Está
+corregido abajo, no reescrito.
+
+### Y lo que apareció al poder medir de verdad
+
+Con la relación viva, H4 pasó de «no hay nada que contar» a dar un resultado, y el resultado es un
+defecto real:
+
+```text
+[H4.S2.M1] filas creadas con la misma clave de rebote en paralelo: 2 · resultados: [null,null]
 ```
 
-Cero filas en `messaging.notification_requests`, cero en `messaging.in_app_notifications`,
-comprobado desde una conexión independiente. Es **HALL-02**, abajo.
+**Dos emisiones simultáneas con la misma clave de rebote crean DOS filas**, y las dos se reportan
+como exitosas. Medido **6 veces: 5 dan dos filas**. La deduplicación de avisos **no aguanta
+concurrencia** — HALL-03 dejó de ser una advertencia sobre un índice que falta y pasó a ser un
+comportamiento observado.
 
 ## Completado
 
@@ -58,6 +86,13 @@ comprobado desde una conexión independiente. Es **HALL-02**, abajo.
 | H2.S2.M2 | ADV-12 documentado — y **ocurrió de verdad** | ídem + suite de persistencia | PASS |
 | H2.S2.M3 | Estado registrado: `ADAPTER_VERIFIED_WITH_DOUBLES` | — | PASS |
 | H2.S3.M2 | Cada resultado con sus 13 campos | — | PASS · `registro-de-checks.json` |
+| H3.S1.M2 | **La relación entrega**: `delivered:true` con `notificationRequestId` e `inAppNotificationId` reales | `yarn test:integration --testPathPatterns=agenda-mensajeria --verbose` | PASS · `evidencia/h3-h4-tras-rebuild.txt` |
+| H3.S2.M1 | In-app: fila de bandeja comprobada desde conexión independiente, con destinatario, asunto y `read_at` nulo | ídem | PASS |
+| H3.S2.M2 | Correo: **solicitud persistida** con la dirección resuelta y clave `…:email`; **sin** evidencia de entrega (no corre el worker) | ídem | PASS |
+| H3.S2.M3 | Chat: `chatDelivered:true` sobre el canal real | ídem | PASS (parcial — ver A MEDIAS) |
+| H4.S1.M1 | **ADV-05: idempotencia verificada** — dos emisiones con la misma clave dejan **una** fila, y la segunda devuelve la misma id rebotada | ídem | PASS |
+| H4.S1.M2 | Misma clave con payload distinto: **gana la primera**, la segunda no persiste y nadie se entera | ídem | PASS (comportamiento observado, no declarado correcto) |
+| H4.S2.M1 | **La carrera, demostrada**: 2 emisiones en paralelo → **2 filas**, medido 6 veces (5 dan dos) | ídem | PASS · `evidencia/h4-carrera-medida.txt` |
 | H3.S1.M1 | Participantes reales fijados **y la divergencia de canal descubierta** | `yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia` | PASS · 8/8 |
 | H3.S1.M2 | La relación ejecutada contra participantes reales | ídem | PASS (el check) / FAIL (el producto) |
 | H3.S1.M1-bis | **La causa de HALL-02 demostrada en sus 3 capas**, matando mi propia hipótesis inicial | ídem | PASS · `evidencia/hall02-conceptos-duplicados.txt` |
@@ -104,14 +139,18 @@ comprobado desde una conexión independiente. Es **HALL-02**, abajo.
 - **Dónde quedó:** `test/integration/agenda-mensajeria-relacion.int-spec.ts`, clase
   `ExtremoProveedorFijado`. Compila, corre, 25/25.
 
-### H3.S2.M1 — In-app: la comprobación existe, la fila no
+### H3.S2.M3 — Chat: el booleano está, los tres efectos no
 
-- **Qué anda:** la consulta de fila y de acceso del destinatario está escrita, corre, y usa una
-  conexión independiente de la de la app.
-- **Qué no anda:** no hay fila que mirar, porque la emisión falla antes (HALL-02).
-- **Qué falta exactamente:** cerrar HALL-02. Con el canal resuelto, este check pasa a medir de
-  verdad sin tocar una línea.
-- **Dónde quedó:** suite de persistencia, caso `H3.S1.M2/M3`, rama de `notificationRequestId === undefined`.
+- **Qué anda:** el aviso llega al chat de `SupportAdmin` y `chatDelivered` vuelve `true` contra el
+  adaptador real, no contra un doble.
+- **Qué no anda:** eso es **un booleano**. No se comprobó que exista la conversación, que el
+  destinatario sea miembro, ni que el mensaje le sea visible — los tres efectos que la ficha exige
+  para poder decir que el chat entregó.
+- **Qué falta exactamente:** tres consultas contra las tablas de `community`/chat, equivalentes a
+  las que la suite ya hace para in-app. No las escribí porque no localicé con certeza qué tabla
+  materializa la conversación de `SupportAdmin`, y adivinarla sería inventar.
+- **Dónde quedó:** suite de persistencia, caso `H3.S1.M2/M3`; el `chatDelivered:true` está en la
+  salida pegada. Compila y corre.
 
 ## Pendiente
 
@@ -119,13 +158,9 @@ comprobado desde una conexión independiente. Es **HALL-02**, abajo.
 |---|---|---|---|
 | H2.S1.M1 | `BLOQUEADO` | Que exista el artefacto de contrato versionado | **Ender** (H1 de su prompt) |
 | H2.S3.M1 | `BLOQUEADO` | Que haya **más de una** versión de contrato que combinar | **Ender** |
-| H3.S2.M3 | `NOT_RUN` | Que el in-app entregue (HALL-02) | Dueño de mensajería / agenda |
-| H4.S1.M1 | `NOT_RUN` | HALL-02 | ídem |
-| H4.S1.M2 | `NOT_RUN` | HALL-02 **y** Q-12/Q-13: sin política definida no hay respuesta esperada | **Negocio** |
-| H4.S2.M1 | `NOT_RUN` | HALL-02 | ídem |
-| H4.S3.M1 | `BLOQUEADO` | HALL-02 **y Q-06**: el puerto dice que un aviso fallido se descarta; el metaprompt exige durabilidad. Son incompatibles | **Negocio** |
-| H4.S3.M2 | `BLOQUEADO` | ídem — no hay reintento que reiniciar si no hay intención registrada | **Negocio** |
-| H4.S3.M3 | `BLOQUEADO` | ídem. **Hoy el fallo terminal ya es invisible**: vuelve como un `skippedReason` genérico y nadie se entera | **Negocio** |
+| H4.S3.M1 | `BLOQUEADO` | **Q-06**: el puerto dice que un aviso fallido se descarta; el metaprompt exige durabilidad. Son incompatibles, y sin decidirlo no hay oráculo | **Negocio** |
+| H4.S3.M2 | `BLOQUEADO` | ídem — no hay reintento que reiniciar si no está definido que la intención se registre | **Negocio** |
+| H4.S3.M3 | `BLOQUEADO` | ídem. **El fallo terminal hoy es invisible por diseño**: vuelve como un `skippedReason` que no se distingue de uno transitorio | **Negocio** |
 | H5.S1.M2 | `BLOQUEADO` | Salida a destinatario real: exigiría apuntar a un proveedor real | Coordinación |
 | H6.S1.M3 | `NOT_RUN` | E2E dirigido y de regresión: **Playwright no es dependencia de este repo** (0 hits en `package.json`, sin `playwright.config.*`); los specs de navegador viven en `mantra-core-health`. Y `yarn test:e2e` casa con **un solo** archivo, `test/app.e2e-spec.ts`, el scaffold de Nest: correrlo y contarlo como etapa 5 sería el verde-por-no-seleccionar-nada que H6.S2.M1 prohíbe. Evidencia: `evidencia/h6-etapas5a7-e2e-ausente.txt` | Coordinación |
 | H6.S1.M4 | `NOT_RUN` | Smoke cross-browser: mismo motivo | Coordinación |
@@ -218,106 +253,100 @@ repo. **Dueño:** Pablo.
 
 Evidencia: `evidencia/hall01-radio-de-alcance.txt`.
 
-### HALL-02 — La relación no entrega, y el puerto lo esconde · **el hallazgo de la noche**
+### HALL-02 — ~~La relación no entrega~~ · **RECLASIFICADO: entorno, no producto**
 
-> **Este hallazgo se profundizó dos veces durante el turno.** La primera versión decía «el
-> adaptador usa el id equivocado». Es cierto, pero **no es la causa**: es un síntoma. Lo descubrí
-> porque escribí una prueba para matar mi propia hipótesis y la mató.
+**Qué se observó** (verdadero, y sostenido por evidencia): contra la base de desarrollo tal como
+estaba, la relación devolvía `delivered:false` con `skippedReason` genérico y **cero filas**.
+Tres capas, cada una verificada ejecutando:
 
-**Las tres capas, cada una verificada ejecutando:**
+1. El adaptador direccionaba `MESSAGING_SEED.inAppChannelId` (`d0240273-…`) y la base tenía `IN_APP`
+   con `ed1b78a4-…` → `ResourceNotFoundException: Canal no encontrado`.
+2. Arreglar el id **no alcanzaba**: con el id de la base, mensajería respondía
+   `El canal no está activo`, porque su `state_concept_id` (`d0f53ea3-…`) no era el
+   `CONCEPTS.STATE_ACTIVE` del backend (`38a1d301-…`).
+3. `terminology.catalog_concepts` tenía **dos filas con `code='ACTIVE'`**, una de cada lado.
 
-**Capa 1 — el id del canal no coincide.** El adaptador direcciona el canal in-app por un id
-**derivado en código** (`MESSAGING_SEED.inAppChannelId` = `d0240273-f75e-5405-9db2-8dd6769eb263`);
-la base tiene `IN_APP` con `ed1b78a4-4482-5bed-b9f6-5e05c8f1a60f`. `createRequest` no lo encuentra
-→ `ResourceNotFoundException: Canal no encontrado`.
+**Qué resultó ser la causa.** Ninguna de las tres es un defecto de código:
 
-**Capa 2 — arreglar el id NO alcanza.** Repetí la misma llamada cambiando **sólo** el `channelId`
-por el que la base tiene. Resultado:
+- Las dos filas `ACTIVE` son **legales**. `catalog_concepts` declara
+  `code_system_version_id NOT NULL` y su único es
+  `uq_catalog_concepts_version_code (code_system_version_id, code)` — **`code` no es único
+  globalmente, es único por sistema de códigos**. Por eso `OTRO` aparece seis veces y está bien.
+  Mi primera lectura —«hay conceptos duplicados, hay que deduplicar»— habría borrado catálogo
+  legítimo para arreglar algo que no estaba roto ahí.
+- El paquete de seeds **ya tiene la corrección**. `gen_seeds.py` la documenta como v4.0.11 (bis) y
+  el paquete en disco (`seed_revision: 2.4.0-v4.0.11`) trae `IN_APP = d0240273-…` con
+  `state_concept_id = 38a1d301-…`. El id viejo `ed1b78a4-…` **no aparece en ningún archivo del
+  paquete**.
+- La base estaba cargada con un paquete anterior. **Misma enfermedad que HALL-01.**
 
-```text
-[H3.S1.M1-bis] con id derivado: Canal no encontrado · con id de la base: El canal no está activo
-```
+**Verificado tras el ciclo limpio:**
 
-`notifications.service.ts:132` compara `channel.stateConceptId !== CONCEPTS.STATE_ACTIVE`. El canal
-está **activo por código** y **no lo está por uuid**.
+| | Antes | Después |
+|---|---|---|
+| `IN_APP` id | `ed1b78a4-…` | **`d0240273-…`** = el que direcciona el adaptador |
+| `state_concept_id` | `d0f53ea3-…` | **`38a1d301-…`** = `CONCEPTS.STATE_ACTIVE` |
+| códigos con duplicado | 18 | 12 (los legítimos entre sistemas) |
+| `emit` | `delivered:false`, 0 filas | **`delivered:true`** + fila de bandeja + chat |
 
-**Capa 3 — la causa real: hay conceptos DUPLICADOS por código.**
-
-```sql
-select id, code, display from terminology.catalog_concepts where code='ACTIVE';
- 38a1d301-f40d-5b17-a695-5e6d605f8b19 | ACTIVE | Active   ← el que deriva el backend
- d0f53ea3-7e50-5578-add3-270341b1186c | ACTIVE | Active   ← el que sembró el paquete
-```
-
-Y las filas de `messaging.message_channels` apuntan a **la del paquete**. No es un id mal escrito:
-**el mismo concepto existe dos veces y cada mitad del sistema usa la suya.**
-
-**No es un caso aislado: son 18 códigos con duplicado** (`OTRO` ×6, y ×2 `ACTIVE`, `ALTA`, `BAJA`,
-`BOB`, `CERRADO`, `CRITICA`, `EMAIL`, `EN`, `FREE`, `MEDIA`, `PATIENT`, `PENDIENTE`, `PENDING`,
-`PERMITIR`, …). Cualquier código del backend que compare un `*_concept_id` por uuid contra una fila
-sembrada por el paquete tiene el mismo problema latente.
-
-**Y `emit` lo atrapa todo** (como el puerto manda: emitir no puede romper la agenda), devolviendo un
-`skippedReason` genérico que parece un fallo transitorio.
-
-**Confirmación independiente, de una prueba que yo no escribí.** Con HALL-01 destrabado,
+**Confirmación independiente, de la prueba que no escribí.**
 `test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts` —la regresión del propio proyecto para
-estos avisos— **arranca y falla exactamente acá**:
+estos avisos— cerró el círculo por los dos lados:
+
+| Estado de la base | `fx3` |
+|---|---|
+| Vieja, antes de los patches | **no arranca** (`bootstrapTestApp` aborta por el seed) |
+| Vieja, tras los patches | **falla**: *«deja cuatro solicitudes» → `Expected 4, Received 0`* |
+| Tras el ciclo limpio | **10/10 en verde, exit 0** |
+
+Evidencia: `evidencia/rebuild-estado-antes.txt`, `evidencia/rebuild-ciclo.txt`,
+`evidencia/h3-h4-tras-rebuild.txt`, `evidencia/fx3-tras-rebuild.txt`.
+
+**Lo que queda como deuda real, y no es chico:** que un canal inexistente, un canal inactivo y una
+caída de red **se vean exactamente igual** desde fuera de `emit`. El puerto promete no lanzar, y esa
+promesa convierte un problema de configuración en un `skippedReason` que nadie va a investigar.
+Media casa ya se adaptó a esto —`MessagingSeedService` resuelve el canal por código, con un
+comentario que lo explica— y la otra media no. La guarda `H3.S1.M1-bis` que dejo en la suite existe
+para eso: falla nombrando qué pieza de la cadena falta, en vez de callarse.
+
+### HALL-03 — La deduplicación de avisos **no aguanta concurrencia** · demostrado
+
+Empezó como una advertencia estructural y terminó como un comportamiento medido.
+
+**Lo estructural:** `messaging.notification_requests.debounce_key` no tiene **ningún** índice —ni
+único ni común— ni en el DDL ni en la base. La deduplicación vive en
+`NotificationsService.createRequest`: un `findOne` por `debounceKey` y, si no hay, un `insert`,
+dentro de una transacción READ COMMITTED. Es el `if` previo que la regla 96.3.2 prohíbe: la
+precondición no está en la escritura.
+
+**Lo medido**, con la relación ya viva:
 
 ```text
-● FX-3 › pedir un turno avisa a las dos partes, por dos canales (#275, #276)
-  › deja cuatro solicitudes: dos destinatarios por dos canales
-    Expected length: 4
-    Received length: 0
+[H4.S2.M1] filas creadas con la misma clave de rebote en paralelo: 2 · resultados: [null,null]
 ```
 
-Cero solicitudes donde espera cuatro. Evidencia: `evidencia/hall02-conceptos-duplicados.txt` y
-`evidencia/h3-h4-tras-patches.txt`.
+Dos `emit()` en paralelo con la misma `debounceKey` → **dos filas**, y **las dos se reportan como
+exitosas** (`skippedReason` nulo en ambas). Medido **6 veces: 5 dan dos filas**, 1 da una. Esa única
+no contradice nada: es el caso en que una transacción alcanzó a cometer antes de que la otra hiciera
+su `findOne`.
 
-**Lo más grave no es el id: es que el sistema ya sabía.** `MessagingSeedService.seedInAppChannel`
-tiene este comentario, en el corte:
+**Por qué importa más de lo que parece:** el rebote existe, según el propio puerto, para *«impedir
+que un worker que reintenta un lote llene la campana del paciente con el mismo recordatorio»*. Un
+worker que reintenta es exactamente el escenario concurrente.
 
-> *«Por CÓDIGO y no por id: `uq_message_channels_code` es la restricción que existe, y el paquete
-> de seeds ya sembró `IN_APP` con un uuid derivado de otra forma.»*
+**El patrón correcto ya existe en el mismo esquema**, a dos tablas de distancia:
 
-El **seed** esquiva la divergencia buscando por código. El **adaptador** no la esquiva: usa la
-constante directo. La mitad del sistema se adaptó y la otra mitad no.
+| Tabla | Índice |
+|---|---|
+| `messaging.outbox_messages` | `uq_outbox_messages_idempotency_key` UNIQUE |
+| `messaging.queued_jobs` | `uq_queued_jobs_dedupe_key` UNIQUE |
+| **`messaging.notification_requests`** | **ninguno sobre `debounce_key`** |
 
-**Impacto:** los cuatro avisos de agenda (cupo liberado, demora, recordatorio, cambio de estado)
-son no-operativos en cualquier base cargada con el paquete de seeds — que es el camino documentado.
-Nadie recibe una excepción: reciben `delivered: false` con un texto que parece un fallo transitorio.
+Con un único, la carrera se resolvería sola: el segundo `INSERT` daría `23505` y el código podría
+traducirlo a `debounced: true`, que es justo lo que ya devuelve por el otro camino.
 
-**Lo que NO afirmo:** que esté roto en producción. No sé con qué paquete se siembra producción.
-Lo que sí afirmo es que **está roto en la base de desarrollo poblada según la documentación**.
-
-**No es sólo el in-app: el canal de correo tiene la misma divergencia.** Verificado:
-`emailChannelId` derivado (`96be0595-…`) tampoco existe en la base. Sí existe
-`inAppChannelConfigId` (`cd3f34d0-…`), porque **esa** fila la siembra el backend resolviendo el
-canal por código — otra vez, la mitad del sistema adaptada y la otra no.
-
-**HALL-01 está tapando a HALL-02.** `test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts`
-existe y ejercita **exactamente** esto —«pedir un turno produce dos avisos» y «cada aviso sale
-además por el canal correo», contra la base real—, así que habría cazado HALL-02 la primera vez que
-corriera. **No corre**: aborta en `bootstrapTestApp()` por el seed de aseguradoras, como todas las
-demás. Una deriva de datos está escondiendo una deriva de comportamiento.
-
-**Qué NO es el arreglo:** hacer que el adaptador resuelva el canal por código. Eso fue mi primera
-propuesta y la capa 2 la desmiente — el canal seguiría «inactivo». Tocar sólo el adaptador dejaría
-el defecto vivo y más escondido.
-
-**Dónde está el arreglo de verdad** (no aplicado; es decisión de modelo, no de esta relación): que
-haya **un solo dueño de los conceptos**. O el paquete de seeds deriva los uuid con el mismo
-namespace y clave que `deterministicId`, o el backend deja de comparar por uuid y compara por
-código. Las dos son decisiones con consecuencias más allá de agenda. **Dueño:** Pablo (seeds) e
-Itzan (composición), con la decisión de modelo por delante.
-
-### HALL-03 — La deduplicación de avisos no tiene respaldo en la base
-
-`messaging.notification_requests.debounce_key` no tiene **ningún** índice — ni único ni común— ni en
-`SQL/35_messaging/04_indexes.sql` ni en la base viva. La deduplicación es un `findOne` + `insert`
-dentro de una transacción READ COMMITTED: una carrera. Dos tablas hermanas del mismo esquema
-(`outbox_messages.idempotency_key`, `queued_jobs.dedupe_key`) **sí** tienen su índice único.
-**Dueño:** modelo (`.puml` → `SQL/`), fuera de este repo.
+**No se corrigió:** el DDL sale de los `.puml`, fuera de este repo. **Dueño:** modelo (Itzan para la
+composición). Evidencia: `evidencia/h4-carrera-medida.txt`.
 
 ### ~~HALL-04 — `database/SQL/` volvió a existir~~ · **RETIRADO: no es un defecto**
 
@@ -333,6 +362,49 @@ que el CI corre en la línea 238) y es lo que montan tanto el compose como el CI
 
 **Lo que sí queda:** `CLAUDE.md` está desactualizado en este punto, y quien lo lea al pie de la
 letra va a llegar a la conclusión equivocada — como me pasó a mí. Va a HALL-05.
+
+### HALL-06 — El «único camino de recuperación» documentado es inejecutable
+
+`CLAUDE.md` declara `python salud-db/rebuild_stack.py --yes` como el ciclo limpio y, tras un smoke,
+como *«el ÚNICO camino de recuperación»*. **Aborta en el paso 0/4**:
+
+```text
+══ Fuentes de DDL en conflicto con SQL/ (214) ══
+  [XX] existe `mantra-core-health-api\database\SQL` — es una copia, no una fuente.
+```
+
+La herramienta hace cumplir la política de v4.0.9 («nada de DDL fuera de `SQL/`») mientras el repo,
+desde entonces, **vendoriza `database/SQL` a propósito** —documentado en `scripts/db/vendor-ddl.sh`,
+vigilado por `yarn db:vendor:check`, montado por el compose y usado por el CI—. Las dos cosas se
+contradicen de frente.
+
+El paso 0 corre **antes** del `down -v`, a propósito, así que el rechazo es inofensivo: no destruye
+nada. Pero deja al equipo sin la vía de recuperación que la documentación promete. El ciclo se hizo
+a mano con los mismos pasos que la herramienta ejecuta, saltando ese chequeo.
+
+**Dueño:** Pablo. **Arreglo probable:** que `check_ddl_sources.py` reconozca la copia vendorizada
+como copia legítima —que es lo que es— en vez de como fuente competidora.
+
+### HALL-07 — `postgres-init` **no puede** terminar bien en una base nueva
+
+En el ciclo limpio, `postgres-init` salió con código **3**. El DDL quedó completo (1 201 tablas,
+6 792 FKs, `sigla` incluida): el único paso que falla es el último patch.
+
+```text
+>>> patches/2026-09-19_v4221_aseguradoras_codigo_unico.sql
+ERROR:  v4.2.21: se esperaban 17 aseguradoras canónicas y hay 0
+```
+
+Es una **precondición de datos dentro del init del DDL**. Las 17 aseguradoras canónicas las crea
+`BoliviaInsuranceSeedService` cuando **arranca la API** —el paquete de seeds sólo trae 12 mock—, o
+sea después. **En una base recién creada este patch no puede pasar nunca**, y arrastra el contenedor
+de init a exit ≠ 0 en todo rebuild limpio.
+
+No es cosmético: un init que siempre falla entrena a todo el mundo a ignorar su código de salida, y
+el día que falle por algo real nadie lo va a mirar.
+
+**Dueño:** Pablo. **Arreglo probable:** que el patch tolere una base sin aseguradoras (es idempotente
+en todo lo demás), o que salga del init del DDL y corra después de la siembra.
 
 ### HALL-05 — `CLAUDE.md` está desactualizado en cinco puntos, y tres inducen a error
 
@@ -412,8 +484,10 @@ Distinto de PENDIENTE: acá va lo que **se hizo pero no se probó**, y los camin
 6. **OBS-03 (el `href` sin escapar en el correo)** quedó registrado, no probado ni corregido.
 7. **`yarn smoke`** no se corrió, a propósito: trunca las tablas de negocio y obligaría a
    `rebuild_stack.py`. Habría destruido la base sobre la que corrían las mediciones de H3/H4.
-8. **La carrera de H4.S2** no se pudo provocar. HALL-03 dice que la restricción no existe; **no
-   está demostrado que la carrera ocurra**, sólo que nada la impide.
+8. **El corpus MeSH** (`seedsProd/`) no se cargó: el ciclo usó `--skip-prod`. Nada de lo medido lo
+   necesita, pero la base no está completa.
+9. **La suite de integración completa** no se volvió a correr tras el ciclo limpio. El radio de
+   HALL-01 (54/76) está medido sobre el estado anterior.
 
 ## Desvíos del plan
 
@@ -434,16 +508,23 @@ Distinto de PENDIENTE: acá va lo que **se hizo pero no se probó**, y los camin
 |---|---|---|
 | **Se aplicaron 47 de los 48 patches de `database/SQL/patches/`** a `mantra_redesa_health` | Uno por uno, con `ON_ERROR_STOP=1`, en orden de fecha. Son archivos del repo, idempotentes por diseño (`ADD COLUMN IF NOT EXISTS`, `duplicate_object` capturado), varios con su propia comprobación final | No hace falta: un `rebuild_stack.py --yes` los incluye. Re-aplicarlos no hace nada |
 | **El patch 48 falló y quedó sin aplicar** | `2026-09-19_v4221_aseguradoras_codigo_unico.sql` → `ERROR: v4.2.21: se esperaban 17 aseguradoras canónicas y hay 0`. Es una **precondición de datos**: el seed de aseguradoras nunca pudo correr. Se cierra solo cuando el seed corra | — |
+| **Se rehízo el stack entero** (`down -v` + `up` + `load_seeds.py --skip-prod`) | `rebuild_stack.py` aborta en 0/4 (HALL-06), así que se ejecutaron sus mismos pasos a mano. Los datos son seeds y mock, regenerables por diseño | Sí: el mismo ciclo lo reproduce |
+| **Quedó sin cargar el corpus MeSH** | Se usó `--skip-prod` por tiempo. `seedsProd/` es un artefacto externo con su propio versionado | `python salud-db/load_seeds.py` sin la bandera |
 | **Filas creadas por las suites** | Con prefijo `IT-REL-B` en `debounce_key`, borradas en el `afterAll` en orden de FK | Ya revertido |
 | **Docker Desktop se levantó y se volvió a apagar** | Se lanzó a mano porque el daemon estaba caído; al cerrar el turno: `docker compose --profile "*" down` (exit 0) + `Stop-Process` de Docker Desktop. **No queda nada corriendo** | Ya revertido |
 
 **Por qué lo hice:** sin esos patches, 54 de 76 int-specs no arrancan y H3/H4 quedaban sin medir.
+Y después, sin el ciclo limpio, la relación seguía sin entregar y H3/H4 seguían sin oráculo.
 El patch de v4.1.8 dice en su cabecera que existe *«únicamente para una base ya aplicada y
 poblada»* — es exactamente este caso, y es el mecanismo sancionado, no un `ALTER` a mano.
 
-**Efecto medible:** mis suites pasaron de 32 a 33 pruebas en verde, `fx3` pasó de no arrancar a
-arrancar y fallar por HALL-02, y el total de la corrida conjunta pasó de **11 fallos a 4**, todos
-de `fx3` y todos por HALL-02.
+**Efecto medible, en dos saltos:**
+
+| | Antes de los patches | Tras los patches | Tras el ciclo limpio |
+|---|---|---|---|
+| Mis suites | 32/32 (midiendo la nada) | 33/33 | **33/33 midiendo efectos reales** |
+| `fx3` (regresión ajena) | no arranca | arranca y falla: `Expected 4, Received 0` | **10/10 en verde, exit 0** |
+| `emit` | `delivered:false`, 0 filas | `delivered:false`, 0 filas | **`delivered:true`** + fila + chat |
 
 ## Riesgos residuales y deuda
 

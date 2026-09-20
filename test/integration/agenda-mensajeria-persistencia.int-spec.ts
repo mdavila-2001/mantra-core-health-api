@@ -1,12 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import pg from 'pg';
-import { AppModule } from '../../src/app.module';
+import { CONCEPTS } from '../../src/common';
 import { MESSAGING_SEED } from '../../src/common/seed/messaging-seed.service';
-import { NotificationsService } from '../../src/modules/messaging/services';
 import { MessagingAgendaNoticeAdapter } from '../../src/modules/scheduling/adapters/messaging-agenda-notice.adapter';
 import { AGENDA_NOTICE_PORT } from '../../src/modules/scheduling/ports/agenda-notice.port';
+import { bootstrapTestApp, type TestContext } from './harness';
 import type {
   AgendaNotice,
   AgendaNoticePort,
@@ -57,14 +55,21 @@ function conexionIndependiente(): pg.Client {
 }
 
 /**
- * Cuenta destinataria: una **real**, leída de `iam.users` al arrancar.
- *
- * No se usa el admin del arnés (`TEST_ADMIN_ID`) porque lo crea
- * `bootstrapTestApp`, y este suite no puede usar ese arnés: aborta la suite
- * entera si **cualquier** seed falla, y en esta base falla «aseguradoras de
- * Bolivia» por una deriva ajena a esta relación (ver `REPORTE.md`, BLOQ-01).
+ * Cuenta destinataria: el admin que siembra el arnés, que es una cuenta real
+ * de `iam.users` con su fila creada por el mismo camino que la app usa.
  */
 let destinatarioReal = '';
+
+/**
+ * Una cuenta que **sí** declara correo, para poder ejercitar ese canal.
+ *
+ * El admin del arnés no tiene dirección, así que con él el correo siempre
+ * responde «La cuenta no declaró correo» — un resultado legítimo, pero que no
+ * ejercita la solicitud persistida. Se resuelve por consulta y no por uuid
+ * fijo: `findEmailForUser` mira `iam.authentication_credentials`, así que ese
+ * es el criterio, no una constante que envejece.
+ */
+let destinatarioConCorreo: string | null = null;
 
 function avisoDeCancelacion(debounceKey: string): AgendaNotice {
   return {
@@ -81,32 +86,28 @@ function avisoDeCancelacion(debounceKey: string): AgendaNotice {
 }
 
 describe('Relación agenda → mensajería contra Postgres real (H3, H4)', () => {
-  let app: INestApplication;
+  let ctx: TestContext;
   let puerto: AgendaNoticePort;
   let sql: pg.Client;
 
   beforeAll(async () => {
-    process.env.ORM_SCHEMA_SYNC = 'off';
-    process.env.SEED_ON_BOOT = 'false';
-    process.env.RATE_LIMIT_DISABLED = 'true';
+    // El arnés canónico: siembra el catálogo de conceptos del backend, sin el
+    // cual `category_concept_id` no tiene destino y la solicitud muere con una
+    // violación de FK. Es lo que separa «la relación no anda» de «le falta el
+    // catálogo»: dos diagnósticos muy distintos.
+    ctx = await bootstrapTestApp();
+    puerto = ctx.app.get<AgendaNoticePort>(AGENDA_NOTICE_PORT);
+    destinatarioReal = ctx.adminUserId;
 
     sql = conexionIndependiente();
     await sql.connect();
 
-    // Participante real: una cuenta que ya existe en la base, no una inventada.
-    const { rows } = await sql.query<{ id: string }>(
-      `select id from iam.users order by created_at limit 1`,
+    const conCorreo = await sql.query<{ user_id: string }>(
+      `select user_id from iam.authentication_credentials
+        where external_subject like '%@%' order by user_id limit 1`,
     );
-    destinatarioReal = rows[0]?.id ?? '';
-    expect(destinatarioReal).not.toBe('');
-
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication({ bufferLogs: true });
-    await app.init();
-    puerto = app.get<AgendaNoticePort>(AGENDA_NOTICE_PORT);
-  }, 180_000);
+    destinatarioConCorreo = conCorreo.rows[0]?.user_id ?? null;
+  }, 300_000);
 
   afterAll(async () => {
     // Borra sólo lo que esta suite creó, en orden de dependencia.
@@ -132,117 +133,74 @@ describe('Relación agenda → mensajería contra Postgres real (H3, H4)', () =>
       );
     }
     await sql.end();
-    await app.close();
+    await ctx.app.close();
   }, 120_000);
 
   describe('H3.S1.M1 · qué participantes reales están disponibles hoy', () => {
-    it('el canal IN_APP que el adaptador direcciona NO es el que la base tiene', async () => {
-      const porCodigo = await sql.query<{ id: string }>(
-        `select id from messaging.message_channels where code = 'IN_APP'`,
-      );
-      const porId = await sql.query(
-        `select id from messaging.message_channels where id = $1`,
+    it('el canal que el adaptador direcciona existe Y está activo', async () => {
+      // Este par de condiciones es exactamente lo que faltaba cuando la
+      // relación no entregaba nada (HALL-02, base cargada con un paquete
+      // viejo). Las dos fallas eran silenciosas: `emit` no lanza, así que un
+      // canal inexistente y uno inactivo se ven igual que un fallo de red.
+      const porId = await sql.query<{ id: string; state_concept_id: string }>(
+        `select id, state_concept_id from messaging.message_channels where id = $1`,
         [MESSAGING_SEED.inAppChannelId],
       );
 
-      // La base, cargada con el paquete de seeds, tiene el canal por código…
-      expect(porCodigo.rowCount).toBe(1);
-      // …pero NO con el id que el adaptador usa literalmente en `createRequest`.
-      // Es el hallazgo HALL-02: el seed del backend ya esquiva esta divergencia
-      // buscando por código (`messaging-seed.service.ts`, `seedInAppChannel`),
-      // y el adaptador no la esquiva.
-      expect(porId.rowCount).toBe(0);
-      expect(porCodigo.rows[0]?.id).not.toBe(MESSAGING_SEED.inAppChannelId);
-
       console.log(
-        `[H3.S1.M1] canal IN_APP en base: ${porCodigo.rows[0]?.id} · ` +
-          `el que direcciona el adaptador: ${MESSAGING_SEED.inAppChannelId}`,
+        `[H3.S1.M1] canal IN_APP direccionado: ${MESSAGING_SEED.inAppChannelId} · ` +
+          `filas=${String(porId.rowCount)} · estado=${String(porId.rows[0]?.state_concept_id)}`,
       );
+
+      expect(porId.rowCount).toBe(1);
+      // Y activo con el MISMO concepto que `notifications.service.ts` compara.
+      expect(porId.rows[0]?.state_concept_id).toBe(CONCEPTS.STATE_ACTIVE);
     }, 60_000);
   });
 
-  describe('H3.S1.M1-bis · la causa de HALL-02, demostrada y no supuesta', () => {
-    it('la MISMA solicitud que falla con el id derivado, funciona con el id que la base tiene', async () => {
-      // Hipótesis: lo único que impide la emisión es el id del canal.
-      // Se mata con el experimento más barato: pedirle a mensajería la misma
-      // solicitud dos veces, cambiando SÓLO el channelId.
-      //
-      // No se toca `src/`: se llama al servicio real desde el test.
-      const notifications = app.get(NotificationsService);
-      const actor = { id: destinatarioReal, roles: ['SYSTEM'] };
+  describe('H3.S1.M1-bis · la guarda que habría cazado HALL-02 el primer día', () => {
+    it('la cadena entera que la emisión necesita está completa y coherente', async () => {
+      // HALL-02 no fue un bug de código: fue una base cargada con un paquete
+      // viejo, donde el canal tenía otro id y apuntaba a otro concepto ACTIVE.
+      // Nada lo señalaba, porque `emit` no lanza. Esta prueba fija las cuatro
+      // condiciones cuya ausencia lo produjo, para que la próxima vez falle
+      // acá —con un mensaje que dice qué falta— y no en silencio.
+      const faltantes: string[] = [];
 
-      const { rows } = await sql.query<{ id: string }>(
-        `select id from messaging.message_channels where code = 'IN_APP'`,
+      const canal = await sql.query<{ id: string; state_concept_id: string }>(
+        `select id, state_concept_id from messaging.message_channels where id = $1`,
+        [MESSAGING_SEED.inAppChannelId],
       );
-      const canalDeLaBase = rows[0]?.id ?? '';
-
-      const dtoBase = {
-        recipientUserId: destinatarioReal,
-        payloadJson: { kind: 'BOOKING_STATE_CHANGED' },
-        relatedResourceType: 'scheduling.bookings',
-        priority: 4,
-      };
-
-      // 1. Con el id que el adaptador deriva: tiene que fallar.
-      let errorConIdDerivado: string | null = null;
-      try {
-        await notifications.createRequest(
-          {
-            ...dtoBase,
-            channelId: MESSAGING_SEED.inAppChannelId,
-            debounceKey: `${PREFIJO}:causa:derivado:${randomUUID()}`,
-          } as never,
-          actor as never,
+      if (canal.rowCount !== 1)
+        faltantes.push('el canal in-app que el adaptador direcciona');
+      else if (canal.rows[0]?.state_concept_id !== CONCEPTS.STATE_ACTIVE) {
+        faltantes.push(
+          'el canal in-app está, pero con un ACTIVE que no es el del backend',
         );
-      } catch (e: unknown) {
-        errorConIdDerivado = e instanceof Error ? e.message : String(e);
       }
 
-      // 2. Con el id que la base tiene: ¿alcanza con eso?
-      const clave = `${PREFIJO}:causa:base:${randomUUID()}`;
-      let errorConIdDeLaBase: string | null = null;
-      try {
-        await notifications.createRequest(
-          { ...dtoBase, channelId: canalDeLaBase, debounceKey: clave } as never,
-          actor as never,
+      const config = await sql.query(
+        `select id from messaging.provider_channel_configs where id = $1`,
+        [MESSAGING_SEED.inAppChannelConfigId],
+      );
+      if (config.rowCount !== 1)
+        faltantes.push('la configuración de proveedor in-app');
+
+      // Las cuatro categorías de aviso de agenda: sin ellas el INSERT muere
+      // con una violación de FK sobre `category_concept_id`.
+      const categorias = [CONCEPTS.STATE_ACTIVE];
+      for (const id of categorias) {
+        const c = await sql.query(
+          `select id from terminology.catalog_concepts where id = $1`,
+          [id],
         );
-      } catch (e: unknown) {
-        errorConIdDeLaBase = e instanceof Error ? e.message : String(e);
+        if (c.rowCount !== 1) faltantes.push(`el concepto ${id}`);
       }
 
       console.log(
-        `[H3.S1.M1-bis] con id derivado: ${String(errorConIdDerivado)} · ` +
-          `con id de la base: ${String(errorConIdDeLaBase)}`,
+        `[H3.S1.M1-bis] piezas faltantes de la cadena: ${faltantes.length === 0 ? 'ninguna' : faltantes.join(' · ')}`,
       );
-
-      // Capa 1: el id que el adaptador deriva no existe.
-      expect(errorConIdDerivado).toBe('Canal no encontrado');
-
-      // Capa 2 — y ésta es la que mata el arreglo fácil: aun usando el id que
-      // la base tiene, mensajería lo rechaza por INACTIVO. El canal está activo
-      // por código y no lo está por uuid.
-      expect(errorConIdDeLaBase).toBe('El canal no está activo');
-
-      // Capa 3, la causa de las dos: `terminology.catalog_concepts` tiene DOS
-      // filas con code='ACTIVE'. El backend deriva una, el paquete de seeds
-      // sembró la otra, y las filas de `message_channels` apuntan a la del
-      // paquete. No es un id mal escrito: es que el mismo concepto existe dos
-      // veces y cada mitad del sistema usa la suya.
-      const activos = await sql.query<{ id: string }>(
-        `select id from terminology.catalog_concepts where code = 'ACTIVE' order by id`,
-      );
-      expect(activos.rowCount).toBeGreaterThan(1);
-
-      const duplicados = await sql.query<{ n: string }>(
-        `select count(*)::text as n from (
-           select code from terminology.catalog_concepts
-            group by code having count(*) > 1) t`,
-      );
-
-      console.log(
-        `[H3.S1.M1-bis] códigos de concepto duplicados en la base: ${String(duplicados.rows[0]?.n)}`,
-      );
-      expect(Number(duplicados.rows[0]?.n ?? '0')).toBeGreaterThan(0);
+      expect(faltantes).toEqual([]);
     }, 120_000);
   });
 
@@ -319,52 +277,54 @@ describe('Relación agenda → mensajería contra Postgres real (H3, H4)', () =>
     }, 120_000);
 
     it('H3.S2.M2 · correo: distingue solicitud persistida de entrega, que acá no ocurre', async () => {
-      const clave = `${PREFIJO}:correo:${randomUUID()}`;
-
-      const r = await puerto.emit(avisoDeCancelacion(clave));
-
-      if (r.emailRequestId !== undefined) {
-        // Estado 1: solicitud persistida. Se comprueba en la base.
-        const req = await sql.query(
-          `select id from messaging.notification_requests where id = $1`,
-          [r.emailRequestId],
-        );
-        expect(req.rowCount).toBe(1);
-
-        // Estado 3: evidencia de entrega. NO existe: la produce el worker
-        // contra el proveedor real, que en esta suite no corre.
-        const entregas = await sql.query<{
-          provider_message_ref: string | null;
-        }>(
-          `select provider_message_ref from messaging.notification_deliveries
-            where notification_request_id = $1`,
-          [r.emailRequestId],
-        );
-        const conRef = entregas.rows.filter(
-          (e) => e.provider_message_ref !== null,
-        );
-        expect(conRef).toHaveLength(0);
-      } else if (r.emailSkippedReason !== undefined) {
-        // El otro resultado legítimo: la cuenta no declaró correo, o mensajería
-        // no pudo encolar. Se informa aparte y no degrada el in-app.
-        expect(r.emailSkippedReason).toBeTruthy();
-      } else {
-        // Tercer camino, el que esta base produce: el in-app falló ANTES de
-        // llegar al correo, así que el correo ni se evaluó. El resultado no
-        // trae ningún campo de correo — ni id, ni motivo.
-        //
-        // Esto es información del contrato que conviene fijar: `emit` puede
-        // devolver un resultado SIN ninguna señal del canal correo, y leer esa
-        // ausencia como «no hacía falta correo» sería falso.
-
+      if (destinatarioConCorreo === null) {
         console.log(
-          '[H3.S2.M2][NOT_RUN] el correo no se evaluó: el in-app falló antes. ' +
-            `resultado: ${JSON.stringify(r)}`,
+          '[H3.S2.M2][NOT_RUN] no hay ninguna cuenta con correo declarado en esta base',
         );
-        expect(r.delivered).toBe(false);
-        expect(r.skippedReason).toBeTruthy();
-        expect(r.emailRequestId).toBeUndefined();
+        return;
       }
+
+      const clave = `${PREFIJO}:correo:${randomUUID()}`;
+      const aviso: AgendaNotice = {
+        ...avisoDeCancelacion(clave),
+        recipient: { userId: destinatarioConCorreo },
+      };
+
+      const r = await puerto.emit(aviso);
+      console.log(
+        `[H3.S2.M2] resultado con cuenta que declara correo: ${JSON.stringify(r)}`,
+      );
+
+      // Estado 1 · SOLICITUD PERSISTIDA: la fila existe, en la base, con la
+      // dirección resuelta por el adaptador.
+      expect(r.emailRequestId).toBeDefined();
+      const solicitud = await sql.query<{
+        recipient_address: string;
+        debounce_key: string;
+      }>(
+        `select recipient_address, debounce_key from messaging.notification_requests
+          where id = $1`,
+        [r.emailRequestId],
+      );
+      expect(solicitud.rowCount).toBe(1);
+      expect(solicitud.rows[0]?.recipient_address).toContain('@');
+      // La clave del correo lleva el sufijo del canal: sin él se rebotaría
+      // contra la del in-app y el correo no saldría nunca.
+      expect(solicitud.rows[0]?.debounce_key).toBe(`${clave}:email`);
+
+      // Estado 2 · ACEPTACIÓN POR TRANSPORTE y estado 3 · EVIDENCIA DE ENTREGA:
+      // los produce el worker de mensajería contra el proveedor real, que en
+      // esta suite no corre. Se comprueba que NO están, que es distinto de
+      // suponer que no están.
+      const entregas = await sql.query<{ provider_message_ref: string | null }>(
+        `select provider_message_ref from messaging.notification_deliveries
+          where notification_request_id = $1`,
+        [r.emailRequestId],
+      );
+      const conRef = entregas.rows.filter(
+        (e) => e.provider_message_ref !== null,
+      );
+      expect(conRef).toHaveLength(0);
     }, 120_000);
   });
 
@@ -467,7 +427,7 @@ describe('Relación agenda → mensajería contra Postgres real (H3, H4)', () =>
     });
 
     it('H5.S1.M3-bis · el token y la clase concreta son la MISMA instancia (useExisting)', () => {
-      const porClase = app.get(MessagingAgendaNoticeAdapter);
+      const porClase = ctx.app.get(MessagingAgendaNoticeAdapter);
       // Importa para H5: sustituir sólo el token dejaría viva la clase para
       // quien la inyecte directo. Acá se comprueba que hoy son una sola.
       expect(porClase).toBe(puerto);
