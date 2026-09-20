@@ -369,7 +369,6 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
   });
 });
 
-
 /**
  * El nombre del representante legal y de las gerencias, en partes
  * (`name`/`lastName` obligatorios salvo que venga `fullName`, la forma
@@ -472,9 +471,21 @@ describe('RegisterOrganizationDto · representante legal y gerencias · nombre e
         organization: {
           ...ALTA_CON_REPRESENTACION.organization,
           executives: {
-            generalManager: { ...GERENCIA_BASE, name: 'Carlos', lastName: 'Mendoza' },
-            commercialManager: { ...GERENCIA_BASE, name: 'Ana', lastName: 'Paz' },
-            marketingManager: { ...GERENCIA_BASE, name: 'Luis', lastName: 'Rojas' },
+            generalManager: {
+              ...GERENCIA_BASE,
+              name: 'Carlos',
+              lastName: 'Mendoza',
+            },
+            commercialManager: {
+              ...GERENCIA_BASE,
+              name: 'Ana',
+              lastName: 'Paz',
+            },
+            marketingManager: {
+              ...GERENCIA_BASE,
+              name: 'Luis',
+              lastName: 'Rojas',
+            },
           },
         },
       }),

@@ -1,4 +1,5 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { EntityManager } from '@mikro-orm/postgresql';
@@ -16,6 +17,12 @@ import {
   StrictAgendaNoticePortDouble,
   UnexpectedAgendaNoticeCall,
 } from '../doubles/strict-agenda-notice-port.double';
+import {
+  ARTEFACTO_CONSUMIDOR,
+  COMBINACIONES,
+  DOBLE_PROVEEDOR,
+  RUTA_DOBLE_PROVEEDOR,
+} from '../fixtures/artefactos-fijados';
 
 /**
  * Relación `agenda → mensajería` ejercitada con **dobles fijados de los dos
@@ -593,6 +600,92 @@ describe('Relación agenda → mensajería · dobles de ambos extremos (H2)', ()
         UnexpectedAgendaNoticeCall,
       );
       expect(() => doble.assertClean()).toThrow();
+    });
+  });
+
+  /**
+   * Los dos extremos, fijados por versión (H2.S1.M1, H2.S2.M1, H2.S3.M1).
+   *
+   * Al cierre del turno anterior estas tres microtareas estaban `BLOQUEADO` /
+   * `A MEDIAS` con el mismo motivo: «no hay versiones que combinar». Ya hay
+   * dos artefactos publicados —el paquete de Itzan y el laboratorio de Pablo—
+   * así que la fijación dejó de ser imposible y pasó a ser obligatoria.
+   */
+  describe('H2 · la relación, fijada por versión y no por rama', () => {
+    /** Ejecuta git desde la raíz del repo y devuelve el código de salida. */
+    function gitExitCode(argumentos: readonly string[]): number {
+      const resultado = spawnSync('git', [...argumentos], {
+        cwd: process.cwd(),
+      });
+      return resultado.status ?? -1;
+    }
+
+    beforeAll(() => {
+      // Gate B1 pide las fichas pegadas: van a la salida del runner, que es
+      // donde queda la evidencia de esta suite.
+      for (const ficha of [ARTEFACTO_CONSUMIDOR, DOBLE_PROVEEDOR]) {
+        console.log(
+          `[ficha:${ficha.rol}] ${ficha.nombre}@${ficha.version} · sha256=${ficha.sha256.slice(0, 16)}… · origen=${ficha.commitDeOrigen.slice(0, 8)} · entrega=${ficha.estadoDeEntrega}`,
+        );
+      }
+    });
+
+    it('H2.S1.M1 · el consumidor se referencia por versión, y su commit de origen es alcanzable', () => {
+      expect(ARTEFACTO_CONSUMIDOR.version).toMatch(/^v\d+\.\d+\.\d+/);
+      // Una rama no es una versión: si alguien mete un nombre de rama acá, el
+      // artefacto deja de ser reproducible y esto tiene que romper.
+      expect(ARTEFACTO_CONSUMIDOR.version).not.toMatch(
+        /^(origin\/|refs\/|dev$|master$|main$)/,
+      );
+      expect(ARTEFACTO_CONSUMIDOR.commitDeOrigen).toMatch(/^[0-9a-f]{40}$/);
+
+      // Lo que vuelve reproducible al paquete: su commit está en la historia
+      // del corte, así que los 117 archivos se pueden volver a sacar de acá
+      // aunque el paquete en sí no viaje en este repo.
+      expect(
+        gitExitCode([
+          'merge-base',
+          '--is-ancestor',
+          ARTEFACTO_CONSUMIDOR.commitDeOrigen,
+          'HEAD',
+        ]),
+      ).toBe(0);
+    });
+
+    it('H2.S2.M1 · los dos extremos están fijados, y el que vive en el repo no derivó', () => {
+      for (const ficha of [ARTEFACTO_CONSUMIDOR, DOBLE_PROVEEDOR]) {
+        expect(ficha.version).not.toHaveLength(0);
+        expect(ficha.sha256).toMatch(/^[0-9a-f]{64}$/);
+        expect(ficha.commitDeOrigen).toMatch(/^[0-9a-f]{40}$/);
+        expect(ficha.limites.length).toBeGreaterThan(0);
+      }
+
+      // El proveedor sí vive acá: su hash se recalcula, no se declara. Si el
+      // laboratorio cambia, esta suite lo dice en vez de seguir «fijada» a un
+      // archivo que ya no es el mismo.
+      const rutaAbsoluta = path.join(process.cwd(), RUTA_DOBLE_PROVEEDOR);
+      const contenido = fs.readFileSync(rutaAbsoluta);
+      const hashReal = createHash('sha256').update(contenido).digest('hex');
+      expect(hashReal).toBe(DOBLE_PROVEEDOR.sha256);
+    });
+
+    it('H2.S3.M1 · cada combinación de versiones está declarada con su motivo', () => {
+      expect(COMBINACIONES.length).toBeGreaterThan(0);
+      for (const combinacion of COMBINACIONES) {
+        expect(combinacion.motivo.length).toBeGreaterThan(20);
+        expect(['PASA', 'FALLA', 'NO_APLICA']).toContain(combinacion.veredicto);
+        console.log(
+          `[matriz] ${combinacion.consumidor} × ${combinacion.proveedor} → ${combinacion.veredicto}: ${combinacion.motivo}`,
+        );
+      }
+
+      // La celda del contrato ausente no se omite: omitirla haría parecer que
+      // la matriz está completa.
+      const contrato = COMBINACIONES.find((c) =>
+        c.proveedor.includes('contrato-del-piloto'),
+      );
+      expect(contrato?.veredicto).toBe('NO_APLICA');
+      expect(contrato?.motivo).toMatch(/0\/50|no existe/);
     });
   });
 });

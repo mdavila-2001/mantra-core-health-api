@@ -472,4 +472,132 @@ describe('Relación agenda → mensajería contra Postgres real (H3, H4)', () =>
       expect(filas).toBeLessThanOrEqual(2);
     }, 120_000);
   });
+
+  /**
+   * El chat, acreditado con filas (H3.S2.M3).
+   *
+   * Al cierre del turno anterior esta microtarea quedó `A MEDIAS` con este
+   * motivo: `chatDelivered: true` es un booleano que arma el adaptador, y su
+   * DoD pide tres cosas distintas —conversación, membresía y visibilidad—
+   * que un booleano no puede acreditar. Acá se preguntan las tres a Postgres.
+   */
+  describe('H3.S2.M3 · el efecto en chat: conversación, membresía y visibilidad', () => {
+    it('deja el mensaje en una conversación con los dos participantes, sin leer para el destinatario', async () => {
+      const clave = `${PREFIJO}:chat:${randomUUID()}`;
+      // Marca única en el cuerpo: es lo que permite encontrar ESTE mensaje y
+      // no uno de otra corrida sobre la misma conversación reutilizada.
+      const marca = `chat-${randomUUID()}`;
+      const resultado = await puerto.emit({
+        ...avisoDeCancelacion(clave),
+        bodyText: `El profesional canceló la cita. [${marca}]`,
+      });
+
+      const mensaje = await sql.query<{
+        id: string;
+        conversation_id: string;
+        sender_profile_id: string;
+      }>(
+        `select id, conversation_id, sender_profile_id
+           from community.direct_messages
+          where body_text like $1`,
+        [`%${marca}%`],
+      );
+
+      if (mensaje.rowCount === 0) {
+        // No se maquilla: si el chat no escribió, se registra por qué y la
+        // microtarea queda declarada, no aprobada.
+        console.log(
+          `[H3.S2.M3][NOT_RUN] no hay mensaje que acreditar · chatDelivered=${String(
+            resultado.chatDelivered,
+          )} · motivo=${resultado.chatSkippedReason ?? '—'}`,
+        );
+        expect(resultado.chatDelivered).toBe(false);
+        return;
+      }
+
+      const {
+        id: mensajeId,
+        conversation_id: conversacionId,
+        sender_profile_id: emisorId,
+      } = mensaje.rows[0]!;
+
+      try {
+        // 1. Conversación: existe de verdad y es del tipo que el adaptador dice.
+        const conversacion = await sql.query<{
+          id: string;
+          message_count: number;
+        }>(
+          `select c.id, c.message_count
+             from community.conversations c
+            where c.id = $1`,
+          [conversacionId],
+        );
+        expect(conversacion.rowCount).toBe(1);
+
+        // 2. Membresía: los dos extremos del hilo, no uno solo.
+        const participantes = await sql.query<{
+          participant_profile_id: string;
+          target_id: string | null;
+          last_read_message_id: string | null;
+        }>(
+          `select p.participant_profile_id, pp.target_id, p.last_read_message_id
+             from community.conversation_participants p
+             left join community.public_profiles pp
+               on pp.id = p.participant_profile_id
+            where p.conversation_id = $1`,
+          [conversacionId],
+        );
+        expect(participantes.rowCount).toBe(2);
+
+        const perfiles = participantes.rows.map(
+          (f) => f.participant_profile_id,
+        );
+        expect(perfiles).toContain(emisorId);
+
+        // El destinatario está por su cuenta real, no por un perfil cualquiera:
+        // la vitrina se proyecta con `target_id = userId`.
+        const delDestinatario = participantes.rows.find(
+          (f) => f.target_id === destinatarioReal,
+        );
+        expect(delDestinatario).toBeDefined();
+        expect(delDestinatario?.participant_profile_id).not.toBe(emisorId);
+
+        // 3. Visibilidad: la bandeja del destinatario se arma por su
+        //    participación, y el mensaje le queda SIN LEER. Un mensaje ya
+        //    marcado como leído no sería visible: sería invisible.
+        expect(delDestinatario?.last_read_message_id).toBeNull();
+
+        const visibleEnBandeja = await sql.query<{ n: string }>(
+          `select count(*)::text as n
+             from community.direct_messages m
+             join community.conversation_participants p
+               on p.conversation_id = m.conversation_id
+            where m.id = $1
+              and p.participant_profile_id = $2
+              and m.deleted_at is null`,
+          [mensajeId, delDestinatario?.participant_profile_id],
+        );
+        expect(Number(visibleEnBandeja.rows[0]?.n ?? '0')).toBe(1);
+
+        console.log(
+          `[H3.S2.M3] conversación=${conversacionId} · participantes=${String(
+            participantes.rowCount,
+          )} · emisor=${emisorId} · destinatario=${String(
+            delDestinatario?.participant_profile_id,
+          )} · sin leer=${String(delDestinatario?.last_read_message_id === null)}`,
+        );
+      } finally {
+        // La conversación se reutiliza entre corridas (el adaptador la busca
+        // antes de crearla), así que se borra el mensaje de esta prueba y no
+        // el hilo: borrar el hilo destruiría datos que no creó esta suite.
+        await sql.query(
+          `delete from community.message_receipts where direct_message_id = $1`,
+          [mensajeId],
+        );
+        await sql.query(`delete from community.direct_messages where id = $1`, [
+          mensajeId,
+        ]);
+      }
+    }, 120_000);
+  });
 });

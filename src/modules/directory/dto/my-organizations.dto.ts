@@ -99,7 +99,9 @@ export class OrganizationContactPersonDto {
    * cuando el cliente mandó `fullName` en vez de las partes: esos sólo
    * tienen `display_name`, y no hay forma de partirlo sin adivinar.
    */
-  @ApiPropertyOptional({ description: 'Nombre de pila, si se declaró en partes' })
+  @ApiPropertyOptional({
+    description: 'Nombre de pila, si se declaró en partes',
+  })
   name?: string;
 
   /** Segundo nombre, si se declaró. */
@@ -107,7 +109,9 @@ export class OrganizationContactPersonDto {
   middleName?: string;
 
   /** Apellido paterno, si se declaró en partes. */
-  @ApiPropertyOptional({ description: 'Apellido paterno, si se declaró en partes' })
+  @ApiPropertyOptional({
+    description: 'Apellido paterno, si se declaró en partes',
+  })
   lastName?: string;
 
   /** Apellido materno, si se declaró. */
