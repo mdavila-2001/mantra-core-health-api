@@ -271,14 +271,14 @@ GATE_C_NUEVOS = [
     ),
     check(
         'H6.etapa5.e2e', 'C', 'e2e', ARTEFACTO_HOY, True, False, 'NOT_RUN',
-        'Etapa 5: se ejecutó y no pudo arrancar — el navegador de Playwright no está instalado '
-        'en esta máquina (exit 1). Pero la causa de fondo es otra: este trabajo no cambió '
-        'comportamiento de producto (los únicos cambios en src/ son 9 reformateos de prettier), '
-        'así que no hay flujo de usuario al que dirigir un E2E. El único spec vecino, '
-        'carril-p8-avisos-agenda, es evidencia visual de OTRO carril y exige cuatro credenciales '
-        'más datos sembrados contra la API viva.',
-        YO + [participante('mantra-core-health', 'real', 'mockup (árbol sucio)')],
-        'npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list', 1,
+        'Etapa 5: EJECUTADA — 3 skipped, exit 0. La suite se saltea sola sin las cuatro '
+        'credenciales P8, que es lo que su propio docstring promete, y sus datos los crea '
+        'tools/alovida/p8-avisos-agenda.mjs contra la API viva. La causa de fondo es que este '
+        'trabajo no cambió comportamiento de producto (los únicos cambios en src/ son 9 '
+        'reformateos de prettier), así que no hay flujo de usuario al que dirigir un E2E; el '
+        'spec vecino es evidencia visual de OTRO carril.',
+        YO + [participante('mantra-core-health', 'real', 'mockup@68969782')],
+        'npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list', 0,
         ['docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h6-etapa5-e2e-no-ejecutable.txt'],
         'Marcado NO aplicable a este artefacto, no aprobado: un E2E sin flujo modificado que '
         'ejercitar no es un gate pendiente, es un gate sin sujeto. Vuelve a aplicar en cuanto '

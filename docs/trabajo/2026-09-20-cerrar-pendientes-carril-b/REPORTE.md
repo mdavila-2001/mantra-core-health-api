@@ -117,29 +117,43 @@ Ninguna.
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| `H6.S1.M3` (etapa 5, E2E dirigido) | `NOT_RUN` — **ejecutado**, ver abajo | Que esta relación toque `src/`. Hoy no tiene sujeto. |
+| `H6.S1.M3` (etapa 5, E2E dirigido) | `NOT_RUN` — **ejecutada: 3 skipped, exit 0** | Que esta relación toque `src/`. Hoy la etapa no tiene sujeto que ejercitar. |
 
 ### Por qué `H6.S1.M3` queda `NOT_RUN` y no `HECHO`
 
-Su DoD pide resultados pegados; no admite `NOT_RUN` (a diferencia de `H6.S1.M4`, que sí). Así que
-**no se declara hecha**, aunque se haya ejecutado. Tres causas, las tres verificadas:
+**Se ejecutó, y el resultado es `3 skipped, exit 0`.** No es un bloqueo: es que la etapa no tiene
+sujeto.
 
-1. **Se corrió, y el navegador no está**: `npx playwright test playwright/carril-p8-avisos-agenda.spec.ts`
-   → `browserType.launch: Executable doesn't exist … chrome-headless-shell.exe`, exit 1.
-2. **Aunque estuviera, el spec exige un entorno provisto**: cuatro credenciales (`P8_PACIENTE_*`,
-   `P8_DOCTORA_*`) y datos sembrados por `tools/alovida/p8-avisos-agenda.mjs` contra la API viva.
-   Sin ellas se saltea solo (`spec:91,108,122`).
-3. **La causa de fondo: este trabajo no cambió comportamiento de producto.** `git diff --stat
-   4cc5ea1f..HEAD -- src/` da 4 archivos y 28 líneas, **todas reformateo de prettier**. No hay
-   flujo de usuario modificado al que dirigir un E2E; el spec vecino es evidencia visual de otro
-   carril. Por eso en el consolidado va como **no aplicable a este artefacto**, no como aprobado.
+```text
+$ npx playwright install chromium                                        exit=0
+$ npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list
+Running 3 tests using 1 worker
+  -  1 … el paciente ve la demora de su profesional en el detalle del turno
+  -  2 … el paciente ve en qué lista de espera está
+  -  3 … el profesional puede avisar que se demora desde su agenda
+3 skipped
+exit=0
+```
 
-> **Corrección de lo que escribí antes:** dije que el bloqueo era el árbol sucio del front (352
-> archivos sin commitear). Eso es cierto y sigue siendo un problema, pero **no era la causa**: con
-> el árbol limpio tampoco habría corrido, y aunque hubiera corrido no habría hablado de este
-> cambio. Y el comentario del spec que dice que el centro de notificaciones «todavía no existe en
-> el frontend» **está desactualizado**: existe, en `src/app/features/notifications/`, cargado de
-> forma diferida desde `app.routes.ts:73`.
+Es el comportamiento que el propio spec documenta: sin `P8_PACIENTE_ID` / `P8_PACIENTE_CLAVE` /
+`P8_DOCTORA_ID` / `P8_DOCTORA_CLAVE` **se saltea en vez de fallar** (`spec:43-57,91,108,122`), y sus
+datos los crea `tools/alovida/p8-avisos-agenda.mjs` contra la API viva.
+
+Su DoD pide resultados pegados y no admite `NOT_RUN` (a diferencia de `H6.S1.M4`, que sí). Un
+`skipped` no es un resultado del flujo, así que **no se declara hecha**.
+
+**La causa de fondo, que no cambia con ningún entorno:** este trabajo **no cambió comportamiento de
+producto**. `git diff --stat 4cc5ea1f..HEAD -- src/` da 4 archivos y 28 líneas, **todas reformateo
+de prettier**. No hay flujo de usuario modificado al que dirigir un E2E, y el spec vecino es
+evidencia visual de otro carril. Por eso en el consolidado va como **no aplicable a este
+artefacto**, no como aprobado, y vuelve a aplicar en cuanto esta relación toque `src/`.
+
+> **Correcciones de lo que escribí en la primera tanda.** (1) Dije que el bloqueo era el árbol
+> sucio del front (352 archivos en el índice). **Ya no existe**: a las 12:38 un `reset` + `pull`
+> ajenos lo limpiaron y entraron los PR #552 y #554 (consta en el reflog del repo del front). No
+> era la causa de todos modos. (2) El comentario del spec P8 que dice que el centro de
+> notificaciones «todavía no existe en el frontend» **está desactualizado**: existe en
+> `src/app/features/notifications/`, cargado de forma diferida desde `app.routes.ts:73`.
 
 ## Evidencia
 

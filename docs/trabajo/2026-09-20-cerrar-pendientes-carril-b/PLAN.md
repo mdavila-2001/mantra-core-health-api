@@ -90,7 +90,7 @@ Ver [REPORTE.md](./REPORTE.md).
 | H3.S1.M3 | `H4.S3.M3` | `HECHO` | idem (HALL-09) |
 | H4.S1.M1 | `H5.S1.M2` | `HECHO` | idem (HALL-10) |
 | H5.S1.M1 | `H6.S1.M1` | `HECHO` | `evidencia/h5-etapa2-lint.txt`, exit 0 |
-| H5.S1.M2 | `H6.S1.M3` | `NOT_RUN` | ejecutado: sin navegador instalado, y sin flujo modificado que ejercitar |
+| H5.S1.M2 | `H6.S1.M3` | `NOT_RUN` | ejecutada: 3 skipped, exit 0 — sin flujo modificado que ejercitar |
 | H5.S1.M3 | `H6.S1.M4` | `HECHO` | declaracion con motivo verificado: un solo project en `playwright.config.ts` |
 | H6.S1.M1 | `H6.S3.M1` | `HECHO` | `registro-de-checks-consolidado.json` — 37 checks, 13 campos, 0 rutas rotas |
 | H6.S1.M2 | `H6.S3.M2` | `HECHO` | `gates-no-aprobados.md`, generado del registro |

@@ -919,7 +919,7 @@
       "required": true,
       "applicable": false,
       "status": "NOT_RUN",
-      "reason": "Etapa 5: se ejecutó y no pudo arrancar — el navegador de Playwright no está instalado en esta máquina (exit 1). Pero la causa de fondo es otra: este trabajo no cambió comportamiento de producto (los únicos cambios en src/ son 9 reformateos de prettier), así que no hay flujo de usuario al que dirigir un E2E. El único spec vecino, carril-p8-avisos-agenda, es evidencia visual de OTRO carril y exige cuatro credenciales más datos sembrados contra la API viva.",
+      "reason": "Etapa 5: EJECUTADA — 3 skipped, exit 0. La suite se saltea sola sin las cuatro credenciales P8, que es lo que su propio docstring promete, y sus datos los crea tools/alovida/p8-avisos-agenda.mjs contra la API viva. La causa de fondo es que este trabajo no cambió comportamiento de producto (los únicos cambios en src/ son 9 reformateos de prettier), así que no hay flujo de usuario al que dirigir un E2E; el spec vecino es evidencia visual de OTRO carril.",
       "participants": [
         {
           "name": "mantra-core-health-api",
@@ -929,11 +929,11 @@
         {
           "name": "mantra-core-health",
           "kind": "real",
-          "version": "mockup (árbol sucio)"
+          "version": "mockup@68969782"
         }
       ],
       "command": "npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list",
-      "exit_code": 1,
+      "exit_code": 0,
       "evidence_paths": [
         "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h6-etapa5-e2e-no-ejecutable.txt"
       ],
