@@ -165,7 +165,8 @@ export class RegisterOrganizationExecutiveContactDto {
    * manda tal cual; si no, se compone con las partes.
    */
   @ApiPropertyOptional({
-    description: 'Nombre completo del ejecutivo (forma anterior; preferí name/lastName)',
+    description:
+      'Nombre completo del ejecutivo (forma anterior; preferí name/lastName)',
     maxLength: 200,
     example: 'Carlos Mendoza Rivero',
     deprecated: true,
@@ -272,7 +273,8 @@ export class RegisterOrganizationLegalRepresentativeDto {
    * manda tal cual; si no, se compone con las partes.
    */
   @ApiPropertyOptional({
-    description: 'Nombre completo del representante legal (forma anterior; preferí name/lastName)',
+    description:
+      'Nombre completo del representante legal (forma anterior; preferí name/lastName)',
     maxLength: 200,
     example: 'Mariana Siles Justiniano',
     deprecated: true,

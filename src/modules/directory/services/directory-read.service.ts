@@ -604,7 +604,9 @@ export class DirectoryReadService {
         // `undefined` — comparar contra `undefined` acá dejaba pasar un
         // `name: null` explícito al JSON de respuesta.
         ...(persona.name == null ? {} : { name: persona.name }),
-        ...(persona.middleName == null ? {} : { middleName: persona.middleName }),
+        ...(persona.middleName == null
+          ? {}
+          : { middleName: persona.middleName }),
         ...(persona.lastName == null ? {} : { lastName: persona.lastName }),
         ...(persona.motherLastName == null
           ? {}
