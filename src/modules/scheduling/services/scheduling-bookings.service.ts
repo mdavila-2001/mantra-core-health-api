@@ -1255,6 +1255,15 @@ export class SchedulingBookingsService {
           bookingId,
         });
       }
+
+      // H3.S1.M2 (BOLA/IDOR de escritura): mismo hueco que `cancelarYAvisar` —
+      // reprogramar no comprobaba que el actor fuera el paciente titular.
+      await this.assertPuedeActuarPorElPaciente(
+        booking.patientProfileId,
+        actor,
+        tx,
+      );
+
       if (!ACTIVE_BOOKING_STATES.includes(booking.statusConceptId)) {
         throw new PreconditionFailedException(
           'Solo se reprograma una cita vigente',
@@ -1404,6 +1413,18 @@ export class SchedulingBookingsService {
           bookingId,
         });
       }
+
+      // H3.S1.M2 (BOLA/IDOR de escritura): cancelar/rechazar no comprobaba de
+      // quién era la cita — el único control era `@Roles(...,'PATIENT')`, que
+      // autoriza a cualquier cuenta de paciente, no sólo a la titular. Mismo
+      // método que ya usan `placeHold`, la confirmación del hold y `enroll` de
+      // la lista de espera: es un no-op para quien opera la agenda.
+      await this.assertPuedeActuarPorElPaciente(
+        booking.patientProfileId,
+        actor,
+        tx,
+      );
+
       if (booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED) {
         throw new ConflictException('La cita ya está cancelada', { bookingId });
       }
@@ -2855,6 +2876,31 @@ export class SchedulingBookingsService {
       booking.resourceId && actor?.practitionerProfileId !== undefined
         ? await this.catalogRepo.findResourceById(em, booking.resourceId)
         : null;
+
+    // H3.S1.M1 (BOLA/IDOR de lectura): el detalle no comprobaba de quién era
+    // la cita — devolvía nombre, motivo y horario a cualquier cuenta con rol
+    // de agenda. Mismo criterio que `cargarParaOperar`: el paciente titular o
+    // su representante, quien opera cualquier agenda (`SCHEDULING_ADMIN`,
+    // `SCHEDULING_AGENT`, `SUPERADMIN`), o quien atiende exactamente en ese
+    // recurso. Reusa el `recurso` de arriba: no agrega una consulta nueva.
+    if (this.esUnPaciente(actor)) {
+      await this.assertPuedeActuarPorElPaciente(
+        booking.patientProfileId,
+        actor!,
+        em,
+      );
+    } else if (actor && !this.operaCualquierAgenda(actor)) {
+      const esSuAgenda =
+        actor.practitionerProfileId !== undefined &&
+        recurso !== null &&
+        recurso.resourceRefId === actor.practitionerProfileId &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType);
+      if (!esSuAgenda) {
+        throw new ForbiddenException(
+          'Esta cita es de otra agenda: solo la opera quien atiende en ella.',
+        );
+      }
+    }
 
     // El detalle tiene que decir exactamente lo mismo que el listado, así que
     // la tipología también se resuelve acá. Una sola cita: el lote de uno es la

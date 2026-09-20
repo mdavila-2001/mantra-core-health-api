@@ -3544,4 +3544,133 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
       expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
     });
   });
+
+  describe('operar y leer la cita de otro (H3.S1)', () => {
+    /** La cita confirmada de un tercero: la que nadie más debería tocar. */
+    function citaAjena() {
+      return {
+        id: 'booking-ajena',
+        patientProfileId: 'pat-ajeno',
+        bookableSlotId: 'slot-1',
+        resourceId: 'res-1',
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      };
+    }
+
+    it('un paciente no puede cancelar la cita de otro', async () => {
+      // Medido contra la API real antes del arreglo: devolvía 200 y liberaba
+      // el cupo. El único control era `@Roles(...,'PATIENT')`, que autoriza a
+      // cualquier cuenta de paciente, no sólo a la titular.
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaAjena());
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        new ForbiddenException('No cuenta con autorización de tutoría'),
+      );
+
+      await expect(
+        d.service.cancel(
+          'booking-ajena',
+          { cancelledBy: 'PATIENT', reasonText: MOTIVO } as any,
+          intruso,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      // Y no llega a tocar el cupo ni a registrar la cancelación.
+      expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+      expect(d.bookingsRepo.findSlotForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('un paciente no puede reprogramar la cita de otro', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaAjena());
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        new ForbiddenException('No cuenta con autorización de tutoría'),
+      );
+
+      await expect(
+        d.service.reschedule(
+          'booking-ajena',
+          {
+            toSlotId: '44444444-4444-4444-4444-444444444444',
+            reasonText: MOTIVO,
+          } as any,
+          intruso,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
+      expect(d.bookingsRepo.findSlotForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('al mostrador no se le pregunta: cancelar turnos ajenos es su oficio', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaAjena());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ startAt: new Date(Date.now() + 86_400_000) }),
+      );
+
+      await d.service.cancel(
+        'booking-ajena',
+        { cancelledBy: 'PROVIDER', reasonText: MOTIVO } as any,
+        mostrador,
+      );
+
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+      expect(d.bookingsRepo.createCancellation).toHaveBeenCalled();
+    });
+
+    it('un paciente no puede leer el detalle de la cita de otro', async () => {
+      // Antes del arreglo devolvía 200 con el perfil del paciente, el horario
+      // y el motivo de consulta a cualquier cuenta con rol de agenda.
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue(citaAjena());
+      d.representation.assertMayActForPatient.mockRejectedValue(
+        new ForbiddenException('No cuenta con autorización de tutoría'),
+      );
+
+      await expect(
+        d.service.getBookingById('booking-ajena', intruso),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('quien atiende en otra agenda tampoco lee el detalle', async () => {
+      // El profesional pasa el `RolesGuard` por su rol, así que el freno tiene
+      // que mirar de qué agenda es la cita: `res-ajeno` no es la suya.
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue(citaAjena());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'hp-otro',
+        resourceRefType: 'practitioner_profiles',
+      });
+
+      await expect(
+        d.service.getBookingById('booking-ajena', medico),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('quien atiende en esa agenda sí lee el detalle', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue(citaAjena());
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'hp-1',
+        resourceRefType: 'practitioner_profiles',
+      });
+
+      await expect(
+        d.service.getBookingById('booking-ajena', medico),
+      ).resolves.toMatchObject({ id: 'booking-ajena' });
+    });
+
+    it('al mostrador no se le pregunta de qué agenda es', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue(citaAjena());
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+
+      await expect(
+        d.service.getBookingById('booking-ajena', mostrador),
+      ).resolves.toMatchObject({ id: 'booking-ajena' });
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+  });
 });
