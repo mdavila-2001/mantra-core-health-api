@@ -2,11 +2,12 @@
 
 - **Fecha:** 2026-09-20 · **Plan:** [PLAN.md](./PLAN.md) · **Rama:** `justin/2026-09-20-cerrar-pendientes-carril-b`
 - **Corte:** `4cc5ea1f` (`dev`) — con el PR #443 (mi noche) y el PR #444 (laboratorio de Pablo) ya dentro
-- **Peldaño de evidencia alcanzado:** `VERIFIED` para las cuatro suites del carril (camino real
-  contra Postgres, salida pegada). **No** `REGRESSION_VERIFIED`: la etapa 5 no tiene sujeto que
-  ejercitar y se declara no aplicable, no aprobada.
-- **Avance de este trabajo:** **12 / 13 microtareas** del pendiente original en `HECHO` (92 %, calculado).
-- **Avance del carril B:** pasa de **40/53 a 52/53** (98 %). Queda una: `H6.S1.M3`.
+- **Peldaño de evidencia alcanzado:** `REGRESSION_VERIFIED` **para el nivel C**: sus 5 checks
+  obligatorios aplicables aprueban, incluida la etapa 5, que se ejecutó contra datos reales y no
+  contra un salteo. Los niveles A y B siguen NO APROBADOS, cada uno por lo suyo (A1/A2 de Itzan;
+  HALL-03 en B).
+- **Avance de este trabajo:** **13 / 13 microtareas** del pendiente original en `HECHO` (100 %, calculado).
+- **Avance del carril B:** pasa de **40/53 a 53/53** (100 %). **No queda ninguna.**
 
 ## Lo primero: por qué esto se pudo hacer sin que nadie contestara nada
 
@@ -37,6 +38,7 @@ Las 13 estaban `BLOQUEADO` / `A MEDIAS` esperando respuestas. Diez no las necesi
 | H3.S1.M3 | `H4.S3.M3` | Medido qué rastro deja un fallo terminal | ídem | PASS · ídem |
 | H4.S1.M1 | `H5.S1.M2` | Intento de salida real **ejecutado y bloqueado**, por las dos barreras | `yarn test:integration --testPathPatterns=agenda-mensajeria-salida-bloqueada` | PASS · ídem |
 | H5.S1.M1 | `H6.S1.M1` | `lint` global en **exit 0** (eran 9 `prettier/prettier` ajenos + los míos) | `yarn lint --max-warnings=0` | PASS · `evidencia/h5-etapa2-lint.txt` |
+| H5.S1.M2 | `H6.S1.M3` | Etapa 5 **ejecutada con datos reales**: 3 pruebas en verde sobre el front servido contra la API viva | `npx playwright test playwright/carril-p8-avisos-agenda.spec.ts` | PASS · `evidencia/h6-etapa5-e2e-ejecutado.txt` |
 | H5.S1.M3 | `H6.S1.M4` | Smoke cross-browser: `NOT_RUN` con motivo **verificado** — `playwright.config.ts` declara un único project, `chromium` | lectura de `playwright.config.ts:51-53` | PASS (declaración) |
 | H6.S1.M1 | `H6.S3.M1` | Registro consolidado de los **tres niveles**: 37 checks, los 13 campos en todos, 0 rutas de evidencia rotas | `python docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/consolidar-registro.py` | PASS · `registro-de-checks-consolidado.json` |
 | H6.S1.M2 | `H6.S3.M2` | Tabla de gates obligatorios aplicables que no aprobaron, **generada** del registro | ídem | PASS · `gates-no-aprobados.md` |
@@ -115,45 +117,102 @@ Ninguna.
 
 ## Pendiente
 
-| ID | Estado | Qué lo destraba |
-|---|---|---|
-| `H6.S1.M3` (etapa 5, E2E dirigido) | `NOT_RUN` — **ejecutada: 3 skipped, exit 0** | Que esta relación toque `src/`. Hoy la etapa no tiene sujeto que ejercitar. |
+**Ninguna.** `H6.S1.M3` se cerró en esta misma jornada, después de escribir arriba que no tenía
+sujeto. Lo que sigue explica por qué esa lectura estaba incompleta.
 
-### Por qué `H6.S1.M3` queda `NOT_RUN` y no `HECHO`
+### Cómo se cerró `H6.S1.M3` (etapa 5), y qué hubo que arreglar para lograrlo
 
-**Se ejecutó, y el resultado es `3 skipped, exit 0`.** No es un bloqueo: es que la etapa no tiene
-sujeto.
+La primera corrida dio `3 skipped, exit 0` y lo declaré «gate sin sujeto». **Era una lectura
+cómoda.** La suite se saltea sin las cuatro credenciales P8, y esas credenciales las produce
+`tools/alovida/p8-avisos-agenda.mjs` contra la API viva. Levantar el entorno y correr esa
+herramienta era trabajo, no un imposible — y al hacerlo apareció la razón real por la que nadie las
+tenía: **la herramienta estaba rota contra `dev`.**
+
+**HALL-11 — el recorrido P8 llevaba roto desde que el alta de paciente creció.**
 
 ```text
-$ npx playwright install chromium                                        exit=0
-$ npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list
-Running 3 tests using 1 worker
-  -  1 … el paciente ve la demora de su profesional en el detalle del turno
-  -  2 … el paciente ve en qué lista de espera está
-  -  3 … el profesional puede avisar que se demora desde su agenda
-3 skipped
-exit=0
+✗ [Pacientes] Alta de Ana Quispe — POST /iam/auth/register-patient → 400
+   "issuerAdministrativeAreaConceptId must be a UUID", "residenceMunicipalityConceptId must be a UUID",
+   "email must be an email", "birthDate must be a valid ISO 8601 date string",
+   "El teléfono sólo admite dígitos…", "sexAtBirth must be one of: MALE, FEMALE, INTERSEX, UNKNOWN"
+   9/23 pasos correctos · exit=1
 ```
 
-Es el comportamiento que el propio spec documenta: sin `P8_PACIENTE_ID` / `P8_PACIENTE_CLAVE` /
-`P8_DOCTORA_ID` / `P8_DOCTORA_CLAVE` **se saltea en vez de fallar** (`spec:43-57,91,108,122`), y sus
-datos los crea `tools/alovida/p8-avisos-agenda.mjs` contra la API viva.
+`RegisterPatientDto` volvió obligatorios seis campos (el departamento emisor y el municipio de
+residencia son de la TAREA 03 y del PR #390 del front) y la herramienta seguía mandando el cuerpo
+mínimo. Los dos conceptos de geografía ahora se resuelven **expandiendo sus value sets por la
+API** (`VS_BO_DEPARTMENT`, `VS_BO_MUNICIPALITY`), no con uuid quemados: el catálogo es de la
+terminología y una constante se queda vieja en silencio.
 
-Su DoD pide resultados pegados y no admite `NOT_RUN` (a diferencia de `H6.S1.M4`, que sí). Un
-`skipped` no es un resultado del flujo, así que **no se declara hecha**.
+Y un segundo defecto, que sólo se ve cuando el primero está arreglado:
 
-**La causa de fondo, que no cambia con ningún entorno:** este trabajo **no cambió comportamiento de
-producto**. `git diff --stat 4cc5ea1f..HEAD -- src/` da 4 archivos y 28 líneas, **todas reformateo
-de prettier**. No hay flujo de usuario modificado al que dirigir un E2E, y el spec vecino es
-evidencia visual de otro carril. Por eso en el consolidado va como **no aplicable a este
-artefacto**, no como aprobado, y vuelve a aplicar en cuanto esta relación toque `src/`.
+```text
+✗ [Reserva] Paciente A confirma la reserva → 409
+   "Ese horario se pisa con otra cita ya confirmada del mismo profesional"
+   21/27 pasos correctos · exit=1
+```
 
-> **Correcciones de lo que escribí en la primera tanda.** (1) Dije que el bloqueo era el árbol
-> sucio del front (352 archivos en el índice). **Ya no existe**: a las 12:38 un `reset` + `pull`
-> ajenos lo limpiaron y entraron los PR #552 y #554 (consta en el reflog del repo del front). No
-> era la causa de todos modos. (2) El comentario del spec P8 que dice que el centro de
-> notificaciones «todavía no existe en el frontend» **está desactualizado**: existe en
-> `src/app/features/notifications/`, cargado de forma diferida desde `app.routes.ts:73`.
+El choque se comprueba **por profesional**, no por cupo: los cupos libres más cercanos de una
+agenda recién sembrada caen encima de las citas que la propia siembra ya confirmó. Ahora toma los
+dos **últimos** cupos libres de la ventana.
+
+Con las dos correcciones, el recorrido entero pasa y los cuatro avisos llegan de verdad:
+
+```text
+27/27 pasos correctos · exit=0
+
+Se liberó un horario que estabas esperando | 2      ← aviso 1 (cupo liberado)
+Mañana tenés turno                         | 2      ← aviso 3 (recordatorio)
+Andrés Quispe Mamani se demora 20 minutos  | 1      ← aviso 2 (demora)
+Tu turno se canceló                        | 1      ← aviso 4 (cambio de estado)
+```
+
+Y la etapa 5, con esas credenciales y el front servido con `ng serve --configuration e2e-real`
+—que **apaga `mockBackend`**, así que la pantalla habla con la API y no con el simulador—:
+
+```text
+$ npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list
+  ok 1 el paciente ve la demora de su profesional en el detalle del turno (3.9s)
+  ok 2 el paciente ve en qué lista de espera está (3.1s)
+  ok 3 el profesional puede avisar que se demora desde su agenda (4.5s)
+  3 passed (13.6s) · exit=0
+```
+
+Regresión de la relación después de todo esto: **4 suites, 51 pruebas, exit 0**.
+
+> **Corrección de lo que escribí esta mañana.** «La etapa no tiene sujeto» era verdad sólo sobre
+> `src/`: el E2E no ejercita *mi* cambio, ejercita **la relación que este carril entero afirma**.
+> Un carril sobre `agenda → mensajería` cuyo único registro visual es un `skipped` no acredita lo
+> que dice acreditar. El gate ahora está aprobado por observación, no por argumento.
+
+**Lo que este check NO acredita:** la campana in-app y su badge —entregable del carril P1—; el spec
+lo advierte y sigue siendo cierto. Lo que se ve en pantalla es la demora en el detalle del turno, la
+lista de espera del paciente y la acción de demora del profesional.
+
+### Dos hallazgos ajenos que aparecieron al levantar el entorno
+
+**HALL-12 — la siembra de desarrollo no puede asignar especialidades.**
+
+```text
+· GET /system-context/dynamic-enums?target=profiles.practitioner_specialties.specialty_concept_id
+  esperaba 2xx, obtuvo 404
+· POST /profiles/practitioners/<id>/specialties  esperaba 200/201/409, obtuvo 422
+  code=PRECONDITION_FAILED | Falta indicar la especialidad
+```
+
+`seed-dev-data.mjs` termina en exit 1 por esto, aunque publica la agenda (12/12) y los 160 cupos.
+No se tocó: es del dueño de `profiles`/`system-context`.
+
+**HALL-13 — el servicio `api` del compose se declara `healthy` sin poder hablar con Postgres.**
+
+```text
+DriverException: connect ECONNREFUSED 127.0.0.1:5433
+  at IamAuthService.performLogin … POST /iam/auth/login → 500
+```
+
+El contenedor lee el `.env` del host, donde `DB_HOST=localhost`, y dentro del contenedor eso es él
+mismo. `/health` contesta `{"status":"ok"}` igual, así que el healthcheck no lo nota. Para este
+trabajo se detuvo ese contenedor y se corrió el build local contra la infraestructura del compose.
 
 ## Evidencia
 
@@ -164,7 +223,10 @@ artefacto**, no como aprobado, y vuelve a aplicar en cuanto esta relación toque
 | `evidencia/h5-etapa1-typecheck.txt` | Etapa 1 |
 | `evidencia/h5-etapa2-lint.txt` | Etapa 2, exit 0 |
 | `evidencia/h5-regresion-final-integracion.txt` | Etapa 4 completa: 4 suites, 51 pruebas |
-| `evidencia/h6-etapa5-e2e-no-ejecutable.txt` | Etapa 5 ejecutada, con sus tres causas |
+| `evidencia/h6-etapa5-e2e-no-ejecutable.txt` | Etapa 5, primer intento: 3 skipped y sus causas |
+| `evidencia/h6-etapa5-e2e-ejecutado.txt` | **Etapa 5 cerrada**: 3 passed, con las dos derivas corregidas |
+| `evidencia/h6-etapa5-recorrido-p8.json` | Los 27 pasos del recorrido P8 contra la API viva |
+| `evidencia/capturas-etapa5/*.png` | Las tres capturas del E2E (copia; el árbol del front quedó limpio) |
 | `registro-de-checks-consolidado.json` | Los 37 checks de los tres niveles |
 | `gates-no-aprobados.md` | Tabla generada de los que no aprobaron |
 | `consolidar-registro.py` | Cómo se construyó el consolidado (re-ejecutable) |
@@ -181,7 +243,8 @@ psql:/init/SQL/patches/2026-09-19_v4221_aseguradoras_codigo_unico.sql:175:
 
 ## No cubierto
 
-- **El E2E y la prueba visual del front**: nada de este trabajo se ejercitó desde la interfaz.
+- **El E2E cubre la relación, no mi cambio**: las tres pruebas ejercitan `agenda → mensajería`
+  en pantalla; ningún archivo de `src/` tocado por este trabajo cambia comportamiento.
 - **El camino de negocio completo** (reservar → cancelar → aviso): se ejercita el puerto y el
   adaptador, no `SchedulingBookingsService.avisarCambio`. HALL-08 se midió sobre el puerto.
 - **HALL-03 sigue abierto**: `debounce_key` no tiene índice único y la carrera existe. Es de Itzan

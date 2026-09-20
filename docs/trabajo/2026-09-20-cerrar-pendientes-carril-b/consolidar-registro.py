@@ -270,19 +270,20 @@ GATE_C_NUEVOS = [
         'Sólo las suites de esta relación. La integración full-app sigue rota por HALL-01.',
     ),
     check(
-        'H6.etapa5.e2e', 'C', 'e2e', ARTEFACTO_HOY, True, False, 'NOT_RUN',
-        'Etapa 5: EJECUTADA — 3 skipped, exit 0. La suite se saltea sola sin las cuatro '
-        'credenciales P8, que es lo que su propio docstring promete, y sus datos los crea '
-        'tools/alovida/p8-avisos-agenda.mjs contra la API viva. La causa de fondo es que este '
-        'trabajo no cambió comportamiento de producto (los únicos cambios en src/ son 9 '
-        'reformateos de prettier), así que no hay flujo de usuario al que dirigir un E2E; el '
-        'spec vecino es evidencia visual de OTRO carril.',
+        'H6.etapa5.e2e', 'C', 'e2e', ARTEFACTO_HOY, True, True, 'PASS',
+        'Etapa 5: EJECUTADA con datos reales — 3 passed, exit 0. La suite ya no se saltea: sus '
+        'cuatro credenciales P8 existen porque se corrió tools/alovida/p8-avisos-agenda.mjs '
+        'contra la API viva (27/27 pasos, exit 0), y para eso hubo que corregirle dos derivas '
+        '—el alta de paciente pide seis campos que no mandaba, y elegía un cupo que se pisa con '
+        'lo ya sembrado—. El front se sirvió con `ng serve --configuration e2e-real`, que apaga '
+        'mockBackend: la pantalla habla con la API, no con el simulador.',
         YO + [participante('mantra-core-health', 'real', 'mockup@68969782')],
         'npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list', 0,
-        ['docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h6-etapa5-e2e-no-ejecutable.txt'],
-        'Marcado NO aplicable a este artefacto, no aprobado: un E2E sin flujo modificado que '
-        'ejercitar no es un gate pendiente, es un gate sin sujeto. Vuelve a aplicar en cuanto '
-        'esta relación toque src/.',
+        ['docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h6-etapa5-e2e-ejecutado.txt',
+         'docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h6-etapa5-recorrido-p8.json',
+         'docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h6-etapa5-e2e-no-ejecutable.txt'],
+        'Acredita que la relación se ve en pantalla con datos de la API real. NO acredita la '
+        'campana in-app ni su badge: son del carril P1 y todavía no existen en el frontend.',
     ),
     check(
         'H6.etapa7.crossbrowser', 'C', 'e2e', ARTEFACTO_HOY, False, False, 'NOT_RUN',

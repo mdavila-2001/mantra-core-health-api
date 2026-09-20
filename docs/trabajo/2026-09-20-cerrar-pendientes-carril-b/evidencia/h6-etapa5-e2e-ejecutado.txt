@@ -1,0 +1,103 @@
+# H6.S1.M3 - etapa 5 (E2E dirigido): EJECUTADA CONTRA DATOS REALES. 3 passed, exit 0
+# fecha: 2026-09-20T16:37 -04:00
+# API: build local de justin/2026-09-20-cerrar-pendientes-carril-b (951418b0) en :3000
+# Front: mantra-core-health mockup@68969782, `ng serve --configuration e2e-real` en :4300
+#        (esa configuracion apaga `mockBackend`: la pantalla habla con la API, no con el simulador)
+
+## 0. Por que la corrida anterior se salteaba, y que cambio
+
+La primera corrida (h6-etapa5-e2e-no-ejecutable.txt) dio `3 skipped` porque faltaban las cuatro
+credenciales P8. Sus datos los crea `tools/alovida/p8-avisos-agenda.mjs`, y ESA herramienta estaba
+rota contra `dev`: dos derivas, las dos corregidas en este trabajo.
+
+### Deriva 1 - el alta de paciente pedia seis campos que la herramienta no mandaba
+
+$ node tools/alovida/p8-avisos-agenda.mjs --base-url http://localhost:3000
+  X [Pacientes] Alta de Ana Quispe con cuenta de portal - POST /iam/auth/register-patient -> 400
+      "violations":["issuerAdministrativeAreaConceptId must be a UUID",
+                    "residenceMunicipalityConceptId must be a UUID",
+                    "email must be an email","birthDate must be a valid ISO 8601 date string",
+                    "El telefono solo admite digitos, espacios, parentesis, + y guion",
+                    "sexAtBirth must be one of the following values: MALE, FEMALE, INTERSEX, UNKNOWN"]
+  9/23 pasos correctos   exit=1
+
+`RegisterPatientDto` volvio obligatorios esos seis campos; la herramienta seguia mandando el cuerpo
+minimo (documento + nombre + apellido + clave). Los dos conceptos de geografia se resuelven ahora
+expandiendo `VS_BO_DEPARTMENT` y `VS_BO_MUNICIPALITY` por la API, no con uuid quemados: el catalogo
+es de la terminologia y una constante se queda vieja en silencio.
+
+### Deriva 2 - elegia el primer cupo libre, y ese cupo se pisa con lo ya sembrado
+
+  X [Reserva] Paciente A confirma la reserva - POST /scheduling/holds/.../confirm -> 409
+      "Ese horario se pisa con otra cita ya confirmada del mismo profesional"
+  21/27 pasos correctos   exit=1
+
+El choque se comprueba por PROFESIONAL, no por cupo: los cupos libres mas cercanos de una agenda
+recien sembrada caen encima de las citas que la siembra ya confirmo. Ahora toma los dos ultimos
+cupos libres de la ventana.
+
+## 1. El recorrido P8 completo, contra la API viva
+
+$ BOOTSTRAP_ADMIN_EMAIL=justin.admin@redesa.test node tools/alovida/p8-avisos-agenda.mjs \
+    --base-url http://localhost:3000 --out .../evidencia/h6-etapa5-recorrido-p8.json
+
+  OK [Reserva] Paciente A confirma la reserva -> 201
+  OK [Lista de espera] Paciente B se anota en la lista de espera -> 201
+  OK [Aviso 4 - cambio de estado] El paciente A cancela su turno con motivo -> 200
+  OK [Aviso 1 - cupo liberado] El worker promueve la lista de espera del cupo liberado -> 200
+  OK [Aviso 2 - demora] El profesional avisa que se demora sobre esa cita -> 200
+  OK [Aviso 3 - recordatorio] El worker despacha los recordatorios vencidos -> 200
+
+  27/27 pasos correctos
+  exit=0
+
+Antes hizo falta publicar agenda: `node tools/alovida/seed-dev-data.mjs --doctors 2 --patients 4
+--weeks 2` -> "2 profesionales con agenda (160 cupos)", Agenda 12/12. (Esa siembra tiene su propia
+deriva ajena, NO tocada acá: `GET /system-context/dynamic-enums?target=profiles.practitioner_
+specialties.specialty_concept_id` -> 404 y por eso 3 altas de especialidad -> 422.)
+
+## 2. Los cuatro avisos llegaron de verdad (filas, no logs)
+
+$ psql -c "select left(subject,60), count(*) from messaging.in_app_notifications
+           where created_at > now() - interval '15 minutes' group by 1 order by 2 desc;"
+
+Se liberó un horario que estabas esperando|2      <- aviso 1
+Mañana tenés turno|2                              <- aviso 3
+Andrés Quispe Mamani se demora 20 minutos|1       <- aviso 2
+Elena Salas se demora 15 minutos|1                <- aviso 2 (demora de toda la agenda)
+Tu turno se canceló|1                             <- aviso 4
+... 11 avisos in-app en los ultimos 15 minutos
+
+## 3. La etapa 5: el E2E dirigido, ejecutado
+
+$ E2E_BASE_URL=http://localhost:4300 \
+  P8_PACIENTE_ID=P89362665722 P8_PACIENTE_CLAVE=... \
+  P8_ESPERA_ID=P89362665721  P8_ESPERA_CLAVE=... \
+  P8_DOCTORA_ID=pabliarca@gmail.com P8_DOCTORA_CLAVE=... \
+  npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list
+
+Running 3 tests using 1 worker
+  ok 1 el paciente ve la demora de su profesional en el detalle del turno (3.9s)
+  ok 2 el paciente ve en que lista de espera esta (3.1s)
+  ok 3 el profesional puede avisar que se demora desde su agenda (4.5s)
+
+  3 passed (13.6s)
+exit=0
+
+Capturas: evidencia/capturas-etapa5/*.png (3 archivos). Son copia: el spec las escribe en
+`mantra-core-health/evidencias/p8-avisos-agenda/`, que es evidencia versionada de OTRO carril, y
+ese arbol se dejo limpio (`git status --porcelain` -> 0 lineas).
+
+## 4. Regresion de la relacion, despues de todo esto
+
+$ yarn test:integration --testPathPatterns=agenda-mensajeria
+Test Suites: 4 passed, 4 total
+Tests:       51 passed, 51 total
+exit=0
+
+## 5. Alcance honesto de lo que este check acredita
+
+Acredita que la relacion agenda -> mensajeria se ve en pantalla con datos que salieron de la API
+real: la demora en el detalle del turno, la lista de espera del paciente y la accion de demora del
+profesional. NO acredita la campana in-app ni su badge - son el entregable del carril P1 y no
+existen en el frontend todavia, como el propio spec advierte.

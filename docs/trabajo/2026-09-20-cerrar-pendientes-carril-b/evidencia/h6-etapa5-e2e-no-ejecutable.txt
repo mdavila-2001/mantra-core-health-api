@@ -28,3 +28,9 @@ $ git diff --stat 4cc5ea1f..HEAD -- src/
  4 files changed, 28 insertions(+), 9 deletions(-)
 -> solo reformateo de prettier. No hay flujo de usuario modificado al que dirigir un E2E,
    y el spec vecino es evidencia visual de OTRO carril (P8).
+
+
+## CIERRE (misma jornada, 16:37)
+Esta lectura quedo superada: la etapa 5 SI tenia como conseguir sus datos. Se corrigieron dos
+derivas de tools/alovida/p8-avisos-agenda.mjs, se corrio el recorrido (27/27, exit 0) y la suite
+paso a 3 passed contra la API viva. Ver h6-etapa5-e2e-ejecutado.txt.
