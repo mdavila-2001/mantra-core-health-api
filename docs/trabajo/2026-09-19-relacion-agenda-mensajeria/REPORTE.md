@@ -388,7 +388,14 @@ exit=1
 | `h2-h5-suite-completa.txt` | Las dos suites juntas, 32/32 |
 | `h6-etapa1-typecheck.txt` · `h6-etapa2-lint.txt` | Etapas 1 y 2 |
 | `h6-etapa3-unitarios-*.txt` | Etapa 3, dirigida y completa |
-| `h6-etapa4-integracion-completa.txt` | Etapa 4, suite de integración completa |
+| `h6-etapa4-integracion-completa.txt` | Etapa 4, suite de integración completa (recortada: se conservan las 200 primeras, las 200 últimas y todas las líneas de veredicto) |
+| `h6-etapa4-resumen.txt` | Por qué se interrumpió esa corrida y qué dieron las 10 suites que alcanzaron a correr |
+| `h6-etapas5a7-e2e-ausente.txt` | Etapas 5-7: Playwright no es dependencia de este repo; `test:e2e` casa con 1 solo archivo |
+| `hall01-radio-de-alcance.txt` | 54 de 76 int-specs bloqueados · qué corre el CI de verdad |
+| `hall01-patch-aplicado.txt` | Aplicación del patch v4.1.8, con el antes y el después |
+| `hall01-patches-aplicados.txt` | Los 48 patches, uno por uno: 47 `[OK]`, 1 `[FAIL]` con su causa |
+| `hall02-conceptos-duplicados.txt` | Los 18 códigos duplicados y las dos filas `ACTIVE` |
+| `h3-h4-tras-patch.txt` · `h3-h4-tras-patches.txt` | Las corridas después de destrabar el entorno, y `fx3` fallando por HALL-02 |
 
 ## No cubierto
 
