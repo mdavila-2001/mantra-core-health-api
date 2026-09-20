@@ -394,6 +394,59 @@ describe('ServiceRequestsService (UC-08-05)', () => {
   });
 });
 
+describe('ServiceRequestsService · MCH-008.2, coherencia del encuentro', () => {
+  const dtoBase = {
+    custodianTenantId: 't1',
+    patientProfileId: 'p1',
+    codeConceptId: 'code1',
+    encounterId: 'enc-1',
+  };
+
+  it('rechaza un encuentro de otro paciente', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      ...ENCOUNTER,
+      patientProfileId: 'otro-paciente',
+    });
+
+    await expect(
+      d.service.create(dtoBase as any, actor),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('rechaza un encuentro de otro tenant', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      ...ENCOUNTER,
+      tenantId: 'otro-tenant',
+    });
+
+    await expect(
+      d.service.create(dtoBase as any, actor),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('crea la orden cuando el encuentro es coherente', async () => {
+    const d = build();
+    d.serviceRequestsRepo.create.mockReturnValue({
+      id: 'sr1',
+      patientProfileId: 'p1',
+      statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+      intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+      createdAt: new Date(),
+    });
+
+    await d.service.create(dtoBase as any, actor);
+
+    expect(d.serviceRequestsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ encounterId: 'enc-1' }),
+    );
+  });
+});
+
 describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   const dto = {
     custodianTenantId: 't1',

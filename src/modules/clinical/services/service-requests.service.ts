@@ -154,6 +154,38 @@ export class ServiceRequestsService {
     };
   }
 
+  /**
+   * MCH-008.2: el encuentro tiene que ser del mismo paciente y del mismo
+   * custodio que la orden, no sólo existir.
+   *
+   * Antes se comprobaba únicamente la existencia del id: una orden del
+   * paciente A podía colgar del encuentro de B, o de otro tenant, y la FK lo
+   * aceptaba porque sólo demuestra existencia. El custodio que se compara es
+   * `dto.custodianTenantId`, que el interceptor de tenant ya obligó a ser el
+   * tenant activo del actor.
+   *
+   * Una referencia incoherente responde 404, igual que una inexistente —el
+   * mismo criterio que `ObservationsService.assertReferencesBelongToPatient`
+   * y que `checkDuplicate`—: distinguirlas le diría al cliente que ese id
+   * existe en otra historia u otro tenant.
+   */
+  private async assertEncounterBelongsToPatient(
+    tx: EntityManager,
+    dto: CreateServiceRequestDto,
+  ): Promise<void> {
+    if (!dto.encounterId) return;
+    const encounter = await this.encountersRepo.findById(tx, dto.encounterId);
+    if (
+      !encounter ||
+      encounter.patientProfileId !== dto.patientProfileId ||
+      encounter.tenantId !== dto.custodianTenantId
+    ) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId: dto.encounterId,
+      });
+    }
+  }
+
   /** UC-08-05: registra una orden de servicio con intención de orden. */
   async create(
     dto: CreateServiceRequestDto,
@@ -168,17 +200,7 @@ export class ServiceRequestsService {
       'Placing service request',
     );
     return this.em.transactional(async (tx) => {
-      if (dto.encounterId) {
-        const encounter = await this.encountersRepo.findById(
-          tx,
-          dto.encounterId,
-        );
-        if (!encounter) {
-          throw new ResourceNotFoundException('Encuentro no encontrado', {
-            encounterId: dto.encounterId,
-          });
-        }
-      }
+      await this.assertEncounterBelongsToPatient(tx, dto);
 
       const decision = await this.resolveDuplicateDecision(tx, dto, options);
 

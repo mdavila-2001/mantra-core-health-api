@@ -8,7 +8,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { ConditionsRepository } from '../repositories';
+import { ConditionsRepository, EncountersRepository } from '../repositories';
 import {
   AttachFileToConditionDto,
   ChangeConditionClinicalStatusDto,
@@ -85,6 +85,7 @@ export class ConditionsService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param conditionsRepo - Valor de conditions repo requerido por la operación.
+   * @param encountersRepo - Coherencia paciente/custodio del encuentro (MCH-008.2).
    * @param auditTrail - Cadena WORM transversal (CAN-AUDIT-001).
    * @param historyRepo - Versionado append-only (`audit.conditions_history`).
    * @param logger - Valor de logger requerido por la operación.
@@ -94,6 +95,7 @@ export class ConditionsService {
   constructor(
     private readonly em: EntityManager,
     private readonly conditionsRepo: ConditionsRepository,
+    private readonly encountersRepo: EncountersRepository,
     private readonly auditTrail: AuditTrailService,
     private readonly historyRepo: HistoryRepository,
     private readonly logger: PinoLogger,
@@ -130,6 +132,38 @@ export class ConditionsService {
     return found ? { id: found.id } : null;
   }
 
+  /**
+   * MCH-008.2: el encuentro tiene que ser del mismo paciente y del mismo
+   * custodio que la condición, no sólo existir.
+   *
+   * Antes se comprobaba únicamente la existencia del id: una condición del
+   * paciente A podía colgar del encuentro de B, o de otro tenant, y la FK lo
+   * aceptaba porque sólo demuestra existencia. El custodio que se compara es
+   * `dto.custodianTenantId`, que el interceptor de tenant ya obligó a ser el
+   * tenant activo del actor.
+   *
+   * Una referencia incoherente responde 404, igual que una inexistente —el
+   * mismo criterio que `ObservationsService.assertReferencesBelongToPatient`
+   * y que `ServiceRequestsService.checkDuplicate`—: distinguirlas le diría al
+   * cliente que ese id existe en otra historia u otro tenant.
+   */
+  private async assertEncounterBelongsToPatient(
+    tx: EntityManager,
+    dto: CreateConditionDto,
+  ): Promise<void> {
+    if (!dto.encounterId) return;
+    const encounter = await this.encountersRepo.findById(tx, dto.encounterId);
+    if (
+      !encounter ||
+      encounter.patientProfileId !== dto.patientProfileId ||
+      encounter.tenantId !== dto.custodianTenantId
+    ) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId: dto.encounterId,
+      });
+    }
+  }
+
   /** UC-08-08: registra una condición evitando duplicados activos por código. */
   async create(
     dto: CreateConditionDto,
@@ -143,6 +177,10 @@ export class ConditionsService {
       'Recording condition',
     );
     return this.em.transactional(async (tx) => {
+      // El encuentro se valida antes que el duplicado: un encuentro ajeno no
+      // debe enterarse, vía 409, de que el paciente ya tiene esa condición.
+      await this.assertEncounterBelongsToPatient(tx, dto);
+
       const existing = await this.conditionsRepo.findActiveByCode(
         tx,
         dto.custodianTenantId,
