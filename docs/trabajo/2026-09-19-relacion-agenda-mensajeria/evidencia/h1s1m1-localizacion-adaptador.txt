@@ -1,0 +1,39 @@
+=== H1.S1.M1 · localización del adaptador (corte 5d5007f) ===
+$ grep -rln MessagingAgendaNoticeAdapter src test
+src/modules/profiles/adapters/messaging-affiliation-notice.adapter.ts
+src/modules/scheduling/adapters/messaging-agenda-notice.adapter.spec.ts
+src/modules/scheduling/adapters/messaging-agenda-notice.adapter.ts
+src/modules/scheduling/scheduling.module.ts
+
+$ git ls-tree -r --name-only HEAD -- src/modules/scheduling/adapters src/modules/scheduling/ports
+src/modules/scheduling/adapters/README.md
+src/modules/scheduling/adapters/messaging-agenda-notice.adapter.spec.ts
+src/modules/scheduling/adapters/messaging-agenda-notice.adapter.ts
+src/modules/scheduling/adapters/postgres-waitlist.adapter.ts
+src/modules/scheduling/adapters/support-admin-notice.adapter.spec.ts
+src/modules/scheduling/adapters/support-admin-notice.adapter.ts
+src/modules/scheduling/ports/README.md
+src/modules/scheduling/ports/agenda-notice.port.ts
+src/modules/scheduling/ports/waitlist.port.ts
+
+$ wc -l <los tres archivos de la relación>
+  133 src/modules/scheduling/ports/agenda-notice.port.ts
+  440 src/modules/scheduling/adapters/messaging-agenda-notice.adapter.ts
+  165 src/modules/scheduling/adapters/support-admin-notice.adapter.ts
+  738 total
+
+=== binding real (H1.S3.M1) ===
+$ grep -n 'AGENDA_NOTICE_PORT' src/modules/scheduling/scheduling.module.ts
+70:import { AGENDA_NOTICE_PORT } from './ports/agenda-notice.port';
+142:    { provide: AGENDA_NOTICE_PORT, useExisting: MessagingAgendaNoticeAdapter },
+$ grep -n 'export const AGENDA_NOTICE_PORT' src/modules/scheduling/ports/agenda-notice.port.ts
+133:export const AGENDA_NOTICE_PORT = Symbol('AGENDA_NOTICE_PORT');
+
+=== consumidores del puerto ===
+src/modules/scheduling/adapters/messaging-agenda-notice.adapter.ts
+src/modules/scheduling/ports/agenda-notice.port.ts
+src/modules/scheduling/scheduling.module.ts
+src/modules/scheduling/services/scheduling-agenda-notices.service.ts
+src/modules/scheduling/services/scheduling-bookings.service.ts
+src/modules/scheduling/services/scheduling-catalog.service.ts
+src/modules/scheduling/services/scheduling-delay.service.ts

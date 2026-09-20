@@ -1,0 +1,13 @@
+﻿corepack : (node:18456) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En línea: 1 Carácter: 452
++ ... evidencia"; corepack yarn test:integration --testPathPatterns=agenda- ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:18456) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+Test Suites: 1 passed, 1 total
+Tests:       21 passed, 21 total
+Snapshots:   0 total
+Time:        4.608 s, estimated 49 s
+Ran all test suites matching agenda-mensajeria-relacion.

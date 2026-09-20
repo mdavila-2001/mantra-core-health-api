@@ -1,0 +1,22 @@
+﻿=== ETAPA 3a: unitarios dirigidos (scheduling) ===
+corepack : (node:18112) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En línea: 1 Carácter: 630
++ ... oding utf8; corepack yarn test --testPathPatterns=scheduling *>> "$ev ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:18112) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:13476) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5000) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3584) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 20 passed, 20 total
+Tests:       476 passed, 476 total
+Snapshots:   0 total
+Time:        20.787 s
+Ran all test suites matching scheduling.
+exit=0
