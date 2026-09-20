@@ -1,0 +1,24 @@
+=== HALL-01 · aplicacion del patch versionado v4.1.8 ===
+Archivo: database/SQL/patches/2026-08-22_v418_persons_occupation_and_carrier_sigla.sql
+Mecanismo sancionado: es un archivo del repo, idempotente (ADD COLUMN IF NOT EXISTS)
+y trae su propia comprobacion final. NO es un ALTER a mano.
+
+--- ANTES ---
+ sigla=0
+
+ occupation_concept_id=0
+
+--- APLICANDO ---
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+DO
+ALTER TABLE
+ALTER TABLE
+DO
+exit=0
+--- DESPUES ---
+ sigla=1
+
+ occupation_concept_id=1
+

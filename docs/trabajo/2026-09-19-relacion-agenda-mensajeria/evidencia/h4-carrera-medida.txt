@@ -1,0 +1,18 @@
+=== H4.S2.M1 · la carrera de deduplicacion, medida 6 veces ===
+Dos emit() en paralelo con la MISMA debounceKey. El oraculo es el conteo de
+filas en messaging.notification_requests, no la cantidad de llamadas.
+
+corrida 1 (tras el ciclo limpio): 1 fila  · resultados: [null, 'Ya habia un aviso igual sin entregar']
+corrida 2:                        2 filas · resultados: [null, null]
+corrida 3:                        2 filas · resultados: [null, null]
+corrida 4:                        2 filas · resultados: [null, null]
+corrida 5:                        2 filas · resultados: [null, null]
+corrida 6:                        2 filas · resultados: [null, null]
+
+5 de 6 corridas producen DOS filas para la misma clave de rebote.
+No es intermitente: es el read-then-write de createRequest (findOne por
+debounceKey y despues insert) bajo READ COMMITTED, sin restriccion unica
+en la base que lo impida. HALL-03 deja de ser teorico.
+
+La corrida que dio 1 fila no contradice nada: es el caso en que una
+transaccion alcanzo a cometer antes de que la otra hiciera su findOne.

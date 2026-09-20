@@ -1,0 +1,19 @@
+=== HALL-01 · radio de alcance (conteo estatico, corregido) ===
+Correccion: 'grep -l bootstrapTestApp' casa tambien con menciones en PROSA.
+Se cuenta la LLAMADA real: 'await bootstrapTestApp('.
+
+int-specs totales:                          76
+int-specs que LLAMAN a bootstrapTestApp:    54   <-- bloqueados por HALL-01
+int-specs que pueden correr igual:          22
+
+$ grep -c 'await bootstrapTestApp(' test/integration/agenda-mensajeria-persistencia.int-spec.ts
+0
+(0 = mi suite lo NOMBRA en un comentario pero no lo llama: compone la app por su cuenta)
+
+=== Por que esto no lo caza el CI ===
+$ grep -n 'test:integration' ../mantra-core-health-api/.github/workflows/docs.yml
+334:        run: yarn test:integration --testPathPatterns=postgres-privileges
+389:        run: yarn test:integration --ci
+
+El CI corre SOLO el int-spec postgres-privileges, que esta en la lista de los que NO usan
+el arnes. Los 55 bloqueados nunca se ejecutan en CI: el pipeline queda verde igual.

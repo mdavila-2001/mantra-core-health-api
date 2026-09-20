@@ -1,0 +1,34 @@
+=== H2.S1.M1 · el artefacto de contrato versionado de Ender, al corte 5d5007f ===
+$ git ls-tree -r --name-only HEAD | grep -iE 'contract|contrato'
+database/NoSQL/57_search_platform_opensearch/contract_search_docs.mapping.json
+database/SQL/31_integration_contracts/01_schema.sql
+database/SQL/31_integration_contracts/02_tables.sql
+database/SQL/31_integration_contracts/03_fk_intra.sql
+database/SQL/31_integration_contracts/04_indexes.sql
+database/SQL/31_integration_contracts/90_fk_deferred.sql
+docs/modules/integration_contracts.md
+docs/tareas/subtarea-2.4-transparencia-copagos/evidence/api-final/openapi-contract-verification.json
+docs/testing/contract-tests.md
+openapi/CONTRATO-PUBLICO.md
+openapi/endpoints/integration-contracts.md
+src/modules/audit/entities/contracts_history.entity.ts
+src/modules/erp/entities/contract_accounting_terms.entity.ts
+src/modules/erp/entities/contract_amendments.entity.ts
+src/modules/erp/entities/contract_approval_requests.entity.ts
+src/modules/erp/entities/contract_approval_steps.entity.ts
+src/modules/erp/entities/contract_clause_instances.entity.ts
+src/modules/erp/entities/contract_clauses.entity.ts
+src/modules/erp/entities/contract_documents.entity.ts
+src/modules/erp/entities/contract_line_items.entity.ts
+
+$ ls contracts/ docs/contracts/ (rutas candidatas)
+ls: cannot access 'contracts': No such file or directory
+ls: cannot access 'docs/contracts': No such file or directory
+
+$ find . -iname '*agenda-notice*contract*' -o -iname '*contract*agenda*' (fuera de node_modules)
+
+$ git rev-parse HEAD:src/modules/scheduling/ports/agenda-notice.port.ts   # sha1 del contrato de facto
+4e262747735005c16262a907de3caf09a1268923
+
+VEREDICTO H2.S1.M1: BLOCKED — no existe artefacto de contrato versionado que consumir.
+El unico contrato disponible es el puerto en el arbol, cuyo sha1 queda fijado arriba (PROVISIONAL).

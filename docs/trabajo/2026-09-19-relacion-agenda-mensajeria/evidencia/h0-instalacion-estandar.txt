@@ -1,0 +1,39 @@
+=== 2026-09-19 · instalación del estándar · sección 1 del prompt ===
+$ pwd -P
+/c/Users/usuario/Documents/Sistema Salud/mantra-core-health-redesa-api
+
+$ git rev-parse HEAD
+5d5007fbdb7916b124010bbfbb560b7bb3aabc06
+$ git rev-parse --abbrev-ref HEAD
+justin/noche-2026-09-19-relacion-agenda-mensajeria
+$ git merge-base --is-ancestor 32ae9399...  HEAD ; echo $?
+exit=0
+$ git log --oneline 32ae939..HEAD
+5d5007fb Merge pull request #442 from mdavila-2001/itzan/f09-mch008-2-encounter-coherence
+70f8f1a8 fix(clinical): MCH-008.2 · condiciones y órdenes exigen un encuentro del mismo paciente y custodio
+$ git diff --name-only 32ae939..HEAD
+src/modules/clinical/services/conditions.service.spec.ts
+src/modules/clinical/services/conditions.service.ts
+src/modules/clinical/services/service-requests.service.spec.ts
+src/modules/clinical/services/service-requests.service.ts
+
+$ ls .claude/skills | wc -l
+176
+$ ls .claude/rules/*.md | wc -l
+14
+
+$ python .claude/hooks/plan_gate.py --self-test
+PASS  sin plan: bloquea codigo .ts
+PASS  sin plan: bloquea codigo sin extension conocida
+PASS  sin plan: permite .md
+PASS  sin plan: permite bajo docs/
+PASS  sin plan: permite bajo .claude/
+PASS  sin plan: permite ruta fuera del proyecto
+PASS  sin plan: ignora herramienta fuera de alcance
+PASS  sin plan: evento sin file_path no bloquea
+PASS  mensaje de bloqueo nombra la regla
+PASS  con plan: permite codigo
+PASS  plan ilegible: igual permite (no bloquea por formato)
+
+plan_gate self-test: 11 PASS, 0 FAIL
+exit=0
