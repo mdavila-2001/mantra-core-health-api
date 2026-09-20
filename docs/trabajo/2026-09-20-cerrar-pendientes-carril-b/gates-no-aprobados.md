@@ -3,7 +3,7 @@
 Generado por `consolidar-registro.py` desde `registro-de-checks-consolidado.json`. **No se edita a mano.**
 
 - **Artefacto base:** `mantra-core-health-api@4cc5ea1f`
-- **Checks totales:** 37 · **obligatorios y aplicables:** 33 · **no aprobados:** 5
+- **Checks totales:** 37 · **obligatorios y aplicables:** 34 · **no aprobados:** 5
 
 ## La regla que se está midiendo
 
@@ -15,15 +15,7 @@ Generado por `consolidar-registro.py` desde `registro-de-checks-consolidado.json
 |---|---:|---:|---:|---|
 | A | 6 | 2 | 0 | **NO APROBADO** |
 | B | 23 | 22 | 0 | **NO APROBADO** |
-| C | 4 | 4 | 1 | **APROBADO — con salvedad** |
-
-### La salvedad: lo que se declaró NO aplicable
-
-Un check obligatorio marcado no aplicable **no aprobó**: quedó fuera del denominador. Cada uno con su motivo, para que el veredicto de arriba no se lea como que se ejercitó todo.
-
-| Check | Nivel | Estado | Por qué no aplica |
-|---|---|---|---|
-| `H6.etapa5.e2e` | C | NOT_RUN | Marcado NO aplicable a este artefacto, no aprobado: un E2E sin flujo modificado que ejercitar no es un gate pendiente, es un gate sin sujeto. Vuelve a aplicar en cuanto esta relación toque src/. |
+| C | 5 | 5 | 0 | **APROBADO** |
 
 ## Los que no aprobaron
 

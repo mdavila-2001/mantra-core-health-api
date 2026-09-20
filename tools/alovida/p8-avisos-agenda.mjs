@@ -107,8 +107,39 @@ function claimDelToken(token, clave) {
   return JSON.parse(json)[clave];
 }
 
+/**
+ * Los dos conceptos de geografía que el alta exige hoy, resueltos contra la API.
+ *
+ * `POST /iam/auth/register-patient` pide el departamento emisor del documento y
+ * el municipio de residencia como **uuid de concepto**, no como código. Se
+ * expanden sus dos value sets en vez de fijar los uuid acá: el catálogo es de
+ * la terminología, y una constante quemada se queda vieja en silencio el día
+ * que se resiembre.
+ */
+async function resolverGeografia(token, tenantId) {
+  const primerConceptoDe = async (codigoValueSet, descripcion) => {
+    const valueSet = await llamar('Terminología', `Value set ${codigoValueSet}`, 'GET',
+      `/terminology/value-sets?code=${codigoValueSet}`, { token, tenant: tenantId, espera: [200] });
+    const valueSetId = valueSet?.items?.[0]?.id;
+    if (valueSetId === undefined) {
+      throw new Error(`No existe el value set ${codigoValueSet}: ¿la base tiene el catálogo geográfico?`);
+    }
+    const expansion = await llamar('Terminología', descripcion, 'GET',
+      `/terminology/value-sets/${valueSetId}/$expand?limit=1`, { token, tenant: tenantId, espera: [200] });
+    const conceptId = expansion?.items?.[0]?.conceptId;
+    if (conceptId === undefined) throw new Error(`El value set ${codigoValueSet} no expande ningún concepto.`);
+    return conceptId;
+  };
+  return {
+    issuerAdministrativeAreaConceptId:
+      await primerConceptoDe('VS_BO_DEPARTMENT', 'Departamento emisor del documento'),
+    residenceMunicipalityConceptId:
+      await primerConceptoDe('VS_BO_MUNICIPALITY', 'Municipio de residencia'),
+  };
+}
+
 /** Un paciente nuevo con cuenta de portal: sin cuenta no hay bandeja que escribir. */
-async function registrarPaciente(nombre, apellido, indice) {
+async function registrarPaciente(nombre, apellido, indice, geografia, sexoAlNacer) {
   const nationalId = `P8${CORRIDA}${indice}`;
   const password = 'P8-passw0rd!';
   const alta = await llamar(
@@ -116,7 +147,23 @@ async function registrarPaciente(nombre, apellido, indice) {
     `Alta de ${nombre} ${apellido} con cuenta de portal`,
     'POST',
     '/iam/auth/register-patient',
-    { body: { nationalId, password, name: nombre, lastName: apellido }, espera: [201] },
+    {
+      body: {
+        nationalId,
+        password,
+        name: nombre,
+        lastName: apellido,
+        // El alta dejó de aceptar el cuerpo mínimo de documento + nombre: estos
+        // seis campos son obligatorios en `RegisterPatientDto` y sin ellos el
+        // recorrido moría en un 400 de validación.
+        ...geografia,
+        email: `p8.${CORRIDA}${indice}@alovida.test`,
+        birthDate: '1990-05-14',
+        phone: '+591 70000000',
+        sexAtBirth: sexoAlNacer,
+      },
+      espera: [201],
+    },
   );
   const sesion = await llamar('Pacientes', `Login de ${nombre}`, 'POST', '/iam/auth/login', {
     body: { nationalId, password },
@@ -165,15 +212,23 @@ async function main() {
   const agenda = await llamar('Agenda', 'Cupos publicados del recurso', 'GET',
     `/scheduling/resources/${recurso.id}/slots?from=${encodeURIComponent(desde)}&to=${encodeURIComponent(hasta)}`,
     { token: adminToken, tenant: tenantId, espera: [200] });
-  const libres = (agenda?.items ?? []).filter((c) => c.remainingCapacity > 0);
+  // Los cupos libres más cercanos de una agenda recién sembrada se pisan con las
+  // citas que la propia siembra ya confirmó para ese profesional —el choque se
+  // comprueba por profesional, no por cupo— y confirmar ahí devuelve 409. Se
+  // toman los dos ÚLTIMOS cupos libres de la ventana: son los más lejanos a lo
+  // ya reservado, y el recorrido no depende de en qué día caigan.
+  const libres = (agenda?.items ?? [])
+    .filter((c) => c.remainingCapacity > 0)
+    .sort((a, b) => String(a.startAt).localeCompare(String(b.startAt)));
   if (libres.length < 2) throw new Error('Hacen falta al menos dos cupos libres para el recorrido.');
 
   /* ---- 1. dos pacientes con cuenta de portal ----------------------------- */
-  const pacienteA = await registrarPaciente('Ana', 'Quispe', '1');
-  const pacienteB = await registrarPaciente('Bruno', 'Mamani', '2');
+  const geografia = await resolverGeografia(adminToken, tenantId);
+  const pacienteA = await registrarPaciente('Ana', 'Quispe', '1', geografia, 'FEMALE');
+  const pacienteB = await registrarPaciente('Bruno', 'Mamani', '2', geografia, 'MALE');
 
   /* ---- 2. A reserva; B se anota en la lista de espera --------------------- */
-  const cupo = libres[0];
+  const cupo = libres[libres.length - 1];
   const hold = await llamar('Reserva', 'Paciente A retiene el cupo', 'POST',
     `/scheduling/slots/${cupo.id}/holds`,
     { token: adminToken, tenant: tenantId, body: { patientProfileId: pacienteA.patientProfileId }, espera: [201, 200] });
@@ -222,7 +277,7 @@ async function main() {
     { token: adminToken, tenant: tenantId, body: {}, espera: [200] });
 
   /* ---- 5. aviso (2): demora del profesional ------------------------------ */
-  const cupoB = libres[1];
+  const cupoB = libres[libres.length - 2];
   const holdB = await llamar('Reserva', 'Paciente B retiene otro cupo', 'POST',
     `/scheduling/slots/${cupoB.id}/holds`,
     { token: adminToken, tenant: tenantId, body: { patientProfileId: pacienteB.patientProfileId }, espera: [201, 200] });

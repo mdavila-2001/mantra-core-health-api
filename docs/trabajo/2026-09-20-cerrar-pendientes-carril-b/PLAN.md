@@ -76,7 +76,7 @@
 
 ## Estado final (2026-09-20, cierre)
 
-**12 / 13 microtareas del pendiente original en `HECHO`.** Se calcula, no se estima.
+**13 / 13 microtareas del pendiente original en `HECHO`.** Se calcula, no se estima.
 Ver [REPORTE.md](./REPORTE.md).
 
 | ID | Cierra | Estado | Evidencia |
@@ -90,10 +90,14 @@ Ver [REPORTE.md](./REPORTE.md).
 | H3.S1.M3 | `H4.S3.M3` | `HECHO` | idem (HALL-09) |
 | H4.S1.M1 | `H5.S1.M2` | `HECHO` | idem (HALL-10) |
 | H5.S1.M1 | `H6.S1.M1` | `HECHO` | `evidencia/h5-etapa2-lint.txt`, exit 0 |
-| H5.S1.M2 | `H6.S1.M3` | `NOT_RUN` | ejecutada: 3 skipped, exit 0 — sin flujo modificado que ejercitar |
+| H5.S1.M2 | `H6.S1.M3` | `HECHO` | `evidencia/h6-etapa5-e2e-ejecutado.txt` — 3 passed, exit 0, con datos reales |
 | H5.S1.M3 | `H6.S1.M4` | `HECHO` | declaracion con motivo verificado: un solo project en `playwright.config.ts` |
 | H6.S1.M1 | `H6.S3.M1` | `HECHO` | `registro-de-checks-consolidado.json` — 37 checks, 13 campos, 0 rutas rotas |
 | H6.S1.M2 | `H6.S3.M2` | `HECHO` | `gates-no-aprobados.md`, generado del registro |
 
-**Efecto en el carril B: 40/53 -> 52/53.** Queda `H6.S1.M3`.
+**Efecto en el carril B: 40/53 -> 53/53.** No queda ninguna.
+
+> `H6.S1.M3` se cerró en una segunda vuelta de la misma jornada: la etapa 5 no necesitaba un
+> cambio en `src/`, necesitaba entorno y credenciales. Para conseguirlas hubo que corregir dos
+> derivas de `tools/alovida/p8-avisos-agenda.mjs` (HALL-11). Detalle en el REPORTE.
 
