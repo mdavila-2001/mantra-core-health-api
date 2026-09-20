@@ -3,9 +3,10 @@
 - **Fecha:** 2026-09-20 · **Plan:** [PLAN.md](./PLAN.md) · **Rama:** `justin/2026-09-20-cerrar-pendientes-carril-b`
 - **Corte:** `4cc5ea1f` (`dev`) — con el PR #443 (mi noche) y el PR #444 (laboratorio de Pablo) ya dentro
 - **Peldaño de evidencia alcanzado:** `VERIFIED` para las cuatro suites del carril (camino real
-  contra Postgres, salida pegada). **No** `REGRESSION_VERIFIED`: el E2E del front no se ejecutó.
-- **Avance de este trabajo:** **10 / 13 microtareas** del pendiente original en `HECHO` (77 %, calculado).
-- **Avance del carril B:** pasa de **40/53 a 50/53** (94 %).
+  contra Postgres, salida pegada). **No** `REGRESSION_VERIFIED`: la etapa 5 no tiene sujeto que
+  ejercitar y se declara no aplicable, no aprobada.
+- **Avance de este trabajo:** **12 / 13 microtareas** del pendiente original en `HECHO` (92 %, calculado).
+- **Avance del carril B:** pasa de **40/53 a 52/53** (98 %). Queda una: `H6.S1.M3`.
 
 ## Lo primero: por qué esto se pudo hacer sin que nadie contestara nada
 
@@ -37,6 +38,8 @@ Las 13 estaban `BLOQUEADO` / `A MEDIAS` esperando respuestas. Diez no las necesi
 | H4.S1.M1 | `H5.S1.M2` | Intento de salida real **ejecutado y bloqueado**, por las dos barreras | `yarn test:integration --testPathPatterns=agenda-mensajeria-salida-bloqueada` | PASS · ídem |
 | H5.S1.M1 | `H6.S1.M1` | `lint` global en **exit 0** (eran 9 `prettier/prettier` ajenos + los míos) | `yarn lint --max-warnings=0` | PASS · `evidencia/h5-etapa2-lint.txt` |
 | H5.S1.M3 | `H6.S1.M4` | Smoke cross-browser: `NOT_RUN` con motivo **verificado** — `playwright.config.ts` declara un único project, `chromium` | lectura de `playwright.config.ts:51-53` | PASS (declaración) |
+| H6.S1.M1 | `H6.S3.M1` | Registro consolidado de los **tres niveles**: 37 checks, los 13 campos en todos, 0 rutas de evidencia rotas | `python docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/consolidar-registro.py` | PASS · `registro-de-checks-consolidado.json` |
+| H6.S1.M2 | `H6.S3.M2` | Tabla de gates obligatorios aplicables que no aprobaron, **generada** del registro | ídem | PASS · `gates-no-aprobados.md` |
 
 **Regresión de integración del carril, final:**
 
@@ -77,25 +80,66 @@ en desarrollo es la configuración: los **26 destinos** declarados usan dominios
 (`.invalid`), que no resuelven en ningún DNS. La suite ejerce la política con `NODE_ENV=production`
 para medir la política y no el bypass, y deja constancia de las dos cosas.
 
+## Una corrección: A, B y C son NIVELES de gate, no carriles
+
+Al abrir este trabajo escribí que el consolidado juntaba «carril A (Pablo), B (mío) y C (Itzan)».
+**Estaba mal.** El prompt del carril lo dice en `DoblesRelacionYRegresionFinal.md:494-503`: «todos
+los checks obligatorios aplicables **del nivel** deben aprobar para el mismo artefacto y
+configuración». Son niveles:
+
+| Nivel | Qué cubre | Dueño |
+|---|---|---|
+| **A** | el artefacto empaquetado | Itzan (sus gates `A1`–`A8`) |
+| **B** | la relación `agenda → mensajería` | yo (23 checks del registro anterior + 5 de hoy) |
+| **C** | la regresión del sistema | yo, con la de Pablo como insumo |
+
+Contarlo por personas habría hecho que el criterio de aprobación no significara nada: un nivel se
+aprueba entero o no se aprueba, y mezclarlo con quién lo corrió lo vuelve incontable. Los checks
+`L1`–`L7` de Pablo **no entran**: son checks del generador de datos de su laboratorio (su H2.S3),
+otra cosa. Su aporte al nivel C es su regresión, citada como insumo.
+
+### El veredicto del consolidado
+
+| Nivel | Obligatorios aplicables | Aprobados | Veredicto |
+|---|---:|---:|---|
+| A | 6 | 2 | **NO APROBADO** — `A1`/`A2` en FAIL, `A3`/`A4-A6` bloqueados en cascada |
+| B | 23 | 22 | **NO APROBADO** — sólo por `H4.S2.M1` (HALL-03, la carrera) |
+| C | 4 | 4 | **APROBADO — con salvedad** (la etapa 5, abajo) |
+
+**El nivel B está a un solo check de aprobar, y ese check es HALL-03.** Es el argumento más corto
+que existe hoy para priorizar el índice único en `debounce_key`.
+
 ## A medias
 
-### H6.S3.M1 / H6.S3.M2 — consolidado de los checks A, B y C
-- **Qué anda:** los tres registros de origen ya existen y están localizados: **A** (Pablo,
-  `AlovidaPromptManager@origin/main`, 40/53 + `CORTE-2026-09-19.md` y su carpeta `evidencia/`),
-  **B** (el mío, `registro-de-checks.json` del trabajo anterior) y **C** (Itzan,
-  `origin/itzan/daily-noche-2026-09-19`, 26/52 + `MANIFEST-artefacto-h3.md` y 13 archivos).
-- **Qué no anda:** no existe el archivo consolidado con los 13 campos por check.
-- **Qué falta exactamente:** leer los tres registros y fundirlos en un
-  `registro-de-checks-consolidado.json`, declarando a **Ender ausente** (su daily está en 0/50).
-  Es trabajo de datos, no de investigación: las tres fuentes están identificadas arriba.
-- **Dónde quedó:** sin empezar. No bloquea nada del producto.
+Ninguna.
 
 ## Pendiente
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| `H6.S1.M3` (E2E dirigido) | `NOT_RUN` | El spec existe y es el correcto (`playwright/carril-p8-avisos-agenda.spec.ts`, repo del front), pero **el árbol del front tiene 352 archivos con cambios en el índice sin commitear**, incluidos borrados de specs. Correr E2E ahí mediría un árbol que nadie revisó. Destraba: que se resuelva ese estado, o correrlo sobre un checkout limpio. |
-| `H6.S3.M1` · `H6.S3.M2` | `A MEDIAS` | Ver arriba: sólo falta fundir tres archivos que ya existen. |
+| `H6.S1.M3` (etapa 5, E2E dirigido) | `NOT_RUN` — **ejecutado**, ver abajo | Que esta relación toque `src/`. Hoy no tiene sujeto. |
+
+### Por qué `H6.S1.M3` queda `NOT_RUN` y no `HECHO`
+
+Su DoD pide resultados pegados; no admite `NOT_RUN` (a diferencia de `H6.S1.M4`, que sí). Así que
+**no se declara hecha**, aunque se haya ejecutado. Tres causas, las tres verificadas:
+
+1. **Se corrió, y el navegador no está**: `npx playwright test playwright/carril-p8-avisos-agenda.spec.ts`
+   → `browserType.launch: Executable doesn't exist … chrome-headless-shell.exe`, exit 1.
+2. **Aunque estuviera, el spec exige un entorno provisto**: cuatro credenciales (`P8_PACIENTE_*`,
+   `P8_DOCTORA_*`) y datos sembrados por `tools/alovida/p8-avisos-agenda.mjs` contra la API viva.
+   Sin ellas se saltea solo (`spec:91,108,122`).
+3. **La causa de fondo: este trabajo no cambió comportamiento de producto.** `git diff --stat
+   4cc5ea1f..HEAD -- src/` da 4 archivos y 28 líneas, **todas reformateo de prettier**. No hay
+   flujo de usuario modificado al que dirigir un E2E; el spec vecino es evidencia visual de otro
+   carril. Por eso en el consolidado va como **no aplicable a este artefacto**, no como aprobado.
+
+> **Corrección de lo que escribí antes:** dije que el bloqueo era el árbol sucio del front (352
+> archivos sin commitear). Eso es cierto y sigue siendo un problema, pero **no era la causa**: con
+> el árbol limpio tampoco habría corrido, y aunque hubiera corrido no habría hablado de este
+> cambio. Y el comentario del spec que dice que el centro de notificaciones «todavía no existe en
+> el frontend» **está desactualizado**: existe, en `src/app/features/notifications/`, cargado de
+> forma diferida desde `app.routes.ts:73`.
 
 ## Evidencia
 
@@ -106,6 +150,10 @@ para medir la política y no el bypass, y deja constancia de las dos cosas.
 | `evidencia/h5-etapa1-typecheck.txt` | Etapa 1 |
 | `evidencia/h5-etapa2-lint.txt` | Etapa 2, exit 0 |
 | `evidencia/h5-regresion-final-integracion.txt` | Etapa 4 completa: 4 suites, 51 pruebas |
+| `evidencia/h6-etapa5-e2e-no-ejecutable.txt` | Etapa 5 ejecutada, con sus tres causas |
+| `registro-de-checks-consolidado.json` | Los 37 checks de los tres niveles |
+| `gates-no-aprobados.md` | Tabla generada de los que no aprobaron |
+| `consolidar-registro.py` | Cómo se construyó el consolidado (re-ejecutable) |
 
 **HALL-07, de regalo** (no era de este trabajo; apareció al levantar el stack):
 

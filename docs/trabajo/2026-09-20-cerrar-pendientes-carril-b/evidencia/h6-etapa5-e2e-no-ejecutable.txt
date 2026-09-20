@@ -1,0 +1,21 @@
+# H6.S1.M3 — etapa 5 (E2E dirigido): ejecutado, NOT_RUN con tres causas verificadas
+# fecha: 2026-09-20T15:20:22-04:00
+
+## 1. Se ejecutó de verdad, y no pudo arrancar el navegador
+$ npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list   (repo mantra-core-health)
+Error: browserType.launch: Executable doesn't exist at
+  C:\Users\usuario\AppData\Local\ms-playwright\chromium_headless_shell-1234\chrome-headless-shell-win64\chrome-headless-shell.exe
+3 failed · exit=1
+-> el navegador de Playwright no está instalado en esta máquina (npx playwright install chromium)
+
+## 2. Aunque estuviera, el spec exige un entorno provisto
+playwright/carril-p8-avisos-agenda.spec.ts:43-57,91,108,122 — se saltea solo si faltan
+P8_PACIENTE_ID / P8_PACIENTE_CLAVE / P8_DOCTORA_ID / P8_DOCTORA_CLAVE, y sus datos los
+crea tools/alovida/p8-avisos-agenda.mjs contra la API viva.
+
+## 3. La causa de fondo: este trabajo no cambió comportamiento de producto
+$ git diff --stat 4cc5ea1f..HEAD -- src/
+ src/modules/iam/dto/register-organization.dto.ts      |  6 ++++--
+ 4 files changed, 28 insertions(+), 9 deletions(-)
+-> los únicos cambios en src/ son los 9 reformateos de prettier (commit ea40d003).
+   Todo lo demás es test/ y docs/. No hay flujo de usuario modificado al que dirigir un E2E.
