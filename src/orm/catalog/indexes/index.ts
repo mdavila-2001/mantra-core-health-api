@@ -23,6 +23,7 @@ import { communityIndexes2 } from './community.2.idx';
 import { consentIndexes } from './consent.idx';
 import { crmIndexes1 } from './crm.1.idx';
 import { crmIndexes2 } from './crm.2.idx';
+import { dataCatalogIndexes } from './data_catalog.idx';
 import { crossStoreConsistencyIndexes } from './cross_store_consistency.idx';
 import { delegatedAccessIndexes } from './delegated_access.idx';
 import { diagnosticUnitsIndexes } from './diagnostic_units.idx';
@@ -63,6 +64,7 @@ import { proceduresPerioperativeIndexes1 } from './procedures_perioperative.1.id
 import { proceduresPerioperativeIndexes2 } from './procedures_perioperative.2.idx';
 import { profilesIndexes } from './profiles.idx';
 import { promotionsIndexes } from './promotions.idx';
+import { qaExecutionIndexes } from './qa_execution.idx';
 import { qaLabIndexes } from './qa_lab.idx';
 import { readModelsIndexes } from './read_models.idx';
 import { reportingIndexes } from './reporting.idx';
@@ -98,6 +100,7 @@ export const indexCatalog: Readonly<Record<string, readonly (readonly IndexTuple
   consent: [consentIndexes],
   crm: [crmIndexes1, crmIndexes2],
   cross_store_consistency: [crossStoreConsistencyIndexes],
+  data_catalog: [dataCatalogIndexes],
   delegated_access: [delegatedAccessIndexes],
   diagnostic_units: [diagnosticUnitsIndexes],
   diagnostics: [diagnosticsIndexes1, diagnosticsIndexes2],
@@ -128,6 +131,7 @@ export const indexCatalog: Readonly<Record<string, readonly (readonly IndexTuple
   procedures_perioperative: [proceduresPerioperativeIndexes1, proceduresPerioperativeIndexes2],
   profiles: [profilesIndexes],
   promotions: [promotionsIndexes],
+  qa_execution: [qaExecutionIndexes],
   qa_lab: [qaLabIndexes],
   read_models: [readModelsIndexes],
   reporting: [reportingIndexes],

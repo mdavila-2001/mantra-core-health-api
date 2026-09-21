@@ -957,6 +957,25 @@ services:
     networks:
       - mantra-redesa-network
 
+  worker-data_catalog:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-data_catalog.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   worker-qa_lab:
     image: mantra-redesa-api:local
     build:

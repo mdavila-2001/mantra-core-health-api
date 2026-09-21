@@ -89,6 +89,9 @@ import { ReportingModule } from './modules/reporting/reporting.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
 import { SystemContextModule } from './modules/system_context/system_context.module';
 import { SystemOpsModule } from './modules/system_ops/system_ops.module';
+import { DataCatalogModule } from './modules/data_catalog/data_catalog.module';
+import { QaExecutionModule } from './modules/qa_execution/qa_execution.module';
+import { OpsConsoleModule } from './modules/ops_console/ops_console.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
@@ -226,6 +229,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     SurveysModule,
     SystemContextModule,
     SystemOpsModule,
+    DataCatalogModule,
+    QaExecutionModule,
+    OpsConsoleModule,
     TelemetryModule,
     TrackingModule,
     WorkflowModule,

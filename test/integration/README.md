@@ -40,6 +40,7 @@ CI/staging que posea esos recursos debe activar y conservar su propia evidencia.
 | `TERMINOLOGY_DATASET_TESTS=1`      | `loinc`, `ndc`, `hcpcs`, `icd10cm`, `nucc`, `rxterms`, `rxnorm-full` | Todos los importadores correspondientes ya ejecutados contra la misma DB; salida a NLM/openFDA para los spot-checks en vivo |
 | `MOCK_PROVIDER_INTEGRATION_TEST=1` | llamada HTTP real de `worker-provider-adapter-swap`                  | `mock-provider-server` escuchando en `localhost:4100`, con tasa de fallo 0                                                  |
 | Credenciales Google completas      | `google-email-provider.int-spec.ts`                                  | OAuth/client id, secret, refresh token y destinatario de prueba                                                             |
+| `DATA_CATALOG_IT_DB_URL`           | `data-catalog.int-spec.ts`                                           | PostgreSQL **desechable** (crea schemas de fixtures, aplica el patch v4.2.19 y altera tablas); ver cabecera del spec         |
 | `RLS_TEST=1`                       | `rls.int-spec.ts`                                                    | rol runtime real sin `BYPASSRLS`; modifica políticas del esquema                                                            |
 
 Para una base local desechable, RLS puede crear temporalmente el login de prueba

@@ -57,6 +57,26 @@
 
 BEGIN;
 
+-- Guard de reemplazo: v4.2.18 (2026-09-18) le quita a `billing.quotations`
+-- `interest_rate_percent`/`interest_calculation_method` y las reemplaza por
+-- `down_payment_amount`/`payment_frequency` (decisión de producto: sin
+-- interés, plan de pagos a medida — ver el propio v4.2.18). Sobre una base
+-- que ya tiene esa forma (por ejemplo, provista desde el esquema generado
+-- vigente, sin pasar linealmente por este patch), la verificación de D. de
+-- acá abajo NUNCA puede volver a cumplirse: pide una columna y un CHECK que
+-- el producto decidió borrar, no que falten por error. Sin este guard,
+-- `postgres-init` fallaba en cada arranque contra un estado que ya es
+-- correcto para la versión vigente del modelo.
+SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'billing' AND table_name = 'quotations'
+      AND column_name = 'down_payment_amount'
+) AS ya_reemplazado_por_v4218 \gset
+
+\if :ya_reemplazado_por_v4218
+\echo 'v4.2.8: reemplazado por v4.2.18 (down_payment_amount ya existe) — skip'
+\else
+
 -- ---------------------------------------------------------------- A. tablas
 CREATE TABLE IF NOT EXISTS "billing"."quotations" (
     "id" uuid NOT NULL,
@@ -252,5 +272,7 @@ BEGIN
 
     RAISE NOTICE 'v4.2.8 aplicado: 2 tablas, 10 FK validadas, 10 índices, 1 CHECK.';
 END $$;
+
+\endif
 
 COMMIT;

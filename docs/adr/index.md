@@ -31,6 +31,8 @@
 | [0021](ADR-0021-fuente-unica-de-ddl.md) | El esquema se declara en el modelo canónico, no en este repositorio | Aceptado |
 | [0022](ADR-0022-generacion-de-entidades.md) | Generación de entidades — cuerpo desde el modelo, documentación aparte | Aceptado |
 | [0023](ADR-0023-puertos-persistencia-read-write.md) | Puertos de persistencia con rutas de lectura y escritura separadas | Aceptado |
+| [0024](ADR-0024-portal-admin-catalogo-de-datos.md) | Portal administrativo — catálogo de datos como módulo propio con jobs durables | Aceptado (desvío declarado de 0021) |
+| [0025](ADR-0025-qa-runner-en-servidor.md) | QA Lab ejecuta en el servidor, con destinos aprobados y aprobación ligada al plan | Aceptado (desvío declarado de 0021) |
 
 ## Cómo añadir un ADR nuevo
 
