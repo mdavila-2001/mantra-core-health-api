@@ -138,11 +138,7 @@ interface EstadoDeLaReceta {
 
 /** La etiqueta legible de un estado de receta, para el verify público. */
 export type PrescriptionStatusLabel =
-  | 'DRAFT'
-  | 'ISSUED'
-  | 'COMPLETED'
-  | 'INVALIDATED'
-  | 'REPLACED';
+  'DRAFT' | 'ISSUED' | 'COMPLETED' | 'INVALIDATED' | 'REPLACED';
 
 /**
  * Traduce el `status_concept_id` a la etiqueta que expone el verify público.
@@ -196,9 +192,7 @@ function marcaDeAguaPara(estado: EstadoDeLaReceta): string | undefined {
     return 'COPIA DE TRABAJO - SIN VALIDEZ FARMACÉUTICA';
   }
   if (esEstadoOficial(estado.statusConceptId)) return undefined;
-  const motivo = estado.statusReasonText
-    ? ` — ${estado.statusReasonText}`
-    : '';
+  const motivo = estado.statusReasonText ? ` — ${estado.statusReasonText}` : '';
   return `SIN VALIDEZ FARMACÉUTICA${motivo}`;
 }
 
@@ -292,7 +286,9 @@ export function armarReceta(datos: DatosDeLaReceta): PapelDeReceta {
   const lineasMedicamento = [
     `Medicamento: ${etiqueta(datos.conceptsById, datos.medicationConceptId)}`,
     ...(datos.substanceAtcConceptId
-      ? [`Sustancia (ATC): ${etiqueta(datos.conceptsById, datos.substanceAtcConceptId)}`]
+      ? [
+          `Sustancia (ATC): ${etiqueta(datos.conceptsById, datos.substanceAtcConceptId)}`,
+        ]
       : []),
     `Vía: ${etiqueta(datos.conceptsById, datos.routeConceptId)}`,
     `Dosis: ${datos.doseText ?? SIN_DATO}`,
@@ -304,7 +300,9 @@ export function armarReceta(datos: DatosDeLaReceta): PapelDeReceta {
     }`,
     `Vigencia: ${formatearFecha(datos.validFrom)} — ${formatearFecha(datos.validTo)}`,
     ...(datos.indicationCodeConceptId
-      ? [`Indicación: ${etiqueta(datos.conceptsById, datos.indicationCodeConceptId)}`]
+      ? [
+          `Indicación: ${etiqueta(datos.conceptsById, datos.indicationCodeConceptId)}`,
+        ]
       : []),
     `Instrucciones al paciente: ${datos.patientInstructionsText ?? SIN_DATOS}`,
   ];
@@ -404,7 +402,8 @@ export function dibujar(papel: PapelDeReceta): Promise<Buffer> {
       .fontSize(TITLE_FONT_SIZE)
       .text(papel.titulo, PAGE_MARGIN + anchoMarca + 12, PAGE_MARGIN + 4);
     doc.moveDown(0.5);
-    doc.y = PAGE_MARGIN + Math.max(altoDeMarca(anchoMarca), TITLE_FONT_SIZE) + 12;
+    doc.y =
+      PAGE_MARGIN + Math.max(altoDeMarca(anchoMarca), TITLE_FONT_SIZE) + 12;
 
     doc.fontSize(BODY_FONT_SIZE);
     for (const linea of papel.encabezado) doc.text(linea);
@@ -621,10 +620,11 @@ export class PrescriptionPdfService {
     em: EntityManager,
     practitionerProfileId: string,
   ): Promise<PrescriberLicense | null> {
-    const authorizations = await this.jurisdictionAuthorizationsRepo.findByPractitioner(
-      em,
-      practitionerProfileId,
-    );
+    const authorizations =
+      await this.jurisdictionAuthorizationsRepo.findByPractitioner(
+        em,
+        practitionerProfileId,
+      );
     const matricula = authorizations.find(
       (auth) => auth.jurisdictionConceptId === PROF.JURISDICTION_NATIONAL,
     );
@@ -632,7 +632,8 @@ export class PrescriptionPdfService {
     return {
       number: matricula.licenseNumber,
       authority: matricula.regulatoryAuthority ?? null,
-      state: matricula.stateConceptId === PROF.AUTH_ACTIVE ? 'ACTIVE' : 'PENDING',
+      state:
+        matricula.stateConceptId === PROF.AUTH_ACTIVE ? 'ACTIVE' : 'PENDING',
     };
   }
 

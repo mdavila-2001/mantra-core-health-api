@@ -38,7 +38,9 @@ const PUBLIC_RATE_LIMIT = { default: { limit: 60, ttl: 60_000 } };
 @Throttle(PUBLIC_RATE_LIMIT)
 @Controller()
 export class ClinicalPrescriptionsPublicController {
-  constructor(private readonly prescriptionPdfService: PrescriptionPdfService) {}
+  constructor(
+    private readonly prescriptionPdfService: PrescriptionPdfService,
+  ) {}
 
   @Public()
   @Get('public/prescriptions/:id/verify')
