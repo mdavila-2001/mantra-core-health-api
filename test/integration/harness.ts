@@ -802,6 +802,16 @@ const CUENTA_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   // `iam.refresh_tokens` NO tiene `user_id`: se llega a través de
   // `session_id → iam.sessions.id`, y como esa FK sí está en el grafo,
   // borrar `iam.sessions` de la fila de arriba ya arrastra sus tokens.
+  //
+  // Las cuatro siguientes las destapó el int-spec de C-14/C-23: un
+  // profesional que abre un encuentro, registra observaciones, interna a un
+  // paciente o pide una relación asistencial queda como `created_by_user_id`
+  // de esas filas, y ninguna colgaba de acá — la limpieza fallaba con la FK
+  // de `clinical.encounters` en el detalle.
+  { table: 'clinical.encounters', column: 'created_by_user_id' },
+  { table: 'clinical.care_episodes', column: 'created_by_user_id' },
+  { table: 'clinical.observations', column: 'created_by_user_id' },
+  { table: 'authz.care_relationships', column: 'created_by_user_id' },
 ];
 
 /**
