@@ -226,6 +226,11 @@ export async function bootstrapTestApp(
   await seedAdmin(orm);
   await seedFixtures(orm);
 
+  // Desde MCH-004 un access token sólo autentica si su `sid` tiene una sesión
+  // activa en `iam.sessions`: los tokens que firma el harness necesitan la suya.
+  await ensureTestSession(orm, TEST_ADMIN_ID, 'test-session');
+  await ensureTestSession(orm, TEST_ADMIN_ID, 'test-session-tenantless');
+
   const tokenService = app.get(TokenService);
   const adminToken = tokenService.signAccessToken(
     TEST_ADMIN_ID,
@@ -323,6 +328,37 @@ async function seedFixtures(orm: MikroORM): Promise<void> {
  * para las columnas `created_by_user_id`/`recorded_by_user_id` que pueblan los
  * servicios, evitando violaciones de clave foránea al ejercer los endpoints.
  */
+/**
+ * Deja activa la sesión `sid` del usuario, para firmar tokens de prueba a mano.
+ *
+ * El `JwtStrategy` exige que el `sid` del token corresponda a una sesión activa
+ * y vigente del mismo usuario (MCH-004). Es idempotente: si la sesión existe se
+ * reactiva y se le extiende la vigencia.
+ *
+ * @param orm - ORM del contexto de pruebas.
+ * @param userId - Dueño de la sesión; debe existir en `iam.users` y estar activo.
+ * @param sid - Valor que irá en el claim `sid` del token.
+ */
+export async function ensureTestSession(
+  orm: MikroORM,
+  userId: string,
+  sid: string,
+): Promise<void> {
+  await orm.em
+    .fork()
+    .getConnection()
+    .execute(
+      `insert into iam.sessions
+       (id, user_id, token_id, state_concept_id, expires_at, created_at, updated_at)
+     values (gen_random_uuid(), ?, ?, ?, now() + interval '1 day', now(), now())
+     on conflict (token_id) do update
+       set state_concept_id = excluded.state_concept_id,
+           expires_at = excluded.expires_at,
+           updated_at = now()`,
+      [userId, sid, CONCEPTS.STATE_ACTIVE],
+    );
+}
+
 async function seedAdmin(orm: MikroORM): Promise<void> {
   const em = orm.em.fork();
   if (await em.findOne(Users, { id: TEST_ADMIN_ID })) {
@@ -766,6 +802,16 @@ const CUENTA_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   // `iam.refresh_tokens` NO tiene `user_id`: se llega a través de
   // `session_id → iam.sessions.id`, y como esa FK sí está en el grafo,
   // borrar `iam.sessions` de la fila de arriba ya arrastra sus tokens.
+  //
+  // Las cuatro siguientes las destapó el int-spec de C-14/C-23: un
+  // profesional que abre un encuentro, registra observaciones, interna a un
+  // paciente o pide una relación asistencial queda como `created_by_user_id`
+  // de esas filas, y ninguna colgaba de acá — la limpieza fallaba con la FK
+  // de `clinical.encounters` en el detalle.
+  { table: 'clinical.encounters', column: 'created_by_user_id' },
+  { table: 'clinical.care_episodes', column: 'created_by_user_id' },
+  { table: 'clinical.observations', column: 'created_by_user_id' },
+  { table: 'authz.care_relationships', column: 'created_by_user_id' },
 ];
 
 /**

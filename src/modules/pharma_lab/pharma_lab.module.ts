@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { AuditModule } from '../audit/audit.module';
+import { PharmaLabScopeGuard } from './guards';
 import {
   MedicalVisitorsController,
   PharmaCatalogController,
@@ -74,6 +75,7 @@ import {
     PharmaLabSocialController,
   ],
   providers: [
+    PharmaLabScopeGuard,
     // Repositorios
     AgendaRepository,
     AnalyticsRepository,

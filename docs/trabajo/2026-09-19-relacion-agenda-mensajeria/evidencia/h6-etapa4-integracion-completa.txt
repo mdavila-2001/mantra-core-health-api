@@ -1,0 +1,468 @@
+### RECORTADO · el original tenia 19531 lineas (log pino completo, MBs).
+### Se conservan: las 200 primeras y las 200 ultimas, mas las lineas de veredicto.
+### El resumen interpretado esta en h6-etapa4-resumen.txt.
+--- PRIMERAS 200 ---
+﻿=== ETAPA 4: suite de integracion COMPLETA (yarn test:integration) ===
+corepack : Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. 
+Update the import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clini
+cal-forms\transversal\anamnesis-historia-clinica-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+En línea: 1 Carácter: 593
++ ... oding utf8; corepack yarn test:integration *>> "$ev\h6-etapa4-integra ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Jest: importing...mic `import()`.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\examen-fisico-general.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\consentimiento-informado.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\epicrisis-resumen-de-egreso.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\ficha-cardiologica-base.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\riesgo-cardiovascular-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\control-de-nino-sano.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\curvas-de-crecimiento-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+inecologia-obstetricia\control-prenatal-hcp.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\t
+raumatologia\evaluacion-musculoesqueletica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oftalmologia\examen-oftalmologico-basico.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\odontologia\odontograma-oms.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\psiquiatria\evaluacion-de-salud-mental.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\dermatologia\examen-dermatologico.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-interna\evaluacion-de-medicina-interna.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-general\consulta-de-medicina-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-familiar\consulta-de-medicina-familiar.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neurologia\evaluacion-neurologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\e
+ndocrinologia\evaluacion-endocrinologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+astroenterologia\evaluacion-gastroenterologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neumologia\evaluacion-neumologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\nefrologia\evaluacion-nefrologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\reumatologia\evaluacion-reumatologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\infectologia\evaluacion-infectologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\geriatria\valoracion-geriatrica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oncologia\evaluacion-oncologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\hematologia\evaluacion-hematologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-intensiva\evaluacion-en-medicina-intensiva.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-emergencia\atencion-en-emergencia.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\c
+irugia-general\evaluacion-de-cirugia-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\urologia\evaluacion-urologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\o
+torrinolaringologia\evaluacion-otorrinolaringologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\anestesiologia\valoracion-preanestesica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\r
+adiologia\informe-de-estudio-por-imagenes.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+
+--- LINEAS DE VEREDICTO (PASS/FAIL/Tests:/Test Suites:) ---
+FAIL test/integration/frontend-read-flows.int-spec.ts (45.503 s)
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+FAIL test/integration/organization-legal-representative.int-spec.ts (28.906 s)
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+
+--- ULTIMAS 200 ---
+{"level":30,"time":1789884293775,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/ts/location/pings/batch-ingest, POST} route"}
+{"level":30,"time":1789884293775,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RoutesResolver","msg":"TimescaleAdminController {/ts/admin}:"}
+{"level":30,"time":1789884293775,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/ts/admin/hypertables, POST} route"}
+{"level":30,"time":1789884293775,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/ts/admin/hypertables/:table, PATCH} route"}
+{"level":30,"time":1789884293775,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/ts/admin/compression/run, POST} route"}
+{"level":30,"time":1789884293775,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/ts/admin/retention/policies, POST} route"}
+{"level":30,"time":1789884293775,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/ts/admin/rollups/audit-daily/refresh, POST} route"}
+{"level":30,"time":1789884293776,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/ts/admin/rollups/:name/refresh, POST} route"}
+{"level":30,"time":1789884293776,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RoutesResolver","msg":"VectorGovernanceController {/vector-rag}:"}
+{"level":30,"time":1789884293776,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/embedding-model-versions, POST} route"}
+{"level":30,"time":1789884293776,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/embedding-model-versions/:id/retire, POST} route"}
+{"level":30,"time":1789884293776,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/collections, POST} route"}
+{"level":30,"time":1789884293776,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/rag-access-policies, POST} route"}
+{"level":30,"time":1789884293776,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/rag-access-policies/:id/publish, PUT} route"}
+{"level":30,"time":1789884293776,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/collections/:id/embedding-jobs, POST} route"}
+{"level":30,"time":1789884293777,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/collections/:id/re-embed, POST} route"}
+{"level":30,"time":1789884293777,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/collections/:id/lifecycle, PUT} route"}
+{"level":30,"time":1789884293777,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RoutesResolver","msg":"VectorRuntimeController {/vector-rag}:"}
+{"level":30,"time":1789884293777,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/embedding-jobs/pending, GET} route"}
+{"level":30,"time":1789884293777,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/embedding-jobs/:id/run, POST} route"}
+{"level":30,"time":1789884293777,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/retrieval-sessions, POST} route"}
+{"level":30,"time":1789884293777,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/retrieval-sessions/:id/search, POST} route"}
+{"level":30,"time":1789884293777,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/retrieval-sessions/:id/evidence, POST} route"}
+{"level":30,"time":1789884293778,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/retrieval-sessions/:id/feedback, POST} route"}
+{"level":30,"time":1789884293778,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/deletion-jobs, POST} route"}
+{"level":30,"time":1789884293778,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/vector-rag/collections/:id/reconciliation, POST} route"}
+{"level":30,"time":1789884293778,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RoutesResolver","msg":"DocumentStoreController {/document-store/collections/:collection/documents}:"}
+{"level":30,"time":1789884293778,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/document-store/collections/:collection/documents, POST} route"}
+{"level":30,"time":1789884293778,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/document-store/collections/:collection/documents/:id, GET} route"}
+{"level":30,"time":1789884293778,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/document-store/collections/:collection/documents, GET} route"}
+{"level":30,"time":1789884293778,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/document-store/collections/:collection/documents/:id, PATCH} route"}
+{"level":30,"time":1789884293779,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"RouterExplorer","msg":"Mapped {/document-store/collections/:collection/documents/:id, DELETE} route"}
+{"level":30,"time":1789884293792,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SchemaBootstrapService","msg":"ORM_SCHEMA_SYNC=off: la estructura de la base no se toca en el arranque"}
+{"level":40,"time":1789884293797,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.boot.disabled","nodeEnv":"test","msg":"SEED_ON_BOOT=false: la cadena de seeds no corre en este arranque. Si el catálogo no está materializado, ninguna escritura con *_concept_id va a poder persistir. Sembrá con \"yarn seed:boot\"."}
+{"level":30,"time":1789884293800,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"NestApplication","msg":"Nest application successfully started"}
+{"level":30,"time":1789884294383,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"catálogo de conceptos","inserted":0,"tookMs":583,"failed":false,"detail":{"inserted":0},"msg":"Seed: catálogo de conceptos"}
+{"level":30,"time":1789884294695,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"DynamicEnumSeedService","operation":"seed.dynamic-enums","valueSets":0,"definitions":0,"options":0,"bindings":0,"msg":"Enumeraciones dinámicas sembradas"}
+{"level":30,"time":1789884294695,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"enumeraciones dinámicas","inserted":0,"tookMs":312,"failed":false,"detail":{"valueSets":0,"definitions":0,"options":0,"bindings":0},"msg":"Seed: enumeraciones dinámicas"}
+{"level":30,"time":1789884294706,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"PatientPortalProxySeedService","operation":"seed.patient-portal-proxy","valueSets":0,"versions":0,"legalBases":0,"msg":"Patient portal proxy scope and legal basis ensured"}
+{"level":30,"time":1789884294706,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"apoderamiento de portal","inserted":0,"tookMs":11,"failed":false,"detail":{"valueSets":0,"versions":0,"legalBases":0},"msg":"Seed: apoderamiento de portal"}
+{"level":40,"time":1789884294782,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"GlossarySeedService","operation":"seed.glossary.relationship","sourceSlug":"hipertension-arterial","type":"PROCEDURE","targetSlug":"control-de-signos-vitales","msg":"Relación de glosario omitida: el slug destino no existe en el catálogo"}
+{"level":30,"time":1789884294795,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"glosario médico","inserted":0,"tookMs":89,"failed":false,"detail":{"valueSets":0,"terms":0,"designations":0,"properties":0,"memberships":0,"relationships":0,"orphanRelationships":1,"codeSystemBackfilled":0},"msg":"Seed: glosario médico"}
+{"level":30,"time":1789884295001,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"departamentos de Bolivia","inserted":0,"tookMs":206,"failed":false,"detail":{"valueSets":0,"versions":0,"departments":0,"municipalities":0,"designations":0,"properties":0,"memberships":0},"msg":"Seed: departamentos de Bolivia"}
+{"level":30,"time":1789884295009,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"país y categoría canónica de formas societarias","inserted":0,"tookMs":8,"failed":false,"detail":{"properties":0},"msg":"Seed: país y categoría canónica de formas societarias"}
+{"level":30,"time":1789884295044,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"ocupaciones de Bolivia","inserted":0,"tookMs":35,"failed":false,"detail":{"valueSets":0,"versions":0,"occupations":0,"designations":0,"properties":0,"memberships":0},"msg":"Seed: ocupaciones de Bolivia"}
+{"level":30,"time":1789884295096,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"empresas de Bolivia","inserted":0,"tookMs":52,"failed":false,"detail":{"valueSets":0,"versions":0,"employers":0,"designations":0,"properties":0,"memberships":0},"msg":"Seed: empresas de Bolivia"}
+{"level":30,"time":1789884295831,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"establecimientos de salud","inserted":0,"tookMs":735,"failed":false,"detail":{"valueSets":0,"versions":0,"facilities":0,"properties":0,"memberships":0},"msg":"Seed: establecimientos de salud"}
+{"level":40,"time":1789884295866,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","err":{"type":"InvalidFieldNameException","message":"column \"sigla\" of relation \"insurance_carriers\" does not exist","stack":"InvalidFieldNameException: column \"sigla\" of relation \"insurance_carriers\" does not exist\n    at PostgreSqlExceptionConverter.convertException (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\dialects\\postgresql\\PostgreSqlExceptionConverter.js:39:24)\n    at PostgreSqlDriver.convertException (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\drivers\\DatabaseDriver.js:453:54)\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\drivers\\DatabaseDriver.js:457:24\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at PostgreSqlDriver.nativeInsertMany (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlDriver.js:888:21)\n    at ChangeSetPersister.persistNewEntitiesBatch (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\ChangeSetPersister.js:171:21)\n    at ChangeSetPersister.persistNewEntities (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\ChangeSetPersister.js:148:13)\n    at ChangeSetPersister.runForEachSchema (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\ChangeSetPersister.js:90:13)\n    at UnitOfWork.commitCreateChangeSets (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:1039:9)\n    at UnitOfWork.persistToDatabase (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:1006:13)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at UnitOfWork.doCommit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:473:17)\n    at UnitOfWork.commit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:443:13)\n    at PostgreSqlEntityManager.flush (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\EntityManager.js:1605:9)\n    at BoliviaInsuranceSeedService.seedCarriers (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\bolivia-insurance-seed.service.ts:280:5)\n    at BoliviaInsuranceSeedService.run (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\bolivia-insurance-seed.service.ts:113:22)\n    at SeedBootstrapService.runStep (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\seed-bootstrap.service.ts:438:25)\n    at SeedBootstrapService.run (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\seed-bootstrap.service.ts:239:18)\n    at bootstrapTestApp (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\harness.ts:213:23)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\fx14-cockpit-contable.int-spec.ts:56:11)\n\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\pg\\lib\\client.js:652:17\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at PostgresConnection.executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\dialect\\postgres\\postgres-driver.js:113:28)\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\query-executor\\query-executor-base.js:39:24\n    at SingleConnectionProvider.#run (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\driver\\single-connection-provider.js:24:16)\n    at DefaultQueryExecutor.executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\query-executor\\query-executor-base.js:38:28)\n    at ControlledTransaction.executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\kysely.js:535:16)\n    at executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:206:25)\n    at PostgreSqlConnection.executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\connections\\Connection.js:201:25)\n    at PostgreSqlDriver.nativeInsertMany (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlDriver.js:888:21)\n    at ChangeSetPersister.persistNewEntitiesBatch (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\ChangeSetPersister.js:171:21)\n    at ChangeSetPersister.persistNewEntities (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\ChangeSetPersister.js:148:13)\n    at ChangeSetPersister.runForEachSchema (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\ChangeSetPersister.js:90:13)\n    at UnitOfWork.commitCreateChangeSets (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:1039:9)\n    at UnitOfWork.persistToDatabase (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:1006:13)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at UnitOfWork.doCommit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:473:17)\n    at UnitOfWork.commit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:443:13)\n    at PostgreSqlEntityManager.flush (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\EntityManager.js:1605:9)\n    at BoliviaInsuranceSeedService.seedCarriers (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\bolivia-insurance-seed.service.ts:280:5)\n    at BoliviaInsuranceSeedService.run (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\bolivia-insurance-seed.service.ts:113:22)\n    at SeedBootstrapService.runStep (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\seed-bootstrap.service.ts:438:25)\n    at SeedBootstrapService.run (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\seed-bootstrap.service.ts:239:18)\n    at bootstrapTestApp (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\harness.ts:213:23)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\fx14-cockpit-contable.int-spec.ts:56:11)\n    at PostgresConnection.executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\dialect\\postgres\\postgres-driver.js:126:41)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\query-executor\\query-executor-base.js:39:24\n    at SingleConnectionProvider.#run (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\driver\\single-connection-provider.js:24:16)\n    at DefaultQueryExecutor.executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\query-executor\\query-executor-base.js:38:28)\n    at ControlledTransaction.executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\kysely\\dist\\kysely.js:535:16)\n    at executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:206:25)\n    at PostgreSqlConnection.executeQuery (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\connections\\Connection.js:201:25)\n    at PostgreSqlDriver.nativeInsertMany (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlDriver.js:888:21)\n    at ChangeSetPersister.persistNewEntitiesBatch (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\ChangeSetPersister.js:171:21)\n    at ChangeSetPersister.persistNewEntities (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\ChangeSetPersister.js:148:13)\n    at ChangeSetPersister.runForEachSchema (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\ChangeSetPersister.js:90:13)\n    at UnitOfWork.commitCreateChangeSets (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:1039:9)\n    at UnitOfWork.persistToDatabase (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:1006:13)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at UnitOfWork.doCommit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:473:17)\n    at UnitOfWork.commit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\unit-of-work\\UnitOfWork.js:443:13)\n    at PostgreSqlEntityManager.flush (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\EntityManager.js:1605:9)\n    at BoliviaInsuranceSeedService.seedCarriers (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\bolivia-insurance-seed.service.ts:280:5)\n    at BoliviaInsuranceSeedService.run (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\bolivia-insurance-seed.service.ts:113:22)\n    at SeedBootstrapService.runStep (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\seed-bootstrap.service.ts:438:25)\n    at SeedBootstrapService.run (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\common\\seed\\seed-bootstrap.service.ts:239:18)\n    at bootstrapTestApp (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\harness.ts:213:23)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\fx14-cockpit-contable.int-spec.ts:56:11)","code":"42703","length":136,"name":"InvalidFieldNameException","severity":"ERROR","position":"96","file":"parse_target.c","line":"1068","routine":"checkInsertTargets"},"event":"seed.step.failed","name":"aseguradoras de Bolivia","inserted":null,"tookMs":34,"failed":true,"msg":"Seed omitido: aseguradoras de Bolivia"}
+{"level":30,"time":1789884299707,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"nomenclador de procedimientos","inserted":0,"tookMs":3840,"failed":false,"detail":{"valueSets":0,"versions":0,"procedures":0,"properties":0,"memberships":0},"msg":"Seed: nomenclador de procedimientos"}
+{"level":30,"time":1789884299745,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"vademécum de medicamentos","inserted":0,"tookMs":37,"failed":false,"detail":{"inserted":0},"msg":"Seed: vademécum de medicamentos"}
+{"level":30,"time":1789884299766,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"mensajería","inserted":0,"tookMs":21,"failed":false,"detail":{"inserted":0},"msg":"Seed: mensajería"}
+{"level":30,"time":1789884299782,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"audio assets","inserted":0,"tookMs":16,"failed":false,"detail":{"inserted":0},"msg":"Seed: audio assets"}
+{"level":30,"time":1789884299806,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"verificación de identidad","inserted":0,"tookMs":24,"failed":false,"detail":{"inserted":0},"msg":"Seed: verificación de identidad"}
+{"level":30,"time":1789884299845,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"roles asistenciales","inserted":0,"tookMs":38,"failed":false,"detail":{"inserted":0},"msg":"Seed: roles asistenciales"}
+{"level":30,"time":1789884299849,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"permisos de plataforma","inserted":0,"tookMs":4,"failed":false,"detail":{"inserted":0},"msg":"Seed: permisos de plataforma"}
+{"level":30,"time":1789884299966,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"formularios clínicos estándar","inserted":0,"tookMs":117,"failed":false,"detail":{"templates":0,"specialties":0},"msg":"Seed: formularios clínicos estándar"}
+{"level":30,"time":1789884299969,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"IamUsersService","operation":"iam.user.create","actorId":"da1d6483-5391-5752-b635-90732ce16020","msg":"Creating user"}
+{"level":40,"time":1789884299974,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"IamUsersService","operation":"iam.user.create","reason":"email-in-use","msg":"Rejected user creation: email already has an active credential"}
+{"level":30,"time":1789884299984,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"BootstrapAdminSeedService","operation":"seed.bootstrap-admin","userId":"41d40b3f-945d-423e-b79b-b20224b4ad1e","tenantId":"1befcfea-44c0-563a-81cd-337ec6acc840","msg":"Administrador de arranque disponible"}
+{"level":30,"time":1789884299984,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"administrador de arranque","inserted":null,"tookMs":18,"failed":false,"detail":{"provisioned":true,"userId":"41d40b3f-945d-423e-b79b-b20224b4ad1e"},"msg":"Seed: administrador de arranque"}
+{"level":30,"time":1789884299985,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"cuentas de proveedores","inserted":0,"tookMs":1,"failed":false,"detail":{"created":0,"skipped":"not-configured"},"msg":"Seed: cuentas de proveedores"}
+{"level":30,"time":1789884299995,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.step","name":"servicio por defecto de cada práctica","inserted":0,"tookMs":10,"failed":false,"detail":{"inserted":0},"msg":"Seed: servicio por defecto de cada práctica"}
+FAIL test/integration/fx14-cockpit-contable.int-spec.ts (40.228 s)
+  ● FX-14 · el cockpit contable (6.3) › fiscal-years: 200 con los períodos y el vigente
+
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+
+      215 |     // Antes un seed caido dejaba la base a medias y la prueba fallaba mas
+      216 |     // adelante con una violacion de FK que no decia nada del origen real.
+    > 217 |     throw new Error(
+          |           ^
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+      219 |         seedSummary.steps
+      220 |           .filter((paso) => paso.failed)
+
+      at bootstrapTestApp (test/integration/harness.ts:217:11)
+      at Object.<anonymous> (test/integration/fx14-cockpit-contable.int-spec.ts:56:11)
+
+  ● FX-14 · el cockpit contable (6.3) › open-items: 200 con la partida, los cinco tramos y los totales
+
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+
+      215 |     // Antes un seed caido dejaba la base a medias y la prueba fallaba mas
+      216 |     // adelante con una violacion de FK que no decia nada del origen real.
+    > 217 |     throw new Error(
+          |           ^
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+      219 |         seedSummary.steps
+      220 |           .filter((paso) => paso.failed)
+
+      at bootstrapTestApp (test/integration/harness.ts:217:11)
+      at Object.<anonymous> (test/integration/fx14-cockpit-contable.int-spec.ts:56:11)
+
+  ● FX-14 · el cockpit contable (6.3) › dimensions: 200 con el centro de coste imputado y SEGMENT en 0.00
+
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+
+      215 |     // Antes un seed caido dejaba la base a medias y la prueba fallaba mas
+      216 |     // adelante con una violacion de FK que no decia nada del origen real.
+    > 217 |     throw new Error(
+          |           ^
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+      219 |         seedSummary.steps
+      220 |           .filter((paso) => paso.failed)
+
+      at bootstrapTestApp (test/integration/harness.ts:217:11)
+      at Object.<anonymous> (test/integration/fx14-cockpit-contable.int-spec.ts:56:11)
+
+  ● FX-14 · el cockpit contable (6.3) › document-flow: el original trae ACTUAL + REVERSION, la reversa trae ORIGEN + 
+ACTUAL
+
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+
+      215 |     // Antes un seed caido dejaba la base a medias y la prueba fallaba mas
+      216 |     // adelante con una violacion de FK que no decia nada del origen real.
+    > 217 |     throw new Error(
+          |           ^
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+      219 |         seedSummary.steps
+      220 |           .filter((paso) => paso.failed)
+
+      at bootstrapTestApp (test/integration/harness.ts:217:11)
+      at Object.<anonymous> (test/integration/fx14-cockpit-contable.int-spec.ts:56:11)
+
+  ● FX-14 · el cockpit contable (6.3) › assets: 200 con la cuota mensual y la carga total
+
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+
+      215 |     // Antes un seed caido dejaba la base a medias y la prueba fallaba mas
+      216 |     // adelante con una violacion de FK que no decia nada del origen real.
+    > 217 |     throw new Error(
+          |           ^
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+      219 |         seedSummary.steps
+      220 |           .filter((paso) => paso.failed)
+
+      at bootstrapTestApp (test/integration/harness.ts:217:11)
+      at Object.<anonymous> (test/integration/fx14-cockpit-contable.int-spec.ts:56:11)
+
+  ● FX-14 · el cockpit contable (6.3) › accrual-objects: 200 con el avance del cronograma
+
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+
+      215 |     // Antes un seed caido dejaba la base a medias y la prueba fallaba mas
+      216 |     // adelante con una violacion de FK que no decia nada del origen real.
+    > 217 |     throw new Error(
+          |           ^
+{"level":50,"time":1789884299996,"pid":22496,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.summary","ok":20,"failed":1,"inserted":0,"tookMs":6196,"steps":[{"name":"catálogo de conceptos","inserted":0,"tookMs":583,"failed":false},{"name":"enumeraciones dinámicas","inserted":0,"tookMs":312,"failed":false},{"name":"apoderamiento de portal","inserted":0,"tookMs":11,"failed":false},{"name":"glosario médico","inserted":0,"tookMs":89,"failed":false},{"name":"departamentos de Bolivia","inserted":0,"tookMs":206,"failed":false},{"name":"país y categoría canónica de formas societarias","inserted":0,"tookMs":8,"failed":false},{"name":"ocupaciones de Bolivia","inserted":0,"tookMs":35,"failed":false},{"name":"empresas de Bolivia","inserted":0,"tookMs":52,"failed":false},{"name":"establecimientos de salud","inserted":0,"tookMs":735,"failed":false},{"name":"aseguradoras de Bolivia","inserted":null,"tookMs":34,"failed":true},{"name":"nomenclador de procedimientos","inserted":0,"tookMs":3840,"failed":false},{"name":"vademécum de medicamentos","inserted":0,"tookMs":37,"failed":false},{"name":"mensajería","inserted":0,"tookMs":21,"failed":false},{"name":"audio assets","inserted":0,"tookMs":16,"failed":false},{"name":"verificación de identidad","inserted":0,"tookMs":24,"failed":false},{"name":"roles asistenciales","inserted":0,"tookMs":38,"failed":false},{"name":"permisos de plataforma","inserted":0,"tookMs":4,"failed":false},{"name":"formularios clínicos estándar","inserted":0,"tookMs":117,"failed":false},{"name":"administrador de arranque","inserted":null,"tookMs":18,"failed":false},{"name":"cuentas de proveedores","inserted":0,"tookMs":1,"failed":false},{"name":"servicio por defecto de cada práctica","inserted":0,"tookMs":10,"failed":false}],"msg":"Seeds: 20/21 ok · 1 omitidos · 0 filas · 6196 ms"}
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+      219 |         seedSummary.steps
+      220 |           .filter((paso) => paso.failed)
+
+      at bootstrapTestApp (test/integration/harness.ts:217:11)
+      at Object.<anonymous> (test/integration/fx14-cockpit-contable.int-spec.ts:56:11)
+
+  ● FX-14 · el cockpit contable (6.3) › una práctica de otro tenant responde 403, y un id inexistente responde 404
+
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+
+      215 |     // Antes un seed caido dejaba la base a medias y la prueba fallaba mas
+      216 |     // adelante con una violacion de FK que no decia nada del origen real.
+    > 217 |     throw new Error(
+          |           ^
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+      219 |         seedSummary.steps
+      220 |           .filter((paso) => paso.failed)
+
+      at bootstrapTestApp (test/integration/harness.ts:217:11)
+      at Object.<anonymous> (test/integration/fx14-cockpit-contable.int-spec.ts:56:11)
+
+  ● FX-14 · el cockpit contable (6.3) › document-flow de un asiento inexistente responde 404
+
+    La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+
+      215 |     // Antes un seed caido dejaba la base a medias y la prueba fallaba mas
+      216 |     // adelante con una violacion de FK que no decia nada del origen real.
+    > 217 |     throw new Error(
+          |           ^
+      218 |       `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+      219 |         seedSummary.steps
+      220 |           .filter((paso) => paso.failed)
+
+      at bootstrapTestApp (test/integration/harness.ts:217:11)
+      at Object.<anonymous> (test/integration/fx14-cockpit-contable.int-spec.ts:56:11)
+
+
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'app')
+
+      301 |
+      302 |   afterAll(async () => {
+    > 303 |     await ctx.app.close();
+          |               ^
+      304 |   });
+      305 |
+      306 |   it('fiscal-years: 200 con los períodos y el vigente', async () => {
+
+      at Object.app (test/integration/fx14-cockpit-contable.int-spec.ts:303:15)
+

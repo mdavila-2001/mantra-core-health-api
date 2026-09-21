@@ -2845,7 +2845,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "ok",
   "totalAmount": "valor-ejemplo",
   "lineCount": 1,
-  "postedAt": "2026-07-31T12:00:00.000Z"
+  "postedAt": "2026-07-31T12:00:00.000Z",
+  "classification": {
+    "decision": "CLASIFICADA",
+    "rulesetVersion": "valor-ejemplo",
+    "ruleId": "00000000-0000-4000-8000-000000000001",
+    "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "reason": "Texto descriptivo de ejemplo"
+  }
 }
 ```
 
@@ -2859,6 +2866,12 @@ Campos de la respuesta:
 | `totalAmount` | Sí | `string` | Sin restricción adicional declarada | Valor de total amount mantenido por la instancia. | `valor-ejemplo` |
 | `lineCount` | Sí | `number` | Sin restricción adicional declarada | Valor de line count mantenido por la instancia. | `1` |
 | `postedAt` | Sí | `string` | formato `date-time`; admite null | Valor de posted at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `classification` | No | `JournalClassificationDto` | Sin restricción adicional declarada | Evidencia de la clasificación; sólo la devuelve `classify` (MCH-018). | `{"decision":"CLASIFICADA","rulesetVersion":"valor-ejemplo","ruleId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","reason":"Texto descriptivo de ejemplo"}` |
+| `classification.decision` | No | `string` | valores: `CLASIFICADA`, `SIN_REGLA`, `AMBIGUA` | Resultado de evaluar el juego de reglas | `CLASIFICADA` |
+| `classification.rulesetVersion` | No | `string` | Sin restricción adicional declarada | Versión del juego de reglas evaluado | `valor-ejemplo` |
+| `classification.ruleId` | No | `string` | Sin restricción adicional declarada | Regla que decidió la imputación | `00000000-0000-4000-8000-000000000001` |
+| `classification.transactionTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a transaction type concept. | `00000000-0000-4000-8000-000000000001` |
+| `classification.reason` | No | `string` | Sin restricción adicional declarada | Explicación legible de la decisión | `Texto descriptivo de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3124,7 +3137,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "ok",
   "totalAmount": "valor-ejemplo",
   "lineCount": 1,
-  "postedAt": "2026-07-31T12:00:00.000Z"
+  "postedAt": "2026-07-31T12:00:00.000Z",
+  "classification": {
+    "decision": "CLASIFICADA",
+    "rulesetVersion": "valor-ejemplo",
+    "ruleId": "00000000-0000-4000-8000-000000000001",
+    "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "reason": "Texto descriptivo de ejemplo"
+  }
 }
 ```
 
@@ -3138,6 +3158,12 @@ Campos de la respuesta:
 | `totalAmount` | Sí | `string` | Sin restricción adicional declarada | Valor de total amount mantenido por la instancia. | `valor-ejemplo` |
 | `lineCount` | Sí | `number` | Sin restricción adicional declarada | Valor de line count mantenido por la instancia. | `1` |
 | `postedAt` | Sí | `string` | formato `date-time`; admite null | Valor de posted at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `classification` | No | `JournalClassificationDto` | Sin restricción adicional declarada | Evidencia de la clasificación; sólo la devuelve `classify` (MCH-018). | `{"decision":"CLASIFICADA","rulesetVersion":"valor-ejemplo","ruleId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","reason":"Texto descriptivo de ejemplo"}` |
+| `classification.decision` | No | `string` | valores: `CLASIFICADA`, `SIN_REGLA`, `AMBIGUA` | Resultado de evaluar el juego de reglas | `CLASIFICADA` |
+| `classification.rulesetVersion` | No | `string` | Sin restricción adicional declarada | Versión del juego de reglas evaluado | `valor-ejemplo` |
+| `classification.ruleId` | No | `string` | Sin restricción adicional declarada | Regla que decidió la imputación | `00000000-0000-4000-8000-000000000001` |
+| `classification.transactionTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a transaction type concept. | `00000000-0000-4000-8000-000000000001` |
+| `classification.reason` | No | `string` | Sin restricción adicional declarada | Explicación legible de la decisión | `Texto descriptivo de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3258,7 +3284,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "ok",
   "totalAmount": "valor-ejemplo",
   "lineCount": 1,
-  "postedAt": "2026-07-31T12:00:00.000Z"
+  "postedAt": "2026-07-31T12:00:00.000Z",
+  "classification": {
+    "decision": "CLASIFICADA",
+    "rulesetVersion": "valor-ejemplo",
+    "ruleId": "00000000-0000-4000-8000-000000000001",
+    "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "reason": "Texto descriptivo de ejemplo"
+  }
 }
 ```
 
@@ -3272,6 +3305,12 @@ Campos de la respuesta:
 | `totalAmount` | Sí | `string` | Sin restricción adicional declarada | Valor de total amount mantenido por la instancia. | `valor-ejemplo` |
 | `lineCount` | Sí | `number` | Sin restricción adicional declarada | Valor de line count mantenido por la instancia. | `1` |
 | `postedAt` | Sí | `string` | formato `date-time`; admite null | Valor de posted at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `classification` | No | `JournalClassificationDto` | Sin restricción adicional declarada | Evidencia de la clasificación; sólo la devuelve `classify` (MCH-018). | `{"decision":"CLASIFICADA","rulesetVersion":"valor-ejemplo","ruleId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","reason":"Texto descriptivo de ejemplo"}` |
+| `classification.decision` | No | `string` | valores: `CLASIFICADA`, `SIN_REGLA`, `AMBIGUA` | Resultado de evaluar el juego de reglas | `CLASIFICADA` |
+| `classification.rulesetVersion` | No | `string` | Sin restricción adicional declarada | Versión del juego de reglas evaluado | `valor-ejemplo` |
+| `classification.ruleId` | No | `string` | Sin restricción adicional declarada | Regla que decidió la imputación | `00000000-0000-4000-8000-000000000001` |
+| `classification.transactionTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a transaction type concept. | `00000000-0000-4000-8000-000000000001` |
+| `classification.reason` | No | `string` | Sin restricción adicional declarada | Explicación legible de la decisión | `Texto descriptivo de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3644,7 +3683,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "ok",
   "totalAmount": "valor-ejemplo",
   "lineCount": 1,
-  "postedAt": "2026-07-31T12:00:00.000Z"
+  "postedAt": "2026-07-31T12:00:00.000Z",
+  "classification": {
+    "decision": "CLASIFICADA",
+    "rulesetVersion": "valor-ejemplo",
+    "ruleId": "00000000-0000-4000-8000-000000000001",
+    "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "reason": "Texto descriptivo de ejemplo"
+  }
 }
 ```
 
@@ -3658,6 +3704,12 @@ Campos de la respuesta:
 | `totalAmount` | Sí | `string` | Sin restricción adicional declarada | Valor de total amount mantenido por la instancia. | `valor-ejemplo` |
 | `lineCount` | Sí | `number` | Sin restricción adicional declarada | Valor de line count mantenido por la instancia. | `1` |
 | `postedAt` | Sí | `string` | formato `date-time`; admite null | Valor de posted at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `classification` | No | `JournalClassificationDto` | Sin restricción adicional declarada | Evidencia de la clasificación; sólo la devuelve `classify` (MCH-018). | `{"decision":"CLASIFICADA","rulesetVersion":"valor-ejemplo","ruleId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","reason":"Texto descriptivo de ejemplo"}` |
+| `classification.decision` | No | `string` | valores: `CLASIFICADA`, `SIN_REGLA`, `AMBIGUA` | Resultado de evaluar el juego de reglas | `CLASIFICADA` |
+| `classification.rulesetVersion` | No | `string` | Sin restricción adicional declarada | Versión del juego de reglas evaluado | `valor-ejemplo` |
+| `classification.ruleId` | No | `string` | Sin restricción adicional declarada | Regla que decidió la imputación | `00000000-0000-4000-8000-000000000001` |
+| `classification.transactionTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a transaction type concept. | `00000000-0000-4000-8000-000000000001` |
+| `classification.reason` | No | `string` | Sin restricción adicional declarada | Explicación legible de la decisión | `Texto descriptivo de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3777,7 +3829,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "ok",
   "totalAmount": "valor-ejemplo",
   "lineCount": 1,
-  "postedAt": "2026-07-31T12:00:00.000Z"
+  "postedAt": "2026-07-31T12:00:00.000Z",
+  "classification": {
+    "decision": "CLASIFICADA",
+    "rulesetVersion": "valor-ejemplo",
+    "ruleId": "00000000-0000-4000-8000-000000000001",
+    "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "reason": "Texto descriptivo de ejemplo"
+  }
 }
 ```
 
@@ -3791,6 +3850,12 @@ Campos de la respuesta:
 | `totalAmount` | Sí | `string` | Sin restricción adicional declarada | Valor de total amount mantenido por la instancia. | `valor-ejemplo` |
 | `lineCount` | Sí | `number` | Sin restricción adicional declarada | Valor de line count mantenido por la instancia. | `1` |
 | `postedAt` | Sí | `string` | formato `date-time`; admite null | Valor de posted at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `classification` | No | `JournalClassificationDto` | Sin restricción adicional declarada | Evidencia de la clasificación; sólo la devuelve `classify` (MCH-018). | `{"decision":"CLASIFICADA","rulesetVersion":"valor-ejemplo","ruleId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","reason":"Texto descriptivo de ejemplo"}` |
+| `classification.decision` | No | `string` | valores: `CLASIFICADA`, `SIN_REGLA`, `AMBIGUA` | Resultado de evaluar el juego de reglas | `CLASIFICADA` |
+| `classification.rulesetVersion` | No | `string` | Sin restricción adicional declarada | Versión del juego de reglas evaluado | `valor-ejemplo` |
+| `classification.ruleId` | No | `string` | Sin restricción adicional declarada | Regla que decidió la imputación | `00000000-0000-4000-8000-000000000001` |
+| `classification.transactionTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a transaction type concept. | `00000000-0000-4000-8000-000000000001` |
+| `classification.reason` | No | `string` | Sin restricción adicional declarada | Explicación legible de la decisión | `Texto descriptivo de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3911,7 +3976,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "ok",
   "totalAmount": "valor-ejemplo",
   "lineCount": 1,
-  "postedAt": "2026-07-31T12:00:00.000Z"
+  "postedAt": "2026-07-31T12:00:00.000Z",
+  "classification": {
+    "decision": "CLASIFICADA",
+    "rulesetVersion": "valor-ejemplo",
+    "ruleId": "00000000-0000-4000-8000-000000000001",
+    "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "reason": "Texto descriptivo de ejemplo"
+  }
 }
 ```
 
@@ -3925,6 +3997,12 @@ Campos de la respuesta:
 | `totalAmount` | Sí | `string` | Sin restricción adicional declarada | Valor de total amount mantenido por la instancia. | `valor-ejemplo` |
 | `lineCount` | Sí | `number` | Sin restricción adicional declarada | Valor de line count mantenido por la instancia. | `1` |
 | `postedAt` | Sí | `string` | formato `date-time`; admite null | Valor de posted at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `classification` | No | `JournalClassificationDto` | Sin restricción adicional declarada | Evidencia de la clasificación; sólo la devuelve `classify` (MCH-018). | `{"decision":"CLASIFICADA","rulesetVersion":"valor-ejemplo","ruleId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","reason":"Texto descriptivo de ejemplo"}` |
+| `classification.decision` | No | `string` | valores: `CLASIFICADA`, `SIN_REGLA`, `AMBIGUA` | Resultado de evaluar el juego de reglas | `CLASIFICADA` |
+| `classification.rulesetVersion` | No | `string` | Sin restricción adicional declarada | Versión del juego de reglas evaluado | `valor-ejemplo` |
+| `classification.ruleId` | No | `string` | Sin restricción adicional declarada | Regla que decidió la imputación | `00000000-0000-4000-8000-000000000001` |
+| `classification.transactionTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a transaction type concept. | `00000000-0000-4000-8000-000000000001` |
+| `classification.reason` | No | `string` | Sin restricción adicional declarada | Explicación legible de la decisión | `Texto descriptivo de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -4104,7 +4182,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "ok",
   "totalAmount": "valor-ejemplo",
   "lineCount": 1,
-  "postedAt": "2026-07-31T12:00:00.000Z"
+  "postedAt": "2026-07-31T12:00:00.000Z",
+  "classification": {
+    "decision": "CLASIFICADA",
+    "rulesetVersion": "valor-ejemplo",
+    "ruleId": "00000000-0000-4000-8000-000000000001",
+    "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "reason": "Texto descriptivo de ejemplo"
+  }
 }
 ```
 
@@ -4118,6 +4203,12 @@ Campos de la respuesta:
 | `totalAmount` | Sí | `string` | Sin restricción adicional declarada | Valor de total amount mantenido por la instancia. | `valor-ejemplo` |
 | `lineCount` | Sí | `number` | Sin restricción adicional declarada | Valor de line count mantenido por la instancia. | `1` |
 | `postedAt` | Sí | `string` | formato `date-time`; admite null | Valor de posted at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `classification` | No | `JournalClassificationDto` | Sin restricción adicional declarada | Evidencia de la clasificación; sólo la devuelve `classify` (MCH-018). | `{"decision":"CLASIFICADA","rulesetVersion":"valor-ejemplo","ruleId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","reason":"Texto descriptivo de ejemplo"}` |
+| `classification.decision` | No | `string` | valores: `CLASIFICADA`, `SIN_REGLA`, `AMBIGUA` | Resultado de evaluar el juego de reglas | `CLASIFICADA` |
+| `classification.rulesetVersion` | No | `string` | Sin restricción adicional declarada | Versión del juego de reglas evaluado | `valor-ejemplo` |
+| `classification.ruleId` | No | `string` | Sin restricción adicional declarada | Regla que decidió la imputación | `00000000-0000-4000-8000-000000000001` |
+| `classification.transactionTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a transaction type concept. | `00000000-0000-4000-8000-000000000001` |
+| `classification.reason` | No | `string` | Sin restricción adicional declarada | Explicación legible de la decisión | `Texto descriptivo de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

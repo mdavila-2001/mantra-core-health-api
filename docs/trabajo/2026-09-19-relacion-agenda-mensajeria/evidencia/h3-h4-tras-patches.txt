@@ -1,0 +1,306 @@
+﻿corepack : Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. 
+Update the import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+En línea: 1 Carácter: 452
++ ... evidencia"; corepack yarn test:integration --testPathPatterns=agenda- ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Jest: importing...mic `import()`.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-facilities.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\vademecum\vademecum.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\vademecum-seed.service.ts): use 
+`with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\t
+ransversal\anamnesis-historia-clinica-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\examen-fisico-general.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\consentimiento-informado.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\epicrisis-resumen-de-egreso.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\ficha-cardiologica-base.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\riesgo-cardiovascular-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\control-de-nino-sano.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\curvas-de-crecimiento-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+inecologia-obstetricia\control-prenatal-hcp.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\t
+raumatologia\evaluacion-musculoesqueletica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oftalmologia\examen-oftalmologico-basico.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\odontologia\odontograma-oms.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\psiquiatria\evaluacion-de-salud-mental.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\dermatologia\examen-dermatologico.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-interna\evaluacion-de-medicina-interna.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-general\consulta-de-medicina-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-familiar\consulta-de-medicina-familiar.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neurologia\evaluacion-neurologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\e
+ndocrinologia\evaluacion-endocrinologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+astroenterologia\evaluacion-gastroenterologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neumologia\evaluacion-neumologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\nefrologia\evaluacion-nefrologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\reumatologia\evaluacion-reumatologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\infectologia\evaluacion-infectologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\geriatria\valoracion-geriatrica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oncologia\evaluacion-oncologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\hematologia\evaluacion-hematologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-intensiva\evaluacion-en-medicina-intensiva.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-emergencia\atencion-en-emergencia.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\c
+irugia-general\evaluacion-de-cirugia-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\urologia\evaluacion-urologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\o
+torrinolaringologia\evaluacion-otorrinolaringologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\anestesiologia\valoracion-preanestesica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\r
+adiologia\informe-de-estudio-por-imagenes.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\patologia-clinica\informe-de-patologia.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\b
+ioquimica-clinica\informe-de-laboratorio.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-deportiva\evaluacion-de-medicina-deportiva.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\p
+sicologia-clinica\evaluacion-psicologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\nutricion\evaluacion-nutricional.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\fisioterapia\evaluacion-kinesiologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\enfermeria\valoracion-de-enfermeria.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\obstetricia\control-obstetrico.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\odontologia\anamnesis-odontologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\fee-schedule.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-fee-schedule.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:19436) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"level":30,"time":1789884661353,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"PersistenceModule","msg":"Persistencia: «postgres-write» y «postgres-read» son equivalentes; comparten un único pool (postgresql://mantra@localhost:5433/mantra_redesa_health?ssl=off)."}
+{"level":40,"time":1789884661784,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"SeedBootstrapService","event":"seed.boot.disabled","nodeEnv":"test","msg":"SEED_ON_BOOT=false: la cadena de seeds no corre en este arranque. Si el catálogo no está materializado, ninguna escritura con *_concept_id va a poder persistir. Sembrá con \"yarn seed:boot\"."}
+{"level":30,"time":1789884661812,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"d0240273-f75e-5405-9db2-8dd6769eb263","msg":"Creating notification request"}
+{"level":30,"time":1789884661856,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"ed1b78a4-4482-5bed-b9f6-5e05c8f1a60f","msg":"Creating notification request"}
+{"level":30,"time":1789884662123,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"d0240273-f75e-5405-9db2-8dd6769eb263","msg":"Creating notification request"}
+{"level":50,"time":1789884662136,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"MessagingAgendaNoticeAdapter","operation":"scheduling.notice.emit","kind":"BOOKING_STATE_CHANGED","relatedResourceId":"21e171e3-a6fb-427b-9ac6-dbb507d5a28c","err":{"type":"ResourceNotFoundException","message":"Canal no encontrado","stack":"ResourceNotFoundException: Canal no encontrado\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\messaging\\services\\notifications.service.ts:127:15\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at TransactionManager.executeTransactionFlow (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\utils\\TransactionManager.js:216:25)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at MessagingAgendaNoticeAdapter.entregar (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:195:21)\n    at MessagingAgendaNoticeAdapter.emit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:137:14)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\agenda-mensajeria-persistencia.int-spec.ts:257:17)","response":{"type":"Object","message":"Canal no encontrado","stack":"","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"status":404,"name":"ResourceNotFoundException","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"msg":"No se pudo emitir el aviso de agenda"}
+{"level":30,"time":1789884662151,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"d0240273-f75e-5405-9db2-8dd6769eb263","msg":"Creating notification request"}
+{"level":50,"time":1789884662155,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"MessagingAgendaNoticeAdapter","operation":"scheduling.notice.emit","kind":"BOOKING_STATE_CHANGED","relatedResourceId":"be479d63-bd1f-4932-831a-930bb5d37dfa","err":{"type":"ResourceNotFoundException","message":"Canal no encontrado","stack":"ResourceNotFoundException: Canal no encontrado\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\messaging\\services\\notifications.service.ts:127:15\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at TransactionManager.executeTransactionFlow (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\utils\\TransactionManager.js:216:25)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at MessagingAgendaNoticeAdapter.entregar (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:195:21)\n    at MessagingAgendaNoticeAdapter.emit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:137:14)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\agenda-mensajeria-persistencia.int-spec.ts:327:17)","response":{"type":"Object","message":"Canal no encontrado","stack":"","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"status":404,"name":"ResourceNotFoundException","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"msg":"No se pudo emitir el aviso de agenda"}
+{"level":30,"time":1789884662157,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"d0240273-f75e-5405-9db2-8dd6769eb263","msg":"Creating notification request"}
+{"level":50,"time":1789884662162,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"MessagingAgendaNoticeAdapter","operation":"scheduling.notice.emit","kind":"BOOKING_STATE_CHANGED","relatedResourceId":"0a0fbfd4-9d0a-461b-9c00-b89fc1a3d4b6","err":{"type":"ResourceNotFoundException","message":"Canal no encontrado","stack":"ResourceNotFoundException: Canal no encontrado\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\messaging\\services\\notifications.service.ts:127:15\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at TransactionManager.executeTransactionFlow (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\utils\\TransactionManager.js:216:25)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at MessagingAgendaNoticeAdapter.entregar (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:195:21)\n    at MessagingAgendaNoticeAdapter.emit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:137:14)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\agenda-mensajeria-persistencia.int-spec.ts:378:23)","response":{"type":"Object","message":"Canal no encontrado","stack":"","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"status":404,"name":"ResourceNotFoundException","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"msg":"No se pudo emitir el aviso de agenda"}
+{"level":30,"time":1789884662162,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"d0240273-f75e-5405-9db2-8dd6769eb263","msg":"Creating notification request"}
+{"level":50,"time":1789884662167,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"MessagingAgendaNoticeAdapter","operation":"scheduling.notice.emit","kind":"BOOKING_STATE_CHANGED","relatedResourceId":"a272e690-f843-45b7-84f7-bdcba9016b01","err":{"type":"ResourceNotFoundException","message":"Canal no encontrado","stack":"ResourceNotFoundException: Canal no encontrado\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\messaging\\services\\notifications.service.ts:127:15\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at TransactionManager.executeTransactionFlow (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\utils\\TransactionManager.js:216:25)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at MessagingAgendaNoticeAdapter.entregar (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:195:21)\n    at MessagingAgendaNoticeAdapter.emit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:137:14)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\agenda-mensajeria-persistencia.int-spec.ts:379:23)","response":{"type":"Object","message":"Canal no encontrado","stack":"","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"status":404,"name":"ResourceNotFoundException","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"msg":"No se pudo emitir el aviso de agenda"}
+{"level":30,"time":1789884662170,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"d0240273-f75e-5405-9db2-8dd6769eb263","msg":"Creating notification request"}
+{"level":50,"time":1789884662174,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"MessagingAgendaNoticeAdapter","operation":"scheduling.notice.emit","kind":"BOOKING_STATE_CHANGED","relatedResourceId":"837a086c-4c0d-4d9e-8ab2-7ddfbad614b5","err":{"type":"ResourceNotFoundException","message":"Canal no encontrado","stack":"ResourceNotFoundException: Canal no encontrado\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\messaging\\services\\notifications.service.ts:127:15\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at TransactionManager.executeTransactionFlow (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\utils\\TransactionManager.js:216:25)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at MessagingAgendaNoticeAdapter.entregar (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:195:21)\n    at MessagingAgendaNoticeAdapter.emit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:137:14)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\agenda-mensajeria-persistencia.int-spec.ts:420:18)","response":{"type":"Object","message":"Canal no encontrado","stack":"","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"status":404,"name":"ResourceNotFoundException","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"msg":"No se pudo emitir el aviso de agenda"}
+{"level":30,"time":1789884662175,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"d0240273-f75e-5405-9db2-8dd6769eb263","msg":"Creating notification request"}
+{"level":50,"time":1789884662180,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"MessagingAgendaNoticeAdapter","operation":"scheduling.notice.emit","kind":"BOOKING_STATE_CHANGED","relatedResourceId":"837a086c-4c0d-4d9e-8ab2-7ddfbad614b5","err":{"type":"ResourceNotFoundException","message":"Canal no encontrado","stack":"ResourceNotFoundException: Canal no encontrado\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\messaging\\services\\notifications.service.ts:127:15\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at TransactionManager.executeTransactionFlow (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\utils\\TransactionManager.js:216:25)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at MessagingAgendaNoticeAdapter.entregar (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:195:21)\n    at MessagingAgendaNoticeAdapter.emit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:137:14)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\agenda-mensajeria-persistencia.int-spec.ts:421:7)","response":{"type":"Object","message":"Canal no encontrado","stack":"","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"status":404,"name":"ResourceNotFoundException","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"msg":"No se pudo emitir el aviso de agenda"}
+{"level":30,"time":1789884662189,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"d0240273-f75e-5405-9db2-8dd6769eb263","msg":"Creating notification request"}
+{"level":30,"time":1789884662189,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"NotificationsService","operation":"messaging.notification.request","channelId":"d0240273-f75e-5405-9db2-8dd6769eb263","msg":"Creating notification request"}
+{"level":50,"time":1789884662196,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"MessagingAgendaNoticeAdapter","operation":"scheduling.notice.emit","kind":"BOOKING_STATE_CHANGED","relatedResourceId":"327ee9ce-d848-4281-a5be-d7836d704f4b","err":{"type":"ResourceNotFoundException","message":"Canal no encontrado","stack":"ResourceNotFoundException: Canal no encontrado\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\messaging\\services\\notifications.service.ts:127:15\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at TransactionManager.executeTransactionFlow (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\utils\\TransactionManager.js:216:25)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at MessagingAgendaNoticeAdapter.entregar (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:195:21)\n    at MessagingAgendaNoticeAdapter.emit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:137:14)\n    at async Promise.all (index 0)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\agenda-mensajeria-persistencia.int-spec.ts:484:22)","response":{"type":"Object","message":"Canal no encontrado","stack":"","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"status":404,"name":"ResourceNotFoundException","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"msg":"No se pudo emitir el aviso de agenda"}
+{"level":50,"time":1789884662212,"pid":19436,"hostname":"DESKTOP-QSTDUUU","context":"MessagingAgendaNoticeAdapter","operation":"scheduling.notice.emit","kind":"BOOKING_STATE_CHANGED","relatedResourceId":"02c7aefe-7a45-423c-b746-5f47b436bbd7","err":{"type":"ResourceNotFoundException","message":"Canal no encontrado","stack":"ResourceNotFoundException: Canal no encontrado\n    at C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\messaging\\services\\notifications.service.ts:127:15\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at TransactionManager.executeTransactionFlow (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\core\\utils\\TransactionManager.js:216:25)\n    at PostgreSqlConnection.transactional (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\node_modules\\@mikro-orm\\sql\\AbstractSqlConnection.js:108:25)\n    at MessagingAgendaNoticeAdapter.entregar (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:195:21)\n    at MessagingAgendaNoticeAdapter.emit (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\src\\modules\\scheduling\\adapters\\messaging-agenda-notice.adapter.ts:137:14)\n    at async Promise.all (index 1)\n    at Object.<anonymous> (C:\\Users\\usuario\\Documents\\Sistema Salud\\mantra-core-health-redesa-api\\test\\integration\\agenda-mensajeria-persistencia.int-spec.ts:484:22)","response":{"type":"Object","message":"Canal no encontrado","stack":"","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"status":404,"name":"ResourceNotFoundException","code":"NOT_FOUND","details":{"channelId":"d0240273-f75e-5405-9db2-8dd6769eb263"}},"msg":"No se pudo emitir el aviso de agenda"}
+
+Test Suites: 2 passed, 2 total
+Tests:       33 passed, 33 total
+Snapshots:   0 total
+Time:        33.834 s
+Ran all test suites matching agenda-mensajeria.

@@ -20,6 +20,7 @@ import {
   ObservationResponseDto,
 } from '../dto';
 import { CLIN } from '../clinical.concepts';
+import { ClinicalReadService } from './clinical-read.service';
 
 /** Campos de valor recibidos por DTO (números; el modelo persiste string). */
 interface ValueLike {
@@ -68,6 +69,7 @@ export class ObservationsService {
    * @param encountersRepo - Valor de encounters repo requerido por la operación.
    * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
@@ -75,6 +77,7 @@ export class ObservationsService {
     private readonly encountersRepo: EncountersRepository,
     private readonly serviceRequestsRepo: ServiceRequestsRepository,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(ObservationsService.name);
   }
@@ -113,6 +116,61 @@ export class ObservationsService {
     return value;
   }
 
+  /**
+   * MCH-008: el encuentro y la orden tienen que ser del mismo paciente y del
+   * mismo custodio que la observación, no sólo existir.
+   *
+   * Antes se comprobaba la existencia de cada id y se persistían los tres tal
+   * cual: una observación del paciente A podía colgar del encuentro o de la
+   * orden de B, o de otro tenant, y la FK lo aceptaba porque sólo demuestra
+   * existencia. El custodio que se compara es el del cuerpo, que el
+   * interceptor de tenant ya obligó a ser el tenant activo del actor.
+   *
+   * La orden admite un segundo custodio legítimo: el `performerTenantId` al
+   * que se derivó. Así el laboratorio que ejecuta una orden de otra
+   * organización registra el resultado bajo su propia custodia y conserva el
+   * vínculo con la orden de origen, sin reescribir a quién pertenece ninguna.
+   *
+   * Una referencia incoherente responde 404, igual que una inexistente —el
+   * mismo criterio que `ServiceRequestsService.checkDuplicate`—: distinguirlas
+   * le diría al cliente que ese id existe en otra historia u otro tenant.
+   */
+  private async assertReferencesBelongToPatient(
+    tx: EntityManager,
+    dto: CreateObservationDto,
+  ): Promise<void> {
+    if (dto.encounterId) {
+      const encounter = await this.encountersRepo.findById(tx, dto.encounterId);
+      if (
+        !encounter ||
+        encounter.patientProfileId !== dto.patientProfileId ||
+        encounter.tenantId !== dto.custodianTenantId
+      ) {
+        throw new ResourceNotFoundException('Encuentro no encontrado', {
+          encounterId: dto.encounterId,
+        });
+      }
+    }
+    if (dto.basedOnServiceRequestId) {
+      const order = await this.serviceRequestsRepo.findById(
+        tx,
+        dto.basedOnServiceRequestId,
+      );
+      const custodiesOrder =
+        order?.custodianTenantId === dto.custodianTenantId ||
+        order?.performerTenantId === dto.custodianTenantId;
+      if (
+        !order ||
+        order.patientProfileId !== dto.patientProfileId ||
+        !custodiesOrder
+      ) {
+        throw new ResourceNotFoundException('Orden de servicio no encontrada', {
+          serviceRequestId: dto.basedOnServiceRequestId,
+        });
+      }
+    }
+  }
+
   /** UC-08-03: registra una observación con componentes, rangos y ejecutantes. */
   async record(
     dto: CreateObservationDto,
@@ -126,31 +184,7 @@ export class ObservationsService {
       'Recording observation',
     );
     return this.em.transactional(async (tx) => {
-      if (dto.encounterId) {
-        const encounter = await this.encountersRepo.findById(
-          tx,
-          dto.encounterId,
-        );
-        if (!encounter) {
-          throw new ResourceNotFoundException('Encuentro no encontrado', {
-            encounterId: dto.encounterId,
-          });
-        }
-      }
-      if (dto.basedOnServiceRequestId) {
-        const sr = await this.serviceRequestsRepo.findById(
-          tx,
-          dto.basedOnServiceRequestId,
-        );
-        if (!sr) {
-          throw new ResourceNotFoundException(
-            'Orden de servicio no encontrada',
-            {
-              serviceRequestId: dto.basedOnServiceRequestId,
-            },
-          );
-        }
-      }
+      await this.assertReferencesBelongToPatient(tx, dto);
 
       const value = this.resolveValue(dto);
       if (!value.valueTypeConceptId) {
@@ -267,6 +301,11 @@ export class ObservationsService {
           observationId,
         });
       }
+      // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        observation.patientProfileId,
+        actor,
+      );
       const amendable = [CLIN.OBSERVATION_FINAL, CLIN.OBSERVATION_PRELIMINARY];
       if (!amendable.includes(observation.statusConceptId)) {
         throw new PreconditionFailedException(

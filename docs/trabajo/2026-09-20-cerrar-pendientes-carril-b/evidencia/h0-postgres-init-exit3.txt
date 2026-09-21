@@ -1,0 +1,26 @@
+# postgres-init exit=3 (HALL-07, pregunta 11) — 2026-09-20T12:50:26-04:00
+BEGIN
+psql:/init/SQL/patches/2026-09-19_v4220_restore_test_runs_objective_status.sql:46: NOTICE:  column "objective_status" of relation "restore_test_runs" already exists, skipping
+ALTER TABLE
+DO
+DO
+psql:/init/SQL/patches/2026-09-19_v4220_restore_test_runs_objective_status.sql:113: NOTICE:  v4.2.20 aplicado: objective_status en system_ops.restore_test_runs; 16 corrida(s) heredada(s) marcadas NOT_MEASURED (lo único cierto que se sabe de ellas).
+COMMIT
+>>> patches/2026-09-19_v4221_aseguradoras_codigo_unico.sql
+BEGIN
+CREATE TABLE
+INSERT 0 9
+SELECT 0
+UPDATE 0
+UPDATE 0
+UPDATE 0
+UPDATE 0
+UPDATE 0
+UPDATE 0
+DELETE 0
+DELETE 0
+DELETE 0
+DELETE 0
+DELETE 0
+psql:/init/SQL/patches/2026-09-19_v4221_aseguradoras_codigo_unico.sql:175: ERROR:  v4.2.21: se esperaba 1 fila no canónica (la demo) y hay 12
+CONTEXT:  PL/pgSQL function inline_code_block line 19 at RAISE

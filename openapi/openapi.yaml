@@ -13778,6 +13778,152 @@ paths:
         Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo. Requiere JWT y
         los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope
         ErrorResponse.
+  /insurance/portability/export:
+    post:
+      operationId: InsurancePortabilityController_export
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestPortabilityExportDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortabilityExportResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no es el titular del perfil ni plataforma.
+        '404':
+          description: El paciente o la aseguradora declarada no existen.
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Exportar el historial de póliza y siniestralidad del titular a 1 clic
+      tags:
+        - insurance-portability
+      description: >-
+        Exportar el historial de póliza y siniestralidad del titular a 1 clic. Requiere JWT y los roles o alcances
+        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /insurance/portability/certificates/{certificateId}/pdf:
+    get:
+      operationId: InsurancePortabilityController_downloadPdf
+      parameters:
+        - name: certificateId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PDF del certificado, con QR de verificación y sello SHA-256
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no es el titular del certificado
+        '404':
+          description: El certificado no existe
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el certificado de portabilidad en PDF
+      tags:
+        - insurance-portability
+      description: >-
+        Descargar el certificado de portabilidad en PDF. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /insurance/portability/certificates/{certificateId}/json:
+    get:
+      operationId: InsurancePortabilityController_downloadJson
+      parameters:
+        - name: certificateId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: JSON del certificado, exactamente como se selló
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: El actor no es el titular del certificado
+        '404':
+          description: El certificado no existe
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el certificado de portabilidad en JSON interoperable
+      tags:
+        - insurance-portability
+      description: >-
+        Descargar el certificado de portabilidad en JSON interoperable. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /public/portability/verify/{manifestHash}:
+    get:
+      description: 'Sin autenticación y sin PHI: confirma que el certificado existe y con qué se emitió.'
+      operationId: InsurancePortabilityPublicController_verify
+      parameters:
+        - name: manifestHash
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortabilityVerificationResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: No existe un certificado con ese sello
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Verificar la autenticidad de un certificado de portabilidad por su sello
+      tags:
+        - insurance-portability-public
+      security: []
   /practices:
     get:
       operationId: PracticesController_listPractices
@@ -33556,6 +33702,331 @@ paths:
       tags:
         - marketing
       security: []
+  /medical-groups:
+    get:
+      operationId: MedicalGroupsController_list
+      parameters:
+        - name: tab
+          required: false
+          in: query
+          schema:
+            enum:
+              - historico
+              - enviadas
+              - recibidas
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar grupos médicos (histórico/enviadas/recibidas)
+      tags:
+        - medical-groups
+      description: >-
+        Listar grupos médicos (histórico/enviadas/recibidas). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: MedicalGroupsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMedicalGroupDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Crear grupo médico
+      tags:
+        - medical-groups
+      description: >-
+        Crear grupo médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
+  /medical-groups/patients/{patientProfileId}/conditions:
+    get:
+      operationId: MedicalGroupsController_listPatientConditions
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Diagnósticos del paciente para el selector del formulario
+      tags:
+        - medical-groups
+      description: >-
+        Diagnósticos del paciente para el selector del formulario. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}:
+    get:
+      operationId: MedicalGroupsController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Consultar un grupo médico (formulario de sólo lectura)
+      tags:
+        - medical-groups
+      description: >-
+        Consultar un grupo médico (formulario de sólo lectura). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}/members/{memberId}/respond:
+    post:
+      operationId: MedicalGroupsController_respondToInvitation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: memberId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondMedicalGroupInvitationDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Aceptar o rechazar la invitación a un cargo del grupo
+      tags:
+        - medical-groups
+      description: >-
+        Aceptar o rechazar la invitación a un cargo del grupo. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}/reschedule-requests:
+    post:
+      operationId: MedicalGroupsController_requestReschedule
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestMedicalGroupRescheduleDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Solicitar cambio de horario
+      tags:
+        - medical-groups
+      description: >-
+        Solicitar cambio de horario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}/reschedule-requests/respond:
+    post:
+      operationId: MedicalGroupsController_respondToReschedule
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondMedicalGroupRescheduleDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Resolver la solicitud de cambio de horario
+      tags:
+        - medical-groups
+      description: >-
+        Resolver la solicitud de cambio de horario. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /medical-groups/{id}/exercise-notes:
+    patch:
+      operationId: MedicalGroupsController_updateExerciseNotes
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMedicalGroupExerciseNotesDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO)
+      tags:
+        - medical-groups
+      description: >-
+        Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO). Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /object-storage/namespaces/{code}/uploads/initiate:
     post:
       description: 'La clave de destino es opaca: no debe llevar datos del paciente.'
@@ -33915,6 +34386,41 @@ paths:
       security:
         - bearer: []
       summary: Emitir acceso firmado a una versión
+      tags:
+        - object-storage
+  /object-storage/versions/{versionId}/content/{token}:
+    get:
+      description: El token ata versión, actor, operación y caducidad.
+      operationId: ObjectStorageController_downloadSignedContent
+      parameters:
+        - name: versionId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: token
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el contenido de una versión con el enlace emitido
       tags:
         - object-storage
   /object-storage/versions/{versionId}/integrity-checks:
@@ -42440,6 +42946,118 @@ paths:
       description: >-
         Crear un programa de lealtad con niveles y reglas. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /loyalty/me:
+    get:
+      description: >-
+        El titular sale del token; no se acepta ningún identificador de miembro por la petición. No estar inscrito
+        responde 200 con `enrolled: false`, que es un estado normal del portal y no un error.
+      operationId: LoyaltyController_myLoyalty
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyLoyaltyResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mi membresía de lealtad y mi saldo de puntos
+      tags:
+        - loyalty
+  /loyalty/me/points:
+    get:
+      description: Paginado por cursor opaco, con orden estable por fecha e id. Sólo movimientos de la membresía del titular.
+      operationId: LoyaltyController_myPoints
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor opaco devuelto por la página anterior
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Movimientos por página (1..100, por defecto 20)
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyPointsLedgerPageResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mis movimientos de puntos, más nuevos primero
+      tags:
+        - loyalty
+  /loyalty/me/points/redeem:
+    post:
+      description: >-
+        El titular sale del token. Idempotente por `idempotencyKey`; una clave que pertenezca a otra membresía se
+        rechaza en vez de devolver datos ajenos.
+      operationId: LoyaltyController_redeemOwnPoints
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedeemPointsDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointsLedgerResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Canjear puntos de mi propia membresía
+      tags:
+        - loyalty
   /loyalty/programs/{id}/memberships:
     post:
       description: 'Idempotente: repetir la llamada devuelve la membresía existente.'
@@ -51640,6 +52258,14 @@ tags:
     description: >-
       Operaciones del dominio funcional insurance coverage. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: insurance-portability
+    description: >-
+      Operaciones del dominio funcional insurance portability. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: insurance-portability-public
+    description: >-
+      Operaciones del dominio funcional insurance portability public. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: insurance-prior-auth
     description: >-
       Operaciones del dominio funcional insurance prior auth. Consulte el catálogo Markdown de endpoints para payloads
@@ -51696,6 +52322,10 @@ tags:
     description: >-
       Operaciones del dominio funcional marketing. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: medical-groups
+    description: >-
+      Operaciones del dominio funcional medical groups. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: messaging
     description: >-
       Operaciones del dominio funcional messaging. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -52916,11 +53546,28 @@ components:
     RegisterOrganizationLegalRepresentativeDto:
       type: object
       properties:
+        name:
+          type: string
+          maxLength: 100
+          example: Mariana
+        middleName:
+          type: string
+          maxLength: 100
+          example: Elena
+        lastName:
+          type: string
+          maxLength: 100
+          example: Siles
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Justiniano
         fullName:
           type: string
-          description: Nombre completo del representante legal
+          description: Nombre completo del representante legal (forma anterior; preferí name/lastName)
           maxLength: 200
           example: Mariana Siles Justiniano
+          deprecated: true
         idNumber:
           type: string
           description: Cédula de identidad o documento legal equivalente
@@ -52942,18 +53589,34 @@ components:
           description: Id del archivo del poder notariado (PDF ya pre-cargado)
           format: uuid
       required:
-        - fullName
         - idNumber
         - email
         - powerOfAttorneyFileId
     RegisterOrganizationExecutiveContactDto:
       type: object
       properties:
+        name:
+          type: string
+          maxLength: 100
+          example: Carlos
+        middleName:
+          type: string
+          maxLength: 100
+          example: Eduardo
+        lastName:
+          type: string
+          maxLength: 100
+          example: Mendoza
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Rivero
         fullName:
           type: string
-          description: Nombre completo del ejecutivo
+          description: Nombre completo del ejecutivo (forma anterior; preferí name/lastName)
           maxLength: 200
           example: Carlos Mendoza Rivero
+          deprecated: true
         phone:
           type: string
           description: Teléfono celular de contacto
@@ -52966,7 +53629,6 @@ components:
           maxLength: 320
           example: cmendoza@aseguradora.com
       required:
-        - fullName
         - phone
         - email
     RegisterOrganizationExecutivesDto:
@@ -60103,6 +60765,193 @@ components:
         - specialties
         - prevalentPathologies
         - immunization
+    RequestPortabilityExportDto:
+      type: object
+      properties:
+        patientProfileId:
+          type: string
+          format: uuid
+        format:
+          type: string
+          enum:
+            - PDF
+            - JSON
+            - BUNDLE
+          default: BUNDLE
+        targetInsurerTenantId:
+          type: string
+          format: uuid
+      required:
+        - patientProfileId
+    PortabilityPeriodStatsDto:
+      type: object
+      properties:
+        claimsCount:
+          type: number
+        approvedCount:
+          type: number
+        deniedCount:
+          type: number
+        pendingCount:
+          type: number
+        billedAmount:
+          type: string
+          example: '12450.00'
+        coveredAmount:
+          type: string
+          example: '10230.00'
+        patientCopayAmount:
+          type: string
+          example: '1200.00'
+        deniedAmount:
+          type: string
+          example: '0.00'
+        firstClaimAt:
+          type: string
+          nullable: true
+        lastClaimAt:
+          type: string
+          nullable: true
+        coveredMonths:
+          type: string
+          example: '11.87'
+      required:
+        - claimsCount
+        - approvedCount
+        - deniedCount
+        - pendingCount
+        - billedAmount
+        - coveredAmount
+        - patientCopayAmount
+        - deniedAmount
+        - firstClaimAt
+        - lastClaimAt
+        - coveredMonths
+    PortabilityYearStatsDto:
+      type: object
+      properties:
+        year:
+          type: number
+          example: 2026
+        claimsCount:
+          type: number
+        billedAmount:
+          type: string
+          example: '4500.00'
+        coveredAmount:
+          type: string
+          example: '3600.00'
+      required:
+        - year
+        - claimsCount
+        - billedAmount
+        - coveredAmount
+    PortabilitySummaryDto:
+      type: object
+      properties:
+        currencyCode:
+          type: string
+          nullable: true
+          example: BOB
+        allTime:
+          $ref: '#/components/schemas/PortabilityPeriodStatsDto'
+        last36Months:
+          $ref: '#/components/schemas/PortabilityPeriodStatsDto'
+        byYear:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortabilityYearStatsDto'
+        claimsOver2000Count:
+          type: number
+        estimatedLossRatioPercent:
+          type: string
+          nullable: true
+          example: '86.14'
+      required:
+        - currencyCode
+        - allTime
+        - last36Months
+        - byYear
+        - claimsOver2000Count
+        - estimatedLossRatioPercent
+    PortabilityExportResultDto:
+      type: object
+      properties:
+        certificateId:
+          type: string
+          format: uuid
+        manifestHash:
+          type: string
+          example: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        generatedAt:
+          type: string
+          example: '2026-09-18T18:00:00.000Z'
+        format:
+          type: string
+          enum:
+            - PDF
+            - JSON
+            - BUNDLE
+        recordCount:
+          type: number
+          example: 14
+        policiesCount:
+          type: number
+          example: 3
+        pdfDownloadUrl:
+          type: string
+          example: /insurance/portability/certificates/a1b2c3d4/pdf
+        jsonDownloadUrl:
+          type: string
+          example: /insurance/portability/certificates/a1b2c3d4/json
+        verificationUrl:
+          type: string
+          example: https://app.alovida.com/verify/portability/e3b0c442...
+        summary:
+          $ref: '#/components/schemas/PortabilitySummaryDto'
+      required:
+        - certificateId
+        - manifestHash
+        - generatedAt
+        - format
+        - recordCount
+        - policiesCount
+        - pdfDownloadUrl
+        - jsonDownloadUrl
+        - verificationUrl
+        - summary
+    PortabilityVerificationResponseDto:
+      type: object
+      properties:
+        status:
+          type: string
+          example: VALID
+        certificateId:
+          type: string
+          format: uuid
+        manifestHash:
+          type: string
+          example: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        generatedAt:
+          type: string
+          example: '2026-09-18T18:00:00.000Z'
+        recordCount:
+          type: number
+          example: 14
+        algorithm:
+          type: string
+          example: SHA-256
+        issuer:
+          type: string
+          example: AloVida
+      required:
+        - status
+        - certificateId
+        - manifestHash
+        - generatedAt
+        - recordCount
+        - algorithm
+        - issuer
     CreatePracticeDto:
       type: object
       properties:
@@ -73207,6 +74056,101 @@ components:
         - model
         - windowFrom
         - windowTo
+    MedicalGroupMemberInputDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          description: Profesional invitado a este cargo
+          format: uuid
+        roleTitle:
+          type: string
+          description: Cargo/función dentro del grupo (p. ej. "Anestesiólogo")
+        agreedPaymentAmount:
+          type: string
+          example: '500.00'
+        agreedPaymentCurrencyConceptId:
+          type: string
+          format: uuid
+        additionalTermsText:
+          type: string
+          description: Adicionales de términos y condiciones opcionales para este cargo
+      required:
+        - practitionerProfileId
+        - roleTitle
+        - agreedPaymentAmount
+    CreateMedicalGroupDto:
+      type: object
+      properties:
+        serviceCatalogId:
+          type: string
+          format: uuid
+          description: billing.service_catalog
+        patientProfileId:
+          type: string
+          format: uuid
+          description: profiles.patient_profiles
+        conditionId:
+          type: string
+          format: uuid
+          description: clinical.conditions
+        scheduledAt:
+          type: string
+          description: Fecha y hora de realización, ISO 8601
+        locationText:
+          type: string
+          description: Lugar de realización
+        notesText:
+          type: string
+        additionalTermsText:
+          type: string
+          description: Adicionales de términos y condiciones del solicitante, sobre el default del servicio
+        members:
+          description: El resto del equipo (cargo/función + pago). El creador se agrega solo como miembro aceptado.
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalGroupMemberInputDto'
+      required:
+        - serviceCatalogId
+        - scheduledAt
+        - locationText
+        - members
+    RespondMedicalGroupInvitationDto:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum:
+            - ACCEPTED
+            - REJECTED
+      required:
+        - decision
+    RequestMedicalGroupRescheduleDto:
+      type: object
+      properties:
+        proposedAt:
+          type: string
+          description: Nueva fecha propuesta, ISO 8601
+      required:
+        - proposedAt
+    RespondMedicalGroupRescheduleDto:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum:
+            - ACCEPTED
+            - REJECTED
+      required:
+        - decision
+    UpdateMedicalGroupExerciseNotesDto:
+      type: object
+      properties:
+        notesText:
+          type: string
+          description: Notas del procedimiento ya realizado
+      required:
+        - notesText
     InitiateUploadDto:
       type: object
       properties:
@@ -73512,7 +74456,8 @@ components:
           minimum: 30
         studyInstanceUid:
           type: string
-          description: Study UID si el objeto es DICOM
+          deprecated: true
+          description: 'Ignorado: el estudio se resuelve desde el objeto en el servidor'
           maxLength: 200
       required:
         - purposeOfUseCode
@@ -78886,6 +79831,165 @@ components:
       required:
         - patientProfileId
         - procedureCodeConceptId
+    MyLoyaltyTierDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Código del nivel
+        name:
+          type: string
+          description: Nombre del nivel
+        multiplier:
+          type: string
+          description: Cuánto multiplica la acumulación
+        minPoints:
+          type: string
+          description: Puntos de por vida desde los que se alcanza
+      required:
+        - code
+        - name
+        - minPoints
+    MyLoyaltyMembershipDto:
+      type: object
+      properties:
+        membershipId:
+          type: string
+          format: uuid
+        programName:
+          type: string
+          description: Nombre del programa
+        pointsCurrencyName:
+          type: string
+          description: Cómo se llaman las unidades del programa («puntos»)
+        pointsBalance:
+          type: string
+          description: Saldo disponible, como texto exacto
+        lifetimePoints:
+          type: string
+          description: Acumulado de por vida, como texto exacto
+        tier:
+          $ref: '#/components/schemas/MyLoyaltyTierDto'
+        enrolledAt:
+          format: date-time
+          type: string
+          description: Cuándo se inscribió
+        active:
+          type: boolean
+          description: 'Si la membresía está activa. Se publica el hecho y no el concepto: el uuid de terminología es interno.'
+      required:
+        - membershipId
+        - programName
+        - pointsBalance
+        - lifetimePoints
+        - active
+    MyLoyaltyResponseDto:
+      type: object
+      properties:
+        enrolled:
+          type: boolean
+          description: Si el titular tiene membresía en el programa
+        membership:
+          $ref: '#/components/schemas/MyLoyaltyMembershipDto'
+      required:
+        - enrolled
+    MyPointsLedgerEntryDto:
+      type: object
+      properties:
+        entryId:
+          type: string
+          format: uuid
+        direction:
+          type: string
+          description: >-
+            Hacia dónde mueve los puntos, como código del catálogo (POINTS_EARN, POINTS_REDEEM, POINTS_EXPIRE,
+            POINTS_ADJUST). Se omite si el concepto no pertenece a ese catálogo: antes que publicar un uuid interno, no
+            se dice.
+        points:
+          type: string
+          description: Siempre positivo; el signo lo dice la dirección
+        reason:
+          type: string
+          description: Por qué se movieron, como código del catálogo (REASON_*). Se omite con el mismo criterio que `direction`.
+        balanceAfter:
+          type: string
+          description: Saldo que quedó después
+        expiresAt:
+          format: date-time
+          type: string
+          description: Cuándo vencen estos puntos
+        occurredAt:
+          format: date-time
+          type: string
+          description: Cuándo ocurrió el movimiento
+      required:
+        - entryId
+        - points
+        - occurredAt
+    MyPointsLedgerPageResponseDto:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyPointsLedgerEntryDto'
+        nextCursor:
+          type: string
+          description: Cursor de la página siguiente; ausente si no hay más
+      required:
+        - entries
+    RedeemPointsDto:
+      type: object
+      properties:
+        points:
+          type: string
+          description: Puntos a canjear
+        idempotencyKey:
+          type: string
+          description: Clave de idempotencia del canje
+          maxLength: 200
+        awardType:
+          type: string
+          enum:
+            - POINTS
+            - WALLET_CREDIT
+          default: POINTS
+      required:
+        - points
+        - idempotencyKey
+    PointsLedgerResponseDto:
+      type: object
+      properties:
+        ledgerEntryId:
+          type: string
+          format: uuid
+          description: Entrada del ledger
+        membershipId:
+          type: string
+          format: uuid
+        points:
+          type: string
+          description: Puntos del movimiento
+        balanceAfter:
+          type: string
+          description: Saldo tras el movimiento
+        lifetimePoints:
+          type: string
+          description: Puntos de por vida tras el movimiento
+        currentTierId:
+          type: string
+          format: uuid
+          description: Nivel actual tras recalcular
+        duplicate:
+          type: boolean
+          description: true si la clave de idempotencia ya se había usado
+      required:
+        - ledgerEntryId
+        - membershipId
+        - points
+        - balanceAfter
+        - lifetimePoints
+        - duplicate
     LoyaltyTierDto:
       type: object
       properties:
@@ -79055,25 +80159,6 @@ components:
           description: Cuándo ocurrió el evento
       required:
         - earningRuleId
-        - idempotencyKey
-    RedeemPointsDto:
-      type: object
-      properties:
-        points:
-          type: string
-          description: Puntos a canjear
-        idempotencyKey:
-          type: string
-          description: Clave de idempotencia del canje
-          maxLength: 200
-        awardType:
-          type: string
-          enum:
-            - POINTS
-            - WALLET_CREDIT
-          default: POINTS
-      required:
-        - points
         - idempotencyKey
     ExpirePointsDto:
       type: object

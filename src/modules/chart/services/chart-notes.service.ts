@@ -28,6 +28,7 @@ import {
   WithholdVersionDto,
 } from '../dto';
 import type { ClinicalNoteVersions } from '../entities';
+import { ClinicalReadService } from '../../clinical/services';
 
 /**
  * Casos de uso de la nota clínica versionada (UC-15-01..08).
@@ -46,11 +47,13 @@ export class ChartNotesService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param notesRepo - Valor de notes repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly notesRepo: ClinicalNotesRepository,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(ChartNotesService.name);
   }
@@ -138,6 +141,11 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Nota clínica no encontrada', {
           noteId,
         });
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        header.patientProfileId,
+        actor,
+      );
       if (header.lifecycleStatusConceptId !== CHART.NOTE_LIFECYCLE_DRAFT) {
         throw new PreconditionFailedException(
           'La nota ya no está en borrador; use una enmienda (UC-15-05)',
@@ -189,6 +197,11 @@ export class ChartNotesService {
         noteId,
         versionId,
       );
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        header.patientProfileId,
+        actor,
+      );
       if (version.statusConceptId !== CHART.VERSION_DRAFT) {
         throw new PreconditionFailedException(
           'La versión no está en borrador',
@@ -239,6 +252,11 @@ export class ChartNotesService {
         tx,
         noteId,
         versionId,
+      );
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        header.patientProfileId,
+        actor,
       );
       if (version.statusConceptId !== CHART.VERSION_SIGNED) {
         throw new PreconditionFailedException(
@@ -305,6 +323,11 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Nota clínica no encontrada', {
           noteId,
         });
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        header.patientProfileId,
+        actor,
+      );
       if (header.lifecycleStatusConceptId === CHART.NOTE_LIFECYCLE_DRAFT) {
         throw new PreconditionFailedException(
           'La nota no está firmada; edítela como borrador (UC-15-02)',
@@ -357,6 +380,9 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Versión de nota no encontrada', {
           versionId,
         });
+      // MCH-007: la ruta sólo trae el id de la versión; el paciente sale de
+      // la cabecera de su nota.
+      await this.assertPuedeEscribirNota(tx, version.clinicalNoteId, actor);
       const signed =
         version.statusConceptId === CHART.VERSION_SIGNED ||
         version.statusConceptId === CHART.VERSION_COSIGNED;
@@ -428,6 +454,11 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Nota clínica no encontrada', {
           versionId,
         });
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertPuedeEscribirHistoria(
+        header.patientProfileId,
+        actor,
+      );
 
       const event = this.notesRepo.createReleaseEvent(tx, {
         clinicalNoteVersionId: versionId,
@@ -473,6 +504,9 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Versión de nota no encontrada', {
           versionId,
         });
+      // MCH-007: la ruta sólo trae el id de la versión; el paciente sale de
+      // la cabecera de su nota.
+      await this.assertPuedeEscribirNota(tx, version.clinicalNoteId, actor);
       if (version.statusConceptId !== CHART.VERSION_DRAFT) {
         throw new PreconditionFailedException(
           'La versión ya está firmada; los hallazgos quedan sellados',
@@ -524,6 +558,26 @@ export class ChartNotesService {
         'Una nota la firma su profesional: no se puede firmar en nombre de otro perfil.',
       );
     }
+  }
+
+  /**
+   * MCH-007: exige poder escribir en la historia del paciente de la nota. Lo
+   * usan las mutaciones que llegan sólo con el id de una versión.
+   */
+  private async assertPuedeEscribirNota(
+    tx: EntityManager,
+    noteId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const header = await this.notesRepo.findHeaderById(tx, noteId);
+    if (!header)
+      throw new ResourceNotFoundException('Nota clínica no encontrada', {
+        noteId,
+      });
+    await this.clinicalRead.assertPuedeEscribirHistoria(
+      header.patientProfileId,
+      actor,
+    );
   }
 
   /** Carga versión y cabecera comprobando que la versión pertenece a la nota. */

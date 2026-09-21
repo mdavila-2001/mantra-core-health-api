@@ -29,7 +29,13 @@ import { AttachableFileService } from './attachable-file.service';
 import { canActorReadOwnFile } from './file-access';
 import { FilesService } from './files.service';
 import type { Files } from '../entities';
-import type { FileContentDto, FileResponseDto, UploadFileDto } from '../dto';
+import type {
+  FileCategory,
+  FileContentDto,
+  FileResponseDto,
+  FileSensitivity,
+  UploadFileDto,
+} from '../dto';
 
 /** Lo que llega del interceptor de multer, acotado a lo que aquí se usa. */
 export interface UploadedFileBytes {
@@ -45,6 +51,37 @@ export interface UploadedFileBytes {
    * Contenido binario en memoria.
    */
   buffer: Buffer;
+}
+
+/**
+ * Bytes generados por el propio servidor (un certificado, un reporte) que hay
+ * que persistir como archivo. A diferencia de {@link UploadedFileBytes}, el
+ * tipo MIME lo declara quien llama y no se sniffea: el servidor sabe qué
+ * escribió, y el sniff existe para no confiar en lo que declara un cliente
+ * externo — acá no hay cliente externo.
+ */
+export interface GeneratedFileInput {
+  /**
+   * Contenido binario a persistir.
+   */
+  buffer: Buffer;
+  /**
+   * Nombre con el que se registra el archivo (sin extensión implícita: se
+   * incluye acá si corresponde).
+   */
+  originalName: string;
+  /**
+   * Tipo MIME exacto del contenido generado.
+   */
+  mimeType: 'application/json' | 'application/pdf';
+  /**
+   * Clasificación funcional del archivo, igual que en una subida real.
+   */
+  category: FileCategory;
+  /**
+   * Sensibilidad del contenido, igual que en una subida real.
+   */
+  sensitivity: FileSensitivity;
 }
 
 /**
@@ -171,11 +208,50 @@ export class FileUploadService {
       );
     }
 
+    return this.persistBytes(
+      { buffer: file.buffer, originalName: file.originalname },
+      { category: dto.category, sensitivity: dto.sensitivity },
+      detectedMimeType,
+      actor,
+      'common.file.upload',
+    );
+  }
+
+  /**
+   * Persiste bytes ya validados y crea el archivo con su versión 1.
+   *
+   * Tramo común de {@link upload} y {@link storeGenerated}: ambos llegan acá
+   * con un tipo MIME ya decidido —uno por firma binaria, el otro porque el
+   * propio servidor lo generó— y de acá en más el camino es idéntico: pasar
+   * por `StoragePublicationService` si está cableado, o guardar directo con el
+   * adaptador activo.
+   *
+   * @param bytes - Contenido y nombre a persistir.
+   * @param classification - Categoría y sensibilidad del archivo.
+   * @param mimeType - Tipo MIME ya decidido, sin volver a detectarlo.
+   * @param actor - Usuario autenticado dueño del archivo, o `null` para una
+   *   pre-carga anónima.
+   * @param operation - Nombre de la operación, para el registro.
+   * @returns El archivo recién creado.
+   * @throws StorageLifecycleDenied si el binding físico exige reserva y no
+   *   hay `StoragePublicationService` cableado.
+   */
+  private async persistBytes(
+    bytes: { buffer: Buffer; originalName: string },
+    classification: { category: FileCategory; sensitivity: FileSensitivity },
+    mimeType: string,
+    actor: AuthenticatedUser | null,
+    operation: string,
+  ): Promise<FileResponseDto> {
     if (this.publication) {
       const result = await this.publishUpload(
-        file,
-        dto,
-        detectedMimeType,
+        {
+          buffer: bytes.buffer,
+          originalname: bytes.originalName,
+          mimetype: mimeType,
+        },
+        classification,
+        mimeType,
         actor,
       );
       return result.created;
@@ -183,32 +259,72 @@ export class FileUploadService {
     if (loadStorageEnv().lifecycleBinding)
       throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
     const stored = await this.storage.store({
-      buffer: file.buffer,
-      originalName: file.originalname,
-      mimeType: detectedMimeType,
+      buffer: bytes.buffer,
+      originalName: bytes.originalName,
+      mimeType,
     });
 
     this.logger.info(
       {
-        operation: 'common.file.upload',
-        actorId: actor.id,
+        operation,
+        actorId: actor?.id,
         sizeBytes: stored.sizeBytes,
-        mimeType: detectedMimeType,
+        mimeType,
       },
-      'Uploaded file stored, registering metadata',
+      'File bytes stored, registering metadata',
     );
 
     return this.filesService.createFile(
       {
-        originalName: file.originalname,
-        category: dto.category,
-        sensitivity: dto.sensitivity,
-        mimeType: detectedMimeType,
+        originalName: bytes.originalName,
+        category: classification.category,
+        sensitivity: classification.sensitivity,
+        mimeType,
         sizeBytes: stored.sizeBytes,
         contentHash: stored.contentHash,
         storageUri: stored.storageUri,
       },
       actor,
+    );
+  }
+
+  /**
+   * Persiste un artefacto generado por el propio servidor (un certificado, un
+   * reporte) como archivo, sin pasar por el sniff de contenido: el tipo MIME
+   * lo aporta quien llama porque es quien escribió los bytes.
+   *
+   * Reutiliza el mismo camino de {@link upload} a partir de la detección del
+   * tipo (`{@link persistBytes}`): mismo cableado de `StoragePublicationService`
+   * o adaptador directo, mismo registro de `common.files`.
+   *
+   * @param input - Bytes, nombre, tipo MIME, categoría y sensibilidad.
+   * @param actor - Usuario autenticado a nombre de quien se registra el archivo.
+   * @returns El archivo recién creado.
+   * @throws PreconditionFailedException si el contenido viene vacío o excede
+   *   el tamaño máximo configurado.
+   */
+  async storeGenerated(
+    input: GeneratedFileInput,
+    actor: AuthenticatedUser,
+  ): Promise<FileResponseDto> {
+    if (!input.buffer.byteLength) {
+      throw new PreconditionFailedException(
+        'El artefacto generado no tiene contenido',
+      );
+    }
+    if (input.buffer.byteLength > this.maxSizeBytes) {
+      throw new PreconditionFailedException(
+        'El artefacto generado excede el tamaño máximo permitido',
+        { maxSizeBytes: this.maxSizeBytes, sizeBytes: input.buffer.byteLength },
+      );
+    }
+
+    return this.persistBytes(
+      { buffer: input.buffer, originalName: input.originalName },
+      { category: input.category, sensitivity: input.sensitivity },
+      input.mimeType,
+      actor,
+      'common.file.store-generated',
     );
   }
 
@@ -326,8 +442,8 @@ export class FileUploadService {
 
   private async publishUpload(
     file: UploadedFileBytes,
-    dto: UploadFileDto,
-    mimeType: SniffedMimeType,
+    dto: { category: FileCategory; sensitivity: FileSensitivity },
+    mimeType: string,
     actor: AuthenticatedUser | null,
   ) {
     if (!this.publication)

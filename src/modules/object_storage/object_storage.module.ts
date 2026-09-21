@@ -13,6 +13,16 @@ import {
   ObjectGovernanceRepository,
   DicomRepository,
 } from './repositories';
+import { OBJECT_CONTENT_READER, S3ObjectContentReader } from './ports';
+// MCH-010: la emisión de acceso a un objeto de un paciente se decide con la
+// política del expediente (`ClinicalReadService`), que `ClinicalModule` ya
+// exporta para el guard del expediente. Import unidireccional: `clinical` no
+// conoce `object_storage`, así que no cierra ciclo.
+import { ClinicalModule } from '../clinical/clinical.module';
+// MCH-020: todo acceso a un objeto —emitido, denegado o canjeado— se sella en
+// la cadena WORM de `audit`, que ya exporta `AuditTrailService` para que cada
+// dominio selle dentro de su propia transacción.
+import { AuditModule } from '../audit/audit.module';
 
 /**
  * Módulo de almacenamiento de objetos: cargas multiparte, versiones inmutables,
@@ -24,6 +34,8 @@ import {
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     StorageLifecycleModule,
+    ClinicalModule,
+    AuditModule,
   ],
   controllers: [ObjectStorageController, DicomWebController],
   providers: [
@@ -33,6 +45,9 @@ import {
     ObjectStorageService,
     DicomCatalogService,
     ObjectGovernanceService,
+    // MCH-021/MCH-009: lectura física de los objetos para verificarlos al
+    // cerrarlos y para entregarlos detrás de un acceso firmado.
+    { provide: OBJECT_CONTENT_READER, useClass: S3ObjectContentReader },
   ],
 })
 export class ObjectStorageModule {}

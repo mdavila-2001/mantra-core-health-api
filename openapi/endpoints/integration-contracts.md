@@ -1356,10 +1356,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
-  "providerId": "00000000-0000-4000-8000-000000000001",
-  "eventType": "valor-ejemplo",
-  "state": "00000000-0000-4000-8000-000000000001",
-  "updated": true
+  "integrationContractId": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1368,10 +1366,8 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
-| `providerId` | Sí | `string` | formato `uuid` | Identificador asociado a provider. | `00000000-0000-4000-8000-000000000001` |
-| `eventType` | Sí | `string` | Sin restricción adicional declarada | Valor de event type mantenido por la instancia. | `valor-ejemplo` |
-| `state` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
-| `updated` | Sí | `boolean` | Sin restricción adicional declarada | true si se actualizó una suscripción existente | `true` |
+| `integrationContractId` | Sí | `string` | formato `uuid` | Identificador asociado a integration contract. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concepto de estado de la suscripción | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1663,6 +1659,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | La suscripción ya expiró | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay versión ACTIVE del contrato para entregar | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
 | 422 | `PRECONDITION_FAILED` | La suscripción no tiene callbackUri para entregar | Excepción explícita en src/modules/integration_contracts/services/integration-webhooks.service.ts |
+| 422 | `PRECONDITION_FAILED` | El cuerpo del despacho excede el tamaño permitido | Excepción explícita en src/common/http/http-dispatcher.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

@@ -101,7 +101,13 @@ export type NotificationDestinationType =
    * autorización para ver el expediente de un paciente que encontró por
    * búsqueda. Aditivo, mismo criterio que `PHARMACY_ORDER`.
    */
-  | 'CARE_RELATIONSHIP_REQUEST';
+  | 'CARE_RELATIONSHIP_REQUEST'
+  /**
+   * Una orden de estudios que el médico dejó al paciente (MCH-027). Aditivo,
+   * mismo criterio que `PHARMACY_ORDER`: el `switch` del front suma su ruta
+   * (la lista de órdenes del paciente) al conectar.
+   */
+  | 'SERVICE_REQUEST';
 
 /**
  * A dónde lleva la notificación al abrirla.

@@ -2,13 +2,17 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Res,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
   ObjectStorageService,
@@ -204,6 +208,41 @@ export class ObjectStorageController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SignedUrlResponseDto> {
     return this.storageService.issueSignedUrl(versionId, dto, actor);
+  }
+
+  /**
+   * UC-60-09 (canje): el otro extremo del enlace temporal (MCH-009).
+   *
+   * Sigue detrás de la autenticación: el token dice a quién se emitió y el
+   * servicio comprueba que quien lo canjea sea esa persona. Un enlace robado no
+   * sirve en otra sesión, y una sesión válida no sirve sin el enlace.
+   *
+   * `no-store` porque lo que baja por acá es PHI: no debe quedar en la caché
+   * del navegador ni en un proxy intermedio.
+   */
+  @Get('versions/:versionId/content/:token')
+  @Roles('DICOM_VIEWER', 'CLINICIAN', 'SYSTEM', 'STORAGE_ADMIN')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar el contenido de una versión con el enlace emitido',
+    description: 'El token ata versión, actor, operación y caducidad.',
+  })
+  async downloadSignedContent(
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+    @Param('token') token: string,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Res() res: Response,
+  ): Promise<void> {
+    const content = await this.storageService.redeemSignedAccess(
+      versionId,
+      token,
+      actor,
+    );
+    res.setHeader('Content-Type', content.mimeType);
+    if (content.contentLength !== undefined) {
+      res.setHeader('Content-Length', String(content.contentLength));
+    }
+    content.body.pipe(res);
   }
 
   /** UC-60-10. */

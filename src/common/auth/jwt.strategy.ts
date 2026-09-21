@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWT_ALGORITHM, loadAuthEnv } from './auth.env';
 import type { JwtPayload } from './jwt-payload.interface';
 import type { AuthenticatedUser } from './authenticated-user.interface';
+import { SessionValidator } from './session-validator';
 
 /**
  * Reconstruye el `AuthenticatedUser` a partir de un payload ya verificado.
@@ -15,6 +16,7 @@ export function toAuthenticatedUser(payload: JwtPayload): AuthenticatedUser {
     id: payload.sub,
     sessionId: payload.sid,
     roles: payload.roles ?? [],
+    scopedRoles: payload.scopedRoles,
     tenantIds: payload.tenants ?? [],
     practitionerProfileId: payload.hpid,
     patientProfileId: payload.pid,
@@ -22,17 +24,17 @@ export function toAuthenticatedUser(payload: JwtPayload): AuthenticatedUser {
 }
 
 /**
- * Estrategia Passport que valida el access token (firma + expiración) y
- * reconstruye el `AuthenticatedUser`. No consulta la base de datos: la sesión y
- * los roles viajan firmados dentro del token, y la revocación fina (logout,
- * reuse-detection) se resuelve en los servicios que sí tocan `iam.sessions`.
+ * Estrategia Passport que valida el access token (firma + expiración + tipo),
+ * exige que su sesión siga activa en `iam.sessions` y reconstruye el
+ * `AuthenticatedUser`. La consulta de sesión es lo que hace efectivo el logout,
+ * el bloqueo y el retiro de roles antes de que el token expire (MCH-004).
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   /**
    * Inicializa la instancia y sus dependencias.
    */
-  constructor() {
+  constructor(private readonly sessions: SessionValidator) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -48,12 +50,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * que el token sea de tipo `access`: un refresh token nunca debe autenticar
    * una petición ordinaria aunque esté firmado con el mismo secreto.
    */
-  validate(payload: JwtPayload): AuthenticatedUser {
+  async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
     if (payload.typ !== 'access') {
       throw new UnauthorizedException(
         'Tipo de token no válido para autenticación',
       );
     }
+    await this.sessions.assertActive(payload);
     return toAuthenticatedUser(payload);
   }
 }

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { RefreshTokens } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
@@ -55,6 +56,26 @@ export class RefreshTokensRepository {
     tokenHash: string,
   ): Promise<RefreshTokens | null> {
     return em.findOne(RefreshTokens, { tokenHash });
+  }
+
+  /**
+   * Lee el refresh token bloqueando su fila (`FOR UPDATE`) hasta el fin de la
+   * transacción. Dos peticiones con el mismo token se serializan acá: la
+   * segunda espera y ve el estado que dejó la primera (MCH-005).
+   *
+   * @param em - Transacción activa; el bloqueo no existe fuera de una.
+   * @param tokenHash - SHA-256 del token presentado.
+   * @returns El token bloqueado, o `null`.
+   */
+  findByHashForUpdate(
+    em: EntityManager,
+    tokenHash: string,
+  ): Promise<RefreshTokens | null> {
+    return em.findOne(
+      RefreshTokens,
+      { tokenHash },
+      { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true },
+    );
   }
 
   /** Revoca todos los refresh tokens de una sesión (detección de reuso). */

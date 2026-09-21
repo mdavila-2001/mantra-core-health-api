@@ -368,3 +368,127 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
     expect(await propiedadesConError(ALTA_PAYER)).toEqual([]);
   });
 });
+
+/**
+ * El nombre del representante legal y de las gerencias, en partes
+ * (`name`/`lastName` obligatorios salvo que venga `fullName`, la forma
+ * anterior). Mismo criterio que `RegisterOrganizationOwnerDto`.
+ */
+describe('RegisterOrganizationDto · representante legal y gerencias · nombre en partes', () => {
+  const ALTA_CON_REPRESENTACION = {
+    organization: {
+      code: 'ASEGURADORA_PARTES',
+      legalName: 'Aseguradora Partes S.R.L.',
+      tenantType: 'PAYER',
+      payer: {
+        carrierCode: 'CAR-PARTES',
+        sigla: 'APT',
+        address: 'Av. Siempre Viva 742',
+        regulatorIdentifier: 'APS-9001',
+      },
+    },
+    owner: ALTA_MINIMA.owner,
+  };
+
+  const REPRESENTANTE_BASE = {
+    idNumber: '4872190 SC',
+    email: 'legal@aseguradora.com',
+    powerOfAttorneyFileId: '11111111-1111-4111-8111-111111111111',
+  };
+
+  const GERENCIA_BASE = {
+    phone: '+591 70012345',
+    email: 'gm@aseguradora.com',
+  };
+
+  function altaCon(legalRepresentative: Record<string, unknown>) {
+    return {
+      ...ALTA_CON_REPRESENTACION,
+      organization: {
+        ...ALTA_CON_REPRESENTACION.organization,
+        legalRepresentative,
+      },
+    };
+  }
+
+  it('acepta las partes (name/lastName), sin fullName', async () => {
+    expect(
+      await propiedadesConError(
+        altaCon({ ...REPRESENTANTE_BASE, name: 'Mariana', lastName: 'Siles' }),
+      ),
+    ).toEqual([]);
+  });
+
+  it('acepta sólo fullName (forma anterior), sin partes', async () => {
+    expect(
+      await propiedadesConError(
+        altaCon({
+          ...REPRESENTANTE_BASE,
+          fullName: 'Mariana Siles Justiniano',
+        }),
+      ),
+    ).toEqual([]);
+  });
+
+  it('sin partes NI fullName, rechaza name y lastName', async () => {
+    expect(
+      await propiedadesConError(altaCon({ ...REPRESENTANTE_BASE })),
+    ).toEqual([
+      'organization.legalRepresentative.lastName',
+      'organization.legalRepresentative.name',
+    ]);
+  });
+
+  it('rechaza thirdName: no es una clave del contrato, el cliente lo pliega en middleName', async () => {
+    expect(
+      await propiedadesConError(
+        altaCon({
+          ...REPRESENTANTE_BASE,
+          name: 'Mariana',
+          lastName: 'Siles',
+          thirdName: 'Elena',
+        }),
+      ),
+    ).toEqual(['organization.legalRepresentative.thirdName']);
+  });
+
+  it('rechaza un nombre de más de 100 caracteres', async () => {
+    expect(
+      await propiedadesConError(
+        altaCon({
+          ...REPRESENTANTE_BASE,
+          name: 'A'.repeat(101),
+          lastName: 'Siles',
+        }),
+      ),
+    ).toEqual(['organization.legalRepresentative.name']);
+  });
+
+  it('una gerencia con partes, sin fullName, es válida', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_CON_REPRESENTACION,
+        organization: {
+          ...ALTA_CON_REPRESENTACION.organization,
+          executives: {
+            generalManager: {
+              ...GERENCIA_BASE,
+              name: 'Carlos',
+              lastName: 'Mendoza',
+            },
+            commercialManager: {
+              ...GERENCIA_BASE,
+              name: 'Ana',
+              lastName: 'Paz',
+            },
+            marketingManager: {
+              ...GERENCIA_BASE,
+              name: 'Luis',
+              lastName: 'Rojas',
+            },
+          },
+        },
+      }),
+    ).toEqual([]);
+  });
+});

@@ -5728,6 +5728,19 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'EXPORT_FAILED',
     'Export failed',
   ),
+  /**
+   * Tipo de exportación de `health_export_jobs.export_type_concept_id` para un
+   * certificado de portabilidad de póliza y siniestralidad (subtarea 3.3): el
+   * paciente titular pide su historial de seguros para llevarlo a otra
+   * aseguradora. Ningún otro tipo de exportación existía en el código; se
+   * declara acá, junto a los estados de exportación, y no en `insurance`,
+   * porque la columna es de `health_data`.
+   */
+  EXPORT_TYPE_INSURANCE_PORTABILITY: def(
+    'health-data:export-type:insurance-portability',
+    'EXPORT_TYPE_INSURANCE_PORTABILITY',
+    'Insurance portability export',
+  ),
 
   // --- Mensajería: outbox y eventos de dominio (35) ---
   //

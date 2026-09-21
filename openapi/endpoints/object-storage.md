@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `object_storage`
 
-Referencia exhaustiva de 13 operación(es) del módulo `object_storage`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 14 operación(es) del módulo `object_storage`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `dicomweb`, `object-storage`
 - **Controladores:** `DicomWebController`, `ObjectStorageController`
@@ -19,11 +19,12 @@ Referencia exhaustiva de 13 operación(es) del módulo `object_storage`, derivad
 6. [POST /object-storage/objects/{manifestId}/request-deletion](#6-post-object-storage-objects-manifestid-request-deletion) — Solicitar el borrado gobernado
 7. [POST /object-storage/objects/{manifestId}/versions](#7-post-object-storage-objects-manifestid-versions) — Crear una versión nueva del objeto
 8. [POST /object-storage/uploads/{id}/complete](#8-post-object-storage-uploads-id-complete) — Completar la carga y materializar la versión del objeto
-9. [POST /object-storage/versions/{versionId}/integrity-checks](#9-post-object-storage-versions-versionid-integrity-checks) — Registrar la verificación de integridad
-10. [POST /object-storage/versions/{versionId}/legal-holds](#10-post-object-storage-versions-versionid-legal-holds) — Colocar una retención legal
-11. [DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}](#11-delete-object-storage-versions-versionid-legal-holds-holdid) — Liberar una retención legal
-12. [POST /object-storage/versions/{versionId}/retention-lock](#12-post-object-storage-versions-versionid-retention-lock) — Aplicar retención WORM sobre la versión
-13. [POST /object-storage/versions/{versionId}/signed-url](#13-post-object-storage-versions-versionid-signed-url) — Emitir acceso firmado a una versión
+9. [GET /object-storage/versions/{versionId}/content/{token}](#9-get-object-storage-versions-versionid-content-token) — Descargar el contenido de una versión con el enlace emitido
+10. [POST /object-storage/versions/{versionId}/integrity-checks](#10-post-object-storage-versions-versionid-integrity-checks) — Registrar la verificación de integridad
+11. [POST /object-storage/versions/{versionId}/legal-holds](#11-post-object-storage-versions-versionid-legal-holds) — Colocar una retención legal
+12. [DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}](#12-delete-object-storage-versions-versionid-legal-holds-holdid) — Liberar una retención legal
+13. [POST /object-storage/versions/{versionId}/retention-lock](#13-post-object-storage-versions-versionid-retention-lock) — Aplicar retención WORM sobre la versión
+14. [POST /object-storage/versions/{versionId}/signed-url](#14-post-object-storage-versions-versionid-signed-url) — Emitir acceso firmado a una versión
 
 ---
 
@@ -1050,6 +1051,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El objeto no está activo | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 422 | `PRECONDITION_FAILED` | El espacio de nombres no tiene versionado habilitado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | La URI declarada no es la ubicación del objeto | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | El objeto no está en el almacenamiento | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión del proveedor no coincide con la declarada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | El tamaño almacenado no coincide con el declarado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | El contenido almacenado no coincide con el SHA-256 declarado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1228,6 +1234,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | La carga ya no está en curso | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 422 | `PRECONDITION_FAILED` | La carga caducó | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 422 | `PRECONDITION_FAILED` | El tamaño recibido no coincide con el declarado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | La URI declarada no es la ubicación del objeto | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | El objeto no está en el almacenamiento | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión del proveedor no coincide con la declarada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | El tamaño almacenado no coincide con el declarado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | El contenido almacenado no coincide con el SHA-256 declarado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1245,7 +1256,112 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /object-storage/versions/{versionId}/integrity-checks
+## 9. GET /object-storage/versions/{versionId}/content/{token}
+
+- **Módulo:** `object_storage`
+- **Etiqueta OpenAPI:** `object-storage`
+- **Nombre:** Descargar el contenido de una versión con el enlace emitido
+- **Operation ID:** `ObjectStorageController_downloadSignedContent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ObjectStorageController.downloadSignedContent](../../src/modules/object_storage/controllers/object-storage.controller.ts)
+
+### Descripción de negocio
+
+El token ata versión, actor, operación y caducidad.
+
+Contexto declarado en el controlador: UC-60-09 (canje): el otro extremo del enlace temporal (MCH-009). Sigue detrás de la autenticación: el token dice a quién se emitió y el servicio comprueba que quien lo canjea sea esa persona. Un enlace robado no sirve en otra sesión, y una sesión válida no sirve sin el enlace. `no-store` porque lo que baja por acá es PHI: no debe quedar en la caché del navegador ni en un proxy intermedio.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /object-storage/versions/{versionId}/content/{token}` en `ObjectStorageController_downloadSignedContent`. El controlador delega en `ObjectStorageService.redeemSignedAccess`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `versionId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `token` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /object-storage/versions/00000000-0000-4000-8000-000000000001/content/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DICOM_VIEWER`, `CLINICIAN`, `SYSTEM`, `STORAGE_ADMIN`.
+- Deben ser UUID válidos: `versionId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /object-storage/versions/00000000-0000-4000-8000-000000000001/content/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Consulta completada correctamente. | `Promise<void>` | No |
+| 404 | Consulta completada correctamente. | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Enlace de acceso no válido | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 404 | `NOT_FOUND` | El espacio de nombres de la versión no existe | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 404 | `NOT_FOUND` | Versión no encontrada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 404 | `NOT_FOUND` | Objeto no encontrado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 404 | `NOT_FOUND` | La versión no tiene ubicación primaria | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | El objeto no está disponible | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión no tiene la integridad verificada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión está en almacenamiento frío: requiere rehidratación previa | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/object-storage/versions/{versionId}/content/{token}"
+}
+```
+
+---
+
+## 10. POST /object-storage/versions/{versionId}/integrity-checks
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1380,7 +1496,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /object-storage/versions/{versionId}/legal-holds
+## 11. POST /object-storage/versions/{versionId}/legal-holds
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1513,7 +1629,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}
+## 12. DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1635,7 +1751,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /object-storage/versions/{versionId}/retention-lock
+## 13. POST /object-storage/versions/{versionId}/retention-lock
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1776,7 +1892,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /object-storage/versions/{versionId}/signed-url
+## 14. POST /object-storage/versions/{versionId}/signed-url
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1828,7 +1944,7 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `purposeOfUseCode` | Sí | `string` | longitud máxima 100 | Propósito de uso; sin él no se emite | `CODIGO_EJEMPLO` |
 | `expiresInSeconds` | No | `number` | mínimo 30 | Segundos de validez | `300` |
-| `studyInstanceUid` | No | `string` | longitud máxima 200 | Study UID si el objeto es DICOM | `00000000-0000-4000-8000-000000000001` |
+| `studyInstanceUid` | No | `string` | longitud máxima 200 | Ignorado: el estudio se resuelve desde el objeto en el servidor | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -1867,7 +1983,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "objectVersionId": "00000000-0000-4000-8000-000000000001",
-  "providerUri": "valor-ejemplo",
+  "url": "/object-storage/versions/6b1e.../content/eyJ2Ijoi....c2lnbmF0dXJl",
+  "method": "GET",
   "expiresAt": "2026-07-31T12:00:00.000Z",
   "keyVersion": "valor-ejemplo",
   "accessLogId": "00000000-0000-4000-8000-000000000001"
@@ -1879,7 +1996,8 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `objectVersionId` | Sí | `string` | formato `uuid` | Identificador asociado a object version. | `00000000-0000-4000-8000-000000000001` |
-| `providerUri` | Sí | `string` | Sin restricción adicional declarada | URI del proveedor sobre la que se firma | `valor-ejemplo` |
+| `url` | Sí | `string` | Sin restricción adicional declarada | Ruta de descarga con el token firmado; caduca en expiresAt | `/object-storage/versions/6b1e.../content/eyJ2Ijoi....c2lnbmF0dXJl` |
+| `method` | Sí | `string` | Sin restricción adicional declarada | Único método que el enlace habilita | `GET` |
 | `expiresAt` | Sí | `string` | formato `date-time` | Cuándo caduca el acceso | `2026-07-31T12:00:00.000Z` |
 | `keyVersion` | No | `string` | Sin restricción adicional declarada | Versión de la clave con la que se descifra | `valor-ejemplo` |
 | `accessLogId` | No | `string` | formato `uuid` | Registro del acceso si el objeto es DICOM | `00000000-0000-4000-8000-000000000001` |
@@ -1893,11 +2011,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Versión no encontrada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | Objeto no encontrado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | La versión no tiene ubicación primaria | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El objeto no está disponible | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión no tiene la integridad verificada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 422 | `PRECONDITION_FAILED` | La versión está en almacenamiento frío: requiere rehidratación previa | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

@@ -40,8 +40,9 @@ import {
  * (`BOOTSTRAP_ACCESS_RESIDUAL`), no como parte cerrada de SEC-01: estas rutas
  * **no están protegidas** por paciente. Resolverlo pide decidir antes qué acto
  * funda la relación asistencial, y eso no lo define ninguna fuente vigente.
- * `encounters/:id/close` sigue fuera por el otro motivo de siempre: su paciente
- * sale del encuentro ya cargado (GAP-3).
+ * `encounters/:id/close` sigue fuera del guard por el otro motivo de siempre:
+ * su paciente sale del encuentro ya cargado, y lo autoriza el servicio
+ * (MCH-007).
  */
 @ApiTags('clinical-encounters')
 @ApiBearerAuth()

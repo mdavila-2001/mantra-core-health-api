@@ -2,7 +2,14 @@
 ### Mantra Core Technologies — Sincronización Integral Backend y Frontend
 **Fecha de corte:** 11 de Septiembre de 2026, 23:30 (-04:00)  
 **Ramas sincronizadas:** `origin/dev` en `mantra-core-health-api` y `mantra-core-health`  
-**Estado de Verificación QA:** 🟢 **100% Tests Unitarios Pasando (62/62 pruebas en verde tras merge)**
+**Estado de Verificación QA:** verificación **dirigida**: 2 suites unitarias, 62/62 pruebas en verde tras el merge. **No** es la suite completa de la API ni cubre integración o runtime.
+
+> [!NOTE]
+> **Snapshot histórico (11/09/2026) — MCH-033.** Este informe es una foto de esa fecha y no se actualiza. Su titular decía «100% Tests Unitarios
+> Pasando», pero lo que se corrió fueron las dos suites listadas en §1, punto 2: el denominador son esas 62
+> pruebas, no la API. El inventario vigente (módulos, entidades, endpoints declarados y registrados,
+> con commit y método) está en [`ALOVIDA-COBERTURA.md`](ALOVIDA-COBERTURA.md) y se regenera con
+> `node tools/alovida/coverage-report.mjs`.
 
 ---
 

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { BackupPolicies, RestoreTestRuns } from '../entities';
 import { createdBy } from '../../../common';
+import { RestoreObjectiveStatus } from '../policies';
 
 /**
  * Acceso a datos de políticas de backup (UC-11-09) y pruebas de restauración
@@ -143,6 +144,11 @@ export class BackupRepository {
        * Valor de integrity check passed mantenido por la instancia.
        */
       integrityCheckPassed?: boolean;
+      /**
+       * Evaluación trivalente contra los objetivos de la política (MCH-023).
+       * La calcula el servicio; nunca la aporta quien llama al endpoint.
+       */
+      objectiveStatus: RestoreObjectiveStatus;
       /**
        * Identificador asociado a evidence file.
        */

@@ -1198,7 +1198,7 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'service-request-status',
     name: 'Estado de la orden',
     description:
-      'Ciclo de vida de la orden: borrador, activa, en espera, revocada, completada, o satisfecha por un informe previo.',
+      'Ciclo de vida de la orden: borrador, activa, en espera, revocada, completada o satisfecha por un informe previo.',
     concepts: [
       CLIN.SERVICE_REQUEST_DRAFT,
       CLIN.SERVICE_REQUEST_ACTIVE,

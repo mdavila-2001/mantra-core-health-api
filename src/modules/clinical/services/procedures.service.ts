@@ -21,6 +21,7 @@ import { CLIN } from '../clinical.concepts';
 // `PeriopDentalService`)—, mismo criterio que `ConditionsService.attachFile`.
 import { FilesService } from '../../common/services';
 import { OwnerType, type FileLinkResponseDto } from '../../common/dto';
+import { ClinicalReadService } from './clinical-read.service';
 
 /** UC-08-12: registro de procedimientos completados; cierra la orden si aplica. */
 @Injectable()
@@ -33,6 +34,7 @@ export class ProceduresService {
    * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
    * @param filesService - Vincula archivos ya subidos a un procedimiento puntual.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
@@ -40,6 +42,7 @@ export class ProceduresService {
     private readonly serviceRequestsRepo: ServiceRequestsRepository,
     private readonly filesService: FilesService,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(ProceduresService.name);
   }
@@ -147,6 +150,11 @@ export class ProceduresService {
         procedureId,
       });
     }
+    // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
+    await this.clinicalRead.assertPuedeEscribirHistoria(
+      procedure.patientProfileId,
+      actor,
+    );
     this.logger.info(
       {
         operation: 'clinical.procedure.attach_file',

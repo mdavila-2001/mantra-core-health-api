@@ -47,14 +47,35 @@ export interface CreateRoleAssignmentData {
 @Injectable()
 export class UserRoleAssignmentsRepository {
   /** Asignación activa concreta (user, role) si existe (evita solapes). */
+  /**
+   * Asignación activa concreta para un ámbito exacto (MCH-034).
+   *
+   * `(userId, roleId)` no identifica una asignación: el mismo rol puede
+   * concederse por separado en distintos tenants/sedes/consultorios. La clave
+   * es la tupla completa, y un ámbito no declarado es parte de esa clave —
+   * `tenantId` ausente busca una asignación **global** (columna en `NULL`),
+   * nunca "cualquier tenant". Por eso cada campo se normaliza a `null` en vez
+   * de dejarlo en `undefined`: MikroORM omite del `WHERE` una clave en
+   * `undefined`, que es justo el bug que esto corrige.
+   *
+   * @param scope - Ámbito exacto a buscar; cada campo ausente es `NULL`.
+   */
   findActive(
     em: EntityManager,
     userId: string,
     roleId: string,
+    scope: {
+      tenantId?: string | null;
+      branchId?: string | null;
+      practiceId?: string | null;
+    } = {},
   ): Promise<UserRoleAssignments | null> {
     return em.findOne(UserRoleAssignments, {
       userId,
       roleId,
+      tenantId: scope.tenantId ?? null,
+      branchId: scope.branchId ?? null,
+      practiceId: scope.practiceId ?? null,
       statusConceptId: CONCEPTS.STATE_ACTIVE,
     });
   }

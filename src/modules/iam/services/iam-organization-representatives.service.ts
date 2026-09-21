@@ -14,6 +14,7 @@ import {
   type RegistrationExecutive,
 } from '../../directory/services';
 import { PersonsRepository } from '../../profiles/repositories';
+import type { DeclaredPersonName } from '../../profiles/person-name';
 import { createContactPerson } from '../../profiles/services';
 import type {
   RegisterOrganizationExecutivesDto,
@@ -62,6 +63,31 @@ export class IamOrganizationRepresentativesService {
   ) {}
 
   /**
+   * El nombre declarado por el DTO, traducido a `DeclaredPersonName`.
+   *
+   * Los dos DTO de este alta (`RegisterOrganizationLegalRepresentativeDto` y
+   * `RegisterOrganizationExecutiveContactDto`) llaman `fullName` a su forma
+   * anterior; `createContactPerson` espera `displayName`, el nombre que
+   * `person-name.ts` usa en las otras cuatro altas. Traducir acá evita que la
+   * pieza compartida conozca el nombre de campo de un DTO en particular.
+   */
+  private nombreDe(dto: {
+    readonly name?: string;
+    readonly middleName?: string;
+    readonly lastName?: string;
+    readonly motherLastName?: string;
+    readonly fullName?: string;
+  }): DeclaredPersonName {
+    return {
+      name: dto.name,
+      middleName: dto.middleName,
+      lastName: dto.lastName,
+      motherLastName: dto.motherLastName,
+      displayName: dto.fullName,
+    };
+  }
+
+  /**
    * Registra al representante legal y a las gerencias declaradas.
    *
    * Todas las personas se construyen primero y se persisten con un solo
@@ -90,7 +116,7 @@ export class IamOrganizationRepresentativesService {
 
     const representanteCreado = legalRepresentative
       ? createContactPerson(repos, tx, {
-          displayName: legalRepresentative.fullName,
+          ...this.nombreDe(legalRepresentative),
           email: legalRepresentative.email,
           phone: legalRepresentative.phone,
           nationalId: legalRepresentative.idNumber,
@@ -103,7 +129,7 @@ export class IamOrganizationRepresentativesService {
       for (const key of EXECUTIVE_DTO_KEYS) {
         const contacto = executives[key];
         const { personId } = createContactPerson(repos, tx, {
-          displayName: contacto.fullName,
+          ...this.nombreDe(contacto),
           email: contacto.email,
           mobile: contacto.phone,
           actorUserId: input.ownerUserId,

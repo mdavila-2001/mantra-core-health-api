@@ -3072,7 +3072,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El RPO no puede superar al RTO | Excepción explícita en src/modules/system_ops/services/backup.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3328,7 +3327,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "outcomeConceptId": "00000000-0000-4000-8000-000000000001",
-  "objectiveBreached": true
+  "objectiveStatus": "MET"
 }
 ```
 
@@ -3338,7 +3337,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `outcomeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a outcome concept. | `00000000-0000-4000-8000-000000000001` |
-| `objectiveBreached` | Sí | `boolean` | Sin restricción adicional declarada | true si el RPO/RTO medido supera el objetivo | `true` |
+| `objectiveStatus` | Sí | `string` | valores: `MET`, `BREACHED`, `NOT_MEASURED` | Resultado contra los objetivos de la política (MCH-023). `NOT_MEASURED` no es un incumplimiento: es la falta de evidencia para afirmar cumplimiento. Un consumidor no puede leerlo como «aprobado» — el propio nombre lo obliga a distinguirlo. | `MET` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

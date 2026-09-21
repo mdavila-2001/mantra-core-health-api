@@ -8,6 +8,7 @@ import { INS } from '../../src/modules/insurance/insurance.concepts';
 import {
   bootstrapTestApp,
   deleteRegisteredOrganizations,
+  ensureTestSession,
   type TestContext,
 } from './harness';
 
@@ -122,6 +123,7 @@ describe('administración tenant-scoped de planes y coberturas', () => {
     );
     await em.flush();
     created.push({ userId, tenantId });
+    await ensureTestSession(ctx.orm, userId, `session-${label}`);
     return {
       userId,
       token: ctx.app

@@ -64,6 +64,50 @@ export class AuthzEffectiveRolesService {
   }
 
   /**
+   * Igual que {@link codesForUser}, pero sin descartar el ámbito de la
+   * asignación (MCH-001).
+   *
+   * `codesForUser` colapsa cada asignación a su código de rol: un rol concedido
+   * sólo en el tenant A queda indistinguible de uno global, y cualquier
+   * pertenencia a otro tenant lo hereda. Esto devuelve un par `(code, tenantId)`
+   * por asignación, para que quien autorice pueda exigir que coincidan.
+   *
+   * Una asignación sin `tenantId` (columna nula) es una excepción global
+   * deliberada del propio modelo de datos, no un olvido de esta consulta: se
+   * conserva como tal (`tenantId: undefined`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - Usuario del que se resuelven los roles.
+   * @param now - Instante de referencia; por defecto, el actual.
+   * @returns Un elemento por asignación activa, con su código y su tenant.
+   */
+  async scopedAssignmentsForUser(
+    em: EntityManager,
+    userId: string,
+    now: Date = new Date(),
+  ): Promise<{ code: string; tenantId?: string }[]> {
+    const assignments = await this.assignmentsRepo.findActiveForUser(
+      em,
+      userId,
+      now,
+    );
+    if (assignments.length === 0) return [];
+
+    const roles = await em.find(Roles, {
+      id: { $in: [...new Set(assignments.map((a) => a.roleId))] },
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+    const codeById = new Map(roles.map((r) => [r.id, r.code]));
+
+    const result: { code: string; tenantId?: string }[] = [];
+    for (const a of assignments) {
+      const code = codeById.get(a.roleId);
+      if (code) result.push({ code, tenantId: a.tenantId });
+    }
+    return result;
+  }
+
+  /**
    * Garantiza que el usuario ejerza el rol indicado, sin duplicar la asignación.
    *
    * Se opera sobre la transacción del llamador para que la concesión del rol
@@ -98,7 +142,17 @@ export class AuthzEffectiveRolesService {
     });
     if (!role || !role.isAssignable) return false;
 
-    const existing = await this.assignmentsRepo.findActive(em, userId, role.id);
+    // MCH-034: el ámbito es parte de la identidad de la asignación. Sin esto,
+    // conceder el mismo rol en un segundo tenant encontraba la fila del primero
+    // y la daba por buena: el alta pedida quedaba sin hacerse, en silencio.
+    const existing = await this.assignmentsRepo.findActive(
+      em,
+      userId,
+      role.id,
+      {
+        tenantId: options.tenantId,
+      },
+    );
     if (existing) return true;
 
     this.assignmentsRepo.create(em, {

@@ -1,0 +1,23 @@
+﻿=== ETAPA 2: lint global (yarn lint --max-warnings=0) ===
+
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\modules\directory\dto\my-organizations.dto.ts
+  102:25  error  Replace `·description:·'Nombre·de·pila,·si·se·declaró·en·partes'` with `⏎····description:·'Nombre·de·pila,·si·se·declaró·en·partes',⏎·`      prettier/prettier
+  110:25  error  Replace `·description:·'Apellido·paterno,·si·se·declaró·en·partes'` with `⏎····description:·'Apellido·paterno,·si·se·declaró·en·partes',⏎·`  prettier/prettier
+
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\modules\directory\services\directory-read.service.ts
+  607:39  error  Replace `·?·{}` with `⏎··········?·{}⏎·········`  prettier/prettier
+
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\modules\iam\dto\register-organization.dto.spec.ts
+  372:1   error  Delete `⏎`                                                                                                                                                                             prettier/prettier
+  475:30  error  Replace `·...GERENCIA_BASE,·name:·'Carlos',·lastName:·'Mendoza'` with `⏎··············...GERENCIA_BASE,⏎··············name:·'Carlos',⏎··············lastName:·'Mendoza',⏎···········`  prettier/prettier
+  476:33  error  Replace `·...GERENCIA_BASE,·name:·'Ana',·lastName:·'Paz'` with `⏎··············...GERENCIA_BASE,⏎··············name:·'Ana',⏎··············lastName:·'Paz',⏎···········`                prettier/prettier
+  477:32  error  Replace `·...GERENCIA_BASE,·name:·'Luis',·lastName:·'Rojas'` with `⏎··············...GERENCIA_BASE,⏎··············name:·'Luis',⏎··············lastName:·'Rojas',⏎···········`          prettier/prettier
+
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\modules\iam\dto\register-organization.dto.ts
+  168:17  error  Insert `⏎·····`  prettier/prettier
+  275:17  error  Insert `⏎·····`  prettier/prettier
+
+✖ 9 problems (9 errors, 0 warnings)
+  9 errors and 0 warnings potentially fixable with the `--fix` option.
+
+exit=1

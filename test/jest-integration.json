@@ -9,6 +9,7 @@
   "testEnvironment": "node",
   "testTimeout": 180000,
   "maxWorkers": 1,
+  "workerIdleMemoryLimit": "1GB",
   "collectCoverageFrom": [
     "<rootDir>/src/modules/iam/**/*.ts",
     "<rootDir>/src/modules/common/**/*.ts",

@@ -326,6 +326,10 @@ services:
   # `localhost:5433` desde el host). La API ya no espera por ellos (ver su
   # `depends_on`): con el perfil activo hay que dejar terminar `postgres-init`
   # antes de arrancarla, o arranca contra una base sin tablas.
+  # El DDL que aplican los `*-init` sale por defecto de `database/SQL` y
+  # `database/NoSQL` (la copia versionada de este repo); para aplicar el
+  # modelo en caliente se exportan SQL_MODEL_DIR/NOSQL_MODEL_DIR apuntando al
+  # repositorio hermano.
   postgres:
     profiles: ["local-db"]
     image: timescale/timescaledb-ha:pg18
@@ -362,11 +366,13 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      # DDL canónico del repositorio del modelo, que se clona como hermano de
-      # este (SQL/ y NoSQL/ generados desde los .puml). El database/ interno del
-      # repo NO es fuente de esquema.
-      - ../mantra-core-health-model/SQL:/init/SQL:ro
-      - ../mantra-core-health-model/NoSQL:/init/NoSQL:ro
+      # Por defecto se aplica la copia versionada del DDL (`database/SQL` y
+      # `database/NoSQL`, regenerada desde el modelo con `yarn db:vendor`).
+      # Quien edita el modelo en caliente exporta SQL_MODEL_DIR/NOSQL_MODEL_DIR
+      # apuntando al repositorio hermano para que el contenedor los vea sin
+      # pasar por `db:vendor` (ver `database/README.md`).
+      - ${SQL_MODEL_DIR:-./database/SQL}:/init/SQL:ro
+      - ${NOSQL_MODEL_DIR:-./database/NoSQL}:/init/NoSQL:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
@@ -416,7 +422,7 @@ services:
     environment:
       MONGO_DB: ${MONGO_DB:-salud_document_store}
     volumes:
-      - ../mantra-core-health-model/NoSQL/55_document_store_mongodb:/init/mongo:ro
+      - ${NOSQL_MODEL_DIR:-./database/NoSQL}/55_document_store_mongodb:/init/mongo:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       mongodb:
@@ -478,7 +484,7 @@ services:
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:
-      - ../mantra-core-health-model/NoSQL/57_search_platform_opensearch:/init/os:ro
+      - ${NOSQL_MODEL_DIR:-./database/NoSQL}/57_search_platform_opensearch:/init/os:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       opensearch:

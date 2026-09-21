@@ -209,6 +209,7 @@ DECLARE
     n_fk       integer;
     n_indices  integer;
     n_check    integer;
+    n_columna  integer;
 BEGIN
     -- 2: las dos tablas nuevas están.
     SELECT count(*) INTO n_tablas
@@ -264,10 +265,22 @@ BEGIN
             'interest_calculation_method=ANYARRAY[''FRENCH'',''FLAT'']'
           );
 
-    IF n_tablas <> 2 OR n_fk <> 10 OR n_indices <> 10 OR n_check <> 1 THEN
+    -- El CHECK sólo se exige mientras exista la columna. v4.2.18
+    -- (2026-09-18_v4218_quotations_flexible_payment_plan.sql) la retira junto
+    -- con su CHECK, y el DDL base ya nace en ese estado: en una base nueva la
+    -- tabla la crea apply_all sin la columna, el CREATE TABLE IF NOT EXISTS de
+    -- arriba no hace nada y exigir el CHECK abortaba la inicialización entera.
+    SELECT count(*) INTO n_columna
+    FROM information_schema.columns
+    WHERE table_schema = 'billing'
+      AND table_name = 'quotations'
+      AND column_name = 'interest_calculation_method';
+
+    IF n_tablas <> 2 OR n_fk <> 10 OR n_indices <> 10
+       OR n_check <> n_columna THEN
         RAISE EXCEPTION
-            'v4.2.8 incompleto: tablas=% (esperado 2), fk=% (esperado 10), indices=% (esperado 10), check=% (esperado 1)',
-            n_tablas, n_fk, n_indices, n_check;
+            'v4.2.8 incompleto: tablas=% (esperado 2), fk=% (esperado 10), indices=% (esperado 10), check=% (esperado %)',
+            n_tablas, n_fk, n_indices, n_check, n_columna;
     END IF;
 
     RAISE NOTICE 'v4.2.8 aplicado: 2 tablas, 10 FK validadas, 10 índices, 1 CHECK.';

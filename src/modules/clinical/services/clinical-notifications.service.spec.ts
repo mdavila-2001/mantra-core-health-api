@@ -70,6 +70,18 @@ describe('ClinicalNotificationsService · disparadores de P1', () => {
     expect(input.destination).toEqual({ type: 'ENCOUNTER', id: 'enc-1' });
   });
 
+  it('MCH-027 · avisa de la orden nueva apuntando a la orden, una vez por orden', async () => {
+    const d = build();
+
+    await d.service.serviceRequestPlaced('sr-1', PACIENTE, MEDICO);
+
+    const [input] = d.notifications.emitInApp.mock.calls[0] as any[];
+    expect(input.recipientUserId).toBe(CUENTA);
+    expect(input.category).toBe('CLINICAL');
+    expect(input.destination).toEqual({ type: 'SERVICE_REQUEST', id: 'sr-1' });
+    expect(input.debounceKey).toBe('clinical:SERVICE_REQUEST:sr-1');
+  });
+
   it('no avisa —ni falla— cuando el perfil todavía no tiene cuenta activa', async () => {
     const d = build();
     d.accountLinks.findActiveByPerson.mockResolvedValue(null);

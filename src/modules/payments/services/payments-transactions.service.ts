@@ -8,7 +8,6 @@ import {
   ResourceNotFoundException,
   UnauthorizedException,
   canonicalJson,
-  deriveWebhookSecret,
   touch,
   verifySignature,
   type AuthenticatedUser,
@@ -30,6 +29,14 @@ import {
   CancellationResponseDto,
   type TransactionOperation,
 } from '../dto';
+import { resolveGatewayWebhookSecrets } from './webhook-secret.resolver';
+import {
+  compararImportes,
+  esImportePositivo,
+  restarImportes,
+  sumarImportes,
+} from './payment-money';
+import { decidirCallback, referenciaEvento } from './payment-callback-machine';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   AUTHORIZE: CONCEPTS.TXN_OP_AUTHORIZE,
@@ -37,13 +44,13 @@ const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   SALE: CONCEPTS.TXN_OP_SALE,
 };
 
-/** Estado en que queda la transacción según la operación solicitada. */
-const OPERATION_RESULT_STATUS: Readonly<Record<TransactionOperation, string>> =
-  {
-    AUTHORIZE: CONCEPTS.TXN_AUTHORIZED,
-    CAPTURE: CONCEPTS.TXN_CAPTURED,
-    SALE: CONCEPTS.TXN_CAPTURED,
-  };
+/*
+ * Contención MCH-003 (F01-T01). El módulo no tiene adaptador de gateway: ninguna
+ * de estas rutas llama a un proveedor. Hasta que exista uno (F05), lo único
+ * honesto es registrar la *solicitud* y dejar el resultado pendiente. El único
+ * camino que puede afirmar que el dinero se movió es el callback firmado del
+ * proveedor (`applyCallback`), que verifica el HMAC antes de tocar un estado.
+ */
 
 /** Estados terminales de cobro: habilitan reembolso pero no anulación. */
 const CAPTURED_STATES: readonly string[] = [
@@ -77,11 +84,18 @@ export class PaymentsTransactionsService {
   }
 
   /**
-   * UC-42-05: ejecuta la operación contra el gateway.
+   * UC-42-05: registra la operación solicitada al gateway.
+   *
+   * La transacción nace en PROCESSING sea cual sea la operación: sin adaptador no
+   * hay respuesta del proveedor que permita afirmar autorización ni captura.
    *
    * Se exige que el motor de riesgo haya aprobado el intent (UC-42-04 va incluido
    * en este flujo): cobrar sin esa decisión dejaría pasar operaciones que el
    * antifraude rechazó.
+   *
+   * MCH-036: el importe se valida contra el saldo pendiente de la intención
+   * —lo debido menos lo efectivamente capturado— con aritmética exacta, de modo
+   * que un cobro parcial es legítimo pero la suma nunca excede lo debido.
    */
   async processTransaction(
     intentId: string,
@@ -115,6 +129,28 @@ export class PaymentsTransactionsService {
         });
       }
 
+      // Una operación abierta impide otra que el proveedor pueda confirmar a la
+      // vez: sería un segundo cobro. Sobre una autorización confirmada sólo cabe
+      // capturarla; otra venta o autorización duplicaría el cargo.
+      const open = await this.transactionsRepo.findPendingByIntent(
+        tx,
+        intentId,
+      );
+      if (
+        open &&
+        (open.statusConceptId === CONCEPTS.TXN_PROCESSING ||
+          dto.operation !== 'CAPTURE')
+      ) {
+        throw new ConflictException(
+          'La intención tiene una operación abierta en el gateway',
+          {
+            intentId,
+            transactionId: open.id,
+            statusConceptId: open.statusConceptId,
+          },
+        );
+      }
+
       const risk = await this.flowRepo.findLatestRiskAssessment(tx, intentId);
       if (!risk) {
         throw new PreconditionFailedException(
@@ -131,24 +167,56 @@ export class PaymentsTransactionsService {
         );
       }
 
+      // MCH-036: el importe de la operación se mide contra lo que todavía se
+      // debe, no contra el de la intención. Antes se admitía cualquier importe y
+      // el saldo nunca se calculaba, así que una captura parcial podía cerrar la
+      // intención completa y una segunda podía cobrar de más.
+      const capturado = await this.capturadoDeIntencion(tx, intentId);
+      const saldo = restarImportes(intent.amount, capturado);
+      // Sin importe explícito se pide el saldo pendiente, que en una intención
+      // intacta es el total.
+      const solicitado = dto.amount ?? saldo;
+      if (!esImportePositivo(solicitado)) {
+        throw new PreconditionFailedException(
+          'El importe a procesar debe ser mayor que cero',
+          { intentId, amount: solicitado },
+        );
+      }
+      if (compararImportes(solicitado, saldo) > 0) {
+        throw new ConflictException(
+          'El importe excede el saldo pendiente de la intención',
+          { intentId, amount: solicitado, captured: capturado, balance: saldo },
+        );
+      }
+      // Capturar más de lo autorizado es un cobro sin autorización del emisor.
+      if (
+        dto.operation === 'CAPTURE' &&
+        open?.statusConceptId === CONCEPTS.TXN_AUTHORIZED &&
+        compararImportes(solicitado, open.amount) > 0
+      ) {
+        throw new ConflictException('La captura excede el importe autorizado', {
+          intentId,
+          transactionId: open.id,
+          amount: solicitado,
+          authorized: open.amount,
+        });
+      }
+
       const transaction = this.transactionsRepo.create(tx, {
         paymentIntentId: intentId,
         gatewayId: intent.gatewayId,
         transactionTypeConceptId: OPERATION_CONCEPT[dto.operation],
         gatewayTransactionRef: dto.gatewayTransactionRef,
-        amount: dto.amount ?? intent.amount,
+        amount: solicitado,
         currencyConceptId: intent.currencyConceptId,
-        statusConceptId: OPERATION_RESULT_STATUS[dto.operation],
+        statusConceptId: CONCEPTS.TXN_PROCESSING,
         authorizationCode: dto.authorizationCode,
         processedAt: new Date(),
         actorUserId: actor.id,
       });
 
-      // Autorizar deja el intent en proceso; capturar o vender lo cierra.
-      intent.statusConceptId =
-        dto.operation === 'AUTHORIZE'
-          ? CONCEPTS.PI_PROCESSING
-          : CONCEPTS.PI_SUCCEEDED;
+      // El intent sólo se cierra cuando el proveedor confirma por callback.
+      intent.statusConceptId = CONCEPTS.PI_PROCESSING;
       touch(intent, actor.id);
 
       return {
@@ -167,6 +235,12 @@ export class PaymentsTransactionsService {
    * Los proveedores reintentan los webhooks, así que la operación debe ser
    * idempotente: si la transacción ya está en el estado que informa el callback se
    * responde `duplicate=true` sin volver a mutar nada ni duplicar efectos contables.
+   *
+   * MCH-011: también reordenan. El evento verificado se archiva en
+   * `payment_webhook_events` y se interpreta con la máquina de estados
+   * (`decidirCallback`): sólo un avance legítimo escribe. Una entrega atrasada se
+   * ignora sin retroceder y una contradicción con un estado terminal queda sin
+   * procesar para conciliación, en vez de sobreescribir un cobro confirmado.
    */
   async applyCallback(
     callbackPath: string,
@@ -197,27 +271,28 @@ export class PaymentsTransactionsService {
 
       // Verificación de origen del webhook (fail-closed). Sin esto, cualquiera que
       // conozca una `gatewayTransactionRef` podía forzar `PI_SUCCEEDED` (pago
-      // fraudulento). Se valida el HMAC de la firma contra el secreto del gateway.
-      // TODO: resolver el secreto real desde `gateway_connections.webhook_secret_ref`
-      // (bóveda de credenciales) en lugar del secreto derivado por gateway.
-      const webhookSecret = deriveWebhookSecret(
-        'payments-gateway',
-        transaction.gatewayId,
-      );
+      // fraudulento). MCH-019: el HMAC se valida con el secreto de la conexión
+      // configurada (`gateway_connections.webhook_secret_ref`); sin él, se rechaza.
+      const { secrets, connectionId, reason } =
+        await resolveGatewayWebhookSecrets(tx, transaction);
       const signedBody = canonicalJson({
         gatewayTransactionRef: dto.gatewayTransactionRef,
         outcome: dto.outcome,
         authorizationCode: dto.authorizationCode,
       });
+      const signature = dto.signature;
       if (
-        !dto.signature ||
-        !verifySignature(webhookSecret, signedBody, dto.signature)
+        !signature ||
+        !secrets.some((secret) =>
+          verifySignature(secret, signedBody, signature),
+        )
       ) {
         this.logger.warn(
           {
             operation: 'payments.callback.apply',
             gatewayTransactionRef: dto.gatewayTransactionRef,
-            reason: 'invalid-signature',
+            gatewayConnectionId: connectionId,
+            reason: reason ?? 'invalid-signature',
           },
           'Rejected gateway callback with invalid signature',
         );
@@ -225,11 +300,67 @@ export class PaymentsTransactionsService {
       }
 
       const targetStatus = this.callbackStatus(dto.outcome);
-      if (transaction.statusConceptId === targetStatus) {
+      // MCH-011: el evento se interpreta contra el estado ya conocido. Antes
+      // sólo coincidencia exacta contaba como duplicado y cualquier otro caso
+      // sobreescribía, así que un AUTHORIZED atrasado hacía retroceder un cobro
+      // ya confirmado.
+      const decision = decidirCallback(
+        transaction.statusConceptId,
+        targetStatus,
+      );
+
+      // Bandeja de entrada: el hecho verificado se archiva con su firma antes de
+      // decidir nada. La referencia es determinista, así que su índice único
+      // reconoce la reentrega aunque el estado local ya haya avanzado.
+      const eventRef = referenciaEvento(dto);
+      const archivado = await this.transactionsRepo.findWebhookEventByRef(
+        tx,
+        eventRef,
+      );
+      if (!archivado) {
+        this.transactionsRepo.recordWebhookEvent(tx, {
+          gatewayId: transaction.gatewayId,
+          eventType: `payments.callback.${dto.outcome}`,
+          gatewayEventRef: eventRef,
+          payloadJson: {
+            callbackPath,
+            gatewayTransactionRef: dto.gatewayTransactionRef,
+            outcome: dto.outcome,
+            authorizationCode: dto.authorizationCode,
+          },
+          signature: dto.signature,
+          isVerified: true,
+          processed: decision === 'aplicar',
+          relatedIntentId: transaction.paymentIntentId,
+        });
+      }
+
+      if (decision !== 'aplicar') {
+        if (decision !== 'duplicado') {
+          this.logger.warn(
+            {
+              operation: 'payments.callback.apply',
+              transactionId: transaction.id,
+              gatewayTransactionRef: dto.gatewayTransactionRef,
+              currentStatusConceptId: transaction.statusConceptId,
+              reportedStatusConceptId: targetStatus,
+              decision,
+            },
+            decision === 'obsoleto'
+              ? 'Ignored out-of-order gateway callback'
+              : 'Gateway callback contradicts a terminal state; needs reconciliation',
+          );
+        }
+        // No se toca ni la transacción ni la intención: retroceder un estado
+        // confirmado es peor que perder el evento, y la contradicción queda
+        // archivada sin procesar para que alguien la concilie.
         return {
           transactionId: transaction.id,
-          duplicate: true,
-          statusConceptId: targetStatus,
+          duplicate: decision === 'duplicado',
+          applied: false,
+          decision,
+          reconciliationRequired: decision === 'contradiccion',
+          statusConceptId: transaction.statusConceptId,
         };
       }
 
@@ -246,18 +377,29 @@ export class PaymentsTransactionsService {
         transaction.paymentIntentId,
       );
       if (intent) {
-        intent.statusConceptId =
-          dto.outcome === 'FAILED'
-            ? CONCEPTS.PI_FAILED
-            : dto.outcome === 'CAPTURED'
-              ? CONCEPTS.PI_SUCCEEDED
-              : CONCEPTS.PI_PROCESSING;
+        // MCH-036: el estado de la intención se deriva de lo efectivamente
+        // capturado y confirmado, no de la operación que informa este callback.
+        // Antes un CAPTURED de 40 sobre una intención de 100 la dejaba
+        // PI_SUCCEEDED, es decir, la obligación aparecía satisfecha por completo.
+        const capturado = await this.capturadoDeIntencion(
+          tx,
+          transaction.paymentIntentId,
+          { id: transaction.id, statusConceptId: targetStatus },
+        );
+        intent.statusConceptId = this.estadoIntencion(
+          dto.outcome,
+          capturado,
+          intent.amount,
+        );
         touch(intent, undefined);
       }
 
       return {
         transactionId: transaction.id,
         duplicate: false,
+        applied: true,
+        decision,
+        reconciliationRequired: false,
         statusConceptId: targetStatus,
       };
     });
@@ -267,7 +409,8 @@ export class PaymentsTransactionsService {
    * UC-42-07: consulta independiente de estado.
    *
    * Sirve como confirmación antes de los efectos contables cuando el callback no
-   * llegó o discrepa. `reconciled` indica si la consulta cambió el estado local.
+   * llegó o discrepa. `reconciled` indica si la consulta cambió el estado local;
+   * mientras no exista adaptador de gateway es siempre `false`.
    */
   async inquireStatus(
     transactionId: string,
@@ -289,25 +432,29 @@ export class PaymentsTransactionsService {
         });
       }
 
-      // Sin conector de gateway implementado, la consulta confirma el estado ya
-      // conocido: no se inventa un resultado que el proveedor no informó.
-      const reconciled =
-        transaction.statusConceptId === CONCEPTS.TXN_PROCESSING;
-      if (reconciled) {
-        transaction.statusConceptId = CONCEPTS.TXN_CAPTURED;
-        touch(transaction, actor.id);
-      }
+      // Sin conector de gateway no hay a quién consultar: se devuelve el estado
+      // conocido tal cual. Antes esto convertía PROCESSING en CAPTURED, es decir,
+      // afirmaba un cobro que el proveedor nunca informó (MCH-003-AC01).
+      this.logger.warn(
+        {
+          operation: 'payments.transaction.inquiry',
+          transactionId,
+          actorUserId: actor.id,
+          reason: 'gateway-adapter-not-configured',
+        },
+        'Status inquiry answered from local state; no gateway adapter',
+      );
 
       return {
         transactionId,
         statusConceptId: transaction.statusConceptId,
-        reconciled,
+        reconciled: false,
       };
     });
   }
 
   /**
-   * UC-42-08: reembolso total o parcial.
+   * UC-42-08: solicita un reembolso total o parcial; queda pendiente del gateway.
    *
    * Solo sobre transacciones capturadas o liquidadas, y la suma de reembolsos no
    * puede superar lo cobrado: devolver más de lo capturado es un descuadre contable.
@@ -339,18 +486,39 @@ export class PaymentsTransactionsService {
         );
       }
 
+      // El DTO ya lo valida; se repite acá porque el tope de abajo supone
+      // importes positivos y el servicio también se llama sin pasar por HTTP.
+      if (!esImportePositivo(dto.amount)) {
+        throw new PreconditionFailedException(
+          'El importe del reembolso debe ser mayor que cero',
+          { transactionId, amount: dto.amount },
+        );
+      }
+
       const previous = await this.transactionsRepo.findRefundsByTransaction(
         tx,
         transactionId,
       );
-      const refunded = previous.reduce((sum, r) => sum + Number(r.amount), 0);
-      if (refunded + Number(dto.amount) > Number(transaction.amount)) {
+      // Un reembolso fallido no devolvió dinero; uno pendiente sí lo compromete.
+      // Suma y comparación exactas (MCH-017): con `Number`, 0.10 + 0.20 superaba
+      // 0.30 y se rechazaba un reembolso válido.
+      const refunded = sumarImportes(
+        previous
+          .filter((r) => r.statusConceptId !== CONCEPTS.REFUND_FAILED)
+          .map((r) => r.amount),
+      );
+      if (
+        compararImportes(
+          sumarImportes([refunded, dto.amount]),
+          transaction.amount,
+        ) > 0
+      ) {
         throw new ConflictException(
           'El reembolso excede el importe capturado',
           {
             transactionId,
             captured: transaction.amount,
-            alreadyRefunded: refunded.toFixed(2),
+            alreadyRefunded: refunded,
           },
         );
       }
@@ -361,8 +529,8 @@ export class PaymentsTransactionsService {
         currencyConceptId: transaction.currencyConceptId,
         reasonConceptId: CONCEPTS.REFUND_REASON_REQUESTED,
         gatewayRefundRef: dto.gatewayRefundRef,
-        statusConceptId: CONCEPTS.REFUND_COMPLETED,
-        processedAt: new Date(),
+        // Pendiente hasta que el proveedor confirme la devolución (MCH-003-AC03).
+        statusConceptId: CONCEPTS.REFUND_PENDING,
         actorUserId: actor.id,
       });
 
@@ -370,7 +538,7 @@ export class PaymentsTransactionsService {
         id: refund.id,
         paymentTransactionId: transactionId,
         amount: dto.amount,
-        statusConceptId: CONCEPTS.REFUND_COMPLETED,
+        statusConceptId: CONCEPTS.REFUND_PENDING,
       };
     });
   }
@@ -421,8 +589,8 @@ export class PaymentsTransactionsService {
         actorUserId: actor.id,
       });
 
-      transaction.statusConceptId = CONCEPTS.TXN_VOIDED;
-      touch(transaction, actor.id);
+      // La transacción no cambia: anular es una decisión del proveedor, no de
+      // quien la pide. CANCEL_REQUESTED no es VOIDED (MCH-003-AC03).
 
       return {
         id: request.id,
@@ -430,6 +598,66 @@ export class PaymentsTransactionsService {
         statusConceptId: CONCEPTS.CANCEL_REQUESTED,
       };
     });
+  }
+
+  /**
+   * Suma exacta de lo efectivamente cobrado por una intención (MCH-036).
+   *
+   * Sólo cuentan las transacciones capturadas o liquidadas: una operación en
+   * PROCESSING no movió dinero y una autorización tampoco. Por eso una
+   * reentrega del mismo callback no incrementa el acumulado: éste se deriva de
+   * las filas, no de los eventos.
+   *
+   * @param tx - Transacción de base de datos activa.
+   * @param intentId - Intención de pago.
+   * @param enCurso - Transacción cuyo estado está cambiando en esta misma unidad;
+   *   se toma su estado nuevo en lugar del persistido.
+   * @returns El importe capturado, como cadena decimal.
+   */
+  private async capturadoDeIntencion(
+    tx: EntityManager,
+    intentId: string,
+    enCurso?: { id: string; statusConceptId: string },
+  ): Promise<string> {
+    const transacciones = await this.transactionsRepo.findByIntent(
+      tx,
+      intentId,
+    );
+    return sumarImportes(
+      transacciones
+        .map((t) => ({
+          amount: t.amount,
+          statusConceptId:
+            t.id === enCurso?.id ? enCurso.statusConceptId : t.statusConceptId,
+        }))
+        .filter((t) => CAPTURED_STATES.includes(t.statusConceptId))
+        .map((t) => t.amount),
+    );
+  }
+
+  /**
+   * Estado de la intención derivado del importe confirmado (MCH-036).
+   *
+   * No hay un concepto PI_PARTIALLY_CAPTURED en el catálogo, así que una
+   * intención cobrada a medias sigue en PI_PROCESSING: es el estado que ya
+   * significa "en curso" y no afirma que la obligación esté satisfecha. Un fallo
+   * posterior a un cobro parcial tampoco la marca fallida: hay dinero cobrado.
+   *
+   * @param outcome - Resultado informado por el proveedor.
+   * @param capturado - Importe efectivamente capturado.
+   * @param debido - Importe de la intención.
+   * @returns El concepto de estado de la intención.
+   */
+  private estadoIntencion(
+    outcome: GatewayCallbackDto['outcome'],
+    capturado: string,
+    debido: string,
+  ): string {
+    if (compararImportes(capturado, debido) >= 0) return CONCEPTS.PI_SUCCEEDED;
+    if (outcome === 'FAILED' && !esImportePositivo(capturado)) {
+      return CONCEPTS.PI_FAILED;
+    }
+    return CONCEPTS.PI_PROCESSING;
   }
 
   /**

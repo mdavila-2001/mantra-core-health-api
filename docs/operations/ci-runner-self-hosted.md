@@ -135,10 +135,30 @@ enterarse el 14/08 en vez del 18/08.
 
 ## Riesgo aceptado
 
-Un runner self-hosted **ejecuta el código de los PRs en la máquina que lo hospeda**. En estos repos
-es tolerable porque son **privados y sin PRs de forks**: todo lo que corre viene de ramas del
-equipo. Si algún día se abren a contribuciones externas, este runner **no puede seguir así** — hay
-que aislarlo en un contenedor efímero o volver a runners hospedados.
+Un runner self-hosted **ejecuta el código de los PRs en la máquina que lo hospeda**. Esto se aceptó
+suponiendo repos privados y sin forks, pero **la API de GitHub reporta `mantra-core-health-api`
+como público** (consulta del 18/09/2026, 0 forks en ese momento). En un repo público cualquiera
+puede hacer un fork y abrir un PR (MCH-014).
+
+Contención aplicada en `docs.yml`:
+
+- El job `docs` sólo corre para PRs cuya rama vive en este repositorio (y para `workflow_dispatch`).
+- Un PR desde fork dispara `fork-guard`, que **falla a propósito sin hacer checkout ni ejecutar
+  nada del PR**. Falla en vez de saltarse porque un job `skipped` cuenta como éxito en un check
+  requerido. Para validar ese aporte, un mantenedor revisa el código, trae la rama al repositorio y
+  abre el PR desde ahí.
+- `GITHUB_TOKEN` con `contents: read`, y `persist-credentials: false` en el checkout para que el
+  token no quede en `.git/config` del workspace, que en este runner sobrevive al job.
+
+Esto es contención, no aislamiento. Lo que sigue abierto:
+
+- El workspace, la caché de Yarn y los contenedores de Docker **persisten entre jobs** en esta
+  máquina. Un PR de una rama del equipo sigue corriendo con acceso al Docker del host y a la red
+  local. La salida real es un runner efímero (contenedor o VM recreados en cada job) o volver a
+  runners hospedados.
+- Revisar en *Settings → Actions → General* que la aprobación de workflows de forks esté en
+  "Require approval for all outside collaborators". Desde este entorno la API devolvió 403, así
+  que no se pudo verificar.
 
 ## Lo que la primera corrida va a destapar
 

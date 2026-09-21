@@ -53,7 +53,19 @@
  *
  * Requiere una API levantada con el administrador de arranque
  * (`BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`).
+ *
+ * ## `--tanda` y `--emit-credentials` (subtarea 3.3)
+ *
+ * El leg de Playwright contra la API real necesita loguearse como uno de los
+ * pacientes sembrados para ejercer `POST /insurance/portability/export`.
+ * `--tanda <sufijo>` fija el sufijo de la corrida (en vez del reloj) y
+ * `--emit-credentials <ruta.json>` escribe ahí `[{ nombre, nationalId, email,
+ * password, patientProfileId }]` de los pacientes dados de alta, para que el
+ * spec los lea sin tener que adivinar el documento de nadie.
  */
+
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 /**
  * Lee un argumento con valor de la línea de órdenes.
@@ -84,8 +96,17 @@ const CLAVE = 'D3mo-passw0rd!';
 const OPERADOR_EMAIL =
   process.env.T16_BILLING_OPERATOR_EMAIL ?? 'facturacion.demo@alovida.test';
 
-/** Sufijo de la corrida, para que dos pasadas no choquen por código único. */
-const TANDA = Date.now().toString(36).slice(-5);
+/**
+ * Sufijo de la corrida, para que dos pasadas no choquen por código único.
+ *
+ * `--tanda <sufijo>` lo fija (subtarea 3.3): el leg de Playwright contra la
+ * API real necesita saber de antemano el documento con el que inicia sesión
+ * cada paciente sembrado, y un sufijo por reloj (`Date.now()`) se lo impediría.
+ */
+const TANDA = arg('tanda', Date.now().toString(36).slice(-5));
+
+/** Ruta donde volcar las credenciales de los pacientes sembrados, si se pide. */
+const EMIT_CREDENTIALS_PATH = arg('emit-credentials', null);
 
 /**
  * Moneda de los planes sembrados: el boliviano del catálogo global.
@@ -485,6 +506,7 @@ async function main() {
 
   console.log(`· Dando de alta ${PACIENTES.length} pacientes con su cobertura…`);
   const coberturas = [];
+  const credenciales = [];
   for (const [indice, persona] of PACIENTES.entries()) {
     const ci = `${persona.ci}${TANDA.slice(-2)}`;
     const correo = `${persona.nombre.toLowerCase()}.${persona.apellido.toLowerCase()}.${TANDA}${indice}@alovida.test`;
@@ -536,7 +558,26 @@ async function main() {
     if (!cobertura.ok) continue;
 
     coberturas.push({ quien, id: cobertura.body.id });
+    credenciales.push({
+      nombre: quien,
+      nationalId: ci,
+      email: correo,
+      password: CLAVE,
+      patientProfileId,
+    });
     console.log(`    ${indice + 1}/${PACIENTES.length}  ${quien}`);
+  }
+
+  if (EMIT_CREDENTIALS_PATH && credenciales.length > 0) {
+    mkdirSync(dirname(EMIT_CREDENTIALS_PATH), { recursive: true });
+    writeFileSync(
+      EMIT_CREDENTIALS_PATH,
+      JSON.stringify(credenciales, null, 2),
+      'utf8',
+    );
+    console.log(
+      `  Credenciales de ${credenciales.length} paciente(s) escritas en ${EMIT_CREDENTIALS_PATH}`,
+    );
   }
 
   if (coberturas.length === 0) {

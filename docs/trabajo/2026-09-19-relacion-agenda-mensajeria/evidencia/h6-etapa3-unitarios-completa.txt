@@ -1,0 +1,1042 @@
+﻿=== ETAPA 3b: suite unitaria completa (yarn test) ===
+corepack : (node:18260) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En línea: 1 Carácter: 588
++ ... 0=Get-Date; corepack yarn test *>> "$ev\h6-etapa3-unitarios-completa. ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:18260) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:20652) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:20460) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:9236) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-facilities.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-facilities.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\vademecum\vademecum.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\vademecum-seed.service.ts): use 
+`with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\t
+ransversal\anamnesis-historia-clinica-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\examen-fisico-general.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\consentimiento-informado.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\epicrisis-resumen-de-egreso.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\ficha-cardiologica-base.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\riesgo-cardiovascular-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\control-de-nino-sano.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\curvas-de-crecimiento-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+inecologia-obstetricia\control-prenatal-hcp.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\t
+raumatologia\evaluacion-musculoesqueletica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oftalmologia\examen-oftalmologico-basico.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\odontologia\odontograma-oms.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\psiquiatria\evaluacion-de-salud-mental.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\dermatologia\examen-dermatologico.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-interna\evaluacion-de-medicina-interna.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-general\consulta-de-medicina-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-familiar\consulta-de-medicina-familiar.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neurologia\evaluacion-neurologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\e
+ndocrinologia\evaluacion-endocrinologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+astroenterologia\evaluacion-gastroenterologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neumologia\evaluacion-neumologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\nefrologia\evaluacion-nefrologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\reumatologia\evaluacion-reumatologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\infectologia\evaluacion-infectologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\geriatria\valoracion-geriatrica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oncologia\evaluacion-oncologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\hematologia\evaluacion-hematologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-intensiva\evaluacion-en-medicina-intensiva.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-emergencia\atencion-en-emergencia.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\c
+irugia-general\evaluacion-de-cirugia-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\urologia\evaluacion-urologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\o
+torrinolaringologia\evaluacion-otorrinolaringologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\anestesiologia\valoracion-preanestesica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\r
+adiologia\informe-de-estudio-por-imagenes.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\patologia-clinica\informe-de-patologia.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\b
+ioquimica-clinica\informe-de-laboratorio.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-deportiva\evaluacion-de-medicina-deportiva.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\p
+sicologia-clinica\evaluacion-psicologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\nutricion\evaluacion-nutricional.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\fisioterapia\evaluacion-kinesiologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\enfermeria\valoracion-de-enfermeria.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\obstetricia\control-obstetrico.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\odontologia\anamnesis-odontologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\fee-schedule.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-fee-schedule.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-facilities.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\t
+ransversal\anamnesis-historia-clinica-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\examen-fisico-general.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\consentimiento-informado.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\epicrisis-resumen-de-egreso.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\ficha-cardiologica-base.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\riesgo-cardiovascular-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\control-de-nino-sano.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\curvas-de-crecimiento-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+inecologia-obstetricia\control-prenatal-hcp.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\t
+raumatologia\evaluacion-musculoesqueletica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oftalmologia\examen-oftalmologico-basico.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\odontologia\odontograma-oms.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\psiquiatria\evaluacion-de-salud-mental.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\dermatologia\examen-dermatologico.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-interna\evaluacion-de-medicina-interna.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-general\consulta-de-medicina-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-familiar\consulta-de-medicina-familiar.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neurologia\evaluacion-neurologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\e
+ndocrinologia\evaluacion-endocrinologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+astroenterologia\evaluacion-gastroenterologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neumologia\evaluacion-neumologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\nefrologia\evaluacion-nefrologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\reumatologia\evaluacion-reumatologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\infectologia\evaluacion-infectologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\geriatria\valoracion-geriatrica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oncologia\evaluacion-oncologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\hematologia\evaluacion-hematologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-intensiva\evaluacion-en-medicina-intensiva.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-emergencia\atencion-en-emergencia.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\c
+irugia-general\evaluacion-de-cirugia-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\urologia\evaluacion-urologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\o
+torrinolaringologia\evaluacion-otorrinolaringologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\anestesiologia\valoracion-preanestesica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\r
+adiologia\informe-de-estudio-por-imagenes.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\patologia-clinica\informe-de-patologia.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\b
+ioquimica-clinica\informe-de-laboratorio.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-deportiva\evaluacion-de-medicina-deportiva.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\p
+sicologia-clinica\evaluacion-psicologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\nutricion\evaluacion-nutricional.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\fisioterapia\evaluacion-kinesiologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\enfermeria\valoracion-de-enfermeria.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\obstetricia\control-obstetrico.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\odontologia\anamnesis-odontologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\vademecum\vademecum.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\vademecum-seed.service.ts): use 
+`with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\fee-schedule.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-fee-schedule.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-facilities.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:19988) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22132) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:10416) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[Nest] 10416  - 20/09/2026, 01:51:23    WARN [DeclaredCoverage] Cobertura ya registrada para el documento y plan declarados; se omite (perfil person-1)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:18628) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:16260) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:19516) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-facilities.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+(node:16392) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:22080) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22468) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:16324) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:14448) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\t
+ransversal\anamnesis-historia-clinica-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\examen-fisico-general.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\consentimiento-informado.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\transversal\epicrisis-resumen-de-egreso.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\ficha-cardiologica-base.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\cardiologia\riesgo-cardiovascular-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\control-de-nino-sano.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\pediatria\curvas-de-crecimiento-oms.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+inecologia-obstetricia\control-prenatal-hcp.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\t
+raumatologia\evaluacion-musculoesqueletica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oftalmologia\examen-oftalmologico-basico.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\odontologia\odontograma-oms.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\psiquiatria\evaluacion-de-salud-mental.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\dermatologia\examen-dermatologico.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-interna\evaluacion-de-medicina-interna.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-general\consulta-de-medicina-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-familiar\consulta-de-medicina-familiar.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neurologia\evaluacion-neurologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\e
+ndocrinologia\evaluacion-endocrinologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\g
+astroenterologia\evaluacion-gastroenterologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\neumologia\evaluacion-neumologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\nefrologia\evaluacion-nefrologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\reumatologia\evaluacion-reumatologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\infectologia\evaluacion-infectologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\geriatria\valoracion-geriatrica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\oncologia\evaluacion-oncologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\hematologia\evaluacion-hematologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-intensiva\evaluacion-en-medicina-intensiva.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-emergencia\atencion-en-emergencia.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\c
+irugia-general\evaluacion-de-cirugia-general.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\urologia\evaluacion-urologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\o
+torrinolaringologia\evaluacion-otorrinolaringologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\anestesiologia\valoracion-preanestesica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\r
+adiologia\informe-de-estudio-por-imagenes.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\patologia-clinica\informe-de-patologia.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\b
+ioquimica-clinica\informe-de-laboratorio.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\m
+edicina-deportiva\evaluacion-de-medicina-deportiva.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\p
+sicologia-clinica\evaluacion-psicologica.json" (from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\nutricion\evaluacion-nutricional.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\fisioterapia\evaluacion-kinesiologica.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\enfermeria\valoracion-de-enfermeria.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\obstetricia\control-obstetrico.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\odontologia\anamnesis-odontologica.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:18260) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17936) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3692) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:21164) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:18332) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3488) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6332) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22212) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:14208) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:768) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:20192) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12164) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7272) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-facilities.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+(node:17544) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\vademecum\vademecum.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\vademecum-seed.service.spec.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\vademecum\vademecum.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\vademecum-seed.service.ts): use 
+`with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+(node:3436) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7456) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:20268) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[Nest] 7456  - 20/09/2026, 01:58:27    WARN [RedisThrottlerStorage] Redis no responde; el rate limit se degrada a memoria por réplica: conexión perdida
+(node:15600) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-facilities.catalog.spec.ts): use `with { type: 'json' }` 
+for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from 
+C:\Users\usuario\Documents\Sistema Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from C:\Users\usuario\Documents\Sistema 
+Salud\mantra-core-health-redesa-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+
+Test Suites: 1 skipped, 680 passed, 680 of 681 total
+Tests:       1 skipped, 8248 passed, 8249 total
+Snapshots:   0 total
+Time:        526.834 s
+Ran all test suites.
+exit=0 · duracion=528s

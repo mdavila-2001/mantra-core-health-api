@@ -19,6 +19,8 @@ import {
 } from '../dto';
 import { CLIN } from '../clinical.concepts';
 import { ClinicalReadService } from './clinical-read.service';
+import { ClinicalNotificationsService } from './clinical-notifications.service';
+import { OutboxService } from '../../messaging/services';
 import {
   DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
   DuplicateStudyDetector,
@@ -52,6 +54,8 @@ export class ServiceRequestsService {
    * @param clinicalRead - Gate de autorización clínica (antiduplicación: PHI cruzada).
    * @param duplicateStudyDetector - Motor de antiduplicación de estudios (T-26).
    * @param logger - Valor de logger requerido por la operación.
+   * @param outbox - Publicación transaccional del hecho (MCH-027).
+   * @param clinicalNotifications - Aviso in-app al paciente (MCH-027).
    */
   constructor(
     private readonly em: EntityManager,
@@ -60,6 +64,8 @@ export class ServiceRequestsService {
     private readonly clinicalRead: ClinicalReadService,
     private readonly duplicateStudyDetector: DuplicateStudyDetector,
     private readonly logger: PinoLogger,
+    private readonly outbox: OutboxService,
+    private readonly clinicalNotifications: ClinicalNotificationsService,
   ) {
     this.logger.setContext(ServiceRequestsService.name);
   }
@@ -148,6 +154,38 @@ export class ServiceRequestsService {
     };
   }
 
+  /**
+   * MCH-008.2: el encuentro tiene que ser del mismo paciente y del mismo
+   * custodio que la orden, no sólo existir.
+   *
+   * Antes se comprobaba únicamente la existencia del id: una orden del
+   * paciente A podía colgar del encuentro de B, o de otro tenant, y la FK lo
+   * aceptaba porque sólo demuestra existencia. El custodio que se compara es
+   * `dto.custodianTenantId`, que el interceptor de tenant ya obligó a ser el
+   * tenant activo del actor.
+   *
+   * Una referencia incoherente responde 404, igual que una inexistente —el
+   * mismo criterio que `ObservationsService.assertReferencesBelongToPatient`
+   * y que `checkDuplicate`—: distinguirlas le diría al cliente que ese id
+   * existe en otra historia u otro tenant.
+   */
+  private async assertEncounterBelongsToPatient(
+    tx: EntityManager,
+    dto: CreateServiceRequestDto,
+  ): Promise<void> {
+    if (!dto.encounterId) return;
+    const encounter = await this.encountersRepo.findById(tx, dto.encounterId);
+    if (
+      !encounter ||
+      encounter.patientProfileId !== dto.patientProfileId ||
+      encounter.tenantId !== dto.custodianTenantId
+    ) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId: dto.encounterId,
+      });
+    }
+  }
+
   /** UC-08-05: registra una orden de servicio con intención de orden. */
   async create(
     dto: CreateServiceRequestDto,
@@ -162,17 +200,7 @@ export class ServiceRequestsService {
       'Placing service request',
     );
     return this.em.transactional(async (tx) => {
-      if (dto.encounterId) {
-        const encounter = await this.encountersRepo.findById(
-          tx,
-          dto.encounterId,
-        );
-        if (!encounter) {
-          throw new ResourceNotFoundException('Encuentro no encontrado', {
-            encounterId: dto.encounterId,
-          });
-        }
-      }
+      await this.assertEncounterBelongsToPatient(tx, dto);
 
       const decision = await this.resolveDuplicateDecision(tx, dto, options);
 
@@ -213,16 +241,34 @@ export class ServiceRequestsService {
         );
       }
 
-      // TODO(J1/P1): avisarle al paciente «tu médico te dejó una orden».
-      //
-      // Va acá, después del flush y DENTRO de la transacción sólo para
-      // encolar: la emisión real sale por outbox, nunca por una llamada
-      // externa dentro de la ventana de lock.
-      //
-      // No se escribe todavía porque el canal in-app es el carril P1 y a la
-      // fecha no mergeó: no hay a quién llamar. Mientras tanto la orden SÍ es
-      // visible para el paciente —`GET /diagnostic-results/me/orders`—, así que
-      // la ausencia del aviso retrasa el enterarse, no lo impide.
+      // MCH-027: el hecho, durable y atómico con la orden. Un rollback se
+      // lleva el evento; la clave de idempotencia derivada del payload impide
+      // publicarlo dos veces. Sólo ids: ni el estudio ni el paciente viajan
+      // en el outbox.
+      await this.outbox.publishDomainEvent(tx, {
+        tenantId: sr.custodianTenantId,
+        eventType: 'ServiceRequestPlaced',
+        aggregateType: 'clinical.service_requests',
+        aggregateId: sr.id,
+        payloadJson: {
+          serviceRequestId: sr.id,
+          statusConceptId: sr.statusConceptId,
+        },
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      // Y la campana del paciente, dentro de la transacción (ver
+      // `ClinicalNotificationsService.serviceRequestPlaced`). Una orden que se
+      // resolvió reutilizando un informe previo no le pide nada al paciente:
+      // no se avisa.
+      if (sr.statusConceptId === CLIN.SERVICE_REQUEST_ACTIVE) {
+        await this.clinicalNotifications.serviceRequestPlaced(
+          sr.id,
+          sr.patientProfileId,
+          actor.id,
+        );
+      }
 
       return {
         id: sr.id,

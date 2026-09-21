@@ -84,9 +84,39 @@ export class OrganizationContactPersonDto {
 
   /**
    * Nombre completo, tal como lo declaró el alta.
+   *
+   * Sigue siendo `profiles.persons.display_name`: si el alta mandó las
+   * partes, la API lo compuso; si mandó la forma anterior (`fullName`), es
+   * ese valor tal cual. Nunca falta.
    */
   @ApiProperty({ description: 'Nombre completo del contacto' })
   fullName!: string;
+
+  /**
+   * Nombre de pila, si el alta lo declaró en partes.
+   *
+   * Ausente en los contactos que se registraron antes de esta subtarea, o
+   * cuando el cliente mandó `fullName` en vez de las partes: esos sólo
+   * tienen `display_name`, y no hay forma de partirlo sin adivinar.
+   */
+  @ApiPropertyOptional({
+    description: 'Nombre de pila, si se declaró en partes',
+  })
+  name?: string;
+
+  /** Segundo nombre, si se declaró. */
+  @ApiPropertyOptional({ description: 'Segundo nombre, si se declaró' })
+  middleName?: string;
+
+  /** Apellido paterno, si se declaró en partes. */
+  @ApiPropertyOptional({
+    description: 'Apellido paterno, si se declaró en partes',
+  })
+  lastName?: string;
+
+  /** Apellido materno, si se declaró. */
+  @ApiPropertyOptional({ description: 'Apellido materno, si se declaró' })
+  motherLastName?: string;
 
   /**
    * Correo de contacto, si lo tiene vigente.

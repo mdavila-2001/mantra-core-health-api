@@ -188,6 +188,44 @@ describe('IamUsersService', () => {
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
+
+    // MCH-004: el rol viaja firmado en el access token. Retirarlo sin cortar las
+    // sesiones dejaba el permiso usable hasta que el token expirara.
+    it('revoking a role ends the user sessions so the signed role stops working', async () => {
+      const d = build();
+      d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
+      d.rolesRepo.findActive.mockResolvedValue({ id: 'r1' });
+      d.sessionsRepo.activeSessionIdsForUser.mockResolvedValue(['s1']);
+
+      await d.service.changeGlobalRole(
+        'u1',
+        { role: 'SECURITY_ADMIN', action: 'REVOKE' },
+        actor as any,
+      );
+
+      expect(d.sessionsRepo.revokeAllActiveForUser).toHaveBeenCalledWith(
+        d.tx,
+        'u1',
+      );
+      expect(d.refreshRepo.revokeActiveBySessionIds).toHaveBeenCalledWith(
+        d.tx,
+        ['s1'],
+      );
+    });
+
+    it('granting a role does not end sessions', async () => {
+      const d = build();
+      d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
+      d.rolesRepo.findActive.mockResolvedValue(null);
+
+      await d.service.changeGlobalRole(
+        'u1',
+        { role: 'SECURITY_ADMIN', action: 'GRANT' },
+        actor as any,
+      );
+
+      expect(d.sessionsRepo.revokeAllActiveForUser).not.toHaveBeenCalled();
+    });
   });
 
   describe('anonymize (UC-01-12)', () => {

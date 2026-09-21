@@ -196,6 +196,13 @@ export class DataReleaseRepository {
     em: EntityManager,
     data: {
       /**
+       * Identificador a fijar en vez del generado por defecto. Lo necesita
+       * un certificado de portabilidad (subtarea 3.3), que referencia este
+       * mismo id como `certificateId` dentro del contenido que sella con
+       * SHA-256 — sin poder fijarlo, el hash y el id de la fila divergirían.
+       */
+      id?: string;
+      /**
        * Identificador asociado a tenant.
        */
       tenantId?: string;
@@ -244,6 +251,7 @@ export class DataReleaseRepository {
     return em.create(
       HealthExportJobs,
       {
+        ...(data.id ? { id: data.id } : {}),
         tenantId: data.tenantId,
         exportTypeConceptId: data.exportTypeConceptId,
         requestedByUserId: data.requestedByUserId,
@@ -355,5 +363,32 @@ export class DataReleaseRepository {
       healthExportJobId,
       manifestVersion,
     });
+  }
+
+  /**
+   * Busca un manifiesto por su sello de contenido (subtarea 3.3: verify
+   * público de un certificado de portabilidad). `content_hash` no es único
+   * por diseño —dos exportaciones idénticas byte a byte compartirían hash—,
+   * pero en la práctica cada certificado lleva su propio `certificateId` y
+   * `generatedAt`, así que dos manifiestos nunca coinciden. Se toma el más
+   * reciente si igual llegara a haber más de uno.
+   */
+  findManifestByContentHash(
+    em: EntityManager,
+    contentHash: string,
+  ): Promise<HealthExportManifests | null> {
+    return em.findOne(
+      HealthExportManifests,
+      { contentHash },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /** El trabajo de exportación por id, de sólo lectura (sin bloqueo). */
+  findExportJobById(
+    em: EntityManager,
+    id: string,
+  ): Promise<HealthExportJobs | null> {
+    return em.findOne(HealthExportJobs, { id });
   }
 }

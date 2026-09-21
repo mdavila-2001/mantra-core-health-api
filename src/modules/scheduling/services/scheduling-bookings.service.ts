@@ -16,6 +16,7 @@ import {
   SchedulingCatalogRepository,
 } from '../repositories';
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
+import { puedeVerElMotivoDeLaCita } from '../policies/booking-reason-visibility.policy';
 import { SchedulingProfessionalTimeService } from './scheduling-professional-time.service';
 import { SchedulingWaitlistService } from './scheduling-waitlist.service';
 import {
@@ -1254,6 +1255,15 @@ export class SchedulingBookingsService {
           bookingId,
         });
       }
+
+      // H3.S1.M2 (BOLA/IDOR de escritura): mismo hueco que `cancelarYAvisar` —
+      // reprogramar no comprobaba que el actor fuera el paciente titular.
+      await this.assertPuedeActuarPorElPaciente(
+        booking.patientProfileId,
+        actor,
+        tx,
+      );
+
       if (!ACTIVE_BOOKING_STATES.includes(booking.statusConceptId)) {
         throw new PreconditionFailedException(
           'Solo se reprograma una cita vigente',
@@ -1403,6 +1413,18 @@ export class SchedulingBookingsService {
           bookingId,
         });
       }
+
+      // H3.S1.M2 (BOLA/IDOR de escritura): cancelar/rechazar no comprobaba de
+      // quién era la cita — el único control era `@Roles(...,'PATIENT')`, que
+      // autoriza a cualquier cuenta de paciente, no sólo a la titular. Mismo
+      // método que ya usan `placeHold`, la confirmación del hold y `enroll` de
+      // la lista de espera: es un no-op para quien opera la agenda.
+      await this.assertPuedeActuarPorElPaciente(
+        booking.patientProfileId,
+        actor,
+        tx,
+      );
+
       if (booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED) {
         throw new ConflictException('La cita ya está cancelada', { bookingId });
       }
@@ -2855,6 +2877,31 @@ export class SchedulingBookingsService {
         ? await this.catalogRepo.findResourceById(em, booking.resourceId)
         : null;
 
+    // H3.S1.M1 (BOLA/IDOR de lectura): el detalle no comprobaba de quién era
+    // la cita — devolvía nombre, motivo y horario a cualquier cuenta con rol
+    // de agenda. Mismo criterio que `cargarParaOperar`: el paciente titular o
+    // su representante, quien opera cualquier agenda (`SCHEDULING_ADMIN`,
+    // `SCHEDULING_AGENT`, `SUPERADMIN`), o quien atiende exactamente en ese
+    // recurso. Reusa el `recurso` de arriba: no agrega una consulta nueva.
+    if (this.esUnPaciente(actor)) {
+      await this.assertPuedeActuarPorElPaciente(
+        booking.patientProfileId,
+        actor!,
+        em,
+      );
+    } else if (actor && !this.operaCualquierAgenda(actor)) {
+      const esSuAgenda =
+        actor.practitionerProfileId !== undefined &&
+        recurso !== null &&
+        recurso.resourceRefId === actor.practitionerProfileId &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType);
+      if (!esSuAgenda) {
+        throw new ForbiddenException(
+          'Esta cita es de otra agenda: solo la opera quien atiende en ella.',
+        );
+      }
+    }
+
     // El detalle tiene que decir exactamente lo mismo que el listado, así que
     // la tipología también se resuelve acá. Una sola cita: el lote de uno es la
     // misma consulta.
@@ -2909,50 +2956,6 @@ export class SchedulingBookingsService {
    * uno y olvidarlo en el otro hacía que el detalle contradijera a la fila que
    * lo abrió.
    */
-  /**
-   * ¿Puede este actor leer el **motivo de consulta** de esta cita?
-   *
-   * Sólo el paciente titular y el profesional que la atiende. Ni la
-   * organización, ni otro médico, ni un administrador: por qué alguien pide un
-   * turno es un dato clínico, y una agenda de organización que lo muestre
-   * convierte un listado operativo en una lista de diagnósticos presuntos.
-   *
-   * **No** es lo mismo que el motivo de CANCELACIÓN (`statusReason`), que sí es
-   * visible para las dos partes: ahí el interés es saber por qué se cayó el
-   * turno, y quien lo escribió sabía que el otro lado lo iba a leer.
-   *
-   * Vive acá —en la proyección, un solo lugar— para que cualquier lectura
-   * futura lo herede sin acordarse. Es lo que hace que la agenda de la
-   * organización (TP-5) nazca sin la fuga.
-   */
-  private puedeVerElMotivo(
-    booking: AppointmentBookings,
-    actor?: AuthenticatedUser,
-    profesionalDeLaAgenda?: string,
-    pacientesRepresentados?: ReadonlySet<string>,
-  ): boolean {
-    if (!actor) return false;
-    if (
-      actor.patientProfileId !== undefined &&
-      actor.patientProfileId === booking.patientProfileId
-    ) {
-      return true;
-    }
-    // Y quien lo representa (B.1): el motivo del turno de un hijo lo escribió
-    // su madre al pedirlo. Ocultárselo le escondería lo que ella misma tipeó.
-    // El conjunto lo aporta quien proyecta, que lo pidió una vez para toda la
-    // página en vez de una consulta por fila.
-    if (pacientesRepresentados?.has(booking.patientProfileId)) return true;
-    // El profesional que atiende. La cita no lo guarda: cuelga del recurso
-    // (`resource_ref_id`), así que lo aporta quien proyecta — que es el único
-    // que sabe si ya lo tenía cargado o no vale la pena buscarlo.
-    return (
-      actor.practitionerProfileId !== undefined &&
-      profesionalDeLaAgenda !== undefined &&
-      actor.practitionerProfileId === profesionalDeLaAgenda
-    );
-  }
-
   /**
    * La solicitud de seguro más reciente de cada cita, indexada por `appointmentId`.
    *
@@ -3052,7 +3055,7 @@ export class SchedulingBookingsService {
       // El motivo de consulta se omite salvo para el titular y su médico. Se
       // omite, no se vacía: un `''` diría «no escribió motivo», que es una
       // afirmación distinta y falsa.
-      ...(this.puedeVerElMotivo(
+      ...(puedeVerElMotivoDeLaCita(
         booking,
         actor,
         profesionalDeLaAgenda,
@@ -3065,7 +3068,7 @@ export class SchedulingBookingsService {
       // necesita saber a quién espera —es el pedido explícito del registro del
       // cliente— y la organización ya opera con el identificador.
       ...(nombreDelPaciente !== undefined &&
-      this.puedeVerElMotivo(
+      puedeVerElMotivoDeLaCita(
         booking,
         actor,
         profesionalDeLaAgenda,
@@ -3077,7 +3080,7 @@ export class SchedulingBookingsService {
       // tiene» —Particular—; el campo entero se omite cuando quien mira no
       // puede ver al paciente, que es una pregunta distinta.
       ...(aseguradoraPorPaciente !== undefined &&
-      this.puedeVerElMotivo(
+      puedeVerElMotivoDeLaCita(
         booking,
         actor,
         profesionalDeLaAgenda,
@@ -3093,7 +3096,7 @@ export class SchedulingBookingsService {
       // —también cuando la reserva todavía no tiene cita clínica, que no puede
       // tener solicitud—; ausente es «quien mira no puede verlo».
       ...(solicitudPorCita !== undefined &&
-      this.puedeVerElMotivo(
+      puedeVerElMotivoDeLaCita(
         booking,
         actor,
         profesionalDeLaAgenda,

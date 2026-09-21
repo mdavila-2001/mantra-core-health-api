@@ -597,6 +597,20 @@ export class DirectoryReadService {
       return {
         role: rol,
         fullName: persona.displayName ?? '',
+        // Las partes sólo se declaran si `persons` las tiene: un contacto
+        // registrado con la forma legada (`fullName`), o antes de esta
+        // subtarea, sólo tiene `display_name` — no hay de dónde sacarlas.
+        // MikroORM hidrata una columna nullable sin valor como `null`, nunca
+        // `undefined` — comparar contra `undefined` acá dejaba pasar un
+        // `name: null` explícito al JSON de respuesta.
+        ...(persona.name == null ? {} : { name: persona.name }),
+        ...(persona.middleName == null
+          ? {}
+          : { middleName: persona.middleName }),
+        ...(persona.lastName == null ? {} : { lastName: persona.lastName }),
+        ...(persona.motherLastName == null
+          ? {}
+          : { motherLastName: persona.motherLastName }),
         email: contactoDe(vinculo.personId, [CONCEPTS.CONTACT_EMAIL]),
         phone: contactoDe(vinculo.personId, [
           CONCEPTS.CONTACT_MOBILE,

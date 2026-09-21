@@ -1,0 +1,57 @@
+# H2.S1.M2 - kill-test del detector de deriva del catalogo
+# fecha: 2026-09-20 · rama: justin/2026-09-20-catalogo-razones-emit
+
+## 1. Verde de partida
+
+$ yarn test --testPathPatterns=agenda-notice-reason
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+exit=0
+
+## 2. Se inyecta una razon que el catalogo NO tiene
+
+En messaging-agenda-notice.adapter.ts, junto a la razon de "sin cuenta de portal":
+
+    ...(false ? { skippedReason: 'una razon que nadie catalogo' } : {}),
+
+Es una rama inalcanzable a proposito: lo que se esta probando es que el detector
+lea el FUENTE, no que el adaptador se comporte distinto.
+
+## 3. La prueba se pone en rojo, y dice cual es la razon nueva
+
+$ yarn test --testPathPatterns=agenda-notice-reason
+
+  - Expected  - 1
+  + Received  + 3
+  - Array []
+  + Array [
+  +   "una razon que nadie catalogo",
+  > 104 |       expect(sinCatalogar).toEqual([]);
+
+  Expected: 10
+  Received: 11        <- el fusible de "lee de verdad los dos fuentes"
+
+Tests:       2 failed, 6 passed, 8 total
+exit=1
+
+Fallan las dos que tienen que fallar: la que exige catalogar todo, y el fusible
+que cuenta cuantas razones vivas hay. Las otras seis siguen verdes porque no
+dependen del fuente.
+
+## 4. Se revierte y vuelve el verde
+
+$ git checkout -- src/modules/scheduling/adapters/messaging-agenda-notice.adapter.ts
+$ git status --porcelain src/modules/scheduling/adapters/ | wc -l
+0
+
+$ yarn test --testPathPatterns=agenda-notice-reason
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+exit=0
+
+## Que demuestra
+
+Que el catalogo no se puede quedar viejo en silencio: el dia que alguien agregue
+una razon al adaptador y no la catalogue, la suite lo dice con el texto exacto.
+Sin esta prueba, el catalogo seria una foto que envejece sin avisar - que es
+exactamente el problema que vino a resolver.

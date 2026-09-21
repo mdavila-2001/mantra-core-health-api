@@ -1,0 +1,974 @@
+{
+  "registro": "consolidado de los checks de los niveles A, B y C",
+  "fecha": "2026-09-20",
+  "responsable": "Justin (carril B)",
+  "artefacto_base": "mantra-core-health-api@4cc5ea1f",
+  "formato": "13 campos por check (H1.S2.M1). command y exit_code son null SÓLO sin ejecución, con causa en reason.",
+  "estados": [
+    "PASS",
+    "FAIL",
+    "BLOCKED",
+    "NOT_RUN"
+  ],
+  "niveles": {
+    "A": "artefacto — el módulo empaquetado (dueño: Itzan)",
+    "B": "relación — agenda → mensajería (dueño: Justin)",
+    "C": "sistema — la regresión del candidato (dueño: Justin, con insumo de Pablo)"
+  },
+  "fuentes": [
+    {
+      "nivel": "A",
+      "origen": "AlovidaPromptManager@origin/itzan/daily-noche-2026-09-19:docs/trabajo/2026-09-20-aislamiento-scheduling/MANIFEST-artefacto-h3.md §H3.S3.M2",
+      "nota": "Transcrito de prosa: su autor no publicó JSON. Rama sin mergear."
+    },
+    {
+      "nivel": "B",
+      "origen": "docs/trabajo/2026-09-19-relacion-agenda-mensajeria/registro-de-checks.json",
+      "nota": "Leído del archivo, no retipeado. Cinco checks reevaluados hoy."
+    },
+    {
+      "nivel": "C",
+      "origen": "ídem + las etapas corridas el 2026-09-20",
+      "nota": "La regresión full-app de Pablo (5 rojos por HALL-01) es insumo, no check propio."
+    }
+  ],
+  "ausencias_declaradas": [
+    {
+      "quien": "Ender — propietario del contrato del piloto",
+      "estado": "0 / 50 microtareas; su daily nunca se ejecutó",
+      "efecto": "No existe artefacto de contrato, así que el nivel A no tiene su check de compatibilidad y la matriz de versiones del gate B tiene una celda NO_APLICA."
+    }
+  ],
+  "checks": [
+    {
+      "check_id": "A1",
+      "gate": "A",
+      "scope": "static",
+      "artifact": "scheduling-module@v0.1.0-transitional",
+      "required": true,
+      "applicable": true,
+      "status": "FAIL",
+      "reason": "Mapa de resolución sin vecino: el artefacto SÍ resuelve a messaging y community. Declarado por su autor en vez de empaquetar una versión rota.",
+      "participants": [
+        {
+          "name": "scheduling-module",
+          "kind": "artefacto",
+          "version": "v0.1.0-transitional"
+        }
+      ],
+      "command": null,
+      "exit_code": null,
+      "evidence_paths": [
+        "AlovidaPromptManager@origin/itzan/daily-noche-2026-09-19:docs/trabajo/2026-09-20-aislamiento-scheduling/MANIFEST-artefacto-h3.md"
+      ],
+      "limits": "Evidencia en otro repo y en una rama sin mergear. Los 117 archivos del paquete no viajan."
+    },
+    {
+      "check_id": "A2",
+      "gate": "A",
+      "scope": "static",
+      "artifact": "scheduling-module@v0.1.0-transitional",
+      "required": true,
+      "applicable": true,
+      "status": "FAIL",
+      "reason": "Typecheck/build delimitado por módulo: no existe de forma nativa (el repo no es un monorepo Nest). Typecheck completo con los vecinos retirados: exit 2, 143 errores, contra una línea base de exit 0 en la misma copia.",
+      "participants": [
+        {
+          "name": "scheduling-module",
+          "kind": "artefacto",
+          "version": "v0.1.0-transitional"
+        }
+      ],
+      "command": "tsc --noEmit (en copia descartable, sin messaging ni community)",
+      "exit_code": 2,
+      "evidence_paths": [
+        "AlovidaPromptManager@origin/itzan/daily-noche-2026-09-19:docs/trabajo/2026-09-20-aislamiento-scheduling/evidencia/H2.S2-gates-en-la-copia.txt"
+      ],
+      "limits": "Mide la copia aislada, no el repo. 5 de los 143 errores caen dentro de scheduling."
+    },
+    {
+      "check_id": "A3",
+      "gate": "A",
+      "scope": "integration",
+      "artifact": "scheduling-module@v0.1.0-transitional",
+      "required": true,
+      "applicable": true,
+      "status": "NOT_RUN",
+      "reason": "Arranque propio y cierre limpio: bloqueado por A2. No se ejecutó.",
+      "participants": [
+        {
+          "name": "scheduling-module",
+          "kind": "artefacto",
+          "version": "v0.1.0-transitional"
+        }
+      ],
+      "command": null,
+      "exit_code": null,
+      "evidence_paths": [
+        "AlovidaPromptManager@origin/itzan/daily-noche-2026-09-19:docs/trabajo/2026-09-20-aislamiento-scheduling/evidencia/H2.S2-gates-en-la-copia.txt"
+      ],
+      "limits": "Sin evidencia fabricada ni heredada de otra versión."
+    },
+    {
+      "check_id": "A4-A6",
+      "gate": "A",
+      "scope": "integration",
+      "artifact": "scheduling-module@v0.1.0-transitional",
+      "required": true,
+      "applicable": true,
+      "status": "NOT_RUN",
+      "reason": "Aceptación local contra el laboratorio de Pablo: bloqueada por A3, que a su vez lo está por A2. Su autor la entregó agrupada en una sola fila.",
+      "participants": [
+        {
+          "name": "scheduling-module",
+          "kind": "artefacto",
+          "version": "v0.1.0-transitional"
+        },
+        {
+          "name": "agenda-notice-capability.lab",
+          "kind": "real",
+          "version": "cd1889bf"
+        }
+      ],
+      "command": null,
+      "exit_code": null,
+      "evidence_paths": [
+        "AlovidaPromptManager@origin/itzan/daily-noche-2026-09-19:docs/trabajo/2026-09-20-aislamiento-scheduling/evidencia/H2.S3-veredicto-honesto.md"
+      ],
+      "limits": "Cubre tres gates en un solo resultado. Desagruparlos sería inventar dos resultados."
+    },
+    {
+      "check_id": "A7",
+      "gate": "A",
+      "scope": "static",
+      "artifact": "scheduling-module@v0.1.0-transitional",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Escaneo de secretos sobre los 117 archivos: sin coincidencias.",
+      "participants": [
+        {
+          "name": "scheduling-module",
+          "kind": "artefacto",
+          "version": "v0.1.0-transitional"
+        }
+      ],
+      "command": null,
+      "exit_code": null,
+      "evidence_paths": [
+        "AlovidaPromptManager@origin/itzan/daily-noche-2026-09-19:docs/trabajo/2026-09-20-aislamiento-scheduling/MANIFEST-artefacto-h3.md"
+      ],
+      "limits": "El autor no pegó el comando, sólo su resultado."
+    },
+    {
+      "check_id": "A8",
+      "gate": "A",
+      "scope": "static",
+      "artifact": "scheduling-module@v0.1.0-transitional",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Escaneo de datos reales de personas sobre los 117 archivos: sin coincidencias.",
+      "participants": [
+        {
+          "name": "scheduling-module",
+          "kind": "artefacto",
+          "version": "v0.1.0-transitional"
+        }
+      ],
+      "command": null,
+      "exit_code": null,
+      "evidence_paths": [
+        "AlovidaPromptManager@origin/itzan/daily-noche-2026-09-19:docs/trabajo/2026-09-20-aislamiento-scheduling/MANIFEST-artefacto-h3.md"
+      ],
+      "limits": "El autor no pegó el comando, sólo su resultado."
+    },
+    {
+      "check_id": "H0.instalacion",
+      "gate": "B",
+      "scope": "static",
+      "artifact": "mantra-core-health-api@5d5007f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "176 skills, 14 reglas, 11 PASS / 0 FAIL del self-test",
+      "participants": [
+        {
+          "name": "AlovidaPromptManager",
+          "kind": "real",
+          "version": "1d80697"
+        }
+      ],
+      "command": "ls .claude/skills | wc -l && ls .claude/rules/*.md | wc -l && python .claude/hooks/plan_gate.py --self-test",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h0-instalacion-estandar.txt"
+      ],
+      "limits": "Acredita que el estándar está instalado y que su candado funciona. No acredita que se haya seguido."
+    },
+    {
+      "check_id": "H1.S1.M1",
+      "gate": "B",
+      "scope": "static",
+      "artifact": "src/modules/scheduling/adapters/messaging-agenda-notice.adapter.ts@5d5007f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Adaptador, puerto y binding localizados y abiertos; homónimo de profiles descartado",
+      "participants": [
+        {
+          "name": "git",
+          "kind": "real",
+          "version": "2.x"
+        }
+      ],
+      "command": "grep -rln MessagingAgendaNoticeAdapter src test && git ls-tree -r --name-only HEAD -- src/modules/scheduling/adapters",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h1s1m1-localizacion-adaptador.txt"
+      ],
+      "limits": "Que un símbolo exista no prueba que haga lo que su comentario promete."
+    },
+    {
+      "check_id": "H1.S2.M3",
+      "gate": "B",
+      "scope": "static",
+      "artifact": "package.json@5d5007f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "112 scripts declarados; los 8 relevantes citados literales",
+      "participants": [
+        {
+          "name": "package.json",
+          "kind": "real",
+          "version": "5d5007f"
+        }
+      ],
+      "command": "node -e \"console.log(JSON.stringify(require('./package.json').scripts,null,2))\"",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h1s2m3-comandos-reales.txt"
+      ],
+      "limits": "No existe test:contract ni verify:adapter. Los comandos de los anexos del paquete son especificaciones, no comandos instalados."
+    },
+    {
+      "check_id": "H1.S2.M4",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "mantra_redesa_health@localhost:5433",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "El daemon estaba CAÍDO al arrancar; se levantó a mano y los 5 contenedores subieron healthy",
+      "participants": [
+        {
+          "name": "docker",
+          "kind": "real",
+          "version": "29.4.2"
+        },
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
+      ],
+      "command": "docker exec mantra-redesa-postgres-1 psql -U mantra -d mantra_redesa_health -c '<conteos>'",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h1s2m4-postgres-y-docker.txt"
+      ],
+      "limits": "1 184 tablas y 6 664 FKs. CLAUDE.md documenta 6 663: hay una FK de diferencia, no investigada, ajena a esta relación."
+    },
+    {
+      "check_id": "H2.S1.M1",
+      "gate": "B",
+      "scope": "static",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Destrabado: Itzan publicó scheduling-module-v0.1.0-transitional (sha256 6d4e53d2…, origen 5d5007fb). El adaptador se fija por versión, y el commit de origen se verifica alcanzable desde el corte.",
+      "participants": [
+        {
+          "name": "contrato de Ender",
+          "kind": "double",
+          "version": "PROVISIONAL"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h1-fijacion-por-version.txt"
+      ],
+      "limits": "No dice que el contrato esté mal. Dice que no hay contrato que consumir todavía. · Reevaluado el 2026-09-20 sobre mantra-core-health-api@4cc5ea1f."
+    },
+    {
+      "check_id": "H2.S1.M2",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "test/integration/agenda-mensajeria-relacion.int-spec.ts",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "5 casos de mapeo de datos ejecutados contra el adaptador real con dobles del proveedor",
+      "participants": [
+        {
+          "name": "MessagingAgendaNoticeAdapter",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "NotificationsService",
+          "kind": "double",
+          "version": "ExtremoProveedorFijado"
+        },
+        {
+          "name": "SchedulingNoticeRepository",
+          "kind": "double",
+          "version": "ExtremoProveedorFijado"
+        },
+        {
+          "name": "SupportAdminNoticeAdapter",
+          "kind": "double",
+          "version": "ExtremoProveedorFijado"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h2-relacion-dobles.txt"
+      ],
+      "limits": "Con dobles. NO acredita que ningún aviso llegue a ninguna parte: no hay base, ni fila, ni proveedor."
+    },
+    {
+      "check_id": "H2.S1.M3",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "test/integration/agenda-mensajeria-relacion.int-spec.ts",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "8 casos: los 5 skippedReason del catálogo, los 2 del correo y emitMany",
+      "participants": [
+        {
+          "name": "MessagingAgendaNoticeAdapter",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "extremo proveedor",
+          "kind": "double",
+          "version": "ExtremoProveedorFijado"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h2-relacion-dobles.txt"
+      ],
+      "limits": "Los modos de error se inyectan; no se provocaron condiciones reales de mensajería caída."
+    },
+    {
+      "check_id": "H1.S1.M5",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "test/doubles/strict-agenda-notice-port.double.ts",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Casos 1,2,3,4,4-bis,5,5-bis y 7 del catálogo ejecutados. El caso 6 (repetición) exige base: se cierra en H4",
+      "participants": [
+        {
+          "name": "StrictAgendaNoticePortDouble",
+          "kind": "double",
+          "version": "5d5007f+"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h2-relacion-dobles.txt"
+      ],
+      "limits": "El caso 6 quedó NOT_RUN en esta suite por diseño: medir idempotencia con un contador de llamadas sería exactamente el verde falso que el catálogo prohíbe."
+    },
+    {
+      "check_id": "H3.S1.M1",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "messaging.message_channels@mantra_redesa_health",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Tras el ciclo limpio el canal in-app EXISTE con el id que el adaptador direcciona y está activo con el ACTIVE del backend",
+      "participants": [
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Acredita la cadena de configuración. No acredita que el aviso llegue al destinatario."
+    },
+    {
+      "check_id": "H3.S1.M2",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "AGENDA_NOTICE_PORT en la app compuesta",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "delivered:true con notificationRequestId e inAppNotificationId reales; correo y chat informados aparte",
+      "participants": [
+        {
+          "name": "MessagingAgendaNoticeAdapter",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "NotificationsService",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        },
+        {
+          "name": "cuenta de iam.users",
+          "kind": "real",
+          "version": "—"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria --verbose",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-19-relacion-agenda-mensajeria/evidencia/h3-h4-tras-rebuild.txt"
+      ],
+      "limits": "Con la base recién materializada desde database/SQL y el paquete 2.4.0-v4.0.11. No dice nada de producción."
+    },
+    {
+      "check_id": "H3.S1.M3",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "messaging.notification_requests / in_app_notifications",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Comprobado desde conexión independiente: 0 filas. El check hace lo que debe; lo que no hay es aviso",
+      "participants": [
+        {
+          "name": "postgres (pg.Client propio)",
+          "kind": "real",
+          "version": "pg 8.x"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Un booleano del adaptador no acredita la fila; acá tampoco hubo fila que acreditar."
+    },
+    {
+      "check_id": "H3.S2.M2",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "canal correo",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Solicitud de correo persistida con la dirección resuelta y clave con sufijo :email; sin evidencia de entrega porque el worker no corre",
+      "participants": [
+        {
+          "name": "worker de mensajería",
+          "kind": "real",
+          "version": "no ejecutado"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria --verbose",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Sólo el estado 1 de los 3. Aceptación por transporte y evidencia de entrega las produce el worker contra el proveedor real."
+    },
+    {
+      "check_id": "H3.S2.M3",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": false,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Ya no se acredita con el booleano chatDelivered: se comprueban las tres cosas que pide el DoD con filas reales — conversación, dos participantes y el mensaje sin leer para el destinatario.",
+      "participants": [
+        {
+          "name": "SupportAdminNoticeAdapter",
+          "kind": "real",
+          "version": "no alcanzado"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h5-regresion-final-integracion.txt"
+      ],
+      "limits": "Es UN BOOLEANO. No acredita conversación, membresía ni visibilidad — los tres efectos que la ficha exige. · Reevaluado el 2026-09-20 sobre mantra-core-health-api@4cc5ea1f."
+    },
+    {
+      "check_id": "H4.S1.M1",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "messaging.notification_requests",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "ADV-05: dos emisiones con la misma clave dejan UNA fila; la segunda devuelve la misma id con 'Ya había un aviso igual sin entregar'",
+      "participants": [
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria --verbose",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Idempotencia SECUENCIAL. Bajo concurrencia falla — ver H4.S2.M1."
+    },
+    {
+      "check_id": "H4.S1.M3",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "pg_indexes / SQL/35_messaging/04_indexes.sql",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "HALL-03: debounce_key no tiene índice, ni único ni común, ni en el DDL canónico ni en la base viva",
+      "participants": [
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Acredita la ausencia de la restricción. La carrera concreta no se pudo provocar porque la emisión no persiste."
+    },
+    {
+      "check_id": "H5.S1.M1",
+      "gate": "B",
+      "scope": "static",
+      "artifact": "src/ completo @5d5007f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Barrido recursivo de src/: 0 archivos importan de test/. tsconfig.build.json excluye test/",
+      "participants": [
+        {
+          "name": "árbol de src/",
+          "kind": "real",
+          "version": "5d5007f"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h2-relacion-dobles.txt"
+      ],
+      "limits": "Es un control ESTRUCTURAL. No existe guarda de runtime que impida bindear un doble si alguien agrega la palanca."
+    },
+    {
+      "check_id": "H5.S1.M2",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "El DoD pide observar el bloqueo, no mandar nada. Se ejerce la política con NODE_ENV=production (fuera de producción la guarda retorna sin mirar: HALL-10) y se comprueba que los 26 destinos configurados usan dominios .invalid.",
+      "participants": [
+        {
+          "name": "proveedor externo",
+          "kind": "real",
+          "version": "no disponible"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-salida-bloqueada",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h5-regresion-final-integracion.txt"
+      ],
+      "limits": "Queda sin cubrir. Es el hueco más grande de H5. · Reevaluado el 2026-09-20 sobre mantra-core-health-api@4cc5ea1f."
+    },
+    {
+      "check_id": "H5.S1.M3",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "app compuesta desde AppModule",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "AGENDA_NOTICE_PORT resuelve a MessagingAgendaNoticeAdapter, y useExisting verificado: token y clase son la misma instancia",
+      "participants": [
+        {
+          "name": "AppModule",
+          "kind": "real",
+          "version": "5d5007f"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h3-h4-persistencia.txt"
+      ],
+      "limits": "Evidencia de composición, no de política. La política no existe todavía."
+    },
+    {
+      "check_id": "H6.etapa1.typecheck",
+      "gate": "C",
+      "scope": "static",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "exit 0, pero con una salvedad de entorno: en dev limpio fallaba por un archivo corrupto de node_modules (@mikro-orm/core/types/TimeType.d.ts, «import tyxe»). Se reparó la copia local, que no se versiona.",
+      "participants": [
+        {
+          "name": "tsc",
+          "kind": "real",
+          "version": "del repo"
+        }
+      ],
+      "command": "yarn typecheck",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h5-etapa1-typecheck.txt"
+      ],
+      "limits": "Compilar prueba que el tipo cierra, no que el comportamiento sea el pedido. · Reevaluado el 2026-09-20 sobre mantra-core-health-api@4cc5ea1f."
+    },
+    {
+      "check_id": "H6.etapa2.lint",
+      "gate": "C",
+      "scope": "static",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Los 9 prettier/prettier ajenos se corrigieron con lint --fix, en commit propio. Etapa 2 de la pirámide en exit 0.",
+      "participants": [
+        {
+          "name": "eslint",
+          "kind": "real",
+          "version": "del repo"
+        }
+      ],
+      "command": "yarn lint --max-warnings=0",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h5-etapa2-lint.txt"
+      ],
+      "limits": "El rojo NO es del cambio de esta rama; git status confirma 0 modificaciones en src/. · Reevaluado el 2026-09-20 sobre mantra-core-health-api@4cc5ea1f."
+    },
+    {
+      "check_id": "H6.etapa3.unitarios",
+      "gate": "C",
+      "scope": "unit",
+      "artifact": "src/**/*.spec.ts @rama",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "680 suites pasan, 1 suite skipped (elevenlabs.contract.spec.ts, condicional por credencial) registrada NOT_RUN. 528 s",
+      "participants": [
+        {
+          "name": "jest",
+          "kind": "real",
+          "version": "del repo"
+        }
+      ],
+      "command": "yarn test",
+      "exit_code": 0,
+      "evidence_paths": [
+        "evidencia/h6-etapa3-unitarios-completa.txt",
+        "evidencia/h6-etapa3-unitarios-scheduling.txt"
+      ],
+      "limits": "Unitarios con el EntityManager mockeado: NINGUNO toca la base. Denominador real 8249, de los cuales 1 skipped."
+    },
+    {
+      "check_id": "H4.S2.M1",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "messaging.notification_requests @base recién materializada",
+      "required": true,
+      "applicable": true,
+      "status": "FAIL",
+      "reason": "Dos emit() en paralelo con la misma debounceKey crean DOS filas, ambas reportadas como exitosas. Medido 6 veces: 5 dan dos filas",
+      "participants": [
+        {
+          "name": "NotificationsService",
+          "kind": "real",
+          "version": "5d5007f"
+        },
+        {
+          "name": "postgres",
+          "kind": "real",
+          "version": "timescaledb-ha pg18"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-persistencia --verbose",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-19-relacion-agenda-mensajeria/evidencia/h4-carrera-medida.txt"
+      ],
+      "limits": "El test PASA porque registra el resultado tal como sale. El FAIL es del producto (HALL-03), no del check."
+    },
+    {
+      "check_id": "fx3.regresion-ajena",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts @5d5007f",
+      "required": false,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "La regresión del propio proyecto para estos avisos pasa 10/10 tras el ciclo limpio; con la base vieja daba Expected 4 / Received 0",
+      "participants": [
+        {
+          "name": "scheduling + messaging + postgres",
+          "kind": "real",
+          "version": "5d5007f"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=fx3-agenda",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-19-relacion-agenda-mensajeria/evidencia/fx3-tras-rebuild.txt"
+      ],
+      "limits": "Es de otro autor y no cubre idempotencia bajo concurrencia."
+    },
+    {
+      "check_id": "H2.S2.M1",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Los dos extremos fijados por versión: el consumidor por versión declarada y commit de origen alcanzable; el proveedor por sha256 recalculado en cada corrida.",
+      "participants": [
+        {
+          "name": "mantra-core-health-api",
+          "kind": "real",
+          "version": "4cc5ea1f"
+        },
+        {
+          "name": "scheduling-module",
+          "kind": "artefacto",
+          "version": "v0.1.0-transitional"
+        },
+        {
+          "name": "agenda-notice-capability.lab",
+          "kind": "doble",
+          "version": "cd1889bf"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h1-fijacion-por-version.txt"
+      ],
+      "limits": "El sha256 del consumidor se declara, no se recalcula: sus archivos no están en este repo."
+    },
+    {
+      "check_id": "H2.S3.M1",
+      "gate": "B",
+      "scope": "integration",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Matriz de combinaciones de versión, con la celda del contrato del piloto declarada NO_APLICA porque ese artefacto no existe.",
+      "participants": [
+        {
+          "name": "mantra-core-health-api",
+          "kind": "real",
+          "version": "4cc5ea1f"
+        },
+        {
+          "name": "scheduling-module",
+          "kind": "artefacto",
+          "version": "v0.1.0-transitional"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-relacion",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h1-fijacion-por-version.txt"
+      ],
+      "limits": "Una fila por eje: es lo que existe. No se inventaron versiones históricas."
+    },
+    {
+      "check_id": "H4.S3.M1",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "HALL-08: medido con ROLLBACK. Emitir dentro de una transacción que se deshace deja 0 filas; sin transacción ambiente deja 1. El puerto se suma a la transacción de quien lo llama, así que ADV-09 es alcanzable sin tocarlo.",
+      "participants": [
+        {
+          "name": "mantra-core-health-api",
+          "kind": "real",
+          "version": "4cc5ea1f"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-durabilidad",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h5-regresion-final-integracion.txt"
+      ],
+      "limits": "Mide el puerto, no el camino de negocio completo. Q-06 sigue sin decidirse: esto es la observación, no el veredicto."
+    },
+    {
+      "check_id": "H4.S3.M2",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Reintento idempotente cruzando un reinicio real del proceso: dos composiciones distintas de la app, una sola fila.",
+      "participants": [
+        {
+          "name": "mantra-core-health-api",
+          "kind": "real",
+          "version": "4cc5ea1f"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-durabilidad",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h5-regresion-final-integracion.txt"
+      ],
+      "limits": "La idempotencia descansa en la clave de rebote, que no tiene índice único (HALL-03)."
+    },
+    {
+      "check_id": "H4.S3.M3",
+      "gate": "B",
+      "scope": "db",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "HALL-09: un aviso a un destinatario inexistente no deja rastro en ninguna parte — ni solicitud, ni entrega, ni cola de muertos.",
+      "participants": [
+        {
+          "name": "mantra-core-health-api",
+          "kind": "real",
+          "version": "4cc5ea1f"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria-durabilidad",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h5-regresion-final-integracion.txt"
+      ],
+      "limits": "El check aprueba porque la medición se ejecutó. Que el resultado sea aceptable es Q-06."
+    },
+    {
+      "check_id": "H6.etapa4.integracion",
+      "gate": "C",
+      "scope": "integration",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Etapa 4: las cuatro suites de la relación, 51 pruebas, exit 0.",
+      "participants": [
+        {
+          "name": "mantra-core-health-api",
+          "kind": "real",
+          "version": "4cc5ea1f"
+        }
+      ],
+      "command": "yarn test:integration --testPathPatterns=agenda-mensajeria",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h5-regresion-final-integracion.txt"
+      ],
+      "limits": "Sólo las suites de esta relación. La integración full-app sigue rota por HALL-01."
+    },
+    {
+      "check_id": "H6.etapa5.e2e",
+      "gate": "C",
+      "scope": "e2e",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": true,
+      "applicable": true,
+      "status": "PASS",
+      "reason": "Etapa 5: EJECUTADA con datos reales — 3 passed, exit 0. La suite ya no se saltea: sus cuatro credenciales P8 existen porque se corrió tools/alovida/p8-avisos-agenda.mjs contra la API viva (27/27 pasos, exit 0), y para eso hubo que corregirle dos derivas —el alta de paciente pide seis campos que no mandaba, y elegía un cupo que se pisa con lo ya sembrado—. El front se sirvió con `ng serve --configuration e2e-real`, que apaga mockBackend: la pantalla habla con la API, no con el simulador.",
+      "participants": [
+        {
+          "name": "mantra-core-health-api",
+          "kind": "real",
+          "version": "4cc5ea1f"
+        },
+        {
+          "name": "mantra-core-health",
+          "kind": "real",
+          "version": "mockup@68969782"
+        }
+      ],
+      "command": "npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list",
+      "exit_code": 0,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h6-etapa5-e2e-ejecutado.txt",
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h6-etapa5-recorrido-p8.json",
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/evidencia/h6-etapa5-e2e-no-ejecutable.txt"
+      ],
+      "limits": "Acredita que la relación se ve en pantalla con datos de la API real. NO acredita la campana in-app ni su badge: son del carril P1 y todavía no existen en el frontend."
+    },
+    {
+      "check_id": "H6.etapa7.crossbrowser",
+      "gate": "C",
+      "scope": "e2e",
+      "artifact": "mantra-core-health-api@4cc5ea1f",
+      "required": false,
+      "applicable": false,
+      "status": "NOT_RUN",
+      "reason": "Etapa 7: el proyecto no soporta cross-browser — playwright.config.ts declara un único project, chromium. NOT_RUN con motivo verificado en archivo, que es lo que su DoD admite.",
+      "participants": [
+        {
+          "name": "mantra-core-health-api",
+          "kind": "real",
+          "version": "4cc5ea1f"
+        },
+        {
+          "name": "mantra-core-health",
+          "kind": "real",
+          "version": "mockup"
+        }
+      ],
+      "command": null,
+      "exit_code": null,
+      "evidence_paths": [
+        "docs/trabajo/2026-09-20-cerrar-pendientes-carril-b/REPORTE.md"
+      ],
+      "limits": "No aplicable: no es una deuda, es una capacidad que el proyecto no tiene."
+    }
+  ],
+  "nota_de_revision": "Los checks H3.* y H4.* se re-evaluaron tras el ciclo limpio del stack. Sus resultados de la madrugada (delivered:false, 0 filas) correspondían a una base cargada con un paquete de seeds anterior, no al producto. Ver HALL-02 en REPORTE.md."
+}

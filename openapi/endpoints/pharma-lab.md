@@ -331,6 +331,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Organización no encontrada | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-organization.service.ts |
+| 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 409 | `CONFLICT` | La organización ya está registrada como laboratorio | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-organization.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -475,6 +476,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -611,6 +613,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -984,6 +987,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5257,6 +5261,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5538,6 +5543,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Ficha de personal no encontrada en el laboratorio | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-organization.service.ts |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5668,6 +5674,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Ficha de personal no encontrada en el laboratorio | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-organization.service.ts |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

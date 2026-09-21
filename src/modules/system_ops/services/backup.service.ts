@@ -14,6 +14,12 @@ import {
   IdResultDto,
   RestoreTestRunResponseDto,
 } from '../dto';
+import {
+  RestoreObjectiveStatus,
+  evaluarRestauracion,
+  validarObjetivosDeContinuidad,
+} from '../policies';
+import { SYSOPS } from '../system_ops.concepts';
 
 /**
  * UC-11-09 (política de backup con RPO/RTO/inmutabilidad) y UC-11-10 (prueba de
@@ -37,16 +43,25 @@ export class BackupService {
     this.logger.setContext(BackupService.name);
   }
 
-  /** UC-11-09: define una política de backup (RPO <= RTO, valores positivos). */
+  /**
+   * UC-11-09: define una política de backup.
+   *
+   * MCH-022: cada objetivo se valida contra **su propio** rango. RPO y RTO
+   * miden dimensiones distintas y no se comparan entre sí: `RPO=3600` con
+   * `RTO=900` es una política legítima («tolero perder una hora de datos, pero
+   * exijo estar arriba en quince minutos»). Los rangos y sus motivos viven en
+   * `policies/continuity-objectives.policy.ts`.
+   */
   async createPolicy(
     dto: CreateBackupPolicyDto,
     actor: AuthenticatedUser,
   ): Promise<IdResultDto> {
-    if (dto.rpoSeconds > dto.rtoSeconds) {
-      throw new PreconditionFailedException('El RPO no puede superar al RTO', {
-        rpoSeconds: dto.rpoSeconds,
-        rtoSeconds: dto.rtoSeconds,
-      });
+    const fueraDeRango = validarObjetivosDeContinuidad(dto);
+    if (fueraDeRango.length > 0) {
+      throw new PreconditionFailedException(
+        fueraDeRango.map((v) => v.mensaje).join('; '),
+        Object.fromEntries(fueraDeRango.map((v) => [v.campo, v.valor])),
+      );
     }
     return this.em.transactional(async (tx) => {
       const policy = this.repo.createPolicy(tx, {
@@ -95,15 +110,20 @@ export class BackupService {
         );
       }
 
+      // MCH-023: la evaluación es trivalente. Sin las mediciones que la
+      // política exige el resultado es NOT_MEASURED — desconocido, nunca
+      // aprobado — y un fallo informado no se revierte por omitir métricas.
+      const evaluacion = evaluarRestauracion(policy, {
+        measuredRpoSeconds: dto.measuredRpoSeconds,
+        measuredRtoSeconds: dto.measuredRtoSeconds,
+        integrityCheckPassed: dto.integrityCheckPassed,
+        reportedFailure: dto.outcomeConceptId === SYSOPS.RESTORE_OUTCOME_FAIL,
+      });
       const objectiveBreached =
-        (dto.measuredRpoSeconds !== undefined &&
-          policy.rpoSeconds !== undefined &&
-          dto.measuredRpoSeconds > policy.rpoSeconds) ||
-        (dto.measuredRtoSeconds !== undefined &&
-          policy.rtoSeconds !== undefined &&
-          dto.measuredRtoSeconds > policy.rtoSeconds);
+        evaluacion.status === RestoreObjectiveStatus.FAILED;
 
       const run = this.repo.createTestRun(tx, {
+        objectiveStatus: evaluacion.status,
         backupPolicyId: policy.id,
         backupReference: dto.backupReference,
         outcomeConceptId: dto.outcomeConceptId,
@@ -116,15 +136,24 @@ export class BackupService {
         recordedByUserId: actor.id,
       });
       await tx.flush();
-      if (objectiveBreached) {
+      if (evaluacion.status !== RestoreObjectiveStatus.PASSED) {
         this.logger.warn(
-          { operation: 'sysops.backup.restore-test', runId: run.id },
-          'Restore objective breached',
+          {
+            operation: 'sysops.backup.restore-test',
+            runId: run.id,
+            objectiveStatus: evaluacion.status,
+            motivo: evaluacion.motivo,
+          },
+          evaluacion.status === RestoreObjectiveStatus.FAILED
+            ? 'Restore objective breached'
+            : 'Restore objective not measured',
         );
       }
       return {
         id: run.id,
         outcomeConceptId: run.outcomeConceptId,
+        objectiveStatus: evaluacion.status,
+        objectiveStatusReason: evaluacion.motivo,
         objectiveBreached,
       };
     });

@@ -26,6 +26,8 @@ import {
   InsuranceReadController,
   InsuranceCatalogController,
   InsuranceAnalyticsController,
+  InsurancePortabilityController,
+  InsurancePortabilityPublicController,
 } from './controllers';
 import {
   InsuranceBackboneService,
@@ -40,6 +42,8 @@ import {
   InsuranceCatalogService,
   InsuranceAnalyticsService,
   DeclaredCoveragesReader,
+  InsurancePortabilityService,
+  InsurancePortabilityPdfService,
 } from './services';
 import {
   CatalogRepository,
@@ -51,7 +55,30 @@ import {
   SettlementRepository,
   InsuranceReadRepository,
   InsuranceAnalyticsRepository,
+  InsurancePortabilityRepository,
 } from './repositories';
+// Portabilidad de póliza y siniestralidad (subtarea 3.3): el certificado se
+// autoriza contra el titular (`ProfileOwnershipService`, mismo criterio que
+// `practice.module.ts` §ALV-005/006 — clases sueltas, no `ProfilesModule`
+// entero, porque `profiles` ya importa `insurance` por `DeclaredCoveragesReader`
+// y cerraría el ciclo), resuelve nombre/documento del paciente
+// (`PatientProfilesRepository`, `PersonsRepository`), guarda el JSON sellado
+// como archivo (`CommonModule`) y deja constancia en auditoría (`AuditModule`
+// + los dos repos de `audit` y `health_data` que ninguno de los dos módulos
+// exporta).
+import { ProfileOwnershipService } from '../profiles/services/profile-ownership.service';
+import {
+  PatientProfilesRepository,
+  PersonAccountLinksRepository,
+  HealthPractitionerProfilesRepository,
+  PersonsRepository,
+} from '../profiles/repositories';
+import { CommonModule } from '../common/common.module';
+import { AuditModule } from '../audit/audit.module';
+import { DataReleaseRepository } from '../health_data/repositories/data-release.repository';
+import { HealthProvenanceRepository } from '../health_data/repositories/health-provenance.repository';
+import { DsarRequestsRepository } from '../audit/repositories/dsar-requests.repository';
+import { DataAccessLogRepository } from '../audit/repositories/data-access-log.repository';
 
 /**
  * Módulo Insurance (26): redes, coberturas, elegibilidad, autorización previa,
@@ -69,6 +96,8 @@ import {
     PracticeModule,
     DirectoryAuthorizationModule,
     TerminologyModule,
+    CommonModule,
+    AuditModule,
   ],
   controllers: [
     InsuranceBackboneController,
@@ -82,6 +111,8 @@ import {
     InsuranceReadController,
     InsuranceCatalogController,
     InsuranceAnalyticsController,
+    InsurancePortabilityController,
+    InsurancePortabilityPublicController,
   ],
   providers: [
     // Repositorios
@@ -94,9 +125,21 @@ import {
     DisputeRepository,
     SettlementRepository,
     InsuranceAnalyticsRepository,
+    InsurancePortabilityRepository,
     LinkedClaimOrderService,
     LinkedClaimAccessService,
     DuplicateStudyDetector,
+    // Sueltos de otros dominios, sin importar sus módulos enteros (ver el
+    // comentario junto a los imports de más arriba).
+    ProfileOwnershipService,
+    PatientProfilesRepository,
+    PersonAccountLinksRepository,
+    HealthPractitionerProfilesRepository,
+    PersonsRepository,
+    DataReleaseRepository,
+    HealthProvenanceRepository,
+    DsarRequestsRepository,
+    DataAccessLogRepository,
     // Servicios
     InsuranceBackboneService,
     CoverageService,
@@ -110,6 +153,8 @@ import {
     InsuranceCatalogService,
     InsuranceAnalyticsService,
     DeclaredCoveragesReader,
+    InsurancePortabilityService,
+    InsurancePortabilityPdfService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.

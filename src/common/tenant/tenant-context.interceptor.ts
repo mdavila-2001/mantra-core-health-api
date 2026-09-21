@@ -8,21 +8,16 @@ import {
 import { Reflector } from '@nestjs/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { lastValueFrom, from, Observable } from 'rxjs';
-import type { Request } from 'express';
 import { runWithTenant } from './tenant-context';
+import { findTenantScopeViolation } from './tenant-scope';
 import {
-  findTenantScopeViolation,
-  listTenantScopeDeclarations,
-} from './tenant-scope';
+  hasPrivilegedTenantRole,
+  resolveOrdinaryTenantId,
+  resolvePrivilegedTenantId,
+} from './tenant-resolution';
 import { IS_PUBLIC_KEY } from '../auth/public.decorator';
 import { IS_TENANT_AGNOSTIC_KEY } from './tenant-agnostic.decorator';
-import type {
-  AuthenticatedRequest,
-  AuthenticatedUser,
-} from '../auth/authenticated-user.interface';
-
-/** Roles internos que pueden seleccionar cualquier tenant explícitamente. */
-const PRIVILEGED_TENANT_ROLES = new Set(['SUPERADMIN', 'SYSTEM']);
+import type { AuthenticatedRequest } from '../auth/authenticated-user.interface';
 
 /**
  * Establece y **hace cumplir** el contexto de tenant de cada petición.
@@ -113,10 +108,15 @@ export class TenantContextInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const privilegedTenantId = this.hasPrivilegedTenantRole(user)
-      ? this.resolvePrivilegedTenantId(request)
-      : undefined;
-    const tenantId = privilegedTenantId ?? this.resolveTenantId(request, user);
+    // Si `TenantScopeGuard` ya resolvió el tenant (camino normal desde que
+    // existe MCH-001), se reutiliza: resolver dos veces sería el mismo trabajo
+    // con el mismo resultado. El cómputo propio sigue acá como respaldo para
+    // cualquier ruta que por lo que sea no pase por ese guard.
+    const tenantId =
+      request.resolvedTenantId ??
+      (hasPrivilegedTenantRole(user)
+        ? resolvePrivilegedTenantId(request)
+        : resolveOrdinaryTenantId(request, user));
     if (!tenantId) {
       return this.runSystemSweep(next);
     }
@@ -154,64 +154,12 @@ export class TenantContextInterceptor implements NestInterceptor {
    * @throws ForbiddenException si un actor normal no puede resolver un tenant sin
    *         ambigüedad, o si declara uno del que no es miembro.
    */
-  private resolveTenantId(
-    request: Request,
-    user: AuthenticatedUser,
-  ): string | undefined {
-    const header = request.headers['x-tenant-id'];
-    const declared = Array.isArray(header) ? header[0] : header;
-    const memberships = user.tenantIds ?? [];
-    const isPrivileged = this.hasPrivilegedTenantRole(user);
-
-    if (declared) {
-      if (!isPrivileged && !memberships.includes(declared)) {
-        throw new ForbiddenException(
-          'El actor no pertenece al tenant indicado en X-Tenant-Id',
-        );
-      }
-      return declared;
-    }
-
-    if (memberships.length === 1) {
-      return memberships[0];
-    }
-
-    // `SUPERADMIN` sin cabecera opera entre tenants: acotarlo a uno rompería los
-    // flujos de sistema. Un actor normal, en cambio, tiene que poder resolver su
-    // tenant sin ambigüedad, o el `tenantId` del cuerpo volvería a ser su elección.
-    if (isPrivileged) {
-      return undefined;
-    }
-
-    throw new ForbiddenException(
-      memberships.length === 0
-        ? 'El actor no pertenece a ningún tenant: indique X-Tenant-Id.'
-        : 'El actor pertenece a varios tenants: indique cuál en X-Tenant-Id.',
-    );
-  }
 
   /**
    * Un rol privilegiado puede elegir cualquier tenant, pero todas las fuentes
    * de propiedad presentes deben elegir el mismo. Esto evita que RLS se fije a
    * A mientras el servicio persiste B.
    */
-  private resolvePrivilegedTenantId(request: Request): string | undefined {
-    const header = request.headers['x-tenant-id'];
-    const headerValue = Array.isArray(header) ? header[0] : header;
-    const declarations = [
-      ...(headerValue ? [{ field: 'X-Tenant-Id', declared: headerValue }] : []),
-      ...listTenantScopeDeclarations(request.params),
-      ...listTenantScopeDeclarations(request.body),
-      ...listTenantScopeDeclarations(request.query),
-    ];
-    const distinct = [...new Set(declarations.map(({ declared }) => declared))];
-    if (distinct.length > 1) {
-      throw new ForbiddenException(
-        'La solicitud privilegiada declara tenants propietarios contradictorios',
-      );
-    }
-    return distinct[0];
-  }
 
   /** Ejecuta un barrido cross-tenant sólo para el rol SYSTEM firmado interno. */
   private runSystemSweep(next: CallHandler<unknown>): Observable<unknown> {
@@ -225,12 +173,6 @@ export class TenantContextInterceptor implements NestInterceptor {
         );
         return lastValueFrom(next.handle());
       }),
-    );
-  }
-
-  private hasPrivilegedTenantRole(user: AuthenticatedUser): boolean {
-    return (
-      user.roles?.some((role) => PRIVILEGED_TENANT_ROLES.has(role)) ?? false
     );
   }
 

@@ -765,3 +765,100 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     expect(c.accountLinksRepo.findActiveByUser).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
+  const MEDICO = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const PACIENTE = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+  const LA_PAZ = 'America/La_Paz';
+
+  const medico = () =>
+    ({
+      id: 'u',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: MEDICO,
+      tenantIds: ['t1'],
+    }) as any;
+
+  /** El PDP de verdad decide por nivel: acá sólo concede lo que se le diga. */
+  const pdpQueConcede = (c: ReturnType<typeof build>, acciones: string[]) =>
+    c.pdp.evaluate.mockImplementation(async (dto: { action: string }) => ({
+      decision: acciones.includes(dto.action) ? 'PERMIT' : 'DENY',
+    }));
+
+  function medicoSinTurno() {
+    const c = build();
+    c.darDeAltaProfesional(MEDICO);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    return c;
+  }
+
+  it('un grant de sólo lectura deja leer pero no escribir', async () => {
+    const c = medicoSinTurno();
+    pdpQueConcede(c, ['READ']);
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, medico()),
+    ).resolves.toBeUndefined();
+    await expect(
+      c.service.assertPuedeEscribirHistoria(PACIENTE, medico()),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(c.pdp.evaluate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ action: 'WRITE', patientProfileId: PACIENTE }),
+      expect.anything(),
+    );
+  });
+
+  it('un grant de escritura habilita escribir', async () => {
+    const c = medicoSinTurno();
+    pdpQueConcede(c, ['READ', 'WRITE']);
+
+    await expect(
+      c.service.assertPuedeEscribirHistoria(PACIENTE, medico()),
+    ).resolves.toBeUndefined();
+  });
+
+  it('sin vínculo ni grant no se escribe', async () => {
+    const c = medicoSinTurno();
+
+    await expect(
+      c.service.assertPuedeEscribirHistoria(PACIENTE, medico()),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('quien lo atiende hoy escribe sin preguntarle al PDP', async () => {
+    const c = medicoSinTurno();
+    const ahora = new Date();
+    c.agendar(MEDICO, PACIENTE, ahora, LA_PAZ);
+
+    await expect(
+      c.service.assertPuedeEscribirHistoria(PACIENTE, medico()),
+    ).resolves.toBeUndefined();
+    expect(c.pdp.evaluate).not.toHaveBeenCalled();
+  });
+
+  it('el titular no escribe su propia historia por serlo', async () => {
+    const c = build();
+    c.darDeAltaPaciente(PACIENTE);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+      personId: PACIENTE,
+    });
+    const paciente = { id: 'u', roles: ['PATIENT'] } as any;
+
+    await expect(
+      c.service.assertPuedeLeerHistoria(PACIENTE, paciente),
+    ).resolves.toBeUndefined();
+    await expect(
+      c.service.assertPuedeEscribirHistoria(PACIENTE, paciente),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('SUPERADMIN pasa, como en el resto del sistema de roles', async () => {
+    const c = build();
+    await expect(
+      c.service.assertPuedeEscribirHistoria(PACIENTE, {
+        id: 'root',
+        roles: ['SUPERADMIN'],
+      } as any),
+    ).resolves.toBeUndefined();
+  });
+});
