@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { QaScheduleTickJob } from './schedule-tick.job';
+import { QaPlanRunTickJob } from './plan-run-tick.job';
 
 export { QaScheduleTickJob } from './schedule-tick.job';
+export { QaPlanRunTickJob } from './plan-run-tick.job';
 
 /**
  * Fase 2 del plan de corrección de workers: cierra el "Disparo programado"
@@ -9,6 +11,6 @@ export { QaScheduleTickJob } from './schedule-tick.job';
  * corridas).
  */
 @Module({
-  providers: [QaScheduleTickJob],
+  providers: [QaScheduleTickJob, QaPlanRunTickJob],
 })
 export class QaLabWorkerModule {}

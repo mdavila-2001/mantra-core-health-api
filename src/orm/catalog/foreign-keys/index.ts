@@ -22,6 +22,7 @@ import { communityForeignKeys2 } from './community.2.fk';
 import { consentForeignKeys } from './consent.fk';
 import { crmForeignKeys1 } from './crm.1.fk';
 import { crmForeignKeys2 } from './crm.2.fk';
+import { dataCatalogForeignKeys } from './data_catalog.fk';
 import { delegatedAccessForeignKeys } from './delegated_access.fk';
 import { diagnosticUnitsForeignKeys } from './diagnostic_units.fk';
 import { diagnosticsForeignKeys1 } from './diagnostics.1.fk';
@@ -57,6 +58,7 @@ import { proceduresPerioperativeForeignKeys1 } from './procedures_perioperative.
 import { proceduresPerioperativeForeignKeys2 } from './procedures_perioperative.2.fk';
 import { profilesForeignKeys } from './profiles.fk';
 import { promotionsForeignKeys } from './promotions.fk';
+import { qaExecutionForeignKeys } from './qa_execution.fk';
 import { qaLabForeignKeys } from './qa_lab.fk';
 import { readModelsForeignKeys } from './read_models.fk';
 import { reportingForeignKeys } from './reporting.fk';
@@ -89,6 +91,7 @@ export const foreignKeyCatalog: Readonly<Record<string, readonly (readonly Forei
   community: [communityForeignKeys1, communityForeignKeys2],
   consent: [consentForeignKeys],
   crm: [crmForeignKeys1, crmForeignKeys2],
+  data_catalog: [dataCatalogForeignKeys],
   delegated_access: [delegatedAccessForeignKeys],
   diagnostic_units: [diagnosticUnitsForeignKeys],
   diagnostics: [diagnosticsForeignKeys1, diagnosticsForeignKeys2],
@@ -117,6 +120,7 @@ export const foreignKeyCatalog: Readonly<Record<string, readonly (readonly Forei
   procedures_perioperative: [proceduresPerioperativeForeignKeys1, proceduresPerioperativeForeignKeys2],
   profiles: [profilesForeignKeys],
   promotions: [promotionsForeignKeys],
+  qa_execution: [qaExecutionForeignKeys],
   qa_lab: [qaLabForeignKeys],
   read_models: [readModelsForeignKeys],
   reporting: [reportingForeignKeys],

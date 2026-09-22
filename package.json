@@ -45,6 +45,8 @@
     "start:worker:pharmacy_inventory:dev": "nest start --watch --entryFile worker-pharmacy_inventory",
     "start:worker:promotions": "node dist/src/worker-promotions",
     "start:worker:promotions:dev": "nest start --watch --entryFile worker-promotions",
+    "start:worker:data_catalog": "node dist/src/worker-data_catalog",
+    "start:worker:data_catalog:dev": "nest start --watch --entryFile worker-data_catalog",
     "start:worker:qa_lab": "node dist/src/worker-qa_lab",
     "start:worker:qa_lab:dev": "nest start --watch --entryFile worker-qa_lab",
     "start:worker:community": "node dist/src/worker-community",

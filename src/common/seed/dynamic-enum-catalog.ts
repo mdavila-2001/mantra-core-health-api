@@ -1205,6 +1205,10 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CLIN.SERVICE_REQUEST_ON_HOLD,
       CLIN.SERVICE_REQUEST_REVOKED,
       CLIN.SERVICE_REQUEST_COMPLETED,
+      // La antiduplicación (v4.2.17) añadió este estado y su traducción, pero
+      // no lo publicó acá: `ServiceRequestsService` lo asigna de verdad, así
+      // que había órdenes con un `status_concept_id` que su propio conjunto de
+      // valores no declaraba y el glosario no podía resolver.
       CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR,
     ],
     defaultConceptId: CLIN.SERVICE_REQUEST_DRAFT,

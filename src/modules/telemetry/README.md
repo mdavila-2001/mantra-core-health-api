@@ -62,3 +62,21 @@ Variables (ver `.env.example`): `TELEMETRY_WEB_ANALYTICS_ENABLED`,
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+
+## Lectura para el portal administrativo (`/admin/analytics`)
+
+Consultas de sólo lectura sobre lo que persiste la ingesta. Toda consulta tiene ventana
+(`from`/`to`, por defecto 7 días, máximo 92; por hora sólo hasta 7 días) y los agregados se
+calculan en la base: el portal no suma ni promedia.
+
+| Ruta | Qué devuelve |
+| --- | --- |
+| `GET overview` | Eventos, sesiones, sujetos seudónimos, vistas; top rutas y eventos; definición de cada conteo |
+| `GET timeseries` | Eventos y sesiones por cubo UTC, con cubos vacíos en 0 |
+| `GET web-vitals` | p50/p75/p95 por métrica con `percentile_cont` sobre las muestras (nunca promedio de percentiles), tamaño de muestra, ratings; `?metric=` añade p75 por ruta |
+| `GET funnels` · `funnels/:id/report` | Embudo por **sesión**, orden estricto, denominador explícito, 0/0 = null; conversiones confirmadas por servidor aparte |
+| `GET pipeline-health` | Aceptados, frescura, latencia de ingesta p50/p95, desfase de reloj, bots. Duplicados, descartes por consentimiento y rechazos se declaran **no medidos**: la ingesta no los persiste |
+| `GET sessions` · `sessions/:id` | Sesiones y su timeline, sin `session_id` ni sujeto, con nombres de propiedad pero **nunca sus valores**. Roles más restringidos que los agregados |
+
+Pruebas: `domain/analytics-window.spec.ts` y `test/integration/telemetry-analytics.int-spec.ts`
+(DDL canónico del módulo 28 y datos con resultado calculable a mano).

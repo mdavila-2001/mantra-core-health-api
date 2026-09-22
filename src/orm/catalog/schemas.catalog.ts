@@ -1,7 +1,7 @@
 import type { SchemaSpec } from './catalog.types';
 
 /**
- * Registro de los 61 esquemas PostgreSQL que compone el modelo canónico.
+ * Registro de los 63 esquemas PostgreSQL que compone el modelo canónico.
  * La capa 02 del arranque crea cada uno con CREATE SCHEMA IF NOT EXISTS antes de
  * que MikroORM sincronice tablas: sin el schema, el DDL de tablas fallaría.
  * Generado desde la bóveda SALUD; regenerar con `yarn orm:catalog`.
@@ -24,6 +24,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['consent', 7, 'consent', 10],
   ['crm', 49, 'crm', 32],
   ['cross_store_consistency', 62, 'cross_store_consistency', 20],
+  ['data_catalog', 67, 'data_catalog', 8],
   ['delegated_access', 29, 'delegated_access', 7],
   ['diagnostic_units', 23, 'diagnostic_units', 10],
   ['diagnostics', 20, 'diagnostics', 36],
@@ -56,6 +57,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['procedures_perioperative', 53, 'procedures_perioperative', 37],
   ['profiles', 5, 'profiles', 19],
   ['promotions', 51, 'promotions', 11],
+  ['qa_execution', 68, 'qa_execution', 4],
   ['qa_lab', 36, 'qa_lab', 13],
   ['read_models', 30, 'read_models', 13],
   ['reporting', 39, 'reporting', 12],
