@@ -1195,6 +1195,31 @@ describe('ProfilesPractitionersService', () => {
       );
     });
 
+    it('la lectura propia conserva los correos personal y laboral por uso', async () => {
+      const d = build();
+      conPerfil(d);
+      d.contactPointsRepo.findVigentesByOwner.mockResolvedValue([
+        {
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+          value: 'lucia.personal@alovida.test',
+        },
+        {
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+          value: 'lucia@hospital.test',
+        },
+      ]);
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.personalEmail).toBe('lucia.personal@alovida.test');
+      expect(perfil.workEmail).toBe('lucia@hospital.test');
+    });
+
     it('la ficha ajena NO los trae, y ni siquiera los consulta', async () => {
       // Lo segundo importa tanto como lo primero: si la ficha los leyera y
       // después los quitara, bastaría con que alguien devolviera el objeto
