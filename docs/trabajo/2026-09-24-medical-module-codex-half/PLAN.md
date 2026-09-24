@@ -65,6 +65,25 @@
 | H3.S1.M3 | Probar por HTTP el rollback del walk-in cruzado. | La respuesta es 403 y no queda el identificador del paciente provisional. | Integración FX-10 sobre PostgreSQL real en verde. | HECHO — 3/3 |
 | H3.S1.M4 | Ejecutar gates, documentar y publicar. | No aparecen fallos nuevos y el PR contiene implementación más evidencia. | Typecheck, lint, `git diff --check`, commit y push. | HECHO — 21 suites / 493 pruebas de scheduling; publicación en PR #453 |
 
+## H4 — Participantes autorizados en la sesión virtual
+
+**CA:** Dado un encuentro clínico, sólo su paciente o un profesional participante pueden unirse; sólo un profesional participante puede crear o finalizar la sesión. Un tercero y un actor de otro tenant reciben 403 sin cambiar el estado.
+**DoD:** casos RED→GREEN del servicio y metadata del controlador, recorrido HTTP con PostgreSQL, suite dirigida, typecheck, lint dirigido y `git diff --check`.
+**Estado:** HECHO — autorización por participante, recorrido HTTP y publicación en PR #453
+
+### H4.S1 — Autorización por relación con el encuentro
+
+**CA:** La decisión se toma con `encounter.patientProfileId`, `primaryPractitionerId`, participantes activos y tenant custodio; el rol solo abre la ruta y no reemplaza esa relación.
+**DoD:** create/join/end cubren actor propio, tercero y paciente; `join` admite el rol `PATIENT` en el controlador.
+**Estado:** HECHO
+
+| ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
+|---|---|---|---|---|
+| H4.S1.M1 | Escribir casos RED de tercero y paciente titular. | Hoy el tercero cambia el estado y el paciente ni siquiera supera el `RolesGuard`. | Specs dirigidos fallan por falta de autorización y metadata. | HECHO — 2 fallos nuevos / 9 aprobadas |
+| H4.S1.M2 | Cargar el encuentro y comprobar tenant y participación antes de cada transición. | Create/end exigen profesional participante; join acepta también al paciente titular; un tercero recibe 403. | Specs dirigidos en verde. | HECHO — 18/18 |
+| H4.S1.M3 | Probar el flujo por HTTP con PostgreSQL real. | Profesional crea, paciente titular se une, tercero no finaliza ni muta la sesión. | Integración dirigida en verde. | HECHO — 1/1 |
+| H4.S1.M4 | Ejecutar gates, documentar y publicar. | No hay regresiones nuevas y el PR contiene la evidencia. | Suite de `clinical_ext`, typecheck, lint, `git diff --check`, commit y push. | HECHO — 15 suites / 84 pruebas; publicación en PR #453 |
+
 ## Riesgos y bloqueos previstos
 
 | Riesgo | Impacto | Mitigación |
@@ -73,3 +92,4 @@
 | El resumen propio y la ficha pública comparten DTO. | Podría filtrarse el NIT en la guía. | Leer y asignar NIT únicamente cuando `incluyeContacto` sea verdadero. |
 | Cambiar un solo campo puede borrar el otro. | Corrupción de identidad fiscal. | Reutilizar la semántica histórica ya probada en Paciente y cubrir cambios parciales. |
 | La búsqueda por UUID no queda acotada si RLS está desactivado. | Un rol de mostrador puede comprometer una agenda de otra organización. | Comparar siempre `resource.tenantId` con el tenant activo ya validado por el guard. |
+| `virtual_encounters` no contiene `tenant_id` ni participante. | Un UUID conocido puede saltar tenant o relación clínica. | Resolver siempre el encuentro padre y autorizar contra su custodio y participantes antes de mutar. |

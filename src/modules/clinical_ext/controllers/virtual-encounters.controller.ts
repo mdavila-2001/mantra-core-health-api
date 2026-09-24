@@ -48,6 +48,7 @@ export class VirtualEncountersController {
 
   /** UC-18-12 (join). */
   @Patch(':id/join')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Unirse a una sesión de telesalud' })
   join(

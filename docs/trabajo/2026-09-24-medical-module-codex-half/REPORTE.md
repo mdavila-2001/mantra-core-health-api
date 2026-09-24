@@ -1,8 +1,8 @@
 # Reporte — ejecución Codex del módulo Médico: identidad fiscal
 
 - Fecha: 2026-09-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/medical-module-execution-20260924`
-- Peldaño de evidencia alcanzado: `VERIFIED` para el NIT profesional y el aislamiento de tenant del walk-in; el plan Médico global sigue abierto.
-- Avance: 10 / 10 microtareas HECHO en los tramos incluidos; el plan Médico global sigue abierto.
+- Peldaño de evidencia alcanzado: `VERIFIED` para el NIT profesional, el aislamiento del walk-in y la autorización de sesiones virtuales; el plan Médico global sigue abierto.
+- Avance: 14 / 14 microtareas HECHO en los tramos incluidos; el plan Médico global sigue abierto.
 
 ## Completado
 
@@ -18,6 +18,10 @@
 | H3.S1.M2 | La cita directa compara `resource.tenantId` con el tenant activo antes del bypass del mostrador y rechaza sin alcance comprobable. | Specs dirigidos de bookings y walk-in. | GREEN: 2 suites / 159 pruebas. |
 | H3.S1.M3 | Recorrido HTTP con un rol `SCHEDULING_AGENT` limitado al tenant A y un recurso movido al tenant B. | `corepack yarn test:integration test/integration/fx10-mostrador-atomico.int-spec.ts --runInBand --silent` sobre PostgreSQL 18 efímero. | 1 suite / 3 pruebas; 403 y cero identificadores para el paciente provisional. |
 | H3.S1.M4 | Regresión del módulo, gates y publicación en el PR API. | Suite `src/modules/scheduling`, typecheck, ESLint dirigido, `git diff --check`, commit y push. | 21 suites / 493 pruebas; gates en código 0; publicado en PR #453. |
+| H4.S1.M1 | Casos RED de unión por tercero y acceso del rol paciente al endpoint. | Specs dirigidos de servicio y controlador. | RED: 2 fallos nuevos / 9 aprobadas. |
+| H4.S1.M2 | Create/join/end resuelven el encuentro padre y validan tenant, paciente titular, profesional principal o participante activo antes de mutar. | Specs dirigidos tras implementar. | GREEN: 2 suites / 18 pruebas. |
+| H4.S1.M3 | Recorrido HTTP: profesional principal crea, paciente titular se une, profesional ajeno recibe 403 y la fila sigue `IN_PROGRESS`; el titular profesional finaliza. | Integración sobre PostgreSQL 18 efímero. | 1 suite / 1 prueba en 17.841 s. |
+| H4.S1.M4 | Regresión de `clinical_ext`, typecheck, ESLint dirigido y diff check. | Gates locales y publicación en PR #453. | 15 suites / 84 pruebas; todos los gates terminaron en código 0. |
 
 ## A medias
 
@@ -60,6 +64,17 @@ Time:        15.507 s
 ```
 
 ```text
+Test Suites: 15 passed, 15 total
+Tests:       84 passed, 84 total
+```
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Time:        17.841 s
+```
+
+```text
 openapi/openapi.yaml: validated in 484ms
 openapi.json: valid JSON
 ```
@@ -72,6 +87,7 @@ Typecheck, ESLint dirigido y `git diff --check` finalizaron con código 0.
 - Entidad fiscal empresarial, documentos legales, representante, poder, pagos y aseguradoras.
 - Suite global completa de la API.
 - Auditoría de todos los endpoints de agenda que cargan recursos por UUID.
+- Integración con un proveedor real de videollamada, credenciales de sala, expiración y grabación.
 
 ## Desvíos del plan
 
@@ -84,6 +100,7 @@ Typecheck, ESLint dirigido y `git diff --check` finalizaron con código 0.
 - El check `docs` seguirá bloqueado hasta que la infraestructura adopte una distribución oficial disponible o construya MinIO desde la fuente fijada.
 - El contrato empresarial de MED-06 todavía debe decidir si el emisor fiscal vive en la persona, práctica o tenant.
 - `SCHEDULING_AGENT` no forma parte del seed base de roles; FX-10 lo materializa y concede dentro del tenant para probar el contrato que ya usa el controlador.
+- El enlace y las credenciales de la sala virtual siguen siendo datos declarados por el cliente hasta que se apruebe el contrato con un proveedor.
 
 ## Decisiones y ambigüedades
 
@@ -91,3 +108,4 @@ Typecheck, ESLint dirigido y `git diff --check` finalizaron con código 0.
 - Una edición parcial conserva el campo fiscal omitido; vaciar el número cierra la fila vigente sin crear otra.
 - NIT y razón social sólo se leen en `me/summary`; la ficha pública no ejecuta la consulta de filiación privada.
 - El tenant activo resuelto por el guard es la autoridad para una solicitud HTTP; `actor.tenantIds` sólo respalda invocaciones internas y, si ambos faltan, la cita directa falla cerrada.
+- Una sesión virtual no concede acceso por `createdByUserId` ni por rol general. `join` admite al paciente titular; `create` y `end` exigen profesional principal o participante activo. `SUPERADMIN` tampoco evita esa relación clínica.
