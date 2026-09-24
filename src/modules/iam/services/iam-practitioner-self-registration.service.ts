@@ -61,7 +61,10 @@ import {
   RegisterPractitionerDto,
   RegisterPractitionerResponseDto,
 } from '../dto';
-import { createResidenceAddress } from '../../common/services/residence-address';
+import {
+  createResidenceAddress,
+  createWorkAddress,
+} from '../../common/services/residence-address';
 import { FileUploadService } from '../../common/services/file-upload.service';
 import { AttachableFileService } from '../../common/services/attachable-file.service';
 import { FileCategory, FileSensitivity } from '../../common/dto';
@@ -744,6 +747,22 @@ export class IamPractitionerSelfRegistrationService {
           lines: dto.homeAddressLines,
           latitude: dto.homeLatitude,
           longitude: dto.homeLongitude,
+          actorUserId: user.id,
+        },
+      );
+
+      // Dirección y punto de trabajo (MED-03): fila distinta de HOME y del
+      // consultorio propio opcional. El registro sólo tiene líneas y GPS; no
+      // selecciona municipio laboral, que queda sin derivación administrativa.
+      await createWorkAddress(
+        this.addressesRepo,
+        tx,
+        this.catalogConceptsRepo,
+        {
+          personId: person.id,
+          lines: dto.workAddressLines,
+          latitude: dto.workLatitude,
+          longitude: dto.workLongitude,
           actorUserId: user.id,
         },
       );

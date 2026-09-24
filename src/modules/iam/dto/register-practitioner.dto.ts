@@ -382,6 +382,39 @@ export class RegisterPractitionerDto {
   @Max(180)
   homeLongitude?: number;
 
+  /** Calle y número de la dirección laboral, separada del domicilio particular. */
+  @ApiPropertyOptional({
+    maxLength: 500,
+    description: 'Calle y número de la dirección laboral',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  workAddressLines?: string;
+
+  /** Latitud del trabajo. Se envía junto con {@link RegisterPractitionerDto.workLongitude}. */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: RegisterPractitionerDto) =>
+      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  workLatitude?: number;
+
+  /** Longitud del trabajo. Ver {@link RegisterPractitionerDto.workLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: RegisterPractitionerDto) =>
+      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  workLongitude?: number;
+
   /**
    * Forma anterior de declarar el teléfono del trabajo.
    *

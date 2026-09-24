@@ -1399,4 +1399,52 @@ describe('IamPractitionerSelfRegistrationService', () => {
       );
     });
   });
+
+  describe('la dirección laboral del alta (MED-03)', () => {
+    it('escribe la dirección laboral como fila WORK, separada del domicilio', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        homeAddressLines: 'Domicilio, Calle Norte 10',
+        homeLatitude: -16.5,
+        homeLongitude: -68.11,
+        workAddressLines: 'Hospital Central, Av. Principal 200',
+        workLatitude: -17.78,
+        workLongitude: -63.18,
+      });
+
+      expect(d.addressesRepo.create).toHaveBeenCalledTimes(2);
+      expect(d.addressesRepo.create).toHaveBeenNthCalledWith(
+        1,
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'person-1',
+          useConceptId: CONCEPTS.ADDR_USE_HOME,
+          lines: 'Domicilio, Calle Norte 10',
+          latitude: '-16.5',
+          longitude: '-68.11',
+        }),
+      );
+      expect(d.addressesRepo.create).toHaveBeenNthCalledWith(
+        2,
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'person-1',
+          useConceptId: CONCEPTS.ADDR_USE_WORK,
+          lines: 'Hospital Central, Av. Principal 200',
+          latitude: '-17.78',
+          longitude: '-63.18',
+        }),
+      );
+    });
+
+    it('sin dirección ni GPS laboral no crea una fila vacía', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner(dto);
+
+      expect(d.addressesRepo.create).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -486,3 +486,39 @@ describe('RegisterPractitionerDto · domicilio (P19)', () => {
     expect(rutasConError(errores)).toEqual(['homeLongitude']);
   });
 });
+
+/**
+ * La dirección laboral y el GPS (MED-03) se guardan aparte del domicilio.
+ */
+describe('RegisterPractitionerDto · dirección laboral (MED-03)', () => {
+  it('acepta la dirección y el par de coordenadas del trabajo', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workAddressLines: 'Hospital Central, Av. Principal 200',
+        workLatitude: -17.78,
+        workLongitude: -63.18,
+      }),
+    ).toEqual([]);
+  });
+
+  it('acepta el alta sin dirección de trabajo', async () => {
+    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+  });
+
+  it('rechaza coordenadas laborales incompletas', async () => {
+    expect(
+      await propiedadesConError({ ...ALTA_MINIMA, workLatitude: -17.78 }),
+    ).toEqual(['workLongitude']);
+  });
+
+  it('rechaza coordenadas laborales fuera de rango', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workLatitude: -91,
+        workLongitude: -63.18,
+      }),
+    ).toEqual(['workLatitude']);
+  });
+});
