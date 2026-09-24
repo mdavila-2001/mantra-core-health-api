@@ -41,11 +41,62 @@ describe('documentos de títulos del alta profesional (integración)', () => {
   });
 
   it('guarda varios títulos con su PDF y rechaza reutilizar un archivo sin crear otra cuenta', async () => {
-    const fileIds = [
-      await subirPdf('titulo-carrera-1.pdf'),
-      await subirPdf('titulo-carrera-2.pdf'),
-      await subirPdf('titulo-maestria.pdf'),
+    const declaraciones = [
+      {
+        tipo: PROF.CREDENTIAL_TYPE_DEGREE,
+        numero: `TIT-1-${marca}`,
+        institucion: 'Universidad Mayor de San Andrés',
+      },
+      {
+        tipo: PROF.CREDENTIAL_TYPE_DEGREE,
+        numero: `TIT-2-${marca}`,
+        institucion: 'Universidad Autónoma Gabriel René Moreno',
+      },
+      {
+        tipo: PROF.CREDENTIAL_TYPE_DIPLOMA,
+        numero: `DIP-1-${marca}`,
+        institucion: 'Instituto Nacional de Salud Pública',
+      },
+      {
+        tipo: PROF.CREDENTIAL_TYPE_DIPLOMA,
+        numero: `DIP-2-${marca}`,
+        institucion: 'Universidad Católica Boliviana',
+      },
+      {
+        tipo: PROF.CREDENTIAL_TYPE_MASTER,
+        numero: `MAE-1-${marca}`,
+        institucion: 'Universidad Privada de Santa Cruz',
+      },
+      {
+        tipo: PROF.CREDENTIAL_TYPE_MASTER,
+        numero: `MAE-2-${marca}`,
+        institucion: 'Universidad Andina Simón Bolívar',
+      },
+      {
+        tipo: PROF.CREDENTIAL_TYPE_DOCTORATE,
+        numero: `DOC-1-${marca}`,
+        institucion: 'Universidad de Chile',
+      },
+      {
+        tipo: PROF.CREDENTIAL_TYPE_DOCTORATE,
+        numero: `DOC-2-${marca}`,
+        institucion: 'Universidad Nacional de Córdoba',
+      },
+      {
+        tipo: PROF.CREDENTIAL_TYPE_SPECIALTY,
+        numero: `ESP-1-${marca}`,
+        institucion: 'Colegio Médico Departamental',
+      },
+      {
+        tipo: PROF.CREDENTIAL_TYPE_SPECIALTY,
+        numero: `ESP-2-${marca}`,
+        institucion: 'Sociedad Boliviana de Cardiología',
+      },
     ];
+    const fileIds: string[] = [];
+    for (const { numero } of declaraciones) {
+      fileIds.push(await subirPdf(`${numero}.pdf`));
+    }
     const email = `credenciales-${marca}@example.test`;
     const alta = await http()
       .post('/iam/auth/register-practitioner')
@@ -55,26 +106,12 @@ describe('documentos de títulos del alta profesional (integración)', () => {
         name: 'Elena',
         lastName: 'Salas',
         licenseNumber: `LIC-CRED-${marca}`,
-        credentials: [
-          {
-            credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
-            number: `TIT-1-${marca}`,
-            issuingInstitutionText: 'Universidad Mayor de San Andrés',
-            fileId: fileIds[0],
-          },
-          {
-            credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
-            number: `TIT-2-${marca}`,
-            issuingInstitutionText: 'Universidad Autónoma Gabriel René Moreno',
-            fileId: fileIds[1],
-          },
-          {
-            credentialTypeConceptId: PROF.CREDENTIAL_TYPE_MASTER,
-            number: `MAE-1-${marca}`,
-            issuingInstitutionText: 'Universidad Católica Boliviana',
-            fileId: fileIds[2],
-          },
-        ],
+        credentials: declaraciones.map((credential, index) => ({
+          credentialTypeConceptId: credential.tipo,
+          number: credential.numero,
+          issuingInstitutionText: credential.institucion,
+          fileId: fileIds[index],
+        })),
       })
       .expect(201);
     creados.push({ userId: alta.body.userId, personId: alta.body.personId });
@@ -83,21 +120,19 @@ describe('documentos de títulos del alta profesional (integración)', () => {
     const credentials = await em.find(ProfessionalCredentials, {
       practitionerProfileId: alta.body.practitionerProfileId,
     });
-    expect(credentials).toHaveLength(3);
+    expect(credentials).toHaveLength(declaraciones.length);
     expect(
       credentials
         .map((credential) => [credential.number, credential.fileId])
         .sort(([a], [b]) => String(a).localeCompare(String(b))),
     ).toEqual(
-      [
-        [`TIT-1-${marca}`, fileIds[0]],
-        [`TIT-2-${marca}`, fileIds[1]],
-        [`MAE-1-${marca}`, fileIds[2]],
-      ].sort(([a], [b]) => String(a).localeCompare(String(b))),
+      declaraciones
+        .map(({ numero }, index) => [numero, fileIds[index]])
+        .sort(([a], [b]) => String(a).localeCompare(String(b))),
     );
 
     const files = await em.find(Files, { id: { $in: fileIds } });
-    expect(files).toHaveLength(3);
+    expect(files).toHaveLength(declaraciones.length);
     for (const file of files) {
       expect(file.tenantId).toBe(SEED.tenantId);
       expect(file.createdByUserId).toBe(alta.body.userId);
@@ -120,18 +155,16 @@ describe('documentos de títulos del alta profesional (integración)', () => {
         ])
         .sort(([a]: string[], [b]: string[]) => a.localeCompare(b)),
     ).toEqual(
-      [
-        [`TIT-1-${marca}`, fileIds[0]],
-        [`TIT-2-${marca}`, fileIds[1]],
-        [`MAE-1-${marca}`, fileIds[2]],
-      ].sort(([a], [b]) => String(a).localeCompare(String(b))),
+      declaraciones
+        .map(({ numero }, index) => [numero, fileIds[index]])
+        .sort(([a], [b]) => a.localeCompare(b)),
     );
 
     const fichaPublica = await http()
       .get(`/profiles/practitioners/${alta.body.practitionerProfileId}/summary`)
       .set(bearer(ctx.adminToken))
       .expect(200);
-    expect(fichaPublica.body.credentials).toHaveLength(3);
+    expect(fichaPublica.body.credentials).toHaveLength(declaraciones.length);
     for (const credential of fichaPublica.body.credentials) {
       expect(credential).not.toHaveProperty('fileId');
     }
