@@ -123,11 +123,21 @@ describe('documentos de títulos del alta profesional (integración)', () => {
     expect(credentials).toHaveLength(declaraciones.length);
     expect(
       credentials
-        .map((credential) => [credential.number, credential.fileId])
+        .map((credential) => [
+          credential.number,
+          credential.credentialTypeConceptId,
+          credential.issuingInstitutionText,
+          credential.fileId,
+        ])
         .sort(([a], [b]) => String(a).localeCompare(String(b))),
     ).toEqual(
       declaraciones
-        .map(({ numero }, index) => [numero, fileIds[index]])
+        .map(({ numero, tipo, institucion }, index) => [
+          numero,
+          tipo,
+          institucion,
+          fileIds[index],
+        ])
         .sort(([a], [b]) => String(a).localeCompare(String(b))),
     );
 
@@ -149,14 +159,28 @@ describe('documentos de títulos del alta profesional (integración)', () => {
       .expect(200);
     expect(
       ownSummary.body.credentials
-        .map((credential: { number: string; fileId?: string }) => [
-          credential.number,
-          credential.fileId,
-        ])
+        .map(
+          (credential: {
+            number: string;
+            credentialTypeConceptId: string;
+            issuingInstitutionText?: string;
+            fileId?: string;
+          }) => [
+            credential.number,
+            credential.credentialTypeConceptId,
+            credential.issuingInstitutionText,
+            credential.fileId,
+          ],
+        )
         .sort(([a]: string[], [b]: string[]) => a.localeCompare(b)),
     ).toEqual(
       declaraciones
-        .map(({ numero }, index) => [numero, fileIds[index]])
+        .map(({ numero, tipo, institucion }, index) => [
+          numero,
+          tipo,
+          institucion,
+          fileIds[index],
+        ])
         .sort(([a], [b]) => a.localeCompare(b)),
     );
 
