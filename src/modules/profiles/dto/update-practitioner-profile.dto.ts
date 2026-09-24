@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsEmail,
   IsISO8601,
   IsNumber,
   IsOptional,
@@ -159,13 +160,26 @@ export class UpdateOwnPractitionerProfileDto {
   @Matches(PATRON_TELEFONO, { message: MENSAJE_TELEFONO })
   phone?: string;
 
-  /* --- los cuatro contactos que el alta captura por separado ----------------
+  /* --- los cinco contactos que el alta captura por separado ----------------
      Se editan igual que se declararon: cada uno es su propio par sistema × uso
      en `common.contact_points`. Una cadena vacía lo borra, como en el resto del
-     PATCH. El correo de trabajo NO está acá: es la identidad de login y
-     cambiarlo es otro trámite. */
+     PATCH —salvo el correo de trabajo, que es obligatorio—. */
 
-  /** Correo personal; el de trabajo, que es el de login, se cambia aparte. */
+  /**
+   * Correo de trabajo: el contacto laboral que se muestra en el perfil.
+   *
+   * No es la credencial de acceso. El alta lo siembra con el mismo valor que el
+   * login, pero la cuenta vive en IAM y no lee esta fila: cambiarlo acá no
+   * cambia con qué correo se entra. Es obligatorio en el alta, así que no se
+   * puede borrar — por eso `@IsEmail` y no la cadena vacía de los demás.
+   */
+  @ApiPropertyOptional({ format: 'email', maxLength: 320 })
+  @IsOptional()
+  @IsEmail({}, { message: 'El correo de trabajo no es un correo válido' })
+  @MaxLength(320)
+  workEmail?: string;
+
+  /** Correo personal. */
   @ApiPropertyOptional({ format: 'email', maxLength: 320 })
   @IsOptional()
   @IsString()

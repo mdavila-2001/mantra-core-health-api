@@ -103,11 +103,20 @@ import { ProfilesAffiliationsService } from './profiles-affiliations.service';
  * responde si el conteo no se pudo hacer. Cero es un dato legítimo acá: un
  * perfil dado de alta por la organización nunca escribió nada.
  */
-/* --- los cuatro contactos que el registro del médico pide por separado ------
+/* --- los cinco contactos que el registro del médico pide por separado -------
    Cada uno es una fila de `common.contact_points` identificada por su par
    sistema × uso. Viven como constantes con nombre para que la edición del
    perfil y el alta escriban exactamente el mismo par: si divergieran, el
    perfil leería un contacto que el alta guardó en otro lado. */
+
+/**
+ * Correo de trabajo. El alta lo siembra con el correo de login, pero es un
+ * contacto: la cuenta vive en IAM y no lee esta fila.
+ */
+const PAR_CORREO_TRABAJO = {
+  systemConceptId: CONCEPTS.CONTACT_EMAIL,
+  useConceptId: CONCEPTS.CONTACT_USE_WORK,
+} as const;
 
 /** Correo personal: el que no sirve para entrar. */
 const PAR_CORREO_PERSONAL = {
@@ -1187,11 +1196,12 @@ export class ProfilesPractitionersService {
             ahora,
           );
         }
-        // Los cuatro contactos que el alta captura por separado. `phone` sigue
+        // Los cinco contactos que el alta captura por separado. `phone` sigue
         // arriba —es la forma anterior— y escribe el mismo par que
         // `workMobilePhone` escribiría con el sistema viejo, así que enviar los
         // dos a la vez no tiene sentido: gana el que llegue segundo.
         for (const [valor, par] of [
+          [dto.workEmail, PAR_CORREO_TRABAJO],
           [dto.personalEmail, PAR_CORREO_PERSONAL],
           [dto.mobilePhone, PAR_CELULAR_PERSONAL],
           [dto.workMobilePhone, PAR_CELULAR_TRABAJO],
