@@ -1034,6 +1034,12 @@ export class ProfilesPractitionersService {
         id: credential.id,
         credentialTypeConceptId: credential.credentialTypeConceptId,
         number: credential.number,
+        // El identificador permite que el titular vuelva a descargar el
+        // diploma. No se incluye en la ficha de terceros: un UUID no es un
+        // permiso de lectura y tampoco debe revelar vínculos a documentos.
+        ...(incluyeContacto && credential.fileId
+          ? { fileId: credential.fileId }
+          : {}),
         issuingInstitutionText: credential.issuingInstitutionText,
         issueDate: credential.issueDate,
         expiryDate: credential.expiryDate,

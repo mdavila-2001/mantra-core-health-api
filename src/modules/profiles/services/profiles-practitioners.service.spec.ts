@@ -1283,6 +1283,7 @@ describe('ProfilesPractitionersService', () => {
           credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
           number: 'TIT-1',
           issuingInstitutionText: 'UMSA',
+          fileId: 'diploma-file-1',
           stateConceptId: PROF.CRED_PENDING,
         },
       ]);
@@ -1307,6 +1308,7 @@ describe('ProfilesPractitionersService', () => {
       expect(perfil.specialties).toHaveLength(1);
       expect(perfil.credentials[0]).toMatchObject({
         issuingInstitutionText: 'UMSA',
+        fileId: 'diploma-file-1',
       });
       expect(perfil.activity).toEqual({
         encounters: 12,
@@ -2493,11 +2495,21 @@ describe('ProfilesPractitionersService', () => {
         practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
         createdAt: new Date(),
       });
+      d.credentialsRepo.findByPractitioner.mockResolvedValue([
+        {
+          id: 'cr-1',
+          credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+          number: 'TIT-1',
+          fileId: 'private-diploma-file',
+          stateConceptId: PROF.CRED_PENDING,
+        },
+      ]);
       d.em.count.mockResolvedValue(3);
 
       const perfil = await d.service.getPractitionerSummary('per-1');
 
       expect(perfil.profileId).toBe('per-1');
+      expect(perfil.credentials[0]?.fileId).toBeUndefined();
       // La actividad es la del TITULAR del perfil consultado, no la de quien
       // mira: los cuatro conteos filtran por su cuenta.
       const filtros = d.em.count.mock.calls.map((c: any[]) => c[1]);

@@ -2789,6 +2789,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PractitionerProfileSummaryDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2953,6 +2957,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PractitionerProfileSummaryDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -54241,6 +54249,320 @@ components:
         longitude:
           type: number
           description: Longitud; viaja siempre junto a la latitud
+    PractitionerSpecialtyDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        specialtyConceptId:
+          type: string
+          format: uuid
+        isPrimary:
+          type: boolean
+        boardCertified:
+          type: boolean
+        practiceScopeText:
+          type: string
+        verificationStatusConceptId:
+          type: string
+          format: uuid
+        validFrom:
+          type: string
+          format: date-time
+        validTo:
+          type: string
+          format: date-time
+      required:
+        - id
+        - specialtyConceptId
+        - isPrimary
+        - boardCertified
+        - verificationStatusConceptId
+    PractitionerCredentialDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        credentialTypeConceptId:
+          type: string
+          format: uuid
+        number:
+          type: string
+        fileId:
+          type: string
+          format: uuid
+          description: Sólo en la lectura propia; permite descargar el diploma adjunto
+        issuingInstitutionText:
+          type: string
+        issueDate:
+          type: string
+          format: date-time
+        expiryDate:
+          type: string
+          format: date-time
+        stateConceptId:
+          type: string
+          format: uuid
+        verifiedAt:
+          type: string
+          format: date-time
+        verificationSourceUri:
+          type: string
+      required:
+        - id
+        - credentialTypeConceptId
+        - number
+        - stateConceptId
+    PractitionerLicenseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        jurisdictionConceptId:
+          type: string
+          format: uuid
+        licenseNumber:
+          type: string
+        regulatoryAuthority:
+          type: string
+        stateConceptId:
+          type: string
+          format: uuid
+        validFrom:
+          type: string
+          format: date-time
+        validTo:
+          type: string
+          format: date-time
+      required:
+        - id
+        - jurisdictionConceptId
+        - licenseNumber
+        - stateConceptId
+    PractitionerLanguageDto:
+      type: object
+      properties:
+        languageConceptId:
+          type: string
+          format: uuid
+        proficiencyConceptId:
+          type: string
+          format: uuid
+        clinicalInterpretationAllowed:
+          type: boolean
+      required:
+        - languageConceptId
+        - clinicalInterpretationAllowed
+    AffiliationResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        practitionerProfileId:
+          type: string
+          format: uuid
+        organizationName:
+          type: string
+        roleTitle:
+          type: object
+          nullable: true
+        practiceSiteId:
+          type: object
+          format: uuid
+          nullable: true
+        affiliationTypeConceptId:
+          type: object
+          format: uuid
+          nullable: true
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        current:
+          type: boolean
+          description: 'Derivado de `endDate`: sin fin declarado, sigue vigente'
+        status:
+          type: string
+          format: uuid
+        statusKind:
+          type: string
+          enum:
+            - pendiente
+            - declarado
+            - aprobado
+            - rechazado
+            - revocado
+            - desconocido
+        decisionReasonText:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - practitionerProfileId
+        - organizationName
+        - startDate
+        - current
+        - status
+        - statusKind
+        - createdAt
+    PractitionerActivityDto:
+      type: object
+      properties:
+        encounters:
+          type: number
+        medicationRequests:
+          type: number
+        clinicalNotes:
+          type: number
+        documents:
+          type: number
+      required:
+        - encounters
+        - medicationRequests
+        - clinicalNotes
+        - documents
+    PractitionerProfileSummaryDto:
+      type: object
+      properties:
+        profileId:
+          type: string
+          format: uuid
+        personId:
+          type: string
+          format: uuid
+        practitionerCode:
+          type: string
+        displayName:
+          type: string
+        professionalTitle:
+          type: string
+        professionalBio:
+          type: string
+        photoFileId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          description: Sólo en la lectura propia
+        phone:
+          type: string
+          description: Sólo en la lectura propia
+        workEmail:
+          type: string
+          description: Sólo en la lectura propia
+        personalEmail:
+          type: string
+          description: Sólo en la lectura propia
+        mobilePhone:
+          type: string
+          description: Sólo en la lectura propia
+        workMobilePhone:
+          type: string
+          description: Sólo en la lectura propia
+        workLandline:
+          type: string
+          description: Sólo en la lectura propia
+        name:
+          type: string
+        middleName:
+          type: string
+        lastName:
+          type: string
+        motherLastName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        nationalId:
+          type: string
+        issuerAdministrativeAreaConceptId:
+          type: string
+          format: uuid
+          description: Departamento emisor (VS_BO_DEPARTMENT)
+        residenceMunicipalityConceptId:
+          type: string
+          format: uuid
+          description: Municipio de residencia (VS_BO_MUNICIPALITY)
+        homeAddress:
+          $ref: '#/components/schemas/OwnAddressDto'
+        occupationConceptId:
+          type: string
+          format: uuid
+          description: Ocupación elegida del catálogo (VS_BO_OCCUPATION)
+        occupationFreeText:
+          type: string
+          description: Ocupación declarada en texto libre
+        workEmployerConceptId:
+          type: string
+          format: uuid
+          description: Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)
+        workEmployerFreeText:
+          type: string
+          description: Empresa declarada en texto libre
+        practitionerCategoryConceptId:
+          type: string
+          format: uuid
+        verificationStatusConceptId:
+          type: string
+          format: uuid
+        practiceStatusConceptId:
+          type: string
+          format: uuid
+        acceptsNewPatients:
+          type: boolean
+        telehealthAvailable:
+          type: boolean
+        specialties:
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerSpecialtyDto'
+        credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerCredentialDto'
+        licenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerLicenseDto'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerLanguageDto'
+        affiliations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AffiliationResponseDto'
+        activity:
+          $ref: '#/components/schemas/PractitionerActivityDto'
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - profileId
+        - personId
+        - practitionerCode
+        - practitionerCategoryConceptId
+        - verificationStatusConceptId
+        - practiceStatusConceptId
+        - acceptsNewPatients
+        - telehealthAvailable
+        - specialties
+        - credentials
+        - licenses
+        - languages
+        - affiliations
+        - activity
+        - createdAt
     CoverageBenefitSummaryDto:
       type: object
       properties:

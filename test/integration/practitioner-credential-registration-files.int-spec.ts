@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import {
   bootstrapTestApp,
+  bearer,
   deleteRegisteredPractitioners,
   type TestContext,
 } from './harness';
@@ -101,6 +102,69 @@ describe('documentos de títulos del alta profesional (integración)', () => {
       expect(file.tenantId).toBe(SEED.tenantId);
       expect(file.createdByUserId).toBe(alta.body.userId);
     }
+
+    const login = await http()
+      .post('/iam/auth/login')
+      .send({ email, password: 'S3cret-passw0rd' })
+      .expect(200);
+    const ownerToken = login.body.accessToken as string;
+    const ownSummary = await http()
+      .get('/profiles/practitioners/me/summary')
+      .set(bearer(ownerToken))
+      .expect(200);
+    expect(
+      ownSummary.body.credentials
+        .map((credential: { number: string; fileId?: string }) => [
+          credential.number,
+          credential.fileId,
+        ])
+        .sort(([a]: string[], [b]: string[]) => a.localeCompare(b)),
+    ).toEqual(
+      [
+        [`TIT-1-${marca}`, fileIds[0]],
+        [`TIT-2-${marca}`, fileIds[1]],
+        [`MAE-1-${marca}`, fileIds[2]],
+      ].sort(([a], [b]) => String(a).localeCompare(String(b))),
+    );
+
+    const fichaPublica = await http()
+      .get(`/profiles/practitioners/${alta.body.practitionerProfileId}/summary`)
+      .set(bearer(ctx.adminToken))
+      .expect(200);
+    expect(fichaPublica.body.credentials).toHaveLength(3);
+    for (const credential of fichaPublica.body.credentials) {
+      expect(credential).not.toHaveProperty('fileId');
+    }
+
+    await http()
+      .get(`/common/files/${fileIds[0]}/content`)
+      .set(bearer(ownerToken))
+      .expect(200)
+      .expect('Content-Type', /application\/pdf/);
+
+    const otroEmail = `credenciales-otro-${marca}@example.test`;
+    const otraAlta = await http()
+      .post('/iam/auth/register-practitioner')
+      .send({
+        email: otroEmail,
+        password: 'S3cret-passw0rd',
+        name: 'Otra',
+        lastName: 'Profesional sintético',
+        licenseNumber: `LIC-OTRO-${marca}`,
+      })
+      .expect(201);
+    creados.push({
+      userId: otraAlta.body.userId,
+      personId: otraAlta.body.personId,
+    });
+    const otroLogin = await http()
+      .post('/iam/auth/login')
+      .send({ email: otroEmail, password: 'S3cret-passw0rd' })
+      .expect(200);
+    await http()
+      .get(`/common/files/${fileIds[0]}/content`)
+      .set(bearer(otroLogin.body.accessToken as string))
+      .expect(403);
 
     const segundoEmail = `credenciales-reuso-${marca}@example.test`;
     const reuso = await http()

@@ -85,6 +85,14 @@ export class PractitionerCredentialDto {
   @ApiProperty()
   number!: string;
 
+  /** Identificador del diploma adjunto. Sólo se incluye en la lectura propia. */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Sólo en la lectura propia; permite descargar el diploma adjunto',
+  })
+  fileId?: string;
+
   /** Dónde se cursó, en texto libre: la institución no siempre es un tenant. */
   @ApiPropertyOptional()
   issuingInstitutionText?: string;

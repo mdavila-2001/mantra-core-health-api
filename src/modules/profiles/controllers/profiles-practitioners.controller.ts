@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -90,6 +91,7 @@ export class ProfilesPractitionersController {
    * las rutas por orden de declaración y un parámetro capturaría `me`.
    */
   @Get('practitioners/me/summary')
+  @ApiOkResponse({ type: PractitionerProfileSummaryDto })
   @ApiOperation({
     summary: 'Consultar el perfil profesional propio (trayectoria y actividad)',
   })
@@ -206,6 +208,7 @@ export class ProfilesPractitionersController {
    * @returns Su perfil completo de presentación.
    */
   @Get('practitioners/:profileId/summary')
+  @ApiOkResponse({ type: PractitionerProfileSummaryDto })
   @ApiOperation({
     summary: 'Consultar el perfil profesional de un colega (ficha de la guía)',
   })
