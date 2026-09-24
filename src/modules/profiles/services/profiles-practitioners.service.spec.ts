@@ -724,13 +724,34 @@ describe('ProfilesPractitionersService', () => {
       expect(d.specialtiesRepo.create).not.toHaveBeenCalled();
     });
 
-    it('no deja pasar de tres especialidades vigentes (422)', async () => {
+    it('permite la cuarta especialidad vigente como tercera adicional', async () => {
       const d = build();
       d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
       d.specialtiesRepo.findAllByPractitioner.mockResolvedValue([
         { id: 's1', validTo: null },
         { id: 's2', validTo: null },
         { id: 's3', validTo: null },
+      ]);
+      d.specialtiesRepo.findActive.mockResolvedValue(null);
+      d.specialtiesRepo.create.mockReturnValue({ id: 's4' });
+
+      await expect(
+        d.service.addSpecialty(
+          'pp1',
+          { specialtyConceptId: CARDIO } as any,
+          actor,
+        ),
+      ).resolves.toMatchObject({ id: 's4' });
+    });
+
+    it('no deja pasar de cuatro especialidades vigentes (422)', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
+      d.specialtiesRepo.findAllByPractitioner.mockResolvedValue([
+        { id: 's1', validTo: null },
+        { id: 's2', validTo: null },
+        { id: 's3', validTo: null },
+        { id: 's4', validTo: null },
       ]);
       await expect(
         d.service.addSpecialty(
@@ -843,6 +864,45 @@ describe('ProfilesPractitionersService', () => {
         isPrimary: true,
       });
       expect(escritas[1]).toMatchObject({ isPrimary: false });
+    });
+
+    it('registra una especialidad principal y tres adicionales', async () => {
+      const d = alta();
+      const especialidades = [
+        CARDIO,
+        'bd0484b1-8959-5ba5-bb65-ca9305eedb30',
+        'e0f2c074-572e-521c-a647-0ec85de5ff62',
+        '3f29af08-4339-5c4f-90d6-e3831c7f0fbc',
+      ];
+
+      await d.service.onboardPractitioner(altaCon(especialidades), actor);
+
+      const escritas = d.specialtiesRepo.create.mock.calls.map(
+        (llamada: any) => llamada[1],
+      );
+      expect(escritas).toHaveLength(4);
+      expect(escritas.map((fila: any) => fila.isPrimary)).toEqual([
+        true,
+        false,
+        false,
+        false,
+      ]);
+    });
+
+    it('rechaza una especialidad principal y cuatro adicionales como grupo', async () => {
+      const d = alta();
+      const especialidades = [
+        CARDIO,
+        'bd0484b1-8959-5ba5-bb65-ca9305eedb30',
+        'e0f2c074-572e-521c-a647-0ec85de5ff62',
+        '3f29af08-4339-5c4f-90d6-e3831c7f0fbc',
+        'c7a25eba-6961-5b97-bfae-bf1e2a33ce19',
+      ];
+
+      await expect(
+        d.service.onboardPractitioner(altaCon(especialidades), actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.specialtiesRepo.create).not.toHaveBeenCalled();
     });
 
     it('una especialidad fuera del catálogo rechaza el alta ENTERA', async () => {

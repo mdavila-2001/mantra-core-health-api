@@ -53167,8 +53167,8 @@ components:
           type: string
           maxLength: 100
         specialtyConceptIds:
-          description: Especialidades declaradas (hasta 3). La primera queda como principal.
-          maxItems: 3
+          description: Especialidades declaradas (una principal y hasta tres adicionales).
+          maxItems: 4
           type: array
           items:
             type: string
@@ -54033,8 +54033,8 @@ components:
           type: string
           maxLength: 100
         specialtyConceptIds:
-          description: Especialidades declaradas (hasta 3). La primera queda como principal.
-          maxItems: 3
+          description: Especialidades declaradas (una principal y hasta tres adicionales).
+          maxItems: 4
           type: array
           items:
             type: string
@@ -55316,8 +55316,8 @@ components:
           description: Título profesional
           maxLength: 200
         specialtyConceptIds:
-          description: Especialidades del catálogo VS_MEDICAL_SPECIALTY. La primera es la principal.
-          maxItems: 3
+          description: Especialidades del catálogo VS_MEDICAL_SPECIALTY (una principal y hasta tres adicionales).
+          maxItems: 4
           type: array
           items:
             type: string

@@ -51,6 +51,36 @@ describe('RegisterPractitionerDto · correo laboral separado (MED-03)', () => {
   });
 });
 
+describe('RegisterPractitionerDto · especialidad principal y tres adicionales (MED-02)', () => {
+  const cuatroEspecialidades = [
+    '7218acbc-5098-56ae-980a-9345961ced89',
+    'bd0484b1-8959-5ba5-bb65-ca9305eedb30',
+    'e0f2c074-572e-521c-a647-0ec85de5ff62',
+    '3f29af08-4339-5c4f-90d6-e3831c7f0fbc',
+  ];
+
+  it('acepta una especialidad principal y tres adicionales', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        specialtyConceptIds: cuatroEspecialidades,
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza una especialidad principal y cuatro adicionales', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        specialtyConceptIds: [
+          ...cuatroEspecialidades,
+          'c7a25eba-6961-5b97-bfae-bf1e2a33ce19',
+        ],
+      }),
+    ).toEqual(['specialtyConceptIds']);
+  });
+});
+
 /**
  * Aplana el árbol de `ValidationError` a rutas `a.b.c`, igual que hace el
  * `ValidationPipe` de Nest (`prependConstraintsWithParentProp`) para las

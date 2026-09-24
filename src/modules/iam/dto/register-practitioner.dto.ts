@@ -271,14 +271,14 @@ export class RegisterPractitionerDto {
    */
   @ApiPropertyOptional({
     description:
-      'Especialidades declaradas (hasta 3). La primera queda como principal.',
+      'Especialidades declaradas (una principal y hasta tres adicionales).',
     type: [String],
     format: 'uuid',
-    maxItems: 3,
+    maxItems: 4,
   })
   @IsOptional()
   @IsArray()
-  @ArrayMaxSize(3)
+  @ArrayMaxSize(4)
   @IsUUID(undefined, { each: true })
   specialtyConceptIds?: string[];
 
