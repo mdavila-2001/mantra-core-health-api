@@ -46,6 +46,25 @@
 |---|---|---|---|---|
 | H2.S1.M1 | Inspeccionar el job y comparar el workflow. | La falla ocurre antes de instalar dependencias y el workflow no pertenece al diff. | `gh run view ... --log-failed` más diff vacío. | HECHO |
 
+## H3 — Aislamiento de tenant en la recepción sin turno
+
+**CA:** Dado un agente de agenda operando en el tenant A, cuando envía el UUID de un recurso del tenant B a la cita directa o al walk-in, entonces la API responde 403 antes de crear cita o encuentro y la transacción no conserva el paciente provisional.
+**DoD:** caso unitario RED→GREEN en `SchedulingBookingsService`, recorrido HTTP con PostgreSQL para el walk-in, suite dirigida, typecheck, lint dirigido y `git diff --check`.
+**Estado:** HECHO — prueba unitaria, recorrido HTTP real, gates y publicación en PR #453
+
+### H3.S1 — Recurso limitado al tenant activo
+
+**CA:** El tenant del recurso coincide con el tenant resuelto por el request; sólo `SUPERADMIN` puede operar sin ese límite.
+**DoD:** la cita directa conserva sus permisos dentro del tenant y rechaza el recurso de otro tenant con `ForbiddenException`.
+**Estado:** HECHO
+
+| ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
+|---|---|---|---|---|
+| H3.S1.M1 | Escribir el caso RED de un agente del tenant A sobre un recurso del tenant B. | La implementación actual deja avanzar el flujo; la nueva aserción espera 403 antes de consultar al paciente. | El spec dirigido falla por ausencia del aislamiento. | HECHO — 1 fallo nuevo / 154 aprobadas |
+| H3.S1.M2 | Comparar el recurso con el tenant activo antes de autorizar la agenda. | Un agente sólo opera agendas del contexto resuelto; `SUPERADMIN` conserva el alcance de plataforma. | Spec dirigido en verde. | HECHO — 155/155 |
+| H3.S1.M3 | Probar por HTTP el rollback del walk-in cruzado. | La respuesta es 403 y no queda el identificador del paciente provisional. | Integración FX-10 sobre PostgreSQL real en verde. | HECHO — 3/3 |
+| H3.S1.M4 | Ejecutar gates, documentar y publicar. | No aparecen fallos nuevos y el PR contiene implementación más evidencia. | Typecheck, lint, `git diff --check`, commit y push. | HECHO — 21 suites / 493 pruebas de scheduling; publicación en PR #453 |
+
 ## Riesgos y bloqueos previstos
 
 | Riesgo | Impacto | Mitigación |
@@ -53,3 +72,4 @@
 | El workflow consume una imagen histórica de MinIO retirada. | El check `docs` seguirá bloqueado aunque el cambio médico sea correcto. | Mantener el diagnóstico separado y abrir una corrección de infraestructura con fuente oficial, sin contaminar este diff. |
 | El resumen propio y la ficha pública comparten DTO. | Podría filtrarse el NIT en la guía. | Leer y asignar NIT únicamente cuando `incluyeContacto` sea verdadero. |
 | Cambiar un solo campo puede borrar el otro. | Corrupción de identidad fiscal. | Reutilizar la semántica histórica ya probada en Paciente y cubrir cambios parciales. |
+| La búsqueda por UUID no queda acotada si RLS está desactivado. | Un rol de mostrador puede comprometer una agenda de otra organización. | Comparar siempre `resource.tenantId` con el tenant activo ya validado por el guard. |

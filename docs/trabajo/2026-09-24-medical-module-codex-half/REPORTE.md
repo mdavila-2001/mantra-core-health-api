@@ -1,8 +1,8 @@
 # Reporte — ejecución Codex del módulo Médico: identidad fiscal
 
 - Fecha: 2026-09-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/medical-module-execution-20260924`
-- Peldaño de evidencia alcanzado: `VERIFIED` para el NIT del perfil profesional; el plan Médico global sigue abierto.
-- Avance: 5 / 5 microtareas HECHO (100 % del tramo fiscal); el plan Médico global sigue abierto.
+- Peldaño de evidencia alcanzado: `VERIFIED` para el NIT profesional y el aislamiento de tenant del walk-in; el plan Médico global sigue abierto.
+- Avance: 10 / 10 microtareas HECHO en los tramos incluidos; el plan Médico global sigue abierto.
 
 ## Completado
 
@@ -14,10 +14,14 @@
 | H1.S1.M4 | Recorrido HTTP sobre PostgreSQL 18: alta, dos PATCH, relectura, dos filas históricas y privacidad pública. | `corepack yarn test:integration test/integration/practitioner-own-profile.int-spec.ts --runInBand --silent` con base efímera materializada desde `database/SQL/apply_all.sql` y `apply_deferred.sql`. | 1 suite / 6 pruebas aprobadas. |
 | H1.S1.M5 | Cambio publicado en el PR API. | `git push origin justin/medical-module-execution-20260924` | Commit `27055a6d` publicado en el PR #453. |
 | H2.S1.M1 | Causa del check `docs` del PR #453 identificada. | `gh run view 36041223938 --job 107773588987 --log-failed`; comparación del workflow contra `origin/dev`. | La imagen histórica de MinIO responde `unauthorized`; `.github/workflows` no pertenece al diff médico. |
+| H3.S1.M1 | Caso RED para el UUID de una agenda perteneciente a otro tenant. | Spec dirigido de `SchedulingBookingsService`. | RED: el promise resolvió una cita confirmada; 1 fallo nuevo / 154 aprobadas. |
+| H3.S1.M2 | La cita directa compara `resource.tenantId` con el tenant activo antes del bypass del mostrador y rechaza sin alcance comprobable. | Specs dirigidos de bookings y walk-in. | GREEN: 2 suites / 159 pruebas. |
+| H3.S1.M3 | Recorrido HTTP con un rol `SCHEDULING_AGENT` limitado al tenant A y un recurso movido al tenant B. | `corepack yarn test:integration test/integration/fx10-mostrador-atomico.int-spec.ts --runInBand --silent` sobre PostgreSQL 18 efímero. | 1 suite / 3 pruebas; 403 y cero identificadores para el paciente provisional. |
+| H3.S1.M4 | Regresión del módulo, gates y publicación en el PR API. | Suite `src/modules/scheduling`, typecheck, ESLint dirigido, `git diff --check`, commit y push. | 21 suites / 493 pruebas; gates en código 0; publicado en PR #453. |
 
 ## A medias
 
-Ninguna dentro de este tramo fiscal.
+Ninguna dentro de los tramos incluidos en este plan.
 
 ## Pendiente
 
@@ -40,6 +44,22 @@ Time:        6.184 s
 ```
 
 ```text
+Test Suites: 2 passed, 2 total
+Tests:       159 passed, 159 total
+```
+
+```text
+Test Suites: 21 passed, 21 total
+Tests:       493 passed, 493 total
+```
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Time:        15.507 s
+```
+
+```text
 openapi/openapi.yaml: validated in 484ms
 openapi.json: valid JSON
 ```
@@ -51,19 +71,23 @@ Typecheck, ESLint dirigido y `git diff --check` finalizaron con código 0.
 - Pantalla frontend y captura visual del perfil fiscal.
 - Entidad fiscal empresarial, documentos legales, representante, poder, pagos y aseguradoras.
 - Suite global completa de la API.
+- Auditoría de todos los endpoints de agenda que cargan recursos por UUID.
 
 ## Desvíos del plan
 
 - La primera corrida de integración encontró la base vacía porque `test:integration` fuerza `ORM_SCHEMA_SYNC=off`. Se materializó el DDL versionado y se repitió; la segunda corrida fue verde.
 - No se corrigió el workflow de MinIO dentro de este PR: el fallo antecede al diff médico y las distribuciones históricas oficiales consultadas ya no están disponibles por etiqueta, digest ni descarga directa.
+- La primera extensión de FX-10 dejó ambos profesionales en el tenant semilla y no reprodujo el cruce. El fixture final conserva un recurso válido y cambia su `tenant_id` a otra organización sembrada antes de ejecutar la solicitud.
 
 ## Riesgos residuales
 
 - El check `docs` seguirá bloqueado hasta que la infraestructura adopte una distribución oficial disponible o construya MinIO desde la fuente fijada.
 - El contrato empresarial de MED-06 todavía debe decidir si el emisor fiscal vive en la persona, práctica o tenant.
+- `SCHEDULING_AGENT` no forma parte del seed base de roles; FX-10 lo materializa y concede dentro del tenant para probar el contrato que ya usa el controlador.
 
 ## Decisiones y ambigüedades
 
 - Se reutilizó `common.identifiers` con `ID_TYPE_TAX`, igual que Paciente, sin cambios de DDL.
 - Una edición parcial conserva el campo fiscal omitido; vaciar el número cierra la fila vigente sin crear otra.
 - NIT y razón social sólo se leen en `me/summary`; la ficha pública no ejecuta la consulta de filiación privada.
+- El tenant activo resuelto por el guard es la autoridad para una solicitud HTTP; `actor.tenantIds` sólo respalda invocaciones internas y, si ambos faltan, la cita directa falla cerrada.

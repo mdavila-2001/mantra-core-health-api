@@ -8,6 +8,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   createdBy,
+  getCurrentTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -1017,6 +1018,8 @@ export class SchedulingBookingsService {
         resourceId: dto.resourceId,
       });
     }
+
+    this.assertRecursoEnTenantActivo(resource.tenantId, actor);
 
     // La agenda tiene que ser SUYA (o el actor administra agendas por
     // oficio): mismo criterio de titularidad que operar una reserva.
@@ -2563,6 +2566,36 @@ export class SchedulingBookingsService {
             'en pie: hablá con la organización para reactivarlo.',
       { tenantId, vinculo: veredicto },
     );
+  }
+
+  /**
+   * Impide que un UUID conocido salte el tenant activo del request.
+   *
+   * El `RolesGuard` limita el rol al tenant resuelto, pero el recurso llega por
+   * id y su repositorio no agrega `tenant_id` al predicado. Cuando RLS no está
+   * activo, un agente de agenda podía usar el recurso de otra organización y
+   * su rol de mostrador evitaba las comprobaciones de titularidad posteriores.
+   *
+   * `tenantIds` es el respaldo para invocaciones internas sin contexto HTTP.
+   * Sin contexto ni membresía comprobable se rechaza; `SUPERADMIN` mantiene su
+   * alcance de plataforma.
+   */
+  private assertRecursoEnTenantActivo(
+    resourceTenantId: string,
+    actor: AuthenticatedUser,
+  ): void {
+    if (actor.roles.includes('SUPERADMIN')) return;
+
+    const activeTenantId = getCurrentTenantId();
+    const perteneceAlAlcance = activeTenantId
+      ? activeTenantId === resourceTenantId
+      : actor.tenantIds?.includes(resourceTenantId) === true;
+
+    if (!perteneceAlAlcance) {
+      throw new ForbiddenException(
+        'La agenda indicada pertenece a otra organización.',
+      );
+    }
   }
 
   private operaCualquierAgenda(actor: AuthenticatedUser): boolean {
