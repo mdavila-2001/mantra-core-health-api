@@ -52,20 +52,20 @@ const PHONE_PATTERN_MESSAGE =
  * plataforma la que valida la matrícula antes de que el perfil pueda atender.
  *
  * El identificador de login es el **correo**, como en el alta del owner de una
- * organización. El documento de identidad es opcional y se guarda como
+ * organización. El CI es obligatorio para el alta profesional y se guarda como
  * identificador oficial de la persona.
  */
 export class RegisterPractitionerDto {
   /**
-   * Correo de trabajo, con el que el profesional iniciará sesión.
+   * Correo con el que el profesional iniciará sesión.
    *
-   * Es el **correo de trabajo** y a la vez la identidad de login: así se venía
-   * grabando ya (`CONTACT_USE_WORK`) y así lo confirmó el propietario al pedir
-   * los dos correos separados. El personal viaja en {@link personalEmail} y no
-   * sirve para entrar.
+   * Por compatibilidad, sin `workEmail` se conserva el comportamiento anterior
+   * y se guarda también como contacto de trabajo. Si se envía `workEmail`, este
+   * campo se trata como correo personal/de acceso y `workEmail` como contacto
+   * laboral.
    */
   @ApiProperty({
-    description: 'Correo de trabajo; es la identidad de login del profesional',
+    description: 'Correo de acceso del profesional',
     format: 'email',
     maxLength: 320,
   })
@@ -74,7 +74,9 @@ export class RegisterPractitionerDto {
   email!: string;
 
   /**
-   * Correo personal, distinto del de trabajo con el que se entra.
+   * Correo personal explícito. Si se omite y llega `workEmail`, `email` se usa
+   * como contacto personal; sin `workEmail`, se conserva la forma anterior en
+   * la que `email` es el contacto laboral y este campo agrega el personal.
    */
   @ApiPropertyOptional({
     description: 'Correo personal; no sirve para iniciar sesión',
@@ -85,6 +87,17 @@ export class RegisterPractitionerDto {
   @IsEmail()
   @MaxLength(320)
   personalEmail?: string;
+
+  /** Correo del lugar de trabajo, separado del correo de acceso. */
+  @ApiPropertyOptional({
+    description: 'Correo de trabajo, distinto del correo de acceso',
+    format: 'email',
+    maxLength: 320,
+  })
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(320)
+  workEmail?: string;
 
   /**
    * Contraseña en claro; se persiste sólo su hash argon2id.

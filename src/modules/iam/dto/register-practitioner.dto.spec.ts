@@ -30,6 +30,27 @@ describe('RegisterPractitionerDto · CI obligatorio (MED-01)', () => {
   });
 });
 
+describe('RegisterPractitionerDto · correo laboral separado (MED-03)', () => {
+  it('acepta el correo laboral junto al correo de acceso personal', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        email: 'ana.personal@example.test',
+        workEmail: 'ana@hospital.example.test',
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un correo laboral con formato inválido', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workEmail: 'no-es-un-correo',
+      }),
+    ).toEqual(['workEmail']);
+  });
+});
+
 /**
  * Aplana el árbol de `ValidationError` a rutas `a.b.c`, igual que hace el
  * `ValidationPipe` de Nest (`prependConstraintsWithParentProp`) para las

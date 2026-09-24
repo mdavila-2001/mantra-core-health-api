@@ -162,10 +162,9 @@ export class UpdateOwnPractitionerProfileDto {
   /* --- los cuatro contactos que el alta captura por separado ----------------
      Se editan igual que se declararon: cada uno es su propio par sistema × uso
      en `common.contact_points`. Una cadena vacía lo borra, como en el resto del
-     PATCH. El correo de trabajo NO está acá: es la identidad de login y
-     cambiarlo es otro trámite. */
+     PATCH. El correo de trabajo NO está incluido en este contrato. */
 
-  /** Correo personal; el de trabajo, que es el de login, se cambia aparte. */
+  /** Correo personal. */
   @ApiPropertyOptional({ format: 'email', maxLength: 320 })
   @IsOptional()
   @IsString()

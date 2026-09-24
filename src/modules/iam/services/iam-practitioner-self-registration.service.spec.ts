@@ -954,6 +954,35 @@ describe('IamPractitionerSelfRegistrationService', () => {
     expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(esperados.length);
   });
 
+  it('guarda el correo de acceso personal y workEmail en usos distintos', async () => {
+    const d = build();
+    const correoPersonal = 'ana.personal@example.test';
+    const correoTrabajo = 'ana@hospital.example.test';
+
+    await d.service.registerPractitioner({
+      ...dto,
+      email: correoPersonal,
+      workEmail: correoTrabajo,
+    } as RegisterPractitionerDto);
+
+    expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        systemConceptId: CONCEPTS.CONTACT_EMAIL,
+        useConceptId: CONCEPTS.CONTACT_USE_HOME,
+        value: correoPersonal,
+      }),
+    );
+    expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        systemConceptId: CONCEPTS.CONTACT_EMAIL,
+        useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        value: correoTrabajo,
+      }),
+    );
+  });
+
   it('el celular personal y el de trabajo no se pisan entre sí', async () => {
     const d = build();
 

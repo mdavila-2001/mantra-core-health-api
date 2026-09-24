@@ -140,13 +140,14 @@ interface ContactoDeclarado {
 }
 
 /**
- * Traduce los cinco campos de contacto del alta a filas de
+ * Traduce los contactos del alta a filas de
  * `common.contact_points`.
  *
- * El registro del médico pide correo y celular **personales** además de los del
- * trabajo, y un fijo de trabajo. Cada uno se distingue por el par
- * sistema × uso; el correo de trabajo es además la identidad de login, por eso
- * es el único obligatorio.
+ * Cuando llega `workEmail`, `email` es el correo de acceso/personal y el nuevo
+ * campo representa el de trabajo. Sin `workEmail`, `email` sigue guardándose
+ * como correo laboral para no cambiar el comportamiento de clientes anteriores;
+ * `personalEmail` continúa siendo aceptado como contacto personal opcional.
+ * Cada contacto se distingue por sistema × uso.
  *
  * `dto.phone` es la forma anterior de declarar el teléfono y se grababa como
  * `PHONE` con uso de trabajo. **Sigue cayendo exactamente ahí**: reinterpretarlo
@@ -163,6 +164,7 @@ function contactosDeclarados(
     RegisterPractitionerDto,
     | 'email'
     | 'personalEmail'
+    | 'workEmail'
     | 'mobilePhone'
     | 'workMobilePhone'
     | 'workLandline'
@@ -170,17 +172,20 @@ function contactosDeclarados(
   >,
 ): readonly ContactoDeclarado[] {
   const fijoDeTrabajo = dto.workLandline ?? dto.phone;
+  const correoPersonal =
+    dto.personalEmail ?? (dto.workEmail ? dto.email : undefined);
+  const correoTrabajo = dto.workEmail ?? dto.email;
 
   const candidatos: readonly (ContactoDeclarado | null)[] = [
     {
       systemConceptId: CONCEPTS.CONTACT_EMAIL,
-      value: dto.email,
+      value: correoTrabajo,
       useConceptId: CONCEPTS.CONTACT_USE_WORK,
     },
-    dto.personalEmail
+    correoPersonal
       ? {
           systemConceptId: CONCEPTS.CONTACT_EMAIL,
-          value: dto.personalEmail,
+          value: correoPersonal,
           useConceptId: CONCEPTS.CONTACT_USE_HOME,
         }
       : null,
