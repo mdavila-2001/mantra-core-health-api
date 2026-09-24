@@ -6,6 +6,7 @@
 - Peldaño máximo: TESTED para unitarios/API dirigida y una integración parcial; no se alcanzó VERIFIED ni REGRESSION_VERIFIED.
 - Avance: 0/18 microtareas HECHO (0 %). Estado: 12 A MEDIAS, 5 BLOQUEADO, 1 TODO.
 - Alcance real: auditoría, pruebas existentes y artefactos de reporte; no se alteraron código API, pruebas, OpenAPI ni modelo/DDL.
+- Publicación: la rama justin/medical-module-cierre-api se subió a origin y el SHA remoto coincidió con el local; no se abrió PR, mergeó ni desplegó.
 
 ## Completado
 

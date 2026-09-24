@@ -1,6 +1,6 @@
 # Verificaciones API — 2026-09-24
 
-Entorno: worktree justin/medical-module-cierre-api, datos de prueba sintéticos, proyecto Docker desechable mch-medical-20260924. Nunca se leyó ni usó el .env administrado.
+Entorno: worktree justin/medical-module-cierre-api, datos de prueba sintéticos, proyecto Docker desechable mch-medical-20260924. Nunca se leyó ni usó el .env administrado. La rama documental se publicó en origin; no hay PR, merge ni deploy.
 
 - typecheck: exit 0.
 - lint: exit 0.
