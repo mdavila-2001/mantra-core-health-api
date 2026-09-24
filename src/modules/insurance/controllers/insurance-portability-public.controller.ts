@@ -20,22 +20,29 @@ import { InsurancePortabilityService } from '../services/insurance-portability.s
 import { PortabilityVerificationResponseDto } from '../dto';
 
 const PUBLIC_RATE_LIMIT = { default: { limit: 60, ttl: 60_000 } };
-const SHA256_HEX_PATTERN = /^[0-9a-f]{64}$/;
+const SHA256_HEX_PATTERN = /^[0-9a-fA-F]{64}$/;
 
 /**
- * Valida que el parámetro sea un hexadecimal SHA-256 de 64 caracteres.
- * Un formato inválido responde 400 sin llegar a consultar la base — mismo
- * criterio que `ParseUUIDPipe` para los `:id` del resto de la API.
+ * Valida que el parámetro sea un hexadecimal SHA-256 de 64 caracteres y lo
+ * normaliza a minúsculas.
+ *
+ * El sello se persiste en minúsculas (`createHash(...).digest('hex')` en
+ * `InsurancePortabilityService.export`), pero el mismo hash llega también
+ * tecleado a mano o transcrito de un lector de QR, donde las mayúsculas son
+ * tan comunes como las minúsculas (CA-04: «acepta hashes en mayúsculas o
+ * minúsculas insensiblemente»). Un formato inválido responde 400 sin llegar
+ * a consultar la base — mismo criterio que `ParseUUIDPipe` para los `:id`
+ * del resto de la API.
  */
 @Injectable()
-class ParseShaHashPipe implements PipeTransform<string, string> {
+export class ParseShaHashPipe implements PipeTransform<string, string> {
   transform(value: string, metadata: ArgumentMetadata): string {
     if (!SHA256_HEX_PATTERN.test(value)) {
       throw new BadRequestException(
         `${metadata.data ?? 'valor'} debe ser un hash SHA-256 hexadecimal de 64 caracteres`,
       );
     }
-    return value;
+    return value.toLowerCase();
   }
 }
 
