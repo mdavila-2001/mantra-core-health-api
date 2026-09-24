@@ -27,11 +27,20 @@ import {
 } from '../../../common';
 import { COMM } from '../community.concepts';
 import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
+import { PublicTerritoryFilterService } from './public-territory-filter.service';
 
 /** Un concepto de `VS_MEDICAL_SPECIALTY`, el que el catálogo doble declara. */
 const ESPECIALIDAD_CARDIOLOGIA = '11111111-1111-4111-8111-111111111111';
 /** Un concepto del catálogo que **no** es una especialidad médica. */
 const CONCEPTO_AJENO = '22222222-2222-4222-8222-222222222222';
+/** Departamentos y municipios del catálogo territorial doble. */
+const DEPTO_LP = '33333333-3333-4333-8333-333333333301';
+const DEPTO_SC = '33333333-3333-4333-8333-333333333302';
+const MUNI_EL_ALTO = '44444444-4444-4444-8444-444444444401';
+const MUNI_SANTA_CRUZ = '44444444-4444-4444-8444-444444444402';
+/** Chuquisaca y Sucre con código del INE, como en la base de desarrollo. */
+const DEPTO_CH = '33333333-3333-4333-8333-333333333303';
+const MUNI_SUCRE_INE = '44444444-4444-4444-8444-444444444403';
 
 /**
  * Un perfil tal como sale de la base: **con** todos los campos internos.
@@ -144,6 +153,36 @@ function build(opciones?: {
   const concepts = {
     findById: mockFn().mockResolvedValue({ display: 'Cardiología' }),
   };
+  // El filtro territorial también es real; sólo los catálogos son dobles: dos
+  // departamentos (LP, SC) y un municipio de cada uno.
+  const territoryValueSets = {
+    findByInternalCode: mockFn(async (_em: unknown, code: string) => ({
+      id: code,
+    })),
+    findIncludedConceptIdsByValueSet: mockFn(
+      async (_em: unknown, id: string) =>
+        id === 'VS_BO_DEPARTMENT'
+          ? [DEPTO_LP, DEPTO_SC, DEPTO_CH]
+          : [MUNI_EL_ALTO, MUNI_SANTA_CRUZ, MUNI_SUCRE_INE],
+    ),
+  };
+  const territoryConcepts = {
+    findById: mockFn(
+      async (_em: unknown, id: string) =>
+        ({
+          [DEPTO_LP]: { code: 'geo:bo:department:LP' },
+          [DEPTO_SC]: { code: 'geo:bo:department:SC' },
+          [MUNI_EL_ALTO]: { code: 'LP-EL_ALTO' },
+          [MUNI_SANTA_CRUZ]: { code: 'SC-SANTA_CRUZ_DE_LA_SIERRA' },
+          [MUNI_SUCRE_INE]: { code: 'geo:bo:municipality:010101' },
+          [DEPTO_CH]: { code: 'geo:bo:department:CH' },
+        })[id] ?? null,
+    ),
+  };
+  const territory = new PublicTerritoryFilterService(
+    territoryValueSets as any,
+    territoryConcepts as any,
+  );
   const service = new CommunityPublicService(
     em as any,
     repo as any,
@@ -155,6 +194,7 @@ function build(opciones?: {
     specialtyCatalog,
     concepts as any,
     logger as any,
+    territory,
   );
   return {
     service,
@@ -1291,6 +1331,142 @@ describe('CommunityPublicService · filtro por especialidad (AC-02-7, AC-02-8)',
       }),
       expect.any(Number),
     );
+  });
+});
+
+describe('CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3)', () => {
+  it('un departamento del catálogo acota por SQL con su sigla', async () => {
+    const d = build({ hits: [] });
+
+    await d.service.search({
+      kind: 'ORGANIZATION',
+      departmentConceptId: DEPTO_LP,
+    });
+
+    // El índice no guarda el lugar: con filtro territorial no se le pregunta.
+    expect(d.searchIndex.search).not.toHaveBeenCalled();
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        // Las dos formas de código sembradas: la del generador del modelo y la
+        // del INE (La Paz es el 02).
+        territory: {
+          departmentConceptId: DEPTO_LP,
+          municipalityCodePrefixes: ['LP-', 'geo:bo:municipality:02'],
+        },
+      }),
+      expect.any(Number),
+    );
+  });
+
+  it('departamento y municipio coherentes acotan por el municipio', async () => {
+    const d = build();
+
+    await d.service.search({
+      kind: 'PRACTITIONER',
+      departmentConceptId: DEPTO_LP,
+      municipalityConceptId: MUNI_EL_ALTO,
+    });
+
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        territory: { municipalityConceptId: MUNI_EL_ALTO },
+      }),
+      expect.any(Number),
+    );
+  });
+
+  it('un municipio solo alcanza: ya implica su departamento', async () => {
+    const d = build();
+
+    await d.service.search({
+      kind: 'ORGANIZATION',
+      municipalityConceptId: MUNI_SANTA_CRUZ,
+    });
+
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        territory: { municipalityConceptId: MUNI_SANTA_CRUZ },
+      }),
+      expect.any(Number),
+    );
+  });
+
+  it('un municipio de otro departamento da 422 y no busca', async () => {
+    const d = build();
+
+    await expect(
+      d.service.search({
+        kind: 'ORGANIZATION',
+        departmentConceptId: DEPTO_LP,
+        municipalityConceptId: MUNI_SANTA_CRUZ,
+      }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.repo.searchProfiles).not.toHaveBeenCalled();
+  });
+
+  it('un departamento ajeno al catálogo da 422 y no devuelve el directorio entero', async () => {
+    const d = build();
+
+    const error = await d.service
+      .search({ kind: 'ORGANIZATION', departmentConceptId: CONCEPTO_AJENO })
+      .catch((e: PreconditionFailedException) => e);
+
+    expect(error).toBeInstanceOf(PreconditionFailedException);
+    expect((error as PreconditionFailedException).getStatus()).toBe(422);
+    expect(d.repo.searchProfiles).not.toHaveBeenCalled();
+  });
+
+  it('un municipio con código del INE se reconoce en su departamento', async () => {
+    const d = build();
+
+    await d.service.search({
+      kind: 'ORGANIZATION',
+      departmentConceptId: DEPTO_CH,
+      municipalityConceptId: MUNI_SUCRE_INE,
+    });
+
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        territory: { municipalityConceptId: MUNI_SUCRE_INE },
+      }),
+      expect.any(Number),
+    );
+  });
+
+  it('un municipio con código del INE de otro departamento da 422', async () => {
+    const d = build();
+
+    await expect(
+      d.service.search({
+        kind: 'ORGANIZATION',
+        departmentConceptId: DEPTO_LP,
+        municipalityConceptId: MUNI_SUCRE_INE,
+      }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('un municipio ajeno al catálogo da 422', async () => {
+    const d = build();
+
+    await expect(
+      d.service.search({
+        kind: 'PRACTITIONER',
+        municipalityConceptId: DEPTO_LP,
+      }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.repo.searchProfiles).not.toHaveBeenCalled();
+  });
+
+  it('sin lugar pedido el índice sigue sirviendo y no hay filtro territorial', async () => {
+    const d = build({ hits: [] });
+
+    await d.service.search({ kind: 'ORGANIZATION' });
+
+    expect(d.searchIndex.search).toHaveBeenCalled();
   });
 });
 

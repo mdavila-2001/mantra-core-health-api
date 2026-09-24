@@ -1,0 +1,13 @@
+PASSED  IamPatientSelfRegistrationService registerPatient locks the national id inside the transaction before checking for a live credential
+PASSED  CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3) un departamento del catálogo acota por SQL con su sigla
+PASSED  CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3) departamento y municipio coherentes acotan por el municipio
+PASSED  CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3) un municipio solo alcanza: ya implica su departamento
+PASSED  CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3) un municipio de otro departamento da 422 y no busca
+PASSED  CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3) un departamento ajeno al catálogo da 422 y no devuelve el directorio entero
+PASSED  CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3) un municipio con código del INE se reconoce en su departamento
+PASSED  CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3) un municipio con código del INE de otro departamento da 422
+PASSED  CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3) un municipio ajeno al catálogo da 422
+PASSED  CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3) sin lugar pedido el índice sigue sirviendo y no hay filtro territorial
+PASSED  CommunityPublicController directorio de profesionales (AC-02-7) departamento y municipio llegan al servicio (2.3)
+PASSED  CommunityPublicController directorio de organizaciones — filtro territorial (2.3) departamento y municipio llegan al servicio junto con la ciudad
+total 12 passed 12

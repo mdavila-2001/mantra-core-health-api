@@ -68,6 +68,7 @@ import {
   CommunityReviewsReadService,
   CommunityModerationReadService,
   CommunityPublicService,
+  PublicTerritoryFilterService,
   CommunitySearchIndexService,
   CommunityVerificationService,
   CommunityProfileStatsService,
@@ -171,6 +172,9 @@ import {
     // La regla de «qué uuid es una especialidad médica», compartida con el alta
     // de profesional. Ver la nota del import.
     MedicalSpecialtyCatalogService,
+    // Filtro territorial en dos pasos del directorio (subtarea 2.3); lee los
+    // mismos repositorios de `TerminologyModule`.
+    PublicTerritoryFilterService,
     // Auth del gateway WS — `WsJwtGuard` no es un `APP_GUARD` (los gateways no
     // pasan por el pipeline HTTP de guards), así que hay que proveerlo acá
     // explícitamente para que `CommunityMessagingGateway` pueda inyectarlo.

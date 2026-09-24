@@ -71,6 +71,7 @@ describe('IamPatientSelfRegistrationService', () => {
       findById: fn(),
     };
     const credentialsRepo = {
+      lockSubjectForRegistration: fn().mockResolvedValue(undefined),
       findLivePasswordBySubject: fn().mockResolvedValue(null),
       createPassword: fn(),
     };
@@ -554,6 +555,22 @@ describe('IamPatientSelfRegistrationService', () => {
         ConflictException,
       );
       expect(d.usersRepo.create).not.toHaveBeenCalled();
+    });
+
+    // 7.1: el cerrojo tiene que tomarse ANTES de mirar si la cédula ya tiene
+    // cuenta, y dentro de la misma transacción; al revés, dos altas
+    // simultáneas pasarían las dos la comprobación.
+    it('locks the national id inside the transaction before checking for a live credential', async () => {
+      const d = build();
+
+      await d.service.registerPatient(dto);
+
+      const lock = d.credentialsRepo.lockSubjectForRegistration;
+      const check = d.credentialsRepo.findLivePasswordBySubject;
+      expect(lock).toHaveBeenCalledWith(d.tx, dto.nationalId);
+      expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
+        check.mock.invocationCallOrder[0],
+      );
     });
   });
 

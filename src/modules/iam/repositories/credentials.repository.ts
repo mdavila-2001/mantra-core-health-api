@@ -89,6 +89,30 @@ export class CredentialsRepository {
   }
 
   /**
+   * Serializa, dentro de la transacción actual, las altas que reclaman el mismo
+   * identificador de login (subtarea 7.1).
+   *
+   * Es un `pg_advisory_xact_lock`, el mismo patrón que `AuditLogRepository`: se
+   * toma sobre la transacción que va a insertar la credencial y se libera solo
+   * al COMMIT/ROLLBACK. Sin él, dos altas simultáneas con la misma cédula pasan
+   * las dos por {@link findLivePasswordBySubject} sin ver nada, y la segunda
+   * choca recién contra `ux_authentication_credentials_live_password_subject`
+   * con el 409 genérico del filtro. Con él, la segunda espera, vuelve a leer
+   * —en READ COMMITTED cada sentencia ve lo ya confirmado— y recibe el 409 de
+   * dominio. El índice único sigue siendo la garantía de fondo.
+   *
+   * La clave va prefijada para no compartir espacio con otros cerrojos.
+   */
+  lockSubjectForRegistration(
+    em: EntityManager,
+    externalSubject: string,
+  ): Promise<unknown> {
+    return em.execute('SELECT pg_advisory_xact_lock(hashtext(?))', [
+      `iam:credential-subject:${externalSubject}`,
+    ]);
+  }
+
+  /**
    * Credencial de contraseña VIVA (ACTIVA o PENDIENTE de activación) para el
    * identificador dado. Sustenta la detección de duplicados del registro asistido
    * (C-18): si ya existe una cuenta con el identificador verificado no se crea otra.

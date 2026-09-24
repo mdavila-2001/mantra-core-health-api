@@ -1,0 +1,6 @@
+C obtuvo 19:23:08.686411
+A suelta (commit) 19:23:08.386215
+A tomó el cerrojo 19:23:05.381157
+B pide el cerrojo 19:23:06.283423
+B obtuvo el cerrojo 19:23:08.387104
+C (otra cédula) pide 19:23:08.686015
