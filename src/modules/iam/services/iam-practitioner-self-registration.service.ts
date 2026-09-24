@@ -63,6 +63,7 @@ import {
 } from '../dto';
 import { createResidenceAddress } from '../../common/services/residence-address';
 import { FileUploadService } from '../../common/services/file-upload.service';
+import { AttachableFileService } from '../../common/services/attachable-file.service';
 import { FileCategory, FileSensitivity } from '../../common/dto';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
@@ -288,6 +289,7 @@ export class IamPractitionerSelfRegistrationService {
     private readonly tracing: TracingService,
     private readonly ownSiteProvisioning: OwnSiteProvisioningService,
     private readonly administrativeAreas: AdministrativeAreaCatalogService,
+    private readonly attachableFiles: AttachableFileService,
     @Optional()
     private readonly fileUploadService?: FileUploadService,
   ) {
@@ -640,11 +642,28 @@ export class IamPractitionerSelfRegistrationService {
             { credentialTypeConceptId: declarada.credentialTypeConceptId },
           );
         }
+        if (declarada.fileId) {
+          await this.attachableFiles.claimAnonymousUpload(
+            tx,
+            declarada.fileId,
+            { tenantId: SEED.tenantId, ownerUserId: user.id },
+            {
+              allowedMimeTypes: ['application/pdf'],
+              allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+              operation: 'iam.practitioner.self-register.credential',
+            },
+            {
+              subject: 'El título académico',
+              notFound: 'El título académico no fue encontrado',
+            },
+          );
+        }
         this.professionalCredentialsRepo.create(tx, {
           practitionerProfileId: person.id,
           credentialTypeConceptId: declarada.credentialTypeConceptId,
           number: numero,
           issuingInstitutionText: declarada.issuingInstitutionText?.trim(),
+          fileId: declarada.fileId,
           stateConceptId: PROF.CRED_PENDING,
           actorUserId: user.id,
         });

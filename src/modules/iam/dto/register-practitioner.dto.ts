@@ -684,6 +684,20 @@ export class RegisterPractitionerCredentialDto {
   @IsString()
   @MaxLength(200)
   issuingInstitutionText?: string;
+
+  /**
+   * PDF precargado anónimamente por `POST /iam/auth/upload-registration-document`.
+   * El alta lo reclama para el usuario recién creado dentro de la misma
+   * transacción y lo vincula a esta fila de credencial.
+   */
+  @ApiPropertyOptional({
+    description:
+      'fileId del PDF subido por POST /iam/auth/upload-registration-document',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  fileId?: string;
 }
 
 /** Resultado del auto-registro de un profesional de salud. */

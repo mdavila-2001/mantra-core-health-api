@@ -104,6 +104,12 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const fileUploadService = {
       upload: fn().mockResolvedValue({ id: 'file-foto-123' }),
     };
+    const attachableFileService = {
+      claimAnonymousUpload: fn().mockResolvedValue({
+        file: { id: 'file-credential-123' },
+        version: { id: 'version-credential-123' },
+      }),
+    };
     // P20: el consultorio propio declarado en `ownSite` se provisiona con
     // este colaborador. Por defecto resuelve algo (no importa qué): el caso
     // interesante es que no se llame cuando el alta no declara `ownSite`.
@@ -151,6 +157,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       new TracingService(),
       ownSiteProvisioning as never,
       administrativeAreas as never,
+      attachableFileService as never,
       fileUploadService as never,
     );
     return {
@@ -177,6 +184,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       notificationsService,
       activationsRepo,
       fileUploadService,
+      attachableFileService,
       ownSiteProvisioning,
       administrativeAreas,
     };
@@ -548,6 +556,67 @@ describe('IamPractitionerSelfRegistrationService', () => {
           ([, data]: [unknown, { number: string }]) => data.number,
         ),
       ).toEqual(['TIT-1', 'TIT-2', 'MAE-9']);
+    });
+
+    it('reclama el PDF anónimo dentro del alta y lo vincula a su título', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+        credentials: [
+          {
+            credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+            number: 'TIT-1',
+            fileId: 'file-credential-123',
+          },
+        ],
+      });
+
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-credential-123',
+        { tenantId: SEED.tenantId, ownerUserId: 'user-1' },
+        expect.objectContaining({
+          allowedMimeTypes: ['application/pdf'],
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+          operation: 'iam.practitioner.self-register.credential',
+        }),
+        expect.objectContaining({ subject: 'El título académico' }),
+      );
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practitionerProfileId: 'person-1',
+          number: 'TIT-1',
+          fileId: 'file-credential-123',
+        }),
+      );
+    });
+
+    it('si el PDF no se puede reclamar, no crea la fila de credencial', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockRejectedValue(
+        new PreconditionFailedException('El documento ya fue reclamado'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          email: dto.email,
+          password: dto.password,
+          licenseNumber: dto.licenseNumber,
+          credentials: [
+            {
+              credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+              number: 'TIT-1',
+              fileId: 'file-credential-123',
+            },
+          ],
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
     });
 
     it('un concepto que no es tipo de credencial corta el alta entera', async () => {

@@ -1736,13 +1736,13 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-      summary: Pre-cargar un documento legal (PDF) del registro de organización
+      summary: Pre-cargar un PDF para un registro de organización o profesional
       tags:
         - iam-auth
       security: []
       description: >-
-        Pre-cargar un documento legal (PDF) del registro de organización. Operación pública; no requiere JWT. Todas las
-        respuestas de error usan el envelope ErrorResponse.
+        Pre-cargar un PDF para un registro de organización o una credencial profesional. Operación pública; no requiere
+        JWT. Todas las respuestas de error usan el envelope ErrorResponse.
   /iam/auth/register-practitioner:
     post:
       operationId: IamAuthController_registerPractitioner
@@ -53093,6 +53093,10 @@ components:
         issuingInstitutionText:
           type: string
           maxLength: 200
+        fileId:
+          type: string
+          description: fileId del PDF subido por POST /iam/auth/upload-registration-document
+          format: uuid
       required:
         - credentialTypeConceptId
         - number

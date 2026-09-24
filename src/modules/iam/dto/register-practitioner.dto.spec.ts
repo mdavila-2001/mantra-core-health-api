@@ -147,6 +147,36 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
     ).toEqual([]);
   });
 
+  it('acepta el fileId del PDF precargado para asociarlo a ese título', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'TIT-001',
+            fileId: '36c99f5d-9417-51e8-89d2-4f54138bb323',
+          },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un fileId que no es uuid', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'TIT-001',
+            fileId: 'documento-subido',
+          },
+        ],
+      }),
+    ).toEqual(['credentials.0.fileId']);
+  });
+
   it('rechaza un elemento sin número', async () => {
     expect(
       await propiedadesConError({

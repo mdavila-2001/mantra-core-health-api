@@ -795,6 +795,10 @@ const CUENTA_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   { table: 'iam.email_verifications', column: 'user_id' },
   { table: 'iam.account_activations', column: 'user_id' },
   { table: 'iam.security_events', column: 'user_id' },
+  // Los PDFs reclamados durante el alta profesional son propiedad del usuario
+  // recién creado aunque su tenant siga siendo DEFAULT; limpiarlos por
+  // `tenant_id` borraría archivos de otras cuentas de prueba.
+  { table: 'common.files', column: 'created_by_user_id' },
   { table: 'directory.tenant_memberships', column: 'user_id' },
   { table: 'authz.user_role_assignments', column: 'user_id' },
   { table: 'messaging.notification_requests', column: 'recipient_user_id' },
