@@ -69,13 +69,13 @@ Ender lidera la capa de **Identidad, Acreditación Profesional, Directorios Púb
 | # | Subtarea | Título / Objetivo | Rama de Trabajo Exigida | Estado | Prompt Listo |
 |:---:|:---:|---|---|:---:|:---:|
 | **1** | **1.6** | **Universidad, Lugar de Estudio y Títulos Múltiples (Médico y Paciente)**<br>Ingesta en `RegisterPractitionerDto` y persistencia en `profiles.professional_credentials`. | `ender/1.6-universidad-titulos` | 🟣 **FUSIONADA EN DEV (PR #382)** | ✅ `PROMPT_SUBTAREA_1_6_UNIVERSIDAD_TITULOS.md` |
-| **2** | **2.1** | **Exposición de Sedes de Atención en Ficha Pública (`P16`)**<br>Exponer `practiceLocations` en `PublicProfileDetailDto` para `/p/:slug`. | `ender/feat-public-profile-practice-locations` | 🚀 **Prioridad Inmediata** | En roadmap |
+| **2** | **2.1** | **Exposición de Sedes de Atención en Ficha Pública (`P16`)**<br>Exponer `practiceLocations` en `PublicProfileDetailDto` para `/p/:slug`. | `ender/feat-public-profile-practice-locations` | 🟣 **FUSIONADA EN DEV (PR #394)** | ✅ Completado |
 | **3** | **2.2** | **Asociación de Foto de Perfil en Edición Profesional (`P17`)**<br>Admitir `photoFileId` en `PUT /profiles/practitioners/:id/photo`. | `PUT /profiles/practitioners/:id/photo` | 🟣 **FUSIONADA EN DEV** | ✅ Consumido en front |
-| **4** | **2.3** | **Filtro Territorial en Dos Pasos (Depto -> Municipio)**<br>Filtro en cascada para directorio de organizaciones y prestadores. | `ender/feat-territorial-filter-two-step` | Fase 2 | En roadmap |
-| **5** | **5.1** | **Autorización de Descarga en Chat y Evidencias FT-32 (`P0`)**<br>Presigned URLs y token efímero seguro para descarga de documentos médicos. | `ender/feat-ft32-chat-attachment-download-auth` | 🔴 **Prioridad P0** | En roadmap |
-| **6** | **5.2** | **Metadatos Enriquecidos y Previews de Adjuntos (`P5`)**<br>Extracción de mime-type, tamaño, páginas y previsualizaciones drag-and-drop. | `ender/feat-attachment-metadata-previews` | Fase 3 | En roadmap |
-| **7** | **5.3** | **🆕 Preferencias de Chat y Respuesta Automática de Profesionales (PR #433)**<br>`GET/PUT /profiles/practitioners/me/chat-preferences` para autorespuesta y descansos. | `ender/feat-chat-auto-reply-preferences` | Fase 3 | En roadmap |
-| **8** | **7.2** | **Retención, Anonimización y Purga de Evidencias**<br>Soft-delete y limpieza periódica de documentos de identidad rechazados. | `ender/feat-identity-evidence-purge-policy` | Fase 4 | En roadmap |
+| **4** | **2.3** | **Filtro Territorial en Dos Pasos (Depto -> Municipio)**<br>Filtro en cascada para directorio de organizaciones y prestadores. | `justin/cierre-plan-2-3-y-7-1` | 🔵 **EN PR** — `department`/`municipality` en `/public/search/practitioners` y `/organizations` (ver `docs/trabajo/2026-09-24-cierre-plan-2-3-y-7-1/`) | ✅ Tests en verde |
+| **5** | **5.1** | **Autorización de Descarga en Chat y Evidencias FT-32 (`P0`)**<br>Presigned URLs y token efímero seguro para descarga de documentos médicos. | `ender/feat-ft32-chat-attachment-download-auth` | 🟣 **FUSIONADA EN DEV (PR #402)** | ✅ Completado |
+| **6** | **5.2** | **Metadatos Enriquecidos y Previews de Adjuntos (`P5`)**<br>Extracción de mime-type, tamaño, páginas y previsualizaciones drag-and-drop. | `ender/feat-attachment-metadata-previews` | 🟣 **FUSIONADA EN DEV (PR #406)** | ✅ Completado |
+| **7** | **5.3** | **🆕 Preferencias de Chat y Respuesta Automática de Profesionales (PR #433)**<br>`GET/PUT /profiles/practitioners/me/chat-preferences` para autorespuesta y descansos. | `ender/feat-chat-auto-reply-preferences` | 🟡 **CUBIERTA DE OTRA FORMA** — autorespuesta en `GET/PUT /community/profiles/:profileId/auto-reply`, no en la ruta planeada | Decidir si se acepta |
+| **8** | **7.2** | **Retención, Anonimización y Purga de Evidencias**<br>Soft-delete y limpieza periódica de documentos de identidad rechazados. | `ender/feat-identity-evidence-purge-policy` | 🟣 **FUSIONADA EN DEV (PR #405)** | ✅ Completado |
 
 ---
 
@@ -105,17 +105,19 @@ Itzan lidera la capa de **Agendas Médicas, Creación de Citas, Expediente/Notas
 | **2** | **3.1** | **Retiro de Plantillas de Horarios y Liberación Segura (`P15`)**<br>`DELETE /scheduling/templates/:id` respondiendo `409 Conflict` si hay reservas activas. | Commit `3a431e30` / `fde22f2f` | 🟣 **FUSIONADA EN DEV** | ✅ 9/9 tests en verde |
 | **3** | **3.2** | **Creación Atómica de Citas Clínicas (`P13`)**<br>`SchedulingConfirmationService` con flush y control de solapamiento de slots. | Commit `9a6fb9dd` (`crearCitaClinica`) | 🟣 **FUSIONADA EN DEV** | ✅ Verificado en DB |
 | **4** | **4.1** | **Lectura y Paginación Cursor de Notas Clínicas (`P18`)**<br>`GET /charts/notes` con paginación cursor para navegación fluida de evoluciones. | `itzan/feat-chart-notes-collection-read` | 🟣 **FUSIONADA EN DEV (PR #385)** | ✅ Tests fx11 en verde |
-| **5** | **4.2** | **Check-in Idempotente por Cita y Manejo 409 (`POST /clinical/encounters/check-in`)**<br>Garantizar correlación unívoca cita-encuentro sin duplicados ante recargas. | `itzan/feat-clinical-encounter-checkin-idempotency` | 🚀 **Prioridad Inmediata** | En roadmap |
-| **6** | **4.3** | **Exposición de `encounterId` en Reservas (`BookingItemDto`)**<br>Proyectar `encounterId` en `aBookingItem` para enlace 1:1 en frontend. | `itzan/feat-scheduling-bookings-encounter-id` | 🚀 **Siguiente en Cola** | En roadmap |
-| **7** | **4.4** | **🆕 Plan de Cuidados y Firma en Expediente (PR #430)**<br>Persistencia estructurada de `carePlan` y firma PDF de sesión en `charts.notes`. | `itzan/feat-clinical-care-plan-progress-notes` | Fase 2 | En roadmap |
+| **5** | **4.2** | **Check-in Idempotente por Cita y Manejo 409 (`POST /clinical/encounters/check-in`)**<br>Garantizar correlación unívoca cita-encuentro sin duplicados ante recargas. | `itzan/feat-clinical-encounter-checkin-idempotency` | 🟣 **FUSIONADA EN DEV (PR #390)** | ✅ Completado |
+| **6** | **4.3** | **Exposición de `encounterId` en Reservas (`BookingItemDto`)**<br>Proyectar `encounterId` en `aBookingItem` para enlace 1:1 en frontend. | `itzan/feat-scheduling-bookings-encounter-id` | 🟣 **FUSIONADA EN DEV (PR #392)** | ✅ Completado |
+| **7** | **4.4** | **🆕 Plan de Cuidados y Firma en Expediente (PR #430)**<br>Persistencia estructurada de `carePlan` y firma PDF de sesión en `charts.notes`. | `itzan/feat-chart-care-plan-documents` | 🟣 **FUSIONADA EN DEV (PRs #408 y #413)** | ✅ Completado |
 | **8** | **6.1** | **Catálogo y Consola de Coberturas y Planes de Salud**<br>Módulo `insurance` y consola administrativa de planes en frontend. | PR #386 (API) / PR #437 (Front) | 🟣 **FUSIONADA EN DEV** | ✅ Completado hoy |
-| **9** | **6.2** | **Simulador de Financiamiento y Cotizaciones**<br>Endpoint `POST /quotations/simulate` con cálculo determinista de planes. | `itzan/feat-insurance-quotation-simulator` | Fase 3 | En roadmap |
-| **10** | **6.3** | **🆕 Endpoints de Lectura para Cockpit Contable SAP (PR #433)**<br>`GET /accounting/fiscal-years`, `open-items`, `dimensions` y `document-flow`. | `itzan/feat-accounting-cockpit-read-models` | Fase 3 | En roadmap |
-| **11** | **7.1** | **Prevención Atómica de Cédulas Homónimas y Rollback**<br>Manejo de concurrencia e integridad transaccional en autorregistro de personas. | `itzan/feat-patient-homonym-prevention-acid` | Fase 4 | En roadmap |
+| **9** | **6.2** | **Simulador de Financiamiento y Cotizaciones**<br>Endpoint `POST /quotations/simulate` con cálculo determinista de planes. | — | ⚪ **REEMPLAZADA** — el simulador `POST /quotations/simulate` se retiró en v4.2.18 por el plan de pagos sin interés (PR #419); coberturas por Marcelo (PRs #400, #407, #433) | Decidir si se da por cerrada |
+| **10** | **6.3** | **🆕 Endpoints de Lectura para Cockpit Contable SAP (PR #433)**<br>`GET /accounting/fiscal-years`, `open-items`, `dimensions` y `document-flow`. | `itzan/feat-accounting-cockpit-read-models` | 🟣 **FUSIONADA EN DEV (PR #403)** | ✅ Completado |
+| **11** | **7.1** | **Prevención Atómica de Cédulas Homónimas y Rollback**<br>Manejo de concurrencia e integridad transaccional en autorregistro de personas. | `justin/cierre-plan-2-3-y-7-1` | 🔵 **EN PR** — cerrojo transaccional por cédula en el auto-registro de paciente; el índice único ya impedía la doble cuenta | ✅ Tests en verde |
 
 ---
 
 ## ⚡ 5. Siguientes Pasos Inmediatos (Sprint Activo)
+
+> **Estado al 2026-09-24:** 2.3 y 7.1 en PR (`justin/cierre-plan-2-3-y-7-1`); 5.3 y 6.2 resueltas por otra vía y pendientes de aceptación; el resto, fusionado en `dev`. Las instrucciones de abajo son las del 2026-09-12 y quedaron cumplidas.
 
 ### Instrucciones para Ender:
 1. Con Subtareas 1.6 y 2.2 cerradas, arrancar con la **Subtarea 2.1: Exposición de Sedes de Atención en Ficha Pública (`/p/:slug`, P16)** o **Subtarea 5.1 (P0: Descarga segura de archivos FT-32)**.

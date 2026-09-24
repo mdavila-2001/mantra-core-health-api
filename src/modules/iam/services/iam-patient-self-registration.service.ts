@@ -185,6 +185,9 @@ export class IamPatientSelfRegistrationService {
     );
 
     const created = await this.em.transactional(async (tx) => {
+      // Primero el cerrojo por documento y después la comprobación: así dos
+      // altas simultáneas con la misma cédula no pasan las dos (7.1).
+      await this.credentialsRepo.lockSubjectForRegistration(tx, dto.nationalId);
       const existing = await this.credentialsRepo.findLivePasswordBySubject(
         tx,
         dto.nationalId,

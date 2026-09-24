@@ -10,6 +10,7 @@ import {
 import { COMM } from '../community.concepts';
 import { PROF } from '../../profiles/profiles.concepts';
 import { PRAC } from '../../practice/practice.concepts';
+import type { PublicTerritoryFilter } from '../services/public-territory-filter.service';
 
 /**
  * Los estados de un vínculo laboral que se publican en la ficha pública.
@@ -391,6 +392,8 @@ export class PublicSearchRepository {
       verified?: boolean;
       /** Ciudad exacta, sin distinguir tildes ni mayúsculas. */
       city?: string;
+      /** Departamento o municipio del catálogo, ya validado (2.3). */
+      territory?: PublicTerritoryFilter;
       /** Especialidad médica de `VS_MEDICAL_SPECIALTY`, ya validada. */
       specialtyConceptId?: string;
       /** Clave de continuación `(displayName, id)`. */
@@ -426,6 +429,13 @@ export class PublicSearchRepository {
     const conjuntosDeSujetos: string[][] = [];
     if (filtros.city) {
       conjuntosDeSujetos.push(await this.targetIdsByCity(em, filtros.city));
+    }
+    // El lugar del catálogo acota el mismo eje —el sujeto— y por la misma
+    // puerta que la ciudad: «cardiólogos en Cochabamba» interseca, no pisa.
+    if (filtros.territory) {
+      conjuntosDeSujetos.push(
+        await this.targetIdsByTerritory(em, filtros.territory),
+      );
     }
     if (filtros.specialtyConceptId) {
       conjuntosDeSujetos.push(
@@ -516,6 +526,58 @@ export class PublicSearchRepository {
         );
       return filas.map((f) => f.owner_id);
     }
+  }
+
+  /**
+   * Los sujetos con una dirección vigente en ese municipio o departamento.
+   *
+   * Es el filtro territorial en dos pasos (subtarea 2.3). Compara conceptos del
+   * catálogo, no el texto de `city`, que es libre y no garantiza consistencia.
+   *
+   * Un departamento se reconoce por `administrative_area_concept_id` **o** por
+   * el prefijo del código de su municipio (`SC-…` o `geo:bo:municipality:07…`):
+   * hay direcciones que traen sólo el municipio —en la base de desarrollo, todas—
+   * y quedarse con la columna del departamento dejaría afuera, sin avisar, a
+   * quien no la tiene.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param territory - Municipio, o departamento con su sigla, ya validados.
+   * @returns Los `owner_id` con dirección vigente en ese lugar.
+   */
+  private async targetIdsByTerritory(
+    em: EntityManager,
+    territory: PublicTerritoryFilter,
+  ): Promise<string[]> {
+    // Mismo tope que el de ciudad, por el mismo motivo.
+    const tope = 5000;
+    const filas =
+      'municipalityConceptId' in territory
+        ? await em.getConnection().execute<{ owner_id: string }[]>(
+            `SELECT DISTINCT owner_id FROM common.addresses
+              WHERE (valid_to IS NULL OR valid_to >= CURRENT_DATE)
+                AND municipality_concept_id = ?
+              LIMIT ?`,
+            [territory.municipalityConceptId, tope],
+            'all',
+          )
+        : await em.getConnection().execute<{ owner_id: string }[]>(
+            `SELECT DISTINCT a.owner_id FROM common.addresses a
+              WHERE (a.valid_to IS NULL OR a.valid_to >= CURRENT_DATE)
+                AND (a.administrative_area_concept_id = ?
+                     OR a.municipality_concept_id IN (
+                          SELECT c.id FROM terminology.catalog_concepts c
+                           WHERE c.code LIKE ANY (ARRAY[?])))
+              LIMIT ?`,
+            [
+              territory.departmentConceptId,
+              territory.municipalityCodePrefixes.map(
+                (prefijo) => `${prefijo}%`,
+              ),
+              tope,
+            ],
+            'all',
+          );
+    return filas.map((f) => f.owner_id);
   }
 
   /**

@@ -1,0 +1,40 @@
+BEGIN
+-- catálogos
+   internal_code    | miembros 
+--------------------+----------
+ VS_BO_MUNICIPALITY |      340
+ VS_BO_DEPARTMENT   |        9
+(2 rows)
+
+-- direcciones vigentes con datos territoriales
+ con_depto | con_muni | total 
+-----------+----------+-------
+         0 |       14 |    14
+(1 row)
+
+-- consulta por departamento (la del repositorio), para cada departamento con direcciones
+     departamento     | sujetos 
+----------------------+---------
+ geo:bo:department:BE |       0
+ geo:bo:department:CB |       0
+ geo:bo:department:CH |       0
+ geo:bo:department:LP |       0
+ geo:bo:department:OR |       0
+ geo:bo:department:PD |       0
+ geo:bo:department:PT |       0
+ geo:bo:department:SC |       0
+ geo:bo:department:TJ |       0
+(9 rows)
+
+-- consulta por municipio (la del repositorio), top 5
+            code            | sujetos 
+----------------------------+---------
+ geo:bo:municipality:010101 |      14
+(1 row)
+
+-- perfiles públicos alcanzados por el filtro (owner_id = target_id)
+ target_type_concept_id | count 
+------------------------+-------
+(0 rows)
+
+ROLLBACK

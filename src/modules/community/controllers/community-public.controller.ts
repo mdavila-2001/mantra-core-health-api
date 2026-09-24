@@ -80,6 +80,16 @@ const NEARBY_KINDS: readonly PublicResultKind[] = [
 /** Tope por defecto de opiniones por página, igual que el resto de la API. */
 const DEFAULT_REVIEW_PAGE_LIMIT = 50;
 
+/**
+ * Filtro territorial en dos pasos (subtarea 2.3), compartido por los
+ * directorios de profesionales y de organizaciones.
+ */
+const DEPARTMENT_QUERY_DESCRIPTION =
+  'concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422';
+const MUNICIPALITY_QUERY_DESCRIPTION =
+  'concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o ' +
+  'de otro departamento que `department`, da 422';
+
 @ApiTags('community-public')
 @Throttle(PUBLIC_RATE_LIMIT)
 @Controller()
@@ -213,18 +223,32 @@ export class CommunityPublicController {
       'concept_id de VS_MEDICAL_SPECIALTY al que acotar; uno ajeno al ' +
       'conjunto da 422',
   })
+  @ApiQuery({
+    name: 'department',
+    required: false,
+    description: DEPARTMENT_QUERY_DESCRIPTION,
+  })
+  @ApiQuery({
+    name: 'municipality',
+    required: false,
+    description: MUNICIPALITY_QUERY_DESCRIPTION,
+  })
   searchPractitioners(
     @Query('q') q?: string,
     @Query('verified') verified?: string,
     @Query('specialty') specialty?: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
+    @Query('department') department?: string,
+    @Query('municipality') municipality?: string,
   ): Promise<PublicSearchPageDto> {
     return this.service.search({
       q,
       kind: 'PRACTITIONER',
       verified: this.toBool(verified),
       specialtyConceptId: specialty,
+      departmentConceptId: department,
+      municipalityConceptId: municipality,
       cursor,
       limit: this.toInt(limit),
     });
@@ -248,16 +272,30 @@ export class CommunityPublicController {
     required: false,
     description: 'Ciudad a la que acotar; sin tildes ni mayúsculas que valgan',
   })
+  @ApiQuery({
+    name: 'department',
+    required: false,
+    description: DEPARTMENT_QUERY_DESCRIPTION,
+  })
+  @ApiQuery({
+    name: 'municipality',
+    required: false,
+    description: MUNICIPALITY_QUERY_DESCRIPTION,
+  })
   searchOrganizations(
     @Query('q') q?: string,
     @Query('city') city?: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
+    @Query('department') department?: string,
+    @Query('municipality') municipality?: string,
   ): Promise<PublicSearchPageDto> {
     return this.service.search({
       q,
       kind: 'ORGANIZATION',
       city,
+      departmentConceptId: department,
+      municipalityConceptId: municipality,
       cursor,
       limit: this.toInt(limit),
     });
