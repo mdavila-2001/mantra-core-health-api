@@ -753,9 +753,10 @@ export class ProfilesPractitionersService {
    * alta no admite corregir); ahora delega en `replaceResidenceAddress`,
    * mismo criterio que ya tenía `ProfilesPatientsService.reemplazarDireccion`.
    */
-  private async reemplazarDomicilio(
+  private async reemplazarDireccion(
     tx: EntityManager,
     personId: string,
+    useConceptId: string,
     cambios: {
       municipalityConceptId?: string;
       lines?: string;
@@ -772,7 +773,7 @@ export class ProfilesPractitionersService {
       this.catalogConceptsRepo,
       {
         personId,
-        useConceptId: CONCEPTS.ADDR_USE_HOME,
+        useConceptId,
         municipalityConceptId: cambios.municipalityConceptId,
         lines: cambios.lines,
         latitude: cambios.latitude,
@@ -784,15 +785,15 @@ export class ProfilesPractitionersService {
   }
 
   /**
-   * El documento de identidad y el domicilio completo (municipio, calle y
-   * coordenadas si las declaró).
+   * El documento de identidad y las dos direcciones de contacto (domicilio y
+   * trabajo, con coordenadas si se declararon).
    *
-   * Los dos los escribe el alta y ninguno volvía en la ficha. Van juntos en una
+   * El alta escribe estos datos y ninguno volvía en la ficha. Van juntos en una
    * lectura porque se piden a la vez y ninguno depende del otro; y devuelve un
    * objeto vacío en vez de fallar, para que la envoltura `sinTumbarLaFicha`
    * tenga algo neutro con lo que seguir.
    */
-  private async leerDocumentoYDomicilio(
+  private async leerDocumentoYDirecciones(
     em: EntityManager,
     personId: string,
   ): Promise<{
@@ -800,13 +801,19 @@ export class ProfilesPractitionersService {
     issuerArea?: string;
     municipio?: string;
     homeAddress?: AddressSummary;
+    workAddress?: AddressSummary;
   }> {
-    const [documentos, domicilio] = await Promise.all([
+    const [documentos, domicilio, trabajo] = await Promise.all([
       em.find(Identifiers, { ownerId: personId, validTo: null }),
       this.addressesRepo.findVigenteByOwnerAndUse(
         em,
         personId,
         CONCEPTS.ADDR_USE_HOME,
+      ),
+      this.addressesRepo.findVigenteByOwnerAndUse(
+        em,
+        personId,
+        CONCEPTS.ADDR_USE_WORK,
       ),
     ]);
     const documento = documentos.find(
@@ -817,6 +824,7 @@ export class ProfilesPractitionersService {
       issuerArea: documento?.issuerAdministrativeAreaConceptId,
       municipio: domicilio?.municipalityConceptId,
       homeAddress: summarizeAddress(domicilio),
+      workAddress: summarizeAddress(trabajo),
     };
   }
 
@@ -931,16 +939,16 @@ export class ProfilesPractitionersService {
             { profileId, pieza: 'contacto' },
           )
         : Promise.resolve([]),
-      // El documento y el domicilio: sólo en la lectura propia y envueltos como
-      // el resto. Un fallo acá deja la ficha sin esos dos datos, no sin ficha.
+      // El documento y las direcciones: sólo en la lectura propia y envueltos
+      // como el resto. Un fallo acá deja la ficha sin esos datos, no sin ficha.
       incluyeContacto
         ? this.sinTumbarLaFicha(
-            () => this.leerDocumentoYDomicilio(em, person.id),
+            () => this.leerDocumentoYDirecciones(em, person.id),
             {},
             { profileId, pieza: 'filiación' },
           )
         : Promise.resolve(
-            {} as Awaited<ReturnType<typeof this.leerDocumentoYDomicilio>>,
+            {} as Awaited<ReturnType<typeof this.leerDocumentoYDirecciones>>,
           ),
     ]);
 
@@ -1001,6 +1009,7 @@ export class ProfilesPractitionersService {
       issuerAdministrativeAreaConceptId: filiacion.issuerArea,
       residenceMunicipalityConceptId: filiacion.municipio,
       homeAddress: filiacion.homeAddress,
+      workAddress: filiacion.workAddress,
       // Ocupación y empleador viven en `persons`, no en `filiacion` (que ya
       // resuelve solo `incluyeContacto`): sin este condicional saldrían
       // también en la ficha que ve un tercero, y son un dato personal como el
@@ -1221,14 +1230,33 @@ export class ProfilesPractitionersService {
           dto.homeLatitude !== undefined ||
           dto.homeLongitude !== undefined
         ) {
-          await this.reemplazarDomicilio(
+          await this.reemplazarDireccion(
             tx,
             person.id,
+            CONCEPTS.ADDR_USE_HOME,
             {
               municipalityConceptId: dto.residenceMunicipalityConceptId,
               lines: dto.homeAddressLines,
               latitude: dto.homeLatitude,
               longitude: dto.homeLongitude,
+            },
+            actor.id,
+            ahora,
+          );
+        }
+        if (
+          dto.workAddressLines !== undefined ||
+          dto.workLatitude !== undefined ||
+          dto.workLongitude !== undefined
+        ) {
+          await this.reemplazarDireccion(
+            tx,
+            person.id,
+            CONCEPTS.ADDR_USE_WORK,
+            {
+              lines: dto.workAddressLines,
+              latitude: dto.workLatitude,
+              longitude: dto.workLongitude,
             },
             actor.id,
             ahora,

@@ -1362,6 +1362,57 @@ describe('ProfilesPractitionersService', () => {
       });
     });
 
+    it('devuelve la dirección laboral separada del domicilio propio', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Lucía Salas',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      });
+      const domicilio = {
+        lines: 'Av. Brasil 1234',
+        latitude: '-16.5',
+        longitude: '-68.15',
+      };
+      const trabajo = {
+        lines: 'Calle Warnes 45',
+        latitude: '-17.78',
+        longitude: '-63.18',
+      };
+      d.addressesRepo.findVigenteByOwnerAndUse.mockImplementation(
+        (_em: unknown, _ownerId: string, useConceptId: string) =>
+          Promise.resolve(
+            useConceptId === CONCEPTS.ADDR_USE_WORK ? trabajo : domicilio,
+          ),
+      );
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.homeAddress).toEqual({
+        lines: 'Av. Brasil 1234',
+        latitude: -16.5,
+        longitude: -68.15,
+      });
+      expect(perfil.workAddress).toEqual({
+        lines: 'Calle Warnes 45',
+        latitude: -17.78,
+        longitude: -63.18,
+      });
+    });
+
     /**
      * Ocupación y empleador (1.3): la lectura propia los trae, igual que el
      * domicilio o el documento — son un dato personal, no de la Guía.
@@ -1742,6 +1793,47 @@ describe('ProfilesPractitionersService', () => {
       expect(d.addressesRepo.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ lines: 'Av. Brasil 1234' }),
+      );
+    });
+
+    it('guarda la dirección laboral y sus coordenadas con uso WORK', async () => {
+      const d = build();
+      prepararParaEditar(d, practitionerBase());
+      const vigente = { id: 'addr-work-1', lines: 'Calle vieja 8' };
+      d.addressesRepo.findVigenteByOwnerAndUse.mockImplementation(
+        (_em: unknown, _ownerId: string, useConceptId: string) =>
+          Promise.resolve(
+            useConceptId === CONCEPTS.ADDR_USE_WORK ? vigente : null,
+          ),
+      );
+
+      await d.service.updateOwnPractitionerProfile(
+        {
+          workAddressLines: 'Calle Warnes 45',
+          workLatitude: -17.78,
+          workLongitude: -63.18,
+        } as any,
+        { id: 'u-1' } as any,
+      );
+
+      expect(d.addressesRepo.findVigenteByOwnerAndUse).toHaveBeenCalledWith(
+        expect.anything(),
+        'per-1',
+        CONCEPTS.ADDR_USE_WORK,
+      );
+      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+        vigente,
+        expect.any(Date),
+        'u-1',
+      );
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          useConceptId: CONCEPTS.ADDR_USE_WORK,
+          lines: 'Calle Warnes 45',
+          latitude: '-17.78',
+          longitude: '-63.18',
+        }),
       );
     });
 

@@ -248,6 +248,40 @@ export class UpdateOwnPractitionerProfileDto {
   @Max(180)
   homeLongitude?: number | null;
 
+  /** Dirección del lugar de trabajo. Vacío para quitarla. */
+  @ApiPropertyOptional({
+    maxLength: 300,
+    description: 'Dirección del lugar de trabajo. Vacío para quitarla.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  workAddressLines?: string;
+
+  /** Latitud del trabajo. Ambos-o-ninguno con {@link workLongitude}. */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: UpdateOwnPractitionerProfileDto) =>
+      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  workLatitude?: number | null;
+
+  /** Longitud del trabajo. Ver {@link workLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: UpdateOwnPractitionerProfileDto) =>
+      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  workLongitude?: number | null;
+
   /* --- ocupación y empleador, con salida a texto libre --------------------
      Mismo contrato y misma regla de exclusión mutua que
      `UpdateOwnPatientProfileDto`: el catálogo (`VS_BO_OCCUPATION`/

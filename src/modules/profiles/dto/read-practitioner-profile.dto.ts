@@ -312,6 +312,10 @@ export class PractitionerProfileSummaryDto {
   @ApiPropertyOptional({ type: OwnAddressDto })
   homeAddress?: OwnAddressDto;
 
+  /** Dirección del lugar de trabajo; sólo en la lectura propia. */
+  @ApiPropertyOptional({ type: OwnAddressDto })
+  workAddress?: OwnAddressDto;
+
   /**
    * Ocupación elegida del catálogo (VS_BO_OCCUPATION). Sólo en la lectura
    * propia, igual que el domicilio.
