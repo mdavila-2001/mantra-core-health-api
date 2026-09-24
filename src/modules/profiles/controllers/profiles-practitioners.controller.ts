@@ -15,6 +15,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -35,6 +36,7 @@ import {
   CredentialResponseDto,
   AddSpecialtyDto,
   AddOwnCredentialDto,
+  UpdateOwnCredentialDto,
   OwnCredentialResponseDto,
   SpecialtyResponseDto,
   CreateAffiliationDto,
@@ -458,6 +460,34 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<OwnCredentialResponseDto> {
     return this.practitionersService.addOwnCredential(dto, actor);
+  }
+
+  /**
+   * Corregir los campos propios de un título aún pendiente de revisión.
+   * El perfil se deduce de la sesión y no se acepta por cuerpo ni URL.
+   */
+  @Patch('practitioners/me/credentials/:credentialId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Editar un título propio pendiente de verificación',
+    description:
+      'Sólo permite cambiar tipo, número, institución, fecha y documento de una credencial pendiente perteneciente al usuario autenticado. Los documentos deben haberse subido por ese mismo usuario.',
+  })
+  @ApiParam({
+    name: 'credentialId',
+    description: 'Identificador de la credencial propia',
+    format: 'uuid',
+  })
+  updateOwnCredential(
+    @Param('credentialId', ParseUUIDPipe) credentialId: string,
+    @Body() dto: UpdateOwnCredentialDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionersService.updateOwnCredential(
+      credentialId,
+      dto,
+      actor,
+    );
   }
 
   /**

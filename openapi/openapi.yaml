@@ -3381,6 +3381,51 @@ paths:
       summary: Retirar un título propio pendiente
       tags:
         - profiles-practitioners
+    patch:
+      description: >-
+        Sólo permite cambiar tipo, número, institución, fecha y documento de una credencial pendiente perteneciente al
+        usuario autenticado. Los documentos deben haberse subido por ese mismo usuario.
+      operationId: ProfilesPractitionersController_updateOwnCredential
+      parameters:
+        - name: credentialId
+          required: true
+          in: path
+          description: Identificador de la credencial propia
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnCredentialDto'
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Editar un título propio pendiente de verificación
+      tags:
+        - profiles-practitioners
   /profiles/practitioners/{profileId}/affiliations:
     post:
       description: 'Mismas reglas que el alta propia: no repite un vínculo ya declarado y respeta el estado inicial según la sede.'
@@ -85495,6 +85540,27 @@ components:
           format: date-time
         path:
           type: string
+    UpdateOwnCredentialDto:
+      type: object
+      properties:
+        credentialTypeConceptId:
+          type: string
+          description: Concept id de tipo de credencial profesional
+          format: uuid
+        number:
+          type: string
+          maxLength: 100
+          pattern: \S
+        issuingInstitutionText:
+          type: string
+          maxLength: 200
+        issueDate:
+          type: string
+          format: date
+        fileId:
+          type: string
+          description: Archivo del diploma (debe haberlo subido el mismo usuario)
+          format: uuid
   responses:
     BadRequest:
       description: La solicitud no cumple el contrato de entrada.

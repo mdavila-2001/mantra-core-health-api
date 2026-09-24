@@ -72,6 +72,7 @@ import {
   SetPractitionerPhotoDto,
   AddOwnCredentialDto,
   OwnCredentialResponseDto,
+  UpdateOwnCredentialDto,
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
 import {
@@ -1657,7 +1658,10 @@ export class ProfilesPractitionersService {
       'Verifying credential',
     );
     return this.em.transactional(async (tx) => {
-      const credential = await this.credentialsRepo.findById(tx, credentialId);
+      const credential = await this.credentialsRepo.findByIdForUpdate(
+        tx,
+        credentialId,
+      );
       if (!credential) {
         throw new ResourceNotFoundException('Credencial no encontrada', {
           credentialId,
@@ -2498,6 +2502,90 @@ export class ProfilesPractitionersService {
   }
 
   /**
+   * Corrige una credencial propia mientras siga pendiente de revisión.
+   * Reutiliza el propietario resuelto desde la sesión y el control existente
+   * del ciclo de vida/propiedad de archivos.
+   */
+  async updateOwnCredential(
+    credentialId: string,
+    dto: UpdateOwnCredentialDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (
+      dto.credentialTypeConceptId !== undefined &&
+      !ProfilesPractitionersService.TIPOS_DE_CREDENCIAL.includes(
+        dto.credentialTypeConceptId,
+      )
+    ) {
+      throw new PreconditionFailedException(
+        'Ese concepto no es un tipo de credencial profesional',
+        { credentialTypeConceptId: dto.credentialTypeConceptId },
+      );
+    }
+
+    await this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+      const credential = await this.credentialsRepo.findByIdForUpdate(
+        tx,
+        credentialId,
+      );
+      if (!credential || credential.practitionerProfileId !== profileId) {
+        throw new ResourceNotFoundException('Título no encontrado', {
+          credentialId,
+        });
+      }
+      if (credential.stateConceptId !== PROF.CRED_PENDING) {
+        throw new PreconditionFailedException(
+          'Ese título ya fue verificado o rechazado; no se puede editar',
+          { credentialId, stateConceptId: credential.stateConceptId },
+        );
+      }
+
+      if (dto.fileId !== undefined) {
+        await this.attachableFiles.assertUsableBy(
+          tx,
+          dto.fileId,
+          actor,
+          {
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.DOCUMENT,
+            operation: 'profiles.credential.updateOwn',
+          },
+          {
+            subject: 'El archivo del título',
+            notFound: 'El archivo del título no existe',
+          },
+        );
+      }
+
+      if (dto.credentialTypeConceptId !== undefined) {
+        credential.credentialTypeConceptId = dto.credentialTypeConceptId;
+      }
+      if (dto.number !== undefined) credential.number = dto.number.trim();
+      if (dto.issuingInstitutionText !== undefined) {
+        credential.issuingInstitutionText = dto.issuingInstitutionText.trim();
+      }
+      if (dto.issueDate !== undefined) {
+        credential.issueDate = new Date(dto.issueDate);
+      }
+      if (dto.fileId !== undefined) credential.fileId = dto.fileId;
+      touch(credential, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.credential.updateOwn',
+          credentialId,
+          actorId: actor.id,
+        },
+        'Own professional credential updated',
+      );
+    });
+  }
+
+  /**
    * Retira un título propio cargado por error (ALV-009/formación).
    *
    * Sólo mientras está PENDIENTE: uno ya verificado o rechazado es un hecho
@@ -2522,7 +2610,10 @@ export class ProfilesPractitionersService {
         tx,
         actor,
       );
-      const credencial = await this.credentialsRepo.findById(tx, credentialId);
+      const credencial = await this.credentialsRepo.findByIdForUpdate(
+        tx,
+        credentialId,
+      );
       if (!credencial || credencial.practitionerProfileId !== profileId) {
         throw new ResourceNotFoundException('Título no encontrado', {
           credentialId,
