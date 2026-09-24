@@ -14,13 +14,13 @@
 
 **CA:** Dado un profesional autenticado, cuando guarda NIT y razón social, entonces la API acepta el cuerpo, conserva historial y devuelve ambos valores al recargar.
 **DoD:** spec dirigido RED→GREEN, recorrido HTTP con PostgreSQL, suite de `profiles`, typecheck, lint dirigido, OpenAPI válido y `git diff --check`.
-**Estado:** A MEDIAS — implementación y verificación completas; falta publicar el commit
+**Estado:** HECHO — implementación, recorrido real y publicación en PR #453
 
 ### H1.S1 — Contrato, persistencia y lectura
 
 **CA:** Dado un identificador fiscal vigente, cuando cambia sólo número o titular, entonces el dato omitido se conserva; una cadena vacía en el número cierra la fila sin abrir otra.
 **DoD:** `corepack yarn test --runInBand src/modules/profiles/services/profiles-practitioners.service.spec.ts` termina en verde con casos de escritura y relectura.
-**Estado:** A MEDIAS — implementación y verificación completas; falta publicar el commit
+**Estado:** HECHO — implementación, recorrido real y publicación en PR #453
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
@@ -28,7 +28,7 @@
 | H1.S1.M2 | Agregar los campos al DTO, persistirlos históricamente y devolverlos sólo en la lectura propia. | Guardar ambos, cambiar uno y borrar el NIT producen el estado esperado. | Spec dirigido en verde. | HECHO — 144/144 |
 | H1.S1.M3 | Actualizar y validar OpenAPI y gates del diff. | El contrato publicado contiene ambos campos y no hay errores nuevos. | Typecheck, lint dirigido, OpenAPI lint y `git diff --check` en 0. | HECHO |
 | H1.S1.M4 | Probar el flujo por HTTP con PostgreSQL real. | Dos PATCH, relectura, historial y privacidad pública quedan demostrados. | Spec de integración dirigido en verde. | HECHO — 6/6 |
-| H1.S1.M5 | Documentar el resultado y publicar el commit en el PR #453. | El PR contiene el cambio y el reporte distingue el bloqueo externo de CI. | Commit y push; estado de checks registrado. | EN CURSO |
+| H1.S1.M5 | Documentar el resultado y publicar el commit en el PR #453. | El PR contiene el cambio y el reporte distingue el bloqueo externo de CI. | Commit y push; estado de checks registrado. | HECHO — `27055a6d` publicado |
 
 ## H2 — Diagnóstico del CI del PR #453
 

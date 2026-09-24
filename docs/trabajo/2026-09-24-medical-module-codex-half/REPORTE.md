@@ -2,7 +2,7 @@
 
 - Fecha: 2026-09-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/medical-module-execution-20260924`
 - Peldaño de evidencia alcanzado: `VERIFIED` para el NIT del perfil profesional; el plan Médico global sigue abierto.
-- Avance: 4 / 5 microtareas HECHO (80 %); falta publicar el commit en el PR #453.
+- Avance: 5 / 5 microtareas HECHO (100 % del tramo fiscal); el plan Médico global sigue abierto.
 
 ## Completado
 
@@ -12,22 +12,17 @@
 | H1.S1.M2 | DTO, persistencia histórica y lectura propia del NIT y razón social; la ficha pública no consulta ni devuelve el dato. | Mismo spec dirigido tras implementar. | GREEN: 144/144. |
 | H1.S1.M3 | OpenAPI YAML/JSON y gates del diff actualizados. | typecheck, ESLint dirigido, `corepack yarn docs:openapi:lint`, parse JSON y `git diff --check`. | Todos terminaron con código 0; OpenAPI válido. |
 | H1.S1.M4 | Recorrido HTTP sobre PostgreSQL 18: alta, dos PATCH, relectura, dos filas históricas y privacidad pública. | `corepack yarn test:integration test/integration/practitioner-own-profile.int-spec.ts --runInBand --silent` con base efímera materializada desde `database/SQL/apply_all.sql` y `apply_deferred.sql`. | 1 suite / 6 pruebas aprobadas. |
+| H1.S1.M5 | Cambio publicado en el PR API. | `git push origin justin/medical-module-execution-20260924` | Commit `27055a6d` publicado en el PR #453. |
 | H2.S1.M1 | Causa del check `docs` del PR #453 identificada. | `gh run view 36041223938 --job 107773588987 --log-failed`; comparación del workflow contra `origin/dev`. | La imagen histórica de MinIO responde `unauthorized`; `.github/workflows` no pertenece al diff médico. |
 
 ## A medias
 
-### H1.S1.M5 — publicación
-
-- Qué anda: la rama contiene el cambio validado y el PR #453 ya existe.
-- Qué no anda: el commit de este tramo todavía no fue publicado al momento de escribir este reporte.
-- Qué falta exactamente: commit y push; volver a consultar los checks.
-- Dónde quedó: worktree `wt-medical-execution-api`, rama `justin/medical-module-execution-20260924`.
+Ninguna dentro de este tramo fiscal.
 
 ## Pendiente
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H1.S1.M5 | EN CURSO | Commit y push al PR #453. |
 | CI-DOCS | BLOQUEADO | Sustituir la distribución histórica retirada de MinIO mediante un cambio de infraestructura separado y basado en una fuente oficial. |
 
 ## Evidencia
