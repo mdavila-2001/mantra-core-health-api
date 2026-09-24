@@ -203,6 +203,15 @@ export class DataReleaseRepository {
        */
       id?: string;
       /**
+       * Instante a fijar como `requested_at` en vez de `new Date()`. Lo
+       * necesita la portabilidad de seguros: `report.generatedAt` es el
+       * instante que se sella dentro del JSON/PDF, y sin poder fijarlo acá
+       * `job.requestedAt` tomaría OTRO `new Date()` —el de después de subir
+       * el archivo— y el verify público devolvería un metadato de emisión
+       * distinto del que el propio certificado imprime.
+       */
+      requestedAt?: Date;
+      /**
        * Identificador asociado a tenant.
        */
       tenantId?: string;
@@ -260,7 +269,7 @@ export class DataReleaseRepository {
         cohortDefinitionId: data.cohortDefinitionId,
         consentDirectiveId: data.consentDirectiveId,
         deidentificationRunId: data.deidentificationRunId,
-        requestedAt: new Date(),
+        requestedAt: data.requestedAt ?? new Date(),
         statusConceptId: data.statusConceptId,
         completedAt: new Date(),
         expiresAt: data.expiresAt,
