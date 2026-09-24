@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 
 /**
  * FX-1 · lo que el doctor recién registrado trae en su sesión.
@@ -31,6 +36,7 @@ describe('FX-1 · la sesión del doctor nuevo habilita publicar su agenda', () =
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(email),
         email,
         password,
         name: 'Elena',

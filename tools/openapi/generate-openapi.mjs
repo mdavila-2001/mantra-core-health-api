@@ -108,7 +108,7 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['get', '/s/{slug}'],
   // Entraron con `@Public()` y sin sumarse acá: `docs` venía fallando en `dev`
   // con estos `security-defined` (verificado contra el decorador el 16/09).
-  // Pre-carga del PDF del alta de organización (`iam-auth.controller.ts`).
+  // Pre-carga del PDF para alta de organización o profesional (`iam-auth.controller.ts`).
   ['post', '/iam/auth/upload-registration-document'],
   // Lecturas sociales y ficha pública (`community-public.controller.ts`).
   ['get', '/public/posts'],

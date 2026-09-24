@@ -30,7 +30,11 @@ const BO_EMPLOYER_CONCEPT_ID = boEmployerConceptId('BANCO_UNION');
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined), remove: mockFn() };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    remove: mockFn(),
+    find: mockFn().mockResolvedValue([]),
+  };
   // `fork` devuelve el mismo doble: las lecturas usan un contexto propio y las
   // escrituras una transacción, pero para la prueba es el mismo objeto. `count`
   // responde 0 salvo que una prueba lo cambie — es lo que consume el conteo de
@@ -64,6 +68,7 @@ function build() {
   };
   const credentialsRepo = {
     findById: mockFn(),
+    findByIdForUpdate: mockFn(),
     create: mockFn(),
     remove: mockFn(),
     countInStateExcept: mockFn().mockResolvedValue(0),
@@ -180,6 +185,10 @@ function build() {
     findById: mockFn(() => Promise.resolve(null)),
   };
 
+  const identifiersRepo = {
+    create: mockFn(),
+  };
+
   const service = new ProfilesPractitionersService(
     em as any,
     personsRepo,
@@ -200,6 +209,7 @@ function build() {
     // las pruebas que hablan del correo lo declaran ellas.
     contactPointsRepo as any,
     addressesRepo as any,
+    identifiersRepo as any,
     catalogConceptsRepo as any,
     accountLinksRepo as any,
     effectiveRoles as any,
@@ -230,6 +240,7 @@ function build() {
     fileVersionsRepo,
     addressesRepo,
     catalogConceptsRepo,
+    identifiersRepo,
   };
 }
 
@@ -241,6 +252,20 @@ function build() {
  * dentro de un año no dejaría claro de qué catálogo salía.
  */
 const CARDIO = '7218acbc-5098-56ae-980a-9345961ced89';
+
+/** Invoca el caso de uso que falta en `dev` sin hacer fallar el compilador antes del test. */
+function invocarActualizacionDeCredencial(
+  service: ProfilesPractitionersService,
+  credentialId: string,
+  changes: Readonly<Record<string, unknown>>,
+): Promise<unknown> | null {
+  const update: unknown = Reflect.get(service, 'updateOwnCredential');
+  expect(typeof update).toBe('function');
+  if (typeof update !== 'function') return null;
+  return Promise.resolve(
+    Reflect.apply(update, service, [credentialId, changes, actor]),
+  );
+}
 
 describe('ProfilesPractitionersService', () => {
   describe('onboardPractitioner (UC-05-03)', () => {
@@ -531,7 +556,7 @@ describe('ProfilesPractitionersService', () => {
   describe('verifyCredential (UC-05-05)', () => {
     it('rejects verifying a credential that is not pending (precondition)', async () => {
       const d = build();
-      d.credentialsRepo.findById.mockResolvedValue({
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue({
         id: 'c1',
         stateConceptId: PROF.CRED_VERIFIED,
       });
@@ -583,7 +608,7 @@ describe('ProfilesPractitionersService', () => {
         practitionerProfileId: 'pp1',
         updatedAt: new Date(),
       };
-      d.credentialsRepo.findById.mockResolvedValue(credential);
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
 
       const res = await d.service.verifyCredential(
         'c1',
@@ -593,6 +618,10 @@ describe('ProfilesPractitionersService', () => {
 
       expect(credential.stateConceptId).toBe(PROF.CRED_REJECTED);
       expect(res).toMatchObject({ id: 'c1', practitionerVerified: false });
+      expect(d.credentialsRepo.findByIdForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        'c1',
+      );
     });
 
     it('verifies the credential and activates the practitioner when none remain pending', async () => {
@@ -603,7 +632,7 @@ describe('ProfilesPractitionersService', () => {
         practitionerProfileId: 'pp1',
         updatedAt: new Date(),
       };
-      d.credentialsRepo.findById.mockResolvedValue(credential);
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
       d.credentialsRepo.countInStateExcept.mockResolvedValue(0);
       const practitioner = { profileId: 'pp1', updatedAt: new Date() } as any;
       d.practitionersRepo.findById.mockResolvedValue(practitioner);
@@ -630,6 +659,10 @@ describe('ProfilesPractitionersService', () => {
         PROF.PRACT_VERIF_VERIFIED,
       );
       expect(res).toMatchObject({ id: 'c1', practitionerVerified: true });
+      expect(d.credentialsRepo.findByIdForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        'c1',
+      );
     });
   });
 
@@ -701,13 +734,34 @@ describe('ProfilesPractitionersService', () => {
       expect(d.specialtiesRepo.create).not.toHaveBeenCalled();
     });
 
-    it('no deja pasar de tres especialidades vigentes (422)', async () => {
+    it('permite la cuarta especialidad vigente como tercera adicional', async () => {
       const d = build();
       d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
       d.specialtiesRepo.findAllByPractitioner.mockResolvedValue([
         { id: 's1', validTo: null },
         { id: 's2', validTo: null },
         { id: 's3', validTo: null },
+      ]);
+      d.specialtiesRepo.findActive.mockResolvedValue(null);
+      d.specialtiesRepo.create.mockReturnValue({ id: 's4' });
+
+      await expect(
+        d.service.addSpecialty(
+          'pp1',
+          { specialtyConceptId: CARDIO } as any,
+          actor,
+        ),
+      ).resolves.toMatchObject({ id: 's4' });
+    });
+
+    it('no deja pasar de cuatro especialidades vigentes (422)', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
+      d.specialtiesRepo.findAllByPractitioner.mockResolvedValue([
+        { id: 's1', validTo: null },
+        { id: 's2', validTo: null },
+        { id: 's3', validTo: null },
+        { id: 's4', validTo: null },
       ]);
       await expect(
         d.service.addSpecialty(
@@ -820,6 +874,45 @@ describe('ProfilesPractitionersService', () => {
         isPrimary: true,
       });
       expect(escritas[1]).toMatchObject({ isPrimary: false });
+    });
+
+    it('registra una especialidad principal y tres adicionales', async () => {
+      const d = alta();
+      const especialidades = [
+        CARDIO,
+        'bd0484b1-8959-5ba5-bb65-ca9305eedb30',
+        'e0f2c074-572e-521c-a647-0ec85de5ff62',
+        '3f29af08-4339-5c4f-90d6-e3831c7f0fbc',
+      ];
+
+      await d.service.onboardPractitioner(altaCon(especialidades), actor);
+
+      const escritas = d.specialtiesRepo.create.mock.calls.map(
+        (llamada: any) => llamada[1],
+      );
+      expect(escritas).toHaveLength(4);
+      expect(escritas.map((fila: any) => fila.isPrimary)).toEqual([
+        true,
+        false,
+        false,
+        false,
+      ]);
+    });
+
+    it('rechaza una especialidad principal y cuatro adicionales como grupo', async () => {
+      const d = alta();
+      const especialidades = [
+        CARDIO,
+        'bd0484b1-8959-5ba5-bb65-ca9305eedb30',
+        'e0f2c074-572e-521c-a647-0ec85de5ff62',
+        '3f29af08-4339-5c4f-90d6-e3831c7f0fbc',
+        'c7a25eba-6961-5b97-bfae-bf1e2a33ce19',
+      ];
+
+      await expect(
+        d.service.onboardPractitioner(altaCon(especialidades), actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.specialtiesRepo.create).not.toHaveBeenCalled();
     });
 
     it('una especialidad fuera del catálogo rechaza el alta ENTERA', async () => {
@@ -1172,6 +1265,31 @@ describe('ProfilesPractitionersService', () => {
       );
     });
 
+    it('la lectura propia conserva los correos personal y laboral por uso', async () => {
+      const d = build();
+      conPerfil(d);
+      d.contactPointsRepo.findVigentesByOwner.mockResolvedValue([
+        {
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+          value: 'lucia.personal@alovida.test',
+        },
+        {
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+          value: 'lucia@hospital.test',
+        },
+      ]);
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.personalEmail).toBe('lucia.personal@alovida.test');
+      expect(perfil.workEmail).toBe('lucia@hospital.test');
+    });
+
     it('la ficha ajena NO los trae, y ni siquiera los consulta', async () => {
       // Lo segundo importa tanto como lo primero: si la ficha los leyera y
       // después los quitara, bastaría con que alguien devolviera el objeto
@@ -1184,7 +1302,10 @@ describe('ProfilesPractitionersService', () => {
 
       expect(ficha.email).toBeUndefined();
       expect(ficha.phone).toBeUndefined();
+      expect(ficha.taxId).toBeUndefined();
+      expect(ficha.taxHolderName).toBeUndefined();
       expect(d.contactPointsRepo.findVigentesByOwner).not.toHaveBeenCalled();
+      expect(d.em.find).not.toHaveBeenCalled();
     });
 
     it('sin contactos cargados el perfil sale igual, sin correo', async () => {
@@ -1221,6 +1342,44 @@ describe('ProfilesPractitionersService', () => {
   });
 
   describe('getOwnPractitionerProfile', () => {
+    it('devuelve el NIT y la razón social únicamente en el perfil propio', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dr. Uno',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        acceptsNewPatients: true,
+        telehealthAvailable: false,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      });
+      d.em.find.mockResolvedValue([
+        {
+          typeConceptId: CONCEPTS.ID_TYPE_TAX,
+          value: '1020304050',
+          holderName: 'Consultorio Uno',
+        },
+      ]);
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil).toMatchObject({
+        taxId: '1020304050',
+        taxHolderName: 'Consultorio Uno',
+      });
+    });
+
     /**
      * El caso que dejaba la pantalla de perfil de un médico sin nada que
      * mostrar: no existía lectura y la única disponible era la de pacientes.
@@ -1260,6 +1419,7 @@ describe('ProfilesPractitionersService', () => {
           credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
           number: 'TIT-1',
           issuingInstitutionText: 'UMSA',
+          fileId: 'diploma-file-1',
           stateConceptId: PROF.CRED_PENDING,
         },
       ]);
@@ -1284,6 +1444,7 @@ describe('ProfilesPractitionersService', () => {
       expect(perfil.specialties).toHaveLength(1);
       expect(perfil.credentials[0]).toMatchObject({
         issuingInstitutionText: 'UMSA',
+        fileId: 'diploma-file-1',
       });
       expect(perfil.activity).toEqual({
         encounters: 12,
@@ -1334,6 +1495,57 @@ describe('ProfilesPractitionersService', () => {
         municipalityConceptId: 'mun-lp',
         latitude: -16.5,
         longitude: -68.15,
+      });
+    });
+
+    it('devuelve la dirección laboral separada del domicilio propio', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Lucía Salas',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      });
+      const domicilio = {
+        lines: 'Av. Brasil 1234',
+        latitude: '-16.5',
+        longitude: '-68.15',
+      };
+      const trabajo = {
+        lines: 'Calle Warnes 45',
+        latitude: '-17.78',
+        longitude: '-63.18',
+      };
+      d.addressesRepo.findVigenteByOwnerAndUse.mockImplementation(
+        (_em: unknown, _ownerId: string, useConceptId: string) =>
+          Promise.resolve(
+            useConceptId === CONCEPTS.ADDR_USE_WORK ? trabajo : domicilio,
+          ),
+      );
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil.homeAddress).toEqual({
+        lines: 'Av. Brasil 1234',
+        latitude: -16.5,
+        longitude: -68.15,
+      });
+      expect(perfil.workAddress).toEqual({
+        lines: 'Calle Warnes 45',
+        latitude: -17.78,
+        longitude: -63.18,
       });
     });
 
@@ -1570,6 +1782,56 @@ describe('ProfilesPractitionersService', () => {
       expect(actualizado.professionalTitle).toBe('Médica cardióloga');
     });
 
+    it('cambia sólo la razón social y conserva el NIT vigente', async () => {
+      const d = build();
+      prepararParaEditar(d, practitionerBase());
+      const vigente = {
+        typeConceptId: CONCEPTS.ID_TYPE_TAX,
+        value: '1020304050',
+        holderName: 'Titular anterior',
+      };
+      d.tx.find.mockResolvedValue([vigente]);
+
+      await d.service.updateOwnPractitionerProfile(
+        { taxHolderName: 'Consultorio Uno' } as any,
+        { id: 'u-1' } as any,
+      );
+
+      expect(vigente).toEqual(
+        expect.objectContaining({ validTo: expect.any(Date) }),
+      );
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'per-1',
+          typeConceptId: CONCEPTS.ID_TYPE_TAX,
+          value: '1020304050',
+          holderName: 'Consultorio Uno',
+        }),
+      );
+    });
+
+    it('vaciar el NIT cierra el vigente y no crea otro', async () => {
+      const d = build();
+      prepararParaEditar(d, practitionerBase());
+      const vigente = {
+        typeConceptId: CONCEPTS.ID_TYPE_TAX,
+        value: '1020304050',
+        holderName: 'Consultorio Uno',
+      };
+      d.tx.find.mockResolvedValue([vigente]);
+
+      await d.service.updateOwnPractitionerProfile(
+        { taxId: '' } as any,
+        { id: 'u-1' } as any,
+      );
+
+      expect(vigente).toEqual(
+        expect.objectContaining({ validTo: expect.any(Date) }),
+      );
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    });
+
     /**
      * `PATCH`: lo que no viene no se toca. Si el servicio usara `??` en vez de
      * comparar contra `undefined`, esta prueba fallaría — es la que fija que
@@ -1717,6 +1979,47 @@ describe('ProfilesPractitionersService', () => {
       expect(d.addressesRepo.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ lines: 'Av. Brasil 1234' }),
+      );
+    });
+
+    it('guarda la dirección laboral y sus coordenadas con uso WORK', async () => {
+      const d = build();
+      prepararParaEditar(d, practitionerBase());
+      const vigente = { id: 'addr-work-1', lines: 'Calle vieja 8' };
+      d.addressesRepo.findVigenteByOwnerAndUse.mockImplementation(
+        (_em: unknown, _ownerId: string, useConceptId: string) =>
+          Promise.resolve(
+            useConceptId === CONCEPTS.ADDR_USE_WORK ? vigente : null,
+          ),
+      );
+
+      await d.service.updateOwnPractitionerProfile(
+        {
+          workAddressLines: 'Calle Warnes 45',
+          workLatitude: -17.78,
+          workLongitude: -63.18,
+        } as any,
+        { id: 'u-1' } as any,
+      );
+
+      expect(d.addressesRepo.findVigenteByOwnerAndUse).toHaveBeenCalledWith(
+        expect.anything(),
+        'per-1',
+        CONCEPTS.ADDR_USE_WORK,
+      );
+      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+        vigente,
+        expect.any(Date),
+        'u-1',
+      );
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          useConceptId: CONCEPTS.ADDR_USE_WORK,
+          lines: 'Calle Warnes 45',
+          latitude: '-17.78',
+          longitude: '-63.18',
+        }),
       );
     });
 
@@ -2470,11 +2773,21 @@ describe('ProfilesPractitionersService', () => {
         practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
         createdAt: new Date(),
       });
+      d.credentialsRepo.findByPractitioner.mockResolvedValue([
+        {
+          id: 'cr-1',
+          credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+          number: 'TIT-1',
+          fileId: 'private-diploma-file',
+          stateConceptId: PROF.CRED_PENDING,
+        },
+      ]);
       d.em.count.mockResolvedValue(3);
 
       const perfil = await d.service.getPractitionerSummary('per-1');
 
       expect(perfil.profileId).toBe('per-1');
+      expect(perfil.credentials[0]?.fileId).toBeUndefined();
       // La actividad es la del TITULAR del perfil consultado, no la de quien
       // mira: los cuatro conteos filtran por su cuenta.
       const filtros = d.em.count.mock.calls.map((c: any[]) => c[1]);
@@ -2950,6 +3263,156 @@ describe('ProfilesPractitionersService', () => {
     });
   });
 
+  describe('updateOwnCredential', () => {
+    function credencialPendiente(overrides: Record<string, unknown> = {}) {
+      return {
+        id: 'cred-1',
+        practitionerProfileId: 'pp1',
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+        number: 'DIP-1',
+        issuingInstitutionText: 'Universidad de origen',
+        issueDate: new Date('2020-01-02'),
+        stateConceptId: PROF.CRED_PENDING,
+        fileId: 'file-old',
+        updatedAt: new Date('2024-01-01'),
+        ...overrides,
+      };
+    }
+
+    it('actualiza sólo los campos enviados y conserva los documentos omitidos', async () => {
+      const d = build();
+      const credential = credencialPendiente();
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+
+      const request = invocarActualizacionDeCredencial(d.service, 'cred-1', {
+        number: 'DIP-2',
+      });
+      if (request === null) return;
+      await expect(request).resolves.toBeUndefined();
+
+      expect(credential).toMatchObject({
+        number: 'DIP-2',
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+        issuingInstitutionText: 'Universidad de origen',
+        issueDate: new Date('2020-01-02'),
+        stateConceptId: PROF.CRED_PENDING,
+        fileId: 'file-old',
+      });
+      expect(d.credentialsRepo.findByIdForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        'cred-1',
+      );
+      expect(d.tx.flush).toHaveBeenCalledTimes(1);
+    });
+
+    it('actualiza tipo, institución, fecha y archivo validado por dueño', async () => {
+      const d = build();
+      const credential = credencialPendiente();
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-new',
+        createdByUserId: actor.id,
+        currentVersionId: 'version-new',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'version-new',
+        mimeType: 'application/pdf',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      });
+
+      const request = invocarActualizacionDeCredencial(d.service, 'cred-1', {
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_MASTER,
+        number: 'MAE-2',
+        issuingInstitutionText: '',
+        issueDate: '2024-02-03',
+        fileId: 'file-new',
+      });
+      if (request === null) return;
+      await expect(request).resolves.toBeUndefined();
+
+      expect(credential).toMatchObject({
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_MASTER,
+        number: 'MAE-2',
+        issuingInstitutionText: '',
+        issueDate: new Date('2024-02-03'),
+        fileId: 'file-new',
+      });
+    });
+
+    it('un identificador ajeno responde 404 sin modificar otra credencial', async () => {
+      const d = build();
+      const credential = credencialPendiente({
+        practitionerProfileId: 'otro-perfil',
+      });
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+
+      const request = invocarActualizacionDeCredencial(d.service, 'cred-1', {
+        number: 'DIP-2',
+      });
+      if (request === null) return;
+      await expect(request).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+      expect(credential.number).toBe('DIP-1');
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('una credencial verificada ya no se puede editar', async () => {
+      const d = build();
+      const credential = credencialPendiente({
+        stateConceptId: PROF.CRED_VERIFIED,
+      });
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+
+      const request = invocarActualizacionDeCredencial(d.service, 'cred-1', {
+        number: 'DIP-2',
+      });
+      if (request === null) return;
+      await expect(request).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(credential.number).toBe('DIP-1');
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('rechaza el archivo subido por otra persona', async () => {
+      const d = build();
+      const credential = credencialPendiente();
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-foreign',
+        createdByUserId: 'otro-usuario',
+        currentVersionId: 'version-foreign',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      const request = invocarActualizacionDeCredencial(d.service, 'cred-1', {
+        fileId: 'file-foreign',
+      });
+      if (request === null) return;
+      await expect(request).rejects.toBeInstanceOf(ForbiddenException);
+
+      expect(credential.fileId).toBe('file-old');
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un concepto que no sea tipo de credencial', async () => {
+      const d = build();
+      const credential = credencialPendiente();
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+
+      const request = invocarActualizacionDeCredencial(d.service, 'cred-1', {
+        credentialTypeConceptId: PROF.LANGUAGE_SPANISH,
+      });
+      if (request === null) return;
+      await expect(request).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(credential.credentialTypeConceptId).toBe(
+        PROF.CREDENTIAL_TYPE_DIPLOMA,
+      );
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+  });
+
   describe('removeOwnCredential (ALV-009/formación)', () => {
     it('retira un título propio pendiente', async () => {
       const d = build();
@@ -2958,7 +3421,7 @@ describe('ProfilesPractitionersService', () => {
         practitionerProfileId: 'pp1',
         stateConceptId: PROF.CRED_PENDING,
       };
-      d.credentialsRepo.findById.mockResolvedValue(credencial);
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credencial);
 
       await d.service.removeOwnCredential('cred-1', { id: 'u-1' } as any);
 
@@ -2966,12 +3429,16 @@ describe('ProfilesPractitionersService', () => {
         expect.anything(),
         credencial,
       );
+      expect(d.credentialsRepo.findByIdForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        'cred-1',
+      );
     });
 
     /** Un id ajeno y uno inexistente responden igual: no delatan cuáles existen. */
     it('un título de otro profesional responde 404, igual que uno inexistente', async () => {
       const d = build();
-      d.credentialsRepo.findById.mockResolvedValue({
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue({
         id: 'cred-1',
         practitionerProfileId: 'OTRO-PERFIL',
         stateConceptId: PROF.CRED_PENDING,
@@ -2985,7 +3452,7 @@ describe('ProfilesPractitionersService', () => {
 
     it('inexistente responde 404', async () => {
       const d = build();
-      d.credentialsRepo.findById.mockResolvedValue(null);
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(null);
 
       await expect(
         d.service.removeOwnCredential('cred-1', { id: 'u-1' } as any),
@@ -2995,7 +3462,7 @@ describe('ProfilesPractitionersService', () => {
     /** Una verificada es un hecho de la autoridad; el titular no la deshace. */
     it('ya verificado no se puede retirar', async () => {
       const d = build();
-      d.credentialsRepo.findById.mockResolvedValue({
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue({
         id: 'cred-1',
         practitionerProfileId: 'pp1',
         stateConceptId: PROF.CRED_VERIFIED,

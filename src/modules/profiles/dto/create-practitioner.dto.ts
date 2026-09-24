@@ -87,14 +87,14 @@ export class CreatePractitionerDto {
    */
   @ApiPropertyOptional({
     description:
-      'Especialidades del catálogo VS_MEDICAL_SPECIALTY. La primera es la principal.',
+      'Especialidades del catálogo VS_MEDICAL_SPECIALTY (una principal y hasta tres adicionales).',
     type: [String],
     format: 'uuid',
-    maxItems: 3,
+    maxItems: 4,
   })
   @IsOptional()
   @IsArray()
-  @ArrayMaxSize(3)
+  @ArrayMaxSize(4)
   @IsUUID(undefined, { each: true })
   specialtyConceptIds?: string[];
 

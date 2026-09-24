@@ -5,6 +5,7 @@ import {
   bearer,
   type TestContext,
   camposObligatoriosDePaciente,
+  identidadProfesional,
 } from './harness';
 
 /**
@@ -90,6 +91,7 @@ describe('B.3 · PDF oficial de receta y verificación pública (integración)',
     const altaMedico = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Sofía',

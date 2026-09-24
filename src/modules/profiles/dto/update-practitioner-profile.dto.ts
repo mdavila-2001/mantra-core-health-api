@@ -162,10 +162,9 @@ export class UpdateOwnPractitionerProfileDto {
   /* --- los cuatro contactos que el alta captura por separado ----------------
      Se editan igual que se declararon: cada uno es su propio par sistema × uso
      en `common.contact_points`. Una cadena vacía lo borra, como en el resto del
-     PATCH. El correo de trabajo NO está acá: es la identidad de login y
-     cambiarlo es otro trámite. */
+     PATCH. El correo de trabajo NO está incluido en este contrato. */
 
-  /** Correo personal; el de trabajo, que es el de login, se cambia aparte. */
+  /** Correo personal. */
   @ApiPropertyOptional({ format: 'email', maxLength: 320 })
   @IsOptional()
   @IsString()
@@ -203,6 +202,27 @@ export class UpdateOwnPractitionerProfileDto {
   @IsOptional()
   @IsUUID()
   residenceMunicipalityConceptId?: string;
+
+  /** NIT para facturación. Cadena vacía para cerrar el vigente. */
+  @ApiPropertyOptional({
+    maxLength: 20,
+    description: 'NIT para facturación. Cadena vacía para quedarse sin NIT.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  taxId?: string;
+
+  /** Nombre o razón social asociada al NIT. */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description:
+      'Nombre o razón social del titular del NIT. Cadena vacía para quitarla.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  taxHolderName?: string;
 
   /* --- el domicilio, ALV-009 ------------------------------------------------
      Mismo contrato que `UpdateOwnPatientProfileDto.homeAddressLines/
@@ -247,6 +267,40 @@ export class UpdateOwnPractitionerProfileDto {
   @Min(-180)
   @Max(180)
   homeLongitude?: number | null;
+
+  /** Dirección del lugar de trabajo. Vacío para quitarla. */
+  @ApiPropertyOptional({
+    maxLength: 300,
+    description: 'Dirección del lugar de trabajo. Vacío para quitarla.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  workAddressLines?: string;
+
+  /** Latitud del trabajo. Ambos-o-ninguno con {@link workLongitude}. */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: UpdateOwnPractitionerProfileDto) =>
+      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  workLatitude?: number | null;
+
+  /** Longitud del trabajo. Ver {@link workLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: UpdateOwnPractitionerProfileDto) =>
+      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  workLongitude?: number | null;
 
   /* --- ocupación y empleador, con salida a texto libre --------------------
      Mismo contrato y misma regla de exclusión mutua que

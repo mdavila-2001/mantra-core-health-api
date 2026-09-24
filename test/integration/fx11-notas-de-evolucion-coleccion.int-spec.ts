@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 
 /**
  * FX-11 · `GET /charts/notes` lista lo del profesional que la pide, en su
@@ -52,6 +57,7 @@ describe('FX-11 · la colección de notas de evolución (P18)', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(email),
         email,
         password: PASSWORD,
         name: 'Profesional',

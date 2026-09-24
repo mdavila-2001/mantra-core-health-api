@@ -5,6 +5,7 @@ import {
   bearer,
   camposObligatoriosDePaciente,
   deleteRegisteredPractitioners,
+  identidadProfesional,
   type TestContext,
 } from './harness';
 import { PRAC } from '../../src/modules/practice/practice.concepts';
@@ -72,8 +73,10 @@ describe('registro de profesional (integración)', () => {
 
   /** Un alta de profesional válida, con datos únicos por caso. */
   function altaBase(sufijo: string) {
+    const email = `p20-${sufijo}@example.test`;
     return {
-      email: `p20-${sufijo}@example.test`,
+      ...identidadProfesional(email),
+      email,
       password: 'S3cret-passw0rd',
       name: 'Elena',
       lastName: 'Salas',

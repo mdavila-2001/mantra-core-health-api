@@ -16,6 +16,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
 import { SCHED } from '../scheduling.concepts';
 import { CLIN } from '../../clinical/clinical.concepts';
@@ -1252,6 +1253,7 @@ describe('SchedulingBookingsService', () => {
         id: 'user-med',
         roles: ['PRACTITIONER'],
         practitionerProfileId: 'hp-1',
+        tenantIds: ['ten-1'],
       } as never;
 
       const dto = {
@@ -1435,6 +1437,29 @@ describe('SchedulingBookingsService', () => {
         await expect(
           d.service.createDirectAppointment(dto as never, medico),
         ).rejects.toThrow(/su propia agenda/);
+      });
+
+      it('el mostrador no asigna en una agenda ajena al tenant activo', async () => {
+        const d = listoParaAsignar(build());
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          tenantId: 'ten-B',
+          resourceRefId: 'hp-otro',
+          resourceRefType: 'health_practitioner_profiles',
+        });
+        const mostrador = {
+          id: 'user-mostrador',
+          roles: ['SCHEDULING_AGENT'],
+          tenantIds: ['ten-A'],
+        } as never;
+
+        await expect(
+          runWithTenant('ten-A', () =>
+            d.service.createDirectAppointment(dto as never, mostrador),
+          ),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.bookingsRepo.findPatientNames).not.toHaveBeenCalled();
+        expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
       });
 
       it('un paciente que no existe rebota con 404, no crea nada', async () => {

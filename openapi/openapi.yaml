@@ -1736,13 +1736,13 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-      summary: Pre-cargar un documento legal (PDF) del registro de organización
+      summary: Pre-cargar un PDF para un registro de organización o profesional
       tags:
         - iam-auth
       security: []
       description: >-
-        Pre-cargar un documento legal (PDF) del registro de organización. Operación pública; no requiere JWT. Todas las
-        respuestas de error usan el envelope ErrorResponse.
+        Pre-cargar un PDF para un registro de organización o una credencial profesional. Operación pública; no requiere
+        JWT. Todas las respuestas de error usan el envelope ErrorResponse.
   /iam/auth/register-practitioner:
     post:
       operationId: IamAuthController_registerPractitioner
@@ -2789,6 +2789,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PractitionerProfileSummaryDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2953,6 +2957,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PractitionerProfileSummaryDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -3379,6 +3387,51 @@ paths:
       security:
         - bearer: []
       summary: Retirar un título propio pendiente
+      tags:
+        - profiles-practitioners
+    patch:
+      description: >-
+        Sólo permite cambiar tipo, número, institución, fecha y documento de una credencial pendiente perteneciente al
+        usuario autenticado. Los documentos deben haberse subido por ese mismo usuario.
+      operationId: ProfilesPractitionersController_updateOwnCredential
+      parameters:
+        - name: credentialId
+          required: true
+          in: path
+          description: Identificador de la credencial propia
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnCredentialDto'
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Editar un título propio pendiente de verificación
       tags:
         - profiles-practitioners
   /profiles/practitioners/{profileId}/affiliations:
@@ -53048,6 +53101,10 @@ components:
         issuingInstitutionText:
           type: string
           maxLength: 200
+        fileId:
+          type: string
+          description: fileId del PDF subido por POST /iam/auth/upload-registration-document
+          format: uuid
       required:
         - credentialTypeConceptId
         - number
@@ -53110,8 +53167,8 @@ components:
           type: string
           maxLength: 100
         specialtyConceptIds:
-          description: Especialidades declaradas (hasta 3). La primera queda como principal.
-          maxItems: 3
+          description: Especialidades declaradas (una principal y hasta tres adicionales).
+          maxItems: 4
           type: array
           items:
             type: string
@@ -53976,8 +54033,8 @@ components:
           type: string
           maxLength: 100
         specialtyConceptIds:
-          description: Especialidades declaradas (hasta 3). La primera queda como principal.
-          maxItems: 3
+          description: Especialidades declaradas (una principal y hasta tres adicionales).
+          maxItems: 4
           type: array
           items:
             type: string
@@ -54192,6 +54249,326 @@ components:
         longitude:
           type: number
           description: Longitud; viaja siempre junto a la latitud
+    PractitionerSpecialtyDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        specialtyConceptId:
+          type: string
+          format: uuid
+        isPrimary:
+          type: boolean
+        boardCertified:
+          type: boolean
+        practiceScopeText:
+          type: string
+        verificationStatusConceptId:
+          type: string
+          format: uuid
+        validFrom:
+          type: string
+          format: date-time
+        validTo:
+          type: string
+          format: date-time
+      required:
+        - id
+        - specialtyConceptId
+        - isPrimary
+        - boardCertified
+        - verificationStatusConceptId
+    PractitionerCredentialDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        credentialTypeConceptId:
+          type: string
+          format: uuid
+        number:
+          type: string
+        fileId:
+          type: string
+          format: uuid
+          description: Sólo en la lectura propia; permite descargar el diploma adjunto
+        issuingInstitutionText:
+          type: string
+        issueDate:
+          type: string
+          format: date-time
+        expiryDate:
+          type: string
+          format: date-time
+        stateConceptId:
+          type: string
+          format: uuid
+        verifiedAt:
+          type: string
+          format: date-time
+        verificationSourceUri:
+          type: string
+      required:
+        - id
+        - credentialTypeConceptId
+        - number
+        - stateConceptId
+    PractitionerLicenseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        jurisdictionConceptId:
+          type: string
+          format: uuid
+        licenseNumber:
+          type: string
+        regulatoryAuthority:
+          type: string
+        stateConceptId:
+          type: string
+          format: uuid
+        validFrom:
+          type: string
+          format: date-time
+        validTo:
+          type: string
+          format: date-time
+      required:
+        - id
+        - jurisdictionConceptId
+        - licenseNumber
+        - stateConceptId
+    PractitionerLanguageDto:
+      type: object
+      properties:
+        languageConceptId:
+          type: string
+          format: uuid
+        proficiencyConceptId:
+          type: string
+          format: uuid
+        clinicalInterpretationAllowed:
+          type: boolean
+      required:
+        - languageConceptId
+        - clinicalInterpretationAllowed
+    AffiliationResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        practitionerProfileId:
+          type: string
+          format: uuid
+        organizationName:
+          type: string
+        roleTitle:
+          type: object
+          nullable: true
+        practiceSiteId:
+          type: object
+          format: uuid
+          nullable: true
+        affiliationTypeConceptId:
+          type: object
+          format: uuid
+          nullable: true
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        current:
+          type: boolean
+          description: 'Derivado de `endDate`: sin fin declarado, sigue vigente'
+        status:
+          type: string
+          format: uuid
+        statusKind:
+          type: string
+          enum:
+            - pendiente
+            - declarado
+            - aprobado
+            - rechazado
+            - revocado
+            - desconocido
+        decisionReasonText:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - practitionerProfileId
+        - organizationName
+        - startDate
+        - current
+        - status
+        - statusKind
+        - createdAt
+    PractitionerActivityDto:
+      type: object
+      properties:
+        encounters:
+          type: number
+        medicationRequests:
+          type: number
+        clinicalNotes:
+          type: number
+        documents:
+          type: number
+      required:
+        - encounters
+        - medicationRequests
+        - clinicalNotes
+        - documents
+    PractitionerProfileSummaryDto:
+      type: object
+      properties:
+        profileId:
+          type: string
+          format: uuid
+        personId:
+          type: string
+          format: uuid
+        practitionerCode:
+          type: string
+        displayName:
+          type: string
+        professionalTitle:
+          type: string
+        professionalBio:
+          type: string
+        photoFileId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          description: Sólo en la lectura propia
+        phone:
+          type: string
+          description: Sólo en la lectura propia
+        workEmail:
+          type: string
+          description: Sólo en la lectura propia
+        personalEmail:
+          type: string
+          description: Sólo en la lectura propia
+        mobilePhone:
+          type: string
+          description: Sólo en la lectura propia
+        workMobilePhone:
+          type: string
+          description: Sólo en la lectura propia
+        workLandline:
+          type: string
+          description: Sólo en la lectura propia
+        name:
+          type: string
+        middleName:
+          type: string
+        lastName:
+          type: string
+        motherLastName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        nationalId:
+          type: string
+        issuerAdministrativeAreaConceptId:
+          type: string
+          format: uuid
+          description: Departamento emisor (VS_BO_DEPARTMENT)
+        taxId:
+          type: string
+          description: Sólo en la lectura propia
+        taxHolderName:
+          type: string
+          description: Sólo en la lectura propia
+        residenceMunicipalityConceptId:
+          type: string
+          format: uuid
+          description: Municipio de residencia (VS_BO_MUNICIPALITY)
+        homeAddress:
+          $ref: '#/components/schemas/OwnAddressDto'
+        occupationConceptId:
+          type: string
+          format: uuid
+          description: Ocupación elegida del catálogo (VS_BO_OCCUPATION)
+        occupationFreeText:
+          type: string
+          description: Ocupación declarada en texto libre
+        workEmployerConceptId:
+          type: string
+          format: uuid
+          description: Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)
+        workEmployerFreeText:
+          type: string
+          description: Empresa declarada en texto libre
+        practitionerCategoryConceptId:
+          type: string
+          format: uuid
+        verificationStatusConceptId:
+          type: string
+          format: uuid
+        practiceStatusConceptId:
+          type: string
+          format: uuid
+        acceptsNewPatients:
+          type: boolean
+        telehealthAvailable:
+          type: boolean
+        specialties:
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerSpecialtyDto'
+        credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerCredentialDto'
+        licenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerLicenseDto'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerLanguageDto'
+        affiliations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AffiliationResponseDto'
+        activity:
+          $ref: '#/components/schemas/PractitionerActivityDto'
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - profileId
+        - personId
+        - practitionerCode
+        - practitionerCategoryConceptId
+        - verificationStatusConceptId
+        - practiceStatusConceptId
+        - acceptsNewPatients
+        - telehealthAvailable
+        - specialties
+        - credentials
+        - licenses
+        - languages
+        - affiliations
+        - activity
+        - createdAt
     CoverageBenefitSummaryDto:
       type: object
       properties:
@@ -54885,6 +55262,14 @@ components:
           type: string
           format: uuid
           description: Municipio de residencia (VS_BO_MUNICIPALITY)
+        taxId:
+          type: string
+          maxLength: 20
+          description: NIT para facturación. Cadena vacía para quedarse sin NIT.
+        taxHolderName:
+          type: string
+          maxLength: 200
+          description: Nombre o razón social del titular del NIT. Cadena vacía para quitarla.
         homeAddressLines:
           type: string
           maxLength: 300
@@ -54945,8 +55330,8 @@ components:
           description: Título profesional
           maxLength: 200
         specialtyConceptIds:
-          description: Especialidades del catálogo VS_MEDICAL_SPECIALTY. La primera es la principal.
-          maxItems: 3
+          description: Especialidades del catálogo VS_MEDICAL_SPECIALTY (una principal y hasta tres adicionales).
+          maxItems: 4
           type: array
           items:
             type: string
@@ -85495,6 +85880,27 @@ components:
           format: date-time
         path:
           type: string
+    UpdateOwnCredentialDto:
+      type: object
+      properties:
+        credentialTypeConceptId:
+          type: string
+          description: Concept id de tipo de credencial profesional
+          format: uuid
+        number:
+          type: string
+          maxLength: 100
+          pattern: \S
+        issuingInstitutionText:
+          type: string
+          maxLength: 200
+        issueDate:
+          type: string
+          format: date
+        fileId:
+          type: string
+          description: Archivo del diploma (debe haberlo subido el mismo usuario)
+          format: uuid
   responses:
     BadRequest:
       description: La solicitud no cumple el contrato de entrada.

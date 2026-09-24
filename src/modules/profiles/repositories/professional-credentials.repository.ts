@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { ProfessionalCredentials } from '../entities';
 import { PROF } from '../profiles.concepts';
@@ -82,6 +83,21 @@ export class ProfessionalCredentialsRepository {
     id: string,
   ): Promise<ProfessionalCredentials | null> {
     return em.findOne(ProfessionalCredentials, { id });
+  }
+
+  /**
+   * Obtiene una credencial dentro de una transacción, reservando la fila para
+   * que edición, retiro y verificación no se pisen entre sí.
+   */
+  findByIdForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<ProfessionalCredentials | null> {
+    return em.findOne(
+      ProfessionalCredentials,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
   }
 
   /**

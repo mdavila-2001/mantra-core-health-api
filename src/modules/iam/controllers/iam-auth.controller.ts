@@ -143,17 +143,16 @@ export class IamAuthController {
   }
 
   /**
-   * Pre-carga pública de un documento legal en PDF para el alta de
-   * organización (subtarea 1.2).
+   * Pre-carga pública de un PDF para un registro que todavía no tiene sesión:
+   * documento legal de organización o respaldo de credencial profesional.
    *
    * El archivo nace sin dueño (`common.files.created_by_user_id` NULL) y
-   * queda inutilizable hasta que `POST /iam/auth/register-organization` lo
-   * reclama por su `fileId` dentro de `organization.legalDocuments`, en la
-   * misma transacción que crea el tenant.
+   * queda inutilizable hasta que el alta correspondiente lo reclama por su
+   * `fileId` en la misma transacción que crea la organización o al profesional.
    *
-   * Límite de 30/min y no el estándar de 10: un alta legítima de aseguradora
-   * sube hasta 5 PDF y puede reintentar alguno, y sigue diez veces por
-   * debajo del backstop global (300/min, `app.module.ts`).
+   * Límite de 30/min y no el estándar de 10: un alta legítima puede subir
+   * varios PDF y reintentar alguno, y sigue diez veces por debajo del backstop
+   * global (300/min, `app.module.ts`).
    *
    * Deuda conocida, declarada y no resuelta acá: nada purga las subidas
    * anónimas que nunca se reclaman (abandono del formulario, rechazo del
@@ -177,7 +176,7 @@ export class IamAuthController {
     },
   })
   @ApiOperation({
-    summary: 'Pre-cargar un documento legal (PDF) del registro de organización',
+    summary: 'Pre-cargar un PDF para un registro de organización o profesional',
   })
   uploadRegistrationDocument(
     @UploadedFile() file: UploadedFileBytes | undefined,

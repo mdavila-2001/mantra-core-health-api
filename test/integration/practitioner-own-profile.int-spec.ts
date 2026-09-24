@@ -5,9 +5,12 @@ import {
   bearer,
   deleteRegisteredPractitioners,
   type TestContext,
+  identidadProfesional,
 } from './harness';
 import { boOccupationConceptId } from '../../src/common/seed/bo-occupations.catalog';
 import { Persons } from '../../src/modules/profiles/entities';
+import { Identifiers } from '../../src/modules/common/entities';
+import { CONCEPTS } from '../../src/common';
 
 /**
  * 1.3 · ocupación y empleador del profesional (catálogo o texto libre).
@@ -48,6 +51,7 @@ describe('1.3 · ocupación y empleador del profesional (integración)', () => {
     const res = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(email),
         email,
         password: 'S3cret-passw0rd',
         name: 'Elena',
@@ -162,6 +166,42 @@ describe('1.3 · ocupación y empleador del profesional (integración)', () => {
       .expect(422);
   });
 
+  it('escenario 4 · guarda NIT y razón social, conserva historial y relee', async () => {
+    await http()
+      .patch('/profiles/practitioners/me')
+      .set(bearer(token))
+      .send({ taxId: '1020304050', taxHolderName: 'Consultorio Elena' })
+      .expect(200);
+
+    await http()
+      .patch('/profiles/practitioners/me')
+      .set(bearer(token))
+      .send({ taxHolderName: 'Consultorio Elena S.R.L.' })
+      .expect(200);
+
+    const releido = await http()
+      .get('/profiles/practitioners/me/summary')
+      .set(bearer(token))
+      .expect(200);
+    expect(releido.body).toMatchObject({
+      taxId: '1020304050',
+      taxHolderName: 'Consultorio Elena S.R.L.',
+    });
+
+    const em = ctx.orm.em.fork();
+    const fiscales = await em.find(Identifiers, {
+      ownerId: personId,
+      typeConceptId: CONCEPTS.ID_TYPE_TAX,
+    });
+    expect(fiscales).toHaveLength(2);
+    expect(fiscales.filter((fila) => fila.validTo === null)).toEqual([
+      expect.objectContaining({
+        value: '1020304050',
+        holderName: 'Consultorio Elena S.R.L.',
+      }),
+    ]);
+  });
+
   it('un tercero no ve la ocupación ni el empleador en la ficha de la guía', async () => {
     // Reponer un dato declarado antes de mirarlo desde afuera.
     await http()
@@ -179,5 +219,7 @@ describe('1.3 · ocupación y empleador del profesional (integración)', () => {
     expect(ficha.body).not.toHaveProperty('occupationFreeText');
     expect(ficha.body).not.toHaveProperty('workEmployerConceptId');
     expect(ficha.body).not.toHaveProperty('workEmployerFreeText');
+    expect(ficha.body).not.toHaveProperty('taxId');
+    expect(ficha.body).not.toHaveProperty('taxHolderName');
   });
 });

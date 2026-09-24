@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 import { CONCEPTS } from '../../src/common';
 import { PROF } from '../../src/modules/profiles/profiles.concepts';
 import { DIR } from '../../src/modules/directory/directory.concepts';
@@ -146,6 +151,7 @@ describe('FX-2 · aprobar el vínculo habilita la agenda multi-sede', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password,
         name: 'Oliver',

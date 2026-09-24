@@ -34,21 +34,34 @@ function compromiso(over: Record<string, unknown> = {}) {
  * @returns El servicio y el doble, para programar y observar.
  */
 function build() {
+  const execute = mockFn(async () => undefined);
+  const em = { execute };
   const bookingsRepo = {
     findProfessionalCommitmentsOverlapping: mockFn(async () => []),
     findProfessionalBusyExceptionsOverlapping: mockFn(async () => []),
     findPatientNames: mockFn(async () => new Map([['pp-ana', 'Ana Quispe']])),
   };
   const service = new SchedulingProfessionalTimeService(bookingsRepo as any);
-  return { service, bookingsRepo };
+  return { service, bookingsRepo, em, execute };
 }
 
 describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
+  it('bloquea el calendario del profesional con un advisory lock transaccional', async () => {
+    const d = build();
+
+    await d.service.bloquearAgendaDeProfesional(d.em as any, HP);
+
+    expect(d.execute).toHaveBeenCalledWith(
+      expect.stringContaining('pg_advisory_xact_lock'),
+      [`scheduling.professional.calendar:${HP}`],
+    );
+  });
+
   it('con el rango libre no dice nada', async () => {
     const d = build();
 
     await d.service.assertRangoLibre(
-      {} as any,
+      d.em as any,
       HP,
       new Date('2026-09-03T15:00:00Z'),
       new Date('2026-09-03T15:30:00Z'),
@@ -67,7 +80,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
 
     await expect(
       d.service.assertRangoLibre(
-        {} as any,
+        d.em as any,
         HP,
         new Date('2026-09-03T14:15:00Z'),
         new Date('2026-09-03T14:45:00Z'),
@@ -86,7 +99,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
 
     await expect(
       d.service.assertRangoLibre(
-        {} as any,
+        d.em as any,
         HP,
         new Date('2026-09-03T14:00:00Z'),
         new Date('2026-09-03T15:00:00Z'),
@@ -103,7 +116,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
 
     await expect(
       d.service.assertRangoLibre(
-        {} as any,
+        d.em as any,
         HP,
         new Date('2026-09-03T14:00:00Z'),
         new Date('2026-09-03T15:00:00Z'),
@@ -117,7 +130,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
     const d = build();
 
     await d.service.assertRangoLibre(
-      {} as any,
+      d.em as any,
       HP,
       new Date('2026-09-03T14:00:00Z'),
       new Date('2026-09-03T14:30:00Z'),
@@ -159,7 +172,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
 
     await expect(
       d.service.assertRangoLibre(
-        {} as any,
+        d.em as any,
         HP,
         new Date('2026-09-03T14:15:00Z'),
         new Date('2026-09-03T14:45:00Z'),
@@ -184,7 +197,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
 
     await expect(
       d.service.assertRangoLibre(
-        {} as any,
+        d.em as any,
         HP,
         new Date('2026-09-03T17:00:00Z'),
         new Date('2026-09-03T18:00:00Z'),

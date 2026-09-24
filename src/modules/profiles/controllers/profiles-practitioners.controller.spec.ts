@@ -1,4 +1,10 @@
 import { jest } from '@jest/globals';
+import { RequestMethod } from '@nestjs/common';
+import {
+  HTTP_CODE_METADATA,
+  METHOD_METADATA,
+  PATH_METADATA,
+} from '@nestjs/common/constants';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
 /**
@@ -23,6 +29,7 @@ function build() {
     addSpecialty: mockFn(),
     setOwnPrimarySpecialty: mockFn(),
     verifyCredential: mockFn(),
+    updateOwnCredential: mockFn(),
     setPractitionerPhoto: mockFn(),
     removePractitionerPhoto: mockFn(),
     getOwnOnboarding: mockFn(),
@@ -38,6 +45,34 @@ function build() {
 }
 
 describe('ProfilesPractitionersController', () => {
+  it('declares and delegates the own-credential PATCH without accepting a profile id', async () => {
+    const d = build();
+    const handler: unknown = Reflect.get(d.controller, 'updateOwnCredential');
+    expect(typeof handler).toBe('function');
+    if (typeof handler !== 'function') return;
+
+    expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(
+      'practitioners/me/credentials/:credentialId',
+    );
+    expect(Reflect.getMetadata(METHOD_METADATA, handler)).toBe(
+      RequestMethod.PATCH,
+    );
+    expect(Reflect.getMetadata(HTTP_CODE_METADATA, handler)).toBe(204);
+
+    const dto = { number: 'DIP-2' };
+    d.practitionersService.updateOwnCredential.mockResolvedValue(undefined);
+    await expect(
+      Promise.resolve(
+        Reflect.apply(handler, d.controller, ['cred-1', dto, actor]),
+      ),
+    ).resolves.toBeUndefined();
+    expect(d.practitionersService.updateOwnCredential).toHaveBeenCalledWith(
+      'cred-1',
+      dto,
+      actor,
+    );
+  });
+
   it('delegates onboardPractitioner (UC-05-03)', async () => {
     const d = build();
     const dto = {

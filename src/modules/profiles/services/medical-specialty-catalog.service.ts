@@ -14,8 +14,8 @@ import { ValueSetsRepository } from '../../terminology/repositories/value-sets.r
  */
 export const MEDICAL_SPECIALTY_VALUE_SET = 'VS_MEDICAL_SPECIALTY';
 
-/** Cuántas especialidades puede declarar un profesional (registro del cliente). */
-export const MAX_SPECIALTIES_PER_PRACTITIONER = 3;
+/** Una especialidad principal y hasta tres adicionales, según el registro del cliente. */
+export const MAX_SPECIALTIES_PER_PRACTITIONER = 4;
 
 /**
  * Quién decide si un uuid es una especialidad médica válida.

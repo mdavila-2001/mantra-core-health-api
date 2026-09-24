@@ -15,7 +15,13 @@ import { DIR } from '../../directory/directory.concepts';
 import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
 import type { RegisterPractitionerDto } from '../dto';
 
+const IDENTIDAD_PROFESIONAL = {
+  nationalId: '4821993',
+  issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
+};
+
 const dto: RegisterPractitionerDto = {
+  ...IDENTIDAD_PROFESIONAL,
   email: 'dra.rojas@sanrafael.bo',
   password: 'password123',
   name: 'Ana',
@@ -104,6 +110,12 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const fileUploadService = {
       upload: fn().mockResolvedValue({ id: 'file-foto-123' }),
     };
+    const attachableFileService = {
+      claimAnonymousUpload: fn().mockResolvedValue({
+        file: { id: 'file-credential-123' },
+        version: { id: 'version-credential-123' },
+      }),
+    };
     // P20: el consultorio propio declarado en `ownSite` se provisiona con
     // este colaborador. Por defecto resuelve algo (no importa qué): el caso
     // interesante es que no se llame cuando el alta no declara `ownSite`.
@@ -151,6 +163,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       new TracingService(),
       ownSiteProvisioning as never,
       administrativeAreas as never,
+      attachableFileService as never,
       fileUploadService as never,
     );
     return {
@@ -177,6 +190,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       notificationsService,
       activationsRepo,
       fileUploadService,
+      attachableFileService,
       ownSiteProvisioning,
       administrativeAreas,
     };
@@ -415,6 +429,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const d = build();
 
     await d.service.registerPractitioner({
+      ...IDENTIDAD_PROFESIONAL,
       email: dto.email,
       password: dto.password,
       licenseNumber: dto.licenseNumber,
@@ -440,6 +455,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const d = build();
 
     await d.service.registerPractitioner({
+      ...IDENTIDAD_PROFESIONAL,
       email: dto.email,
       password: dto.password,
       licenseNumber: dto.licenseNumber,
@@ -473,6 +489,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -485,6 +502,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -498,6 +516,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -521,6 +540,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -550,11 +570,75 @@ describe('IamPractitionerSelfRegistrationService', () => {
       ).toEqual(['TIT-1', 'TIT-2', 'MAE-9']);
     });
 
+    it('reclama el PDF anónimo dentro del alta y lo vincula a su título', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+        credentials: [
+          {
+            credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+            number: 'TIT-1',
+            fileId: 'file-credential-123',
+          },
+        ],
+      });
+
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-credential-123',
+        { tenantId: SEED.tenantId, ownerUserId: 'user-1' },
+        expect.objectContaining({
+          allowedMimeTypes: ['application/pdf'],
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+          operation: 'iam.practitioner.self-register.credential',
+        }),
+        expect.objectContaining({ subject: 'El título académico' }),
+      );
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practitionerProfileId: 'person-1',
+          number: 'TIT-1',
+          fileId: 'file-credential-123',
+        }),
+      );
+    });
+
+    it('si el PDF no se puede reclamar, no crea la fila de credencial', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockRejectedValue(
+        new PreconditionFailedException('El documento ya fue reclamado'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...IDENTIDAD_PROFESIONAL,
+          email: dto.email,
+          password: dto.password,
+          licenseNumber: dto.licenseNumber,
+          credentials: [
+            {
+              credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+              number: 'TIT-1',
+              fileId: 'file-credential-123',
+            },
+          ],
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
+    });
+
     it('un concepto que no es tipo de credencial corta el alta entera', async () => {
       const d = build();
 
       await expect(
         d.service.registerPractitioner({
+          ...IDENTIDAD_PROFESIONAL,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
@@ -583,6 +667,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
+          ...IDENTIDAD_PROFESIONAL,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
@@ -597,6 +682,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -615,6 +701,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
+          ...IDENTIDAD_PROFESIONAL,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
@@ -674,6 +761,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const d = build();
 
     await d.service.registerPractitioner({
+      ...IDENTIDAD_PROFESIONAL,
       email: dto.email,
       password: dto.password,
       licenseNumber: dto.licenseNumber,
@@ -866,6 +954,35 @@ describe('IamPractitionerSelfRegistrationService', () => {
     expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(esperados.length);
   });
 
+  it('guarda el correo de acceso personal y workEmail en usos distintos', async () => {
+    const d = build();
+    const correoPersonal = 'ana.personal@example.test';
+    const correoTrabajo = 'ana@hospital.example.test';
+
+    await d.service.registerPractitioner({
+      ...dto,
+      email: correoPersonal,
+      workEmail: correoTrabajo,
+    } as RegisterPractitionerDto);
+
+    expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        systemConceptId: CONCEPTS.CONTACT_EMAIL,
+        useConceptId: CONCEPTS.CONTACT_USE_HOME,
+        value: correoPersonal,
+      }),
+    );
+    expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        systemConceptId: CONCEPTS.CONTACT_EMAIL,
+        useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        value: correoTrabajo,
+      }),
+    );
+  });
+
   it('el celular personal y el de trabajo no se pisan entre sí', async () => {
     const d = build();
 
@@ -965,12 +1082,19 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
-  it('omits the identifier when no document is supplied', async () => {
+  it('stores the required national identifier for every professional', async () => {
     const d = build();
 
     await d.service.registerPractitioner(dto);
 
-    expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        value: dto.nationalId,
+        issuerAdministrativeAreaConceptId:
+          dto.issuerAdministrativeAreaConceptId,
+      }),
+    );
   });
 
   it('rejects an email that already has a live credential', async () => {
@@ -1088,35 +1212,33 @@ describe('IamPractitionerSelfRegistrationService', () => {
   });
 
   /**
-   * El departamento emisor del documento (1.4): obligatorio con `nationalId`
-   * (PR #390 del front); la FK admite cualquier concepto, así que el
-   * servicio lo comprueba contra `VS_BO_DEPARTMENT` antes de escribir nada —
+   * El documento y su departamento emisor son obligatorios (MED-01); la FK
+   * admite cualquier concepto, así que el servicio lo comprueba contra
+   * `VS_BO_DEPARTMENT` antes de escribir nada —
    * la foto de perfil se sube a almacenamiento más abajo en la misma
    * transacción y un rollback no la borraría.
    */
   describe('departamento emisor del documento (1.4)', () => {
-    it('comprueba el departamento contra VS_BO_DEPARTMENT cuando hay documento', async () => {
-      const d = build();
-
-      await d.service.registerPractitioner({
-        ...dto,
-        nationalId: '4821993',
-        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
-      });
-
-      expect(
-        d.administrativeAreas.assertIsAdministrativeArea,
-      ).toHaveBeenCalledWith(d.tx, DEPARTAMENTO_SANTA_CRUZ);
-    });
-
-    it('sin documento, no comprueba ningún departamento', async () => {
+    it('comprueba el departamento obligatorio contra VS_BO_DEPARTMENT', async () => {
       const d = build();
 
       await d.service.registerPractitioner(dto);
 
       expect(
         d.administrativeAreas.assertIsAdministrativeArea,
-      ).not.toHaveBeenCalled();
+      ).toHaveBeenCalledWith(d.tx, DEPARTAMENTO_SANTA_CRUZ);
+    });
+
+    it('si falta el departamento, rechaza antes de escribir', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          issuerAdministrativeAreaConceptId: undefined,
+        } as never),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
     });
 
     it('si el catálogo rechaza el departamento, el alta no escribe nada', async () => {
@@ -1328,6 +1450,54 @@ describe('IamPractitionerSelfRegistrationService', () => {
           lines: 'Calle Sucre 450',
         }),
       );
+    });
+  });
+
+  describe('la dirección laboral del alta (MED-03)', () => {
+    it('escribe la dirección laboral como fila WORK, separada del domicilio', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        homeAddressLines: 'Domicilio, Calle Norte 10',
+        homeLatitude: -16.5,
+        homeLongitude: -68.11,
+        workAddressLines: 'Hospital Central, Av. Principal 200',
+        workLatitude: -17.78,
+        workLongitude: -63.18,
+      });
+
+      expect(d.addressesRepo.create).toHaveBeenCalledTimes(2);
+      expect(d.addressesRepo.create).toHaveBeenNthCalledWith(
+        1,
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'person-1',
+          useConceptId: CONCEPTS.ADDR_USE_HOME,
+          lines: 'Domicilio, Calle Norte 10',
+          latitude: '-16.5',
+          longitude: '-68.11',
+        }),
+      );
+      expect(d.addressesRepo.create).toHaveBeenNthCalledWith(
+        2,
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'person-1',
+          useConceptId: CONCEPTS.ADDR_USE_WORK,
+          lines: 'Hospital Central, Av. Principal 200',
+          latitude: '-17.78',
+          longitude: '-63.18',
+        }),
+      );
+    });
+
+    it('sin dirección ni GPS laboral no crea una fila vacía', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner(dto);
+
+      expect(d.addressesRepo.create).not.toHaveBeenCalled();
     });
   });
 });

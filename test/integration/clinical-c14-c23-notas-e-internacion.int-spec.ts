@@ -5,6 +5,7 @@ import {
   bearer,
   type TestContext,
   camposObligatoriosDePaciente,
+  identidadProfesional,
 } from './harness';
 
 /**
@@ -79,6 +80,7 @@ describe('C-14/C-23 · cuadrícula de notas y hoja de internación (integración
     const altaMedico = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Marcelo',

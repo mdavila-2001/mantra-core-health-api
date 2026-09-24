@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { MikroORM } from '@mikro-orm/postgresql';
 import type { INestApplication } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import { createHash } from 'node:crypto';
 import pg from 'pg';
 import { AppModule } from '../../src/app.module';
 import { CONCEPTS, SEED, TokenService, createdBy } from '../../src/common';
@@ -20,6 +21,25 @@ import {
 } from '../../src/modules/profiles/entities';
 import { SpecialtyChartTemplates } from '../../src/modules/chart/entities';
 import { SeedBootstrapService } from '../../src/common/seed/seed-bootstrap.service';
+import { boDepartmentConceptId } from '../../src/common/seed/bo-geography.catalog';
+
+/**
+ * Identidad ficticia obligatoria para altas profesionales en integración.
+ * Derivarla del correo mantiene cada fixture determinista y único sin usar un
+ * documento real; Santa Cruz es un concepto de departamento sembrado.
+ * @param email - Correo único del profesional sintético.
+ * @returns CI ficticio y departamento emisor.
+ */
+export function identidadProfesional(email: string): {
+  nationalId: string;
+  issuerAdministrativeAreaConceptId: string;
+} {
+  const suffix = createHash('sha256').update(email).digest('hex').slice(0, 32);
+  return {
+    nationalId: `MED${suffix}`,
+    issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
+  };
+}
 
 /**
  * Vacía todos los datos de negocio antes de un arranque, dejando la base limpia
@@ -795,6 +815,10 @@ const CUENTA_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   { table: 'iam.email_verifications', column: 'user_id' },
   { table: 'iam.account_activations', column: 'user_id' },
   { table: 'iam.security_events', column: 'user_id' },
+  // Los PDFs reclamados durante el alta profesional son propiedad del usuario
+  // recién creado aunque su tenant siga siendo DEFAULT; limpiarlos por
+  // `tenant_id` borraría archivos de otras cuentas de prueba.
+  { table: 'common.files', column: 'created_by_user_id' },
   { table: 'directory.tenant_memberships', column: 'user_id' },
   { table: 'authz.user_role_assignments', column: 'user_id' },
   { table: 'messaging.notification_requests', column: 'recipient_user_id' },

@@ -1,3 +1,4 @@
+import { LockMode } from '@mikro-orm/core';
 import { ProfessionalCredentialsRepository } from './professional-credentials.repository';
 
 /**
@@ -79,5 +80,32 @@ describe('ProfessionalCredentialsRepository', () => {
     expect(fila.issueDate).toBe(emision);
     expect(fila.verificationSourceUri).toBe('https://registro.test/dip/17');
     expect(fila.stateConceptId).toBe('cred-pending');
+  });
+
+  it('lee la credencial con bloqueo de escritura antes de cambiar su estado', async () => {
+    const repository = new ProfessionalCredentialsRepository();
+    const llamadas: unknown[][] = [];
+    const row = { id: 'cred-1' };
+    const em = {
+      findOne: (...args: unknown[]) => {
+        llamadas.push(args);
+        return Promise.resolve(row);
+      },
+    } as never;
+    const findByIdForUpdate: unknown = Reflect.get(
+      repository,
+      'findByIdForUpdate',
+    );
+    expect(typeof findByIdForUpdate).toBe('function');
+    if (typeof findByIdForUpdate !== 'function') return;
+
+    await expect(
+      Promise.resolve(
+        Reflect.apply(findByIdForUpdate, repository, [em, 'cred-1']),
+      ),
+    ).resolves.toBe(row);
+
+    expect(llamadas[0]?.[1]).toEqual({ id: 'cred-1' });
+    expect(llamadas[0]?.[2]).toEqual({ lockMode: LockMode.PESSIMISTIC_WRITE });
   });
 });
