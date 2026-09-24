@@ -32,3 +32,24 @@ describe('UpdateOwnPractitionerProfileDto · dirección de trabajo', () => {
     expect(validateSync(dto)).toHaveLength(0);
   });
 });
+
+describe('UpdateOwnPractitionerProfileDto · identidad fiscal', () => {
+  it('acepta NIT y razón social en el PATCH profesional', () => {
+    const dto = plainToInstance(UpdateOwnPractitionerProfileDto, {
+      taxId: '1020304050',
+      taxHolderName: 'Consultorio Uno',
+    });
+
+    expect(
+      validateSync(dto, { whitelist: true, forbidNonWhitelisted: true }),
+    ).toHaveLength(0);
+  });
+
+  it('rechaza un NIT que excede el contrato', () => {
+    const dto = plainToInstance(UpdateOwnPractitionerProfileDto, {
+      taxId: '1'.repeat(21),
+    });
+
+    expect(validateSync(dto).map((error) => error.property)).toContain('taxId');
+  });
+});

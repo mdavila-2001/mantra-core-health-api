@@ -78,6 +78,7 @@ import { AttachableFileService } from '../../common/services';
 import {
   AddressesRepository,
   ContactPointsRepository,
+  IdentifiersRepository,
 } from '../../common/repositories';
 import { Identifiers } from '../../common/entities';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
@@ -192,6 +193,7 @@ export class ProfilesPractitionersService {
     private readonly attachableFiles: AttachableFileService,
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly identifiersRepo: IdentifiersRepository,
     private readonly catalogConceptsRepo: CatalogConceptsRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
@@ -799,6 +801,8 @@ export class ProfilesPractitionersService {
   ): Promise<{
     nationalId?: string;
     issuerArea?: string;
+    taxId?: string;
+    taxHolderName?: string;
     municipio?: string;
     homeAddress?: AddressSummary;
     workAddress?: AddressSummary;
@@ -819,9 +823,14 @@ export class ProfilesPractitionersService {
     const documento = documentos.find(
       (d: Identifiers) => d.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
+    const fiscal = documentos.find(
+      (d: Identifiers) => d.typeConceptId === CONCEPTS.ID_TYPE_TAX,
+    );
     return {
       nationalId: documento?.value,
       issuerArea: documento?.issuerAdministrativeAreaConceptId,
+      taxId: fiscal?.value,
+      taxHolderName: fiscal?.holderName,
       municipio: domicilio?.municipalityConceptId,
       homeAddress: summarizeAddress(domicilio),
       workAddress: summarizeAddress(trabajo),
@@ -1007,6 +1016,8 @@ export class ProfilesPractitionersService {
       birthDate: person.birthDate,
       nationalId: filiacion.nationalId,
       issuerAdministrativeAreaConceptId: filiacion.issuerArea,
+      taxId: filiacion.taxId,
+      taxHolderName: filiacion.taxHolderName,
       residenceMunicipalityConceptId: filiacion.municipio,
       homeAddress: filiacion.homeAddress,
       workAddress: filiacion.workAddress,
@@ -1194,6 +1205,17 @@ export class ProfilesPractitionersService {
         aplicarEmpresa(person, dto);
         touch(person, actor.id);
 
+        if (dto.taxId !== undefined || dto.taxHolderName !== undefined) {
+          await this.reemplazarNit(
+            tx,
+            person.id,
+            dto.taxId,
+            dto.taxHolderName,
+            actor.id,
+            ahora,
+          );
+        }
+
         if (dto.phone !== undefined) {
           await this.reemplazarTelefono(
             tx,
@@ -1271,6 +1293,51 @@ export class ProfilesPractitionersService {
     // escribir: así quien edita ve lo mismo que va a ver al recargar, incluidas
     // las colecciones y la actividad, que esta operación no toca.
     return this.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * Reemplaza la identidad fiscal sin destruir su historial.
+   *
+   * El NIT y su titular son un solo hecho de facturación: si el PATCH trae
+   * únicamente uno, el otro se conserva de la fila vigente. Una cadena vacía
+   * en el número cierra la fila sin abrir otra.
+   */
+  private async reemplazarNit(
+    tx: EntityManager,
+    personId: string,
+    nit: string | undefined,
+    razonSocial: string | undefined,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const filas = await tx.find(Identifiers, {
+      ownerId: personId,
+      validTo: null,
+    });
+    const vigente = filas.find(
+      (fila) => fila.typeConceptId === CONCEPTS.ID_TYPE_TAX,
+    );
+    const numero = (nit ?? vigente?.value ?? '').trim();
+    const titular = (razonSocial ?? vigente?.holderName ?? '').trim();
+
+    if (vigente?.value === numero && (vigente.holderName ?? '') === titular) {
+      return;
+    }
+    if (vigente) {
+      vigente.validTo = ahora;
+      touch(vigente, actorUserId);
+    }
+    if (numero === '') return;
+
+    this.identifiersRepo.create(tx, {
+      ownerId: personId,
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      typeConceptId: CONCEPTS.ID_TYPE_TAX,
+      value: numero,
+      holderName: titular === '' ? undefined : titular,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+      actorUserId,
+    });
   }
 
   /**

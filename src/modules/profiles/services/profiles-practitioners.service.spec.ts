@@ -30,7 +30,11 @@ const BO_EMPLOYER_CONCEPT_ID = boEmployerConceptId('BANCO_UNION');
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined), remove: mockFn() };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    remove: mockFn(),
+    find: mockFn().mockResolvedValue([]),
+  };
   // `fork` devuelve el mismo doble: las lecturas usan un contexto propio y las
   // escrituras una transacción, pero para la prueba es el mismo objeto. `count`
   // responde 0 salvo que una prueba lo cambie — es lo que consume el conteo de
@@ -181,6 +185,10 @@ function build() {
     findById: mockFn(() => Promise.resolve(null)),
   };
 
+  const identifiersRepo = {
+    create: mockFn(),
+  };
+
   const service = new ProfilesPractitionersService(
     em as any,
     personsRepo,
@@ -201,6 +209,7 @@ function build() {
     // las pruebas que hablan del correo lo declaran ellas.
     contactPointsRepo as any,
     addressesRepo as any,
+    identifiersRepo as any,
     catalogConceptsRepo as any,
     accountLinksRepo as any,
     effectiveRoles as any,
@@ -231,6 +240,7 @@ function build() {
     fileVersionsRepo,
     addressesRepo,
     catalogConceptsRepo,
+    identifiersRepo,
   };
 }
 
@@ -1292,7 +1302,10 @@ describe('ProfilesPractitionersService', () => {
 
       expect(ficha.email).toBeUndefined();
       expect(ficha.phone).toBeUndefined();
+      expect(ficha.taxId).toBeUndefined();
+      expect(ficha.taxHolderName).toBeUndefined();
       expect(d.contactPointsRepo.findVigentesByOwner).not.toHaveBeenCalled();
+      expect(d.em.find).not.toHaveBeenCalled();
     });
 
     it('sin contactos cargados el perfil sale igual, sin correo', async () => {
@@ -1329,6 +1342,44 @@ describe('ProfilesPractitionersService', () => {
   });
 
   describe('getOwnPractitionerProfile', () => {
+    it('devuelve el NIT y la razón social únicamente en el perfil propio', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dr. Uno',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        acceptsNewPatients: true,
+        telehealthAvailable: false,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      });
+      d.em.find.mockResolvedValue([
+        {
+          typeConceptId: CONCEPTS.ID_TYPE_TAX,
+          value: '1020304050',
+          holderName: 'Consultorio Uno',
+        },
+      ]);
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil).toMatchObject({
+        taxId: '1020304050',
+        taxHolderName: 'Consultorio Uno',
+      });
+    });
+
     /**
      * El caso que dejaba la pantalla de perfil de un médico sin nada que
      * mostrar: no existía lectura y la única disponible era la de pacientes.
@@ -1729,6 +1780,56 @@ describe('ProfilesPractitionersService', () => {
       expect(practitioner.telehealthAvailable).toBe(true);
       // Se relee entero: la respuesta es la misma forma que `getOwnPractitionerProfile`.
       expect(actualizado.professionalTitle).toBe('Médica cardióloga');
+    });
+
+    it('cambia sólo la razón social y conserva el NIT vigente', async () => {
+      const d = build();
+      prepararParaEditar(d, practitionerBase());
+      const vigente = {
+        typeConceptId: CONCEPTS.ID_TYPE_TAX,
+        value: '1020304050',
+        holderName: 'Titular anterior',
+      };
+      d.tx.find.mockResolvedValue([vigente]);
+
+      await d.service.updateOwnPractitionerProfile(
+        { taxHolderName: 'Consultorio Uno' } as any,
+        { id: 'u-1' } as any,
+      );
+
+      expect(vigente).toEqual(
+        expect.objectContaining({ validTo: expect.any(Date) }),
+      );
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'per-1',
+          typeConceptId: CONCEPTS.ID_TYPE_TAX,
+          value: '1020304050',
+          holderName: 'Consultorio Uno',
+        }),
+      );
+    });
+
+    it('vaciar el NIT cierra el vigente y no crea otro', async () => {
+      const d = build();
+      prepararParaEditar(d, practitionerBase());
+      const vigente = {
+        typeConceptId: CONCEPTS.ID_TYPE_TAX,
+        value: '1020304050',
+        holderName: 'Consultorio Uno',
+      };
+      d.tx.find.mockResolvedValue([vigente]);
+
+      await d.service.updateOwnPractitionerProfile(
+        { taxId: '' } as any,
+        { id: 'u-1' } as any,
+      );
+
+      expect(vigente).toEqual(
+        expect.objectContaining({ validTo: expect.any(Date) }),
+      );
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
     });
 
     /**

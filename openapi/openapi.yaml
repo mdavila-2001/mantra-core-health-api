@@ -54489,6 +54489,12 @@ components:
           type: string
           format: uuid
           description: Departamento emisor (VS_BO_DEPARTMENT)
+        taxId:
+          type: string
+          description: Sólo en la lectura propia
+        taxHolderName:
+          type: string
+          description: Sólo en la lectura propia
         residenceMunicipalityConceptId:
           type: string
           format: uuid
@@ -55256,6 +55262,14 @@ components:
           type: string
           format: uuid
           description: Municipio de residencia (VS_BO_MUNICIPALITY)
+        taxId:
+          type: string
+          maxLength: 20
+          description: NIT para facturación. Cadena vacía para quedarse sin NIT.
+        taxHolderName:
+          type: string
+          maxLength: 200
+          description: Nombre o razón social del titular del NIT. Cadena vacía para quitarla.
         homeAddressLines:
           type: string
           maxLength: 300

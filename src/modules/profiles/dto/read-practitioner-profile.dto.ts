@@ -299,6 +299,14 @@ export class PractitionerProfileSummaryDto {
   })
   issuerAdministrativeAreaConceptId?: string;
 
+  /** NIT para facturación; sólo se incluye en la lectura propia. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  taxId?: string;
+
+  /** Nombre o razón social asociada al NIT; sólo en la lectura propia. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  taxHolderName?: string;
+
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Municipio de residencia (VS_BO_MUNICIPALITY)',

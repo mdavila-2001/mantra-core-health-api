@@ -203,6 +203,27 @@ export class UpdateOwnPractitionerProfileDto {
   @IsUUID()
   residenceMunicipalityConceptId?: string;
 
+  /** NIT para facturación. Cadena vacía para cerrar el vigente. */
+  @ApiPropertyOptional({
+    maxLength: 20,
+    description: 'NIT para facturación. Cadena vacía para quedarse sin NIT.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  taxId?: string;
+
+  /** Nombre o razón social asociada al NIT. */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description:
+      'Nombre o razón social del titular del NIT. Cadena vacía para quitarla.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  taxHolderName?: string;
+
   /* --- el domicilio, ALV-009 ------------------------------------------------
      Mismo contrato que `UpdateOwnPatientProfileDto.homeAddressLines/
      homeLatitude/homeLongitude`: `common.addresses` es la misma tabla, y el
