@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 
 /**
  * FX-10 · el turno de mostrador (AC-3.3) es una sola transacción, de verdad.
@@ -81,6 +86,7 @@ describe('FX-10 · el mostrador atómico (AC-3.3)', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Elena',

@@ -19,7 +19,16 @@ const ALTA_MINIMA = {
   password: 'secreto12',
   displayName: 'Ana Rojas',
   licenseNumber: 'MP-1234',
+  nationalId: '4821993',
+  issuerAdministrativeAreaConceptId: '22222222-2222-4222-8222-222222222222',
 };
+
+describe('RegisterPractitionerDto · CI obligatorio (MED-01)', () => {
+  it('rechaza el alta si falta el documento de identidad', async () => {
+    const { nationalId: _nationalId, ...sinDocumento } = ALTA_MINIMA;
+    expect(await propiedadesConError(sinDocumento)).toContain('nationalId');
+  });
+});
 
 /**
  * Aplana el árbol de `ValidationError` a rutas `a.b.c`, igual que hace el
@@ -284,25 +293,16 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
   });
 });
 
-/**
- * El departamento emisor del documento (1.4): `ALTA_MINIMA` no trae
- * `nationalId`, así que sirve tal cual para «sin documento, el departamento
- * no hace falta». Con documento pasa a ser obligatorio (PR #390 del front) —
- * mismo catálogo `VS_BO_DEPARTMENT` que en `RegisterPatientDto`, pero acá
- * condicionado a `nationalId` en vez de siempre obligatorio.
- */
+/** CI y departamento emisor obligatorios para el alta profesional (MED-01). */
 describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', () => {
-  it('acepta el alta sin documento ni departamento', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
-  });
-
-  it('rechaza el documento sin departamento', async () => {
-    expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
-        nationalId: '4821993',
-      }),
-    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  it('rechaza el alta si falta el departamento emisor', async () => {
+    const {
+      issuerAdministrativeAreaConceptId: _issuerAdministrativeAreaConceptId,
+      ...sinDepartamento
+    } = ALTA_MINIMA;
+    expect(await propiedadesConError(sinDepartamento)).toEqual([
+      'issuerAdministrativeAreaConceptId',
+    ]);
   });
 
   it('acepta documento y departamento juntos', async () => {
@@ -316,20 +316,16 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
     ).toEqual([]);
   });
 
-  it('acepta el departamento sin documento: se ignora', async () => {
+  it('rechaza el departamento sin documento', async () => {
+    const { nationalId: _nationalId, ...sinDocumento } = ALTA_MINIMA;
     expect(
       await propiedadesConError({
-        ...ALTA_MINIMA,
-        issuerAdministrativeAreaConceptId:
-          '22222222-2222-4222-8222-222222222222',
+        ...sinDocumento,
       }),
-    ).toEqual([]);
+    ).toEqual(['nationalId']);
   });
 
-  it('un documento en blanco no activa la exigencia del departamento', async () => {
-    // El `Matches` del propio `nationalId` ya lo rechaza; lo que se fija acá
-    // es que el `ValidateIf` no dispare por una condición mal escrita
-    // (`!== undefined` en vez de comprobar la cadena vacía).
+  it('rechaza el CI en blanco', async () => {
     expect(
       await propiedadesConError({
         ...ALTA_MINIMA,

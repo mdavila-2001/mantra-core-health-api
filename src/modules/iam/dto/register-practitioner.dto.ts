@@ -269,22 +269,18 @@ export class RegisterPractitionerDto {
   @IsUUID(undefined, { each: true })
   specialtyConceptIds?: string[];
 
-  /**
-   * Documento de identidad. Opcional: se guarda como identificador oficial de
-   * la persona, no como credencial de login.
-   */
-  @ApiPropertyOptional({
+  /** Documento de identidad obligatorio para asociar la matrícula a la persona. */
+  @ApiProperty({
     description:
-      'Documento de identidad (se guarda como identificador oficial)',
+      'Documento de identidad obligatorio; se guarda como identificador oficial',
     maxLength: 40,
   })
-  @IsOptional()
   @IsString()
   @MaxLength(40)
   @Matches(/^[A-Za-z0-9.-]+$/, {
     message: 'El documento sólo admite letras, dígitos, punto y guion',
   })
-  nationalId?: string;
+  nationalId!: string;
 
   /**
    * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`).
@@ -296,23 +292,17 @@ export class RegisterPractitionerDto {
    * `400 property issuerAdministrativeAreaConceptId should not exist`, así que
    * elegir el departamento rompía el alta entera en vez de enriquecerla.
    *
-   * Se ignora sin `nationalId`: sin documento no hay identificador al que
-   * atarle un departamento de emisión. **Con documento pasa a ser obligatorio**
-   * (PR #390 del front): `@ValidateIf` sin `@IsOptional` — agregarlo anularía
-   * la condición y dejaría el campo opcional siempre.
+   * El CI es obligatorio en el alta profesional, por eso también se exige el
+   * departamento de emisión. El concepto se vuelve a validar contra
+   * `VS_BO_DEPARTMENT` antes de persistir el identificador.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     format: 'uuid',
     description:
-      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT); ' +
-      'obligatorio si se envía `nationalId`',
+      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)',
   })
-  @ValidateIf(
-    (dto: RegisterPractitionerDto) =>
-      typeof dto.nationalId === 'string' && dto.nationalId.trim() !== '',
-  )
   @IsUUID()
-  issuerAdministrativeAreaConceptId?: string;
+  issuerAdministrativeAreaConceptId!: string;
 
   /**
    * Municipio de residencia (miembro de `VS_BO_MUNICIPALITY`).

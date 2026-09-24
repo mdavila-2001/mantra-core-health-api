@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 
 /**
  * FX-8 · el recorrido completo de la agenda, contra la base real.
@@ -62,6 +67,7 @@ describe('FX-8 · el recorrido de la agenda, de punta a punta', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Rocío',

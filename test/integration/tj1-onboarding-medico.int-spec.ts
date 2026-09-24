@@ -5,6 +5,7 @@ import {
   bearer,
   type TestContext,
   camposObligatoriosDePaciente,
+  identidadProfesional,
 } from './harness';
 
 /**
@@ -93,6 +94,7 @@ describe('TJ-1 · alta del profesional (integración)', () => {
     await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(email),
         email,
         password,
         name: 'Elena',

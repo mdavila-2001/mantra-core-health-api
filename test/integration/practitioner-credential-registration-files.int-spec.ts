@@ -5,6 +5,7 @@ import {
   bearer,
   deleteRegisteredPractitioners,
   type TestContext,
+  identidadProfesional,
 } from './harness';
 import { SEED } from '../../src/common';
 import { Files } from '../../src/modules/common/entities';
@@ -101,6 +102,7 @@ describe('documentos de títulos del alta profesional (integración)', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(email),
         email,
         password: 'S3cret-passw0rd',
         name: 'Elena',
@@ -203,6 +205,7 @@ describe('documentos de títulos del alta profesional (integración)', () => {
     const otraAlta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(otroEmail),
         email: otroEmail,
         password: 'S3cret-passw0rd',
         name: 'Otra',
@@ -227,6 +230,7 @@ describe('documentos de títulos del alta profesional (integración)', () => {
     const reuso = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(segundoEmail),
         email: segundoEmail,
         password: 'S3cret-passw0rd',
         name: 'Otra',

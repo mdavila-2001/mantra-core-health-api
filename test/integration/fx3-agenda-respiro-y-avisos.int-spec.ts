@@ -5,6 +5,7 @@ import {
   bearer,
   type TestContext,
   camposObligatoriosDePaciente,
+  identidadProfesional,
 } from './harness';
 
 /**
@@ -98,6 +99,7 @@ describe('FX-3 · el respiro y los avisos de la agenda, contra la base', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Elena',

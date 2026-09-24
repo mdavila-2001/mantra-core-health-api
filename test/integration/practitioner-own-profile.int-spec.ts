@@ -5,6 +5,7 @@ import {
   bearer,
   deleteRegisteredPractitioners,
   type TestContext,
+  identidadProfesional,
 } from './harness';
 import { boOccupationConceptId } from '../../src/common/seed/bo-occupations.catalog';
 import { Persons } from '../../src/modules/profiles/entities';
@@ -48,6 +49,7 @@ describe('1.3 · ocupación y empleador del profesional (integración)', () => {
     const res = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(email),
         email,
         password: 'S3cret-passw0rd',
         name: 'Elena',

@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 
 /**
  * FX-17 · sello SHA-256 del cierre del encuentro y su PDF oficial (C.4).
@@ -74,6 +79,7 @@ describe('FX-17 · sello del encuentro y PDF oficial (C.4)', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Elena',

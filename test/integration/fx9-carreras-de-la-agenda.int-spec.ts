@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 import { boDepartmentConceptId } from '../../src/common/seed/bo-geography.catalog';
 
 /**
@@ -149,6 +154,7 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Elena',

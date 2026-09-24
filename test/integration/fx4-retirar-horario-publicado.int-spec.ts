@@ -5,6 +5,7 @@ import {
   bearer,
   type TestContext,
   camposObligatoriosDePaciente,
+  identidadProfesional,
 } from './harness';
 
 /**
@@ -80,6 +81,7 @@ describe('FX-4 · retirar un horario publicado', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Rocío',
@@ -245,6 +247,7 @@ describe('FX-4 · retirar un horario publicado', () => {
     const otro = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(`fx4-otro-${sufijo}@example.test`),
         email: `fx4-otro-${sufijo}@example.test`,
         password: PASSWORD,
         name: 'Iván',

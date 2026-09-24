@@ -437,17 +437,13 @@ export class IamPractitionerSelfRegistrationService {
         });
       }
 
-      // Con documento, el departamento emisor es obligatorio (el DTO ya lo
-      // exige por `@ValidateIf`); se comprueba acá también porque un llamador
-      // que no pase por el `ValidationPipe` HTTP podría saltárselo. Antes de
-      // cualquier escritura: la foto de perfil se sube a almacenamiento más
-      // abajo y un rollback de la transacción no la borraría.
-      if (dto.nationalId) {
-        await this.assertDepartamentoEmisor(
-          tx,
-          dto.issuerAdministrativeAreaConceptId,
-        );
-      }
+      // El CI y su departamento emisor son requisitos del alta médica. Se
+      // comprueba el catálogo también acá para proteger a llamadores que no
+      // pasen por el ValidationPipe HTTP. Ocurre antes de cualquier escritura.
+      await this.assertDepartamentoEmisor(
+        tx,
+        dto.issuerAdministrativeAreaConceptId,
+      );
 
       // El nombre para mostrar sale de las partes; si el cliente mandó la forma
       // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
@@ -715,23 +711,19 @@ export class IamPractitionerSelfRegistrationService {
         actorUserId: user.id,
       });
 
-      if (dto.nationalId) {
-        // `issuerAdministrativeAreaConceptId` ya se comprobó semánticamente
-        // (VS_BO_DEPARTMENT) al principio de esta transacción.
-        this.identifiersRepo.create(tx, {
-          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-          ownerId: person.id,
-          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-          value: dto.nationalId,
-          useConceptId: CONCEPTS.USE_OFFICIAL,
-          stateConceptId: CONCEPTS.STATE_ACTIVE,
-          // Sólo tiene sentido dentro de este `if`: es el departamento que
-          // emitió ESTE documento, no un dato suelto de la persona.
-          issuerAdministrativeAreaConceptId:
-            dto.issuerAdministrativeAreaConceptId,
-          actorUserId: user.id,
-        });
-      }
+      // El departamento emisor ya se comprobó semánticamente
+      // (VS_BO_DEPARTMENT) al principio de esta transacción.
+      this.identifiersRepo.create(tx, {
+        ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+        ownerId: person.id,
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: dto.nationalId,
+        useConceptId: CONCEPTS.USE_OFFICIAL,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        issuerAdministrativeAreaConceptId:
+          dto.issuerAdministrativeAreaConceptId,
+        actorUserId: user.id,
+      });
 
       // Domicilio: municipio, calle y coordenadas elegidas en el alta (P19).
       // El departamento lo deriva el ayudante del código del INE, no viene
@@ -963,8 +955,8 @@ export class IamPractitionerSelfRegistrationService {
    * La columna `issuer_administrative_area_concept_id` es una FK plana a
    * `terminology.catalog_concepts`: la base aceptaría cualquier concepto (un
    * municipio, una especialidad) como si fuera un departamento. El DTO exige
-   * el campo con `@ValidateIf` cuando hay `nationalId`, así que `conceptId`
-   * indefinido sólo puede llegar acá si alguien invoca el servicio sin pasar
+   * el campo es obligatorio, así que `conceptId` indefinido sólo puede llegar
+   * acá si alguien invoca el servicio sin pasar
    * por el `ValidationPipe` HTTP — se lo rechaza igual, en vez de dejar que
    * `assertIsAdministrativeArea` reciba `undefined`.
    *
@@ -978,7 +970,7 @@ export class IamPractitionerSelfRegistrationService {
   ): Promise<void> {
     if (conceptId === undefined) {
       throw new PreconditionFailedException(
-        'El departamento emisor es obligatorio cuando se declara el documento',
+        'El departamento emisor es obligatorio para el alta del profesional',
         { field: 'issuerAdministrativeAreaConceptId' },
       );
     }

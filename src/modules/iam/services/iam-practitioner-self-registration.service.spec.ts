@@ -15,7 +15,13 @@ import { DIR } from '../../directory/directory.concepts';
 import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
 import type { RegisterPractitionerDto } from '../dto';
 
+const IDENTIDAD_PROFESIONAL = {
+  nationalId: '4821993',
+  issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
+};
+
 const dto: RegisterPractitionerDto = {
+  ...IDENTIDAD_PROFESIONAL,
   email: 'dra.rojas@sanrafael.bo',
   password: 'password123',
   name: 'Ana',
@@ -423,6 +429,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const d = build();
 
     await d.service.registerPractitioner({
+      ...IDENTIDAD_PROFESIONAL,
       email: dto.email,
       password: dto.password,
       licenseNumber: dto.licenseNumber,
@@ -448,6 +455,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const d = build();
 
     await d.service.registerPractitioner({
+      ...IDENTIDAD_PROFESIONAL,
       email: dto.email,
       password: dto.password,
       licenseNumber: dto.licenseNumber,
@@ -481,6 +489,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -493,6 +502,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -506,6 +516,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -529,6 +540,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -562,6 +574,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -603,6 +616,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
+          ...IDENTIDAD_PROFESIONAL,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
@@ -624,6 +638,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
+          ...IDENTIDAD_PROFESIONAL,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
@@ -652,6 +667,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
+          ...IDENTIDAD_PROFESIONAL,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
@@ -666,6 +682,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -684,6 +701,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
+          ...IDENTIDAD_PROFESIONAL,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
@@ -743,6 +761,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const d = build();
 
     await d.service.registerPractitioner({
+      ...IDENTIDAD_PROFESIONAL,
       email: dto.email,
       password: dto.password,
       licenseNumber: dto.licenseNumber,
@@ -1034,12 +1053,19 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
-  it('omits the identifier when no document is supplied', async () => {
+  it('stores the required national identifier for every professional', async () => {
     const d = build();
 
     await d.service.registerPractitioner(dto);
 
-    expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        value: dto.nationalId,
+        issuerAdministrativeAreaConceptId:
+          dto.issuerAdministrativeAreaConceptId,
+      }),
+    );
   });
 
   it('rejects an email that already has a live credential', async () => {
@@ -1157,35 +1183,33 @@ describe('IamPractitionerSelfRegistrationService', () => {
   });
 
   /**
-   * El departamento emisor del documento (1.4): obligatorio con `nationalId`
-   * (PR #390 del front); la FK admite cualquier concepto, así que el
-   * servicio lo comprueba contra `VS_BO_DEPARTMENT` antes de escribir nada —
+   * El documento y su departamento emisor son obligatorios (MED-01); la FK
+   * admite cualquier concepto, así que el servicio lo comprueba contra
+   * `VS_BO_DEPARTMENT` antes de escribir nada —
    * la foto de perfil se sube a almacenamiento más abajo en la misma
    * transacción y un rollback no la borraría.
    */
   describe('departamento emisor del documento (1.4)', () => {
-    it('comprueba el departamento contra VS_BO_DEPARTMENT cuando hay documento', async () => {
-      const d = build();
-
-      await d.service.registerPractitioner({
-        ...dto,
-        nationalId: '4821993',
-        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
-      });
-
-      expect(
-        d.administrativeAreas.assertIsAdministrativeArea,
-      ).toHaveBeenCalledWith(d.tx, DEPARTAMENTO_SANTA_CRUZ);
-    });
-
-    it('sin documento, no comprueba ningún departamento', async () => {
+    it('comprueba el departamento obligatorio contra VS_BO_DEPARTMENT', async () => {
       const d = build();
 
       await d.service.registerPractitioner(dto);
 
       expect(
         d.administrativeAreas.assertIsAdministrativeArea,
-      ).not.toHaveBeenCalled();
+      ).toHaveBeenCalledWith(d.tx, DEPARTAMENTO_SANTA_CRUZ);
+    });
+
+    it('si falta el departamento, rechaza antes de escribir', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          issuerAdministrativeAreaConceptId: undefined,
+        } as never),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
     });
 
     it('si el catálogo rechaza el departamento, el alta no escribe nada', async () => {

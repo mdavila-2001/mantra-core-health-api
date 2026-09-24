@@ -5,6 +5,7 @@ import {
   bearer,
   deleteRegisteredPractitioners,
   type TestContext,
+  identidadProfesional,
 } from './harness';
 import { PROF } from '../../src/modules/profiles/profiles.concepts';
 import { ProfessionalCredentialsRepository } from '../../src/modules/profiles/repositories';
@@ -24,6 +25,7 @@ describe('edición de credencial profesional propia (integración)', () => {
     const registration = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(email),
         email,
         password: 'S3cret-passw0rd',
         name: 'Cuenta',
