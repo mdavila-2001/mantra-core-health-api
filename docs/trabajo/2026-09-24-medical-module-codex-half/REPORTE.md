@@ -1,8 +1,8 @@
 # Reporte — ejecución Codex del módulo Médico: identidad fiscal
 
 - Fecha: 2026-09-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/medical-module-execution-20260924`
-- Peldaño de evidencia alcanzado: `VERIFIED` para el NIT profesional, el aislamiento del walk-in y la autorización de sesiones virtuales; el plan Médico global sigue abierto.
-- Avance: 14 / 14 microtareas HECHO en los tramos incluidos; el plan Médico global sigue abierto.
+- Peldaño de evidencia alcanzado: `VERIFIED` para el NIT profesional, el aislamiento del walk-in, la autorización virtual y los roles operativos de agenda; el plan Médico global sigue abierto.
+- Avance: 18 / 18 microtareas HECHO en los tramos incluidos; el plan Médico global sigue abierto.
 
 ## Completado
 
@@ -22,6 +22,10 @@
 | H4.S1.M2 | Create/join/end resuelven el encuentro padre y validan tenant, paciente titular, profesional principal o participante activo antes de mutar. | Specs dirigidos tras implementar. | GREEN: 2 suites / 18 pruebas. |
 | H4.S1.M3 | Recorrido HTTP: profesional principal crea, paciente titular se une, profesional ajeno recibe 403 y la fila sigue `IN_PROGRESS`; el titular profesional finaliza. | Integración sobre PostgreSQL 18 efímero. | 1 suite / 1 prueba en 17.841 s. |
 | H4.S1.M4 | Regresión de `clinical_ext`, typecheck, ESLint dirigido y diff check. | Gates locales y publicación en PR #453. | 15 suites / 84 pruebas; todos los gates terminaron en código 0. |
+| H5.S1.M1 | Caso RED del catálogo de roles de agenda. | Spec dirigido de `scheduling.roles`. | RED: Jest no pudo resolver el módulo inexistente. |
+| H5.S1.M2 | Catálogo determinista de `SCHEDULING_ADMIN` y `SCHEDULING_AGENT`, agregado al seed común con scope `TENANT`. | Spec de catálogo y consulta sobre bootstrap PostgreSQL. | Ambos roles existen, son de sistema y asignables; bases `ADMIN`/`STAFF`. |
+| H5.S1.M3 | FX-10 dejó de insertar rol y asignación por SQL; usa `POST /authz/users/:id/role-assignments` y comprueba el claim posterior. | Integración FX-10 sobre PostgreSQL 18 efímero. | 1 suite / 3 pruebas en 14.719 s; `scopedRoles[tenant]` contiene `SCHEDULING_AGENT`. |
+| H5.S1.M4 | Regresión scheduling, typecheck, ESLint dirigido y diff check. | Gates locales y publicación en PR #453. | 22 suites / 494 pruebas; todos los gates terminaron en código 0. |
 
 ## A medias
 
@@ -75,6 +79,17 @@ Time:        17.841 s
 ```
 
 ```text
+Test Suites: 22 passed, 22 total
+Tests:       494 passed, 494 total
+```
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Time:        14.719 s
+```
+
+```text
 openapi/openapi.yaml: validated in 484ms
 openapi.json: valid JSON
 ```
@@ -99,7 +114,6 @@ Typecheck, ESLint dirigido y `git diff --check` finalizaron con código 0.
 
 - El check `docs` seguirá bloqueado hasta que la infraestructura adopte una distribución oficial disponible o construya MinIO desde la fuente fijada.
 - El contrato empresarial de MED-06 todavía debe decidir si el emisor fiscal vive en la persona, práctica o tenant.
-- `SCHEDULING_AGENT` no forma parte del seed base de roles; FX-10 lo materializa y concede dentro del tenant para probar el contrato que ya usa el controlador.
 - El enlace y las credenciales de la sala virtual siguen siendo datos declarados por el cliente hasta que se apruebe el contrato con un proveedor.
 
 ## Decisiones y ambigüedades
@@ -109,3 +123,4 @@ Typecheck, ESLint dirigido y `git diff --check` finalizaron con código 0.
 - NIT y razón social sólo se leen en `me/summary`; la ficha pública no ejecuta la consulta de filiación privada.
 - El tenant activo resuelto por el guard es la autoridad para una solicitud HTTP; `actor.tenantIds` sólo respalda invocaciones internas y, si ambos faltan, la cita directa falla cerrada.
 - Una sesión virtual no concede acceso por `createdByUserId` ni por rol general. `join` admite al paciente titular; `create` y `end` exigen profesional principal o participante activo. `SUPERADMIN` tampoco evita esa relación clínica.
+- Los roles de scheduling son catálogos de sistema globales; su asignación sigue siendo explícita y acotada por tenant. El bootstrap no los concede automáticamente.

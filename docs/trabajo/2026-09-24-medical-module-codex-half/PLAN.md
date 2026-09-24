@@ -84,6 +84,25 @@
 | H4.S1.M3 | Probar el flujo por HTTP con PostgreSQL real. | Profesional crea, paciente titular se une, tercero no finaliza ni muta la sesión. | Integración dirigida en verde. | HECHO — 1/1 |
 | H4.S1.M4 | Ejecutar gates, documentar y publicar. | No hay regresiones nuevas y el PR contiene la evidencia. | Suite de `clinical_ext`, typecheck, lint, `git diff --check`, commit y push. | HECHO — 15 suites / 84 pruebas; publicación en PR #453 |
 
+## H5 — Roles operativos de agenda disponibles desde el bootstrap
+
+**CA:** Dada una base limpia, `SCHEDULING_ADMIN` y `SCHEDULING_AGENT` existen como roles de sistema asignables con ámbito `TENANT`; un administrador puede concederlos por la API pública y el siguiente login los recibe en `scopedRoles`.
+**DoD:** catálogo TDD, seed idempotente, FX-10 sin INSERT crudo de rol/asignación, integración PostgreSQL y gates del diff.
+**Estado:** HECHO — catálogo, bootstrap y asignación pública verificados
+
+### H5.S1 — Catálogo y asignación real de roles de scheduling
+
+**CA:** Ambos roles usan ids deterministas; admin deriva de `ADMIN`, agente de `STAFF`, y ninguno se autoasigna a profesionales.
+**DoD:** prueba de catálogo, bootstrap real, asignación por `POST /authz/users/:userId/role-assignments` y reingreso con alcance del tenant.
+**Estado:** HECHO
+
+| ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
+|---|---|---|---|---|
+| H5.S1.M1 | Escribir el caso RED del catálogo de roles de scheduling. | La prueba exige dos roles que hoy no existen en el árbol ni en el seed. | Spec dirigido falla por módulo ausente. | HECHO — suite no pudo resolver `scheduling.roles` |
+| H5.S1.M2 | Declarar los dos roles y agregarlos al seed de sistema. | Una base limpia materializa ambos como asignables y con scope `TENANT`. | Spec dirigido y prueba del seed en verde. | HECHO — 1/1 más comprobación PostgreSQL de ambas filas |
+| H5.S1.M3 | Sustituir el SQL de FX-10 por la API real de asignación. | El admin concede `SCHEDULING_AGENT`; el relogin contiene `scopedRoles[tenant]` y el aislamiento sigue pasando. | Integración FX-10 en verde. | HECHO — 3/3 |
+| H5.S1.M4 | Ejecutar gates, documentar y publicar. | No hay regresiones nuevas y el PR contiene catálogo, integración y evidencia. | Suites dirigidas, typecheck, lint, `git diff --check`, commit y push. | HECHO — 22 suites / 494 pruebas; publicación en PR #453 |
+
 ## Riesgos y bloqueos previstos
 
 | Riesgo | Impacto | Mitigación |
@@ -93,3 +112,4 @@
 | Cambiar un solo campo puede borrar el otro. | Corrupción de identidad fiscal. | Reutilizar la semántica histórica ya probada en Paciente y cubrir cambios parciales. |
 | La búsqueda por UUID no queda acotada si RLS está desactivado. | Un rol de mostrador puede comprometer una agenda de otra organización. | Comparar siempre `resource.tenantId` con el tenant activo ya validado por el guard. |
 | `virtual_encounters` no contiene `tenant_id` ni participante. | Un UUID conocido puede saltar tenant o relación clínica. | Resolver siempre el encuentro padre y autorizar contra su custodio y participantes antes de mutar. |
+| Los controladores exigen roles que el bootstrap no materializa. | Un administrador no puede asignar los roles operativos en una instalación limpia. | Declarar el catálogo en el módulo y agregarlo al seed común idempotente. |

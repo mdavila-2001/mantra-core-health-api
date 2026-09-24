@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { CONCEPTS } from '../../src/common';
+import { AUTHZ } from '../../src/modules/authz/authz.concepts';
 import {
   bootstrapTestApp,
   bearer,
@@ -92,6 +92,38 @@ describe('FX-10 · el mostrador atómico (AC-3.3)', () => {
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
 
+    const roleRows = await ctx.orm.em.getConnection().execute<
+      {
+        code: string;
+        base_role_concept_id: string;
+        scope_concept_id: string;
+        is_system: boolean;
+        is_assignable: boolean;
+      }[]
+    >(
+      `select code, base_role_concept_id, scope_concept_id,
+              is_system, is_assignable
+         from authz.roles
+        where code in ('SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+        order by code`,
+    );
+    expect(roleRows).toEqual([
+      {
+        code: 'SCHEDULING_ADMIN',
+        base_role_concept_id: AUTHZ.BASE_ROLE_ADMIN,
+        scope_concept_id: AUTHZ.SCOPE_TENANT,
+        is_system: true,
+        is_assignable: true,
+      },
+      {
+        code: 'SCHEDULING_AGENT',
+        base_role_concept_id: AUTHZ.BASE_ROLE_STAFF,
+        scope_concept_id: AUTHZ.SCOPE_TENANT,
+        is_system: true,
+        is_assignable: true,
+      },
+    ]);
+
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
@@ -171,37 +203,27 @@ describe('FX-10 · el mostrador atómico (AC-3.3)', () => {
       [foreignTenant.id, foreignResourceId],
     );
 
-    // El catálogo base sólo siembra los roles clínicos. Este fixture agrega el
-    // rol de mostrador que el controlador reconoce y lo concede únicamente en
-    // el tenant del actor, igual que lo haría la administración de authz.
-    const [schedulingAgentRole] = await ctx.orm.em
-      .getConnection()
-      .execute<{ id: string }[]>(
-        `insert into authz.roles
-         (id, code, name, is_system, is_assignable, state_concept_id,
-          created_at, updated_at)
-       values (gen_random_uuid(), 'SCHEDULING_AGENT', 'Agente de agenda',
-               true, true, ?, now(), now())
-       returning id`,
-        [CONCEPTS.STATE_ACTIVE],
-      );
-    await ctx.orm.em.getConnection().execute(
-      `insert into authz.user_role_assignments
-         (id, user_id, role_id, tenant_id, status_concept_id, created_at, updated_at)
-       values (gen_random_uuid(), ?, ?, ?, ?, now(), now())`,
-      [
-        claims(medico.token)['sub'],
-        schedulingAgentRole.id,
-        medico.tenantId,
-        CONCEPTS.STATE_ACTIVE,
-      ],
-    );
+    // El bootstrap ya materializó el rol. Se concede por la misma API pública
+    // que usa administración, con ámbito explícito en el tenant del mostrador.
+    await http()
+      .post(
+        `/authz/users/${String(claims(medico.token)['sub'])}/role-assignments`,
+      )
+      .set(bearer(ctx.adminToken))
+      .send({
+        roleCode: 'SCHEDULING_AGENT',
+        tenantId: medico.tenantId,
+      })
+      .expect(201);
 
     const loginMostrador = await http()
       .post('/iam/auth/login')
       .send({ email: medico.email, password: PASSWORD })
       .expect(200);
     medico.token = loginMostrador.body.accessToken;
+    expect(claims(medico.token)['scopedRoles']).toMatchObject({
+      [medico.tenantId]: expect.arrayContaining(['SCHEDULING_AGENT']),
+    });
 
     const recurso = await http()
       .post('/scheduling/resources')
