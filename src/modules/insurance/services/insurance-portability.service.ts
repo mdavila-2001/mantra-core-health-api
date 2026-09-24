@@ -279,6 +279,12 @@ export class InsurancePortabilityService {
           targetInsurerTenantId: dto.targetInsurerTenantId ?? null,
         },
       });
+      // `health_export_manifests.health_export_job_id` es una columna uuid
+      // plana, no una relación que MikroORM pueda ordenar por sí solo: sin
+      // este flush, el manifiesto puede insertarse antes que el job y la FK
+      // (`fk_health_export_manifests_health_export_job_id`) lo rechaza.
+      // Mismo patrón que el flush de más abajo, para `provenance`/`manifest`.
+      await tx.flush();
 
       const manifest = this.releaseRepo.createExportManifest(tx, {
         healthExportJobId: job.id,
@@ -290,6 +296,11 @@ export class InsurancePortabilityService {
       });
 
       const provenance = this.provenanceRepo.createProvenanceRecord(tx, {
+        // NOT NULL sin default en el esquema (HealthProvenanceRecords
+        // .custodianTenantId). Un export de portabilidad es un trámite del
+        // paciente, no de un tenant asistencial: el custodio es la
+        // plataforma, mismo tenant que ya usa `createExportJob` arriba.
+        custodianTenantId: SEED.tenantId,
         activityConceptId: CONCEPTS.PROV_EXPORT,
         occurredStartAt: generatedAt,
         responsibleAgentId: actor.id,
