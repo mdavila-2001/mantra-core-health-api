@@ -1,6 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
+/** Una atención (encuentro clínico) del titular, cruda de la base. */
+export interface PortabilityEncounterRow {
+  readonly encounter_id: string;
+  readonly start_at: string | null;
+  readonly end_at: string | null;
+  readonly class_concept_id: string | null;
+  readonly type_concept_id: string | null;
+  readonly status_concept_id: string;
+  readonly tenant_name: string | null;
+  readonly branch_name: string | null;
+}
+
 /** Una póliza o cobertura declarada por el titular, cruda de la base. */
 export interface PortabilityPolicyRow {
   readonly coverage_id: string;
@@ -222,6 +234,31 @@ export class InsurancePortabilityRepository {
          LEFT JOIN terminology.code_systems cs ON cs.id = csv.code_system_id
         WHERE cd.patient_profile_id = ?
         ORDER BY cd.onset_at ASC NULLS LAST, cd.id`,
+      [patientProfileId],
+    );
+  }
+
+  /**
+   * Las atenciones (encuentros clínicos) del titular, sin `reason_text`: es
+   * texto clínico libre y el certificado se entrega a un tercero (otra
+   * aseguradora) — minimización de PHI (CA-01 pide «histórico de
+   * atenciones», no el motivo de consulta de cada una).
+   */
+  async encountersOfPatient(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<PortabilityEncounterRow[]> {
+    return em.getConnection().execute<PortabilityEncounterRow[]>(
+      `SELECT e.id AS encounter_id,
+              to_char(e.start_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS start_at,
+              to_char(e.end_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS end_at,
+              e.class_concept_id, e.type_concept_id, e.status_concept_id,
+              t.legal_name AS tenant_name, b.name AS branch_name
+         FROM clinical.encounters e
+         LEFT JOIN directory.tenants t ON t.id = e.tenant_id
+         LEFT JOIN directory.branches b ON b.id = e.branch_id
+        WHERE e.patient_profile_id = ?
+        ORDER BY e.start_at ASC NULLS LAST, e.id`,
       [patientProfileId],
     );
   }

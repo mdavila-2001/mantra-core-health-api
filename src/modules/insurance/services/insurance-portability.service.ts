@@ -14,6 +14,7 @@ import { InsurancePortabilityRepository } from '../repositories/insurance-portab
 import type {
   PortabilityClaimLineRow,
   PortabilityConditionRow,
+  PortabilityEncounterRow,
   PortabilityPolicyRow,
 } from '../repositories/insurance-portability.repository';
 import { INS } from '../insurance.concepts';
@@ -42,6 +43,7 @@ import {
   type PortabilityClaimDto,
   type PortabilityClaimLineDto,
   type PortabilityConditionDto,
+  type PortabilityEncounterDto,
   type PortabilityPatientDto,
   type PortabilityPeriodStatsDto,
   type PortabilityPolicyDto,
@@ -53,7 +55,7 @@ import {
 } from '../dto/insurance-portability.dto';
 
 /** Versión del esquema del certificado. Cambia si la forma del JSON cambia. */
-const SCHEMA_VERSION = 'alovida.insurance-portability/1';
+const SCHEMA_VERSION = 'alovida.insurance-portability/2';
 const ISSUER = 'AloVida';
 const MONTHS_36 = 36;
 
@@ -135,9 +137,9 @@ export class InsurancePortabilityService {
     await this.assertOwnership(dto.patientProfileId, actor);
 
     if (dto.targetInsurerTenantId) {
-      const em0 = this.em.fork();
+      const lookupEm = this.em.fork();
       const carrier = await this.catalogRepo.findCarrierByTenantId(
-        em0,
+        lookupEm,
         dto.targetInsurerTenantId,
       );
       if (!carrier) {
@@ -151,10 +153,11 @@ export class InsurancePortabilityService {
     const format = dto.format ?? PortabilityExportFormat.BUNDLE;
     const em = this.em.fork();
 
-    const [patientParts, policyRows, claimRows, conditionRows] =
+    const [patientParts, policyRows, encounterRows, claimRows, conditionRows] =
       await Promise.all([
         this.resolvePatientParts(em, dto.patientProfileId),
         this.portabilityRepo.policiesOfPatient(em, dto.patientProfileId),
+        this.portabilityRepo.encountersOfPatient(em, dto.patientProfileId),
         this.portabilityRepo.claimsOfPatient(
           em,
           dto.patientProfileId,
@@ -171,6 +174,11 @@ export class InsurancePortabilityService {
         row.status_concept_id,
         row.relationship_concept_id,
       ]),
+      ...encounterRows.flatMap((row) => [
+        row.class_concept_id,
+        row.type_concept_id,
+        row.status_concept_id,
+      ]),
       ...claimRows.flatMap((row) => [
         row.status_concept_id,
         row.billing_provider_type_concept_id,
@@ -184,6 +192,9 @@ export class InsurancePortabilityService {
 
     const patient = this.buildPatient(patientParts, concepts);
     const policies = policyRows.map((row) => this.buildPolicy(row, concepts));
+    const encounters = encounterRows.map((row) =>
+      this.buildEncounter(row, concepts),
+    );
     const claims = this.buildClaims(claimRows, concepts);
     const conditions = conditionRows.map((row) =>
       this.buildCondition(row, concepts),
@@ -219,6 +230,7 @@ export class InsurancePortabilityService {
       issuer: ISSUER,
       patient,
       policies,
+      encounters,
       claims,
       conditions,
       summary,
@@ -257,6 +269,10 @@ export class InsurancePortabilityService {
         purposeOfUseConceptId: AUD.PURPOSE_PATIENT_REQUEST,
         patientProfileId: dto.patientProfileId,
         statusConceptId: CONCEPTS.EXPORT_COMPLETED,
+        // Mismo instante que se selló en `report.generatedAt` (:206): el
+        // verify público lo devuelve tal cual, y sin esto `requestedAt`
+        // tomaría otro `new Date()` después de escribir el archivo.
+        requestedAt: generatedAt,
         deliveryDestinationJson: {
           channel: 'PATIENT_SELF_SERVICE',
           format,
@@ -510,14 +526,14 @@ export class InsurancePortabilityService {
       em,
       patientProfile.profileId,
     );
-    const documento = identifiers.find(
-      (fila) => fila.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    const nationalIdentifier = identifiers.find(
+      (identifier) => identifier.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
     return {
       fullName: person ? (composePersonDisplayName(person) ?? '') : '',
-      nationalId: documento?.value ?? null,
+      nationalId: nationalIdentifier?.value ?? null,
       issuerAdministrativeAreaConceptId:
-        documento?.issuerAdministrativeAreaConceptId,
+        nationalIdentifier?.issuerAdministrativeAreaConceptId,
       birthDate: person?.birthDate
         ? person.birthDate.toISOString().slice(0, 10)
         : null,
@@ -572,6 +588,26 @@ export class InsurancePortabilityService {
         row.currency_code,
       ),
       monthlyPremiumAmount: row.monthly_premium_amount,
+    };
+  }
+
+  private buildEncounter(
+    row: PortabilityEncounterRow,
+    concepts: ConceptMap,
+  ): PortabilityEncounterDto {
+    return {
+      encounterId: row.encounter_id,
+      startAt: row.start_at,
+      endAt: row.end_at,
+      encounterClass: row.class_concept_id
+        ? (concepts.get(row.class_concept_id)?.code ?? null)
+        : null,
+      type: row.type_concept_id
+        ? (concepts.get(row.type_concept_id)?.code ?? null)
+        : null,
+      status: concepts.get(row.status_concept_id)?.code ?? 'UNKNOWN',
+      organizationName: row.tenant_name,
+      branchName: row.branch_name,
     };
   }
 

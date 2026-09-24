@@ -215,6 +215,48 @@ export class PortabilityClaimDto {
   lines!: PortabilityClaimLineDto[];
 }
 
+/** Una atención (encuentro clínico) del titular. Sin motivo de consulta: es texto clínico libre y este certificado sale a un tercero. */
+export class PortabilityEncounterDto {
+  @ApiProperty({ format: 'uuid' })
+  encounterId!: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    example: '2026-06-02T14:30:00.000Z',
+  })
+  startAt!: string | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    example: '2026-06-02T15:10:00.000Z',
+  })
+  endAt!: string | null;
+
+  /** Código del tipo de encuentro (`ENCOUNTER_CLASS_AMBULATORY`…), `null` si no consta. */
+  @ApiProperty({ type: String, nullable: true })
+  encounterClass!: string | null;
+
+  /** Código del tipo específico de atención, `null` si no consta. */
+  @ApiProperty({ type: String, nullable: true })
+  type!: string | null;
+
+  /** Código del estado del encuentro (`ENCOUNTER_FINISHED`…). */
+  @ApiProperty({ example: 'ENCOUNTER_FINISHED' })
+  status!: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    example: 'Centro Médico Foianini',
+  })
+  organizationName!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  branchName!: string | null;
+}
+
 /** Un diagnóstico (condición clínica) del titular, con su codificación si existe. */
 export class PortabilityConditionDto {
   @ApiProperty({ type: String, nullable: true, example: 'K80.2' })
@@ -328,7 +370,7 @@ export class PortabilitySummaryDto {
  * quien consulta el certificado ya emitido, nunca en el momento de sellarlo.
  */
 export class InsurancePortabilityReportDto {
-  @ApiProperty({ example: 'alovida.insurance-portability/1' })
+  @ApiProperty({ example: 'alovida.insurance-portability/2' })
   schemaVersion!: string;
 
   @ApiProperty({ format: 'uuid' })
@@ -349,6 +391,11 @@ export class InsurancePortabilityReportDto {
   @ValidateNested({ each: true })
   @Type(() => PortabilityPolicyDto)
   policies!: PortabilityPolicyDto[];
+
+  @ApiProperty({ type: [PortabilityEncounterDto] })
+  @ValidateNested({ each: true })
+  @Type(() => PortabilityEncounterDto)
+  encounters!: PortabilityEncounterDto[];
 
   @ApiProperty({ type: [PortabilityClaimDto] })
   @ValidateNested({ each: true })
