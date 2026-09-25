@@ -2,6 +2,30 @@
 
 Agrupa los componentes relacionados con **insurance** y mantiene cohesionada esta responsabilidad del sistema.
 
+## Liquidación al profesional (H8)
+
+Transparencia de exclusiones, desglose de liquidación y lotes periódicos de
+liquidación entre aseguradora y prestador (Tarea 3, resolución del handoff H8
+del plan médico, `MED-E13..E16`). El contrato canónico —actores, vocabulario
+de importes, exclusiones formales, ciclo del reclamo e inmutabilidad,
+elegibilidad y calendario del lote, idempotencia, reversión y contención
+financiera— vive en
+[`docs/contracts/insurer-practitioner-settlement-batches.md`](../../../docs/contracts/insurer-practitioner-settlement-batches.md).
+
+`GET /insurance-claims/:id` expone el desglose conciliado
+(`ClaimDetailDto.settlement`, `ClaimSettlementBreakdownDto`) construido por
+`services/claim-settlement-breakdown.ts`: `totalBilledAmount =
+totalApprovedAmount + totalPatientAmount + totalDeniedAmount`, con
+`reconciled: boolean` y las exclusiones formales
+(`ClaimExclusionDto.policyClauseReference`/`.denialRationale`). Una exclusión
+sin cláusula, una línea sin adjudicar o un descuadre degradan `availability` a
+`UNDER_REVIEW` en vez de publicarse como liquidación firme.
+
+El lote periódico de liquidación al profesional
+(`POST /practitioner-settlement-batches`, CA-3.2 del contrato) está
+especificado en el documento de arriba y **todavía no implementado**; queda
+pendiente en `docs/trabajo/2026-09-24-insurance-exclusions-settlement-contracts/`.
+
 ## Administración de planes y coberturas
 
 Las lecturas `GET /insurance-carriers` y `GET /insurance-carriers/:carrierId`
